@@ -7,7 +7,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -22,11 +22,10 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
-  useGetSecuritySolutionUrl,
 } from '../link_to';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
+import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
@@ -43,16 +42,17 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
+import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
 
+export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
+
+export { useGetSecuritySolutionLinkProps, withSecuritySolutionLink };
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 /** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
-
-const isModified = (event: MouseEvent) =>
-  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -64,11 +64,13 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
-
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -92,22 +94,27 @@ const UserDetailsLinkComponent: React.FC<{
     [formatUrl, encodedUserName, userTab]
   );
 
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      telemetry.reportEntityDetailsClicked({ entity: 'user' });
+      const callback = onClickParam ?? goToUsersDetails;
+      callback(e);
+    },
+    [goToUsersDetails, onClickParam, telemetry]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
       href={href}
-      onClick={onClick ?? goToUsersDetails}
+      onClick={onClick}
       title={title ?? userName}
     >
       {children ? children : userName}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      data-test-subj="users-link-anchor"
-      onClick={onClick ?? goToUsersDetails}
-      href={href}
-    >
+    <LinkAnchor data-test-subj="users-link-anchor" onClick={onClick} href={href}>
       {children ? children : userName}
     </LinkAnchor>
   );
@@ -124,9 +131,12 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
+}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
 
   const encodedHostName = encodeURIComponent(hostName);
 
@@ -151,23 +161,30 @@ const HostDetailsLinkComponent: React.FC<{
       ),
     [formatUrl, encodedHostName, hostTab]
   );
+
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      telemetry.reportEntityDetailsClicked({ entity: 'host' });
+
+      const callback = onClickParam ?? goToHostDetails;
+      callback(e);
+    },
+    [goToHostDetails, onClickParam, telemetry]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
       iconType="expand"
-      onClick={onClick ?? goToHostDetails}
+      onClick={onClick}
       title={title ?? hostName}
     >
       {children}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      onClick={onClick ?? goToHostDetails}
-      href={href}
-      data-test-subj="host-details-button"
-    >
+    <LinkAnchor onClick={onClick} href={href} data-test-subj="host-details-button">
       {children ? children : hostName}
     </LinkAnchor>
   );
@@ -259,12 +276,28 @@ const NetworkDetailsLinkComponent: React.FC<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;
+  /**
+   * Will be used to construct case url
+   */
   detailName: string;
+  /**
+   * Link title
+   */
   title?: string;
+  /**
+   * Link index
+   */
   index?: number;
-}> = ({ index, children, detailName, title }) => {
+}
+
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
+  index,
+  children,
+  detailName,
+  title,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -543,74 +576,6 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
-
-interface SecuritySolutionLinkProps {
-  deepLinkId: SecurityPageName;
-  path?: string;
-}
-
-interface LinkProps {
-  onClick: MouseEventHandler;
-  href: string;
-}
-
-type GetSecuritySolutionProps = (
-  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
-) => LinkProps;
-
-/**
- * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
- */
-export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { navigateTo } = useNavigateTo();
-
-  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
-    ({ deepLinkId, path, onClick: onClickProps }) => {
-      const url = getSecuritySolutionUrl({ deepLinkId, path });
-      return {
-        href: url,
-        onClick: (ev: MouseEvent) => {
-          if (isModified(ev)) {
-            return;
-          }
-
-          ev.preventDefault();
-          navigateTo({ url });
-          if (onClickProps) {
-            onClickProps(ev);
-          }
-        },
-      };
-    },
-    [getSecuritySolutionUrl, navigateTo]
-  );
-
-  return getSecuritySolutionProps;
-};
-
-/**
- * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- */
-export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<T>
-) => {
-  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
-    deepLinkId,
-    path,
-    onClick: onClickProps,
-    ...rest
-  }) => {
-    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-    const { onClick, href } = getSecuritySolutionLinkProps({
-      deepLinkId,
-      path,
-      onClick: onClickProps,
-    });
-    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
-  };
-  return SecuritySolutionLink;
-};
 
 /**
  * Security Solutions internal link button.

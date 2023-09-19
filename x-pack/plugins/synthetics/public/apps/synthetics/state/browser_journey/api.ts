@@ -17,15 +17,14 @@ import {
   Ping,
   PingType,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
-  syntheticEventTypes?: string[];
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
+  return apiService.post<ScreenshotBlockDoc[]>(SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
     hashes: params,
   });
 }
@@ -35,7 +34,7 @@ export async function fetchBrowserJourney(
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    { syntheticEventTypes: params.syntheticEventTypes },
+    undefined,
     SyntheticsJourneyApiResponseType
   );
 }
@@ -45,7 +44,11 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return apiService.get(API_URLS.JOURNEY_FAILED_STEPS, { checkGroups }, FailedStepsApiResponseType);
+  return apiService.get(
+    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
+    { checkGroups },
+    FailedStepsApiResponseType
+  );
 }
 
 export async function fetchLastSuccessfulCheck({
@@ -60,7 +63,7 @@ export async function fetchLastSuccessfulCheck({
   location?: string;
 }): Promise<Ping> {
   return await apiService.get(
-    API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
+    SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
     {
       monitorId,
       timestamp,
@@ -71,12 +74,24 @@ export async function fetchLastSuccessfulCheck({
   );
 }
 
+export interface BackoffOptions {
+  shouldBackoff?: boolean;
+  maxRetry?: number;
+  initialBackoff?: number;
+}
+
+const DEFAULT_SHOULD_BACKOFF = true;
+const DEFAULT_MAX_RETRY = 8;
+const DEFAULT_INITIAL_BACKOFF = 100;
+
 export async function getJourneyScreenshot(
   imgSrc: string,
-  shouldBackoff = true,
-  maxRetry = 15,
-  initialBackoff = 100
+  options?: Partial<BackoffOptions>
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
+  const shouldBackoff = options?.shouldBackoff ?? DEFAULT_SHOULD_BACKOFF;
+  const maxRetry = options?.maxRetry ?? DEFAULT_MAX_RETRY;
+  const initialBackoff = options?.initialBackoff ?? DEFAULT_INITIAL_BACKOFF;
+
   try {
     let retryCount = 0;
 
@@ -85,8 +100,12 @@ export async function getJourneyScreenshot(
     while (response?.status !== 200) {
       const imgRequest = new Request(imgSrc);
 
+      if (retryCount > maxRetry) break;
+
       response = await fetch(imgRequest);
-      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+
+      if (!shouldBackoff || response.status !== 404) break;
+
       await new Promise((r) => setTimeout(r, (backoff *= 2)));
       retryCount++;
     }

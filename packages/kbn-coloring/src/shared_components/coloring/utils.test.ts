@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  getColorStops,
-  isValidColor,
-  mergePaletteParams,
-  updateRangeType,
-  changeColorPalette,
-} from './utils';
+import { getColorStops, mergePaletteParams, updateRangeType, changeColorPalette } from './utils';
 
 import { getPaletteRegistry } from './mocks/palettes_registry';
+import { isValidColor } from '../../color_manipulation';
 
 describe('getColorStops', () => {
   const paletteRegistry = getPaletteRegistry();
@@ -103,6 +98,7 @@ describe('isValidColor', () => {
     expect(isValidColor('#fff')).toBe(true);
     expect(isValidColor('#ffffff')).toBe(true);
     expect(isValidColor('#ffffffaa')).toBe(true);
+    expect(isValidColor('#fffa')).toBe(true);
   });
 
   it('should return false for non valid strings', () => {
@@ -114,8 +110,6 @@ describe('isValidColor', () => {
     expect(isValidColor('rgba(1, 1, 1, 0)')).toBe(false);
     expect(isValidColor('#ffffffgg')).toBe(false);
     expect(isValidColor('#fff00')).toBe(false);
-    // this version of chroma does not support hex4 format
-    expect(isValidColor('#fffa')).toBe(false);
   });
 });
 

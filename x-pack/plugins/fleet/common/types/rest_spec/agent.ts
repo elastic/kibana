@@ -101,6 +101,7 @@ export interface PostAgentUpgradeRequest {
   body: {
     source_uri?: string;
     version: string;
+    force?: boolean;
   };
 }
 
@@ -111,6 +112,7 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
     rollout_duration_seconds?: number;
     start_time?: string;
+    force?: boolean;
   };
 }
 
@@ -231,5 +233,15 @@ export interface GetActionStatusResponse {
   items: ActionStatus[];
 }
 export interface GetAvailableVersionsResponse {
+  items: string[];
+}
+
+export interface PostRetrieveAgentsByActionsRequest {
+  body: {
+    actionIds: string[];
+  };
+}
+
+export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
 }

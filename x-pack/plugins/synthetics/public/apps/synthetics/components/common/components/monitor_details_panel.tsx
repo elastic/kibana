@@ -11,15 +11,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TagsBadges } from './tag_badges';
-import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -31,14 +29,7 @@ import {
   Ping,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
-
-const TitleLabel = euiStyled(EuiDescriptionListTitle)`
-  width: 40%;
-`;
-
-const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
-  width: 60%;
-`;
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
@@ -62,87 +53,95 @@ export const MonitorDetailsPanel = ({
   const dispatch = useDispatch();
 
   if (!monitor) {
-    return <EuiLoadingContent lines={8} />;
+    return <EuiSkeletonText lines={8} />;
   }
+
+  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
 
   return (
     <PanelWithTitle
       paddingSize="m"
+      margin="none"
       title={MONITOR_DETAILS_LABEL}
       titleLeftAlign
       hasBorder={hasBorder}
     >
-      <WrapperStyle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList type="column" compressed align="left">
-          {!hideEnabled && (
-            <>
-              <TitleLabel>{ENABLED_LABEL}</TitleLabel>
-              <DescriptionLabel>
-                {monitor && (
-                  <MonitorEnabled
-                    initialLoading={loading}
-                    configId={configId}
-                    monitor={monitor}
-                    reloadPage={() => {
-                      dispatch(getMonitorAction.get({ monitorId: configId }));
-                    }}
-                  />
-                )}
-              </DescriptionLabel>
-            </>
-          )}
-          <TitleLabel>{URL_LABEL}</TitleLabel>
-          <DescriptionLabel style={{ wordBreak: 'break-all' }}>
-            <EuiLink
-              href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-              external
-            >
-              {latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
+      <EuiSpacer size="s" />
+      <EuiDescriptionList type="column" columnWidths={[2, 3]} compressed align="left">
+        {!hideEnabled && (
+          <>
+            <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor && (
+                <MonitorEnabled
+                  initialLoading={loading}
+                  configId={configId}
+                  monitor={monitor}
+                  reloadPage={() => {
+                    dispatch(getMonitorAction.get({ monitorId: configId }));
+                  }}
+                />
+              )}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
+          {url ? (
+            <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
+              {url}
             </EuiLink>
-          </DescriptionLabel>
-          <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            {latestPing?.timestamp ? (
-              <Time timestamp={latestPing?.timestamp} />
-            ) : (
-              <EuiText color="subdued">--</EuiText>
-            )}
-          </DescriptionLabel>
-          <TitleLabel>{LAST_MODIFIED_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <Time timestamp={monitor.updated_at} />
-          </DescriptionLabel>
-          {monitor[ConfigKey.PROJECT_ID] && (
-            <>
-              <TitleLabel>{PROJECT_ID_LABEL}</TitleLabel>
-              <DescriptionLabel>{monitor[ConfigKey.PROJECT_ID]}</DescriptionLabel>
-            </>
+          ) : (
+            <EuiText color="subdued" size="s">
+              {UN_AVAILABLE_LABEL}
+            </EuiText>
           )}
-          <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
-          <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <MonitorTypeBadge monitor={monitor} />
-          </DescriptionLabel>
-          <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
-          <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
-
-          {!hideLocations && (
-            <>
-              <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-              <DescriptionLabel>
-                <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
-              </DescriptionLabel>
-            </>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{LAST_RUN_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {latestPing?.timestamp ? (
+            <Time timestamp={latestPing?.timestamp} />
+          ) : (
+            <EuiText color="subdued">--</EuiText>
           )}
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <Time timestamp={monitor.updated_at} />
+        </EuiDescriptionListDescription>
+        {monitor[ConfigKey.PROJECT_ID] && (
+          <>
+            <EuiDescriptionListTitle>{PROJECT_ID_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor[ConfigKey.PROJECT_ID]}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+        <EuiDescriptionListTitle>{MONITOR_ID_ITEM_TEXT}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{monitor.id}</EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <MonitorTypeBadge monitor={monitor} />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {frequencyStr(monitor[ConfigKey.SCHEDULE])}
+        </EuiDescriptionListDescription>
 
-          <TitleLabel>{TAGS_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <TagsBadges tags={monitor[ConfigKey.TAGS]} />
-          </DescriptionLabel>
-        </EuiDescriptionList>
-      </WrapperStyle>
+        {!hideLocations && (
+          <>
+            <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <TagsBadges tags={monitor[ConfigKey.TAGS]} />
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
     </PanelWithTitle>
   );
 };
@@ -201,17 +200,11 @@ function translateUnitMessage(unitMsg: string) {
 }
 
 const Time = ({ timestamp }: { timestamp?: string }) => {
-  const dateTimeFormatted = useFormatTestRunAt(timestamp);
+  const formatter = useDateFormat();
+  const dateTimeFormatted = formatter(timestamp);
 
   return timestamp ? <time dateTime={timestamp}>{dateTimeFormatted}</time> : null;
 };
-
-export const WrapperStyle = euiStyled.div`
-  .euiDescriptionList.euiDescriptionList--column > *,
-  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;
 
 const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
   defaultMessage: 'Frequency',
@@ -229,7 +222,7 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const MONITOR_TYPE_LABEL = i18n.translate(
@@ -257,4 +250,8 @@ const PROJECT_ID_LABEL = i18n.translate('xpack.synthetics.monitorList.projectIdH
 
 const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
   defaultMessage: 'Monitor ID',
+});
+
+const UN_AVAILABLE_LABEL = i18n.translate('xpack.synthetics.monitorList.unAvailable', {
+  defaultMessage: '(unavailable)',
 });

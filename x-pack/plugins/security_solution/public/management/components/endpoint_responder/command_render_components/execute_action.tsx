@@ -8,13 +8,14 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
-import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -72,13 +73,43 @@ export const ExecuteActionResult = memo<
         { defaultMessage: 'Command execution was successful.' }
       )}
     >
-      <ExecuteActionHostResponseOutput
+      <ExecuteActionHostResponse
         action={completedActionDetails}
+        canAccessFileDownloadLink={true}
         agentId={command.commandDefinition?.meta?.endpointId}
-        data-test-subj="consoleExecuteResponseOutput"
         textSize="s"
+        data-test-subj="console"
       />
     </ResultComponent>
   );
 });
 ExecuteActionResult.displayName = 'ExecuteActionResult';
+
+const ABOUT_ESCAPE_DASHES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutConsecutiveDashes',
+  {
+    defaultMessage: 'Multiple consecutive dashes in the value provided must be escaped. Ex:',
+  }
+);
+
+const ABOUT_ESCAPE_QUOTES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutQuotes',
+  {
+    defaultMessage: 'Quotes provided in the value can be used without escaping. Ex:',
+  }
+);
+
+export const getExecuteCommandArgAboutInfo = (): React.ReactNode => {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpointConsoleCommands.execute.args.command.about"
+        defaultMessage="The command to execute."
+      />
+      <br />
+      {`${ABOUT_ESCAPE_DASHES} execute --command "/opt/directory\\-\\-\\-directory/myBinary \\-\\-version"`}
+      <br />
+      {`${ABOUT_ESCAPE_QUOTES} execute --command "cd "C:\\Program Files\\directory""`}
+    </>
+  );
+};

@@ -18,6 +18,7 @@ import { PresentationUtilPluginStartDeps } from '../types';
 import { capabilitiesServiceFactory } from './capabilities/capabilities_service';
 import { dataViewsServiceFactory } from './data_views/data_views_service';
 import { dashboardsServiceFactory } from './dashboards/dashboards_service';
+import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
 import { labsServiceFactory } from './labs/labs_service';
 import { PresentationUtilServices } from './types';
 
@@ -29,6 +30,7 @@ export const providers: PluginServiceProviders<
   labs: new PluginServiceProvider(labsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();

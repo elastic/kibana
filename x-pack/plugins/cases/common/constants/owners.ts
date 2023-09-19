@@ -15,7 +15,7 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 export const GENERAL_CASES_OWNER = APP_ID;
 
-export const OWNERS = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER] as const;
+export const OWNERS = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER] as const;
 
 interface RouteInfo {
   id: Owner;

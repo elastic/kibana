@@ -14,15 +14,17 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
 import {
   createListsIndex,
@@ -34,7 +36,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   executeSetupModuleRequest,
   forceStartDatafeeds,
   getOpenSignals,
@@ -77,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -117,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           'event.kind': 'signal',
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
+          [ALERT_WORKFLOW_TAGS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',
@@ -156,6 +159,22 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const { logs } = await previewRule({
+        supertest,
+        rule: { ...rule, anomaly_threshold: 1, max_signals: 5 }, // This threshold generates 10 alerts with the current esArchive
+      });
+      expect(logs[0].warnings).toContain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met, but not exceeded", async () => {
+      const { logs } = await previewRule({
+        supertest,
+        rule: { ...rule, anomaly_threshold: 1, max_signals: 10 },
+      });
+      expect(logs[0].warnings).not.toContain(getMaxSignalsWarning());
     });
 
     it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
@@ -230,11 +249,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

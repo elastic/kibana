@@ -60,7 +60,7 @@ describe('Stage: updateAliases', () => {
     });
   });
 
-  it('UPDATE_ALIASES -> DONE if successful', () => {
+  it('UPDATE_ALIASES -> INDEX_STATE_UPDATE_DONE if successful', () => {
     const state = createState();
     const res: StateActionResponse<'UPDATE_ALIASES'> = Either.right('update_aliases_succeeded');
 
@@ -68,7 +68,7 @@ describe('Stage: updateAliases', () => {
 
     expect(newState).toEqual({
       ...state,
-      controlState: 'DONE',
+      controlState: 'INDEX_STATE_UPDATE_DONE',
     });
   });
 });

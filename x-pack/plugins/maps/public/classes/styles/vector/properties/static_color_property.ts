@@ -10,12 +10,12 @@ import { StaticStyleProperty } from './static_style_property';
 import { ColorStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticColorProperty extends StaticStyleProperty<ColorStaticOptions> {
-  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     mbMap.setPaintProperty(mbLayerId, 'circle-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
   }
 
-  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     mbMap.setPaintProperty(mbLayerId, 'fill-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
@@ -28,17 +28,17 @@ export class StaticColorProperty extends StaticStyleProperty<ColorStaticOptions>
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', this._options.color);
   }
 
-  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     mbMap.setPaintProperty(mbLayerId, 'line-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncCircleStrokeWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleStrokeWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     mbMap.setPaintProperty(mbLayerId, 'text-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }

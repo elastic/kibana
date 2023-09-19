@@ -31,5 +31,20 @@ describe('fieldSupportsBreakdown', () => {
     expect(
       fieldSupportsBreakdown({ aggregatable: true, scripted: false, type: 'string' } as any)
     ).toBe(true);
+
+    expect(
+      fieldSupportsBreakdown({ aggregatable: true, scripted: false, type: 'number' } as any)
+    ).toBe(true);
+  });
+
+  it('should return false if field is aggregatable but it is a time series counter metric', () => {
+    expect(
+      fieldSupportsBreakdown({
+        aggregatable: true,
+        scripted: false,
+        type: 'number',
+        timeSeriesMetric: 'counter',
+      } as any)
+    ).toBe(false);
   });
 });

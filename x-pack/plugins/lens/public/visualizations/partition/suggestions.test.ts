@@ -8,14 +8,13 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-} from '../../../common';
+} from '../../../common/constants';
 import { layerTypes } from '../../../common/layer_types';
 
 describe('suggestions', () => {
@@ -456,6 +455,7 @@ describe('suggestions', () => {
       });
       expect(currentSuggestions).toHaveLength(5);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
+      expect(currentSuggestions.every((s) => s.incomplete)).toEqual(true);
     });
 
     it('should suggest a donut chart as initial state when only one bucket', () => {
@@ -768,51 +768,63 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should accept multiple metrics if active visualization', () => {
+    it('should accept multiple metrics if active visualization and allows multiple metrics', () => {
+      const props = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'd',
+              operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: {
+          shape: PieChartTypes.TREEMAP,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              primaryGroups: ['a', 'b'],
+              metrics: ['e'],
+              numberDisplay: NumberDisplay.PERCENT,
+              categoryDisplay: CategoryDisplay.DEFAULT,
+              legendDisplay: LegendDisplay.DEFAULT,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+      } as SuggestionRequest<PieVisualizationState>;
+
+      // no suggestions if multiple metrics are not allowed
+      expect(suggestions(props)).toHaveLength(0);
+
+      // accepts suggestions if multiple metrics are allowed
       expect(
         suggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [
-              {
-                columnId: 'a',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'b',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'c',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'd',
-                operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
-              },
-              {
-                columnId: 'e',
-                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
-              },
-            ],
-            changeType: 'initial',
-          },
+          ...props,
           state: {
-            shape: PieChartTypes.TREEMAP,
-            layers: [
-              {
-                layerId: 'first',
-                layerType: layerTypes.DATA,
-                primaryGroups: ['a', 'b'],
-                metrics: ['e'],
-                numberDisplay: NumberDisplay.PERCENT,
-                categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: LegendDisplay.DEFAULT,
-              },
-            ],
-          },
-          keptLayerIds: ['first'],
+            ...props.state,
+            layers: [{ ...props.state!.layers[0], allowMultipleMetrics: true }],
+          } as PieVisualizationState,
         })
       ).toHaveLength(2);
     });
@@ -1040,7 +1052,8 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
-            "previewIcon": "bullseye",
+            "incomplete": false,
+            "previewIcon": [Function],
             "score": 0.61,
             "state": Object {
               "layers": Array [
@@ -1069,7 +1082,7 @@ describe('suggestions', () => {
               "palette": undefined,
               "shape": "mosaic",
             },
-            "title": "As Mosaic",
+            "title": "Mosaic",
           },
         ]
       `);
@@ -1149,7 +1162,8 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
-            "previewIcon": "bullseye",
+            "incomplete": false,
+            "previewIcon": [Function],
             "score": 0.46,
             "state": Object {
               "layers": Array [
@@ -1175,7 +1189,7 @@ describe('suggestions', () => {
               "palette": undefined,
               "shape": "waffle",
             },
-            "title": "As Waffle",
+            "title": "Waffle",
           },
         ]
       `);

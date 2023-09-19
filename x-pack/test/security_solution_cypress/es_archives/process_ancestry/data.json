@@ -1,0 +1,277 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "26d2d9935c51f506b7b236984491999f3f6847f2e29fc7147745bdd6de2d775a",
+    "index": ".alerts-security.alerts-default",
+    "source": {
+      "kibana.version": "8.5.0-SNAPSHOT",
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.execution.uuid": "79694f5c-30e4-4979-83e3-87193f51e3e6",
+      "kibana.alert.rule.name": "Testing Process Rule",
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.uuid": "532e0020-4a0c-11ed-9aa3-574e520c127d",
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.alert.rule.tags": [],
+      "@timestamp": 1666873459714,
+      "agent": {
+        "id": "2ea4b363-6a3f-449e-9d4e-c73ccf28f693",
+        "type": "endpoint",
+        "version": "8.5.0-SNAPSHOT"
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "MmVhNGIzNjMtNmEzZi00NDllLTlkNGUtYzczY2NmMjhmNjkzLTY1Mi0xNjY0ODA2NTI4Ljc4NTg5NTAw",
+            "MmVhNGIzNjMtNmEzZi00NDllLTlkNGUtYzczY2NmMjhmNjkzLTUzNi0xNjY0ODA2NTI3LjEwNDI2NTQwMA=="
+          ],
+          "code_signature": [
+            {
+              "trusted": true,
+              "subject_name": "Elasticsearch, Inc.",
+              "exists": true,
+              "status": "trusted"
+            }
+          ]
+        },
+        "parent": {
+          "pid": 652
+        },
+        "code_signature": {
+          "trusted": true,
+          "subject_name": "Elasticsearch, Inc.",
+          "exists": true,
+          "status": "trusted"
+        },
+        "name": "winlogbeat.exe",
+        "pid": 1704,
+        "thread": {
+          "id": 4100
+        },
+        "entity_id": "MmVhNGIzNjMtNmEzZi00NDllLTlkNGUtYzczY2NmMjhmNjkzLTE3MDQtMTY2NDgwNjcwNi4yODUzODk4MDA=",
+        "executable": "C:\\\\Program Files\\\\Winlogbeat\\\\winlogbeat.exe",
+        "entry_leader": {
+          "entity_id": "some97",
+          "start": "2022-10-03T12:13:23.560Z"
+        }
+      },
+      "file": {
+        "Ext": {
+          "header_data": [],
+          "entropy": 5.273971112252894,
+          "original": {
+            "path": "C:\\\\ProgramData\\\\winlogbeat\\\\.winlogbeat.yml.new",
+            "name": ".winlogbeat.yml.new"
+          },
+          "header_bytes": "7570646174655f74696d653a20323032",
+          "monotonic_id": 157728
+        },
+        "path": "C:\\\\ProgramData\\\\winlogbeat\\\\.winlogbeat.yml",
+        "extension": "yml",
+        "size": 1408,
+        "name": ".winlogbeat.yml"
+      },
+      "ecs": {
+        "version": "1.11.0"
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "endpoint.events.file"
+      },
+      "elastic": {
+        "agent": {
+          "id": "2ea4b363-6a3f-449e-9d4e-c73ccf28f693"
+        }
+      },
+      "host": {
+        "hostname": "siem-windows-endpoint",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server 2019 Datacenter"
+          },
+          "kernel": "1809 (10.0.17763.3406)",
+          "name": "Windows",
+          "family": "windows",
+          "type": "windows",
+          "version": "1809 (10.0.17763.3406)",
+          "platform": "windows",
+          "full": "Windows Server 2019 Datacenter 1809 (10.0.17763.3406)"
+        },
+        "ip": [
+          "10.200.0.223",
+          "fe80::eda9:848c:24ae:431d",
+          "127.0.0.1",
+          "::1"
+        ],
+        "name": "siem-windows-endpoint",
+        "id": "526e76a2-1c82-4245-a179-4fcde1e608fc",
+        "mac": [
+          "42:01:0a:c8:00:df"
+        ],
+        "architecture": "x86_64",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score_norm": 31.092354
+        }
+      },
+      "message": "Endpoint file event",
+      "user": {
+        "domain": "NT AUTHORITY",
+        "name": "SYSTEM",
+        "id": "S-1-5-18",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score_norm": 75.22127
+        }
+      },
+      "event.agent_id_status": "verified",
+      "event.sequence": 940444,
+      "event.ingested": "2022-10-14T14:00:50Z",
+      "event.created": "2022-10-14T14:00:27.2646226Z",
+      "event.kind": "signal",
+      "event.module": "endpoint",
+      "event.action": "exec",
+      "event.id": "MnfiZLkz1DywMGBf++++9ApE",
+      "event.category": [
+        "file"
+      ],
+      "event.type": [
+        "change"
+      ],
+      "event.dataset": "endpoint.events.file",
+      "kibana.alert.original_time": "2022-10-14T14:00:27.264Z",
+      "kibana.alert.ancestors": [
+        {
+          "id": "dCjM1oMBw7Pvz6uQMxM4",
+          "type": "event",
+          "index": ".ds-logs-endpoint.events.file-default-2022.10.08-000003",
+          "depth": 0
+        }
+      ],
+      "kibana.alert.status": "active",
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.depth": 1,
+      "kibana.alert.reason": "file event with process winlogbeat.exe, file .winlogbeat.yml, by SYSTEM on siem-windows-endpoint created low alert Testing Process Rule.",
+      "kibana.alert.severity": "low",
+      "kibana.alert.risk_score": 21,
+      "kibana.alert.rule.parameters": {
+        "description": "Testing Process Rule",
+        "risk_score": 21,
+        "severity": "low",
+        "license": "",
+        "timeline_id": "76e52245-7519-4251-91ab-262fb1a1728c",
+        "timeline_title": "Generic Process Timeline",
+        "meta": {
+          "from": "1h",
+          "kibana_siem_app_url": "https://kibana.siem.estc.dev/app/security"
+        },
+        "author": [],
+        "false_positives": [],
+        "from": "now-3900s",
+        "rule_id": "1e505276-9f3e-4b7e-aeb3-8fe96a16dc08",
+        "max_signals": 100,
+        "risk_score_mapping": [],
+        "severity_mapping": [],
+        "threat": [],
+        "to": "now",
+        "references": [],
+        "version": 7,
+        "exceptions_list": [
+          {
+            "id": "0f917120-4b20-11ed-b1c3-c7b6b88e8883",
+            "list_id": "5d68ab0c-0424-42eb-bb60-ed161e2b34ac",
+            "type": "detection",
+            "namespace_type": "single"
+          }
+        ],
+        "immutable": false,
+        "related_integrations": [],
+        "required_fields": [],
+        "setup": "",
+        "type": "query",
+        "language": "kuery",
+        "index": [
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "traces-apm*",
+          "winlogbeat-*",
+          "-*elastic-cloud-logs-*"
+        ],
+        "query": "_id :*",
+        "filters": []
+      },
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": [],
+      "kibana.alert.rule.created_at": "2022-10-12T09:00:32.322Z",
+      "kibana.alert.rule.created_by": "testing@elastic.co",
+      "kibana.alert.rule.description": "Testing Process Rule",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+        {
+          "id": "0f917120-4b20-11ed-b1c3-c7b6b88e8883",
+          "list_id": "5d68ab0c-0424-42eb-bb60-ed161e2b34ac",
+          "type": "detection",
+          "namespace_type": "single"
+        }
+      ],
+      "kibana.alert.rule.false_positives": [],
+      "kibana.alert.rule.from": "now-3900s",
+      "kibana.alert.rule.immutable": false,
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.indices": [
+        "apm-*-transaction*",
+        "auditbeat-*",
+        "endgame-*",
+        "filebeat-*",
+        "logs-*",
+        "packetbeat-*",
+        "traces-apm*",
+        "winlogbeat-*",
+        "-*elastic-cloud-logs-*"
+      ],
+      "kibana.alert.rule.license": "",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.references": [],
+      "kibana.alert.rule.risk_score_mapping": [],
+      "kibana.alert.rule.rule_id": "1e505276-9f3e-4b7e-aeb3-8fe96a16dc08",
+      "kibana.alert.rule.severity_mapping": [],
+      "kibana.alert.rule.threat": [],
+      "kibana.alert.rule.timeline_id": "76e52245-7519-4251-91ab-262fb1a1728c",
+      "kibana.alert.rule.timeline_title": "Generic Process Timeline",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2022-10-13T17:54:20.323Z",
+      "kibana.alert.rule.updated_by": "testing@elastic.co",
+      "kibana.alert.rule.version": 7,
+      "kibana.alert.rule.meta.from": "1h",
+      "kibana.alert.rule.meta.kibana_siem_app_url": "https://kibana.siem.estc.dev/app/security",
+      "kibana.alert.rule.risk_score": 21,
+      "kibana.alert.rule.severity": "low",
+      "kibana.alert.original_event.agent_id_status": "verified",
+      "kibana.alert.original_event.sequence": 940444,
+      "kibana.alert.original_event.ingested": "2022-10-14T14:00:50Z",
+      "kibana.alert.original_event.created": "2022-10-14T14:00:27.2646226Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "endpoint",
+      "kibana.alert.original_event.action": "rename",
+      "kibana.alert.original_event.id": "MnfiZLkz1DywMGBf++++9ApE",
+      "kibana.alert.original_event.category": [
+        "file"
+      ],
+      "kibana.alert.original_event.type": [
+        "change"
+      ],
+      "kibana.alert.original_event.dataset": "endpoint.events.file",
+      "kibana.alert.uuid": "26d2d9935c51f506b7b236984491999f3f6847f2e29fc7147745bdd6de2d775a",
+      "timestamp": 1666873459714
+    }
+  }
+}

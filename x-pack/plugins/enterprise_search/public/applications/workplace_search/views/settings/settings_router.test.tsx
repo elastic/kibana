@@ -10,9 +10,11 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Routes } from '@kbn/shared-ux-router';
 
 import { Connectors } from './components/connectors';
 import { Customize } from './components/customize';
@@ -30,7 +32,7 @@ describe('SettingsRouter', () => {
   it('renders', () => {
     const wrapper = shallow(<SettingsRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(Redirect)).toHaveLength(1);
     expect(wrapper.find(Connectors)).toHaveLength(1);
     expect(wrapper.find(Customize)).toHaveLength(1);

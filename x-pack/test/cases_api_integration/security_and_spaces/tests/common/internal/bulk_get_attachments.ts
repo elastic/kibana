@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import {
-  AttributesTypeExternalReference,
-  AttributesTypeExternalReferenceSO,
-  CaseResponse,
-  CommentResponseTypePersistableState,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceAttachmentAttributes,
+  ExternalReferenceSOAttachmentAttributes,
+  Case,
+  PersistableStateAttachment,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('bulk_get_attachments', () => {
     describe('setup using two comments', () => {
-      let updatedCase: CaseResponse;
+      let updatedCase: Case;
 
       before(async () => {
         const postedCase = await createCase(supertest, postCaseReq);
@@ -90,27 +90,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.attachments[1].id).to.eql(updatedCase.comments![1].id);
       });
 
-      it('returns an empty array when no ids are requested', async () => {
-        const { attachments, errors } = await bulkGetAttachments({
-          attachmentIds: [],
-          caseId: updatedCase.id,
-          supertest,
-          expectedHttpCode: 200,
-        });
-
-        expect(attachments.length).to.be(0);
-        expect(errors.length).to.be(0);
-      });
-
-      it('returns a 400 when more than 10k ids are requested', async () => {
-        await bulkGetAttachments({
-          attachmentIds: Array.from(Array(10001).keys()).map((item) => item.toString()),
-          caseId: updatedCase.id,
-          supertest,
-          expectedHttpCode: 400,
-        });
-      });
-
       it('populates the errors field with attachments that could not be found', async () => {
         const response = await bulkGetAttachments({
           attachmentIds: [updatedCase.comments![0].id, 'does-not-exist'],
@@ -145,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const persistableState = response.attachments[0] as CommentResponseTypePersistableState;
+        const persistableState = response.attachments[0] as PersistableStateAttachment;
 
         expect(persistableState.persistableStateAttachmentState).to.eql(
           persistableStateAttachment.persistableStateAttachmentState
@@ -166,7 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const externalRefSO = response.attachments[0] as AttributesTypeExternalReferenceSO;
+        const externalRefSO = response.attachments[0] as ExternalReferenceSOAttachmentAttributes;
 
         expect(externalRefSO.externalReferenceId).to.eql(
           postExternalReferenceSOReq.externalReferenceId
@@ -193,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const externalRefES = response.attachments[0] as AttributesTypeExternalReference;
+        const externalRefES = response.attachments[0] as ExternalReferenceAttachmentAttributes;
 
         expect(externalRefES.externalReferenceId).to.eql(
           postExternalReferenceESReq.externalReferenceId
@@ -212,8 +191,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('security and observability cases', () => {
-        let secCase: CaseResponse;
-        let obsCase: CaseResponse;
+        let secCase: Case;
+        let obsCase: Case;
         let secAttachmentId: string;
         let obsAttachmentId: string;
 
@@ -454,6 +433,26 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('errors', () => {
+      it('400s when requesting more than 100 attachments', async () => {
+        await bulkGetAttachments({
+          attachmentIds: Array(101).fill('foobar'),
+          caseId: 'id',
+          expectedHttpCode: 400,
+          supertest,
+        });
+      });
+
+      it('400s when requesting zero attachments', async () => {
+        await bulkGetAttachments({
+          attachmentIds: [],
+          caseId: 'id',
+          expectedHttpCode: 400,
+          supertest,
+        });
+      });
     });
   });
 };

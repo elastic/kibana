@@ -122,7 +122,7 @@ const getJobsTableColumns = (
           onJobStateChange={onJobStateChange}
         />
       ) : (
-        <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
+        <EuiIcon aria-label="Warning" size="s" type="warning" color="warning" />
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',

@@ -15,13 +15,13 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ButtonGroupField,
-  HiddenField,
+  TextField,
   PasswordField,
-} from '@kbn/triggers-actions-ui-plugin/public';
+  HiddenField,
+  ButtonGroupField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersAuthenticationType } from '../types';
 import * as i18n from './translations';
 
@@ -107,14 +107,28 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <ButtonGroupField
-        defaultValue={selectedAuthDefaultValue}
-        path={'__internal__.auth'}
-        label={i18n.BASIC_AUTH_LABEL}
-        legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
-        options={authenticationButtons}
+      <UseField
+        path="__internal__.auth"
+        component={ButtonGroupField}
+        config={{
+          label: i18n.BASIC_AUTH_LABEL,
+          defaultValue: selectedAuthDefaultValue,
+          validations: [
+            {
+              validator: emptyField(i18n.BASIC_AUTH_REQUIRED),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            legend: i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND,
+            options: authenticationButtons,
+            buttonSize: 'm',
+            color: 'primary',
+          },
+        }}
       />
-      <HiddenField path={'config.usesBasic'} config={{ defaultValue: true }} />
+      <UseField path="config.usesBasic" component={HiddenField} config={{ defaultValue: true }} />
       <EuiSpacer size="m" />
       {selectedAuth === XmattersAuthenticationType.URL ? (
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -167,11 +181,23 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <PasswordField
+              <UseField
                 path="secrets.password"
-                label={i18n.PASSWORD_LABEL}
-                readOnly={readOnly}
-                data-test-subj="xmattersPasswordInput"
+                config={{
+                  label: i18n.PASSWORD_LABEL,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.PASSWORD_REQUIRED),
+                    },
+                  ],
+                }}
+                component={PasswordField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'xmattersPasswordInput',
+                    readOnly,
+                  },
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

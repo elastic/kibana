@@ -6,74 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+
 import {
   // eslint-disable-next-line no-restricted-imports
-  Route as ReactRouterRoute,
-  RouteComponentProps,
-  RouteProps,
-  useRouteMatch,
+  Router as ReactRouter,
+  MemoryRouter as ReactMemoryRouter,
+  BrowserRouter as ReactBrowserRouter,
+  HashRouter as ReactHashRouter,
 } from 'react-router-dom';
-import { useKibanaSharedUX } from './services';
-import { useSharedUXExecutionContext } from './use_execution_context';
+import type {
+  RouterProps,
+  MemoryRouterProps,
+  BrowserRouterProps,
+  HashRouterProps,
+} from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
-/**
- * This is a wrapper around the react-router-dom Route component that inserts
- * MatchPropagator in every application route. It helps track all route changes
- * and send them to the execution context, later used to enrich APM
- * 'route-change' transactions.
- */
-export const Route = ({ children, component: Component, render, ...rest }: RouteProps) => {
-  const component = useMemo(() => {
-    if (!Component) {
-      return undefined;
-    }
-    return (props: RouteComponentProps) => (
-      <>
-        <MatchPropagator />
-        <Component {...props} />
-      </>
-    );
-  }, [Component]);
+export const HashRouter = ({ children, ...props }: HashRouterProps) => (
+  <ReactHashRouter {...props}>
+    <CompatRouter>{children}</CompatRouter>
+  </ReactHashRouter>
+);
 
-  if (component) {
-    return <ReactRouterRoute {...rest} component={component} />;
-  }
-  if (render || typeof children === 'function') {
-    const renderFunction = typeof children === 'function' ? children : render;
-    return (
-      <ReactRouterRoute
-        {...rest}
-        render={(props) => (
-          <>
-            <MatchPropagator />
-            {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
-            {renderFunction(props)}
-          </>
-        )}
-      />
-    );
-  }
-  return (
-    <ReactRouterRoute {...rest}>
-      <MatchPropagator />
-      {children}
-    </ReactRouterRoute>
-  );
-};
+export const BrowserRouter = ({ children, ...props }: BrowserRouterProps) => (
+  <ReactBrowserRouter {...props}>
+    <CompatRouter>{children}</CompatRouter>
+  </ReactBrowserRouter>
+);
 
-/**
- * The match propogator that is part of the Route
- */
-const MatchPropagator = () => {
-  const { executionContext } = useKibanaSharedUX().services;
-  const match = useRouteMatch();
+export const MemoryRouter = ({ children, ...props }: MemoryRouterProps) => (
+  <ReactMemoryRouter {...props}>
+    <CompatRouter>{children}</CompatRouter>
+  </ReactMemoryRouter>
+);
 
-  useSharedUXExecutionContext(executionContext, {
-    type: 'application',
-    page: match.path,
-    id: Object.keys(match.params).length > 0 ? JSON.stringify(match.params) : undefined,
-  });
-
-  return null;
-};
+export const Router = ({ children, ...props }: RouterProps) => (
+  <ReactRouter {...props}>
+    <CompatRouter>{children}</CompatRouter>
+  </ReactRouter>
+);

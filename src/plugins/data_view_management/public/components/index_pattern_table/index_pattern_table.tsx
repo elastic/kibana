@@ -164,7 +164,9 @@ export const IndexPatternTable = ({
 
   chrome.docTitle.change(title);
 
-  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+  const isRollup =
+    new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+    dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
@@ -213,7 +215,10 @@ export const IndexPatternTable = ({
       width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+          <EuiLink
+            {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
+            data-test-subj={`detail-link-${dataView.name}`}
+          >
             {dataView.getName()}
             {dataView.name ? (
               <>
@@ -233,9 +238,9 @@ export const IndexPatternTable = ({
             </>
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-            <>
-              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
-            </>
+            <span key={tagKey}>
+              &emsp;<EuiBadge>{tagName}</EuiBadge>
+            </span>
           ))}
         </div>
       ),

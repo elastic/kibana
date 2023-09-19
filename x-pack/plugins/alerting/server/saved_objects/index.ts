@@ -13,8 +13,10 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { alertMappings } from './mappings';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
+import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
@@ -22,7 +24,10 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
+import {
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+} from '../../common';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
@@ -40,6 +45,7 @@ export const AlertAttributesExcludedFromAAD = [
   'isSnoozedUntil',
   'lastRun',
   'nextRun',
+  'revision',
   'running',
 ];
 
@@ -60,6 +66,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'isSnoozedUntil'
   | 'lastRun'
   | 'nextRun'
+  | 'revision'
   | 'running';
 
 export function setupSavedObjects(
@@ -72,6 +79,7 @@ export function setupSavedObjects(
 ) {
   savedObjects.registerType({
     name: 'alert',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -102,6 +110,7 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: 'api_key_pending_invalidation',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {
@@ -118,9 +127,18 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
+  });
+
+  savedObjects.registerType({
+    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: maintenanceWindowMappings,
   });
 
   // Encrypted attributes

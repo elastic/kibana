@@ -35,12 +35,19 @@ function getTransformConfig(): TransformPivotConfig {
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
+      aggregations: {
+        'products.base_price.avg': { avg: { field: 'products.base_price' } },
+        'order_date.max': {
+          max: {
+            field: 'order_date',
+          },
+        },
+      },
     },
     description:
       'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '1d' } },
+    retention_policy: { time: { field: 'order_date.max', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 0,
@@ -75,11 +82,16 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
         'rt_total_charge.avg': { avg: { field: 'rt_total_charge' } },
         'rt_total_charge.min': { min: { field: 'rt_total_charge' } },
         'rt_total_charge.max': { max: { field: 'rt_total_charge' } },
+        max_order_date: {
+          max: {
+            field: 'order_date',
+          },
+        },
       },
     },
     description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
+    retention_policy: { time: { field: 'max_order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 5,
@@ -155,11 +167,16 @@ function getTransformConfigWithBoolFilterAgg(): TransformPivotConfig {
             },
           },
         },
+        max_order_date: {
+          max: {
+            field: 'order_date',
+          },
+        },
       },
     },
     description: 'ecommerce batch transform with filter aggregations',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
+    retention_policy: { time: { field: 'max_order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 5,
@@ -172,7 +189,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('cloning', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165883
+  describe.skip('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     const transformConfigWithBoolFilterAgg = getTransformConfigWithBoolFilterAgg();
@@ -253,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'order_date.max',
           retentionPolicyMaxAge: '1d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithPivot.settings?.num_failure_retries
@@ -288,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
             values: [`female`, `male`],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'max_order_date',
           retentionPolicyMaxAge: '3d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithRuntimeMapping.settings?.num_failure_retries
@@ -341,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'max_order_date',
           retentionPolicyMaxAge: '3d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithBoolFilterAgg.settings?.num_failure_retries

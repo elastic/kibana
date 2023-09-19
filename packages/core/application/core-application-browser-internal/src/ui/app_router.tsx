@@ -7,8 +7,8 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { RouteComponentProps, Router, Route, Switch } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -55,7 +55,7 @@ export const AppRouter: FunctionComponent<Props> = ({
 
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         {[...mounters].map(([appId, mounter]) => (
           <Route
             key={mounter.appRoute}
@@ -108,7 +108,7 @@ export const AppRouter: FunctionComponent<Props> = ({
             );
           }}
         />
-      </Switch>
+      </Routes>
     </Router>
   );
 };

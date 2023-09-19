@@ -9,6 +9,8 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MonitoredHealth } from '../routes/health';
 import { TaskManagerUsage } from './types';
 import { MonitoredUtilization } from '../routes/background_task_utilization';
+import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
+import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
 
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -19,12 +21,13 @@ export function createTaskManagerUsageCollector(
   excludeTaskTypes: string[]
 ) {
   let lastMonitoredHealth: MonitoredHealth | null = null;
-  let lastMonitoredUtilization: MonitoredUtilization | null = null;
+  let lastMonitoredUtilizationStats: MonitoredStat<BackgroundTaskUtilizationStat> | null = null;
   combineLatest([monitoringStats$, monitoredUtilization$])
     .pipe()
     .subscribe(([health, utilization]) => {
       lastMonitoredHealth = health;
-      lastMonitoredUtilization = utilization;
+      lastMonitoredUtilizationStats =
+        (utilization?.stats as MonitoredStat<BackgroundTaskUtilizationStat>) ?? null;
     });
 
   return usageCollection.makeUsageCollector<TaskManagerUsage>({
@@ -69,15 +72,15 @@ export function createTaskManagerUsageCollector(
         ),
         recurring_tasks: {
           actual_service_time:
-            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual ?? 0,
+            lastMonitoredUtilizationStats?.value.recurring.ran.service_time.actual ?? 0,
           adjusted_service_time:
-            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted ?? 0,
+            lastMonitoredUtilizationStats?.value.recurring.ran.service_time.adjusted ?? 0,
         },
         adhoc_tasks: {
           actual_service_time:
-            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual ?? 0,
+            lastMonitoredUtilizationStats?.value.adhoc.ran.service_time.actual ?? 0,
           adjusted_service_time:
-            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted ?? 0,
+            lastMonitoredUtilizationStats?.value.adhoc.ran.service_time.adjusted ?? 0,
         },
         capacity:
           lastMonitoredHealth?.stats.capacity_estimation?.value.observed

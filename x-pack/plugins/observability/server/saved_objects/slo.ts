@@ -5,10 +5,32 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
 import { StoredSLO } from '../domain/models';
+
+type StoredSLOBefore890 = StoredSLO & {
+  timeWindow: {
+    duration: string;
+    isRolling?: boolean;
+    isCalendar?: boolean;
+  };
+};
+
+const migrateSlo890: SavedObjectMigrationFn<StoredSLOBefore890, StoredSLO> = (doc) => {
+  const { timeWindow, ...other } = doc.attributes;
+  return {
+    ...doc,
+    attributes: {
+      ...other,
+      timeWindow: {
+        duration: timeWindow.duration,
+        type: timeWindow.isCalendar ? 'calendarAligned' : 'rolling',
+      },
+    },
+  };
+};
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -20,7 +42,7 @@ export const slo: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
-      name: { type: 'keyword' },
+      name: { type: 'text' },
       description: { type: 'text' },
       indicator: {
         properties: {
@@ -28,43 +50,19 @@ export const slo: SavedObjectsType = {
           params: { type: 'flattened' },
         },
       },
-      timeWindow: {
-        properties: {
-          duration: { type: 'keyword' },
-          isRolling: { type: 'boolean' },
-          calendar: {
-            properties: {
-              startTime: { type: 'date' },
-            },
-          },
-        },
-      },
       budgetingMethod: { type: 'keyword' },
-      objective: {
-        properties: {
-          target: { type: 'float' },
-          timesliceTarget: { type: 'float' },
-          timesliceWindow: { type: 'keyword' },
-        },
-      },
-      settings: {
-        properties: {
-          timestampField: { type: 'keyword' },
-          syncDelay: { type: 'keyword' },
-          frequency: { type: 'keyword' },
-        },
-      },
-      revision: { type: 'short' },
       enabled: { type: 'boolean' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
+      tags: { type: 'keyword' },
     },
   },
   management: {
     displayName: 'SLO',
-    importableAndExportable: true,
+    importableAndExportable: false,
     getTitle(sloSavedObject: SavedObject<StoredSLO>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },
+  },
+  migrations: {
+    '8.9.0': migrateSlo890,
   },
 };

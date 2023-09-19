@@ -23,6 +23,9 @@ import { SecurityPlugin } from './plugin';
 export type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
@@ -52,6 +55,8 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     loginAssistanceMessage: true,
     showInsecureClusterWarning: true,
     sameSiteCookies: true,
+    showNavLinks: true,
+    ui: true,
   },
 };
 export const plugin: PluginInitializer<

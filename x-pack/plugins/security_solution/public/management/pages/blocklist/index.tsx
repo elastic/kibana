@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { MANAGEMENT_ROUTING_BLOCKLIST_PATH } from '../../common/constants';
@@ -21,10 +20,10 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 export const BlocklistContainer = memo(() => {
   return (
     <TrackApplicationView viewId={SecurityPageName.blocklist}>
-      <Switch>
+      <Routes>
         <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} exact component={Blocklist} />
         <Route path="*" component={NotFoundPage} />
-      </Switch>
+      </Routes>
       <SpyRoute pageName={SecurityPageName.blocklist} />
     </TrackApplicationView>
   );

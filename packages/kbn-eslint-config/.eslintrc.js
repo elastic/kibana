@@ -1,22 +1,18 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
-  extends: [
-    './javascript.js',
-    './typescript.js',
-    './jest.js',
-    './react.js',
-  ],
+  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
+    '@kbn/eslint-plugin-telemetry',
     'prettier',
   ],
 
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2018,
   },
 
   env: {
@@ -41,7 +37,7 @@ module.exports = {
         {
           from: 'mkdirp',
           to: false,
-          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
+          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`,
         },
         {
           from: 'numeral',
@@ -50,7 +46,7 @@ module.exports = {
         {
           from: '@kbn/elastic-idx',
           to: false,
-          disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
+          disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`,
         },
         {
           from: 'x-pack',
@@ -67,46 +63,45 @@ module.exports = {
         {
           from: 'monaco-editor',
           to: false,
-          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`
+          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`,
         },
         {
           from: 'tinymath',
           to: '@kbn/tinymath',
-          disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`
+          disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`,
         },
         {
           from: '@kbn/test/types/ftr',
           to: '@kbn/test',
-          disallowedMessage: `import from the root of @kbn/test instead`
+          disallowedMessage: `import from the root of @kbn/test instead`,
         },
         {
           from: 'react-intl',
           to: '@kbn/i18n-react',
-          disallowedMessage: `import from @kbn/i18n-react instead`
+          disallowedMessage: `import from @kbn/i18n-react instead`,
         },
         {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,
-          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...[
-          '@elastic/eui/dist/eui_theme_light.json',
-          '@elastic/eui/dist/eui_theme_dark.json',
-        ].map(from => ({
-          from,
-          to: false,
-          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`
-        })),
+        ...['@elastic/eui/dist/eui_theme_light.json', '@elastic/eui/dist/eui_theme_dark.json'].map(
+          (from) => ({
+            from,
+            to: false,
+            disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
+          })
+        ),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',
-          disallowedMessage: `import from @kbn/test-jest-helpers instead`
+          disallowedMessage: `import from @kbn/test-jest-helpers instead`,
         },
         {
           from: '@kbn/utility-types/jest',
           to: '@kbn/utility-types-jest',
-          disallowedMessage: `import from @kbn/utility-types-jest instead`
+          disallowedMessage: `import from @kbn/utility-types-jest instead`,
         },
         {
           from: '@kbn/inspector-plugin',
@@ -149,142 +144,126 @@ module.exports = {
      *  of the file being linted so that we could re-route imports from `plugin-client` types to a different package
      *  than `plugin-server` types.
      */
-    '@kbn/imports/exports_moved_packages': ['error', [
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/tooling-log',
-        exportNames: [
-          'DEFAULT_LOG_LEVEL',
-          'getLogLevelFlagsHelp',
-          'LOG_LEVEL_FLAGS',
-          'LogLevel',
-          'Message',
-          'ParsedLogLevel',
-          'parseLogLevel',
-          'pickLevelFromFlags',
-          'ToolingLog',
-          'ToolingLogCollectingWriter',
-          'ToolingLogOptions',
-          'ToolingLogTextWriter',
-          'ToolingLogTextWriterConfig',
-          'Writer',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/ci-stats-reporter',
-        exportNames: [
-          'CiStatsMetric',
-          'CiStatsReporter',
-          'CiStatsReportTestsOptions',
-          'CiStatsTestGroupInfo',
-          'CiStatsTestResult',
-          'CiStatsTestRun',
-          'CiStatsTestType',
-          'CiStatsTiming',
-          'getTimeReporter',
-          'MetricsOptions',
-          'TimingsOptions',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/ci-stats-core',
-        exportNames: [
-          'Config',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/jest-serializers',
-        exportNames: [
-          'createAbsolutePathSerializer',
-          'createStripAnsiSerializer',
-          'createRecursiveSerializer',
-          'createAnyInstanceSerializer',
-          'createReplaceSerializer',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/stdio-dev-helpers',
-        exportNames: [
-          'observeReadable',
-          'observeLines',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/sort-package-json',
-        exportNames: [
-          'sortPackageJson',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/dev-cli-runner',
-        exportNames: [
-          'run',
-          'Command',
-          'RunWithCommands',
-          'CleanupTask',
-          'Command',
-          'CommandRunFn',
-          'FlagOptions',
-          'Flags',
-          'RunContext',
-          'RunFn',
-          'RunOptions',
-          'RunWithCommands',
-          'RunWithCommandsOptions',
-          'getFlags',
-          'mergeFlagOptions'
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/dev-cli-errors',
-        exportNames: [
-          'createFailError',
-          'createFlagError',
-          'isFailError',
-        ]
-      },
-      {
-        from: '@kbn/dev-utils',
-        to: '@kbn/dev-proc-runner',
-        exportNames: [
-          'withProcRunner',
-          'ProcRunner',
-        ]
-      },
-      {
-        from: '@kbn/utils',
-        to: '@kbn/repo-info',
-        exportNames: [
-          'REPO_ROOT',
-          'UPSTREAM_BRANCH',
-          'kibanaPackageJson',
-          'isKibanaDistributable',
-          'fromRoot',
-        ]
-      },
-      {
-        from: '@kbn/presentation-util-plugin/common',
-        to: '@kbn/presentation-util-plugin/test_helpers',
-        exportNames: [
-          'functionWrapper',
-          'fontStyle'
-        ]
-      },
-      {
-        from: '@kbn/fleet-plugin/common',
-        to: '@kbn/fleet-plugin/common/mocks',
-        exportNames: [
-          'createFleetAuthzMock'
-        ]
-      }
-    ]],
+    '@kbn/imports/exports_moved_packages': [
+      'error',
+      [
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/tooling-log',
+          exportNames: [
+            'DEFAULT_LOG_LEVEL',
+            'getLogLevelFlagsHelp',
+            'LOG_LEVEL_FLAGS',
+            'LogLevel',
+            'Message',
+            'ParsedLogLevel',
+            'parseLogLevel',
+            'pickLevelFromFlags',
+            'ToolingLog',
+            'ToolingLogCollectingWriter',
+            'ToolingLogOptions',
+            'ToolingLogTextWriter',
+            'ToolingLogTextWriterConfig',
+            'Writer',
+          ],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/ci-stats-reporter',
+          exportNames: [
+            'CiStatsMetric',
+            'CiStatsReporter',
+            'CiStatsReportTestsOptions',
+            'CiStatsTestGroupInfo',
+            'CiStatsTestResult',
+            'CiStatsTestRun',
+            'CiStatsTestType',
+            'CiStatsTiming',
+            'getTimeReporter',
+            'MetricsOptions',
+            'TimingsOptions',
+          ],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/ci-stats-core',
+          exportNames: ['Config'],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/jest-serializers',
+          exportNames: [
+            'createAbsolutePathSerializer',
+            'createStripAnsiSerializer',
+            'createRecursiveSerializer',
+            'createAnyInstanceSerializer',
+            'createReplaceSerializer',
+          ],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/stdio-dev-helpers',
+          exportNames: ['observeReadable', 'observeLines'],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/sort-package-json',
+          exportNames: ['sortPackageJson'],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/dev-cli-runner',
+          exportNames: [
+            'run',
+            'Command',
+            'RunWithCommands',
+            'CleanupTask',
+            'Command',
+            'CommandRunFn',
+            'FlagOptions',
+            'Flags',
+            'RunContext',
+            'RunFn',
+            'RunOptions',
+            'RunWithCommands',
+            'RunWithCommandsOptions',
+            'getFlags',
+            'mergeFlagOptions',
+          ],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/dev-cli-errors',
+          exportNames: ['createFailError', 'createFlagError', 'isFailError'],
+        },
+        {
+          from: '@kbn/dev-utils',
+          to: '@kbn/dev-proc-runner',
+          exportNames: ['withProcRunner', 'ProcRunner'],
+        },
+        {
+          from: '@kbn/utils',
+          to: '@kbn/repo-info',
+          exportNames: [
+            'REPO_ROOT',
+            'UPSTREAM_BRANCH',
+            'kibanaPackageJson',
+            'isKibanaDistributable',
+            'fromRoot',
+          ],
+        },
+        {
+          from: '@kbn/presentation-util-plugin/common',
+          to: '@kbn/presentation-util-plugin/test_helpers',
+          exportNames: ['functionWrapper', 'fontStyle'],
+        },
+        {
+          from: '@kbn/fleet-plugin/common',
+          to: '@kbn/fleet-plugin/common/mocks',
+          exportNames: ['createFleetAuthzMock'],
+        },
+      ],
+    ],
 
     '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',

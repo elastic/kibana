@@ -68,15 +68,24 @@ export function getNumberSettings(item: FieldVisConfig, defaultDataView: DataVie
     return { columns, layer };
   }
 
+  const operationType = item.supportedAggs?.has('avg') ? 'average' : 'max';
+  const operationLabel =
+    operationType === 'average'
+      ? i18n.translate('xpack.dataVisualizer.index.lensChart.averageOfLabel', {
+          defaultMessage: 'Average of {fieldName}',
+          values: { fieldName: item.fieldName },
+        })
+      : i18n.translate('xpack.dataVisualizer.index.lensChart.maximumOfLabel', {
+          defaultMessage: 'Maximum of {fieldName}',
+          values: { fieldName: item.fieldName },
+        });
+
   const columns: Record<string, GenericIndexPatternColumn> = {
     col2: {
       dataType: 'number',
       isBucketed: false,
-      label: i18n.translate('xpack.dataVisualizer.index.lensChart.averageOfLabel', {
-        defaultMessage: 'Average of {fieldName}',
-        values: { fieldName: item.fieldName },
-      }),
-      operationType: 'average',
+      label: operationLabel,
+      operationType,
       sourceField: item.fieldName!,
     },
     col1: {

@@ -11,18 +11,18 @@ import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 
 jest.mock('../../../containers/api');
 
-const caseData: Case = {
+const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('Case View Page activity tab', () => {
+describe('CaseUI View Page activity tab', () => {
   const getAlertsStateTableMock = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -94,10 +94,10 @@ describe('Case View Page activity tab', () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
     appMockRender.render(<CaseViewAlerts caseData={caseData} />);
     await waitFor(async () => {
-      expect(getFeatureIdsMock).toHaveBeenCalledWith(
-        { registrationContext: ['matchme'] },
-        expect.anything()
-      );
+      expect(getFeatureIdsMock).toHaveBeenCalledWith({
+        query: { registrationContext: ['matchme'] },
+        signal: expect.anything(),
+      });
     });
   });
 

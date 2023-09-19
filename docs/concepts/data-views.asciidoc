@@ -40,7 +40,8 @@ image::images/discover-data-view.png[How to set the {data-source} in Discover, w
 . Give your {data-source} a name.
 
 . Start typing in the *Index pattern* field, and {kib} looks for the names of
-indices, data streams, and aliases that match your input.
+indices, data streams, and aliases that match your input. You can
+view all available sources or only the sources that the data view targets.
 +
 [role="screenshot"]
 image:management/index-patterns/images/create-data-view.png["Create data view"]
@@ -142,14 +143,19 @@ all clusters having a name starting with `cluster_`:
 `cluster_*:logstash-*,cluster_*:-logstash-old*`
 ```
 
-To exclude a cluster having a name starting with `cluster_`:
+Excluding a cluster avoids sending any network calls to that cluster.
+To exclude a cluster with the name `cluster_one`:
 
 ```ts
-`cluster_*:logstash-*,cluster_one:-*`
+`cluster_*:logstash-*,-cluster_one:*`
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and
 aggregations using that {data-source} in {kib} take advantage of {ccs}.
+
+For more information, refer to
+{ref}/modules-cross-cluster-search.html#exclude-problematic-clusters[Excluding
+clusters or indicies from cross-cluster search].
 
 [float]
 [[delete-data-view]]

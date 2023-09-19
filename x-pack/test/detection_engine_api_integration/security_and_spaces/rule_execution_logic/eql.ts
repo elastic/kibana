@@ -10,13 +10,14 @@ import {
   ALERT_REASON,
   ALERT_RULE_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { get } from 'lodash';
 
-import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -26,10 +27,11 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getOpenSignals,
   getPreviewAlerts,
@@ -57,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -147,6 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_WORKFLOW_TAGS]: [],
         [ALERT_DEPTH]: 1,
         [ALERT_ANCESTORS]: [
           {
@@ -173,6 +176,14 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 2 });
       expect(previewAlerts.length).eql(maxSignals);
+    });
+
+    it('generates max signals warning when circuit breaker is hit', async () => {
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
     });
 
     it('uses the provided event_category_override', async () => {
@@ -579,11 +590,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', async () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

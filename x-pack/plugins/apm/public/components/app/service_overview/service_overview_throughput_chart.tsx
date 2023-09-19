@@ -30,6 +30,8 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -60,6 +62,16 @@ export function ServiceOverviewThroughputChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { transactionType, serviceName, transactionTypeStatus } =
     useApmServiceContext();
 
@@ -71,7 +83,7 @@ export function ServiceOverviewThroughputChart({
         return Promise.resolve(INITIAL_STATE);
       }
 
-      if (serviceName && transactionType && start && end) {
+      if (serviceName && transactionType && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/throughput',
           {
@@ -90,6 +102,9 @@ export function ServiceOverviewThroughputChart({
                     ? offset
                     : undefined,
                 transactionName,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -107,6 +122,7 @@ export function ServiceOverviewThroughputChart({
       offset,
       transactionName,
       comparisonEnabled,
+      preferred,
     ]
   );
 

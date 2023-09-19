@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useLensOpenVisualization } from '../../markdown_editor/plugins/lens/use_lens_open_visualization';
 import * as i18n from './translations';
@@ -48,6 +50,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
       ...(showEditPencilIcon
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
               iconType: 'pencil',
               label: i18n.EDIT_COMMENT,
               onClick: onEdit,
@@ -57,6 +60,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
       ...(showQuoteIcon
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
               iconType: 'quote',
               label: i18n.QUOTE,
               onClick: onQuote,
@@ -66,6 +70,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
       ...(showTrashIcon
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
               iconType: 'trash',
               color: 'danger' as const,
               label: i18n.DELETE_COMMENT,

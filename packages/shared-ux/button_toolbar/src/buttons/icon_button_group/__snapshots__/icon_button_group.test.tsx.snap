@@ -2,7 +2,7 @@
 
 exports[`<IconButtonGroup /> is rendered 1`] = `
 <fieldset
-  class="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text"
+  class="euiButtonGroup emotion-EuiButtonGroup"
 >
   <legend
     class="emotion-euiScreenReaderOnly"
@@ -10,27 +10,25 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
     Legend
   </legend>
   <div
-    class="euiButtonGroup__buttons"
+    class="euiButtonGroup__buttons emotion-euiButtonGroup__buttons-m"
   >
     <button
       aria-label="Text"
       aria-pressed="false"
-      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly css-3ca8kv-base-text-EuiButtonGroupButton-EuiButtonGroup"
+      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly emotion-euiButtonDisplay-m-defaultMinWidth-euiButtonGroupButton-iconOnly-m-uncompressed-base-text-EuiButtonGroup"
       data-test-subj="generated-id0"
-      id="generated-id"
       title="Text"
       type="button"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content"
       >
         <span
-          class="euiButtonContent__icon"
           color="inherit"
           data-euiicon-type="visText"
         />
         <span
-          class="euiButton__text euiScreenReaderOnly"
+          class="eui-textTruncate emotion-euiButtonGroupButton__iconOnly"
           data-text="Text"
         >
           Text

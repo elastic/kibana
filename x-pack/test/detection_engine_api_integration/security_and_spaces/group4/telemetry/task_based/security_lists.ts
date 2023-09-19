@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
@@ -29,8 +29,10 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
+  const es = getService('es');
 
-  describe('Security lists task telemetry', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164334
+  describe.skip('Security lists task telemetry', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -46,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
     });

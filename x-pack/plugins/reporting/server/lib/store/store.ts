@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import moment from 'moment';
+import type { IReport, Report, ReportDocument } from '.';
+import { SavedReport } from '.';
 import { statuses } from '..';
 import type { ReportingCore } from '../..';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
-import type { IReport, Report, ReportDocument } from '.';
-import { SavedReport } from '.';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { MIGRATION_VERSION } from './report';
+
+type UpdateResponse<T> = estypes.UpdateResponse<T>;
+type IndexResponse = estypes.IndexResponse;
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -84,12 +87,13 @@ export class ReportingStore {
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
   private ilmPolicyManager?: IlmPolicyManager;
+  config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
-    const config = reportingCore.getConfig();
+    this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = config.get('queue', 'indexInterval');
+    this.indexInterval = this.config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
@@ -102,12 +106,8 @@ export class ReportingStore {
   }
 
   private async getIlmPolicyManager() {
-    if (!this.ilmPolicyManager) {
-      const client = await this.getClient();
-      this.ilmPolicyManager = IlmPolicyManager.create({ client });
-    }
-
-    return this.ilmPolicyManager;
+    const client = await this.getClient();
+    return (this.ilmPolicyManager = IlmPolicyManager.create({ client }));
   }
 
   private async createIndex(indexName: string) {
@@ -118,10 +118,8 @@ export class ReportingStore {
       return exists;
     }
 
-    try {
-      await client.indices.create({
-        index: indexName,
-        body: {
+    const indexSettings = this.config.statefulSettings.enabled
+      ? {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
@@ -129,6 +127,14 @@ export class ReportingStore {
               name: ILM_POLICY_NAME,
             },
           },
+        }
+      : {};
+
+    try {
+      await client.indices.create({
+        index: indexName,
+        body: {
+          ...indexSettings,
           mappings: {
             properties: mapping,
           },
@@ -150,14 +156,11 @@ export class ReportingStore {
     }
   }
 
-  /*
-   * Called from addReport, which handles any errors
-   */
   private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
       index: report._index!,
       id: report._id,
-      refresh: true,
+      refresh: false,
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -185,6 +188,9 @@ export class ReportingStore {
    * configured for storage of reports.
    */
   public async start() {
+    if (!this.config.statefulSettings.enabled) {
+      return;
+    }
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
       if (await ilmPolicyManager.doesIlmPolicyExist()) {
@@ -289,7 +295,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -328,7 +334,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -363,7 +369,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -390,7 +396,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {

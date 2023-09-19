@@ -6,6 +6,8 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
+import { InfraConfig } from '../../types';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';
 
@@ -14,6 +16,7 @@ describe('the InfraSources lib', () => {
     test('returns a source configuration if it exists', async () => {
       const sourcesLib = new InfraSources({
         config: createMockStaticConfiguration({}),
+        metricsClient: createMockMetricsDataClient('METRIC_ALIAS'),
       });
 
       const request: any = createRequestContext({
@@ -55,6 +58,7 @@ describe('the InfraSources lib', () => {
             logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
           },
         }),
+        metricsClient: createMockMetricsDataClient('METRIC_ALIAS'),
       });
 
       const request: any = createRequestContext({
@@ -82,6 +86,7 @@ describe('the InfraSources lib', () => {
     test('adds missing attributes from the default configuration to a source configuration', async () => {
       const sourcesLib = new InfraSources({
         config: createMockStaticConfiguration({}),
+        metricsClient: createMockMetricsDataClient(),
       });
 
       const request: any = createRequestContext({
@@ -108,7 +113,7 @@ describe('the InfraSources lib', () => {
   });
 });
 
-const createMockStaticConfiguration = (sources: any) => ({
+const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   alerting: {
     inventory_threshold: {
       group_by_page_size: 10000,
@@ -117,12 +122,21 @@ const createMockStaticConfiguration = (sources: any) => ({
       group_by_page_size: 10000,
     },
   },
-  enabled: true,
   inventory: {
     compositeSize: 2000,
   },
+  logs: {
+    app_target: 'logs-ui',
+  },
   sources,
+  enabled: true,
 });
+
+const createMockMetricsDataClient = (metricAlias: string = 'metrics-*,metricbeat-*') =>
+  ({
+    getMetricIndices: jest.fn().mockResolvedValue(metricAlias),
+    updateMetricIndices: jest.fn(),
+  } as unknown as MetricsDataClient);
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {
   return {

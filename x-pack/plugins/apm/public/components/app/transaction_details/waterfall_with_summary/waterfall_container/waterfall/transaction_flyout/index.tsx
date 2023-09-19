@@ -11,7 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -39,6 +39,8 @@ interface Props {
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
+  start: string;
+  end: string;
 }
 
 export function TransactionFlyout({
@@ -49,15 +51,17 @@ export function TransactionFlyout({
   rootTransactionDuration,
   spanLinksCount,
   flyoutDetailTab,
+  start,
+  end,
 }: Props) {
   const { data: transaction, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
         'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
-        { params: { path: { traceId, transactionId } } }
+        { params: { path: { traceId, transactionId }, query: { start, end } } }
       );
     },
-    [traceId, transactionId]
+    [traceId, transactionId, start, end]
   );
 
   const isLoading = isPending(status);
@@ -91,16 +95,17 @@ export function TransactionFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {isLoading && <EuiLoadingContent />}
-          {transaction && (
-            <TransactionFlyoutBody
-              transaction={transaction!}
-              errorCount={errorCount}
-              rootTransactionDuration={rootTransactionDuration}
-              spanLinksCount={spanLinksCount}
-              flyoutDetailTab={flyoutDetailTab}
-            />
-          )}
+          <EuiSkeletonText isLoading={isLoading}>
+            {transaction && (
+              <TransactionFlyoutBody
+                transaction={transaction!}
+                errorCount={errorCount}
+                rootTransactionDuration={rootTransactionDuration}
+                spanLinksCount={spanLinksCount}
+                flyoutDetailTab={flyoutDetailTab}
+              />
+            )}
+          </EuiSkeletonText>
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

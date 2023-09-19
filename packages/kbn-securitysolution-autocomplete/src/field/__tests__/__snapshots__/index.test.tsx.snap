@@ -16,12 +16,13 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -33,6 +34,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -45,7 +47,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Clear input"
@@ -89,12 +91,13 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+            class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -106,6 +109,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -118,7 +122,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Clear input"
@@ -219,12 +223,13 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -236,6 +241,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -247,24 +253,6 @@ Object {
                   style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
                 />
               </div>
-            </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -283,12 +271,13 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+            class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -300,6 +289,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
@@ -311,24 +301,6 @@ Object {
                 style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
               />
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>
@@ -404,12 +376,13 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -421,6 +394,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -433,7 +407,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -466,12 +440,13 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+            class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -483,6 +458,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -495,7 +471,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"
@@ -585,12 +561,13 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -602,6 +579,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -615,27 +593,13 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <span
                 aria-label="Loading"
                 class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
                 role="progressbar"
               />
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -654,12 +618,13 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+            class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -671,6 +636,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
@@ -684,27 +650,13 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               aria-label="Loading"
               class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
               role="progressbar"
             />
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>

@@ -10,8 +10,8 @@ import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { SpaceValidator } from '../../lib';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
+import { SpaceValidator } from '../../lib';
 
 const space = {
   id: '',

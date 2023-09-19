@@ -13,8 +13,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
-import { useMlContext } from '../contexts/ml';
-import { useMlKibana } from '../contexts/kibana';
+import { useDataSource } from '../contexts/ml/data_source_context';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
+import { useMlKibana, useIsServerless } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
@@ -22,10 +23,9 @@ import { MlPageHeader } from '../components/page_header';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const isServerless = useIsServerless();
 
-  const context = useMlContext();
-  const dataView = context.currentDataView;
-  const savedSearch = context.selectedSavedSearch;
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
     <>
@@ -46,20 +46,29 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
-          appDependencies={pick(services, [
-            'application',
-            'data',
-            'charts',
-            'fieldFormats',
-            'http',
-            'notifications',
-            'share',
-            'storage',
-            'uiSettings',
-            'unifiedSearch',
-            'theme',
-            'lens',
-          ])}
+          isServerless={isServerless}
+          appDependencies={{
+            ...pick(services, [
+              'application',
+              'data',
+              'executionContext',
+              'charts',
+              'fieldFormats',
+              'http',
+              'notifications',
+              'share',
+              'storage',
+              'uiSettings',
+              'unifiedSearch',
+              'theme',
+              'lens',
+              'presentationUtil',
+              'embeddable',
+              'cases',
+              'i18n',
+            ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+          }}
         />
       ) : null}
       <HelpMenu

@@ -12,6 +12,7 @@ export const useFetchSloList = (): UseFetchSloListResponse => {
   return {
     isInitialLoading: false,
     isLoading: false,
+    isRefetching: false,
     isError: false,
     isSuccess: true,
     sloList,

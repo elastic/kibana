@@ -5,51 +5,74 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { renderGroupPanel } from '.';
+import { render } from '@testing-library/react';
 
-import { getSelectedGroupButtonContent } from '.';
-
-describe('getSelectedGroupButtonContent', () => {
+describe('renderGroupPanel', () => {
   it('renders correctly when the field renderer exists', () => {
-    const wrapperRuleName = shallow(
-      getSelectedGroupButtonContent('kibana.alert.rule.name', {
-        key: ['Rule name test', 'Some description'],
-        doc_count: 10,
-      })!
+    let { getByTestId } = render(
+      renderGroupPanel(
+        'kibana.alert.rule.name',
+        {
+          key: ['Rule name test', 'Some description'],
+          doc_count: 10,
+        },
+        'This is a null group!'
+      )!
     );
 
-    expect(wrapperRuleName.find('[data-test-subj="rule-name-group-renderer"]')).toBeTruthy();
-    const wrapperHostName = shallow(
-      getSelectedGroupButtonContent('host.name', {
-        key: 'Host',
-        doc_count: 2,
-      })!
+    expect(getByTestId('rule-name-group-renderer')).toBeInTheDocument();
+    const result1 = render(
+      renderGroupPanel(
+        'host.name',
+        {
+          key: 'Host',
+          doc_count: 2,
+        },
+        'This is a null group!'
+      )!
     );
+    getByTestId = result1.getByTestId;
 
-    expect(wrapperHostName.find('[data-test-subj="host-name-group-renderer"]')).toBeTruthy();
-    const wrapperUserName = shallow(
-      getSelectedGroupButtonContent('user.name', {
-        key: 'User test',
-        doc_count: 1,
-      })!
+    expect(getByTestId('host-name-group-renderer')).toBeInTheDocument();
+
+    const result2 = render(
+      renderGroupPanel(
+        'user.name',
+        {
+          key: 'User test',
+          doc_count: 1,
+        },
+        'This is a null group!'
+      )!
     );
+    getByTestId = result2.getByTestId;
 
-    expect(wrapperUserName.find('[data-test-subj="host-name-group-renderer"]')).toBeTruthy();
-    const wrapperSourceIp = shallow(
-      getSelectedGroupButtonContent('source.ip', {
-        key: 'sourceIp',
-        doc_count: 23,
-      })!
+    expect(getByTestId('host-name-group-renderer')).toBeInTheDocument();
+    const result3 = render(
+      renderGroupPanel(
+        'source.ip',
+        {
+          key: 'sourceIp',
+          doc_count: 23,
+        },
+        'This is a null group!'
+      )!
     );
+    getByTestId = result3.getByTestId;
 
-    expect(wrapperSourceIp.find('[data-test-subj="source-ip-group-renderer"]')).toBeTruthy();
+    expect(getByTestId('source-ip-group-renderer')).toBeInTheDocument();
   });
 
   it('returns undefined when the renderer does not exist', () => {
-    const wrapper = getSelectedGroupButtonContent('process.name', {
-      key: 'process',
-      doc_count: 10,
-    });
+    const wrapper = renderGroupPanel(
+      'process.name',
+      {
+        key: 'process',
+        doc_count: 10,
+      },
+      'This is a null group!'
+    );
 
     expect(wrapper).toBeUndefined();
   });

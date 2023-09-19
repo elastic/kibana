@@ -20,10 +20,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects(['common', 'context']);
+  const testSubjects = getService('testSubjects');
 
   describe('context filters', function contextSize() {
+    before(async function () {
+      await kibanaServer.uiSettings.update({
+        'discover:rowHeightOption': 0, // to have more grid rows visible at once
+      });
+    });
+
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
@@ -214,6 +222,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.getFilterEditorPreview()).to.equal(
         '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
       );
+    });
+
+    it('should add comma delimiter values', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is one of', value: 'png, jpeg' });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal('extension: is one of png, jpeg');
+    });
+
+    it('should display the negated values correctly', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is not', value: 'png' });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      const filterLabel = await filterBar.getFiltersLabel();
+      expect(filterLabel[0]).to.be('NOT extension: png');
+
+      await filterBar.clickEditFilterById('0');
+      await filterBar.addAndFilter('0');
+      await filterBar.createFilter({ field: 'extension', operation: 'is', value: 'jpeg' }, '0.1');
+      await testSubjects.clickWhenNotDisabled('saveFilter');
+
+      const filterLabelUpdated = await filterBar.getFiltersLabel();
+      expect(filterLabelUpdated[0]).to.be('NOT extension: png AND extension: jpeg');
     });
   });
 }

@@ -25,6 +25,7 @@ export const SelectWithPlaceholder: typeof EuiSelect = (props) => {
   const placeholder = props.placeholder || DEFAULT_PLACEHOLDER;
   return (
     <EuiSelect
+      data-test-subj="apmSelectWithPlaceholderSelect"
       {...props}
       options={[
         { text: placeholder, value: NO_SELECTION },

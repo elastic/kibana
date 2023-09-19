@@ -77,7 +77,7 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         jest.advanceTimersByTime(1000);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/events');
+        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/overview');
         jest.useRealTimers();
       });
     });
@@ -151,6 +151,20 @@ describe('addAnalyticsCollectionLogic', () => {
         });
       });
     });
+
+    describe('setNameValue', () => {
+      it('should call an error if name is not valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+      });
+
+      it('should remove error if name become valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+        AddAnalyticsCollectionLogic.actions.setNameValue('valid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeFalsy();
+      });
+    });
   });
 
   describe('selectors', () => {
@@ -166,9 +180,7 @@ describe('addAnalyticsCollectionLogic', () => {
 
       it('updates when apiSuccess listener triggered', () => {
         AddAnalyticsCollectionLogic.actions.apiSuccess({
-          event_retention_day_length: 180,
           events_datastream: 'logs-elastic_analytics.events-test',
-          id: 'bla',
           name: 'test',
         });
 

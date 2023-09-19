@@ -44,7 +44,7 @@ export const getMonitorsRoute = (
     },
     {
       title: i18n.translate('xpack.synthetics.monitorManagementRoute.title', {
-        defaultMessage: 'Monitor Management | {baseTitle}',
+        defaultMessage: 'Synthetics Management | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITORS_ROUTE,

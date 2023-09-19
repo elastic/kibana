@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           describe('index panel', async () => {
             it('index panel - summary', async () => {
               await PageObjects.settings.clickIndexManagement();
-              await PageObjects.indexManagement.clickIndiceAt(0);
+              await PageObjects.indexManagement.clickIndexAt(0);
               await a11y.testAppSnapshot();
             });
 

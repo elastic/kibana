@@ -12,7 +12,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  docLinks: CoreStart['docLinks'];
 }
 
 export function ExpressionWrapper({
@@ -71,6 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  docLinks,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -93,18 +95,9 @@ export function ExpressionWrapper({
           syncCursor={syncCursor}
           executionContext={executionContext}
           renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error);
-            addUserMessages(
-              messages.map((message) => ({
-                uniqueId: message,
-                severity: 'error',
-                displayLocations: [{ id: 'visualizationOnEmbeddable' }],
-                longMessage: message,
-                shortMessage: message,
-                fixableInEditor: false,
-              }))
-            );
-            onRuntimeError(messages[0] ?? errorMessage);
+            const messages = getOriginalRequestErrorMessages(error || null, docLinks);
+            addUserMessages(messages);
+            onRuntimeError(messages[0].shortMessage ?? (errorMessage || ''));
 
             return <></>; // the embeddable will take care of displaying the messages
           }}

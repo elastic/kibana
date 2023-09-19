@@ -55,6 +55,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "apisToRedactInLogs": Array [],
             "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {

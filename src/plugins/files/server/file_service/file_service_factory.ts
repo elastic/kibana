@@ -20,7 +20,13 @@ import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objec
 import { BlobStorageService } from '../blob_storage_service';
 import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
-import { CreateFileArgs, FindFileArgs, GetByIdArgs, UpdateFileArgs } from './file_action_types';
+import {
+  CreateFileArgs,
+  FindFileArgs,
+  GetByIdArgs,
+  BulkGetByIdArgs,
+  UpdateFileArgs,
+} from './file_action_types';
 import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../../common/file_kinds_registry';
@@ -86,6 +92,26 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       this.logger
     );
 
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
+    ): Promise<Array<File<M>>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+    ): Promise<{ [id: string]: File<M> }>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+    ): Promise<Array<File<M> | null>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+    ): Promise<{ [id: string]: File<M> | null }>;
+    function bulkGetById<M>(
+      args: BulkGetByIdArgs
+    ): Promise<Array<File<M> | null> | { [id: string]: File<M> | null }> {
+      return internalFileService.bulkGetById<M>(
+        args as Parameters<InternalFileService['bulkGetById']>[0]
+      );
+    }
+
     return {
       async create<M>(args: CreateFileArgs<M>) {
         return internalFileService.createFile(args) as Promise<File<M>>;
@@ -94,11 +120,15 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         await internalFileService.updateFile(args);
       },
       async delete(args) {
-        return internalFileService.deleteFile(args);
+        return await internalFileService.deleteFile(args);
+      },
+      async bulkDelete(args) {
+        return await internalFileService.bulkDeleteFiles(args);
       },
       async getById<M>(args: GetByIdArgs) {
         return internalFileService.getById(args) as Promise<File<M>>;
       },
+      bulkGetById,
       async find<M>(args: FindFileArgs) {
         return internalFileService.findFilesJSON(args) as Promise<{
           files: Array<FileJSON<M>>;

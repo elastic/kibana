@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors } from '../common';
 
 const querySchema = schema.object({
@@ -18,7 +18,7 @@ const querySchema = schema.object({
 
 export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     params: schema.object({
       projectName: schema.string(),
@@ -37,21 +37,25 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     const decodedSearchAfter = searchAfter ? decodeURI(searchAfter) : undefined;
 
     try {
-      const { saved_objects: monitors, total } = await getMonitors({
-        ...routeContext,
-        request: {
-          ...request,
-          query: {
-            ...request.query,
-            filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
-            fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-            perPage,
-            sortField: ConfigKey.JOURNEY_ID,
-            sortOrder: 'asc',
-            searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+      const { saved_objects: monitors, total } = await getMonitors(
+        {
+          ...routeContext,
+          request: {
+            ...request,
+            query: {
+              ...request.query,
+              filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
+              perPage,
+              sortField: ConfigKey.JOURNEY_ID,
+              sortOrder: 'asc',
+              searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+            },
           },
         },
-      });
+        {
+          fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
+        }
+      );
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
         hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',

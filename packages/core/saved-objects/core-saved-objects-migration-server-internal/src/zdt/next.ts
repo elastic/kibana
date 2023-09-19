@@ -15,10 +15,31 @@ import type {
   UpdateIndexMappingsWaitForTaskState,
   UpdateMappingModelVersionState,
   UpdateAliasesState,
+  CleanupUnknownAndExcludedDocsState,
+  CleanupUnknownAndExcludedDocsWaitForTaskState,
+  DocumentsUpdateInitState,
+  IndexStateUpdateDoneState,
+  OutdatedDocumentsSearchBulkIndexState,
+  OutdatedDocumentsSearchClosePitState,
+  OutdatedDocumentsSearchOpenPitState,
+  OutdatedDocumentsSearchReadState,
+  OutdatedDocumentsSearchTransformState,
+  CleanupUnknownAndExcludedDocsRefreshState,
+  SetDocMigrationStartedState,
+  SetDocMigrationStartedWaitForInstancesState,
+  OutdatedDocumentsSearchRefreshState,
+  UpdateDocumentModelVersionsState,
+  UpdateDocumentModelVersionsWaitForInstancesState,
 } from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
 import { createDelayFn } from '../common/utils';
+import {
+  setMetaMappingMigrationComplete,
+  setMetaDocMigrationComplete,
+  setMetaDocMigrationStarted,
+} from './utils';
+import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -45,12 +66,15 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         indexName: state.currentIndex,
         mappings: state.indexMappings,
+        esCapabilities: context.esCapabilities,
       }),
     UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) =>
       Actions.updateAndPickupMappings({
         client,
         index: state.currentIndex,
         mappings: { properties: state.additiveMappingChanges },
+        batchSize: context.batchSize,
+        query: buildPickupMappingsQuery(Object.keys(state.additiveMappingChanges)),
       }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask({
@@ -59,18 +83,107 @@ export const nextActionMap = (context: MigratorContext) => {
         timeout: '60s',
       }),
     UPDATE_MAPPING_MODEL_VERSIONS: (state: UpdateMappingModelVersionState) =>
-      Actions.updateMappings({
+      Actions.updateIndexMeta({
         client,
         index: state.currentIndex,
-        mappings: {
-          properties: {},
-          _meta: state.currentIndexMeta,
-        },
+        meta: setMetaMappingMigrationComplete({
+          meta: state.currentIndexMeta,
+          versions: context.typeVirtualVersions,
+        }),
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
       Actions.updateAliases({
         client,
         aliasActions: state.aliasActions,
+      }),
+    INDEX_STATE_UPDATE_DONE: (state: IndexStateUpdateDoneState) => () => Actions.noop(),
+    DOCUMENTS_UPDATE_INIT: (state: DocumentsUpdateInitState) => () => Actions.noop(),
+    SET_DOC_MIGRATION_STARTED: (state: SetDocMigrationStartedState) =>
+      Actions.updateIndexMeta({
+        client,
+        index: state.currentIndex,
+        meta: setMetaDocMigrationStarted({
+          meta: state.currentIndexMeta,
+        }),
+      }),
+    SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: (
+      state: SetDocMigrationStartedWaitForInstancesState
+    ) =>
+      Actions.waitForDelay({
+        delayInSec: context.migrationConfig.zdt.metaPickupSyncDelaySec,
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: (state: CleanupUnknownAndExcludedDocsState) =>
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.currentIndex,
+        discardUnknownDocs: true,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: context.types,
+        removedTypes: context.deletedTypes,
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: (
+      state: CleanupUnknownAndExcludedDocsWaitForTaskState
+    ) =>
+      Actions.waitForDeleteByQueryTask({
+        client,
+        taskId: state.deleteTaskId,
+        timeout: '120s',
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: (state: CleanupUnknownAndExcludedDocsRefreshState) =>
+      Actions.refreshIndex({
+        client,
+        index: state.currentIndex,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPitState) =>
+      Actions.openPit({
+        client,
+        index: state.currentIndex,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchReadState) =>
+      Actions.readWithPit({
+        client,
+        pitId: state.pitId,
+        searchAfter: state.lastHitSortValue,
+        batchSize: context.migrationConfig.batchSize,
+        query: state.outdatedDocumentsQuery,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: (state: OutdatedDocumentsSearchTransformState) =>
+      Actions.transformDocs({
+        outdatedDocuments: state.outdatedDocuments,
+        transformRawDocs: state.transformRawDocs,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: (state: OutdatedDocumentsSearchBulkIndexState) =>
+      Actions.bulkOverwriteTransformedDocuments({
+        client,
+        index: state.currentIndex,
+        operations: state.bulkOperationBatches[state.currentBatch],
+        refresh: false,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
+      Actions.closePit({
+        client,
+        pitId: state.pitId,
+      }),
+    OUTDATED_DOCUMENTS_SEARCH_REFRESH: (state: OutdatedDocumentsSearchRefreshState) =>
+      Actions.refreshIndex({
+        client,
+        index: state.currentIndex,
+      }),
+    UPDATE_DOCUMENT_MODEL_VERSIONS: (state: UpdateDocumentModelVersionsState) =>
+      Actions.updateIndexMeta({
+        client,
+        index: state.currentIndex,
+        meta: setMetaDocMigrationComplete({
+          meta: state.currentIndexMeta,
+          versions: context.typeVirtualVersions,
+        }),
+      }),
+    UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (
+      state: UpdateDocumentModelVersionsWaitForInstancesState
+    ) =>
+      Actions.waitForDelay({
+        delayInSec: context.migrationConfig.zdt.metaPickupSyncDelaySec,
       }),
   };
 };

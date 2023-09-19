@@ -45,6 +45,7 @@ describe('useGetActionDetails hook', () => {
     await renderReactQueryHook(() => useGetActionDetails('123'));
 
     expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
+      version: '2023-10-31',
       path: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: '123' }),
     });
   });
@@ -53,6 +54,7 @@ describe('useGetActionDetails hook', () => {
     await renderReactQueryHook(() => useGetActionDetails(''));
 
     expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
+      version: '2023-10-31',
       path: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: 'undefined' }),
     });
   });

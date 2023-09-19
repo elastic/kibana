@@ -6,18 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AttachmentTotals,
-  CaseResponse,
-  CasesByAlertId,
-  RelatedCaseInfo,
-} from '@kbn/cases-plugin/common/api';
+import { AttachmentTotals, Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import { xorWith, isEqual } from 'lodash';
+import { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common/types/api';
 
 type AttachmentTotalsKeys = keyof AttachmentTotals;
 
 export interface TestCaseWithTotals {
-  caseInfo: CaseResponse;
+  caseInfo: Case;
   totals?: Partial<AttachmentTotals>;
 }
 
@@ -25,10 +21,10 @@ export interface TestCaseWithTotals {
  * Ensure that the result of the alerts API request matches with the cases created for the test.
  */
 export function validateCasesFromAlertIDResponse(
-  casesFromAPIResponse: CasesByAlertId,
+  casesFromAPIResponse: GetRelatedCasesByAlertResponse,
   createdCasesForTest: TestCaseWithTotals[]
 ) {
-  const idToResponse = new Map<string, RelatedCaseInfo>(
+  const idToResponse = new Map<string, RelatedCase>(
     casesFromAPIResponse.map((response) => [response.id, response])
   );
 

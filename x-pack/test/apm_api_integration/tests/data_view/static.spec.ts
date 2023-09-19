@@ -10,6 +10,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
@@ -46,8 +47,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   function getDataViewSuggestions(field: string) {
     return supertest
-      .post(`/api/kibana/suggestions/values/${dataViewPattern}`)
+      .post(`/internal/kibana/suggestions/values/${dataViewPattern}`)
       .set('kbn-xsrf', 'foo')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .send({ query: '', field, method: 'terms_agg' });
   }
 

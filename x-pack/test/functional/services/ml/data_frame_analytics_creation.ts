@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
-
 import {
   isRegressionAnalysis,
   isClassificationAnalysis,
-} from '@kbn/ml-plugin/common/util/analytics_utils';
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
@@ -283,12 +283,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
-    async assertFieldStatTopValuesContent(
-      fieldName: string,
-      fieldType: 'keyword' | 'date' | 'number',
-      expectedContent: string[]
-    ) {
-      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
+    async assertFieldStatTopValuesContent(fieldName: string, expectedContent: string[]) {
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {

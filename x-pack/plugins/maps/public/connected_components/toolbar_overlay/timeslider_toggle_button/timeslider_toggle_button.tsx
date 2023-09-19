@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 
@@ -35,6 +36,9 @@ export function TimesliderToggleButton(props: Props) {
   return (
     <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
       <EuiButtonIcon
+        className={classNames({
+          'mapToolbarOverlay__buttonIcon-empty': !props.isTimesliderOpen,
+        })}
         size="s"
         onClick={onClick}
         data-test-subj="timesliderToggleButton"

@@ -56,8 +56,7 @@ describe('MlAdminJobDescription', () => {
     userEvent.click(screen.getByTestId('job-switch'));
     expect(enableDatafeedSpy).toHaveBeenCalledWith(
       securityJobNotStarted,
-      securityJobNotStarted.latestTimestampMs,
-      true
+      securityJobNotStarted.latestTimestampMs
     );
 
     await waitFor(() => {

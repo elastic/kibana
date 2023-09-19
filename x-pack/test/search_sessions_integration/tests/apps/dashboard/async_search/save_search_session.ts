@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
   const toasts = getService('toasts');
+  const dashboardExpect = getService('dashboardExpect');
 
   const enableNewChartLibraryDebug = async () => {
     await elasticChart.setNewChartUiDebugFlag();
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('completed');
-      await testSubjects.missingOrFail('embeddableError');
+      await dashboardExpect.noErrorEmbeddablesPresent();
       const session2 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
       );
@@ -104,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check that session is restored
       await searchSessions.expectState('restored');
-      await testSubjects.missingOrFail('embeddableError');
+      await dashboardExpect.noErrorEmbeddablesPresent();
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched

@@ -30,6 +30,7 @@ import {
   createSearchAfterReturnType,
   makeFloatString,
   getUnprocessedExceptionsWarnings,
+  getMaxSignalsWarning,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
@@ -37,7 +38,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const eqlExecutor = async ({
@@ -129,6 +130,9 @@ export const eqlExecutor = async ({
       );
 
       addToSearchAfterReturn({ current: result, next: createResult });
+    }
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+      result.warningMessages.push(getMaxSignalsWarning());
     }
     return result;
   });

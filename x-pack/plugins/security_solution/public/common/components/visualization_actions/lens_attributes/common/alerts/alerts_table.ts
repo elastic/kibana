@@ -5,35 +5,127 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { GetLensAttributes } from '../../../types';
+
+import { isEmpty } from 'lodash';
+import type { GetLensAttributes, LensEmbeddableDataTableColumn } from '../../../types';
+import { COUNT_OF, TOP_VALUE } from '../../../translations';
 
 const layerId = uuidv4();
+const topValuesOfStackByFieldColumnId = uuidv4();
+const countColumnId = uuidv4();
+const topValuesOfBreakdownFieldColumnId = uuidv4();
+const defaultColumns = [
+  {
+    columnId: topValuesOfStackByFieldColumnId,
+    isTransposed: false,
+    width: 362,
+  },
+  {
+    columnId: countColumnId,
+    isTransposed: false,
+  },
+];
+const breakdownFieldColumns = [
+  {
+    columnId: topValuesOfBreakdownFieldColumnId,
+    isTransposed: false,
+  },
+];
+const defaultColumnOrder = [topValuesOfStackByFieldColumnId];
+const getTopValuesOfBreakdownFieldColumnSettings = (
+  breakdownField: string
+): Record<string, LensEmbeddableDataTableColumn> => ({
+  [topValuesOfBreakdownFieldColumnId]: {
+    label: TOP_VALUE(breakdownField),
+    dataType: 'string',
+    operationType: 'terms',
+    scale: 'ordinal',
+    sourceField: breakdownField,
+    isBucketed: true,
+    params: {
+      size: 1000,
+      orderBy: {
+        type: 'column',
+        columnId: countColumnId,
+      },
+      orderDirection: 'desc',
+      otherBucket: true,
+      missingBucket: false,
+      parentFormat: {
+        id: 'terms',
+      },
+      include: [],
+      exclude: [],
+      includeIsRegex: false,
+      excludeIsRegex: false,
+    },
+  },
+});
 
 export const getAlertsTableLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
   extraOptions
 ) => {
+  const breakdownFieldProvided = !isEmpty(extraOptions?.breakdownField);
+  const countField =
+    extraOptions?.breakdownField && breakdownFieldProvided
+      ? extraOptions?.breakdownField
+      : stackByField;
+  const columnOrder = breakdownFieldProvided
+    ? [...defaultColumnOrder, topValuesOfBreakdownFieldColumnId, countColumnId]
+    : [...defaultColumnOrder, countColumnId];
+
+  const columnSettings: Record<string, LensEmbeddableDataTableColumn> = {
+    [topValuesOfStackByFieldColumnId]: {
+      label: TOP_VALUE(stackByField),
+      dataType: 'string',
+      operationType: 'terms',
+      scale: 'ordinal',
+      sourceField: stackByField,
+      isBucketed: true,
+      params: {
+        size: 1000,
+        orderBy: {
+          type: 'column',
+          columnId: countColumnId,
+        },
+        orderDirection: 'desc',
+        otherBucket: true,
+        missingBucket: false,
+        parentFormat: {
+          id: 'terms',
+        },
+        include: [],
+        exclude: [],
+        includeIsRegex: false,
+        excludeIsRegex: false,
+      },
+    },
+    [countColumnId]: {
+      label: COUNT_OF(countField),
+      dataType: 'number',
+      operationType: 'count',
+      isBucketed: false,
+      scale: 'ratio',
+      sourceField: countField,
+      params: {
+        emptyAsNull: true,
+      },
+    },
+    ...(extraOptions?.breakdownField && breakdownFieldProvided
+      ? getTopValuesOfBreakdownFieldColumnSettings(extraOptions?.breakdownField)
+      : {}),
+  };
+
   return {
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsDatatable',
     state: {
       visualization: {
-        columns: [
-          {
-            columnId: '2881fedd-54b7-42ba-8c97-5175dec86166',
-            isTransposed: false,
-            width: 362,
-          },
-          {
-            columnId: 'f04a71a3-399f-4d32-9efc-8a005e989991',
-            isTransposed: false,
-          },
-          {
-            columnId: '75ce269b-ee9c-4c7d-a14e-9226ba0fe059',
-            isTransposed: false,
-          },
-        ],
+        columns: breakdownFieldProvided
+          ? [...defaultColumns, ...breakdownFieldColumns]
+          : defaultColumns,
         layerId,
         layerType: 'data',
       },
@@ -46,74 +138,16 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
         formBased: {
           layers: {
             [layerId]: {
-              columns: {
-                '2881fedd-54b7-42ba-8c97-5175dec86166': {
-                  label: `Top values of ${stackByField}`,
-                  dataType: 'string',
-                  operationType: 'terms',
-                  scale: 'ordinal',
-                  sourceField: stackByField,
-                  isBucketed: true,
-                  params: {
-                    size: 1000,
-                    orderBy: {
-                      type: 'column',
-                      columnId: 'f04a71a3-399f-4d32-9efc-8a005e989991',
-                    },
-                    orderDirection: 'desc',
-                    otherBucket: true,
-                    missingBucket: false,
-                    parentFormat: {
-                      id: 'terms',
-                    },
-                    include: [],
-                    exclude: [],
-                    includeIsRegex: false,
-                    excludeIsRegex: false,
-                  },
+              columns: columnOrder.reduce<Record<string, LensEmbeddableDataTableColumn>>(
+                (acc, colId) => {
+                  if (colId && columnSettings[colId]) {
+                    acc[colId] = columnSettings[colId];
+                  }
+                  return acc;
                 },
-                'f04a71a3-399f-4d32-9efc-8a005e989991': {
-                  label: `Count of ${extraOptions?.breakdownField}`,
-                  dataType: 'number',
-                  operationType: 'count',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  sourceField: extraOptions?.breakdownField,
-                  params: {
-                    emptyAsNull: true,
-                  },
-                },
-                '75ce269b-ee9c-4c7d-a14e-9226ba0fe059': {
-                  label: `Top values of ${extraOptions?.breakdownField}`,
-                  dataType: 'string',
-                  operationType: 'terms',
-                  scale: 'ordinal',
-                  sourceField: extraOptions?.breakdownField,
-                  isBucketed: true,
-                  params: {
-                    size: 1000,
-                    orderBy: {
-                      type: 'column',
-                      columnId: 'f04a71a3-399f-4d32-9efc-8a005e989991',
-                    },
-                    orderDirection: 'desc',
-                    otherBucket: true,
-                    missingBucket: false,
-                    parentFormat: {
-                      id: 'terms',
-                    },
-                    include: [],
-                    exclude: [],
-                    includeIsRegex: false,
-                    excludeIsRegex: false,
-                  },
-                },
-              },
-              columnOrder: [
-                '2881fedd-54b7-42ba-8c97-5175dec86166',
-                '75ce269b-ee9c-4c7d-a14e-9226ba0fe059',
-                'f04a71a3-399f-4d32-9efc-8a005e989991',
-              ],
+                {}
+              ),
+              columnOrder,
               sampling: 1,
               incompleteColumns: {},
             },

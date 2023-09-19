@@ -8,9 +8,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
-import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
 import type {
@@ -25,6 +24,12 @@ import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server'
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
 import { mergeAndAppendArrays } from './data_loaders/utils';
+import {
+  waitForMetadataTransformsReady,
+  stopMetadataTransforms,
+  startMetadataTransforms,
+} from './utils/transforms';
+import { getEndpointPackageInfo } from './utils/package';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -44,6 +49,10 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param fleet
  * @param options
  * @param DocGenerator
+ * @param withResponseActions
+ * @param numResponseActions
+ * @param alertIds
+ * @param logger_
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -58,9 +67,14 @@ export async function indexHostsAndAlerts(
   alertsPerHost: number,
   fleet: boolean,
   options: TreeOptions = {},
-  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator
+  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
+  withResponseActions = true,
+  numResponseActions?: number,
+  alertIds?: string[],
+  logger_?: ToolingLog
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
+  const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   const response: IndexedHostsAndAlertsResponse = {
     hosts: [],
@@ -82,7 +96,7 @@ export async function indexHostsAndAlerts(
   };
 
   // Ensure fleet is setup and endpoint package installed
-  await setupFleetForEndpoint(kbnClient);
+  await setupFleetForEndpoint(kbnClient, logger);
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
   if (fleet) {
@@ -91,6 +105,12 @@ export async function indexHostsAndAlerts(
 
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
+  const shouldWaitForEndpointMetadataDocs = fleet;
+  if (shouldWaitForEndpointMetadataDocs) {
+    await waitForMetadataTransformsReady(client);
+    await stopMetadataTransforms(client);
+  }
 
   for (let i = 0; i < numHosts; i++) {
     const generator = new DocGenerator(random);
@@ -104,6 +124,9 @@ export async function indexHostsAndAlerts(
       policyResponseIndex,
       enrollFleet: fleet,
       generator,
+      withResponseActions,
+      numResponseActions,
+      alertIds,
     });
 
     mergeAndAppendArrays(response, indexedHosts);
@@ -118,26 +141,15 @@ export async function indexHostsAndAlerts(
     });
   }
 
-  return response;
-}
-
-export const getEndpointPackageInfo = async (
-  kbnClient: KbnClient
-): Promise<GetInfoResponse['item']> => {
-  const path = epmRouteService.getInfoPath('endpoint');
-  const endpointPackage = (
-    (await kbnClient.request({
-      path,
-      method: 'GET',
-    })) as AxiosResponse<GetInfoResponse>
-  ).data.item;
-
-  if (!endpointPackage) {
-    throw new Error('EPM Endpoint package was not found!');
+  if (shouldWaitForEndpointMetadataDocs) {
+    await startMetadataTransforms(
+      client,
+      response.agents.map((agent) => agent.id)
+    );
   }
 
-  return endpointPackage;
-};
+  return response;
+}
 
 export type DeleteIndexedHostsAndAlertsResponse = DeleteIndexedEndpointHostsResponse;
 

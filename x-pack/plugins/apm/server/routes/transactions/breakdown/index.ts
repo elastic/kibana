@@ -24,6 +24,17 @@ import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface TransactionBreakdownResponse {
+  timeseries: Array<{
+    title: string;
+    color: string;
+    type: string;
+    data: Array<{ x: number; y: number | null }>;
+    hideLegend: boolean;
+    legendValue: any;
+  }>;
+}
+
 export async function getTransactionBreakdown({
   environment,
   kuery,
@@ -44,7 +55,7 @@ export async function getTransactionBreakdown({
   transactionType: string;
   start: number;
   end: number;
-}) {
+}): Promise<TransactionBreakdownResponse> {
   const subAggs = {
     sum_all_self_times: {
       sum: {

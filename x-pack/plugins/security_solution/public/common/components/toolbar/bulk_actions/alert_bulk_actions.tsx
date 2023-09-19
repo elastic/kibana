@@ -11,20 +11,21 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import {
+  dataTableSelectors,
+  dataTableActions,
+  tableEntity,
+} from '@kbn/securitysolution-data-table';
+import type { DataTableModel, DataTableState, TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
-  TableId,
 } from '../../../../../common/types';
-import { tableEntity } from '../../../../../common/types';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
-import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
-import type { DataTableModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
-import type { DataTableState } from '../../../store/data_table/types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
@@ -36,7 +37,6 @@ interface OwnProps {
   totalItems: number;
   filterStatus?: AlertWorkflowStatus;
   query?: string;
-  indexName: string;
   showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -58,7 +58,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     selectedEventIds,
     isSelectAllChecked,
     clearSelected,
-    indexName,
     showAlertStatusActions,
     onActionSuccess,
     onActionFailure,
@@ -176,7 +175,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     );
 
     const bulkActionItems = useBulkActionItems({
-      indexName,
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),

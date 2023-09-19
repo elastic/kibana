@@ -7,7 +7,17 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import {
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  ConnectorStatus,
+  Dependency,
+  FieldType,
+} from '@kbn/search-connectors';
+
+import { isCategoryEntry } from '../../../../../../common/connectors/is_category_entry';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {
@@ -40,36 +50,98 @@ type ConnectorConfigurationActions = Pick<
 
 interface ConnectorConfigurationValues {
   configState: ConnectorConfiguration;
-  configView: ConfigEntry[];
+  configView: ConfigView;
   index: FetchIndexApiResponse;
   isEditing: boolean;
   localConfigState: ConnectorConfiguration;
-  localConfigView: ConfigEntry[];
+  localConfigView: ConfigView;
   shouldStartInEditMode: boolean;
 }
 
-interface ConfigEntry {
-  isPasswordField: boolean;
+interface ConfigEntry extends ConnectorConfigProperties {
+  key: string;
+}
+
+export interface ConfigEntryView extends ConfigEntry {
+  is_valid: boolean;
+  validation_errors: string[];
+}
+
+export interface CategoryEntry {
+  configEntries: ConfigEntryView[];
   key: string;
   label: string;
-  order?: number;
-  value: string;
+  order: number;
+}
+
+export interface ConfigView {
+  categories: CategoryEntry[];
+  unCategorizedItems: ConfigEntryView[];
 }
 
 /**
  *
- * Sorts the connector configuration by specified order (if present)
+ * Sorts and filters the connector configuration
+ *
+ * Sorting is done by specified order (if present)
  * otherwise by alphabetic order of keys
  *
+ * Filtering is done on any fields with ui_restrictions
+ * or that have not had their dependencies met
+ *
  */
-function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
-  return Object.keys(config)
-    .map(
-      (key) =>
-        ({
-          key,
-          ...config[key],
-        } as ConfigEntry)
+function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigView {
+  // This casting is ugly but makes all of the iteration below work for TypeScript
+  // extract_full_html is only defined for crawlers, who don't use this config screen
+  // we explicitly filter it out as well
+  const entries = Object.entries(
+    config as Omit<ConnectorConfiguration, 'extract_full_html'>
+  ).filter(([key]) => key !== 'extract_full_html');
+  const groupedConfigView = entries
+    .map(([key, entry]) => {
+      if (!entry || !isCategoryEntry(entry)) {
+        return null;
+      }
+      const configEntries = entries
+        .map(([configKey, configEntry]) => {
+          if (!configEntry || isCategoryEntry(configEntry) || configEntry.category !== key) {
+            return null;
+          }
+          return { key: configKey, ...configEntry };
+        })
+        .filter(isNotNullish);
+      return { ...entry, configEntries, key };
+    })
+    .filter(isNotNullish);
+
+  const unCategorizedItems = filterSortValidateEntries(
+    entries
+      .map(([key, entry]) =>
+        entry && !isCategoryEntry(entry) && !entry.category ? { key, ...entry } : null
+      )
+      .filter(isNotNullish),
+    config
+  );
+  const categories = groupedConfigView
+    .map((category) => {
+      const configEntries = filterSortValidateEntries(category.configEntries, config);
+
+      return configEntries.length > 0 ? { ...category, configEntries } : null;
+    })
+    .filter(isNotNullish);
+
+  return { categories, unCategorizedItems };
+}
+
+function filterSortValidateEntries(
+  configEntries: Array<ConnectorConfigProperties & { key: string }>,
+  config: ConnectorConfiguration
+): ConfigEntryView[] {
+  return configEntries
+    .filter(
+      (configEntry) =>
+        (configEntry.ui_restrictions ?? []).length <= 0 &&
+        dependenciesSatisfied(configEntry.depends_on, config)
     )
     .sort((a, b) => {
       if (isNotNullish(a.order)) {
@@ -83,7 +155,91 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
         return 1;
       }
       return a.key.localeCompare(b.key);
+    })
+    .map((configEntry) => {
+      const label = configEntry.label;
+
+      const validationErrors = [];
+
+      if (configEntry.type === FieldType.INTEGER && !validIntInput(configEntry.value)) {
+        validationErrors.push(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
+            {
+              defaultMessage: '{label} must be an integer.',
+              values: { label },
+            }
+          )
+        );
+      }
+
+      return {
+        ...configEntry,
+        is_valid: validationErrors.length <= 0,
+        validation_errors: validationErrors,
+      };
     });
+}
+
+function validIntInput(value: string | number | boolean | null): boolean {
+  // reject non integers (including x.0 floats), but don't validate if empty
+  return (value !== null || value !== '') &&
+    (isNaN(Number(value)) ||
+      !Number.isSafeInteger(Number(value)) ||
+      ensureStringType(value).indexOf('.') >= 0)
+    ? false
+    : true;
+}
+
+function ensureCorrectTyping(
+  type: FieldType,
+  value: string | number | boolean | null
+): string | number | boolean | null {
+  switch (type) {
+    case FieldType.INTEGER:
+      return validIntInput(value) ? ensureIntType(value) : value;
+    case FieldType.BOOLEAN:
+      return ensureBooleanType(value);
+    default:
+      return ensureStringType(value);
+  }
+}
+
+export function ensureStringType(value: string | number | boolean | null): string {
+  return value !== null ? String(value) : '';
+}
+
+export function ensureIntType(value: string | number | boolean | null): number | null {
+  // int is null-safe to prevent empty values from becoming zeroes
+  if (value === null || value === '') {
+    return null;
+  }
+
+  return parseInt(String(value), 10);
+}
+
+export function ensureBooleanType(value: string | number | boolean | null): boolean {
+  return Boolean(value);
+}
+
+export function dependenciesSatisfied(
+  dependencies: Dependency[],
+  dependencyLookup: ConnectorConfiguration
+): boolean {
+  if (!dependencies) {
+    return true;
+  }
+
+  for (const dependency of dependencies) {
+    // casting here because this is always going to be a ConnectorConfigProperties and not a Category
+    if (
+      dependency.value !== (dependencyLookup[dependency.field] as ConnectorConfigProperties)?.value
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -148,18 +304,21 @@ export const ConnectorConfigurationLogic = kea<
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
           configuration: Object.keys(values.localConfigState)
-            .map((key) =>
-              values.localConfigState[key]
-                ? { key, value: values.localConfigState[key]?.value ?? '' }
-                : null
-            )
+            .map((key) => {
+              const entry = values.localConfigState[key];
+              if (isCategoryEntry(entry) || !entry) {
+                return null;
+              }
+
+              return { key, value: entry.value ?? '' };
+            })
             .filter(isNotNullish)
-            .reduce(
-              (prev: Record<string, string>, { key, value }) => ({ ...prev, [key]: value }),
-              {}
-            ),
+            .reduce((prev: Record<string, string | number | boolean | null>, { key, value }) => {
+              prev[key] = value;
+              return prev;
+            }, {}),
           connectorId: values.index.connector.id,
-          indexName: values.index.connector.index_name,
+          indexName: values.index.connector.index_name ?? '',
         });
       }
     },
@@ -188,9 +347,18 @@ export const ConnectorConfigurationLogic = kea<
     localConfigState: [
       {},
       {
-        setLocalConfigEntry: (configState, { key, label, order, value }) => ({
+        setLocalConfigEntry: (
+          configState,
+          { key, display, type, validations, value, ...configEntry }
+        ) => ({
           ...configState,
-          [key]: { label, order, value },
+          [key]: {
+            ...configEntry,
+            display,
+            type,
+            validations: validations ?? [],
+            value: display ? ensureCorrectTyping(type, value) : value, // only check type if field had a specified eui element
+          },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
@@ -206,21 +374,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState) => sortAndFilterConnectorConfiguration(configState),
     ],
   }),
 });

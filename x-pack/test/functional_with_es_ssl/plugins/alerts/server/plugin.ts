@@ -6,7 +6,11 @@
  */
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
-import { PluginSetupContract as AlertingSetup, RuleType } from '@kbn/alerting-plugin/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  RuleType,
+  RuleTypeParams,
+} from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies
@@ -26,10 +30,17 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     return { state: {} };
   },
   producer: 'alerts',
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
+interface AlwaysFiringParams extends RuleTypeParams {
+  instances: Array<{ id: string; state: any }>;
+}
+
 export const alwaysFiringAlertType: RuleType<
-  { instances: Array<{ id: string; state: any }> },
+  AlwaysFiringParams,
   never, // Only use if defining useSavedObjectReferences hook
   {
     globalStateValue: boolean;
@@ -66,6 +77,9 @@ export const alwaysFiringAlertType: RuleType<
       },
     };
   },
+  validate: {
+    params: { validate: (params) => params as AlwaysFiringParams },
+  },
 };
 
 export const failingAlertType: RuleType<never, never, never, never, never, 'default' | 'other'> = {
@@ -83,6 +97,9 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   isExportable: true,
   async executor() {
     throw new Error('Failed to execute alert type');
+  },
+  validate: {
+    params: { validate: (params) => params },
   },
 };
 

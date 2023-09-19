@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import {
   AnomaliesSort,
   getJobId,
@@ -16,7 +17,6 @@ import {
   logEntryRateJobTypes,
   Pagination,
 } from '../../../common/log_analysis';
-import { PersistedLogViewReference, ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {

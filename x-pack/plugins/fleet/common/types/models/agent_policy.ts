@@ -6,13 +6,15 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '..';
+import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
+// adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
+// x-pack/plugins/fleet/server/services/agent_policy.ts#L571
 export interface NewAgentPolicy {
   id?: string;
   name: string;
@@ -33,8 +35,11 @@ export interface NewAgentPolicy {
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
+  is_protected?: boolean;
+  overrides?: { [key: string]: any } | null;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
@@ -44,9 +49,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
+  is_protected: boolean;
 }
-
-export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
 
 export interface FullAgentPolicyInputStream {
   id: string;
@@ -120,6 +124,7 @@ export interface FullAgentPolicy {
       signing_key: string;
     };
   };
+  secret_references?: PolicySecretReference[];
   signed?: {
     data: string;
     signature: string;

@@ -19,13 +19,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover test', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/146223
+  describe.skip('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -235,21 +242,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemRemove('_score');
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.clickFieldListItemAdd('referer');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('referer');
         await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
-        expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();
         expect(url).to.contain('referer');
       });

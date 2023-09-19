@@ -20,12 +20,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
+import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
 const services = {
   uiSettings: getUiSettings(),
+  settings: getSettings(),
+  theme: getTheme(),
 };
 
 interface Props {
@@ -105,7 +107,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>
@@ -149,7 +151,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>{errorMsg}</p>

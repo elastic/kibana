@@ -18,7 +18,7 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { EuiHighlight } from '@elastic/eui';
+import { EuiHighlight, EuiToken } from '@elastic/eui';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
@@ -29,7 +29,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
-import { createMockedDragDropContext } from './mocks';
 import { DataViewsState } from '../../state_management';
 
 const fieldsFromQuery = [
@@ -185,7 +184,6 @@ describe('TextBased Query Languages Data Panel', () => {
           ])
         ),
       },
-      dragDropContext: createMockedDragDropContext(),
       core,
       dateRange: {
         fromDate: 'now-7d',
@@ -273,5 +271,16 @@ describe('TextBased Query Languages Data Panel', () => {
         .find(EuiHighlight)
         .map((item) => item.prop('children'))
     ).toEqual(['memory']);
+  });
+
+  it('should render correct field type icons', async () => {
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiToken)
+        .map((item) => item.prop('iconType'))
+    ).toEqual(['tokenNumber', 'tokenNumber', 'tokenDate']);
   });
 });

@@ -14,8 +14,8 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
+  Capabilities as UICapabilities,
 } from '@kbn/core/server';
-import { Capabilities as UICapabilities } from '@kbn/core/server';
 import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
@@ -40,7 +40,9 @@ import {
  */
 export interface PluginSetupContract {
   registerKibanaFeature(feature: KibanaFeatureConfig): void;
+
   registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
+
   /**
    * Calling this function during setup will crash Kibana.
    * Use start contract instead.
@@ -48,6 +50,7 @@ export interface PluginSetupContract {
    * @removeBy 8.8.0
    */
   getKibanaFeatures(): KibanaFeature[];
+
   /**
    * Calling this function during setup will crash Kibana.
    * Use start contract instead.
@@ -55,7 +58,6 @@ export interface PluginSetupContract {
    * @removeBy 8.8.0
    */
   getElasticsearchFeatures(): ElasticsearchFeature[];
-  getFeaturesUICapabilities(): UICapabilities;
 
   /**
    * In the future, OSS features should register their own subfeature
@@ -80,6 +82,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   getElasticsearchFeatures(): ElasticsearchFeature[];
+
   getKibanaFeatures(): KibanaFeature[];
 }
 
@@ -92,6 +95,7 @@ export class FeaturesPlugin
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isReportingEnabled: boolean = false;
+  private capabilities?: UICapabilities;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -103,13 +107,8 @@ export class FeaturesPlugin
       featureRegistry: this.featureRegistry,
     });
 
-    const getFeaturesUICapabilities = () =>
-      uiCapabilitiesForFeatures(
-        this.featureRegistry.getAllKibanaFeatures(),
-        this.featureRegistry.getAllElasticsearchFeatures()
-      );
-
-    core.capabilities.registerProvider(getFeaturesUICapabilities);
+    // capabilities provider wil never be called before plugin start
+    core.capabilities.registerProvider(() => this.capabilities!);
 
     return deepFreeze({
       registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
@@ -120,7 +119,6 @@ export class FeaturesPlugin
       getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
         this.featureRegistry
       ),
-      getFeaturesUICapabilities,
       enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
       featurePrivilegeIterator,
       subFeaturePrivilegeIterator,
@@ -129,6 +127,12 @@ export class FeaturesPlugin
 
   public start(core: CoreStart): RecursiveReadonly<PluginStartContract> {
     this.registerOssFeatures(core.savedObjects);
+    this.featureRegistry.lockRegistration();
+
+    this.capabilities = uiCapabilitiesForFeatures(
+      this.featureRegistry.getAllKibanaFeatures(),
+      this.featureRegistry.getAllElasticsearchFeatures()
+    );
 
     return deepFreeze({
       getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(

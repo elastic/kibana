@@ -13,17 +13,17 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { UserProfileAvatarData } from '../../common';
+import { UserProfile } from './user_profile';
+import type { UserProfileData } from '../../common';
 import { canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
-import { UserProfile } from './user_profile';
 
 export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
+  const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
   // to have a profile. For example, anonymous and users authenticated via
@@ -35,7 +35,7 @@ export const AccountManagementPage: FunctionComponent = () => {
 
   const error = currentUser.error || profileLoadError;
   if (error) {
-    return <EuiEmptyPrompt iconType="alert" title={<h2>{error.message}</h2>} />;
+    return <EuiEmptyPrompt iconType="warning" title={<h2>{error.message}</h2>} />;
   }
 
   if (!currentUser.value || (canUserHaveProfile(currentUser.value) && !userProfile.value)) {

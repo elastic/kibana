@@ -6,57 +6,46 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
+import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getJourneyDetails } from '../../queries/get_journey_details';
+import { getJourneySteps } from '../../legacy_uptime/lib/requests/get_journey_steps';
 
-export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY,
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
     }),
-    query: schema.object({
-      // provides a filter for the types of synthetic events to include
-      // when fetching a journey's data
-      syntheticEventTypes: schema.maybe(
-        schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
-      ),
-    }),
   },
-  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<SyntheticsJourneyApiResponse> => {
     const { checkGroup } = request.params;
-    const { syntheticEventTypes } = request.query;
 
-    try {
-      const [result, details] = await Promise.all([
-        await libs.requests.getJourneySteps({
-          uptimeEsClient,
-          checkGroup,
-          syntheticEventTypes,
-        }),
-        await getJourneyDetails({
-          uptimeEsClient,
-          checkGroup,
-        }),
-      ]);
-
-      return {
+    const [steps, details] = await Promise.all([
+      getJourneySteps({
+        uptimeEsClient,
         checkGroup,
-        steps: result,
-        details,
-      };
-    } catch (e: unknown) {
-      return response.custom({ statusCode: 500, body: { message: e } });
-    }
+      }),
+      getJourneyDetails({
+        uptimeEsClient,
+        checkGroup,
+      }),
+    ]);
+
+    return {
+      steps,
+      details,
+      checkGroup,
+    };
   },
 });
 
-export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.JOURNEY_FAILED_STEPS,
+  path: SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
       checkGroups: schema.arrayOf(schema.string()),
@@ -65,7 +54,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { checkGroups } = request.query;
     try {
-      const result = await libs.requests.getJourneyFailedSteps({
+      const result = await getJourneyFailedSteps({
         uptimeEsClient,
         checkGroups,
       });

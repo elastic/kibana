@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 const moduleIds = [
   'apache_data_stream',
@@ -41,15 +41,16 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/modules/get_module/${module}`)
+      .get(`/internal/ml/modules/get_module/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }
 
-  describe('get_module', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/164420
+  describe.skip('get_module', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });

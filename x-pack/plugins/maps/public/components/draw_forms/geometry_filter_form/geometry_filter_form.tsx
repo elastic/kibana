@@ -6,6 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiForm,
   EuiFormRow,
@@ -19,9 +20,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
 import { ActionSelect } from '../../action_select';
+
+const RELATION_OPTIONS = [
+  {
+    value: 'intersects',
+    text: getEsSpatialRelationLabel('intersects'),
+  },
+  {
+    value: 'disjoint',
+    text: getEsSpatialRelationLabel('disjoint'),
+  },
+  {
+    value: 'within',
+    text: getEsSpatialRelationLabel('within'),
+  },
+];
 
 interface Props {
   buttonLabel: string;
@@ -35,18 +50,24 @@ interface Props {
   }: {
     actionId: string;
     geometryLabel: string;
-    relation: ES_SPATIAL_RELATIONS;
+    relation: GeoShapeRelation;
   }) => void;
   errorMsg?: string;
   className?: string;
   isLoading?: boolean;
 }
 
-export class GeometryFilterForm extends Component<Props> {
-  state = {
+interface State {
+  actionId: string;
+  geometryLabel: string;
+  relation: GeoShapeRelation;
+}
+
+export class GeometryFilterForm extends Component<Props, State> {
+  state: State = {
     actionId: ACTION_GLOBAL_APPLY_FILTER,
     geometryLabel: this.props.intitialGeometryLabel,
-    relation: ES_SPATIAL_RELATIONS.INTERSECTS,
+    relation: 'intersects',
   };
 
   _onGeometryLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +78,7 @@ export class GeometryFilterForm extends Component<Props> {
 
   _onRelationChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({
-      relation: e.target.value,
+      relation: e.target.value as GeoShapeRelation,
     });
   };
 
@@ -74,13 +95,6 @@ export class GeometryFilterForm extends Component<Props> {
   };
 
   _renderRelationInput() {
-    const options = Object.values(ES_SPATIAL_RELATIONS).map((relation) => {
-      return {
-        value: relation,
-        text: getEsSpatialRelationLabel(relation),
-      };
-    });
-
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.geometryFilterForm.relationLabel', {
@@ -90,7 +104,7 @@ export class GeometryFilterForm extends Component<Props> {
       >
         <EuiSelect
           compressed
-          options={options}
+          options={RELATION_OPTIONS}
           value={this.state.relation}
           onChange={this._onRelationChange}
         />

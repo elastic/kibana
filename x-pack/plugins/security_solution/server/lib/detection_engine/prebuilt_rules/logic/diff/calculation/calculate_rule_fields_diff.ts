@@ -9,6 +9,8 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 import type {
+  AllFieldsDiff,
+  DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
@@ -18,8 +20,6 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
-import type {
   CommonFieldsDiff,
   CustomQueryFieldsDiff,
   EqlFieldsDiff,
@@ -29,10 +29,11 @@ import type {
   SavedQueryFieldsDiff,
   ThreatMatchFieldsDiff,
   ThresholdFieldsDiff,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
-import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
+import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
 
@@ -47,15 +48,34 @@ const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;
 export const calculateRuleFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableRule>
 ): RuleFieldsDiff => {
-  validateRuleVersions(ruleVersions);
-
   const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { base_version, current_version, target_version } = ruleVersions;
+  const hasBaseVersion = base_version !== MissingVersion;
+
+  const isRuleTypeDifferentInTargetVersion = current_version.type !== target_version.type;
+  const isRuleTypeDifferentInBaseVersion = hasBaseVersion
+    ? current_version.type !== base_version.type
+    : false;
+
+  if (isRuleTypeDifferentInTargetVersion || isRuleTypeDifferentInBaseVersion) {
+    // If rule type has been changed by Elastic in the target version (can happen)
+    // or by user in the current version (should never happen), we can't calculate the diff
+    // only for fields of a single rule type, and need to calculate it for all fields
+    // of all the rule types we have.
+    // TODO: Try to get rid of "as" casting
+    return calculateAllFieldsDiff({
+      base_version: base_version as DiffableAllFields | MissingVersion,
+      current_version: current_version as DiffableAllFields,
+      target_version: target_version as DiffableAllFields,
+    }) as RuleFieldsDiff;
+  }
 
   switch (current_version.type) {
     case 'query': {
-      invariant(base_version.type === 'query', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'query', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'query', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -63,7 +83,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'saved_query': {
-      invariant(base_version.type === 'saved_query', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'saved_query', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'saved_query', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -71,7 +93,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'eql': {
-      invariant(base_version.type === 'eql', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'eql', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'eql', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -79,7 +103,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'threat_match': {
-      invariant(base_version.type === 'threat_match', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'threat_match', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'threat_match', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -87,7 +113,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'threshold': {
-      invariant(base_version.type === 'threshold', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'threshold', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'threshold', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -95,7 +123,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'machine_learning': {
-      invariant(base_version.type === 'machine_learning', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'machine_learning', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'machine_learning', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -103,7 +133,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'new_terms': {
-      invariant(base_version.type === 'new_terms', BASE_TYPE_ERROR);
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'new_terms', BASE_TYPE_ERROR);
+      }
       invariant(target_version.type === 'new_terms', TARGET_TYPE_ERROR);
       return {
         ...commonFieldsDiff,
@@ -116,20 +148,10 @@ export const calculateRuleFieldsDiff = (
   }
 };
 
-const validateRuleVersions = (ruleVersions: ThreeVersionsOf<DiffableRule>): void => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { base_version, current_version, target_version } = ruleVersions;
-  const types = new Set<string>([base_version.type, current_version.type, target_version.type]);
-
-  if (types.size > 1) {
-    throw new Error('Cannot change rule type during rule upgrade');
-  }
-};
-
 const calculateCommonFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableCommonFields>
+  ruleVersions: ThreeVersionsOf<DiffableCommonFields>
 ): CommonFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, commonFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, commonFieldsDiffAlgorithms);
 };
 
 const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
@@ -164,40 +186,40 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
 };
 
 const calculateCustomQueryFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableCustomQueryFields>
+  ruleVersions: ThreeVersionsOf<DiffableCustomQueryFields>
 ): CustomQueryFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, customQueryFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, customQueryFieldsDiffAlgorithms);
 };
 
 const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateSavedQueryFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableSavedQueryFields>
+  ruleVersions: ThreeVersionsOf<DiffableSavedQueryFields>
 ): SavedQueryFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, savedQueryFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, savedQueryFieldsDiffAlgorithms);
 };
 
 const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateEqlFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableEqlFields>
+  ruleVersions: ThreeVersionsOf<DiffableEqlFields>
 ): EqlFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, eqlFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, eqlFieldsDiffAlgorithms);
 };
 
 const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  eql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   event_category_override: simpleDiffAlgorithm,
   timestamp_field: simpleDiffAlgorithm,
@@ -205,14 +227,14 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
 };
 
 const calculateThreatMatchFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableThreatMatchFields>
+  ruleVersions: ThreeVersionsOf<DiffableThreatMatchFields>
 ): ThreatMatchFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, threatMatchFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, threatMatchFieldsDiffAlgorithms);
 };
 
 const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   threat_query: simpleDiffAlgorithm,
   threat_index: simpleDiffAlgorithm,
@@ -223,22 +245,22 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
 };
 
 const calculateThresholdFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableThresholdFields>
+  ruleVersions: ThreeVersionsOf<DiffableThresholdFields>
 ): ThresholdFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, thresholdFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, thresholdFieldsDiffAlgorithms);
 };
 
 const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   threshold: simpleDiffAlgorithm,
 };
 
 const calculateMachineLearningFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableMachineLearningFields>
+  ruleVersions: ThreeVersionsOf<DiffableMachineLearningFields>
 ): MachineLearningFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, machineLearningFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, machineLearningFieldsDiffAlgorithms);
 };
 
 const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
@@ -249,15 +271,33 @@ const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachi
   };
 
 const calculateNewTermsFieldsDiff = (
-  fieldsVersions: ThreeVersionsOf<DiffableNewTermsFields>
+  ruleVersions: ThreeVersionsOf<DiffableNewTermsFields>
 ): NewTermsFieldsDiff => {
-  return calculateFieldsDiffFor(fieldsVersions, newTermsFieldsDiffAlgorithms);
+  return calculateFieldsDiffFor(ruleVersions, newTermsFieldsDiffAlgorithms);
 };
 
 const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   new_terms_fields: simpleDiffAlgorithm,
   history_window_start: simpleDiffAlgorithm,
+};
+
+const calculateAllFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableAllFields>
+): AllFieldsDiff => {
+  return calculateFieldsDiffFor(ruleVersions, allFieldsDiffAlgorithms);
+};
+
+const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
+  ...commonFieldsDiffAlgorithms,
+  ...customQueryFieldsDiffAlgorithms,
+  ...savedQueryFieldsDiffAlgorithms,
+  ...eqlFieldsDiffAlgorithms,
+  ...threatMatchFieldsDiffAlgorithms,
+  ...thresholdFieldsDiffAlgorithms,
+  ...machineLearningFieldsDiffAlgorithms,
+  ...newTermsFieldsDiffAlgorithms,
+  type: simpleDiffAlgorithm,
 };

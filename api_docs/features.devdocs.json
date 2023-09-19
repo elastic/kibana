@@ -64,7 +64,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
                 "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -339,9 +339,7 @@
             "parentPluginId": "features",
             "id": "def-public.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -350,51 +348,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",
@@ -999,7 +954,7 @@
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
             "signature": [
-              "\"none\" | \"all\" | \"read\""
+              "\"none\" | \"read\" | \"all\""
             ],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
@@ -1317,7 +1272,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
                 "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -1771,9 +1726,7 @@
             "parentPluginId": "features",
             "id": "def-server.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -1782,51 +1735,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",
@@ -2552,29 +2462,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.getFeaturesUICapabilities",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeaturesUICapabilities",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.enableReportingUiCapabilities",
             "type": "Function",
             "tags": [],
@@ -3082,7 +2969,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
                 "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -3346,7 +3233,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>"
                 ],
                 "path": "x-pack/plugins/features/common/sub_feature.ts",
                 "deprecated": false,
@@ -3383,7 +3270,7 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
             ],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
@@ -3427,7 +3314,7 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; app?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }"
             ],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
@@ -3669,9 +3556,7 @@
             "parentPluginId": "features",
             "id": "def-common.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -3680,51 +3565,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",
@@ -4329,7 +4171,7 @@
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
             "signature": [
-              "\"none\" | \"all\" | \"read\""
+              "\"none\" | \"read\" | \"all\""
             ],
             "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,

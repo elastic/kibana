@@ -42,7 +42,7 @@ export const dashboardAddToLibraryActionStrings = {
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.successMessage', {
-      defaultMessage: `Panel {panelTitle} was added to the visualize library`,
+      defaultMessage: `Panel {panelTitle} was added to the library`,
       values: { panelTitle },
     }),
 };
@@ -91,7 +91,7 @@ export const dashboardUnlinkFromLibraryActionStrings = {
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-      defaultMessage: `Panel {panelTitle} is no longer connected to the visualize library`,
+      defaultMessage: `Panel {panelTitle} is no longer connected to the library`,
       values: { panelTitle },
     }),
 };
@@ -99,7 +99,7 @@ export const dashboardUnlinkFromLibraryActionStrings = {
 export const dashboardLibraryNotificationStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.LibraryNotification', {
-      defaultMessage: 'Visualize Library Notification',
+      defaultMessage: 'Library Notification',
     }),
   getTooltip: () =>
     i18n.translate('dashboard.panel.libraryNotification.toolTip', {

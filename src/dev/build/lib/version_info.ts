@@ -38,5 +38,6 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     buildSha,
     buildVersion,
     buildNumber: await getBuildNumber(),
+    buildDate: new Date().toISOString(),
   };
 }

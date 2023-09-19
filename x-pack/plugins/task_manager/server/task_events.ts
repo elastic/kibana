@@ -70,6 +70,7 @@ export interface RanTask {
   task: ConcreteTaskInstance;
   persistence: TaskPersistence;
   result: TaskRunResult;
+  isExpired: boolean;
 }
 export type ErroredTask = RanTask & {
   error: Error;
@@ -87,7 +88,9 @@ export type TaskManagerStats =
   | 'pollingDelay'
   | 'claimDuration'
   | 'queuedEphemeralTasks'
-  | 'ephemeralTaskDelay';
+  | 'ephemeralTaskDelay'
+  | 'workerUtilization'
+  | 'runDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -210,6 +213,11 @@ export function isTaskManagerStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
+}
+export function isTaskManagerWorkerUtilizationStatEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerStat {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_STAT && taskEvent.id === 'workerUtilization';
 }
 export function isEphemeralTaskRejectedDueToCapacityEvent(
   taskEvent: TaskEvent<unknown, unknown>

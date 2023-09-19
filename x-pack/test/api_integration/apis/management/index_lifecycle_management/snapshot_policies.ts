@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     registerSnapshotRepositoriesHelpers(getService);
 
   describe('snapshot policies', function describeSnapshotPoliciesTest() {
-    // skip Cloud failing test https://github.com/elastic/kibana/issues/136881
+    // File-system repositories are not applicable on cloud
     this.tags(['skipCloud']);
 
     before(async () => Promise.all([cleanupPolicies(), cleanupRepositories()]));

@@ -18,6 +18,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type {
   TaskManagerSetupContract,
@@ -25,6 +26,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
+import { cleanupCredentials } from '../common/utils/helpers';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -47,6 +49,7 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
+import { CloudSecurityPostureConfig } from './config';
 
 export class CspPlugin
   implements
@@ -58,6 +61,7 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: CloudSecurityPostureConfig;
   private isCloudEnabled?: boolean;
 
   /**
@@ -67,8 +71,9 @@ export class CspPlugin
    */
   #isInitialized: boolean = false;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<CloudSecurityPostureConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -85,7 +90,7 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
-    registerCspmUsageCollector(this.logger, plugins.usageCollection);
+    registerCspmUsageCollector(this.logger, coreStartServices, plugins.usageCollection);
 
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 
@@ -118,6 +123,34 @@ export class CspPlugin
             if (!isSingleEnabledInput(packagePolicy.inputs)) {
               throw new Error('Only one enabled input is allowed per policy');
             }
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (
+          packagePolicy: NewPackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<NewPackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyUpdate',
+        async (
+          packagePolicy: UpdatePackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<UpdatePackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
           }
 
           return packagePolicy;
@@ -173,7 +206,7 @@ export class CspPlugin
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
-    await initializeCspIndices(esClient, this.logger);
+    await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;

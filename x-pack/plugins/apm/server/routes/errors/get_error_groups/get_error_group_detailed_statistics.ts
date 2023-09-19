@@ -20,6 +20,11 @@ import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+interface ErrorGroupDetailedStat {
+  groupId: string;
+  timeseries: Coordinate[];
+}
+
 export async function getErrorGroupDetailedStatistics({
   kuery,
   serviceName,
@@ -40,7 +45,7 @@ export async function getErrorGroupDetailedStatistics({
   start: number;
   end: number;
   offset?: string;
-}): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
+}): Promise<ErrorGroupDetailedStat[]> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -116,6 +121,11 @@ export async function getErrorGroupDetailedStatistics({
   });
 }
 
+export interface ErrorGroupPeriodsResponse {
+  currentPeriod: Record<string, ErrorGroupDetailedStat>;
+  previousPeriod: Record<string, ErrorGroupDetailedStat>;
+}
+
 export async function getErrorGroupPeriods({
   kuery,
   serviceName,
@@ -136,7 +146,7 @@ export async function getErrorGroupPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ErrorGroupPeriodsResponse> {
   const commonProps = {
     environment,
     kuery,

@@ -34,6 +34,7 @@ import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -98,6 +99,7 @@ export class Server {
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
+  private readonly userSettingsService: UserSettingsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -145,6 +147,7 @@ export class Server {
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
+    this.userSettingsService = new UserSettingsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -187,6 +190,7 @@ export class Server {
     this.capabilities.preboot({ http: httpPreboot });
     const elasticsearchServicePreboot = await this.elasticsearch.preboot();
     const uiSettingsPreboot = await this.uiSettings.preboot();
+    await this.status.preboot({ http: httpPreboot });
 
     const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
     const httpResourcesPreboot = this.httpResources.preboot({
@@ -219,7 +223,7 @@ export class Server {
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 
-    prebootTransaction?.end();
+    prebootTransaction.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
     return corePreboot;
   }
@@ -301,6 +305,7 @@ export class Server {
     });
 
     const customBrandingSetup = this.customBranding.setup();
+    const userSettingsServiceSetup = this.userSettingsService.setup();
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -308,6 +313,7 @@ export class Server {
       status: statusSetup,
       uiPlugins,
       customBranding: customBrandingSetup,
+      userSettings: userSettingsServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -337,15 +343,16 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      userSettings: userSettingsServiceSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup, uiPlugins);
+    await this.coreApp.setup(coreSetup, uiPlugins);
 
-    setupTransaction?.end();
+    setupTransaction.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
@@ -360,7 +367,7 @@ export class Server {
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const deprecationsStart = this.deprecations.start();
-    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
+    const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
@@ -372,7 +379,7 @@ export class Server {
     soStartSpan?.end();
 
     if (this.nodeRoles?.migrator === true) {
-      startTransaction?.end();
+      startTransaction.end();
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
         'Migrations completed, shutting down Kibana',
@@ -413,7 +420,7 @@ export class Server {
 
     await this.http.start();
 
-    startTransaction?.end();
+    startTransaction.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
     this.reportKibanaStartedEvents(analyticsStart);

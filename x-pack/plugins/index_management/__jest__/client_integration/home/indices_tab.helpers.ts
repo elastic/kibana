@@ -30,7 +30,9 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
-    selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
+    selectIndexDetailsTab: (
+      tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
+    ) => Promise<void>;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
@@ -38,6 +40,9 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
     clickModalConfirm: () => void;
+    clickCreateIndexButton: () => void;
+    clickCreateIndexCancelButton: () => void;
+    clickCreateIndexSaveButton: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -133,6 +138,35 @@ export const setup = async (
     return find('dataStreamDetailPanelTitle').text();
   };
 
+  const clickCreateIndexButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('createIndexButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const clickCreateIndexCancelButton = async () => {
+    const { find, exists, component } = testBed;
+
+    expect(exists('createIndexCancelButton')).toBe(true);
+    await act(async () => {
+      find('createIndexCancelButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const clickCreateIndexSaveButton = async () => {
+    const { find, exists, component } = testBed;
+
+    expect(exists('createIndexSaveButton')).toBe(true);
+    await act(async () => {
+      find('createIndexSaveButton').simulate('click');
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -144,6 +178,9 @@ export const setup = async (
       clickManageContextMenuButton,
       clickContextMenuOption,
       clickModalConfirm,
+      clickCreateIndexButton,
+      clickCreateIndexCancelButton,
+      clickCreateIndexSaveButton,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

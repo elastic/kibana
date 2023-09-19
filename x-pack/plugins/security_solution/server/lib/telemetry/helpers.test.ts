@@ -25,6 +25,7 @@ import {
   tlog,
   setIsElasticCloudDeployment,
   createTaskMetric,
+  processK8sUsernames,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -963,6 +964,7 @@ describe.skip('test create task metrics', () => {
       passed: true,
     });
   });
+
   test('can succeed when error given', async () => {
     const stubTaskName = 'test';
     const stubPassed = false;
@@ -980,5 +982,97 @@ describe.skip('test create task metrics', () => {
       passed: false,
       error_message: 'failed',
     });
+  });
+});
+
+describe('Pii is removed from a kubernetes prebuilt rule alert', () => {
+  test('a document without the sensitive values is ignored', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        audit: {},
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+      },
+      powershell: {
+        command_line: 'test',
+        module: 'test',
+        module_loaded: 'test',
+        module_version: 'test',
+        process_name: 'test',
+      },
+    };
+
+    const ignoredDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(ignoredDocument).toEqual(testDocument);
+  });
+
+  test('kubernetes system usernames are not sanitized from a document', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+        audit: {
+          user: {
+            username: 'system:serviceaccount:default:default',
+            groups: [
+              'system:serviceaccounts',
+              'system:serviceaccounts:default',
+              'system:authenticated',
+            ],
+          },
+          impersonated_user: {
+            username: 'system:serviceaccount:default:default',
+            groups: [
+              'system:serviceaccounts',
+              'system:serviceaccounts:default',
+              'system:authenticated',
+            ],
+          },
+        },
+      },
+    };
+
+    const sanitizedDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(sanitizedDocument).toEqual(testDocument);
+  });
+
+  test('kubernetes system usernames are sanitized from a document when not system users', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+        audit: {
+          user: {
+            username: 'user1',
+            groups: ['group1', 'group2', 'group3'],
+          },
+          impersonated_user: {
+            username: 'impersonatedUser1',
+            groups: ['group4', 'group5', 'group6'],
+          },
+        },
+      },
+    };
+
+    const sanitizedDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(sanitizedDocument).toEqual(testDocument);
   });
 });

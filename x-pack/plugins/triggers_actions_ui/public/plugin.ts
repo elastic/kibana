@@ -24,13 +24,16 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
-import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
+import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -62,6 +65,7 @@ import type {
   RuleTagBadgeOptions,
   RuleEventLogListProps,
   RuleEventLogListOptions,
+  GlobalRuleEventLogListProps,
   RulesListProps,
   RulesListNotifyBadgePropsWithApi,
   AlertsTableConfigurationRegistry,
@@ -85,6 +89,7 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -105,10 +110,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddAlertFlyout: (
+  getAddRuleFlyout: (
     props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleAddProps>;
-  getEditAlertFlyout: (
+  getEditRuleFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
@@ -135,6 +140,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getRulesSettingsLink: () => ReactElement;
+  getGlobalRuleEventLogList: (
+    props: GlobalRuleEventLogListProps
+  ) => ReactElement<GlobalRuleEventLogListProps>;
 }
 
 interface PluginsSetup {
@@ -148,12 +156,15 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export class Plugin
@@ -259,6 +270,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -276,6 +288,8 @@ export class Plugin
           ruleTypeRegistry,
           alertsTableConfigurationRegistry,
           kibanaFeatures,
+          licensing: pluginsStart.licensing,
+          expressions: pluginsStart.expressions,
         });
       },
     });
@@ -306,6 +320,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -366,18 +381,18 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
-        return getAddAlertFlyoutLazy({
+      getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+        return getAddRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
           connectorServices: this.connectorServices!,
         });
       },
-      getEditAlertFlyout: (
+      getEditRuleFlyout: (
         props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
-        return getEditAlertFlyoutLazy({
+        return getEditRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
@@ -410,6 +425,9 @@ export class Plugin
       },
       getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
+      },
+      getGlobalRuleEventLogList: (props: GlobalRuleEventLogListProps) => {
+        return getGlobalRuleEventLogListLazy(props);
       },
       getRulesListNotifyBadge: (props: RulesListNotifyBadgePropsWithApi) => {
         return getRulesListNotifyBadgeLazy(props);

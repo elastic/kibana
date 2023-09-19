@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
-import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { flowRight } from 'lodash';
-import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
-import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
+import { useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
-type RedirectToLogsType = RouteComponentProps<{}>;
+export const RedirectToLogs = () => {
+  const { logViewId } = useParams<{ logViewId?: string }>();
+  const location = useLocation();
 
-interface RedirectToLogsProps extends RedirectToLogsType {
-  match: RouteMatch<{
-    sourceId?: string;
-  }>;
-}
+  const {
+    services: { locators },
+  } = useKibanaContextForPlugin();
 
-export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
-  const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
-  const searchString = flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
-    replaceLogPositionInQueryString(time),
-    replaceSourceIdInQueryString(sourceId)
-  )('');
 
-  return <Redirect to={`/stream?${searchString}`} />;
+  useEffect(() => {
+    locators.logsLocator.navigate(
+      {
+        time,
+        filter,
+        logView: { ...DEFAULT_LOG_VIEW, logViewId: logViewId || DEFAULT_LOG_VIEW.logViewId },
+      },
+      { replace: true }
+    );
+  }, [filter, locators.logsLocator, logViewId, time]);
+
+  return null;
 };

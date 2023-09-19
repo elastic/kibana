@@ -22,7 +22,8 @@ describe('validateParamsForWarnings', () => {
   ];
 
   test('returns warnings when publicUrl is not set and there are publicUrl variables used', () => {
-    const warning = 'server.publicBaseUrl is not set. Actions will use relative URLs.';
+    const warning =
+      'server.publicBaseUrl is not set. Generated URLs will be either relative or empty.';
     expect(
       validateParamsForWarnings('Test for {{context.url}}', undefined, actionVariables)
     ).toEqual(warning);
@@ -50,5 +51,9 @@ describe('validateParamsForWarnings', () => {
 
   test('does not returns warnings when publicUrl is not set and the value is not a string', () => {
     expect(validateParamsForWarnings(10, undefined, actionVariables)).toBeFalsy();
+  });
+
+  test('does not throw an error when passing in invalid mustache', () => {
+    expect(() => validateParamsForWarnings('{{', undefined, actionVariables)).not.toThrowError();
   });
 });

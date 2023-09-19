@@ -18,8 +18,10 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -36,15 +38,13 @@ export const getHostsColumns = (
         if (hostName != null && hostName.length > 0) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.name',
+              data={{
                 value: hostName[0],
-                type: 'keyword',
-                aggregatable: true,
+                field: 'host.name',
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />
@@ -94,14 +94,13 @@ export const getHostsColumns = (
         if (hostOsName != null) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.os.name',
+              data={{
                 value: hostOsName[0],
-                type: 'keyword',
+                field: 'host.os.name',
               }}
             >
               {hostOsName}
@@ -121,14 +120,13 @@ export const getHostsColumns = (
         if (hostOsVersion != null) {
           return (
             <SecurityCellActions
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.os.version',
+              data={{
                 value: hostOsVersion[0],
-                type: 'keyword',
+                field: 'host.os.version',
               }}
             >
               {hostOsVersion}
@@ -146,7 +144,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
           <>
-            {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+            <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),

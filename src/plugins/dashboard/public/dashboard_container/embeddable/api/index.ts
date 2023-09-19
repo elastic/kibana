@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { showOptions } from './show_options_popover';
+export { showSettings } from './show_settings';
 export { addFromLibrary } from './add_panel_from_library';
 export { runSaveAs, runQuickSave, runClone } from './run_save_functions';
-export { addOrUpdateEmbeddable, replacePanel, showPlaceholderUntil } from './panel_management';
+export { addOrUpdateEmbeddable, replacePanel } from './panel_management';

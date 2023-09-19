@@ -86,6 +86,8 @@ export interface ArtifactsClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[]>;
+
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 
   encodeContent(content: ArtifactsClientCreateOptions['content']): Promise<ArtifactEncodedMetadata>;

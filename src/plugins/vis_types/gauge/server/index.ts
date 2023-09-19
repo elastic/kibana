@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from '../config';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, GaugeConfig } from '../config';
 import { VisTypeGaugeServerPlugin } from './plugin';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<GaugeConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypeGaugeServerPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypeGaugeServerPlugin(initializerContext);

@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(38);
+      expect(count).toBe(42);
     });
   });
 
@@ -67,6 +67,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -104,6 +105,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities', async () => {
@@ -121,6 +126,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -158,6 +164,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -175,6 +185,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -212,6 +223,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -229,6 +244,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -266,6 +282,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -283,6 +303,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(false);
       expect(capabilities.canGetMlInfo).toBe(false);
+      expect(capabilities.canUseAiops).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
       expect(capabilities.canGetDatafeeds).toBe(false);
       expect(capabilities.canGetCalendars).toBe(false);
@@ -320,6 +341,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
   });
 
@@ -376,5 +401,9 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateTrainedModels).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+    expect(capabilities.isADEnabled).toBe(true);
+    expect(capabilities.isDFAEnabled).toBe(true);
+    expect(capabilities.isNLPEnabled).toBe(true);
   });
 });

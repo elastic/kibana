@@ -1,7 +1,15 @@
 {
   "ml.start_data_frame_analytics": {
     "url_params": {
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -9,6 +17,10 @@
     "patterns": [
       "_ml/data_frame/analytics/{id}/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-dfanalytics.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-dfanalytics.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

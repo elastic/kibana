@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, type FC } from 'react';
 import { render, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
 import { parseUrlState, useUrlState, UrlStateProvider } from './url_state';
 
-const mockHistoryPush = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: mockHistoryPush,
-  }),
-  useLocation: () => ({
-    search:
-      "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d",
-  }),
-}));
+const mockHistoryInitialState =
+  "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d";
 
 describe('getUrlState', () => {
   test('properly decode url with _g and _a', () => {
-    expect(
-      parseUrlState(
-        "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!t,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d"
-      )
-    ).toEqual({
+    expect(parseUrlState(mockHistoryInitialState)).toEqual({
       _a: {
         mlExplorerFilter: {},
         mlExplorerSwimlane: {
@@ -46,7 +35,7 @@ describe('getUrlState', () => {
         },
         refreshInterval: {
           display: 'Off',
-          pause: true,
+          pause: false,
           value: 0,
         },
         time: {
@@ -61,29 +50,96 @@ describe('getUrlState', () => {
 });
 
 describe('useUrlState', () => {
-  beforeEach(() => {
-    mockHistoryPush.mockClear();
-  });
-
-  test('pushes a properly encoded search string to history', () => {
+  it('pushes a properly encoded search string to history', () => {
     const TestComponent: FC = () => {
-      const [, setUrlState] = useUrlState('_a');
-      return <button onClick={() => setUrlState({ query: {} })}>ButtonText</button>;
+      const [appState, setAppState] = useUrlState('_a');
+
+      useEffect(() => {
+        setAppState(parseUrlState(mockHistoryInitialState)._a);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return (
+        <>
+          <button onClick={() => setAppState({ query: 'my-query' })}>ButtonText</button>
+          <div data-test-subj="appState">{JSON.stringify(appState?.query)}</div>
+        </>
+      );
     };
 
-    const { getByText } = render(
-      <UrlStateProvider>
-        <TestComponent />
-      </UrlStateProvider>
+    const { getByText, getByTestId } = render(
+      <MemoryRouter>
+        <UrlStateProvider>
+          <TestComponent />
+        </UrlStateProvider>
+      </MemoryRouter>
+    );
+
+    expect(getByTestId('appState').innerHTML).toBe(
+      '{"query_string":{"analyze_wildcard":true,"query":"*"}}'
     );
 
     act(() => {
       getByText('ButtonText').click();
     });
 
-    expect(mockHistoryPush).toHaveBeenCalledWith({
-      search:
-        '_a=%28mlExplorerFilter%3A%28%29%2CmlExplorerSwimlane%3A%28viewByFieldName%3Aaction%29%2Cquery%3A%28%29%29&_g=%28ml%3A%28jobIds%3A%21%28dec-2%29%29%2CrefreshInterval%3A%28display%3AOff%2Cpause%3A%21f%2Cvalue%3A0%29%2Ctime%3A%28from%3A%272019-01-01T00%3A03%3A40.000Z%27%2Cmode%3Aabsolute%2Cto%3A%272019-08-30T11%3A55%3A07.000Z%27%29%29&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d',
+    expect(getByTestId('appState').innerHTML).toBe('"my-query"');
+  });
+
+  it('updates both _g and _a state successfully', () => {
+    const TestComponent: FC = () => {
+      const [globalState, setGlobalState] = useUrlState('_g');
+      const [appState, setAppState] = useUrlState('_a');
+
+      useEffect(() => {
+        setGlobalState({ time: 'initial time' });
+        setAppState({ query: 'initial query' });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return (
+        <>
+          <button onClick={() => setGlobalState({ time: 'now-15m' })}>GlobalStateButton1</button>
+          <button onClick={() => setGlobalState({ time: 'now-5y' })}>GlobalStateButton2</button>
+          <button onClick={() => setAppState({ query: 'the updated query' })}>
+            AppStateButton
+          </button>
+          <div data-test-subj="globalState">{globalState?.time}</div>
+          <div data-test-subj="appState">{appState?.query}</div>
+        </>
+      );
+    };
+
+    const { getByText, getByTestId } = render(
+      <MemoryRouter>
+        <UrlStateProvider>
+          <TestComponent />
+        </UrlStateProvider>
+      </MemoryRouter>
+    );
+
+    expect(getByTestId('globalState').innerHTML).toBe('initial time');
+    expect(getByTestId('appState').innerHTML).toBe('initial query');
+
+    act(() => {
+      getByText('GlobalStateButton1').click();
     });
+
+    expect(getByTestId('globalState').innerHTML).toBe('now-15m');
+    expect(getByTestId('appState').innerHTML).toBe('initial query');
+
+    act(() => {
+      getByText('AppStateButton').click();
+    });
+
+    expect(getByTestId('globalState').innerHTML).toBe('now-15m');
+    expect(getByTestId('appState').innerHTML).toBe('the updated query');
+
+    act(() => {
+      getByText('GlobalStateButton2').click();
+    });
+
+    expect(getByTestId('globalState').innerHTML).toBe('now-5y');
+    expect(getByTestId('appState').innerHTML).toBe('the updated query');
   });
 });

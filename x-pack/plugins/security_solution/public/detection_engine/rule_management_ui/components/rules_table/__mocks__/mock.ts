@@ -194,13 +194,13 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
+  investigationFields: ['foo', 'bar'],
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
   actions: [],
   kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
-  throttle: 'no_actions',
 });
 
 export const mockDefineStepRule = (): DefineStepRule => ({

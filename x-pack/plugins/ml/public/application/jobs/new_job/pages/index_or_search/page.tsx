@@ -6,10 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
@@ -19,7 +19,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
-  const { uiSettings, http } = useMlKibana().services;
+  const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
@@ -39,8 +39,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             defaultMessage="Select data view or saved search"
           />
         </MlPageHeader>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
-          <SavedObjectFinderUi
+        <EuiPanel hasShadow={false} hasBorder>
+          <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
@@ -67,14 +67,15 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
-            uiSettings={uiSettings}
-            http={http}
+            services={{
+              contentClient: contentManagement.client,
+              uiSettings,
+            }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

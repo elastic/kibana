@@ -210,7 +210,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 </EuiFlexItem>
                 {isAdvanced === false && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={convertToAdvanced}>
+                    <EuiButtonEmpty
+                      onClick={convertToAdvanced}
+                      data-test-subj="mlJobWizardButtonConvertToAdvancedJob"
+                    >
                       <FormattedMessage
                         id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
                         defaultMessage="Convert to advanced job"

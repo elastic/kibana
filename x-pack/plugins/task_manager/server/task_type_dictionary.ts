@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -22,6 +23,8 @@ export const REMOVED_TYPES: string[] = [
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',
+
+  'cleanup_failed_action_executions',
 ];
 
 /**
@@ -63,6 +66,16 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
+
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 }
 
 /**

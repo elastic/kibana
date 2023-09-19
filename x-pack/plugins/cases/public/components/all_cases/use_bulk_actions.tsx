@@ -11,7 +11,7 @@ import type {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { Case } from '../../containers/types';
+import type { CasesUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { useStatusAction } from '../actions/status/use_status_action';
@@ -23,7 +23,7 @@ import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout'
 import * as i18n from './translations';
 
 interface UseBulkActionsProps {
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   onAction: () => void;
   onActionSuccess: () => void;
 }

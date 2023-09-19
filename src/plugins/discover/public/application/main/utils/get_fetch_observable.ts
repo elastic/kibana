@@ -35,10 +35,8 @@ export function getFetch$({
   searchSource: ISearchSource;
 }) {
   const { timefilter } = data.query.timefilter;
-  const { filterManager } = data.query;
   return merge(
     refetch$,
-    filterManager.getFetches$(),
     timefilter.getFetch$(),
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
@@ -55,7 +53,6 @@ export function getFetch$({
         );
       })
     ),
-    data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
   ).pipe(debounceTime(100));
 }

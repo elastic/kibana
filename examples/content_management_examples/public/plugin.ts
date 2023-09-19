@@ -31,10 +31,17 @@ export class ContentManagementExamplesPlugin
       },
     });
 
+    contentManagement.registry.register({
+      id: 'todos',
+      version: {
+        latest: 1,
+      },
+    });
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: StartDeps) {
     return {};
   }
 

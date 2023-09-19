@@ -126,6 +126,8 @@ describe('GET /api/features', () => {
       privileges: null,
     });
 
+    featureRegistry.lockRegistration();
+
     const routerMock = httpServiceMock.createRouter();
     defineRoutes({
       router: routerMock,

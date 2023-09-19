@@ -96,7 +96,7 @@ describe('CaseView', () => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({
       isLoading: false,
-      pushCaseToExternalService: jest.fn(),
+      mutateAsync: jest.fn(),
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });

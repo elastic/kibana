@@ -13,28 +13,35 @@ import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeGetCustomElementRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${API_ROUTE_CUSTOM_ELEMENT}/{id}`,
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const soClient = (await context.core).savedObjects.client;
-      const customElement = await soClient.get<CustomElementAttributes>(
-        CUSTOM_ELEMENT_TYPE,
-        request.params.id
-      );
-
-      return response.ok({
-        body: {
-          id: customElement.id,
-          ...customElement.attributes,
-        },
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const customElement = await soClient.get<CustomElementAttributes>(
+          CUSTOM_ELEMENT_TYPE,
+          request.params.id
+        );
+
+        return response.ok({
+          body: {
+            id: customElement.id,
+            ...customElement.attributes,
+          },
+        });
+      })
+    );
 }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
 import { ServiceLocations, OverviewStatusState } from '../../../../../../../common/runtime_types';
 import { LocationsStatus, useLocations } from '../../../../hooks';
@@ -23,12 +23,19 @@ export const MonitorLocations = ({ locations, monitorId, status }: Props) => {
 
   const locationsToDisplay = locations
     .map((loc) => {
+      if (loc.label) {
+        return {
+          id: loc.id,
+          label: loc.label,
+          ...getLocationStatusColor(theme, loc.id, monitorId, status),
+        };
+      }
       const fullLoc = allLocations.find((l) => l.id === loc.id);
       if (fullLoc) {
         return {
           id: fullLoc.id,
           label: fullLoc.label,
-          ...getLocationStatusColor(theme, fullLoc.label, monitorId, status),
+          ...getLocationStatusColor(theme, fullLoc.id, monitorId, status),
         };
       }
     })
@@ -41,7 +48,7 @@ export const MonitorLocations = ({ locations, monitorId, status }: Props) => {
 
 function getLocationStatusColor(
   euiTheme: ReturnType<typeof useTheme>,
-  locationLabel: string | undefined,
+  locationId: string,
   monitorId: string,
   overviewStatus: OverviewStatusState | null
 ) {
@@ -49,7 +56,7 @@ function getLocationStatusColor(
     eui: { euiColorVis9, euiColorVis0, euiColorDisabled },
   } = euiTheme;
 
-  const locById = `${monitorId}-${locationLabel}`;
+  const locById = `${monitorId}-${locationId}`;
 
   if (overviewStatus?.downConfigs[locById]) {
     return { status: 'down', color: euiColorVis9 };

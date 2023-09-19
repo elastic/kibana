@@ -13,7 +13,8 @@
       "uiActions"
     ],
     "optionalPlugins": [
-      "security"
+      "security",
+      "screenshotMode",
     ],
     "requiredBundles": [
       "kibanaUtils",

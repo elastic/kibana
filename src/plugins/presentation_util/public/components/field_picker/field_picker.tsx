@@ -8,11 +8,17 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { EuiSelectable, EuiSelectableOption, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSpacer,
+} from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
@@ -24,6 +30,7 @@ export interface FieldPickerProps {
   selectedFieldName?: string;
   filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
+  selectableProps?: Partial<EuiSelectableProps>;
 }
 
 export const FieldPicker = ({
@@ -31,8 +38,13 @@ export const FieldPicker = ({
   onSelectField,
   filterPredicate,
   selectedFieldName,
+  selectableProps,
+  ...other
 }: FieldPickerProps) => {
+  const initialSelection = useRef(selectedFieldName);
+
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
 
   const availableFields = useMemo(
@@ -42,7 +54,7 @@ export const FieldPicker = ({
           .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
-      ),
+      ).sort((f) => (f.name === initialSelection.current ? -1 : 1)),
     [dataView, filterPredicate, typesFilter]
   );
 
@@ -52,9 +64,8 @@ export const FieldPicker = ({
       return {
         key: field.name,
         label: field.displayName ?? field.name,
-        className: classNames('presFieldPicker__fieldButton', {
-          presFieldPickerFieldButtonActive: field.name === selectedFieldName,
-        }),
+        className: 'presFieldPicker__fieldButton',
+        checked: field.name === selectedFieldName ? 'on' : undefined,
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
@@ -81,16 +92,29 @@ export const FieldPicker = ({
     [dataView, filterPredicate]
   );
 
+  const setFocusToSearch = useCallback(() => {
+    searchRef?.focus();
+  }, [searchRef]);
+
   const fieldTypeFilter = (
-    <FieldTypeFilter
-      onFieldTypesChange={(types) => setTypesFilter(types)}
-      fieldTypesValue={typesFilter}
-      availableFieldTypes={uniqueTypes}
-    />
+    <EuiFormRow fullWidth={true}>
+      <FieldTypeFilter
+        setFocusToSearch={setFocusToSearch}
+        onFieldTypesChange={(types) => setTypesFilter(types)}
+        fieldTypesValue={typesFilter}
+        availableFieldTypes={uniqueTypes}
+        buttonProps={{ disabled: Boolean(selectableProps?.isLoading) }}
+      />
+    </EuiFormRow>
   );
 
   return (
     <EuiSelectable
+      {...other}
+      {...selectableProps}
+      className={classNames('fieldPickerSelectable', {
+        fieldPickerSelectableLoading: selectableProps?.isLoading,
+      })}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
       })}
@@ -110,13 +134,15 @@ export const FieldPicker = ({
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),
+        disabled: Boolean(selectableProps?.isLoading),
+        inputRef: setSearchRef,
       }}
       listProps={{
         isVirtualized: true,
         showIcons: false,
         bordered: true,
       }}
-      height={300}
+      height="full"
     >
       {(list, search) => (
         <>

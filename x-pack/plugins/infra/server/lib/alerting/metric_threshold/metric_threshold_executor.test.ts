@@ -18,6 +18,7 @@ import {
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   Aggregators,
   Comparator,
@@ -34,6 +35,7 @@ import {
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { InfraConfig } from '../../../../common/plugin_config_types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -69,9 +71,11 @@ const logger = {
   get: () => logger,
 } as unknown as Logger;
 
+const STARTED_AT_MOCK_DATE = new Date();
+
 const mockOptions = {
   executionId: '',
-  startedAt: new Date(),
+  startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
   state: {
     wrapped: initialRuleState,
@@ -113,6 +117,7 @@ const mockOptions = {
     throttle: null,
     notifyWhen: null,
     producer: '',
+    revision: 0,
     ruleTypeId: '',
     ruleTypeName: '',
     muteAll: false,
@@ -126,6 +131,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
+// FAILING: https://github.com/elastic/kibana/issues/155534
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
@@ -1324,7 +1330,9 @@ describe('The metric threshold alert type', () => {
         },
       ]);
       await execute(true);
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action.reason).toEqual('test.metric.3 reported no data in the last 1m');
+      expect(recentAction).toBeNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
@@ -1345,6 +1353,68 @@ describe('The metric threshold alert type', () => {
       ]);
       await execute(false);
       expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+  });
+
+  describe('alerts with NO_DATA where one condtion is an aggregation and the other is a document count', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          sourceId,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [1],
+              metric: 'test.metric.3',
+            },
+            {
+              ...baseCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [30],
+            },
+          ],
+          alertOnNoData,
+        },
+      });
+    test('sends a No Data alert when configured to do so', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.LT,
+            threshold: [1],
+            metric: 'test.metric.3',
+            currentValue: null,
+            timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+            shouldFire: false,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+        {},
+      ]);
+      await execute(true);
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action).toEqual({
+        alertDetailsUrl: '',
+        alertState: 'NO DATA',
+        group: '*',
+        groupByKeys: undefined,
+        metric: { condition0: 'test.metric.3', condition1: 'count' },
+        reason: 'test.metric.3 reported no data in the last 1m',
+        threshold: { condition0: ['1'], condition1: [30] },
+        timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+        value: { condition0: '[NO DATA]', condition1: 0 },
+        viewInAppUrl: 'http://localhost:5601/app/metrics/explorer',
+        tags: [],
+      });
+      expect(recentAction).toBeNoDataAction();
     });
   });
 
@@ -1817,7 +1887,7 @@ describe('The metric threshold alert type', () => {
   });
 });
 
-const createMockStaticConfiguration = (sources: any) => ({
+const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   alerting: {
     inventory_threshold: {
       group_by_page_size: 100,
@@ -1829,12 +1899,19 @@ const createMockStaticConfiguration = (sources: any) => ({
   inventory: {
     compositeSize: 2000,
   },
+  logs: {
+    app_target: 'logs-ui',
+  },
+  enabled: true,
   sources,
 });
 
 const mockLibs: any = {
   sources: new InfraSources({
     config: createMockStaticConfiguration({}),
+    metricsClient: {
+      getMetricIndices: jest.fn().mockResolvedValue('metrics-*,metricbeat-*'),
+    } as unknown as MetricsDataClient,
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {
@@ -1889,10 +1966,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     alertInstance.state = newState;
     return alertInstance.instance;
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
   return alertInstance.instance;
 });
 

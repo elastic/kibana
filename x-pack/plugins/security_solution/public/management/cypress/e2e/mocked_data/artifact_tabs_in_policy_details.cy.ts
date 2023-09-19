@@ -7,6 +7,7 @@
 
 import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
+import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import {
   createPerPolicyArtifact,
   createArtifactList,
@@ -62,13 +63,6 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-const visitPolicyDetailsPage = () => {
-  cy.visit('/app/security/administration/policy');
-  cy.getByTestSubj('policyNameCellLink').eq(0).click({ force: true });
-  cy.getByTestSubj('policyDetailsPage').should('exist');
-  cy.get('#settings').should('exist'); // waiting for Policy Settings tab
-};
-
 describe('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
@@ -81,12 +75,12 @@ describe('Artifact tabs in Policy Details page', () => {
   });
 
   for (const testData of getArtifactsListTestsData()) {
-    beforeEach(() => {
-      login();
-      removeExceptionsList(testData.createRequestBody.list_id);
-    });
-
     describe(`${testData.title} tab`, () => {
+      beforeEach(() => {
+        login();
+        removeExceptionsList(testData.createRequestBody.list_id);
+      });
+
       it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
         loginWithPrivilegeNone(testData.privilegePrefix);
         visitPolicyDetailsPage();

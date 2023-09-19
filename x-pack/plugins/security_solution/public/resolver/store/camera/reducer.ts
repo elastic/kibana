@@ -5,197 +5,203 @@
  * 2.0.
  */
 
-import type { Reducer } from 'redux';
+import type { Draft } from 'immer';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { unitsPerNudge, nudgeAnimationDuration } from './scaling_constants';
 import { animatePanning } from './methods';
 import * as vector2 from '../../models/vector2';
 import * as selectors from './selectors';
 import { clamp } from '../../lib/math';
-
 import type { CameraState, Vector2 } from '../../types';
-import { scaleToZoom } from './scale_to_zoom';
-import type { ResolverAction } from '../actions';
+import { initialAnalyzerState, immerCase } from '../helpers';
+import {
+  userSetZoomLevel,
+  userClickedZoomOut,
+  userClickedZoomIn,
+  userZoomed,
+  userStartedPanning,
+  userStoppedPanning,
+  userSetPositionOfCamera,
+  userNudgedCamera,
+  userSetRasterSize,
+  userMovedPointer,
+} from './action';
 
-/**
- * Used in tests.
- */
-export function cameraInitialState(): CameraState {
-  const state: CameraState = {
-    scalingFactor: scaleToZoom(1), // Defaulted to 1 to 1 scale
-    rasterSize: [0, 0] as const,
-    translationNotCountingCurrentPanning: [0, 0] as const,
-    latestFocusedWorldCoordinates: null,
-    animation: undefined,
-    panning: undefined,
-  };
-  return state;
-}
-
-export const cameraReducer: Reducer<CameraState, ResolverAction> = (
-  state = cameraInitialState(),
-  action
-) => {
-  if (action.type === 'userSetZoomLevel') {
-    /**
-     * Handle the scale being explicitly set, for example by a 'reset zoom' feature, or by a range slider with exact scale values
-     */
-
-    const nextState: CameraState = {
-      ...state,
-      scalingFactor: clamp(action.payload, 0, 1),
-    };
-    return nextState;
-  } else if (action.type === 'userClickedZoomIn') {
-    return {
-      ...state,
-      scalingFactor: clamp(state.scalingFactor + 0.1, 0, 1),
-    };
-  } else if (action.type === 'userClickedZoomOut') {
-    return {
-      ...state,
-      scalingFactor: clamp(state.scalingFactor - 0.1, 0, 1),
-    };
-  } else if (action.type === 'userZoomed') {
-    const stateWithNewScaling: CameraState = {
-      ...state,
-      scalingFactor: clamp(state.scalingFactor + action.payload.zoomChange, 0, 1),
-    };
-
-    /**
-     * Zooming fundamentally just changes the scale, but that would always zoom in (or out) around the center of the map. The user might be interested in
-     * something else, like a node. If the user has moved their pointer on to the map, we can keep the pointer over the same point in the map by adjusting the
-     * panning when we zoom.
-     *
-     * You can see this in action by moving your pointer over a node that isn't directly in the center of the map and then changing the zoom level. Do it by
-     * using CTRL and the mousewheel, or by pinching the trackpad on a Mac. The node will stay under your mouse cursor and other things in the map will get
-     * nearer or further from the mouse cursor. This lets you keep your context when changing zoom levels.
-     */
-    if (
-      state.latestFocusedWorldCoordinates !== null &&
-      !selectors.isAnimating(state)(action.payload.time)
-    ) {
-      const rasterOfLastFocusedWorldCoordinates = vector2.applyMatrix3(
-        state.latestFocusedWorldCoordinates,
-        selectors.projectionMatrix(state)(action.payload.time)
-      );
-      const newWorldCoordinatesAtLastFocusedPosition = vector2.applyMatrix3(
-        rasterOfLastFocusedWorldCoordinates,
-        selectors.inverseProjectionMatrix(stateWithNewScaling)(action.payload.time)
-      );
-
+export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
+  .withHandling(
+    immerCase(userSetZoomLevel, (draft, { id, zoomLevel }) => {
       /**
-       * The change in world position incurred by changing scale.
+       * Handle the scale being explicitly set, for example by a 'reset zoom' feature, or by a range slider with exact scale values
        */
-      const delta = vector2.subtract(
-        newWorldCoordinatesAtLastFocusedPosition,
-        state.latestFocusedWorldCoordinates
-      );
-
-      /**
-       * Adjust for the change in position due to scale.
-       */
-      const translationNotCountingCurrentPanning: Vector2 = vector2.subtract(
-        stateWithNewScaling.translationNotCountingCurrentPanning,
-        delta
-      );
-
-      const nextState: CameraState = {
-        ...stateWithNewScaling,
-        translationNotCountingCurrentPanning,
-      };
-
-      return nextState;
-    } else {
-      return stateWithNewScaling;
-    }
-  } else if (action.type === 'userSetPositionOfCamera') {
-    /**
-     * Handle the case where the position of the camera is explicitly set, for example by a 'back to center' feature.
-     */
-    const nextState: CameraState = {
-      ...state,
-      animation: undefined,
-      translationNotCountingCurrentPanning: action.payload,
-    };
-    return nextState;
-  } else if (action.type === 'userStartedPanning') {
-    if (selectors.isAnimating(state)(action.payload.time)) {
-      return state;
-    }
-    /**
-     * When the user begins panning with a mousedown event we mark the starting position for later comparisons.
-     */
-    const nextState: CameraState = {
-      ...state,
-      animation: undefined,
-      panning: {
-        origin: action.payload.screenCoordinates,
-        currentOffset: action.payload.screenCoordinates,
-      },
-    };
-    return nextState;
-  } else if (action.type === 'userStoppedPanning') {
-    /**
-     * When the user stops panning (by letting up on the mouse) we calculate the new translation of the camera.
-     */
-    const nextState: CameraState = {
-      ...state,
-      translationNotCountingCurrentPanning: selectors.translation(state)(action.payload.time),
-      panning: undefined,
-    };
-    return nextState;
-  } else if (action.type === 'userNudgedCamera') {
-    const { direction, time } = action.payload;
-    /**
-     * Nudge less when zoomed in.
-     */
-    const nudge = vector2.multiply(
-      vector2.divide([unitsPerNudge, unitsPerNudge], selectors.scale(state)(time)),
-      direction
-    );
-
-    return animatePanning(
-      state,
-      time,
-      vector2.add(state.translationNotCountingCurrentPanning, nudge),
-      nudgeAnimationDuration
-    );
-  } else if (action.type === 'userSetRasterSize') {
-    /**
-     * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
-     * and world coordinates.
-     */
-    const nextState: CameraState = {
-      ...state,
-      rasterSize: action.payload,
-    };
-    return nextState;
-  } else if (action.type === 'userMovedPointer') {
-    let stateWithUpdatedPanning: CameraState = state;
-    if (state.panning) {
-      stateWithUpdatedPanning = {
+      const state: Draft<CameraState> = draft[id].camera;
+      state.scalingFactor = clamp(zoomLevel, 0, 1);
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userClickedZoomIn, (draft, { id }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      state.scalingFactor = clamp(state.scalingFactor + 0.1, 0, 1);
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userClickedZoomOut, (draft, { id }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      state.scalingFactor = clamp(state.scalingFactor - 0.1, 0, 1);
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userZoomed, (draft, { id, zoomChange, time }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      const stateWithNewScaling: Draft<CameraState> = {
         ...state,
-        panning: {
-          origin: state.panning.origin,
-          currentOffset: action.payload.screenCoordinates,
-        },
+        scalingFactor: clamp(state.scalingFactor + zoomChange, 0, 1),
       };
-    }
-    const nextState: CameraState = {
-      ...stateWithUpdatedPanning,
       /**
-       * keep track of the last world coordinates the user moved over.
-       * When the scale of the projection matrix changes, we adjust the camera's world transform in order
-       * to keep the same point under the pointer.
-       * In order to do this, we need to know the position of the mouse when changing the scale.
+       * Zooming fundamentally just changes the scale, but that would always zoom in (or out) around the center of the map. The user might be interested in
+       * something else, like a node. If the user has moved their pointer on to the map, we can keep the pointer over the same point in the map by adjusting the
+       * panning when we zoom.
+       *
+       * You can see this in action by moving your pointer over a node that isn't directly in the center of the map and then changing the zoom level. Do it by
+       * using CTRL and the mousewheel, or by pinching the trackpad on a Mac. The node will stay under your mouse cursor and other things in the map will get
+       * nearer or further from the mouse cursor. This lets you keep your context when changing zoom levels.
        */
-      latestFocusedWorldCoordinates: vector2.applyMatrix3(
-        action.payload.screenCoordinates,
-        selectors.inverseProjectionMatrix(stateWithUpdatedPanning)(action.payload.time)
-      ),
-    };
-    return nextState;
-  } else {
-    return state;
-  }
-};
+      if (state.latestFocusedWorldCoordinates !== null && !selectors.isAnimating(state)(time)) {
+        const rasterOfLastFocusedWorldCoordinates = vector2.applyMatrix3(
+          state.latestFocusedWorldCoordinates,
+          selectors.projectionMatrix(state)(time)
+        );
+        const newWorldCoordinatesAtLastFocusedPosition = vector2.applyMatrix3(
+          rasterOfLastFocusedWorldCoordinates,
+          selectors.inverseProjectionMatrix(stateWithNewScaling)(time)
+        );
+
+        /**
+         * The change in world position incurred by changing scale.
+         */
+        const delta = vector2.subtract(
+          newWorldCoordinatesAtLastFocusedPosition,
+          state.latestFocusedWorldCoordinates
+        );
+
+        /**
+         * Adjust for the change in position due to scale.
+         */
+        const translationNotCountingCurrentPanning: Vector2 = vector2.subtract(
+          stateWithNewScaling.translationNotCountingCurrentPanning,
+          delta
+        );
+        draft[id].camera = {
+          ...stateWithNewScaling,
+          translationNotCountingCurrentPanning,
+        };
+      } else {
+        draft[id].camera = stateWithNewScaling;
+      }
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userSetPositionOfCamera, (draft, { id, cameraView }) => {
+      /**
+       * Handle the case where the position of the camera is explicitly set, for example by a 'back to center' feature.
+       */
+      const state: Draft<CameraState> = draft[id].camera;
+      state.animation = undefined;
+      state.translationNotCountingCurrentPanning[0] = cameraView[0];
+      state.translationNotCountingCurrentPanning[1] = cameraView[1];
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userStartedPanning, (draft, { id, screenCoordinates, time }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      if (selectors.isAnimating(state)(time)) {
+        return draft;
+      }
+      /**
+       * When the user begins panning with a mousedown event we mark the starting position for later comparisons.
+       */
+      state.animation = undefined;
+      state.panning = {
+        ...state.panning,
+        origin: screenCoordinates,
+        currentOffset: screenCoordinates,
+      };
+      return draft;
+    })
+  )
+
+  .withHandling(
+    immerCase(userStoppedPanning, (draft, { id, time }) => {
+      /**
+       * When the user stops panning (by letting up on the mouse) we calculate the new translation of the camera.
+       */
+      const state: Draft<CameraState> = draft[id].camera;
+      state.translationNotCountingCurrentPanning = selectors.translation(state)(time);
+      state.panning = undefined;
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userNudgedCamera, (draft, { id, direction, time }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      /**
+       * Nudge less when zoomed in.
+       */
+      const nudge = vector2.multiply(
+        vector2.divide([unitsPerNudge, unitsPerNudge], selectors.scale(state)(time)),
+        direction
+      );
+
+      draft[id].camera = animatePanning(
+        state,
+        time,
+        vector2.add(state.translationNotCountingCurrentPanning, nudge),
+        nudgeAnimationDuration
+      );
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userSetRasterSize, (draft, { id, dimensions }) => {
+      /**
+       * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
+       * and world coordinates.
+       */
+      draft[id].camera.rasterSize = dimensions;
+      return draft;
+    })
+  )
+  .withHandling(
+    immerCase(userMovedPointer, (draft, { id, screenCoordinates, time }) => {
+      const state: Draft<CameraState> = draft[id].camera;
+      let stateWithUpdatedPanning: Draft<CameraState> = draft[id].camera;
+      if (state.panning) {
+        stateWithUpdatedPanning = {
+          ...state,
+          panning: {
+            origin: state.panning.origin,
+            currentOffset: screenCoordinates,
+          },
+        };
+      }
+      draft[id].camera = {
+        ...stateWithUpdatedPanning,
+        /**
+         * keep track of the last world coordinates the user moved over.
+         * When the scale of the projection matrix changes, we adjust the camera's world transform in order
+         * to keep the same point under the pointer.
+         * In order to do this, we need to know the position of the mouse when changing the scale.
+         */
+        latestFocusedWorldCoordinates: vector2.applyMatrix3(
+          screenCoordinates,
+          selectors.inverseProjectionMatrix(stateWithUpdatedPanning)(time)
+        ),
+      };
+      return draft;
+    })
+  )
+  .build();

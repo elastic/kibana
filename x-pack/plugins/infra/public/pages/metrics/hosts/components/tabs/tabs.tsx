@@ -14,6 +14,7 @@ import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
 import { TabIds, useTabId } from '../../hooks/use_tab_id';
+import { LogsTabContent } from './logs';
 
 const tabs = [
   {
@@ -22,6 +23,13 @@ const tabs = [
       defaultMessage: 'Metrics',
     }),
     'data-test-subj': 'hostsView-tabs-metrics',
+  },
+  {
+    id: TabIds.LOGS,
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.title', {
+      defaultMessage: 'Logs',
+    }),
+    'data-test-subj': 'hostsView-tabs-logs',
   },
   {
     id: TabIds.ALERTS,
@@ -61,6 +69,11 @@ export const Tabs = () => {
       {renderedTabsSet.current.has(TabIds.METRICS) && (
         <div hidden={selectedTabId !== TabIds.METRICS}>
           <MetricsGrid />
+        </div>
+      )}
+      {renderedTabsSet.current.has(TabIds.LOGS) && (
+        <div hidden={selectedTabId !== TabIds.LOGS}>
+          <LogsTabContent />
         </div>
       )}
       {renderedTabsSet.current.has(TabIds.ALERTS) && (

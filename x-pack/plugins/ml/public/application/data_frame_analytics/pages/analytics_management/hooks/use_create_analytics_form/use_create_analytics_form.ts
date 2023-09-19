@@ -10,12 +10,14 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../contexts/ml';
 
-import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
+import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -91,7 +93,11 @@ function delay(ms = 1000) {
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
-  const mlContext = useMlContext();
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
@@ -173,9 +179,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       // index exists - create data view
       if (exists?.indexExists === true) {
         try {
-          await mlContext.dataViewsContract.createAndSave(
+          await dataViews.createAndSave(
             {
               title: dataViewName,
+              ...(form.timeFieldName ? { timeFieldName: form.timeFieldName } : {}),
             },
             false,
             true
@@ -261,7 +268,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     try {
       // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await mlContext.dataViewsContract.getCache()) || [];
+      const savedObjects = (await dataViews.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
@@ -283,7 +290,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const initiateWizard = async () => {
-    await mlContext.dataViewsContract.clearCache();
+    await dataViews.clearCache();
     await prepareFormValidation();
   };
 

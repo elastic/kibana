@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -109,7 +109,7 @@ export function InstanceDetails({
   if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
+        <EuiSkeletonText data-test-subj="loadingSpinner" />
       </div>
     );
   }

@@ -55,13 +55,13 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/datavisualizer',
 });
 
-// we need two AIOPS_BREADCRUMB breadcrumb items as they each need to link
-// to either the explain log rate spikes page or the log categorization page
-export const AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
+// we need multiple AIOPS_BREADCRUMB breadcrumb items as they each need to link
+// to each of the AIOps pages.
+export const AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps Labs',
   }),
-  href: '/aiops/explain_log_rate_spikes_index_select',
+  href: '/aiops/log_rate_analysis_index_select',
 });
 
 export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
@@ -78,11 +78,11 @@ export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.
   href: '/aiops/change_point_detection_index_select',
 });
 
-export const EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiops.explainLogRateSpikesBreadcrumbLabel', {
-    defaultMessage: 'Explain Log Rate Spikes',
+export const LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log Rate Analysis',
   }),
-  href: '/aiops/explain_log_rate_spikes_index_select',
+  href: '/aiops/log_rate_analysis_index_select',
 });
 
 export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
@@ -120,17 +120,25 @@ export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/settings/filter_lists',
 });
 
+export const DATA_COMPARISON_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Data comparison',
+  }),
+  href: '/data_comparison_index_select',
+});
+
 const breadcrumbs = {
   ML_BREADCRUMB,
   SETTINGS_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
   DATA_FRAME_ANALYTICS_BREADCRUMB,
   TRAINED_MODELS,
+  DATA_COMPARISON_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
-  AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES,
+  AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
   AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION,
-  EXPLAIN_LOG_RATE_SPIKES,
+  LOG_RATE_ANALYSIS,
   LOG_PATTERN_ANALYSIS,
   CHANGE_POINT_DETECTION,
   CREATE_JOB_BREADCRUMB,

@@ -7,7 +7,7 @@
 
 import { EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverity } from '../../../common/api';
+import type { CaseSeverity } from '../../../common/types/domain';
 import { SeveritySelector } from './selector';
 import { SEVERITY_TITLE } from './translations';
 
@@ -25,7 +25,7 @@ export const SeveritySidebarSelector: React.FC<Props> = ({
   isDisabled,
 }) => {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="sidebar-severity">
       <EuiText>
         <h4>{SEVERITY_TITLE}</h4>
       </EuiText>

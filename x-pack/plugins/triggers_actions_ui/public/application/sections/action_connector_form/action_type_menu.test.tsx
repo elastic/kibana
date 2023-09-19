@@ -59,8 +59,8 @@ describe('connector_add_flyout', () => {
         },
         actionConnectorFields: null,
       });
-      actionTypeRegistry.get.mockReturnValueOnce(actionType);
-      loadActionTypes.mockResolvedValueOnce([
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
         {
           id: actionType.id,
           enabled: true,
@@ -137,8 +137,8 @@ describe('connector_add_flyout', () => {
         },
         actionConnectorFields: null,
       });
-      actionTypeRegistry.get.mockReturnValueOnce(actionType);
-      loadActionTypes.mockResolvedValueOnce([
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
         {
           id: actionType.id,
           enabled: false,
@@ -180,8 +180,8 @@ describe('connector_add_flyout', () => {
         },
         actionConnectorFields: null,
       });
-      actionTypeRegistry.get.mockReturnValueOnce(actionType);
-      loadActionTypes.mockResolvedValueOnce([
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
         {
           id: actionType.id,
           enabled: false,
@@ -221,8 +221,8 @@ describe('connector_add_flyout', () => {
         actionConnectorFields: null,
         isExperimental: false,
       });
-      actionTypeRegistry.get.mockReturnValueOnce(actionType);
-      loadActionTypes.mockResolvedValueOnce([
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
         {
           id: actionType.id,
           enabled: false,
@@ -263,8 +263,8 @@ describe('connector_add_flyout', () => {
         actionConnectorFields: null,
         isExperimental: true,
       });
-      actionTypeRegistry.get.mockReturnValueOnce(actionType);
-      loadActionTypes.mockResolvedValueOnce([
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
         {
           id: actionType.id,
           enabled: false,

@@ -70,5 +70,17 @@ describe('artifact_client', () => {
       });
       expect(fleetArtifactClient.deleteArtifact).toHaveBeenCalledWith('123');
     });
+
+    test('can bulk delete artifacts', async () => {
+      await artifactClient.bulkDeleteArtifacts([
+        'endpoint-trustlist-linux-v1-sha26hash',
+        'endpoint-trustlist-windows-v1-sha26hash',
+      ]);
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalledTimes(0);
+      expect(fleetArtifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        'endpoint-trustlist-linux-v1-sha26hash',
+        'endpoint-trustlist-windows-v1-sha26hash',
+      ]);
+    });
   });
 });

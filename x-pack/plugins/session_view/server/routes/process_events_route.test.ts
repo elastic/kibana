@@ -6,9 +6,14 @@
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEventsAndScopedAlerts } from './process_events_route';
-import { mockEvents, mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+  mockEvents,
+  mockAlerts,
+} from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
-import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
+import type { ProcessEvent } from '../../common';
 
 const getEmptyResponse = async () => {
   return {
@@ -42,7 +47,14 @@ describe('process_events_route.ts', () => {
       const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(client);
 
-      const body = await fetchEventsAndScopedAlerts(client, alertsClient, 'asdf', undefined);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        TEST_PROCESS_INDEX,
+        'asdf',
+        '',
+        undefined
+      );
 
       expect(body.events.length).toBe(0);
       expect(body.total).toBe(0);
@@ -52,15 +64,22 @@ describe('process_events_route.ts', () => {
       const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
       const alertsClient = getAlertsClientMockInstance();
 
-      const body = await fetchEventsAndScopedAlerts(client, alertsClient, 'mockId', undefined);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        TEST_PROCESS_INDEX,
+        'mockId',
+        TEST_SESSION_START_TIME,
+        undefined
+      );
 
       expect(body.events.length).toBe(mockEvents.length + mockAlerts.length);
 
       const eventsOnly = body.events.filter(
-        (event) => (event._source as ProcessEvent)?.event?.kind === EventKind.event
+        (event) => (event._source as ProcessEvent)?.event?.kind === 'event'
       );
       const alertsOnly = body.events.filter(
-        (event) => (event._source as ProcessEvent)?.event?.kind === EventKind.signal
+        (event) => (event._source as ProcessEvent)?.event?.kind === 'signal'
       );
       expect(eventsOnly.length).toBe(mockEvents.length);
       expect(alertsOnly.length).toBe(mockAlerts.length);
@@ -74,7 +93,9 @@ describe('process_events_route.ts', () => {
       const body = await fetchEventsAndScopedAlerts(
         client,
         alertsClient,
+        TEST_PROCESS_INDEX,
         'mockId',
+        TEST_SESSION_START_TIME,
         undefined,
         false
       );
@@ -83,7 +104,7 @@ describe('process_events_route.ts', () => {
       const eventsWithoutOutput = body.events.filter((event) => {
         const { action, kind } = (event._source as ProcessEvent)?.event || {};
 
-        return action !== EventAction.text_output && kind === EventKind.event;
+        return action !== 'text_output' && kind === 'event';
       });
 
       expect(eventsWithoutOutput[0]._source).toEqual(mockEvents[mockEvents.length - 1]);

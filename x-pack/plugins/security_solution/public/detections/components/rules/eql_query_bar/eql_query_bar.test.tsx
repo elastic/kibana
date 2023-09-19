@@ -67,7 +67,7 @@ describe('EqlQueryBar', () => {
 
     wrapper
       .find('[data-test-subj="eqlQueryBarTextInput"]')
-      .first()
+      .last()
       .simulate('change', { target: { value: 'newQuery' } });
 
     const expected = {

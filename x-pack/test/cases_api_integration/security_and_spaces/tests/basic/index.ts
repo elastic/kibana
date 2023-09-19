@@ -30,6 +30,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure/get_connectors'));
+    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_basic'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
@@ -39,5 +40,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

@@ -15,13 +15,13 @@ import { PluginFunctionalProviderContext } from '../../plugin_functional/service
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
   describe('Todo app', () => {
     it('Todo app works', async () => {
       const appId = 'contentManagementExamples';
       await PageObjects.common.navigateToApp(appId);
+      await testSubjects.missingOrFail(`todoPending`);
 
       // check that initial state is correct
       let todos = await testSubjects.findAll(`~todoItem`);
@@ -29,24 +29,26 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       // check that filters work
       await (await find.byCssSelector('label[title="Completed"]')).click();
+      await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(1);
 
       await (await find.byCssSelector('label[title="Todo"]')).click();
+      await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(1);
 
       await (await find.byCssSelector('label[title="All"]')).click();
+      await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(2);
 
       // check that adding new todo works
       await testSubjects.setValue('newTodo', 'New todo');
       await (await testSubjects.find('newTodo')).pressKeys(Key.ENTER);
-      await retry.tryForTime(1000, async () => {
-        todos = await testSubjects.findAll(`~todoItem`);
-        expect(todos.length).to.be(3);
-      });
+      await testSubjects.missingOrFail(`todoPending`);
+      todos = await testSubjects.findAll(`~todoItem`);
+      expect(todos.length).to.be(3);
 
       // check that updating todo works
       let newTodo = todos[2];
@@ -54,8 +56,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       let newTodoCheckbox = await newTodo.findByTestSubject('~todoCheckbox');
       expect(await newTodoCheckbox.isSelected()).to.be(false);
       await (await newTodo.findByTagName('label')).click();
+      await testSubjects.missingOrFail(`todoPending`);
 
       await (await find.byCssSelector('label[title="Completed"]')).click();
+      await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(2);
       newTodo = todos[1];
@@ -65,6 +69,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       // check that deleting todo works
       await (await newTodo.findByCssSelector('[aria-label="Delete"]')).click();
+      await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(1);
     });

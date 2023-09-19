@@ -9,20 +9,13 @@
 import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { UiSettingsParams, TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 
 export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
-  const timezones = [
-    'Browser',
-    ...moment.tz
-      .names()
-      // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
-      // does not understand and would fail thus with a 400 bad request when using them.
-      .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
-  ];
+  const timezones = ['Browser', ...TIMEZONE_OPTIONS];
 
   return {
     dateFormat: {

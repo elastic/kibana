@@ -35,6 +35,7 @@ export interface ImageEmbeddableFactoryDeps {
     theme: ThemeServiceStart;
     getUser: () => Promise<AuthenticatedUser | undefined>;
     uiActions: UiActionsStart;
+    isScreenshotMode: () => boolean;
   };
 }
 
@@ -68,6 +69,7 @@ export class ImageEmbeddableFactoryDefinition
               .catch(() => [])
               .then((actions) => actions.length > 0),
         },
+        isScreenshotMode: () => this.deps.start().isScreenshotMode(),
       },
       initialInput,
       parent

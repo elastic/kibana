@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
@@ -22,13 +23,15 @@ import type {
   RouterRoute,
   IRouter,
   RequestHandler,
+  VersionedRouter,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidator } from './validator';
 
 export type ContextEnhancer<
   P,
@@ -116,6 +119,17 @@ function validOptions(
   return { ...options, body };
 }
 
+/** @internal */
+export interface RouterOptions {
+  /** Whether we are running in development */
+  isDev?: boolean;
+  /**
+   * Which route resolution algo to use.
+   * @note default to "oldest", but when running in dev default to "none"
+   */
+  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
+}
+
 /**
  * @internal
  */
@@ -132,7 +146,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
+    private readonly options: RouterOptions
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -184,23 +199,50 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
-    } catch (e) {
-      return hapiResponseAdapter.toBadRequest(e.message);
+    } catch (error) {
+      this.log.error(`400 Bad Request`, {
+        http: { response: { status_code: 400 } },
+      });
+
+      return hapiResponseAdapter.toBadRequest(error.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
-    } catch (e) {
-      this.log.error(e);
+    } catch (error) {
+      // capture error
+      apm.captureError(error);
+
       // forward 401 errors from ES client
-      if (isElasticsearchUnauthorizedError(e)) {
+      if (isElasticsearchUnauthorizedError(error)) {
+        this.log.error(`401 Unauthorized`, {
+          http: { response: { status_code: 401 } },
+        });
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
         );
       }
+
+      // return a generic 500 to avoid error info / stack trace surfacing
+      this.log.error(`500 Server Error`, {
+        http: { response: { status_code: 500 } },
+      });
       return hapiResponseAdapter.toInternalError();
     }
+  }
+
+  private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+
+  public get versioned(): VersionedRouter<Context> {
+    if (this.versionedRouter === undefined) {
+      this.versionedRouter = CoreVersionedRouter.from({
+        router: this,
+        isDev: this.options.isDev,
+        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
+      });
+    }
+    return this.versionedRouter;
   }
 }
 

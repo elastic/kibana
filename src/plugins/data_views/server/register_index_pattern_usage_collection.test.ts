@@ -12,7 +12,7 @@ import {
   updateMax,
   getIndexPatternTelemetry,
 } from './register_index_pattern_usage_collection';
-import { DataViewsService } from '../common';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 const scriptA = 'emit(0);';
 const scriptB = 'emit(1);\nemit(2);';
@@ -22,17 +22,27 @@ const scriptedFieldA = { script: scriptA };
 const scriptedFieldB = { script: scriptB };
 const scriptedFieldC = { script: scriptC };
 
-const runtimeFieldA = { runtimeField: { script: { source: scriptA } } };
-const runtimeFieldB = { runtimeField: { script: { source: scriptB } } };
-const runtimeFieldC = { runtimeField: { script: { source: scriptC } } };
+const runtimeFieldA = { script: { source: scriptA } };
+const runtimeFieldB = { script: { source: scriptB } };
+const runtimeFieldC = { script: { source: scriptC } };
 
-const indexPatterns = {
-  getIds: async () => [1, 2, 3],
-  get: jest.fn().mockResolvedValue({
-    getScriptedFields: () => [],
-    fields: [],
+let returnedSavedObjects = [
+  {
+    attributes: {},
+  },
+];
+
+const savedObjects = {
+  createPointInTimeFinder: jest.fn().mockReturnValue({
+    find: jest.fn().mockImplementation(async function* () {
+      yield await Promise.resolve({
+        total: 3,
+        saved_objects: returnedSavedObjects,
+      });
+    }),
+    close: jest.fn(),
   }),
-} as any as DataViewsService;
+} as any as SavedObjectsClient;
 
 describe('index pattern usage collection', () => {
   it('minMaxAvgLoC calculates min, max, and average ', () => {
@@ -59,7 +69,7 @@ describe('index pattern usage collection', () => {
     };
 
     it('when there are no runtime fields or scripted fields', async () => {
-      expect(await getIndexPatternTelemetry(indexPatterns)).toEqual({
+      expect(await getIndexPatternTelemetry(savedObjects)).toEqual({
         indexPatternsCount: 3,
         indexPatternsWithScriptedFieldCount: 0,
         indexPatternsWithRuntimeFieldCount: 0,
@@ -75,12 +85,20 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are both runtime fields or scripted fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
-        getScriptedFields: () => [scriptedFieldA, scriptedFieldB, scriptedFieldC],
-        fields: [runtimeFieldA, runtimeFieldB, runtimeFieldC],
-      });
+      const dataView = {
+        attributes: {
+          fields: JSON.stringify([scriptedFieldA, scriptedFieldB, scriptedFieldC]),
+          runtimeFieldMap: JSON.stringify({
+            runtimeFieldA,
+            runtimeFieldB,
+            runtimeFieldC,
+          }),
+        },
+      };
 
-      expect(await getIndexPatternTelemetry(indexPatterns)).toEqual({
+      returnedSavedObjects = [dataView, dataView, dataView];
+
+      expect(await getIndexPatternTelemetry(savedObjects)).toEqual({
         indexPatternsCount: 3,
         indexPatternsWithScriptedFieldCount: 3,
         indexPatternsWithRuntimeFieldCount: 3,
@@ -96,12 +114,20 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are only runtime fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
-        getScriptedFields: () => [],
-        fields: [runtimeFieldA, runtimeFieldB, runtimeFieldC],
-      });
+      const dataView = {
+        attributes: {
+          fields: JSON.stringify([]),
+          runtimeFieldMap: JSON.stringify({
+            runtimeFieldA,
+            runtimeFieldB,
+            runtimeFieldC,
+          }),
+        },
+      };
 
-      expect(await getIndexPatternTelemetry(indexPatterns)).toEqual({
+      returnedSavedObjects = [dataView, dataView, dataView];
+
+      expect(await getIndexPatternTelemetry(savedObjects)).toEqual({
         indexPatternsCount: 3,
         indexPatternsWithScriptedFieldCount: 0,
         indexPatternsWithRuntimeFieldCount: 3,
@@ -117,12 +143,16 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are only scripted fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
-        getScriptedFields: () => [scriptedFieldA, scriptedFieldB, scriptedFieldC],
-        fields: [],
-      });
+      const dataView = {
+        attributes: {
+          fields: JSON.stringify([scriptedFieldA, scriptedFieldB, scriptedFieldC]),
+          runtimeFieldMap: JSON.stringify({}),
+        },
+      };
 
-      expect(await getIndexPatternTelemetry(indexPatterns)).toEqual({
+      returnedSavedObjects = [dataView, dataView, dataView];
+
+      expect(await getIndexPatternTelemetry(savedObjects)).toEqual({
         indexPatternsCount: 3,
         indexPatternsWithScriptedFieldCount: 3,
         indexPatternsWithRuntimeFieldCount: 0,

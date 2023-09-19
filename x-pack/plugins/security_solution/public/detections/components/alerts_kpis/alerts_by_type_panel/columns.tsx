@@ -20,6 +20,7 @@ import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
 import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const getAlertsTypeTableColumns = (
   isAlertTypeEnabled: boolean
@@ -56,15 +57,15 @@ export const getAlertsTypeTableColumns = (
               <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
                 <EuiText grow={false} size="xs">
                   <SecurityCellActions
-                    mode={CellActionsMode.HOVER}
+                    mode={CellActionsMode.HOVER_DOWN}
                     visibleCellActions={4}
                     showActionTooltips
                     triggerId={SecurityCellActionsTrigger.DEFAULT}
-                    field={{
-                      name: 'event.type',
+                    data={{
                       value: 'denied',
-                      type: 'keyword',
+                      field: 'event.type',
                     }}
+                    sourcererScopeId={SourcererScopeName.detections}
                     metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
                   >
                     {ALERT_TYPE_LABEL[type as AlertType]}

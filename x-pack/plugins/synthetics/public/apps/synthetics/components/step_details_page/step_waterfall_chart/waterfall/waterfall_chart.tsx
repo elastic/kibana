@@ -11,13 +11,15 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useWaterfallContext } from './context/waterfall_context';
 import { WaterfallSearch } from './waterfall_header/waterfall_search';
-import { WaterfallLegend } from './waterfall_header/waterfall_legend';
+import { WaterfallMimeLegend } from './waterfall_header/waterfall_mime_legend';
+import { WaterfallTimingLegend } from './waterfall_header/waterfall_timing_legend';
 import { WaterfallTickAxis } from './waterfall_header/waterfall_tick_axis';
 
 import {
   WaterfallChartOuterContainer,
   WaterfallChartStickyHeaderContainer,
   WaterfallChartSidebarWrapper,
+  WaterfallChartStickyFooterContainer,
 } from './styles';
 import { MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
@@ -57,6 +59,8 @@ export const WaterfallChart = ({
     setActiveFilters,
     showOnlyHighlightedNetworkRequests,
     setOnlyHighlighted,
+    showCustomMarks,
+    setShowCustomMarks,
     totalNetworkRequests,
     highlightedNetworkRequests,
     fetchedNetworkRequests,
@@ -94,7 +98,12 @@ export const WaterfallChart = ({
             </WaterfallChartSidebarWrapper>
           )}
           <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
-            <WaterfallLegend activeFilters={activeFilters} setActiveFilters={setActiveFilters} />
+            <WaterfallMimeLegend
+              activeFilters={activeFilters}
+              setActiveFilters={setActiveFilters}
+              showCustomMarks={showCustomMarks}
+              setShowCustomMarks={setShowCustomMarks}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -133,6 +142,12 @@ export const WaterfallChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </WaterfallChartOuterContainer>
+      <WaterfallChartStickyFooterContainer
+        data-test-sub="syntheticsWaterfallChartStickyFooterContainer"
+        style={{ background: euiTheme.colors.body }}
+      >
+        <WaterfallTimingLegend />
+      </WaterfallChartStickyFooterContainer>
       {renderFlyout && renderFlyout()}
     </div>
   );

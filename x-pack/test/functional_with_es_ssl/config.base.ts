@@ -24,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   'test.authorization',
@@ -59,6 +60,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       triggersActionsConnectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
+      },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
     },
     esTestCluster: {

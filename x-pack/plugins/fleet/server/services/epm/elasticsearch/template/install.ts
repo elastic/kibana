@@ -9,20 +9,14 @@ import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
-
-import {
-  FILE_STORAGE_INTEGRATION_INDEX_NAMES,
-  FILE_STORAGE_INTEGRATION_NAMES,
-} from '../../../../../common/constants';
+import type {
+  IndicesCreateRequest,
+  ClusterPutComponentTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
-  getFileWriteIndexName,
-  getFileStorageWriteIndexBody,
   getPipelineNameForDatastream,
-  getFileDataIndexName,
-  getFileMetadataIndexName,
   getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
 import type {
@@ -53,6 +47,8 @@ import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
+
+import { appContextService } from '../../../app_context';
 
 import {
   generateMappings,
@@ -219,8 +215,44 @@ export async function installComponentAndIndexTemplateForDataStream({
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
 }) {
+  // update index template first in case TSDS was removed, so that it does not become invalid
+  await updateIndexTemplateIfTsdsDisabled({ esClient, logger, indexTemplate });
+
   await installDataStreamComponentTemplates({ esClient, logger, componentTemplates });
   await installTemplate({ esClient, logger, template: indexTemplate });
+}
+
+async function updateIndexTemplateIfTsdsDisabled({
+  esClient,
+  logger,
+  indexTemplate,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  indexTemplate: IndexTemplateEntry;
+}) {
+  try {
+    const existingIndexTemplate = await esClient.indices.getIndexTemplate({
+      name: indexTemplate.templateName,
+    });
+    if (
+      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode ===
+        'time_series' &&
+      indexTemplate.indexTemplate.template.settings.index.mode !== 'time_series'
+    ) {
+      await installTemplate({ esClient, logger, template: indexTemplate });
+    }
+  } catch (e) {
+    if (e.statusCode === 404) {
+      logger.debug(
+        `Index template ${indexTemplate.templateName} does not exist, skipping time_series check`
+      );
+    } else {
+      logger.warn(
+        `Error while trying to install index template before component template: ${e.message}`
+      );
+    }
+  }
 }
 
 function putComponentTemplate(
@@ -238,7 +270,16 @@ function putComponentTemplate(
   const { name, body, create = false } = params;
   return {
     clusterPromise: retryTransientEsErrors(
-      () => esClient.cluster.putComponentTemplate({ name, body, create }, { ignore: [404] }),
+      () =>
+        esClient.cluster.putComponentTemplate(
+          // @ts-expect-error lifecycle is not yet supported here
+          {
+            name,
+            body,
+            create,
+          } as ClusterPutComponentTemplateRequest,
+          { ignore: [404] }
+        ),
       { logger }
     ),
     name,
@@ -259,6 +300,7 @@ export function buildComponentTemplates(params: {
   pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
+  lifecycle?: IndexTemplate['template']['lifecycle'];
 }) {
   const {
     templateName,
@@ -268,6 +310,7 @@ export function buildComponentTemplates(params: {
     mappings,
     pipelineName,
     experimentalDataStreamFeature,
+    lifecycle,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -305,6 +348,8 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
+
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
 
@@ -322,9 +367,9 @@ export function buildComponentTemplates(params: {
           ...templateSettings.index,
           ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
-            ...templateSettings?.mapping,
+            ...templateSettings.index?.mapping,
             total_fields: {
-              ...templateSettings?.mapping?.total_fields,
+              ...templateSettings.index?.mapping?.total_fields,
               limit: '10000',
             },
           },
@@ -332,8 +377,11 @@ export function buildComponentTemplates(params: {
       },
       mappings: {
         properties: mappingsProperties,
+        ...(Object.keys(mappingsRuntimeFields).length > 0
+          ? { runtime: mappingsRuntimeFields }
+          : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
-        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source'),
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
         ...(indexTemplateMappings?._source || sourceModeSynthetic
           ? {
               _source: {
@@ -343,6 +391,7 @@ export function buildComponentTemplates(params: {
             }
           : {}),
       },
+      ...(lifecycle ? { lifecycle } : {}),
     },
     _meta,
   };
@@ -404,43 +453,6 @@ export async function ensureDefaultComponentTemplates(
   );
 }
 
-/*
- * Given a list of integration names, if the integrations support file upload
- * then ensure that the alias has a matching write index, as we use "plain" indices
- * not data streams.
- * e.g .fleet-file-data-agent must have .fleet-file-data-agent-00001 as the write index
- * before files can be uploaded.
- */
-export async function ensureFileUploadWriteIndices(opts: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  integrationNames: string[];
-}) {
-  const { esClient, logger, integrationNames } = opts;
-
-  const integrationsWithFileUpload = integrationNames.filter((integration) =>
-    FILE_STORAGE_INTEGRATION_NAMES.includes(integration as any)
-  );
-
-  if (!integrationsWithFileUpload.length) return [];
-
-  const ensure = (aliasName: string) =>
-    ensureAliasHasWriteIndex({
-      esClient,
-      logger,
-      aliasName,
-      writeIndexName: getFileWriteIndexName(aliasName),
-      body: getFileStorageWriteIndexBody(aliasName),
-    });
-
-  return Promise.all(
-    integrationsWithFileUpload.flatMap((integrationName) => {
-      const indexName = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
-      return [ensure(getFileDataIndexName(indexName)), ensure(getFileMetadataIndexName(indexName))];
-    })
-  );
-}
-
 export async function ensureComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -493,6 +505,8 @@ export async function ensureAliasHasWriteIndex(opts: {
   );
 
   if (!existingIndex) {
+    logger.info(`Creating write index [${writeIndexName}], alias [${aliasName}]`);
+
     await retryTransientEsErrors(
       () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
       {
@@ -513,16 +527,20 @@ export function prepareTemplate({
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
-  const validFields = processFields(fields);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
 
-  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
+  const validFields = processFields(fields);
+
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
+
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
 
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
@@ -542,6 +560,7 @@ export function prepareTemplate({
     pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
+    lifecycle: lifecyle,
   });
 
   const template = getTemplate({
@@ -578,7 +597,6 @@ async function installTemplate({
     name: template.templateName,
     body: template.indexTemplate,
   };
-
   await retryTransientEsErrors(
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
     { logger }

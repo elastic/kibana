@@ -11,11 +11,8 @@ import {
   getPrebuiltRuleMock,
   getPrebuiltRuleWithExceptionsMock,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-
-/**
- * Rule signature id (`rule.rule_id`) of the prebuilt "Endpoint Security" rule.
- */
-export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 /**
  * A helper function to create a rule asset saved object
@@ -77,7 +74,12 @@ export const createPrebuiltRuleAssetSavedObjects = async (
   await es.bulk({
     refresh: true,
     body: rules.flatMap((doc) => [
-      { index: { _index: '.kibana', _id: `security-rule:${doc['security-rule'].rule_id}` } },
+      {
+        index: {
+          _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+          _id: `security-rule:${doc['security-rule'].rule_id}`,
+        },
+      },
       doc,
     ]),
   });
@@ -101,7 +103,7 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
     body: rules.flatMap((doc) => [
       {
         index: {
-          _index: '.kibana',
+          _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
           _id: `security-rule:${doc['security-rule'].rule_id}_${doc['security-rule'].version}`,
         },
       },

@@ -12,8 +12,8 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   IndexMappingMeta,
-  getModelVersionsFromMappingMeta,
-  getModelVersionMapForTypes,
+  getVirtualVersionsFromMappingMeta,
+  getVirtualVersionMap,
   getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -35,8 +35,12 @@ export const generateAdditiveMappingDiff = ({
   meta,
   deletedTypes,
 }: GenerateAdditiveMappingsDiffOpts): SavedObjectsMappingProperties => {
-  const typeVersions = getModelVersionMapForTypes(types);
-  const mappingVersion = getModelVersionsFromMappingMeta({ meta, source: 'mappingVersions' });
+  const typeVersions = getVirtualVersionMap(types);
+  const mappingVersion = getVirtualVersionsFromMappingMeta({
+    meta,
+    source: 'mappingVersions',
+    knownTypes: types.map((type) => type.name),
+  });
   if (!mappingVersion) {
     // should never occur given we checked previously in the flow but better safe than sorry.
     throw new Error(

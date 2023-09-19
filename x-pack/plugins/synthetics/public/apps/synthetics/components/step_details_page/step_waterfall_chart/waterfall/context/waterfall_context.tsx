@@ -35,6 +35,7 @@ export interface IWaterfallContext {
   onProjectionClick?: OnProjectionClick;
   onSidebarClick?: OnSidebarClick;
   showOnlyHighlightedNetworkRequests: boolean;
+  showCustomMarks: boolean;
   sidebarItems?: SidebarItem[];
   metadata: WaterfallMetadata;
   renderTooltipItem: (
@@ -46,6 +47,7 @@ export interface IWaterfallContext {
   activeFilters: string[];
   setActiveFilters: Dispatch<SetStateAction<string[]>>;
   setOnlyHighlighted: (val: boolean) => void;
+  setShowCustomMarks: (val: boolean) => void;
   query: string;
   setQuery: (val: string) => void;
 }
@@ -60,6 +62,7 @@ export const WaterfallProvider: React.FC<IWaterfallContext> = ({
   onProjectionClick,
   onSidebarClick,
   showOnlyHighlightedNetworkRequests,
+  showCustomMarks,
   sidebarItems,
   metadata,
   renderTooltipItem,
@@ -70,6 +73,7 @@ export const WaterfallProvider: React.FC<IWaterfallContext> = ({
   activeFilters,
   setActiveFilters,
   setOnlyHighlighted,
+  setShowCustomMarks,
   query,
   setQuery,
 }) => {
@@ -80,6 +84,7 @@ export const WaterfallProvider: React.FC<IWaterfallContext> = ({
         activeStep,
         markerItems,
         showOnlyHighlightedNetworkRequests,
+        showCustomMarks,
         sidebarItems,
         metadata,
         onElementClick,
@@ -92,6 +97,7 @@ export const WaterfallProvider: React.FC<IWaterfallContext> = ({
         activeFilters,
         setActiveFilters,
         setOnlyHighlighted,
+        setShowCustomMarks,
         query,
         setQuery,
       }}

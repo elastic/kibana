@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { TABLE_TAB_CONTENT_TEST_ID } from './test_ids';
+import { TimelineTabs } from '../../../../common/types';
+import { EventFieldsBrowser } from '../../../common/components/event_details/event_fields_browser';
+import { useRightPanelContext } from '../context';
 
 /**
  * Table view displayed in the document details expandable flyout right section
  */
 export const TableTab: FC = memo(() => {
-  return <EuiText data-test-subj={TABLE_TAB_CONTENT_TEST_ID}>{'Table tab'}</EuiText>;
+  const { browserFields, dataFormattedForFieldBrowser, eventId } = useRightPanelContext();
+
+  return (
+    <EventFieldsBrowser
+      browserFields={browserFields}
+      data={dataFormattedForFieldBrowser}
+      eventId={eventId}
+      isDraggable={false}
+      timelineTabType={TimelineTabs.query}
+      scopeId={'alert-details-flyout'}
+      isReadOnly={false}
+    />
+  );
 });
 
 TableTab.displayName = 'TableTab';

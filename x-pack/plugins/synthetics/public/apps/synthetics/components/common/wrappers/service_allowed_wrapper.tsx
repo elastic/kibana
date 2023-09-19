@@ -29,7 +29,13 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}
         body={<p>{ACCESS_RESTRICTED_MESSAGE}</p>}
         actions={[
-          <EuiButton color="primary" fill isDisabled={!signupUrl} href={signupUrl ?? undefined}>
+          <EuiButton
+            data-test-subj="syntheticsServiceAllowedWrapperButton"
+            color="primary"
+            fill
+            isDisabled={!signupUrl}
+            href={signupUrl ?? undefined}
+          >
             {REQUEST_ACCESS_LABEL}
           </EuiButton>,
         ]}
@@ -45,13 +51,13 @@ const REQUEST_ACCESS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.
 });
 
 export const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.label', {
-  defaultMessage: 'Monitor Management',
+  defaultMessage: 'Synthetics App',
 });
 
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.loading.label',
   {
-    defaultMessage: 'Loading Monitor Management',
+    defaultMessage: 'Loading Synthetics App',
   }
 );
 

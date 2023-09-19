@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
@@ -97,7 +98,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             />
           )}
           {latestFunctionService.sortFieldOptions.length === 0 && (
-            <EuiCallOut color="danger" iconType="alert" size="m">
+            <EuiCallOut color="danger" iconType="warning" size="m">
               <p>
                 <FormattedMessage
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"

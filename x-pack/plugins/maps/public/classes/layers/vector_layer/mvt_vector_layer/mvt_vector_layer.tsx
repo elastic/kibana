@@ -74,10 +74,14 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
-      ? false
-      : super.isInitialDataLoadComplete();
+  isLayerLoading(zoom: number) {
+    const isSourceLoading = super.isLayerLoading(zoom);
+    return isSourceLoading ? true : this._isLoadingJoins();
+  }
+
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
@@ -332,7 +336,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // When there are no join results, return a filter that hides all features
     // work around for 'match' with empty array not filtering out features
     // This filter always returns false because features will never have `__kbn_never_prop__` property
-    const hideAllFilter = ['has', '__kbn_never_prop__'];
+    const hideAllFilter = ['has', '__kbn_never_prop__'] as FilterSpecification;
 
     if (!joinPropertiesMap) {
       return hideAllFilter;

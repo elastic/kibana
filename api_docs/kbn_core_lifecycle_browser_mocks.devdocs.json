@@ -70,7 +70,7 @@
               },
               ">; hasCustomBranding$: ",
               "Observable",
-              "<boolean>; }; docLinks: jest.Mock<any, any>; executionContext: jest.Mocked<",
+              "<boolean>; }; docLinks: jest.Mock<any, any, any>; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
                 "scope": "common",
@@ -161,8 +161,8 @@
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-common.MockedKeys",
-                "text": "MockedKeys"
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
               },
               "<",
               {
@@ -244,7 +244,7 @@
                 "section": "def-common.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               },
-              ">; }, any, any]>, []>; http: ",
+              ">; }, any, any]>, [], any>; http: ",
               {
                 "pluginId": "@kbn/core-http-browser-mocks",
                 "scope": "common",
@@ -406,8 +406,8 @@
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-common.MockedKeys",
-                "text": "MockedKeys"
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
               },
               "<",
               {

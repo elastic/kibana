@@ -9,12 +9,6 @@ from files dual-licensed under the Server Side Public License and the Elastic Li
 If you have:
 
 ```yaml
-xpack.observability.unsafe.alertDetails.apm.enabled: true
-```
-
-**[For APM rule types]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
-
-```yaml
 xpack.observability.unsafe.alertDetails.metrics.enabled: true
 ```
 
@@ -31,6 +25,12 @@ xpack.observability.unsafe.alertDetails.uptime.enabled: true
 ```
 
 **[For Uptime rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
+
+```yaml
+xpack.observability.unsafe.alertDetails.observability.enabled: true
+```
+
+**[For Observability Threshold rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
 
 # Development
 

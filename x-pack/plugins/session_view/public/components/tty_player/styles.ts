@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { CSSObject, css } from '@emotion/react';
 import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
-import { Teletype } from '../../../common/types/process_tree';
+import type { Teletype } from '../../../common';
 
 export const useStyles = (tty?: Teletype, show?: boolean) => {
   const { euiTheme, euiVars } = useEuiTheme();
@@ -75,16 +75,11 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       backgroundColor: colors.ink,
     };
 
-    const betaBadge: CSSObject = {
-      backgroundColor: `${colors.emptyShade}`,
-    };
-
     return {
       container,
       header,
       terminal,
       scrollPane,
-      betaBadge,
     };
   }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 

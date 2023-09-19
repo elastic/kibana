@@ -17,6 +17,10 @@ import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
+import {
+  FLEET_COMPONENT_TEMPLATES,
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+} from '../../../../constants';
 
 import {
   generateMappings,
@@ -26,7 +30,9 @@ import {
   updateCurrentWriteIndices,
 } from './template';
 
-const FLEET_COMPONENT_TEMPLATES = ['.fleet_globals-1', '.fleet_agent_id_verification-1'];
+const FLEET_COMPONENT_TEMPLATES_NAMES = FLEET_COMPONENT_TEMPLATES.map(
+  (componentTemplate) => componentTemplate.name
+);
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -69,7 +75,28 @@ describe('EPM template', () => {
     });
     expect(template.composed_of).toStrictEqual([
       ...composedOfTemplates,
-      ...FLEET_COMPONENT_TEMPLATES,
+      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+    ]);
+  });
+
+  it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        agentIdVerificationEnabled: false,
+      })
+    );
+    const composedOfTemplates = ['component1', 'component2'];
+
+    const template = getTemplate({
+      templateIndexPattern: 'name-*',
+      packageName: 'nginx',
+      composedOfTemplates,
+      templatePriority: 200,
+      mappings: { properties: [] },
+    });
+    expect(template.composed_of).toStrictEqual([
+      ...composedOfTemplates,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -83,7 +110,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
     });
-    expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES);
+    expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES_NAMES);
   });
 
   it('adds hidden field correctly', () => {
@@ -802,7 +829,7 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
-  it('tests processing dimension field', () => {
+  it('tests processing dimension field on a keyword', () => {
     const literalYml = `
 - name: example.id
   type: keyword
@@ -826,7 +853,31 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field with index mode time series', () => {
+  it('tests processing dimension field on a long', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              time_series_dimension: true,
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field', () => {
     const literalYml = `
 - name: total.norm.pct
   type: scaled_float
@@ -856,44 +907,11 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field with index mode time series disabled', () => {
-    const literalYml = `
-- name: total.norm.pct
-  type: scaled_float
-  metric_type: gauge
-  unit: percent
-  format: percent
-`;
-    const expectedMapping = {
-      properties: {
-        total: {
-          properties: {
-            norm: {
-              properties: {
-                pct: {
-                  scaling_factor: 1000,
-                  type: 'scaled_float',
-                  meta: {
-                    unit: 'percent',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: false });
-    expect(mappings).toEqual(expectedMapping);
-  });
-
-  it('tests processing metric_type field with long field and index mode timeseries', () => {
+  it('tests processing metric_type field with long field', () => {
     const literalYml = `
     - name: total
       type: long
@@ -916,7 +934,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -979,6 +997,129 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('tests processing field of aggregate_metric_double type', () => {
+    const fieldLiteralYaml = `
+    - name: aggregate_metric
+      type: aggregate_metric_double
+      metrics: ["min", "max", "sum", "value_count"]
+      default_metric: "max"
+    `;
+    const fieldMapping = {
+      properties: {
+        aggregate_metric: {
+          metrics: ['min', 'max', 'sum', 'value_count'],
+          default_metric: 'max',
+          type: 'aggregate_metric_double',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(fieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
+  });
+
+  it('tests processing runtime fields without script', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: runtime_field
+  type: boolean
+  runtime: true
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        runtime_field: {
+          type: 'boolean',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing runtime fields with painless script', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: day_of_week
+  type: date
+  runtime: |
+    emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        day_of_week: {
+          type: 'date',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing runtime fields defined in a group', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: responses
+  type: group
+  fields:
+    - name: day_of_week
+      type: date
+      date_format: date_optional_time
+      runtime: |
+        emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        'responses.day_of_week': {
+          type: 'date',
+          format: 'date_optional_time',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing runtime fields in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  runtime: true
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            runtime: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
   });
 
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
@@ -1067,6 +1208,7 @@ describe('EPM template', () => {
       ]);
       expect(esClient.indices.getDataStream).toBeCalledWith({
         name: 'test.*-*',
+        expand_wildcards: ['open', 'hidden'],
       });
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);
@@ -1085,6 +1227,9 @@ describe('EPM template', () => {
         template: {
           settings: { index: {} },
           mappings: { properties: {} },
+          lifecycle: {
+            data_retention: '7d',
+          },
         },
       } as any);
 
@@ -1105,6 +1250,16 @@ describe('EPM template', () => {
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);
       expect(putMappingsCall[0]).toBe('test-non-replicated');
+
+      const putDatastreamLifecycleCalls = esClient.transport.request.mock.calls;
+      expect(putDatastreamLifecycleCalls).toHaveLength(1);
+      expect(putDatastreamLifecycleCalls[0][0]).toEqual({
+        method: 'PUT',
+        path: '_data_stream/test-non-replicated/_lifecycle',
+        body: {
+          data_retention: '7d',
+        },
+      });
     });
   });
 });

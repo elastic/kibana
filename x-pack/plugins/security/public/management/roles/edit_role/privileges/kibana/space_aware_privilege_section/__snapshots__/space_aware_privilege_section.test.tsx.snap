@@ -4,7 +4,7 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
 <EuiCallOut
   color="danger"
   data-test-subj="userCannotManageSpacesCallout"
-  iconType="alert"
+  iconType="warning"
   title={
     <FormattedMessage
       defaultMessage="Insufficient Privileges"

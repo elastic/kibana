@@ -6,7 +6,6 @@
  */
 
 export { createUrlOverrides, processResults, readFile, DEFAULT_LINES_TO_SAMPLE } from './utils';
-export { roundToDecimalPlace } from './round_to_decimal_place';
 export { kibanaFieldFormat } from './kibana_field_format';
 export { numberAsOrdinal } from './number_as_ordinal';
 export { formatSingleValue } from './format_value';

@@ -25,7 +25,7 @@ import { PreviewHistogram } from './preview_histogram';
 import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
 import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { createStore } from '../../../../common/store';
 import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
 import type { ReactWrapper } from 'enzyme';

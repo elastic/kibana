@@ -11,6 +11,11 @@ import { maybe } from '../../../common/utils/maybe';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface MetadataForDependencyResponse {
+  spanType: string | undefined;
+  spanSubtype: string | undefined;
+}
+
 export async function getMetadataForDependency({
   apmEventClient,
   dependencyName,
@@ -21,7 +26,7 @@ export async function getMetadataForDependency({
   dependencyName: string;
   start: number;
   end: number;
-}) {
+}): Promise<MetadataForDependencyResponse> {
   const sampleResponse = await apmEventClient.search(
     'get_metadata_for_dependency',
     {

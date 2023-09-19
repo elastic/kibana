@@ -149,6 +149,9 @@
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-server",
     "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/tooling-log",
+    "@kbn/stdio-dev-helpers",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

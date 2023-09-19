@@ -13,6 +13,7 @@ import { ServiceHealthStatus } from '../../../../../common/service_health_status
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 import { items, overflowItems } from './__fixtures__/service_api_mock_data';
 
 type Args = ComponentProps<typeof ServiceList>;
@@ -30,6 +31,10 @@ const stories: Meta<Args> = {
   component: ServiceList,
   decorators: [
     (StoryComponent) => {
+      mockApmApiCallResponse(
+        'GET /internal/apm/fallback_to_transactions',
+        () => ({ fallbackToTransactions: false })
+      );
       return (
         <MockApmPluginStorybook
           apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}

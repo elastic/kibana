@@ -9,14 +9,23 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternsFetcher } from '.';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import * as indexNotFoundException from './index_not_found_exception.json';
+
+const rollupResponse = {
+  foo: {
+    rollup_jobs: [
+      {
+        index_pattern: 'foo',
+        job_id: '123',
+        rollup_index: 'foo',
+        fields: [],
+      },
+    ],
+  },
+};
 
 describe('Index Pattern Fetcher - server', () => {
   let indexPatterns: IndexPatternsFetcher;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  const emptyResponse = {
-    indices: [],
-  };
   const response = {
     indices: ['b'],
     fields: [{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }],
@@ -25,66 +34,40 @@ describe('Index Pattern Fetcher - server', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    indexPatterns = new IndexPatternsFetcher(esClient);
+    indexPatterns = new IndexPatternsFetcher(esClient, false, true);
   });
-  it('Removes pattern without matching indices', async () => {
-    esClient.fieldCaps
-      .mockResponseOnce(emptyResponse as unknown as estypes.FieldCapsResponse)
-      .mockResponse(response as unknown as estypes.FieldCapsResponse);
-    // first field caps request returns empty
-    const result = await indexPatterns.validatePatternListActive(patternList);
-    expect(result).toEqual(['b', 'c']);
-  });
-  it('Keeps matching and negating patterns', async () => {
-    esClient.fieldCaps
-      .mockResponseOnce(emptyResponse as unknown as estypes.FieldCapsResponse)
-      .mockResponse(response as unknown as estypes.FieldCapsResponse);
-    // first field caps request returns empty
-    const result = await indexPatterns.validatePatternListActive(['-a', 'b', 'c', 'a:-b']);
-    expect(result).toEqual(['-a', 'c', 'a:-b']);
-  });
-  it('Returns all patterns when all match indices', async () => {
+  it('calls fieldcaps once', async () => {
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient);
-    const result = await indexPatterns.validatePatternListActive(patternList);
-    expect(result).toEqual(patternList);
-  });
-  it('Removes pattern when error is thrown', async () => {
-    class ServerError extends Error {
-      public body?: Record<string, any>;
-
-      constructor(
-        message: string,
-        public readonly statusCode: number,
-        errBody?: Record<string, any>
-      ) {
-        super(message);
-        this.body = errBody;
-      }
-    }
-
-    esClient.fieldCaps
-      .mockResponseOnce(response as unknown as estypes.FieldCapsResponse)
-      .mockImplementationOnce(() => {
-        return Promise.reject(
-          new ServerError('index_not_found_exception', 404, indexNotFoundException)
-        );
-      });
-
-    indexPatterns = new IndexPatternsFetcher(esClient);
-    const result = await indexPatterns.validatePatternListActive(patternList);
-    expect(result).toEqual([patternList[0]]);
-  });
-  it('When allowNoIndices is false, run validatePatternListActive', async () => {
-    esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient);
-    await indexPatterns.getFieldsForWildcard({ pattern: patternList });
-    expect(esClient.fieldCaps).toHaveBeenCalledTimes(4);
-  });
-  it('When allowNoIndices is true, do not run validatePatternListActive', async () => {
-    esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, true, true);
     await indexPatterns.getFieldsForWildcard({ pattern: patternList });
     expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls rollup api when given rollup data view', async () => {
+    esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
+    esClient.rollup.getRollupIndexCaps.mockResponse(
+      rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
+    );
+    indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+    await indexPatterns.getFieldsForWildcard({
+      pattern: patternList,
+      type: 'rollup',
+      rollupIndex: 'foo',
+    });
+    expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't call rollup api when given rollup data view and rollups are disabled", async () => {
+    esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
+    esClient.rollup.getRollupIndexCaps.mockResponse(
+      rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
+    );
+    indexPatterns = new IndexPatternsFetcher(esClient, true, false);
+    await indexPatterns.getFieldsForWildcard({
+      pattern: patternList,
+      type: 'rollup',
+      rollupIndex: 'foo',
+    });
+    expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(0);
   });
 });

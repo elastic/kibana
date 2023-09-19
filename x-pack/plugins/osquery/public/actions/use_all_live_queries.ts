@@ -8,20 +8,19 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { createFilter } from '../common/helpers';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
-import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { Direction } from '../../common/search_strategy';
 
 export interface UseAllLiveQueriesConfig {
-  activePage: number;
+  activePage?: number;
   direction?: Direction;
-  limit: number;
-  sortField: string;
-  filterQuery?: ESTermQuery | ESExistsQuery | string;
+  limit?: number;
+  sortField?: string;
+  kuery?: string;
   skip?: boolean;
   alertId?: string;
 }
@@ -30,11 +29,11 @@ export interface UseAllLiveQueriesConfig {
 const ACTIONS_QUERY_KEY = 'actions';
 
 export const useAllLiveQueries = ({
-  activePage,
+  activePage = 0,
   direction = Direction.desc,
-  limit,
-  sortField,
-  filterQuery,
+  limit = 100,
+  sortField = '@timestamp',
+  kuery,
   skip = false,
   alertId,
 }: UseAllLiveQueriesConfig) => {
@@ -50,8 +49,9 @@ export const useAllLiveQueries = ({
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',
         {
+          version: API_VERSIONS.public.v1,
           query: {
-            filterQuery: createFilter(filterQuery),
+            kuery,
             page: activePage,
             pageSize: limit,
             sort: sortField,

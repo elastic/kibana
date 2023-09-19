@@ -16,8 +16,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 
-import { EuiHorizontalRule, useResizeObserver } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -25,28 +26,24 @@ import {
   unsavedChangesBadgeStrings,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
+import { DashboardEmbedSettings } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 
 import './_dashboard_top_nav.scss';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
-  onHeightChange: (height: number) => void;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
-export function DashboardTopNav({
-  embedSettings,
-  redirectTo,
-  onHeightChange,
-}: DashboardTopNavProps) {
+export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
 
@@ -65,6 +62,7 @@ export function DashboardTopNav({
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
     },
+    serverless,
     settings: { uiSettings },
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
@@ -73,36 +71,31 @@ export function DashboardTopNav({
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
-  /**
-   * Unpack dashboard state from redux
-   */
-  const {
-    useEmbeddableDispatch,
-    actions: { setSavedQueryId },
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+
+  const dashboard = useDashboardAPI();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
-  const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
-  const fullScreenMode = select((state) => state.componentState.fullScreenMode);
-  const savedQueryId = select((state) => state.componentState.savedQueryId);
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const query = select((state) => state.explicitInput.query);
-  const title = select((state) => state.explicitInput.title);
+  const hasRunMigrations = dashboard.select(
+    (state) => state.componentState.hasRunClientsideMigrations
+  );
+  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
+  const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
+  const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const query = dashboard.select((state) => state.explicitInput.query);
+  const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>(
-    dashboardContainer.getAllDataViews()
-  );
+  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
   useEffect(() => {
-    const subscription = dashboardContainer.onDataViewsUpdate$.subscribe((dataViews) =>
+    setAllDataViews(dashboard.getAllDataViews());
+    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
       setAllDataViews(dataViews)
     );
     return () => subscription.unsubscribe();
-  }, [dashboardContainer]);
+  }, [dashboard]);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -121,16 +114,6 @@ export function DashboardTopNav({
   useEffect(() => {
     if (!embedSettings) setChromeVisibility(viewMode !== ViewMode.PRINT);
   }, [embedSettings, setChromeVisibility, viewMode]);
-
-  /**
-   * Keep track of the height of the top nav bar as it changes so that the padding at the top of the
-   * dashboard viewport can be adjusted dynamically as it changes
-   */
-  const resizeRef = useRef<HTMLDivElement>(null);
-  const dimensions = useResizeObserver(resizeRef.current);
-  useEffect(() => {
-    onHeightChange(dimensions.height);
-  }, [dimensions, onHeightChange]);
 
   /**
    * populate recently accessed, and set is chrome visible.
@@ -158,19 +141,43 @@ export function DashboardTopNav({
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
    */
   useEffect(() => {
-    setBreadcrumbs([
+    const dashboardTitleBreadcrumbs = [
       {
-        text: getDashboardBreadcrumb(),
-        'data-test-subj': 'dashboardListingBreadcrumb',
-        onClick: () => {
-          redirectTo({ destination: 'listing' });
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
+      },
+    ];
+
+    if (serverless?.setBreadcrumbs) {
+      // set serverless breadcrumbs if available,
+      // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
+      serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
+    } else {
+      // non-serverless regular breadcrumbs
+      setBreadcrumbs([
+        {
+          text: getDashboardBreadcrumb(),
+          'data-test-subj': 'dashboardListingBreadcrumb',
+          onClick: () => {
+            redirectTo({ destination: 'listing' });
+          },
         },
-      },
-      {
-        text: dashboardTitle,
-      },
-    ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle]);
+        ...dashboardTitleBreadcrumbs,
+      ]);
+    }
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
@@ -226,11 +233,42 @@ export function DashboardTopNav({
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
   UseUnmount(() => {
-    dashboardContainer.clearOverlays();
+    dashboard.clearOverlays();
   });
 
+  const badges = useMemo(() => {
+    if (viewMode !== ViewMode.EDIT) return;
+    const allBadges: TopNavMenuProps['badges'] = [];
+    if (hasUnsavedChanges) {
+      allBadges.push({
+        'data-test-subj': 'dashboardUnsavedChangesBadge',
+        badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
+        title: '',
+        color: 'warning',
+        toolTipProps: {
+          content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
+    if (hasRunMigrations) {
+      allBadges.push({
+        'data-test-subj': 'dashboardSaveRecommendedBadge',
+        badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
+        title: '',
+        color: 'success',
+        iconType: 'save',
+        toolTipProps: {
+          content: unsavedChangesBadgeStrings.getHasRunMigrationsToolTipContent(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
+    return allBadges;
+  }, [hasRunMigrations, hasUnsavedChanges, viewMode]);
+
   return (
-    <div ref={resizeRef} className={'dashboardTopNav'}>
+    <div className="dashboardTopNav">
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
@@ -240,10 +278,11 @@ export function DashboardTopNav({
       <TopNavMenu
         {...visibilityProps}
         query={query}
+        badges={badges}
         screenTitle={title}
         useDefaultBehaviors={true}
-        indexPatterns={allDataViews}
         savedQueryId={savedQueryId}
+        indexPatterns={allDataViews}
         showSaveQuery={showSaveQuery}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
@@ -256,25 +295,14 @@ export function DashboardTopNav({
               : viewModeTopNavConfig
             : undefined
         }
-        badges={
-          hasUnsavedChanges && viewMode === ViewMode.EDIT
-            ? [
-                {
-                  'data-test-subj': 'dashboardUnsavedChangesBadge',
-                  badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-                  color: 'success',
-                },
-              ]
-            : undefined
-        }
         onQuerySubmit={(_payload, isUpdate) => {
           if (isUpdate === false) {
-            dashboardContainer.forceRefresh();
+            dashboard.forceRefresh();
           }
         }}
-        onSavedQueryIdChange={(newId: string | undefined) => {
-          dispatch(setSavedQueryId(newId));
-        }}
+        onSavedQueryIdChange={(newId: string | undefined) =>
+          dashboard.dispatch.setSavedQueryId(newId)
+        }
       />
       {viewMode !== ViewMode.PRINT && isLabsEnabled && isLabsShown ? (
         <PresentationUtilContextProvider>

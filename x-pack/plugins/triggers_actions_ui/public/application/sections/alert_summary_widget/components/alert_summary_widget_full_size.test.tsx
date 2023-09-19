@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 import {
   AlertSummaryWidgetFullSize,
   AlertSummaryWidgetFullSizeProps,
 } from './alert_summary_widget_full_size';
-import { render } from '@testing-library/react';
-import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
+import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
 
 describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
     render(
       <IntlProvider locale="en">
         <AlertSummaryWidgetFullSize
-          chartThemes={mockedChartThemes}
+          chartProps={mockedChartProps}
           {...mockedAlertSummaryResponse}
           {...props}
         />
@@ -35,8 +36,12 @@ describe('AlertSummaryWidgetFullSize', () => {
   it('should render counts correctly', async () => {
     const alertSummaryWidget = renderComponent();
 
-    expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('2');
-    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('22');
+    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '2'
+    );
+    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '22'
+    );
   });
 
   it('should render higher counts correctly', async () => {
@@ -44,7 +49,22 @@ describe('AlertSummaryWidgetFullSize', () => {
       activeAlertCount: 2000,
     });
 
-    expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('2k');
-    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('2.02k');
+    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '2k'
+    );
+    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '2.02k'
+    );
+  });
+
+  it('should render AlertSummaryWidgetFullSize without a chart', async () => {
+    const alertSummaryWidget = renderComponent({
+      hideChart: true,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(
+      alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeChartContainer')
+    ).not.toBeInTheDocument();
   });
 });

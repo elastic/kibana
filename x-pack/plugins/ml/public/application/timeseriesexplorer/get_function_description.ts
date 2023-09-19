@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { mlResultsService } from '../services/results_service';
 import { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {

@@ -49,7 +49,13 @@ export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) =
   };
 
   const button = (
-    <EuiButtonEmpty size="xs" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiButtonEmpty
+      data-test-subj="syntheticsGroupMenuButton"
+      size="xs"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+    >
       {groupField}
     </EuiButtonEmpty>
   );

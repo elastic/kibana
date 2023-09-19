@@ -39,6 +39,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj="syntheticsStepNavStepStepIndexOfTotalStepsButton"
       size="s"
       flush="left"
       iconType={hasMoreThanOneStep ? 'arrowDown' : undefined}

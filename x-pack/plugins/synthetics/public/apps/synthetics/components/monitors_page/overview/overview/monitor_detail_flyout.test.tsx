@@ -9,22 +9,22 @@ import React from 'react';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: observabilityPublic.FETCH_STATUS.PENDING,
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: observabilitySharedPublic.FETCH_STATUS.PENDING,
       data: null,
       refetch: () => null,
     });
     jest
-      .spyOn(observabilityPublic, 'useTheme')
+      .spyOn(observabilitySharedPublic, 'useTheme')
       .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
@@ -40,6 +40,7 @@ describe('Monitor Detail Flyout', () => {
           full: 'https://www.elastic.co',
         },
         tags: ['tag1', 'tag2'],
+        observer: {},
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
@@ -54,7 +55,7 @@ describe('Monitor Detail Flyout', () => {
     const onCloseMock = jest.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -70,15 +71,15 @@ describe('Monitor Detail Flyout', () => {
 
   it('renders error boundary for fetch failure', () => {
     const testErrorText = 'This is a test error';
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: observabilityPublic.FETCH_STATUS.FAILURE,
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: observabilitySharedPublic.FETCH_STATUS.FAILURE,
       error: new Error('This is a test error'),
       refetch: () => null,
     });
 
     const { getByText } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -91,14 +92,14 @@ describe('Monitor Detail Flyout', () => {
   });
 
   it('renders loading state while fetching', () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: observabilityPublic.FETCH_STATUS.LOADING,
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: observabilitySharedPublic.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
 
     const { getByRole } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -112,20 +113,17 @@ describe('Monitor Detail Flyout', () => {
   });
 
   it('renders details for fetch success', () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       data: {
-        attributes: {
-          enabled: true,
-          name: 'test-monitor',
-          schedule: {
-            number: '1',
-            unit: 'm',
-          },
-          tags: ['prod'],
+        enabled: true,
+        name: 'test-monitor',
+        schedule: {
+          number: '1',
+          unit: 'm',
         },
-        type: 'browser',
-        updated_at: '1996-02-27',
+        tags: ['prod'],
+        config_id: 'test-id',
       },
       refetch: jest.fn(),
     });
@@ -135,7 +133,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"

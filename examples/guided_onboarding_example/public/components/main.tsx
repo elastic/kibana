@@ -18,8 +18,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageSection,
+  EuiPageHeader,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -149,7 +149,7 @@ export const Main = (props: MainProps) => {
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -158,8 +158,8 @@ export const Main = (props: MainProps) => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <h3>
             <FormattedMessage
@@ -345,8 +345,16 @@ export const Main = (props: MainProps) => {
               />
             </EuiButton>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => history.push('stepFour')}>
+              <FormattedMessage
+                id="guidedOnboardingExample.main.examplePages.stepFour.link"
+                defaultMessage="Step 4"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type {
-  CasesConfigurePatch,
-  CasesConfigureRequest,
-  ActionConnector,
-  ActionTypeConnector,
-} from '../../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../../common/types/domain';
 
 import type { ApiProps } from '../../types';
 import type { CaseConfigure } from '../types';
 import { caseConfigurationCamelCaseResponseMock } from '../mock';
 import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
+import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../../common/types/api';
 
 export const getSupportedActionConnectors = async ({
   signal,
@@ -25,12 +21,12 @@ export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfig
   Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const postCaseConfigure = async (
-  caseConfiguration: CasesConfigureRequest,
+  caseConfiguration: ConfigurationRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const patchCaseConfigure = async (
-  caseConfiguration: CasesConfigurePatch,
+  caseConfiguration: ConfigurationPatchRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 

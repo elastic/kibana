@@ -64,6 +64,10 @@ describe('TrainedModelsApiLogic', () => {
             ...mlModels[1],
             ...mlModelStats.trained_model_stats[1],
           },
+          {
+            ...mlModels[2],
+            ...mlModelStats.trained_model_stats[2],
+          },
         ]);
       });
       it('returns just models if stats not available', () => {

@@ -14,7 +14,7 @@ import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { getErrorInfo } from './get_error_info';
 
@@ -95,13 +95,13 @@ export class FatalErrorsService {
     this.rootDomElement.appendChild(container);
 
     render(
-      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
+      <KibanaRootContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <FatalErrorsScreen
           buildNumber={injectedMetadata.getKibanaBuildNumber()}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </CoreContextProvider>,
+      </KibanaRootContextProvider>,
       container
     );
   }
@@ -109,7 +109,11 @@ export class FatalErrorsService {
   private setupGlobalErrorHandlers() {
     if (window.addEventListener) {
       window.addEventListener('unhandledrejection', (e) => {
-        console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
+        const { message, stack } = getErrorInfo(e.reason);
+        // eslint-disable-next-line no-console
+        console.log(`Detected an unhandled Promise rejection.\n
+        Message: ${message}\n
+        Stack: ${stack}`);
       });
     }
   }

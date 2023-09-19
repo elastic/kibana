@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { JSON_TAB_CONTENT_TEST_ID } from './test_ids';
+import { JsonView } from '../../../common/components/event_details/json_view';
+import { useRightPanelContext } from '../context';
 
 /**
  * Json view displayed in the document details expandable flyout right section
  */
 export const JsonTab: FC = memo(() => {
-  return <EuiText data-test-subj={JSON_TAB_CONTENT_TEST_ID}>{'Json tab'}</EuiText>;
+  const { searchHit } = useRightPanelContext();
+
+  return <JsonView rawEventData={searchHit} />;
 });
 
 JsonTab.displayName = 'JsonTab';

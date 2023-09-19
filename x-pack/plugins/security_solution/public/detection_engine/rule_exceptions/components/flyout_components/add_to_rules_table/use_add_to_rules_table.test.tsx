@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/dom';
 import { act, renderHook } from '@testing-library/react-hooks';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { Rule } from '../../../../rule_management/logic/types';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { useAddToRulesTable } from './use_add_to_rules_table';
 
@@ -95,7 +95,7 @@ describe('useAddToRulesTable', () => {
     } = current;
     expect(sortedRulesByLinkedRulesOnTop.length).toEqual(0);
     expect(isLoading).toBeTruthy();
-    expect(pagination).toEqual({ pageIndex: 0, initialPageSize: 5, showPerPageOptions: false });
+    expect(pagination).toEqual({ pageIndex: 0, initialPageSize: 25, showPerPageOptions: false });
     expect(searchOptions.filters[0].name).toEqual('Tags');
     expect(addToSelectedRulesDescription).toEqual(
       'After you create the exception, it is added to the rules you link. '
@@ -146,6 +146,7 @@ describe('useAddToRulesTable', () => {
     const { options } = filters[0];
     expect(options).toEqual([
       {
+        field: 'tags',
         name: 'some fake tag 1',
         value: 'some fake tag 1',
       },

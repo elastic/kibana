@@ -24,14 +24,12 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { MlFeatures, PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
-
 import { initMlServerLog } from './lib/log';
-import { initSampleDataSets } from './lib/sample_data_sets';
-
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
 import { dataFeedRoutes } from './routes/datafeeds';
@@ -67,8 +65,16 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import { registerCasesPersistableState } from './lib/register_cases';
+import { registerSampleDataSetLinks } from './lib/register_sameple_data_set_links';
 
-export type MlPluginSetup = SharedServices;
+type SetFeaturesEnabled = (features: MlFeatures) => void;
+
+interface MlSetup {
+  setFeaturesEnabled: SetFeaturesEnabled;
+}
+
+export type MlPluginSetup = SharedServices & MlSetup;
 export type MlPluginStart = void;
 
 export class MlServerPlugin
@@ -88,12 +94,21 @@ export class MlServerPlugin
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
+  private isServerless: boolean = false;
+  private registerCases: () => void = () => {};
+  private registerSampleDatasetsIntegration: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -141,10 +156,13 @@ export class MlServerPlugin
       },
     });
 
-    registerKibanaSettings(coreSetup);
-
     // initialize capabilities switcher to add license filter to ml capabilities
-    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupCapabilitiesSwitcher(
+      coreSetup,
+      plugins.licensing.license$,
+      this.enabledFeatures,
+      this.log
+    );
     setupSavedObjects(coreSetup.savedObjects);
     this.savedObjectsSyncService.registerSyncTask(
       plugins.taskManager,
@@ -203,6 +221,8 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
+      getEnabledFeatures: () => Object.assign({}, this.enabledFeatures),
+      isServerless: this.isServerless,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -232,6 +252,7 @@ export class MlServerPlugin
     });
     trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
+    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
@@ -245,11 +266,42 @@ export class MlServerPlugin
       });
     }
 
+    this.registerCases = () => {
+      if (plugins.cases) {
+        registerCasesPersistableState(plugins.cases);
+      }
+    };
+
+    this.registerSampleDatasetsIntegration = () => {
+      // called in start once enabledFeatures is available
+      if (this.home) {
+        registerSampleDataSetLinks(this.enabledFeatures, this.home);
+      }
+    };
+
+    registerKibanaSettings(coreSetup);
+
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+      const getIndexForType = (type: string) =>
+        coreSetup
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    return sharedServicesProviders;
+    const setFeaturesEnabled = (features: MlFeatures) => {
+      if (features.ad !== undefined) {
+        this.enabledFeatures.ad = features.ad;
+      }
+      if (features.dfa !== undefined) {
+        this.enabledFeatures.dfa = features.dfa;
+      }
+      if (features.nlp !== undefined) {
+        this.enabledFeatures.nlp = features.nlp;
+      }
+    };
+
+    return { ...sharedServicesProviders, setFeaturesEnabled };
   }
 
   public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {
@@ -260,16 +312,20 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    this.mlLicense.setup(plugins.licensing.license$, (mlLicense: MlLicense) => {
+    this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {
       if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
-        this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        try {
+          await this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        } catch (e) {
+          this.log.debug(`Error unscheduling saved objects sync task`, e);
+        }
         return;
       }
 
-      if (this.home) {
-        initSampleDataSets(mlLicense, this.home);
+      if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
+        this.registerCases();
+        this.registerSampleDatasetsIntegration();
       }
-
       // check whether the job saved objects exist
       // and create them if needed.
       const { initializeJobs } = jobSavedObjectsInitializationFactory(

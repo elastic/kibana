@@ -15,7 +15,7 @@ export const UI_SETTINGS_CUSTOMIZED_LOGO = 'xpackCustomBranding:customizedLogo';
 export const UI_SETTINGS_PAGE_TITLE = 'xpackCustomBranding:pageTitle';
 export const UI_SETTINGS_FAVICON_PNG = 'xpackCustomBranding:faviconPNG';
 export const UI_SETTINGS_FAVICON_SVG = 'xpackCustomBranding:faviconSVG';
-export const PLUGIN_ID = 'Custom Branding';
+export const PLUGIN_ID = 'Custom branding';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 const maxLogoSizeInBase64 = kbToBase64Length(200);
@@ -59,15 +59,16 @@ const subscriptionLink = `
         })}
       </a>
   `;
+
 export function registerUiSettings(core: CoreSetup<object, unknown>) {
   core.uiSettings.registerGlobal({
     [UI_SETTINGS_CUSTOM_LOGO]: {
       name: i18n.translate('xpack.customBranding.customLogoLabel', {
-        defaultMessage: 'Logo icon',
+        defaultMessage: 'Custom logo',
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customLogoDescription', {
-        defaultMessage: `Replaces the Elastic logo.  Logos look best when they are no larger than 128 x 128 pixels and have a transparent background. {subscriptionLink}`,
+        defaultMessage: `Replaces the Elastic logo. Logos look best when they are no larger than 128 x 128 pixels and have a transparent background. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -83,7 +84,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customizedLogoDescription', {
-        defaultMessage: `Replaces the Elastic text. Images look best when they are no larger than 200 x 84 pixels and have a transparent background. {subscriptionLink}`,
+        defaultMessage: `Replaces the text next to the logo. Images look best when they are no larger than 200 x 84 pixels and have a transparent background. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -115,7 +116,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconSVGDescription', {
-        defaultMessage: `A link to an icon that will appear on browser tabs. Recommended size is 16 x 16 pixels.  {subscriptionLink}`,
+        defaultMessage: `The URL of an image that will appear on browser tabs. Recommended size is 16 x 16 pixels. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -131,7 +132,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconPNGDescription', {
-        defaultMessage: `An icon for use in browsers that don’t support svg.  {subscriptionLink}`,
+        defaultMessage: `The URL of an image for use in browsers that don’t support SVG. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,

@@ -327,36 +327,44 @@ describe('getMigrationHash', () => {
       const typeA = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         },
       });
       const typeB = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         },
       });
@@ -368,36 +376,44 @@ describe('getMigrationHash', () => {
       const typeA = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         },
       });
       const typeB = createType({
         modelVersions: {
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
         },
       });
@@ -409,36 +425,44 @@ describe('getMigrationHash', () => {
       const typeA = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         },
       });
       const typeB = createType({
         modelVersions: () => ({
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         }),
       });
@@ -450,36 +474,67 @@ describe('getMigrationHash', () => {
       const typeA = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: { type: 'boolean' },
+                },
               },
-            },
+            ],
           },
         },
       });
       const typeB = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: { up: jest.fn(), down: jest.fn() },
-            },
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                bar: { type: 'boolean' },
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  bar: { type: 'boolean' },
+                },
               },
+            ],
+          },
+        },
+      });
+
+      expect(getMigrationHash(typeA)).not.toEqual(getMigrationHash(typeB));
+    });
+
+    it('returns different hashes if different schemas are registered', () => {
+      const typeA = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: jest.fn(),
             },
+          },
+        },
+      });
+      const typeB = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {},
           },
         },
       });

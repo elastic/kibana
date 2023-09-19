@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
@@ -12,9 +13,6 @@ export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
-    name: {
-      type: 'keyword',
-    },
     rule_id: {
       type: 'keyword',
     },
@@ -26,6 +24,7 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
 
 export const prebuiltRuleAssetType: SavedObjectsType = {
   name: PREBUILT_RULE_ASSETS_SO_TYPE,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   management: {
     importableAndExportable: true,

@@ -11,7 +11,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
-  describe('add data tutorials', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/154699
+  describe.skip('add data tutorials', function describeIndexTests() {
     it('directory should redirect to integrations app', async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
       await PageObjects.common.waitUntilUrlIncludes('/app/integrations');

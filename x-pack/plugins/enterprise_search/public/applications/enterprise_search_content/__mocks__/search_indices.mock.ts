@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-
 import {
   ConnectorStatus,
+  DisplayType,
+  FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
-} from '../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
@@ -32,7 +35,23 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          type: FieldType.STRING,
+          ui_restrictions: [],
+          validations: [],
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -100,14 +119,29 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       index_name: 'connector',
       is_native: false,
       language: 'en',
+      last_access_control_sync_error: null,
+      last_access_control_sync_scheduled_at: null,
+      last_access_control_sync_status: SyncStatus.COMPLETED,
+      last_incremental_sync_scheduled_at: null,
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'connector',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: null,
       status: ConnectorStatus.CONFIGURED,
@@ -127,7 +161,23 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          type: FieldType.STRING,
+          ui_restrictions: [],
+          validations: [],
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -195,14 +245,29 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       index_name: 'crawler',
       is_native: true,
       language: 'en',
+      last_access_control_sync_error: null,
+      last_access_control_sync_scheduled_at: null,
+      last_access_control_sync_status: SyncStatus.COMPLETED,
+      last_incremental_sync_scheduled_at: null,
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'crawler',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       status: ConnectorStatus.CONFIGURED,

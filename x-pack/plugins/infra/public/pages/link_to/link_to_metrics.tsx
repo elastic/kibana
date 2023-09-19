@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { match as RouteMatch, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
@@ -22,7 +22,7 @@ const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
 export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
         component={RedirectToNodeDetail}
@@ -33,6 +33,6 @@ export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
       />
       <Route path={`${props.match.url}/inventory`} component={RedirectToInventory} />
       <Redirect to="/" />
-    </Switch>
+    </Routes>
   );
 };

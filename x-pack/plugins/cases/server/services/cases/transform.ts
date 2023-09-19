@@ -10,13 +10,13 @@
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResponse,
-  SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import type { ExternalService } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -25,8 +25,6 @@ import {
   STATUS_ESMODEL_TO_EXTERNAL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -34,23 +32,12 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import type { CaseSavedObject } from '../../common/types';
-
-export function transformUpdateResponsesToExternalModels(
-  response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
-): SavedObjectsBulkUpdateResponse<CaseAttributes> {
-  return {
-    ...response,
-    saved_objects: response.saved_objects.map((so) => ({
-      ...so,
-      ...transformUpdateResponseToExternalModel(so),
-    })),
-  };
-}
+import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
+import type { ExternalServicePersisted } from '../../common/types/external_service';
 
 export function transformUpdateResponseToExternalModel(
-  updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>
-): SavedObjectsUpdateResponse<CaseAttributes> {
+  updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
+): SavedObjectsUpdateResponse<CaseTransformedAttributes> {
   const {
     connector,
     external_service,
@@ -64,7 +51,7 @@ export function transformUpdateResponseToExternalModel(
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as ESCaseAttributes);
+    } as CasePersistedAttributes);
 
   const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
@@ -73,7 +60,7 @@ export function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  let externalService: CaseFullExternalService | null | undefined;
+  let externalService: ExternalService | null | undefined;
 
   // if external_service is not defined then we don't want to include it in the response since it wasn't passed it as an
   // attribute to update
@@ -94,16 +81,16 @@ export function transformUpdateResponseToExternalModel(
   };
 }
 
-export function transformAttributesToESModel(caseAttributes: CaseAttributes): {
-  attributes: ESCaseAttributes;
+export function transformAttributesToESModel(caseAttributes: CaseTransformedAttributes): {
+  attributes: CasePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
-  attributes: Partial<ESCaseAttributes>;
+export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
-  attributes: Partial<ESCaseAttributes>;
+export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
@@ -149,32 +136,9 @@ function buildReferenceHandler(
   ]);
 }
 
-/**
- * Until Kibana uses typescript 4.3 or higher we'll have to keep these functions separate instead of using an overload
- * definition like this:
- *
- * export function transformArrayResponseToExternalModel(
- *  response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
- * ): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
- *
- * See this issue for more details: https://stackoverflow.com/questions/49510832/typescript-how-to-map-over-union-array-type
- */
-
-export function transformBulkResponseToExternalModel(
-  response: SavedObjectsBulkResponse<ESCaseAttributes>
-): SavedObjectsBulkResponse<CaseAttributes> {
-  return {
-    ...response,
-    saved_objects: response.saved_objects.map((so) => ({
-      ...so,
-      ...transformSavedObjectToExternalModel(so),
-    })),
-  };
-}
-
 export function transformFindResponseToExternalModel(
-  response: SavedObjectsFindResponse<ESCaseAttributes>
-): SavedObjectsFindResponse<CaseAttributes> {
+  response: SavedObjectsFindResponse<CasePersistedAttributes>
+): SavedObjectsFindResponse<CaseTransformedAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
@@ -185,8 +149,8 @@ export function transformFindResponseToExternalModel(
 }
 
 export function transformSavedObjectToExternalModel(
-  caseSavedObject: SavedObject<ESCaseAttributes>
-): CaseSavedObject {
+  caseSavedObject: SavedObject<CasePersistedAttributes>
+): SavedObject<CaseTransformedAttributes> {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
     connector: caseSavedObject.attributes?.connector,
@@ -199,17 +163,17 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const severity =
-    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity] ?? CaseSeverity.LOW;
-  const status =
-    STATUS_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.status] ?? CaseStatuses.open;
-
   const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as ESCaseAttributes);
+    } as CasePersistedAttributes);
+
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
+  const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
 
   return {
     ...caseSavedObject,
@@ -219,6 +183,7 @@ export function transformSavedObjectToExternalModel(
       status,
       connector,
       external_service: externalService,
+      category,
     },
   };
 }
@@ -226,9 +191,9 @@ export function transformSavedObjectToExternalModel(
 function transformESExternalService(
   // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/plugins/cases/common/api/cases/case.ts
   // that's why it can be null here
-  externalService: ExternalServicesWithoutConnectorId | null | undefined,
+  externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined
-): CaseFullExternalService | null {
+): ExternalService | null {
   const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);
 
   if (!externalService) {

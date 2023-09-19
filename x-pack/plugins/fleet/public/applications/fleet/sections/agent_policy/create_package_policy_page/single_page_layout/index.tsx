@@ -22,10 +22,14 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import {
+  getNumTransformAssets,
+  TransformInstallWithCurrentUserPermissionCallout,
+} from '../../../../../../components/transform_install_as_current_user_callout';
+
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
@@ -51,8 +55,12 @@ import {
   StepSelectHosts,
 } from '../components';
 
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
+import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
+import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -266,6 +274,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ]
   );
 
+  const numTransformAssets = useMemo(
+    () => getNumTransformAssets(packageInfo?.assets),
+    [packageInfo?.assets]
+  );
+
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
@@ -307,7 +320,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
+            validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
           />
 
@@ -318,7 +331,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               showOnlyIntegration={integrationInfo?.name}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
             />
           )}
@@ -381,7 +394,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
-
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -393,10 +405,28 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => setFormState('VALID')}
           />
         )}
-        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
-          <PostInstallAddAgentModal
-            packageInfo={packageInfo}
+        {formState === 'SUBMITTED_NO_AGENTS' &&
+          agentPolicy &&
+          packageInfo &&
+          savedPackagePolicy && (
+            <PostInstallAddAgentModal
+              packageInfo={packageInfo}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
+        {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
+          <PostInstallCloudFormationModal
             agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
+        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
+          <PostInstallGoogleCloudShellModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />
@@ -408,6 +438,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             integration={integrationInfo?.name}
           />
         )}
+        {numTransformAssets > 0 ? (
+          <>
+            <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
+            <EuiSpacer size="xl" />
+          </>
+        ) : null}
         <StepsWithLessPadding steps={steps} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

@@ -8,18 +8,21 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { validateHours } from '../../routes/lib/validate_hours';
 import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
+export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+  actions: NormalizedAlertAction[];
+};
+
 export async function validateActions(
   context: RulesClientContext,
-  alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
-    actions: NormalizedAlertAction[];
-  },
+  ruleType: UntypedNormalizedRuleType,
+  data: ValidateActionsData,
   allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
@@ -43,10 +46,14 @@ export async function validateActions(
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];
-  const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+
+  const actionResults =
+    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
+
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
+
   if (actionsUsingConnectorsWithMissingSecrets.length) {
     if (allowMissingConnectorSecrets) {
       context.logger.error(
@@ -68,7 +75,7 @@ export async function validateActions(
     }
   }
   // check for actions with invalid action groups
-  const { actionGroups: alertTypeActionGroups } = alertType;
+  const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);
   const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
   const invalidActionGroups = usedAlertActionGroups.filter(
@@ -113,18 +120,66 @@ export async function validateActions(
     }
   }
 
-  // check for actions throttled shorter than the rule schedule
   const scheduleInterval = parseDuration(data.schedule.interval);
-  const actionsWithInvalidThrottles = actions.filter(
-    (action) =>
+  const actionsWithInvalidThrottles = [];
+  const actionWithoutQueryAndTimeframe = [];
+  const actionWithInvalidTimeframe = [];
+  const actionsWithInvalidTimeRange = [];
+  const actionsWithInvalidDays = [];
+  const actionsWithAlertsFilterWithoutAlertsMapping = [];
+
+  for (const action of actions) {
+    const { alertsFilter } = action;
+
+    // check for actions throttled shorter than the rule schedule
+    if (
       action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
       parseDuration(action.frequency.throttle!) < scheduleInterval
-  );
-  if (actionsWithInvalidThrottles.length) {
+    ) {
+      actionsWithInvalidThrottles.push(action);
+    }
+
+    if (alertsFilter) {
+      // Action has alertsFilter but the ruleType does not support AAD
+      if (!ruleType.alerts) {
+        actionsWithAlertsFilterWithoutAlertsMapping.push(action);
+      }
+
+      // alertsFilter must have at least one of query and timeframe
+      if (!alertsFilter.query && !alertsFilter.timeframe) {
+        actionWithoutQueryAndTimeframe.push(action);
+      }
+      if (alertsFilter.timeframe) {
+        // hours, days and timezone fields are required
+        if (
+          !alertsFilter.timeframe.hours ||
+          !alertsFilter.timeframe.days ||
+          !alertsFilter.timeframe.timezone
+        ) {
+          actionWithInvalidTimeframe.push(action);
+        }
+        if (alertsFilter.timeframe.hours) {
+          if (
+            validateHours(alertsFilter.timeframe.hours.start) ||
+            validateHours(alertsFilter.timeframe.hours.end)
+          ) {
+            actionsWithInvalidTimeRange.push(action);
+          }
+        }
+        if (alertsFilter.timeframe.days) {
+          if (alertsFilter.timeframe.days.some((day) => ![1, 2, 3, 4, 5, 6, 7].includes(day))) {
+            actionsWithInvalidDays.push(action);
+          }
+        }
+      }
+    }
+  }
+
+  if (actionsWithInvalidThrottles.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
-          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+          'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
           scheduleIntervalText: data.schedule.interval,
           groups: actionsWithInvalidThrottles
@@ -132,6 +187,72 @@ export async function validateActions(
             .join(', '),
         },
       })
+    );
+  }
+
+  if (actionWithoutQueryAndTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidAlertsFilter', {
+        defaultMessage: `Action's alertsFilter  must have either "query" or "timeframe" : {uuids}`,
+        values: {
+          uuids: actionWithoutQueryAndTimeframe.map((a) => `${a.uuid}`).join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionWithInvalidTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionWithInvalidTimeframe', {
+        defaultMessage: `Action's alertsFilter timeframe has missing fields: days, hours or timezone: {uuids}`,
+        values: {
+          uuids: actionWithInvalidTimeframe.map((a) => a.uuid).join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidDays.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidDays', {
+        defaultMessage: `Action's alertsFilter days has invalid values: {uuidAndDays}`,
+        values: {
+          uuidAndDays: actionsWithInvalidDays
+            .map((a) => `(${a.uuid}:[${a.alertsFilter!.timeframe!.days}]) `)
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidTimeRange.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidTimeRange', {
+        defaultMessage: `Action's alertsFilter time range has an invalid value: {hours}`,
+        values: {
+          hours: actionsWithInvalidTimeRange
+            .map(
+              (a) =>
+                `${a.alertsFilter!.timeframe!.hours.start}-${a.alertsFilter!.timeframe!.hours.end}`
+            )
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithAlertsFilterWithoutAlertsMapping.length > 0) {
+    errors.push(
+      i18n.translate(
+        'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
+        {
+          defaultMessage: `This ruleType ({ruleType}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
+          values: {
+            uuids: actionsWithAlertsFilterWithoutAlertsMapping.map((a) => a.uuid).join(', '),
+            ruleType: ruleType.name,
+          },
+        }
+      )
     );
   }
 

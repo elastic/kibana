@@ -27,7 +27,5 @@ export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRul
       },
     });
 
-    if (result.errors.length > 0) {
-      throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
-    }
+    return result;
   });

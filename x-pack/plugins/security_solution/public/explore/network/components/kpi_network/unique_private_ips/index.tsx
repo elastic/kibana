@@ -31,7 +31,7 @@ const euiColorVis3 = euiVisColorPalette[3];
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
-    key: 'UniqueIps',
+    key: 'uniqueIps',
     fields: [
       {
         key: 'uniqueSourcePrivateIps',

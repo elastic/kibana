@@ -7,7 +7,7 @@
 
 import { transformRulesForExport } from './transform_rule_for_export';
 jest.mock('../lib/rule_execution_status', () => ({
-  getRuleExecutionStatusPending: () => ({
+  getRuleExecutionStatusPendingAttributes: () => ({
     status: 'pending',
     lastExecutionDate: '2020-08-20T19:23:38Z',
     error: null,
@@ -34,6 +34,7 @@ describe('transform rule for export', () => {
         updatedAt: date,
         apiKey: '4tndskbuhewotw4klrhgjewrt9u',
         apiKeyOwner: 'me',
+        apiKeyCreatedByUser: true,
         throttle: null,
         legacyId: '1',
         notifyWhen: 'onActionGroupChange',
@@ -66,6 +67,7 @@ describe('transform rule for export', () => {
         updatedAt: date,
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         throttle: null,
         legacyId: '2',
         notifyWhen: 'onActionGroupChange',
@@ -91,6 +93,7 @@ describe('transform rule for export', () => {
           enabled: false,
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
           scheduledTaskId: null,
           legacyId: null,
           executionStatus: {

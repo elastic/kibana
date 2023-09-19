@@ -6,8 +6,8 @@
  */
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
-import { RouteComponentProps, Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
@@ -23,7 +23,9 @@ import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
-const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
+const LogsList = lazy(
+  () => import('./sections/rule_details/components/global_rule_event_log_list')
+);
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
@@ -130,7 +132,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <EuiSpacer size="l" />
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
-          <Switch>
+          <Routes>
             <Route exact path={routeToLogs} component={renderLogsList} />
             <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
@@ -146,7 +148,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             ) : (
               <Redirect to={routeToRules} />
             )}
-          </Switch>
+          </Routes>
         </HealthCheck>
       </HealthContextProvider>
     </>

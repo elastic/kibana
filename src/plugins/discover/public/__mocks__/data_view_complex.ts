@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataViewMock } from './data_view';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [
   {
@@ -417,3 +417,12 @@ export const dataViewComplexMock = buildDataViewMock({
   fields,
   timeFieldName: 'data',
 });
+
+export const dataViewAdHoc = {
+  ...buildDataViewMock({
+    name: 'data-view-ad-hoc',
+    fields,
+    timeFieldName: 'time',
+  }),
+  isPersisted: () => false,
+} as DataView;

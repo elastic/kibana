@@ -7,43 +7,29 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import {
-  RuleTagsAggregationResult,
-  RuleTagsAggregationFormattedResult,
-  RuleTagsAggregationOptions,
-  getRuleTagsAggregation,
-  formatRuleTagsAggregationResult,
-} from '../../common';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
+import {
+  DEFAULT_TAGS_PER_PAGE,
+  GetTagsParams,
+  GetTagsResult,
+} from '../rules_client/methods/get_tags';
 
 const querySchema = schema.object({
-  filter: schema.maybe(schema.string()),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+  per_page: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
   search: schema.maybe(schema.string()),
-  after: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.nullable(schema.oneOf([schema.string(), schema.number()]))
-    )
-  ),
-  max_tags: schema.maybe(schema.number()),
 });
 
-const rewriteQueryReq: RewriteRequestCase<RuleTagsAggregationOptions> = ({
-  max_tags: maxTags,
-  ...rest
-}) => ({
+const rewriteQueryReq: RewriteRequestCase<GetTagsParams> = ({ per_page: perPage, ...rest }) => ({
   ...rest,
-  ...(maxTags ? { maxTags } : {}),
+  perPage,
 });
 
-const rewriteBodyRes: RewriteResponseCase<RuleTagsAggregationFormattedResult> = ({
-  ruleTags,
-  ...rest
-}) => ({
+const rewriteBodyRes: RewriteResponseCase<GetTagsResult> = ({ perPage, ...rest }) => ({
   ...rest,
-  rule_tags: ruleTags,
+  per_page: perPage,
 });
 
 export const getRuleTagsRoute = (
@@ -62,20 +48,10 @@ export const getRuleTagsRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const options = rewriteQueryReq(req.query);
 
-        const aggregateResult = await rulesClient.aggregate<RuleTagsAggregationResult>({
-          options: {
-            ...options,
-            defaultSearchOperator: 'AND',
-            searchFields: ['tags'],
-          },
-          aggs: getRuleTagsAggregation({
-            maxTags: options.maxTags,
-            after: options.after,
-          }),
-        });
+        const tagsResult = await rulesClient.getTags(options);
 
         return res.ok({
-          body: rewriteBodyRes(formatRuleTagsAggregationResult(aggregateResult)),
+          body: rewriteBodyRes(tagsResult),
         });
       })
     )

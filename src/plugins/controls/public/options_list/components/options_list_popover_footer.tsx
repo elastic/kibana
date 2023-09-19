@@ -7,19 +7,21 @@
  */
 
 import React from 'react';
+
 import {
-  useEuiBackgroundColor,
-  useEuiPaddingSize,
-  EuiPopoverFooter,
-  EuiButtonGroup,
+  EuiIconTip,
+  EuiFlexItem,
   EuiProgress,
+  EuiFlexGroup,
+  EuiButtonGroup,
+  EuiPopoverFooter,
+  useEuiPaddingSize,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 const aggregationToggleButtons = [
   {
@@ -33,16 +35,12 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setExclude },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const exclude = select((state) => state.explicitInput.exclude);
+  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
 
   return (
     <>
@@ -54,25 +52,46 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
       >
         {isLoading && (
           <div style={{ position: 'absolute', width: '100%' }}>
-            <EuiProgress size="xs" color="accent" />
+            <EuiProgress
+              data-test-subj="optionsList-control-popover-loading"
+              size="xs"
+              color="accent"
+            />
           </div>
         )}
-        <div
+
+        <EuiFlexGroup
+          gutterSize="xs"
+          responsive={false}
+          alignItems="center"
           css={css`
             padding: ${useEuiPaddingSize('s')};
           `}
+          justifyContent={'spaceBetween'}
         >
-          <EuiButtonGroup
-            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-            options={aggregationToggleButtons}
-            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-            onChange={(optionId) =>
-              dispatch(setExclude(optionId === 'optionsList__excludeResults'))
-            }
-            buttonSize="compressed"
-            data-test-subj="optionsList__includeExcludeButtonGroup"
-          />
-        </div>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+              options={aggregationToggleButtons}
+              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+              onChange={(optionId) =>
+                optionsList.dispatch.setExclude(optionId === 'optionsList__excludeResults')
+              }
+              buttonSize="compressed"
+              data-test-subj="optionsList__includeExcludeButtonGroup"
+            />
+          </EuiFlexItem>
+          {!allowExpensiveQueries && (
+            <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
+              <EuiIconTip
+                type="warning"
+                color="warning"
+                content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
+                aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
   );

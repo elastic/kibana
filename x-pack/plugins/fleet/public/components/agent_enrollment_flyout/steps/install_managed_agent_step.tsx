@@ -16,14 +16,16 @@ import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/re
 import { InstallSection } from '../../enrollment_instructions/install_section';
 import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 
-import type { K8sMode } from '../types';
+import type { K8sMode, CloudSecurityIntegration } from '../types';
 
 export const InstallManagedAgentStep = ({
   installCommand,
   selectedApiKeyId,
   apiKeyData,
   isK8s,
+  cloudSecurityIntegration,
   enrollToken,
+  fleetServerHost,
   isComplete,
   fullCopyButton,
   onCopy,
@@ -31,7 +33,9 @@ export const InstallManagedAgentStep = ({
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   isK8s?: K8sMode;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   enrollToken?: string;
+  fleetServerHost?: string;
   installCommand: CommandsByPlatform;
   isComplete?: boolean;
   fullCopyButton?: boolean;
@@ -44,14 +48,19 @@ export const InstallManagedAgentStep = ({
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
-    children: selectedApiKeyId && apiKeyData && (
-      <InstallSection
-        installCommand={installCommand}
-        isK8s={isK8s}
-        enrollToken={enrollToken}
-        onCopy={onCopy}
-        fullCopyButton={fullCopyButton}
-      />
-    ),
+    children:
+      selectedApiKeyId && apiKeyData ? (
+        <InstallSection
+          installCommand={installCommand}
+          isK8s={isK8s}
+          cloudSecurityIntegration={cloudSecurityIntegration}
+          enrollToken={enrollToken}
+          onCopy={onCopy}
+          fullCopyButton={fullCopyButton}
+          fleetServerHost={fleetServerHost}
+        />
+      ) : (
+        <React.Fragment />
+      ),
   };
 };

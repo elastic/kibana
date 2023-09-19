@@ -25,14 +25,23 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
   loading,
   refreshJob,
 }) => {
-  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const {
+    enableDatafeed,
+    disableDatafeed,
+    isLoading: isLoadingEnableDataFeed,
+  } = useEnableDataFeed();
 
   const handleJobStateChange = useCallback(
     async (_, latestTimestampMs: number, enable: boolean) => {
-      await enableDatafeed(job, latestTimestampMs, enable);
+      if (enable) {
+        await enableDatafeed(job, latestTimestampMs);
+      } else {
+        await disableDatafeed(job);
+      }
+
       refreshJob(job);
     },
-    [enableDatafeed, job, refreshJob]
+    [enableDatafeed, disableDatafeed, job, refreshJob]
   );
 
   const switchComponent = useMemo(

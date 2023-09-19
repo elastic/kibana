@@ -13,7 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "cancelAlertsOnRuleTimeout": true,
-        "enableFrameworkAlerts": false,
+        "enableFrameworkAlerts": true,
         "healthCheck": Object {
           "interval": "60m",
         },
@@ -23,6 +23,7 @@ describe('config validation', () => {
         },
         "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
+          "maxScheduledPerMinute": 10000,
           "minimumScheduleInterval": Object {
             "enforce": false,
             "value": "1m",

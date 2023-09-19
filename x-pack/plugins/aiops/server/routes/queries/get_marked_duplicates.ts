@@ -22,7 +22,7 @@ export function getMarkedDuplicates(
       group: cpg.group.map((g) => {
         return {
           ...g,
-          duplicate: fieldValuePairCounts[g.fieldName][g.fieldValue] > 1,
+          duplicate: fieldValuePairCounts[g.fieldName][g.fieldValue],
         };
       }),
     };

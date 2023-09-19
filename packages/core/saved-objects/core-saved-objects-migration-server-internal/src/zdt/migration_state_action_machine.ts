@@ -12,11 +12,17 @@ import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { logStateTransition, logActionResponse } from '../common/utils';
 import { type Next, stateActionMachine } from '../state_action_machine';
 import { cleanup } from '../migrations_state_machine_cleanup';
-import type { State } from './state';
+import type {
+  State,
+  OutdatedDocumentsSearchTransformState,
+  OutdatedDocumentsSearchBulkIndexState,
+} from './state';
 import type { MigratorContext } from './context';
+import { redactBulkOperationBatches } from '../common/redact_state';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -60,23 +66,12 @@ export async function migrationStateActionMachine({
         // the _id's of documents
         const redactedNewState = {
           ...newState,
-          /* TODO: commented until we have model stages that process outdated docs. (attrs not on model atm)
-          ...{
-            outdatedDocuments: (
-              (newState as ReindexSourceToTempTransform).outdatedDocuments ?? []
-            ).map(
-              (doc) =>
-                ({
-                  _id: doc._id,
-                } as SavedObjectsRawDoc)
-            ),
-          },
-          ...{
-            transformedDocBatches: (
-              (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
-            ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
-          },
-          */
+          outdatedDocuments: (
+            (newState as OutdatedDocumentsSearchTransformState).outdatedDocuments ?? []
+          ).map((doc) => ({ _id: doc._id } as SavedObjectsRawDoc)),
+          bulkOperationBatches: redactBulkOperationBatches(
+            (newState as OutdatedDocumentsSearchBulkIndexState).bulkOperationBatches ?? [[]]
+          ),
         };
 
         const now = Date.now();

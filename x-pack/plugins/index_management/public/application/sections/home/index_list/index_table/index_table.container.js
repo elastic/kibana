@@ -82,6 +82,15 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    openDetailPanel: ownProps.openDetailPanel ?? dispatchProps.openDetailPanel,
+  };
+};
+
 export const IndexTable = withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(PresentationComponent)
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)(PresentationComponent)
 );

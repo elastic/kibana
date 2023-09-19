@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewOutputSchema, UpdateOutputSchema } from '../models';
+import { OutputSchema, UpdateOutputSchema } from '../models';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
@@ -24,7 +24,7 @@ export const DeleteOutputRequestSchema = {
 export const GetOutputsRequestSchema = {};
 
 export const PostOutputRequestSchema = {
-  body: NewOutputSchema,
+  body: OutputSchema,
 };
 
 export const PutOutputRequestSchema = {

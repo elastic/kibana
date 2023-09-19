@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_DEFAULT_FREQUENCY,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+} from '@kbn/security-solution-plugin/common/constants';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
@@ -17,7 +21,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -26,14 +29,23 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleMlRule,
   getSimpleMlRuleOutput,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
   waitForAlertToComplete,
   waitForSignalsToBePresent,
   getThresholdRuleForSignalTesting,
+  waitForRulePartialFailure,
+  createRule,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import {
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getSomeActionsWithFrequencies,
+} from '../../utils/get_rule_actions';
+import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -41,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -57,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -72,6 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(savedQueryRule)
             .expect(200);
 
@@ -84,6 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleRule())
             .expect(200);
 
@@ -111,14 +126,18 @@ export default ({ getService }: FtrProviderContext) => {
          this pops up again elsewhere.
         */
         it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-          const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id);
+          await waitForRuleSuccess({ supertest, log, id: body.id });
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
@@ -126,38 +145,43 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
-            body.id,
-            RuleExecutionStatus['partial failure']
-          );
+            id: body.id,
+          });
 
           const { body: rule } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .query({ id: body.id })
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
           expect(rule?.execution_summary?.last_execution.message).to.eql(
-            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
-          const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, RuleExecutionStatus.succeeded);
+          await waitForRuleSuccess({ supertest, log, id: body.id });
         });
 
         it('should create a single rule without an input index', async () => {
@@ -192,6 +216,7 @@ export default ({ getService }: FtrProviderContext) => {
             references: [],
             related_integrations: [],
             required_fields: [],
+            revision: 0,
             setup: '',
             severity: 'high',
             severity_mapping: [],
@@ -200,7 +225,6 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'query',
             threat: [],
-            throttle: 'no_actions',
             exceptions_list: [],
             version: 1,
           };
@@ -208,6 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(200);
 
@@ -219,6 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleRuleWithoutRuleId())
             .expect(200);
 
@@ -234,6 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(legacyMlRule)
             .expect(200);
 
@@ -245,6 +272,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleMlRule())
             .expect(200);
 
@@ -256,12 +284,14 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleRule())
             .expect(200);
 
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleRule())
             .expect(409);
 
@@ -302,6 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(500);
 
@@ -334,12 +365,14 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: ruleWithException } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(200);
 
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ ...rule, rule_id: 'rule-2' })
             .expect(409);
 
@@ -372,12 +405,14 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(200);
 
           await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ ...rule, rule_id: 'rule-2' })
             .expect(200);
         });
@@ -399,6 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
             .post(DETECTION_ENGINE_RULES_URL)
             .auth(role, 'changeme')
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(getSimpleRule())
             .expect(403);
         });
@@ -410,6 +446,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send(rule)
             .expect(400);
 
@@ -425,6 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               ...rule,
               threshold: {
@@ -445,6 +483,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               ...rule,
               threshold: {
@@ -466,6 +505,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               ...rule,
               threshold: {
@@ -498,7 +538,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override'
@@ -513,21 +553,22 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(200);
         const bodyId = body.id;
 
         await waitForAlertToComplete(supertest, log, bodyId);
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          bodyId,
-          RuleExecutionStatus['partial failure']
-        );
+          id: bodyId,
+        });
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .query({ id: bodyId })
           .expect(200);
 
@@ -546,26 +587,161 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(simpleRule)
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          bodyId,
-          RuleExecutionStatus['partial failure']
-        );
+          id: bodyId,
+        });
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .query({ id: bodyId })
           .expect(200);
 
         // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
         expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
+      });
+    });
+
+    describe('per-action frequencies', () => {
+      const createSingleRule = async (rule: RuleCreateProps) => {
+        const createdRule = await createRule(supertest, log, rule);
+        createdRule.actions = removeUUIDFromActions(createdRule.actions);
+        return createdRule;
+      };
+
+      describe('actions without frequencies', () => {
+        [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+          (throttle) => {
+            it(`it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+              const simpleRule = getSimpleRule();
+              simpleRule.throttle = throttle;
+              simpleRule.actions = actionsWithoutFrequencies;
+
+              const createdRule = await createSingleRule(simpleRule);
+
+              const expectedRule = getSimpleRuleOutput();
+              expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+                ...action,
+                frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+              }));
+
+              const rule = removeServerGeneratedProperties(createdRule);
+              expect(rule).to.eql(expectedRule);
+            });
+          }
+        );
+
+        // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+        ['300s', '5m', '3h', '4d'].forEach((throttle) => {
+          it(`it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
+            const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
+
+            const simpleRule = getSimpleRule();
+            simpleRule.throttle = throttle;
+            simpleRule.actions = actionsWithoutFrequencies;
+
+            const createdRule = await createSingleRule(simpleRule);
+
+            const expectedRule = getSimpleRuleOutput();
+            expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
+              ...action,
+              frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
+            }));
+
+            const rule = removeServerGeneratedProperties(createdRule);
+            expect(rule).to.eql(expectedRule);
+          });
+        });
+      });
+
+      describe('actions with frequencies', () => {
+        [
+          undefined,
+          NOTIFICATION_THROTTLE_NO_ACTIONS,
+          NOTIFICATION_THROTTLE_RULE,
+          '321s',
+          '6m',
+          '10h',
+          '2d',
+        ].forEach((throttle) => {
+          it(`it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
+            const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
+
+            const simpleRule = getSimpleRule();
+            simpleRule.throttle = throttle;
+            simpleRule.actions = actionsWithFrequencies;
+
+            const createdRule = await createSingleRule(simpleRule);
+
+            const expectedRule = getSimpleRuleOutput();
+            expectedRule.actions = actionsWithFrequencies;
+
+            const rule = removeServerGeneratedProperties(createdRule);
+            expect(rule).to.eql(expectedRule);
+          });
+        });
+      });
+
+      describe('some actions with frequencies', () => {
+        [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
+          (throttle) => {
+            it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+              const simpleRule = getSimpleRule();
+              simpleRule.throttle = throttle;
+              simpleRule.actions = someActionsWithFrequencies;
+
+              const createdRule = await createSingleRule(simpleRule);
+
+              const expectedRule = getSimpleRuleOutput();
+              expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+                ...action,
+                frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+              }));
+
+              const rule = removeServerGeneratedProperties(createdRule);
+              expect(rule).to.eql(expectedRule);
+            });
+          }
+        );
+
+        // Action throttle cannot be shorter than the schedule interval which is by default is 5m
+        ['430s', '7m', '1h', '8d'].forEach((throttle) => {
+          it(`it correctly transforms 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
+            const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
+
+            const simpleRule = getSimpleRule();
+            simpleRule.throttle = throttle;
+            simpleRule.actions = someActionsWithFrequencies;
+
+            const createdRule = await createSingleRule(simpleRule);
+
+            const expectedRule = getSimpleRuleOutput();
+            expectedRule.actions = someActionsWithFrequencies.map((action) => ({
+              ...action,
+              frequency: action.frequency ?? {
+                summary: true,
+                throttle,
+                notifyWhen: 'onThrottleInterval',
+              },
+            }));
+
+            const rule = removeServerGeneratedProperties(createdRule);
+            expect(rule).to.eql(expectedRule);
+          });
+        });
       });
     });
   });

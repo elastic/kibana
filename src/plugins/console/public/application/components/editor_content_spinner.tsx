@@ -7,12 +7,12 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiLoadingContent, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiSkeletonText, EuiPageSection } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {
   return (
-    <EuiPageContent className="conApp__editor__spinner">
-      <EuiLoadingContent lines={10} />
-    </EuiPageContent>
+    <EuiPageSection className="conApp__editor__spinner">
+      <EuiSkeletonText lines={10} />
+    </EuiPageSection>
   );
 };

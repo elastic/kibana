@@ -9,15 +9,15 @@ import { useContext } from 'react';
 import { TimeRangeMetadataContext } from './time_range_metadata_context';
 
 export function useTimeRangeMetadata({
-  rangeFrom,
-  rangeTo,
+  start,
+  end,
   kuery,
 }: {
   // require parameters to enforce type-safety. Only components
   // with access to rangeFrom and rangeTo should be able to request
   // time range metadata.
-  rangeFrom: string;
-  rangeTo: string;
+  start: string;
+  end: string;
   kuery: string;
 }) {
   const context = useContext(TimeRangeMetadataContext);

@@ -8,7 +8,7 @@
 import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';

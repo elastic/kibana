@@ -7,7 +7,37 @@
 
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
+// ILM policy with minimal configuration
 export const getPolicyPayload = (name) => ({
+  name,
+  phases: {
+    hot: {
+      min_age: '1d',
+      actions: {
+        set_priority: {
+          priority: 100,
+        },
+      },
+    },
+    warm: {
+      min_age: '10d',
+      actions: {
+        set_priority: {
+          priority: 50,
+        },
+      },
+    },
+    delete: {
+      min_age: '30d',
+      actions: {
+        delete: {},
+      },
+    },
+  },
+});
+
+// ILM policy with full configuration; includes searchable_snapshot configuration, which requires a valid repository and SLM policy
+export const getPolicyPayloadWithSearchableSnapshots = (name) => ({
   name,
   phases: {
     hot: {

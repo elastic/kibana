@@ -21,11 +21,15 @@ import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  extractContainerType,
+  extractVisualizationType,
+  isOnAggBasedEditor,
+} from '@kbn/chart-expressions-common';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
-import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
+import { ChartTypes, type PartitionVisParams, type PartitionChartProps } from '../../common/types';
 
 export const strings = {
   getDisplayName: () =>
@@ -73,14 +77,14 @@ export const getColumnCellValueActions = async (
 
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
-) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
+) => ExpressionRenderDefinition<PartitionChartProps> = ({ getStartDeps }) => ({
   name: PARTITION_VIS_RENDERER_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode,
-    { visConfig, visData, visType, syncColors, canNavigateToLens },
+    { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
     handlers
   ) => {
     const { core, plugins } = getStartDeps();
@@ -110,6 +114,8 @@ export const getPartitionVisRenderer: (
       plugins.charts.palettes.getPalettes(),
     ]);
 
+    const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -127,6 +133,8 @@ export const getPartitionVisRenderer: (
               services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}
               columnCellValueActions={columnCellValueActions}
+              overrides={overrides}
+              hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
             />
           </div>
         </KibanaThemeProvider>

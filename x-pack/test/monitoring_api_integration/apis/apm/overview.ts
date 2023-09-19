@@ -20,15 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
     getService,
   });
 
-  const timeRange = {
-    min: '2022-12-20T16:28:00.000Z',
-    max: '2022-12-20T16:32:00.000Z',
-  };
+  const timeRange = { min: '2023-03-22T15:57:20.000Z', max: '2023-03-22T16:01:20.000Z' };
 
   testRunner(() => {
     it('should summarize apm cluster with metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/apm')
+        .post('/api/monitoring/v1/clusters/2aloVhnwR7K6CckdBgZ44w/apm')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);

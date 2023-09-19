@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { OsqueryActionItem } from './osquery_action_item';
+import { useMemo } from 'react';
+import { getOsqueryActionItem } from './osquery_action_item';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface IProps {
@@ -14,10 +14,7 @@ interface IProps {
 }
 
 export const useOsqueryContextActionItem = ({ handleClick }: IProps) => {
-  const osqueryActionItem = useMemo(
-    () => <OsqueryActionItem handleClick={handleClick} />,
-    [handleClick]
-  );
+  const osqueryActionItem = useMemo(() => getOsqueryActionItem({ handleClick }), [handleClick]);
   const permissions = useKibana().services.application.capabilities.osquery;
 
   return {

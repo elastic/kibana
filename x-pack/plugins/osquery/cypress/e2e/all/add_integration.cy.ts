@@ -28,21 +28,19 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-
-import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
-describe('ALL - Add Integration', () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
+      savedQueryId = data.saved_object_id;
     });
   });
 
   beforeEach(() => {
-    login();
+    cy.login('elastic');
   });
 
   after(() => {
@@ -63,7 +61,7 @@ describe('ALL - Add Integration', () => {
     cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
 
-  describe('Add and upgrade integration', () => {
+  describe('Add and upgrade integration', { tags: ['@ess'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -78,10 +76,9 @@ describe('ALL - Add Integration', () => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('should add the old integration and be able to upgrade it', () => {
+    it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
-      cy.contains(integrationName);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
@@ -114,6 +111,7 @@ describe('ALL - Add Integration', () => {
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
       cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
       cy.getBySel('agentPolicySelect').within(() => {
@@ -183,15 +181,11 @@ describe('ALL - Add Integration', () => {
       cy.get(`[title="${policyName}"]`).click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)

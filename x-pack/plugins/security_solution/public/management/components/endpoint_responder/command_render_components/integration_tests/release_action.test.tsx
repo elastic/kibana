@@ -50,6 +50,7 @@ describe('When using the release action from response actions console', () => {
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges: {
                     ...getEndpointAuthzInitialState(),
+                    canUnIsolateHost: true,
                     loading: false,
                   },
                 }),

@@ -11,6 +11,7 @@ Array [
     "sort": "0test name",
     "tags": Array [
       Object {
+        "data-test-subj": "default-tag",
         "key": "default",
         "name": "Default",
       },

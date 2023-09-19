@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -146,7 +145,7 @@ const getColumns = (
                   aria-label={staleMessage}
                   content={staleMessage}
                   size="l"
-                  type="alert"
+                  type="warning"
                   color="warning"
                 />
               </>
@@ -318,7 +317,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
         </EuiPanel>
         <EuiSpacer size="m" />
         {setupModeCallOut}
-        <EuiPageContent>
+        <EuiPanel>
           <EuiMonitoringTable
             className="kibanaInstancesTable"
             rows={dataFlattened}
@@ -343,7 +342,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
               defaultFields: ['name'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

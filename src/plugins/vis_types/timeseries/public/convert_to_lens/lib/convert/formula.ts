@@ -141,6 +141,11 @@ export const convertMathToFormulaColumn = (
     return null;
   }
 
+  // now replace the _interval with the new time_range() formula
+  if (script.includes('params._interval')) {
+    script = script.replaceAll('params._interval', 'time_range()');
+  }
+
   const scripthasNoStaticNumber = isNaN(Number(script));
   if (script.includes('params') || !scripthasNoStaticNumber) {
     return null;

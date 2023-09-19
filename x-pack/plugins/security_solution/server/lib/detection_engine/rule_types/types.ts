@@ -31,18 +31,19 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
 
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import type {
   BaseHit,
   RuleAlertAction,
@@ -55,8 +56,8 @@ import type {
   BaseFieldsLatest,
   DetectionAlert,
   WrappedFieldsLatest,
-} from '../../../../common/detection_engine/schemas/alerts';
-import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/alerts';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 
@@ -99,6 +100,8 @@ export interface RunOpts<TParams extends RuleParams> {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
+  publicBaseUrl: string | undefined;
+  inputIndexFields: DataViewFieldBase[];
 }
 
 export type SecurityAlertType<
@@ -128,21 +131,19 @@ export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
+  publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
-  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
-) => <
-  TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {}
->(
-  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => <TParams extends RuleParams, TState extends RuleTypeState>(
+  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -150,11 +151,15 @@ export interface CreateRuleOptions {
   ml?: SetupPlugins['ml'];
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
+  licensing: LicensingPluginSetup;
 }
 
+export interface ScheduleNotificationActions {
+  signals: unknown[];
+  responseActions: RuleResponseAction[];
+}
 export interface CreateQueryRuleAdditionalOptions {
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
-  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
 }
 
 export interface CreateQueryRuleOptions
@@ -182,6 +187,7 @@ export interface RuleRangeTuple {
  */
 export interface SignalSource {
   [key: string]: SearchTypes;
+
   '@timestamp'?: string;
   signal?: {
     /**
@@ -294,6 +300,7 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Signal;
+
   [key: string]: SearchTypes;
 }
 
@@ -340,6 +347,7 @@ export type RuleServices = RuleExecutorServices<
   AlertInstanceContext,
   'default'
 >;
+
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
     to: moment.Moment;
@@ -363,6 +371,7 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

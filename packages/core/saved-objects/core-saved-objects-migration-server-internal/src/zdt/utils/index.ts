@@ -12,3 +12,15 @@ export { checkVersionCompatibility } from './check_version_compatibility';
 export { buildIndexMappings, buildIndexMeta } from './build_index_mappings';
 export { getAliasActions } from './get_alias_actions';
 export { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';
+export { getOutdatedDocumentsQuery } from './outdated_documents_query';
+export { createDocumentTransformFn } from './transform_raw_docs';
+export {
+  setMetaMappingMigrationComplete,
+  setMetaDocMigrationStarted,
+  setMetaDocMigrationComplete,
+  removePropertiesFromV2,
+} from './update_index_meta';
+export {
+  checkIndexCurrentAlgorithm,
+  type CheckCurrentAlgorithmResult,
+} from './check_index_algorithm';

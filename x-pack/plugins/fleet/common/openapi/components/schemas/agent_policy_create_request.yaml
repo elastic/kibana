@@ -44,6 +44,8 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    type: boolean
 required:
   - name
   - namespace

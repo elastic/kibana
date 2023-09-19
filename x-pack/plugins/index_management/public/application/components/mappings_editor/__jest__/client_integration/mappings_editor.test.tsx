@@ -175,10 +175,10 @@ describe('Mappings editor: core', () => {
 
       // Update the dynamic templates editor value
       const updatedValueTemplates = [{ after: 'bar' }];
-      await act(async () => {
-        updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
-      });
-      component.update();
+      // await act(async () => {
+      updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
+      // });
+      // component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);

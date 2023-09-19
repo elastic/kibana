@@ -2,12 +2,15 @@
 [[drilldowns]]
 == Make dashboards interactive
 
-:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, range slider, options list, author, drilldowns
-:description: Add interactive capabilities to your dashboard, such as controls that allow \
-you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
-dashboards and external websites.
+:frontmatter-description: Add interactive filter and navigation capabilities to your dashboard.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [analyze, visualize]
 
 Add interactive capabilities to your dashboard, such as interactive filter controls, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
+
+// Video is slightly outdated. Left in at request of dev team.
+// See https://github.com/elastic/kibana/pull/161090#issuecomment-1620410065
 
 ++++
 <script type="text/javascript" async 
@@ -656,7 +659,7 @@ Note:
 
 |
 | event.values
-| An array of all cell values for the raw on which the action will execute.
+| An array of all cell values for the row on which the action will execute. To access a column value, use `{{event.values.[x]}}`, where `x` represents the column number.
 
 |
 | event.keys

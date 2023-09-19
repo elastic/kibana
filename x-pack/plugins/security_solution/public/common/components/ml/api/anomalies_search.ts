@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { NotableAnomaliesJobId } from '../../../../overview/components/entity_analytics/anomalies/config';
 import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
@@ -17,21 +16,22 @@ export interface AnomaliesSearchResponse {
   aggregations?: {
     number_of_anomalies: {
       buckets: Array<{
-        key: NotableAnomaliesJobId;
+        key: string;
         doc_count: number;
       }>;
     };
   };
 }
 
-export const notableAnomaliesSearch = async (
+export const anomaliesSearch = async (
   body: Body,
   signal: AbortSignal
 ): Promise<AnomaliesSearchResponse> => {
   return KibanaServices.get().http.fetch<AnomaliesSearchResponse>(
-    '/api/ml/results/anomaly_search',
+    '/internal/ml/results/anomaly_search',
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify(body),
       asSystemRequest: true,
       signal,

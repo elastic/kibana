@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { Status } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components/src/status/status';
 import { allCaseStatus, statuses } from '../status';
 import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
 import { StatusAll } from '../../../common/ui/types';

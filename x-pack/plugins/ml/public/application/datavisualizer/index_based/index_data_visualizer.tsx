@@ -15,7 +15,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useIsServerless } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -23,28 +23,21 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 
-interface RecognizerModule {
-  id: string;
-  title: string;
-  query: Record<string, object>;
-  description: string;
-  logo: {
-    icon: string;
-  };
-}
-
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {
-      http,
       docLinks,
       dataVisualizer,
       data: {
         dataViews: { get: getDataView },
       },
+      mlServices: {
+        mlApiServices: { recognizeIndex },
+      },
     },
   } = useMlKibana();
+  const isServerless = useIsServerless();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
@@ -140,18 +133,14 @@ export const IndexDataVisualizerPage: FC = () => {
   const getAsyncRecognizedModuleCards = async (params: GetAdditionalLinksParams) => {
     const { dataViewId, dataViewTitle } = params;
     try {
-      const modules = await http.fetch<RecognizerModule[]>(
-        `/api/ml/modules/recognize/${dataViewTitle}`,
-        {
-          method: 'GET',
-        }
-      );
+      const modules = await recognizeIndex({ indexPatternTitle: dataViewTitle! });
+
       return modules?.map(
         (m): ResultLink => ({
           id: m.id,
           title: m.title,
           description: m.description,
-          icon: m.logo.icon,
+          icon: m.logo?.icon ?? '',
           type: 'index',
           getUrl: async () => {
             return await mlLocator.getUrl({
@@ -200,7 +189,10 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+          <IndexDataVisualizer
+            getAdditionalLinks={getAdditionalLinks}
+            isServerless={isServerless}
+          />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

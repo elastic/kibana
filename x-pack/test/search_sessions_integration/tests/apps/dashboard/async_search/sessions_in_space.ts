@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const security = getService('security');
   const PageObjects = getPageObjects([
@@ -26,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
+  const dashboardExpect = getService('dashboardExpect');
 
   describe('dashboard in space', () => {
     afterEach(async () => await clean());
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Check that session is restored
         await searchSessions.expectState('restored');
-        await testSubjects.missingOrFail('embeddableError');
+        await dashboardExpect.noErrorEmbeddablesPresent();
         expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
       });
     });

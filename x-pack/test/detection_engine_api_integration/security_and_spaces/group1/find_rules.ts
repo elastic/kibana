@@ -7,13 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
@@ -29,11 +30,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_rules', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
       await deleteAllRules(supertest, log);
     });
 
@@ -41,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
@@ -59,6 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
@@ -76,6 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(getComplexRule())
         .expect(200);
 
@@ -83,6 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
@@ -121,13 +121,19 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
-        throttle: 'rule',
+        actions: [
+          {
+            ...action,
+            uuid: body.data[0].actions[0].uuid,
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+          },
+        ],
       };
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
@@ -166,13 +172,19 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
-        throttle: '1h', // <-- throttle makes this a scheduled action
+        actions: [
+          {
+            ...action,
+            uuid: body.data[0].actions[0].uuid,
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          },
+        ],
       };
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
@@ -202,8 +214,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // attach the legacy notification
         await supertest
-          .post(`/internal/api/detection/legacy/notifications?alert_id=${createRuleBody.id}`)
+          .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${createRuleBody.id}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({
             name: 'Legacy notification with one action',
             interval: '1h',
@@ -225,6 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
@@ -239,9 +253,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               action_type_id: hookAction.actionTypeId,
+              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ],
-          throttle: '1h',
         };
 
         body.data = [removeServerGeneratedProperties(body.data[0])];

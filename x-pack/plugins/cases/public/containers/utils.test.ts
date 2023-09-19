@@ -13,7 +13,7 @@ import {
   constructReportersFilter,
 } from './utils';
 
-import type { Case } from './types';
+import type { CaseUI } from './types';
 
 const caseBeforeUpdate = {
   comments: [
@@ -24,9 +24,9 @@ const caseBeforeUpdate = {
   settings: {
     syncAlerts: true,
   },
-} as Case;
+} as CaseUI;
 
-const caseAfterUpdate = { title: 'My case' } as Case;
+const caseAfterUpdate = { title: 'My case' } as CaseUI;
 
 describe('utils', () => {
   describe('valueToUpdateIsSettings', () => {

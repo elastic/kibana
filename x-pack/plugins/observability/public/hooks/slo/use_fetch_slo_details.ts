@@ -11,11 +11,14 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDetailsResponse {
+  isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   slo: SLOWithSummaryResponse | undefined;
@@ -24,16 +27,28 @@ export interface UseFetchSloDetailsResponse {
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
+export function useFetchSloDetails({
+  sloId,
+  instanceId,
+  shouldRefetch,
+}: {
+  sloId?: string;
+  instanceId?: string;
+  shouldRefetch?: boolean;
+}): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchSloDetails', sloId],
+      queryKey: sloKeys.detail(sloId),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
-            query: {},
+            query: {
+              ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
+            },
             signal,
           });
 
@@ -42,14 +57,18 @@ export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
           // ignore error for retrieving slos
         }
       },
+      keepPreviousData: true,
       enabled: Boolean(sloId),
+      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
     }
   );
 
   return {
     slo: data,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading,
+    isInitialLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

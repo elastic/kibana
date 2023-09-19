@@ -1,0 +1,12 @@
+.serverlessSearchHeaderSection {
+  background-color: $euiColorPrimary;
+}
+
+.serverlessSearchHeaderSection > div {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+.serverlessSearchOverviewFooterSection {
+  background-color: transparentize($euiColorPrimary, .9);
+}

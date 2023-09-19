@@ -5,28 +5,13 @@
  * 2.0.
  */
 
+import { AgentPolicyInfo } from '../../../../../common/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
-import { AgentPoliciesList } from '.';
 
-const FLEET_URLS = {
-  AGENT_POLICIES: '/api/fleet/agent_policies',
-};
-
-export const fetchAgentPolicies = async (): Promise<AgentPoliciesList> => {
-  return await apiService.get(
-    FLEET_URLS.AGENT_POLICIES,
-    {
-      page: 1,
-      perPage: 10000,
-      sortField: 'name',
-      sortOrder: 'asc',
-      full: true,
-      kuery: 'ingest-agent-policies.is_managed : false',
-    },
-    null
-  );
+export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
+  return await apiService.get(SYNTHETICS_API_URLS.AGENT_POLICIES);
 };
 
 export const addSyntheticsPrivateLocations = async (

@@ -128,7 +128,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
             <EuiCallOut
               size="m"
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="snUpdateInstallationCallout"
               title={warningMessage}
             />

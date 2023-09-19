@@ -6,8 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { Router, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { HomeRoute } from './home';
@@ -30,7 +30,7 @@ export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
       path="/"
       children={(route: RouteComponentProps) => {
         // If it looks like the hash is a route then we will do a redirect
-        if (isHashPath(route.location.hash)) {
+        if (isHashPath(route.location.hash) && !route.location.pathname) {
           const [hashPath, hashQuery] = route.location.hash.split('?');
           let search = route.location.search || '?';
 
@@ -38,15 +38,23 @@ export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
             search = mergeQueryStrings(search, `?${hashQuery}`);
           }
 
-          return <Redirect to={`${hashPath.substr(1)}${search.length > 1 ? `?${search}` : ''}`} />;
+          return (
+            <Redirect
+              push
+              to={{
+                pathname: `${hashPath.substring(1)}`,
+                search,
+              }}
+            />
+          );
         }
 
         return (
-          <Switch>
+          <Routes>
             {ExportWorkpadRoute()}
             {WorkpadRoute()}
             {HomeRoute()}
-          </Switch>
+          </Routes>
         );
       }}
     />

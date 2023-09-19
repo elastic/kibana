@@ -16,19 +16,19 @@ import type {
 import type {
   RuleExecutionMetrics,
   RuleExecutionSettings,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { truncateValue } from '../utils/normalization';
-import type { ExtMeta } from '../utils/console_logging';
+import { truncateValue } from '../../utils/normalization';
+import type { ExtMeta } from '../../utils/console_logging';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
@@ -38,7 +38,7 @@ import type {
   StatusChangeArgs,
 } from './client_interface';
 
-export const createClientForExecutors = (
+export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
   eventLog: IEventLogWriter,
   logger: Logger,
@@ -50,7 +50,7 @@ export const createClientForExecutors = (
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
 
-  const { executionId, ruleId, ruleUuid, ruleName, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
   const client: IRuleExecutionLogForExecutors = {
     get context() {
@@ -140,6 +140,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
@@ -202,6 +203,7 @@ export const createClientForExecutors = (
         ruleId,
         ruleUuid,
         ruleName,
+        ruleRevision,
         ruleType,
         spaceId,
         executionId,
@@ -213,6 +215,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,

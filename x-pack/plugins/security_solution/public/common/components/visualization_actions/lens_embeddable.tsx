@@ -28,17 +28,25 @@ import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
+const HOVER_ACTIONS_PADDING = 24;
+
 const LensComponentWrapper = styled.div<{
-  height?: string;
-  width?: string;
+  $height?: number;
+  width?: string | number;
   $addHoverActionsPadding?: boolean;
 }>`
-  height: ${({ height }) => height ?? 'auto'};
+  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-  > div {
-    background-color: transparent;
-    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
+
+  ${({ $addHoverActionsPadding }) =>
+    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+
+  .embPanel__header {
+    z-index: 2;
+    position: absolute;
+    right: 0;
   }
+
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }
@@ -103,6 +111,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  // Avoid hover actions button overlaps with its chart
   const addHoverActionsPadding =
     attributes?.visualizationType !== 'lnsLegacyMetric' &&
     attributes?.visualizationType !== 'lnsPie';
@@ -178,9 +187,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
         return;
       }
+      // Update timerange when clicking on a dot in an area chart
       const [{ query }] = await createFiltersFromValueClickAction({
         data: e.data,
         negate: e.negate,
@@ -252,7 +262,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     <>
       {attributes && searchSessionId && (
         <LensComponentWrapper
-          height={wrapperHeight}
+          $height={wrapperHeight}
           width={wrapperWidth}
           $addHoverActionsPadding={addHoverActionsPadding}
         >
@@ -269,6 +279,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            syncTooltips={false}
+            syncCursor={false}
           />
         </LensComponentWrapper>
       )}
@@ -287,6 +299,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

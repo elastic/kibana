@@ -17,7 +17,11 @@ import {
   useGetFleetServerHosts,
 } from '../../../../hooks';
 import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
-import { getAllowedOutputTypeForPolicy } from '../../../../../../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  policyHasFleetServer,
+  policyHasSyntheticsIntegration,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
@@ -59,7 +63,11 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const isLicenceAllowingPolicyPerOutput = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
+  // Allow changing output when agent policy has fleet server or synthetics integrations
+  const isPolicyPerOutputAllowed =
+    licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) ||
+    policyHasFleetServer(agentPolicy as AgentPolicy) ||
+    policyHasSyntheticsIntegration(agentPolicy as AgentPolicy);
   const allowedOutputTypes = useMemo(
     () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
@@ -82,7 +90,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     const defaultOutputDisabledMessage = defaultOutputDisabled ? (
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
-        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
         values={{
           outputType: defaultOutput.type,
         }}
@@ -101,18 +109,18 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
             isOutputTypeUnsupported ? (
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 values={{
                   outputType: item.type,
                 }}
               />
             ) : undefined
           ),
-          disabled: !isLicenceAllowingPolicyPerOutput || isOutputTypeUnsupported,
+          disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported,
         };
       }),
     ];
-  }, [outputsRequest, isLicenceAllowingPolicyPerOutput, allowedOutputTypes]);
+  }, [outputsRequest, isPolicyPerOutputAllowed, allowedOutputTypes]);
 
   const monitoringOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
@@ -128,11 +136,11 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
         return {
           value: item.id,
           inputDisplay: item.name,
-          disabled: !isLicenceAllowingPolicyPerOutput,
+          disabled: !isPolicyPerOutputAllowed,
         };
       }),
     ];
-  }, [outputsRequest, isLicenceAllowingPolicyPerOutput]);
+  }, [outputsRequest, isPolicyPerOutputAllowed]);
 
   return useMemo(
     () => ({

@@ -29,13 +29,14 @@ export interface SyntheticsUrlParams {
   query?: string;
   tags?: string[];
   locations?: string[];
-  monitorTypes?: string[];
+  monitorTypes?: string[] | string;
   status?: string[];
   locationId?: string;
-  projects?: string[];
-  schedules?: string[];
+  projects?: string[] | string;
+  schedules?: string[] | string;
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
+  packagePolicyId?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -93,9 +94,11 @@ export const getSupportedUrlParams = (params: {
     schedules,
     groupBy,
     groupOrderBy,
+    packagePolicyId,
   } = filteredParams;
 
   return {
+    packagePolicyId: packagePolicyId || undefined,
     groupBy: groupBy as MonitorOverviewState['groupBy']['field'],
     groupOrderBy: groupOrderBy as MonitorOverviewState['groupBy']['order'],
     pagination,

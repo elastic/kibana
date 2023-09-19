@@ -44,6 +44,8 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       filters.actionTypes,
       filters.ruleStatuses,
       filters.ruleLastRunOutcomes,
+      filters.ruleParams,
+      filters.kueryNode,
       page,
       sort,
       {
@@ -59,8 +61,10 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         actionTypesFilter: filters.actionTypes,
         ruleExecutionStatusesFilter: filters.ruleExecutionStatuses,
         ruleLastRunOutcomesFilter: filters.ruleLastRunOutcomes,
+        ruleParamsFilter: filters.ruleParams,
         ruleStatusesFilter: filters.ruleStatuses,
         tagsFilter: filters.tags,
+        kueryNode: filters.kueryNode,
         sort,
       });
     },

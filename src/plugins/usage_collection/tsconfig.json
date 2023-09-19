@@ -7,7 +7,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
-    "common/*",
+    "common/**/*",
     "../../../typings/**/*"
   ],
   "kbn_references": [
@@ -15,6 +15,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/analytics",
     "@kbn/config-schema",
+    "@kbn/screenshot-mode-plugin",
     "@kbn/std",
     "@kbn/analytics-client",
     "@kbn/utility-types",

@@ -14,11 +14,23 @@ export const modelIdSchema = schema.object({
   modelId: schema.string(),
 });
 
+export const modelAndDeploymentIdSchema = schema.object({
+  /**
+   * Model ID
+   */
+  modelId: schema.string(),
+  /**
+   * Deployment ID
+   */
+  deploymentId: schema.string(),
+});
+
 export const threadingParamsSchema = schema.maybe(
   schema.object({
     number_of_allocations: schema.number(),
     threads_per_allocation: schema.number(),
     priority: schema.oneOf([schema.literal('low'), schema.literal('normal')]),
+    deployment_id: schema.maybe(schema.string()),
   })
 );
 
@@ -54,3 +66,24 @@ export const pipelineSimulateBody = schema.object({
   docs: schema.arrayOf(schema.any()),
 });
 export const pipelineDocs = schema.arrayOf(schema.string());
+
+export const stopDeploymentSchema = schema.object({
+  modelId: schema.string(),
+  /** force stop */
+  force: schema.maybe(schema.boolean()),
+});
+
+export const deleteTrainedModelQuerySchema = schema.object({
+  with_pipelines: schema.maybe(schema.boolean({ defaultValue: false })),
+  force: schema.maybe(schema.boolean({ defaultValue: false })),
+});
+
+export const createIngestPipelineSchema = schema.object({
+  pipelineName: schema.string(),
+  pipeline: schema.maybe(
+    schema.object({
+      processors: schema.arrayOf(schema.any()),
+      description: schema.maybe(schema.string()),
+    })
+  ),
+});

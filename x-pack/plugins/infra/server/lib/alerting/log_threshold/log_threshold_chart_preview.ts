@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import {
+  ExecutionTimeRange,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
   isOptimizedGroupedSearchQueryResponse,
@@ -17,16 +19,12 @@ import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   Point,
   Series,
-} from '../../../../common/http_api/log_alerts';
-import { ResolvedLogView } from '../../../../common/log_views';
+} from '../../../../common/http_api';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
-import {
-  buildFiltersFromCriteria,
-  getGroupedESQuery,
-  getUngroupedESQuery,
-} from './log_threshold_executor';
+import { buildFiltersFromCriteria } from '../../../../common/alerting/logs/log_threshold/query_helpers';
+import { getGroupedESQuery, getUngroupedESQuery } from './log_threshold_executor';
 
 const COMPOSITE_GROUP_SIZE = 40;
 
@@ -35,7 +33,8 @@ export async function getChartPreviewData(
   resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimeRange?: ExecutionTimeRange
 ) {
   const { indices, timestampField, runtimeMappings } = resolvedLogView;
   const { groupBy, timeSize, timeUnit } = alertParams;
@@ -47,11 +46,10 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const executionTimestamp = Date.now();
   const { rangeFilter } = buildFiltersFromCriteria(
     expandedAlertParams,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   const query = isGrouped
@@ -60,14 +58,14 @@ export async function getChartPreviewData(
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       )
     : getUngroupedESQuery(
         expandedAlertParams,
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       );
 
   if (!query) {

@@ -1,0 +1,33 @@
+# Security Project config
+
+## Disable plugins
+enterpriseSearch.enabled: false
+xpack.apm.enabled: false
+xpack.infra.enabled: false
+xpack.observability.enabled: false
+xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
+
+## Enable the Security Solution Serverless plugin
+xpack.securitySolutionServerless.enabled: true
+xpack.securitySolutionServerless.productTypes:
+  [
+    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+  ]
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/security/get_started
+
+## Set the dev project switcher current type
+xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: security
+
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['security']
+
+# Serverless security specific options
+xpack.securitySolution.enableExperimental:
+  - discoverInTimeline

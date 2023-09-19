@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
     return res.body.item.savedObject.attributes;
   };
 
@@ -229,11 +229,11 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
       // uninstall endpoint package
       await supertest
-        .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+        .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       await supertest
-        .delete(`/api/fleet/epm/packages/input_package-1.0.0`)
+        .delete(`/api/fleet/epm/packages/input_package/1.0.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
@@ -368,7 +368,7 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
-    it('should return a 400 if there is another package policy with the same name', async function () {
+    it('should return a 409 if there is another package policy with the same name', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId2}`)
         .set('kbn-xsrf', 'xxxx')
@@ -385,10 +385,10 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
-    it('should return a 400 if there is another package policy with the same name on a different policy', async function () {
+    it('should return a 409 if there is another package policy with the same name on a different policy', async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -414,7 +414,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
     it('should work with frozen input vars', async function () {
@@ -451,6 +451,74 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
+    });
+
+    it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+      const {
+        body: { item },
+      } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+
+      expect(Array.isArray(item.inputs)).to.be(false);
+    });
+
+    it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+      const {
+        body: { item },
+      } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+
+      expect(Array.isArray(item.inputs));
+    });
+
+    it('should return 400 if an invalid format query param is passed', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
     });
 
     describe('Simplified package policy', async () => {
@@ -514,6 +582,7 @@ export default function (providerContext: FtrProviderContext) {
           'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
         );
       });
+
       it('should return a 400 if dataset is edited on input only package policy', async function () {
         const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
 
@@ -527,6 +596,92 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).eql(
           'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
         );
+      });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        expect(Array.isArray(item.inputs)).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        expect(Array.isArray(item.inputs));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
       });
     });
 

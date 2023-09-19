@@ -21,6 +21,7 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
   startDate: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const OsqueryResult = React.memo<OsqueryResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
     const [isLive, setIsLive] = useState(false);
@@ -37,7 +38,7 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
-          username={ruleName && ruleName[0]}
+          username={ruleName}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}

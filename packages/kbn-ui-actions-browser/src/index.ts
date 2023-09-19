@@ -7,3 +7,4 @@
  */
 
 export * from './types';
+export * from './triggers';

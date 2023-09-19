@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export { RANDOM_SAMPLER_SEED } from './src/constants';
 export { buildSamplerAggregation } from './src/build_sampler_aggregation';
 export { fetchAggIntervals } from './src/fetch_agg_intervals';
 export { fetchHistogramsForFields } from './src/fetch_histograms_for_fields';
-export { getSampleProbability } from './src/get_sample_probability';
+export { DEFAULT_SAMPLER_SHARD_SIZE } from './src/field_histograms';
 export { getSamplerAggregationsResponsePath } from './src/get_sampler_aggregations_response_path';
 export { numberValidator } from './src/validate_number';
 
@@ -18,10 +17,13 @@ export type {
   NumericChartData,
   NumericHistogramField,
 } from './src/fetch_histograms_for_fields';
+export { isMultiBucketAggregate } from './src/is_multi_bucket_aggregate';
+export { isSignificantTerm } from './src/type_guards';
 export type {
   AggCardinality,
   SignificantTerm,
   SignificantTermGroup,
+  SignificantTermGroupItem,
   SignificantTermGroupHistogram,
   SignificantTermHistogram,
   SignificantTermHistogramItem,
@@ -31,3 +33,8 @@ export type {
   FieldValuePair,
 } from './src/types';
 export type { NumberValidationResult } from './src/validate_number';
+export {
+  TIME_SERIES_METRIC_TYPES,
+  isCounterTimeSeriesMetric,
+  isGaugeTimeSeriesMetric,
+} from './src/time_series_metric_fields';

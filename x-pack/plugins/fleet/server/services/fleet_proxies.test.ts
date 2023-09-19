@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { deleteFleetProxy } from './fleet_proxies';
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 jest.mock('./output');
+jest.mock('./download_source');
 jest.mock('./fleet_server_host');
 
 const mockedListFleetServerHostsForProxyId = listFleetServerHostsForProxyId as jest.MockedFunction<
@@ -25,6 +27,9 @@ const mockedUpdateFleetServerHost = updateFleetServerHost as jest.MockedFunction
 >;
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+  typeof downloadSourceService
+>;
 
 const PROXY_IDS = {
   PRECONFIGURED: 'test-preconfigured',
@@ -33,11 +38,17 @@ const PROXY_IDS = {
 
 describe('Fleet proxies service', () => {
   const soClientMock = savedObjectsClientMock.create();
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
   beforeEach(() => {
+    mockedDownloadSourceService.listAllForProxyId.mockReset();
     mockedOutputService.update.mockReset();
     soClientMock.delete.mockReset();
     mockedUpdateFleetServerHost.mockReset();
+    mockedDownloadSourceService.listAllForProxyId.mockImplementation(async () => ({
+      items: [],
+      total: 0,
+    }));
     mockedOutputService.listAllForProxyId.mockImplementation(async (_, proxyId) => {
       if (proxyId === PROXY_IDS.RELATED_PRECONFIGURED) {
         return {
@@ -125,26 +136,28 @@ describe('Fleet proxies service', () => {
   describe('delete', () => {
     it('should not allow to delete preconfigured proxy', async () => {
       await expect(() =>
-        deleteFleetProxy(soClientMock, PROXY_IDS.PRECONFIGURED)
+        deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.PRECONFIGURED)
       ).rejects.toThrowError(/Cannot delete test-preconfigured preconfigured proxy/);
     });
 
     it('should allow to delete preconfigured proxy with option fromPreconfiguration:true', async () => {
-      await deleteFleetProxy(soClientMock, PROXY_IDS.PRECONFIGURED, { fromPreconfiguration: true });
+      await deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.PRECONFIGURED, {
+        fromPreconfiguration: true,
+      });
 
       expect(soClientMock.delete).toBeCalled();
     });
 
-    it('should not allow to delete proxy wiht related preconfigured saved object', async () => {
+    it('should not allow to delete proxy with related preconfigured saved object', async () => {
       await expect(() =>
-        deleteFleetProxy(soClientMock, PROXY_IDS.RELATED_PRECONFIGURED)
+        deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED)
       ).rejects.toThrowError(
         /Cannot delete a proxy used in a preconfigured fleet server hosts or output./
       );
     });
 
     it('should allow to delete proxy wiht related preconfigured saved object option fromPreconfiguration:true', async () => {
-      await deleteFleetProxy(soClientMock, PROXY_IDS.RELATED_PRECONFIGURED, {
+      await deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED, {
         fromPreconfiguration: true,
       });
       expect(mockedOutputService.update).toBeCalled();

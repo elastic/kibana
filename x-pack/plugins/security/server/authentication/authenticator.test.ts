@@ -20,6 +20,15 @@ import {
 } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator, enrichWithUserProfileId } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type {
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from './providers';
 import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -35,6 +44,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import {
+  SessionConcurrencyLimitError,
   type SessionError,
   SessionExpiredError,
   SessionMissingError,
@@ -44,15 +54,6 @@ import {
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-import { AuthenticationResult } from './authentication_result';
-import type { AuthenticatorOptions } from './authenticator';
-import { Authenticator, enrichWithUserProfileId } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import type {
-  BasicAuthenticationProvider,
-  HTTPAuthenticationProvider,
-  SAMLAuthenticationProvider,
-} from './providers';
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -60,11 +61,15 @@ function getMockOptions({
   http = {},
   selector,
   accessAgreementMessage,
+  customLogoutURL,
+  configContext = {},
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
   accessAgreementMessage?: string;
+  customLogoutURL?: string;
+  configContext?: Record<string, unknown>;
 } = {}) {
   const auditService = auditServiceMock.create();
   auditLogger = auditLoggerMock.create();
@@ -83,10 +88,10 @@ function getMockOptions({
     loggers: loggingSystemMock.create(),
     getServerBaseURL: jest.fn(),
     config: createConfig(
-      ConfigSchema.validate({
-        authc: { selector, providers, http },
-        ...accessAgreementObj,
-      }),
+      ConfigSchema.validate(
+        { authc: { selector, providers, http }, ...accessAgreementObj },
+        configContext
+      ),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
@@ -94,6 +99,7 @@ function getMockOptions({
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+    customLogoutURL,
   };
 }
 
@@ -248,6 +254,33 @@ describe('Authenticator', () => {
           '/mock-server-basepath/security/logged_out?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED'
         );
       });
+
+      it('points to a custom URL if `customLogoutURL` is specified', () => {
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(
+          getMockOptions({
+            selector: { enabled: false },
+            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+            customLogoutURL: 'https://some-logout-origin/logout',
+          })
+        );
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          'https://some-logout-origin/logout'
+        );
+
+        // We don't forward any Kibana specific query string parameters to the external logout URL.
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe('https://some-logout-origin/logout');
+      });
     });
 
     describe('HTTP authentication provider', () => {
@@ -283,6 +316,23 @@ describe('Authenticator', () => {
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'basic', 'bearer']),
+        });
+      });
+
+      it('includes JWT options if specified', () => {
+        new Authenticator(
+          getMockOptions({
+            providers: { basic: { basic1: { order: 0 } } },
+            http: { jwt: { taggedRoutesOnly: true } },
+            configContext: { serverless: true },
+          })
+        );
+
+        expect(
+          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
+          jwt: { taggedRoutesOnly: true },
         });
       });
 
@@ -1356,7 +1406,12 @@ describe('Authenticator', () => {
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
 
-    for (const FailureClass of [SessionMissingError, SessionExpiredError, SessionUnexpectedError]) {
+    for (const FailureClass of [
+      SessionMissingError,
+      SessionExpiredError,
+      SessionConcurrencyLimitError,
+      SessionUnexpectedError,
+    ]) {
       describe(`session.get results in ${FailureClass.name}`, () => {
         it('fails as expected for redirectable requests', async () => {
           const request = httpServerMock.createKibanaRequest();
@@ -1455,7 +1510,10 @@ describe('Authenticator', () => {
 
           const authenticationResult = await authenticator.authenticate(request);
           expect(authenticationResult.redirected()).toBe(true);
-          if (failureReason instanceof SessionExpiredError) {
+          if (
+            failureReason instanceof SessionExpiredError ||
+            failureReason instanceof SessionConcurrencyLimitError
+          ) {
             expect(authenticationResult.redirectURL).toBe(
               redirectUrl + '&msg=' + failureReason.code
             );

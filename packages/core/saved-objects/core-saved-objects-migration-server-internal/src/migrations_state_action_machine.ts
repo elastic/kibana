@@ -9,18 +9,16 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
-import { cleanup } from './migrations_state_machine_cleanup';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
-import type { BulkOperation } from './model/create_batches';
+import { redactBulkOperationBatches } from './common/redact_state';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -36,14 +34,14 @@ export async function migrationStateActionMachine({
   logger,
   next,
   model,
-  client,
+  abort,
 }: {
   initialState: State;
   logger: Logger;
   next: Next<State>;
   model: Model<State>;
-  client: ElasticsearchClient;
-}) {
+  abort: (state?: State) => Promise<void>;
+}): Promise<MigrationResult> {
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
@@ -113,22 +111,28 @@ export async function migrationStateActionMachine({
       }
     } else if (finalState.controlState === 'FATAL') {
       try {
-        await cleanup(client, finalState);
+        await abort(finalState);
       } catch (e) {
         logger.warn('Failed to cleanup after migrations:', e.message);
       }
-      return Promise.reject(
-        new Error(
-          `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
-            finalState.reason
-        )
-      );
+
+      const errorMessage =
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
+        finalState.reason;
+
+      if (finalState.throwDelayMillis) {
+        return new Promise((_, reject) =>
+          setTimeout(() => reject(errorMessage), finalState.throwDelayMillis)
+        );
+      }
+
+      return Promise.reject(new Error(errorMessage));
     } else {
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
     try {
-      await cleanup(client, lastState);
+      await abort(lastState);
     } catch (err) {
       logger.warn('Failed to cleanup after migrations:', err.message);
     }
@@ -159,11 +163,3 @@ export async function migrationStateActionMachine({
     }
   }
 }
-
-const redactBulkOperationBatches = (
-  bulkOperationBatches: BulkOperation[][]
-): BulkOperationContainer[][] => {
-  return bulkOperationBatches.map((batch) =>
-    batch.map((operation) => (Array.isArray(operation) ? operation[0] : operation))
-  );
-};

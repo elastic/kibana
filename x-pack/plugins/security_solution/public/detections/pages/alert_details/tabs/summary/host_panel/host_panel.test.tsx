@@ -20,6 +20,28 @@ import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 
+jest.mock('../../../../../../management/hooks', () => {
+  const Generator = jest.requireActual(
+    '../../../../../../../common/endpoint/data_generators/endpoint_metadata_generator'
+  );
+
+  return {
+    useGetEndpointDetails: jest.fn(() => {
+      return {
+        data: new Generator.EndpointMetadataGenerator('seed').generateHostInfo({
+          metadata: {
+            Endpoint: {
+              state: {
+                isolation: true,
+              },
+            },
+          },
+        }),
+      };
+    }),
+  };
+});
+
 jest.mock('../../../../../../explore/containers/risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
@@ -38,7 +60,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
     inspect: null,
     refetch: () => {},
     isModuleEnabled: true,
-    isLicenseValid: true,
+    isAuthorized: true,
     loading: false,
   };
   const HostPanelWithDefaultProps = (propOverrides: Partial<HostPanelProps>) => (
@@ -76,7 +98,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
   describe('Agent status', () => {
     it('should show healthy', () => {
       const { getByTestId } = render(<HostPanelWithDefaultProps />);
-      expect(getByTestId('host-panel-agent-status')).toHaveTextContent('Healthy');
+      expect(getByTestId('endpointHostAgentStatus').textContent).toEqual('HealthyIsolated');
     });
   });
 
@@ -84,7 +106,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
     it('should not show risk if the license is not valid', () => {
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: false,
+        isAuthorized: false,
         data: null,
       });
       const { queryByTestId } = render(<HostPanelWithDefaultProps />);
@@ -97,7 +119,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
 
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: true,
+        isAuthorized: true,
         data: [
           {
             host: {

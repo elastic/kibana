@@ -21,7 +21,7 @@ describe('CustomIntegrationsRegistry', () => {
     uiInternalPath: '/path/to/foo',
     isBeta: false,
     icons: [],
-    categories: ['upload_file'],
+    categories: ['apm'],
     shipper: 'tests',
   };
 
@@ -49,11 +49,11 @@ describe('CustomIntegrationsRegistry', () => {
       const registry = new CustomIntegrationRegistry(mockLogger, true);
       registry.registerCustomIntegration({
         ...integration,
-        categories: ['upload_file', 'foobar'] as IntegrationCategory[],
+        categories: ['apm', 'foobar'] as IntegrationCategory[],
       });
       expect(registry.getAppendCustomIntegrations()).toEqual([
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'foo',
@@ -74,7 +74,7 @@ describe('CustomIntegrationsRegistry', () => {
       registry.registerCustomIntegration({ ...integration, id: 'bar' });
       expect(registry.getAppendCustomIntegrations()).toEqual([
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'foo',
@@ -85,7 +85,7 @@ describe('CustomIntegrationsRegistry', () => {
           uiInternalPath: '/path/to/foo',
         },
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'bar',
@@ -103,7 +103,7 @@ describe('CustomIntegrationsRegistry', () => {
       registry.registerCustomIntegration(integration);
       expect(registry.getAppendCustomIntegrations()).toEqual([
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'foo',
@@ -122,7 +122,7 @@ describe('CustomIntegrationsRegistry', () => {
 
       expect(registry.getAppendCustomIntegrations()).toEqual([
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'foo',
@@ -149,7 +149,7 @@ describe('CustomIntegrationsRegistry', () => {
       registry.registerCustomIntegration({ ...integration, id: 'bar', eprOverlap: 'aws' });
       expect(registry.getReplacementCustomIntegrations()).toEqual([
         {
-          categories: ['upload_file'],
+          categories: ['apm'],
           description: 'test integration',
           icons: [],
           id: 'bar',

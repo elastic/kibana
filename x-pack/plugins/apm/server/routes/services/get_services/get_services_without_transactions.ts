@@ -14,12 +14,21 @@ import {
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
+
+export interface ServicesWithoutTransactionsResponse {
+  services: Array<{
+    serviceName: string;
+    environments: string[];
+    agentName: AgentName;
+  }>;
+  maxServiceCountExceeded: boolean;
+}
 
 export async function getServicesWithoutTransactions({
   environment,
@@ -43,7 +52,7 @@ export async function getServicesWithoutTransactions({
   randomSampler: RandomSampler;
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
-}) {
+}): Promise<ServicesWithoutTransactionsResponse> {
   const isServiceTransactionMetric =
     documentType === ApmDocumentType.ServiceTransactionMetric;
 
@@ -73,7 +82,7 @@ export async function getServicesWithoutTransactions({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...serviceGroupQuery(serviceGroup),
+              ...serviceGroupWithOverflowQuery(serviceGroup),
             ],
           },
         },

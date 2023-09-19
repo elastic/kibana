@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.common.dismissBanner();
       await retry.try(async () => {
         await PageObjects.console.collapseHelp();
       });

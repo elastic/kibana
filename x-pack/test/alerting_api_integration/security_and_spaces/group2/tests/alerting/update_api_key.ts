@@ -98,6 +98,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -152,6 +154,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -217,6 +221,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -282,6 +288,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -346,6 +354,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.api_key_owner).to.eql(user.username);
+              // Ensure revision is not incremented when API key is updated
+              expect(updatedAlert.revision).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

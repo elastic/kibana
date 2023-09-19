@@ -36,6 +36,7 @@ const hoverContentWrapperCSS = css`
 const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
+  anchorPosition: 'downCenter' | 'rightCenter';
   children: React.ReactNode;
   visibleCellActions: number;
   actionContext: CellActionExecutionContext;
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
+  anchorPosition,
   children,
   visibleCellActions,
   actionContext,
@@ -115,12 +117,17 @@ export const HoverActionsPopover: React.FC<Props> = ({
     );
   }, [onMouseEnter, closeExtraActions, children]);
 
+  const panelStyle = useMemo(
+    () => (anchorPosition === 'rightCenter' ? { marginTop: euiThemeVars.euiSizeS } : {}),
+    [anchorPosition]
+  );
+
   return (
     <>
       <div onMouseLeave={closePopover}>
         <EuiPopover
-          panelStyle={PANEL_STYLE}
-          anchorPosition={'downCenter'}
+          panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
+          anchorPosition={anchorPosition}
           button={content}
           closePopover={closePopover}
           hasArrow={false}
@@ -134,7 +141,11 @@ export const HoverActionsPopover: React.FC<Props> = ({
           {showHoverContent && (
             <div css={hoverContentWrapperCSS}>
               <EuiScreenReaderOnly>
-                <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
+                <p>
+                  {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
+                    actionContext.data.map(({ field }) => field.name).join(', ')
+                  )}
+                </p>
               </EuiScreenReaderOnly>
               {visibleActions.map((action) => (
                 <ActionItem
@@ -142,6 +153,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   action={action}
                   actionContext={actionContext}
                   showTooltip={showActionTooltips}
+                  onClick={closePopover}
                 />
               ))}
               {extraActions.length > 0 && (
@@ -155,6 +167,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
         </EuiPopover>
       </div>
       <ExtraActionsPopOverWithAnchor
+        anchorPosition={anchorPosition}
         actions={extraActions}
         anchorRef={contentRef}
         actionContext={actionContext}

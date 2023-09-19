@@ -1,0 +1,2 @@
+type: array
+description: The array of field names you want to filter out in Discover.

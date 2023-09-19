@@ -33,6 +33,7 @@ import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
 
 jest.mock('../../common/store/inputs/actions');
 
@@ -95,11 +96,11 @@ jest.mock('../../timelines/components/open_timeline/helpers', () => {
   };
 });
 
-const mockGetTimiline = jest.fn();
+const mockGetTimeline = jest.fn();
 
 jest.mock('../../timelines/store/timeline', () => ({
   timelineSelectors: {
-    getTimelineByIdSelector: () => mockGetTimiline,
+    getTimelineByIdSelector: () => mockGetTimeline,
   },
 }));
 
@@ -124,6 +125,8 @@ const dummyFilter: Filter = {
   },
 };
 
+const mockTopValuesPopoverService = new TopValuesPopoverService();
+
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
   return {
@@ -132,8 +135,63 @@ jest.mock('../../common/lib/kibana', () => {
       ...original.useKibana(),
       services: {
         ...original.useKibana().services,
+        topValuesPopover: mockTopValuesPopoverService,
         data: {
           ...original.useKibana().services.data,
+          dataViews: {
+            get: jest
+              .fn()
+              .mockImplementation(
+                async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+                  Promise.resolve({
+                    id: dataViewId,
+                    matchedIndices: refreshFields
+                      ? ['hello', 'world', 'refreshed']
+                      : ['hello', 'world'],
+                    fields: [
+                      {
+                        name: 'bytes',
+                        type: 'number',
+                        esTypes: ['long'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 10,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: 'ssl',
+                        type: 'boolean',
+                        esTypes: ['boolean'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 20,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: '@timestamp',
+                        type: 'date',
+                        esTypes: ['date'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 30,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                    ],
+                    getIndexPattern: () => 'hello*,world*,refreshed*',
+                    getRuntimeMappings: () => ({
+                      myfield: {
+                        type: 'keyword',
+                      },
+                    }),
+                  })
+              ),
+          },
           query: {
             ...original.useKibana().services.data.query,
             filterManager: mockedFilterManager,
@@ -213,6 +271,7 @@ describe('HomePage', () => {
     const state = 'test-query-id';
     const savedQueryData: SavedQuery = {
       id: 'testSavedquery',
+      namespaces: ['default'],
       attributes: {
         title: 'testtitle',
         description: 'testDescription',
@@ -567,7 +626,7 @@ describe('HomePage', () => {
       );
     });
 
-    it('it removes empty timeline state from URL', async () => {
+    it('it keeps timeline visibility and selected tab state in URL', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -587,11 +646,15 @@ describe('HomePage', () => {
       const { rerender } = render(<TestComponent />);
 
       jest.clearAllMocks();
-      mockGetTimiline.mockReturnValue({ ...timelineDefaults, savedObjectId: null });
+      mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId: null });
 
       rerender(<TestComponent />);
 
-      expect(mockUpdateUrlParam).toHaveBeenCalledWith(null);
+      expect(mockUpdateUrlParam).toHaveBeenCalledWith({
+        activeTab: 'query',
+        graphEventId: '',
+        isOpen: false,
+      });
     });
 
     it('it updates URL when timeline store changes', async () => {
@@ -615,7 +678,7 @@ describe('HomePage', () => {
       const { rerender } = render(<TestComponent />);
 
       jest.clearAllMocks();
-      mockGetTimiline.mockReturnValue({ ...timelineDefaults, savedObjectId });
+      mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId });
 
       rerender(<TestComponent />);
 

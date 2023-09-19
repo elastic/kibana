@@ -8,9 +8,9 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineAnonymousAccessGetStateRoutes } from './get_state';
 import type { AnonymousAccessServiceStart } from '../../anonymous_access';
 import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';
-import { defineAnonymousAccessGetStateRoutes } from './get_state';
 
 describe('GET /internal/security/anonymous_access/state', () => {
   function doMockAndTest(accessURLParameters: AnonymousAccessServiceStart['accessURLParameters']) {

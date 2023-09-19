@@ -83,6 +83,7 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
               <EuiFlexItem grow={false}>
                 <EuiFormRow>
                   <EuiSelect
+                    data-test-subj="infraThresholdSelect"
                     compressed
                     value={comparator}
                     onChange={(e) => updateThreshold({ comparator: e.target.value as Comparator })}
@@ -93,6 +94,7 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
               <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
                   <EuiFieldNumber
+                    data-test-subj="infraThresholdFieldNumber"
                     compressed
                     value={value}
                     onChange={(e) => {

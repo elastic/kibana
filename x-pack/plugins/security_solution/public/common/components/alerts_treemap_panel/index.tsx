@@ -80,7 +80,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByWidth,
   title,
 }: Props) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);

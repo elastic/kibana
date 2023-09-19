@@ -11,7 +11,7 @@ import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const ruleOutput = (): RuleResponse => ({
   actions: [],
@@ -43,9 +43,10 @@ export const ruleOutput = (): RuleResponse => ({
   tags: [],
   to: 'now',
   type: 'query',
-  throttle: 'no_actions',
+  throttle: undefined,
   threat: getThreatMock(),
   version: 1,
+  revision: 0,
   filters: [
     {
       query: {
@@ -77,13 +78,14 @@ export const ruleOutput = (): RuleResponse => ({
   data_view_id: undefined,
   saved_id: undefined,
   alert_suppression: undefined,
+  investigation_fields: undefined,
 });
 
 describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
@@ -92,7 +94,7 @@ describe('validate', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });

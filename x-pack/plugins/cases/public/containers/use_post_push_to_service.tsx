@@ -5,108 +5,39 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
-import type { CaseConnector } from '../../common/api';
+import { useMutation } from '@tanstack/react-query';
 
+import type { CaseConnector } from '../../common/types/domain';
 import { pushCase } from './api';
 import * as i18n from './translations';
-import type { Case } from './types';
-import { useToasts } from '../common/lib/kibana';
-
-interface PushToServiceState {
-  isLoading: boolean;
-  isError: boolean;
-}
-type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
-
-const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServiceState => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return {
-        ...state,
-        isLoading: true,
-        isError: false,
-      };
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isError: true,
-      };
-    default:
-      return state;
-  }
-};
+import { useCasesToast } from '../common/use_cases_toast';
+import { casesMutationsKeys } from './constants';
+import type { ServerError } from '../types';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 interface PushToServiceRequest {
   caseId: string;
   connector: CaseConnector;
 }
 
-export interface UsePostPushToService extends PushToServiceState {
-  pushCaseToExternalService: ({
-    caseId,
-    connector,
-  }: PushToServiceRequest) => Promise<Case | undefined>;
-}
+export const usePostPushToService = () => {
+  const { showErrorToast, showSuccessToast } = useCasesToast();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
-export const usePostPushToService = (): UsePostPushToService => {
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-  });
-  const toasts = useToasts();
-  const cancel = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
-
-  const pushCaseToExternalService = useCallback(
-    async ({ caseId, connector }: PushToServiceRequest) => {
-      try {
-        abortCtrlRef.current.abort();
-        cancel.current = false;
-        abortCtrlRef.current = new AbortController();
-        dispatch({ type: 'FETCH_INIT' });
-
-        const response = await pushCase(caseId, connector.id, abortCtrlRef.current.signal);
-
-        if (!cancel.current) {
-          dispatch({ type: 'FETCH_SUCCESS' });
-          toasts.addSuccess({
-            title: i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
-            className: 'eui-textBreakWord',
-          });
-        }
-
-        return response;
-      } catch (error) {
-        if (!cancel.current) {
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-          dispatch({ type: 'FETCH_FAILURE' });
-        }
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  return useMutation(
+    (request: PushToServiceRequest) =>
+      pushCase({ caseId: request.caseId, connectorId: request.connector.id }),
+    {
+      mutationKey: casesMutationsKeys.pushCase,
+      onSuccess: (_, { connector }) => {
+        showSuccessToast(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name));
+        refreshCaseViewPage();
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
+    }
   );
-
-  useEffect(
-    () => () => {
-      abortCtrlRef.current.abort();
-      cancel.current = true;
-    },
-    []
-  );
-
-  return { ...state, pushCaseToExternalService };
 };
+
+export type UsePostPushToService = ReturnType<typeof usePostPushToService>;

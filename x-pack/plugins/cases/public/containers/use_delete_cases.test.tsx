@@ -18,7 +18,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useDeleteCases', () => {
-  const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -43,7 +42,7 @@ describe('useDeleteCases', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(['1', '2'], abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ caseIds: ['1', '2'] });
   });
 
   it('invalidates the queries correctly', async () => {

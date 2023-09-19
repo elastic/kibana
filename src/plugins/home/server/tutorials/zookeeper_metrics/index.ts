@@ -57,6 +57,6 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore', 'config_management'],
+    integrationBrowserCategories: ['observability'],
   };
 }

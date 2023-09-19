@@ -11,6 +11,7 @@ import { getNodeTypeClassLabel } from '../get_node_type_class_label';
 import {
   ElasticsearchResponseHit,
   ElasticsearchModifiedSource,
+  ElasticsearchMetricbeatNode,
 } from '../../../../../common/types/es';
 
 /**
@@ -52,6 +53,7 @@ export function mapNodesInfo(
         nodeTypeLabel,
         nodeTypeClass,
         shardCount: nodesShardCount?.nodes[uuid]?.shardCount ?? 0,
+        roles: (sourceNode as ElasticsearchMetricbeatNode)?.roles,
       },
     };
   }, {});

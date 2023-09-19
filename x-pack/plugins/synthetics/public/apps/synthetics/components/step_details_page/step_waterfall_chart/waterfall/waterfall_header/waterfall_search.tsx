@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FILTER_REQUESTS_LABEL, SEARCH_REQUESTS_LABEL } from '../translations';
 import { NetworkRequestsTotal } from './network_requests_total';
 
@@ -60,6 +60,7 @@ export const WaterfallSearch = ({
       </EuiText>
 
       <EuiFieldSearch
+        data-test-subj="syntheticsWaterfallSearchFieldSearch"
         fullWidth
         aria-label={FILTER_REQUESTS_LABEL}
         placeholder={SEARCH_REQUESTS_LABEL}

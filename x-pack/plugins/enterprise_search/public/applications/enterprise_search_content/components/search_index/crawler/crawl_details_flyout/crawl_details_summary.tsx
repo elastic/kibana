@@ -44,10 +44,11 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
   const duration = () => {
     if (stats?.status?.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
+      const days = milliseconds.days();
       const hours = milliseconds.hours();
       const minutes = milliseconds.minutes();
       const seconds = milliseconds.seconds();
-      return `${hours}h ${minutes}m ${seconds}s`;
+      return `${days ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
     } else {
       return '--';
     }

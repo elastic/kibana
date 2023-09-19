@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -54,12 +51,7 @@ describe('Action List Handler', () => {
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-    });
+    registerActionListRoutes(routerMock, createMockEndpointAppContext());
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
@@ -68,17 +60,14 @@ describe('Action List Handler', () => {
         query,
       });
       mockResponse = httpServerMock.createResponseFactory();
-      const [, routeHandler]: [
-        RouteConfig<any, any, any, any>,
-        RequestHandler<
-          unknown,
-          EndpointActionListRequestQuery,
-          unknown,
-          SecuritySolutionRequestHandlerContext
-        >
-      ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
-      )!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        BASE_ENDPOINT_ACTION_ROUTE,
+        '2023-10-31'
+      );
+
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
@@ -96,21 +85,22 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
+    const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: 'index_not_found_exception',
       });
     });
 
     it('should return `ok` when actions index exists', async () => {
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
-      await actionListHandler({ pageSize: 10, page: 1, statuses: ['failed', 'pending'] });
+      await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({ statuses: ['failed', 'pending'] })
       );
@@ -137,8 +127,7 @@ describe('Action List Handler', () => {
 
     it('should call `getActionList` when statuses filter values are not provided', async () => {
       await actionListHandler({
-        pageSize: 10,
-        page: 1,
+        ...defaultParams,
         commands: ['isolate', 'kill-process'],
         userIds: ['userX', 'userY'],
       });
@@ -152,8 +141,7 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionList`', async () => {
       await actionListHandler({
-        page: 1,
-        pageSize: 10,
+        ...defaultParams,
         agentIds: 'agentX',
         commands: 'isolate',
         userIds: 'userX',

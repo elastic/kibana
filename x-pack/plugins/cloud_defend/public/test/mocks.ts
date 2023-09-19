@@ -7,38 +7,85 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../common/constants';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../common/constants';
 
-const MOCK_YAML_CONFIGURATION = `
-selectors:
-  # default selector (user can modify or remove if they want)
-  - name: default
-    operation: [createExecutable, modifyExecutable, execMemFd]
+export const MOCK_YAML_CONFIGURATION = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+    - name: nginxOnly
+      containerImageName:
+        - nginx
+      operation:
+        - createExecutable
+        - modifyExecutable
+    - name: excludeCustomNginxBuild
+      containerImageTag:
+        - staging
+  responses:
+    - match:
+        - nginxOnly
+      exclude:
+        - excludeCustomNginxBuild
+      actions:
+        - alert
+        - block
+    - match:
+        - default
+      actions:
+        - alert
+`;
 
-  # example custom selector
-  - name: nginxOnly
-    containerImageName:
-      - nginx
+// block on it's own should be prevented
+export const MOCK_YAML_INVALID_ACTIONS = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+  responses:
+    - match:
+        - default
+      actions:
+        - block
+`;
 
-  # example selector used for exclude
-  - name: excludeCustomNginxBuild
-    containerImageTag:
-      - staging
-
-# responses are evaluated from top to bottom
-# only the first response with a match will run its actions
-responses:
-  - match: [nginxOnly]
-    exclude: [excludeCustomNginxBuild]
-    actions: [alert, block]
-
-  # default response
-  # delete this if no default response needed
-  - match: [default]
-    actions: [alert]
+export const MOCK_YAML_INVALID_STRING_ARRAY_CONDITION = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+      targetFilePath:
+        - /bin/${new Array(256).fill('a').join()}
+  responses:
+    - match:
+        - default
+      actions:
+        - log
 `;
 
 export const MOCK_YAML_INVALID_CONFIGURATION = `
 s
+`;
+
+export const MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+  responses:
+${new Array(MAX_SELECTORS_AND_RESPONSES_PER_TYPE + 1)
+  .fill(0)
+  .map(() => {
+    return `    - match: [default]
+      actions: [alert]
+`;
+  })
+  .join('')}
 `;
 
 export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): NewPackagePolicy => ({

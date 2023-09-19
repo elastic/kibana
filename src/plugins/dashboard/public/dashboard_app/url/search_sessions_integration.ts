@@ -77,13 +77,12 @@ function getLocatorParams({
       },
       search: { session },
     },
-    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
-  } = container.getReduxEmbeddableTools().getState();
+  } = container.getState();
 
   return {
     viewMode,
@@ -102,9 +101,6 @@ function getLocatorParams({
       : undefined,
     panels: lastSavedId
       ? undefined
-      : (convertPanelMapToSavedPanels(
-          panels,
-          kibanaVersion
-        ) as DashboardAppLocatorParams['panels']),
+      : (convertPanelMapToSavedPanels(panels) as DashboardAppLocatorParams['panels']),
   };
 }

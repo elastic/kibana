@@ -42,7 +42,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
               min: 1,
               prepend: (
                 <EuiIconTip
-                  type="alert"
+                  type="warning"
                   aria-label={i18nTexts.deprecationMessage}
                   content={i18nTexts.deprecationMessage}
                 />

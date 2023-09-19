@@ -21,6 +21,8 @@ import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithProvider } from '../../mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+
 import {
   applyChanges,
   LensAppState,
@@ -105,6 +107,8 @@ describe('suggestion_panel', () => {
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
       getUserMessages: () => [],
+      nowProvider: { get: jest.fn(() => new Date()) },
+      core: coreMock.createStart(),
     };
   });
 

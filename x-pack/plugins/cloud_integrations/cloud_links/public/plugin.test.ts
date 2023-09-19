@@ -10,6 +10,7 @@ import { CloudLinksPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 describe('Cloud Links Plugin - public', () => {
   let plugin: CloudLinksPlugin;
@@ -32,26 +33,46 @@ describe('Cloud Links Plugin - public', () => {
     });
 
     describe('Onboarding Setup Guide link registration', () => {
-      test('registers the Onboarding Setup Guide link when cloud is enabled and it is an authenticated page', () => {
+      describe('guided onboarding is enabled', () => {
+        const guidedOnboarding = guidedOnboardingMock.createStart();
+        test('registers the Onboarding Setup Guide link when cloud and guided onboarding is enabled and it is an authenticated page', () => {
+          const coreStart = coreMock.createStart();
+          coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+          const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
+
+          plugin.start(coreStart, { cloud, guidedOnboarding });
+          expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).toHaveBeenCalledTimes(1);
+        });
+
+        test('does not register the Onboarding Setup Guide link when cloud is enabled but it is an unauthenticated page', () => {
+          const coreStart = coreMock.createStart();
+          coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+          const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
+          plugin.start(coreStart, { cloud, guidedOnboarding });
+          expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
+        });
+
+        test('does not register the Onboarding Setup Guide link when cloud is not enabled', () => {
+          const coreStart = coreMock.createStart();
+          const cloud = { ...cloudMock.createStart(), isCloudEnabled: false };
+          plugin.start(coreStart, { cloud, guidedOnboarding });
+          expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
+        });
+      });
+
+      test('do not register the Onboarding Setup Guide link when guided onboarding is disabled', () => {
+        let { guidedOnboardingApi } = guidedOnboardingMock.createStart();
+        guidedOnboardingApi = {
+          ...guidedOnboardingApi!,
+          isEnabled: false,
+        };
+        const guidedOnboarding = { guidedOnboardingApi };
+
         const coreStart = coreMock.createStart();
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
-        plugin.start(coreStart, { cloud });
-        expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).toHaveBeenCalledTimes(1);
-      });
 
-      test('does not register the Onboarding Setup Guide link when cloud is enabled but it is an unauthenticated page', () => {
-        const coreStart = coreMock.createStart();
-        coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-        const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
-        plugin.start(coreStart, { cloud });
-        expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
-      });
-
-      test('does not register the Onboarding Setup Guide link when cloud is not enabled', () => {
-        const coreStart = coreMock.createStart();
-        const cloud = { ...cloudMock.createStart(), isCloudEnabled: false };
-        plugin.start(coreStart, { cloud });
+        plugin.start(coreStart, { cloud, guidedOnboarding });
         expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
       });
     });

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PersistableStateAttachmentState,
-  PersistableStateAttachmentTypeSetup,
-} from '@kbn/cases-plugin/server/attachment_framework/types';
+import { PersistableStateAttachmentTypeSetup } from '@kbn/cases-plugin/server/attachment_framework/types';
 
 export const getPersistableStateAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
@@ -26,11 +23,5 @@ export const getPersistableStateAttachment = (): PersistableStateAttachmentTypeS
       persistableStateAttachmentState: { foo: 'foo' },
     },
     references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
-  }),
-  migrations: () => ({
-    '8.4.0': (state: PersistableStateAttachmentState): PersistableStateAttachmentState => ({
-      persistableStateAttachmentTypeId: '.test',
-      persistableStateAttachmentState: { migrated: true },
-    }),
   }),
 });

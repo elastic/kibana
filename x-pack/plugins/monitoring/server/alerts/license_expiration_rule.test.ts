@@ -20,13 +20,6 @@ jest.mock('../lib/alerts/fetch_licenses', () => ({
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
-jest.mock('moment', () => {
-  const actual = jest.requireActual('moment');
-  return {
-    ...actual,
-    duration: () => ({ humanize: () => 'HUMANIZED_DURATION' }),
-  };
-});
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -120,7 +113,12 @@ describe('LicenseExpirationRule', () => {
       getState.mockReset();
     });
 
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should fire actions', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
       const alert = new LicenseExpirationRule();
       const type = alert.getRuleType();
       await type.executor({
@@ -169,7 +167,7 @@ describe('LicenseExpirationRule', () => {
                 ],
               },
               severity: 'danger',
-              triggeredMS: 1,
+              triggeredMS: 1680134400000,
               lastCheckedMS: 0,
             },
           },
@@ -179,11 +177,11 @@ describe('LicenseExpirationRule', () => {
         action: '[Please update your license.](elasticsearch/nodes)',
         actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. [Please update your license.](elasticsearch/nodes)',
+          'License expiration alert is firing for testCluster. Your license expires in 53 years. [Please update your license.](elasticsearch/nodes)',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. Please update your license.',
+          'License expiration alert is firing for testCluster. Your license expires in 53 years. Please update your license.',
         clusterName,
-        expiredDate: 'HUMANIZED_DURATION',
+        expiredDate: '53 years',
         state: 'firing',
       });
     });

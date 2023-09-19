@@ -5,36 +5,31 @@
  * 2.0.
  */
 
-import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-
-import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
 import {
+  BulkCrudRulesResponse,
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
-  BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
-
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-
-import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import {
-  transformBulkError,
   buildSiemResponse,
   createBulkErrorObject,
+  transformBulkError,
 } from '../../../../routes/utils';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
+import { getIdBulkError } from '../../../utils/utils';
+import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 
-type Config = RouteConfig<unknown, unknown, BulkDeleteRulesRequestBody, 'delete' | 'post'>;
 type Handler = RequestHandler<
   unknown,
   unknown,
@@ -47,16 +42,11 @@ type Handler = RequestHandler<
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
 export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
-  const config: Config = {
-    validate: {
-      body: buildRouteValidation(BulkDeleteRulesRequestBody),
-    },
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    options: {
-      tags: ['access:securitySolution'],
-    },
-  };
-  const handler: Handler = async (context, request, response) => {
+  const handler: Handler = async (
+    context,
+    request,
+    response
+  ): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);
@@ -64,7 +54,6 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
     const rulesClient = ctx.alerting.getRulesClient();
-    const savedObjectsClient = ctx.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -81,21 +70,16 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
         try {
           const rule = await readRules({ rulesClient, id, ruleId });
-          const migratedRule = await legacyMigrate({
-            rulesClient,
-            savedObjectsClient,
-            rule,
-          });
-          if (!migratedRule) {
+          if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
 
           await deleteRules({
-            ruleId: migratedRule.id,
+            ruleId: rule.id,
             rulesClient,
           });
 
-          return transformValidateBulkError(idOrRuleIdOrUnknown, migratedRule);
+          return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }
@@ -116,6 +100,21 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     }
   };
 
-  router.delete(config, handler);
-  router.post(config, handler);
+  const routeConfig: VersionedRouteConfig<'post' | 'delete'> = {
+    access: 'public',
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
+    options: {
+      tags: ['access:securitySolution'],
+    },
+  };
+  const versionConfig = {
+    version: '2023-10-31',
+    validate: {
+      request: {
+        body: buildRouteValidation(BulkDeleteRulesRequestBody),
+      },
+    },
+  };
+  router.versioned.delete(routeConfig).addVersion(versionConfig, handler);
+  router.versioned.post(routeConfig).addVersion(versionConfig, handler);
 };

@@ -10,7 +10,6 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../common/constants';
-import { useGlobalTime } from '../../containers/use_global_time';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
@@ -149,16 +148,6 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('treemapPanel')).toBeInTheDocument());
-  });
-
-  it('invokes useGlobalTime() with false to prevent global queries from being deleted when the component unmounts', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => expect(useGlobalTime).toBeCalledWith(false));
   });
 
   it('renders the panel with a hidden overflow-x', async () => {

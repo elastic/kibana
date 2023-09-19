@@ -18,14 +18,14 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 import {
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
   RuleReferencesSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_exceptions';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_exceptions';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   getSimpleRule,
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   createExceptionList,
 } from '../../utils';
@@ -35,6 +35,7 @@ import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('find_rule_exception_references', () => {
     before(async () => {
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -66,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: references } = await supertest
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({
           ids: `${exceptionList.id}`,
           list_ids: `${exceptionList.list_id}`,
@@ -119,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: references } = await supertest
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({
           ids: `1234`,
           list_ids: `i_dont_exist`,
@@ -165,6 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: references } = await supertest
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({
           ids: `${exceptionList.id},${exceptionList2.id}`,
           list_ids: `${exceptionList.list_id},${exceptionList2.list_id}`,
@@ -213,6 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: references } = await supertest
         .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({
           namespace_types: 'single,agnostic',
         })

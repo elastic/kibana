@@ -11,6 +11,12 @@ import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 
+import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
+
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
+
+import { generateTransformSecondaryAuthHeaders } from '../../../api_keys/transform_api_keys';
+
 import {
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
@@ -36,7 +42,8 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
+import { getAsset } from './common';
+import { getDestinationIndexAliases } from './transform_utils';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -58,6 +65,7 @@ interface TransformInstallation extends TransformModuleBase {
   content: any;
   transformVersion?: string;
   installationOrder?: number;
+  runAsKibanaSystem?: boolean;
 }
 
 const installLegacyTransformsAssets = async (
@@ -137,7 +145,9 @@ const processTransformAssetsPerModule = (
   installablePackage: InstallablePackage,
   installNameSuffix: string,
   transformPaths: string[],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  force?: boolean,
+  username?: string
 ) => {
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
@@ -195,10 +205,6 @@ const processTransformAssetsPerModule = (
       const installationOrder =
         isFinite(content._meta?.order) && content._meta?.order >= 0 ? content._meta?.order : 0;
       const transformVersion = content._meta?.fleet_transform_version ?? '0.1.0';
-      // The “all” alias for the transform destination indices will be adjusted to include the new transform destination index as well as everything it previously included
-      const allIndexAliasName = `${content.dest.index}.all`;
-      // The “latest” alias for the transform destination indices will point solely to the new transform destination index
-      const latestIndexAliasName = `${content.dest.index}.latest`;
 
       transformsSpecifications
         .get(transformModuleId)
@@ -206,24 +212,30 @@ const processTransformAssetsPerModule = (
 
       // Create two aliases associated with the destination index
       // for better handling during upgrades
-      const alias = {
-        [allIndexAliasName]: {},
-        [latestIndexAliasName]: {},
-      };
+      const aliases = getDestinationIndexAliases(content.dest.aliases);
+      const aliasNames = aliases.map((a) => a.alias);
+      // Override yml settings with alia format for transform's dest.aliases
+      content.dest.aliases = aliases;
 
-      const versionedIndexName = `${content.dest.index}-${installNameSuffix}`;
-      content.dest.index = versionedIndexName;
       indicesToAddRefs.push({
-        id: versionedIndexName,
+        id: content.dest.index,
         type: ElasticsearchAssetType.index,
       });
+
+      // If run_as_kibana_system is not set, or is set to true, then run as kibana_system user
+      // else, run with user's secondary credentials
+      const runAsKibanaSystem = content._meta?.run_as_kibana_system !== false;
+
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
-      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', aliases);
       transformsSpecifications.get(transformModuleId)?.set('transform', content);
       transformsSpecifications.get(transformModuleId)?.set('transformVersion', transformVersion);
+
       content._meta = {
         ...(content._meta ?? {}),
         ...getESAssetMetadata({ packageName: installablePackage.name }),
+        ...(username ? { installed_by: username } : {}),
+        run_as_kibana_system: runAsKibanaSystem,
       };
 
       const installationName = getTransformAssetNameForInstallation(
@@ -233,43 +245,56 @@ const processTransformAssetsPerModule = (
         `default-${transformVersion}`
       );
 
-      const currentTransformSameAsPrev =
-        previousInstalledTransformEsAssets.find((t) => t.id === installationName) !== undefined;
+      // Here, we track if fleet_transform_version (not package version) has changed based on installation name
+      // if version has changed, install transform and update es assets
+      // else, don't delete the dest index and install transform as it can be an expensive operation
+      const matchingTransformFromPrevInstall = previousInstalledTransformEsAssets.find(
+        (t) => t.id === installationName
+      );
+
+      const currentTransformSameAsPrev = matchingTransformFromPrevInstall !== undefined;
       if (previousInstalledTransformEsAssets.length === 0) {
-        aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+        aliasesRefs.push(...aliasNames);
         transforms.push({
           transformModuleId,
           installationName,
           installationOrder,
           transformVersion,
           content,
+          runAsKibanaSystem,
         });
         transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
       } else {
-        if (!currentTransformSameAsPrev) {
-          // If upgrading from old json schema to new yml schema
-          // We need to make sure to delete those transforms by matching the legacy naming convention
-          const versionFromOldJsonSchema = previousInstalledTransformEsAssets.find((t) =>
-            t.id.startsWith(
-              getLegacyTransformNameForInstallation(
-                installablePackage,
-                `${transformModuleId}/default.json`
+        if (force || !currentTransformSameAsPrev) {
+          // If we are reinstalling the package (i.e. force = true),
+          // force delete old transforms so we can reinstall the same transforms again
+          if (force && matchingTransformFromPrevInstall) {
+            transformsToRemoveWithDestIndex.push(matchingTransformFromPrevInstall);
+          } else {
+            // If upgrading from old json schema to new yml schema
+            // We need to make sure to delete those transforms by matching the legacy naming convention
+            const versionFromOldJsonSchema = previousInstalledTransformEsAssets.find((t) =>
+              t.id.startsWith(
+                getLegacyTransformNameForInstallation(
+                  installablePackage,
+                  `${transformModuleId}/default.json`
+                )
               )
-            )
-          );
+            );
 
-          if (versionFromOldJsonSchema !== undefined) {
-            transformsToRemoveWithDestIndex.push(versionFromOldJsonSchema);
-          }
+            if (versionFromOldJsonSchema !== undefined) {
+              transformsToRemoveWithDestIndex.push(versionFromOldJsonSchema);
+            }
 
-          // If upgrading from yml to newer version of yaml
-          // Match using new naming convention
-          const installNameWithoutVersion = installationName.split(transformVersion)[0];
-          const prevVersion = previousInstalledTransformEsAssets.find((t) =>
-            t.id.startsWith(installNameWithoutVersion)
-          );
-          if (prevVersion !== undefined) {
-            transformsToRemove.push(prevVersion);
+            // If upgrading from yml to newer version of yaml
+            // Match using new naming convention
+            const installNameWithoutVersion = installationName.split(transformVersion)[0];
+            const prevVersion = previousInstalledTransformEsAssets.find((t) =>
+              t.id.startsWith(installNameWithoutVersion)
+            );
+            if (prevVersion !== undefined) {
+              transformsToRemove.push(prevVersion);
+            }
           }
           transforms.push({
             transformModuleId,
@@ -277,9 +302,12 @@ const processTransformAssetsPerModule = (
             installationOrder,
             transformVersion,
             content,
+            runAsKibanaSystem,
           });
           transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
-          aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+          if (aliasNames.length > 0) {
+            aliasesRefs.push(...aliasNames);
+          }
         } else {
           transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
         }
@@ -371,9 +399,13 @@ const installTransformsAssets = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[] = [],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  force?: boolean,
+  authorizationHeader?: HTTPAuthorizationHeader | null
 ) => {
   let installedTransforms: EsAssetReference[] = [];
+  const username = authorizationHeader?.getUsername();
+
   if (transformPaths.length > 0) {
     const {
       indicesToAddRefs,
@@ -383,23 +415,31 @@ const installTransformsAssets = async (
       transforms,
       destinationIndexTemplates,
       transformsSpecifications,
-      aliasesRefs,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
     } = processTransformAssetsPerModule(
       installablePackage,
       installNameSuffix,
       transformPaths,
-      previousInstalledTransformEsAssets
+      previousInstalledTransformEsAssets,
+      force,
+      username
     );
 
-    // ensure the .latest alias points to only the latest
-    // by removing any associate of old destination indices
-    await Promise.all(
-      aliasesRefs
-        .filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
-        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias }))
-    );
+    // By default, for internal Elastic packages that touch system indices, we want to run as internal user
+    // so we set runAsKibanaSystem: true by default (e.g. when run_as_kibana_system set to true/not defined in yml file).
+    // If package should be installed as the logged in user, set run_as_kibana_system: false,
+    // generate api key, and pass es-secondary-authorization in header when creating the transforms.
+    const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
+      ? await generateTransformSecondaryAuthHeaders({
+          authorizationHeader,
+          logger,
+          pkgName: installablePackage.name,
+          pkgVersion: installablePackage.version,
+          username,
+        })
+      : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
+        undefined;
 
     // delete all previous transform
     await Promise.all([
@@ -407,13 +447,15 @@ const installTransformsAssets = async (
         esClient,
         transformsToRemoveWithDestIndex.map((asset) => asset.id),
         // Delete destination indices if specified or if from old json schema
-        true
+        true,
+        secondaryAuth
       ),
       deleteTransforms(
         esClient,
         transformsToRemove.map((asset) => asset.id),
         // Else, keep destination indices by default
-        false
+        false,
+        secondaryAuth
       ),
     ]);
 
@@ -492,58 +534,6 @@ const installTransformsAssets = async (
         .filter((p) => p !== undefined)
     );
 
-    // create destination indices
-    await Promise.all(
-      transforms.map(async (transform) => {
-        const index = transform.content.dest.index;
-
-        const aliases = transformsSpecifications
-          .get(transform.transformModuleId)
-          ?.get('destinationIndexAlias');
-        try {
-          const resp = await retryTransientEsErrors(
-            () =>
-              esClient.indices.create(
-                {
-                  index,
-                  aliases,
-                },
-                { ignore: [400] }
-              ),
-            { logger }
-          );
-          logger.debug(`Created destination index: ${index}`);
-
-          // If index already exists, we still need to update the destination index alias
-          // to point '{destinationIndexName}.latest' to the versioned index
-          // @ts-ignore status is a valid field of resp
-          if (resp.status === 400 && aliases) {
-            await retryTransientEsErrors(
-              () =>
-                esClient.indices.updateAliases({
-                  body: {
-                    actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
-                  },
-                }),
-              { logger }
-            );
-            logger.debug(`Created aliases for destination index: ${index}`);
-          }
-        } catch (err) {
-          logger.error(
-            `Error creating destination index: ${JSON.stringify({
-              index,
-              aliases: transformsSpecifications
-                .get(transform.transformModuleId)
-                ?.get('destinationIndexAlias'),
-            })} with error ${err}`
-          );
-
-          throw new Error(err.message);
-        }
-      })
-    );
-
     // If the transforms have specific installation order, install & optionally start transforms sequentially
     const shouldInstallSequentially =
       uniqBy(transforms, 'installationOrder').length === transforms.length;
@@ -555,6 +545,7 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth: transform.runAsKibanaSystem !== false ? undefined : secondaryAuth,
         });
         installedTransforms.push(installTransform);
       }
@@ -566,23 +557,62 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth: transform.runAsKibanaSystem !== false ? undefined : secondaryAuth,
         });
       });
 
       installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
     }
+
+    // If user does not have sufficient permissions to start the transforms,
+    // we need to mark them as deferred installations without blocking full package installation
+    // so that they can be updated/re-authorized later
+
+    if (installedTransforms.length > 0) {
+      // get and save refs associated with the transforms before installing
+      esReferences = await updateEsAssetReferences(
+        savedObjectsClient,
+        installablePackage.name,
+        esReferences,
+        {
+          assetsToRemove: installedTransforms,
+          assetsToAdd: installedTransforms,
+        }
+      );
+    }
   }
 
   return { installedTransforms, esReferences };
 };
-export const installTransforms = async (
-  installablePackage: InstallablePackage,
-  paths: string[],
-  esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger,
-  esReferences?: EsAssetReference[]
-) => {
+
+interface InstallTransformsParams {
+  installablePackage: InstallablePackage;
+  paths: string[];
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  esReferences?: EsAssetReference[];
+  /**
+   * Force transforms to install again even though fleet_transform_version might be same
+   * Should be true when package is re-installing
+   */
+  force?: boolean;
+  /**
+   * Authorization header parsed from original Kibana request, used to generate API key from user
+   * to pass in secondary authorization info to transform
+   */
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+}
+export const installTransforms = async ({
+  installablePackage,
+  paths,
+  esClient,
+  savedObjectsClient,
+  logger,
+  force,
+  esReferences,
+  authorizationHeader,
+}: InstallTransformsParams) => {
   const transformPaths = paths.filter((path) => isTransform(path));
 
   const installation = await getInstallation({
@@ -620,6 +650,7 @@ export const installTransforms = async (
     );
   }
 
+  // If package contains yml transform specifications
   return await installTransformsAssets(
     installablePackage,
     installNameSuffix,
@@ -628,7 +659,9 @@ export const installTransforms = async (
     savedObjectsClient,
     logger,
     esReferences,
-    previousInstalledTransformEsAssets
+    previousInstalledTransformEsAssets,
+    force,
+    authorizationHeader
   );
 };
 
@@ -637,65 +670,59 @@ export const isTransform = (path: string) => {
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
-async function deleteAliasFromIndices({
-  esClient,
-  logger,
-  alias,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  alias: string;
-}) {
-  try {
-    const resp = await esClient.indices.getAlias({ name: alias });
-    const indicesMatchingAlias = Object.keys(resp);
-    logger.debug(`Deleting alias: '${alias}' matching indices ${indicesMatchingAlias}`);
-
-    if (indicesMatchingAlias.length > 0) {
-      await retryTransientEsErrors(
-        () =>
-          // defer validation on put if the source index is not available
-          esClient.indices.deleteAlias(
-            { index: indicesMatchingAlias, name: alias },
-            { ignore: [404] }
-          ),
-        { logger }
-      );
-      logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
-    }
-  } catch (err) {
-    logger.error(`Error deleting alias: ${alias}`);
-  }
+interface TransformEsAssetReference extends EsAssetReference {
+  version?: string;
 }
+/**
+ * Create transform and optionally start transform
+ * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+ * If API Key has insufficient permissions, it should still create the transforms but not start it
+ * Instead of failing, we need to allow package to continue installing other assets
+ * and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
+ */
 async function handleTransformInstall({
   esClient,
   logger,
   transform,
   startTransform,
+  secondaryAuth,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   transform: TransformInstallation;
   startTransform?: boolean;
-}): Promise<EsAssetReference> {
+  secondaryAuth?: SecondaryAuthorizationHeader;
+}): Promise<TransformEsAssetReference> {
+  let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(
       () =>
-        // defer validation on put if the source index is not available
-        esClient.transform.putTransform({
-          transform_id: transform.installationName,
-          defer_validation: true,
-          body: transform.content,
-        }),
+        // defer_validation: true on put if the source index is not available
+        // but will check if API Key has sufficient permission
+        esClient.transform.putTransform(
+          {
+            transform_id: transform.installationName,
+            defer_validation: true,
+            body: transform.content,
+          },
+          // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
+          secondaryAuth ? { ...secondaryAuth } : undefined
+        ),
       { logger }
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
-    // swallow the error if the transform already exists.
+    const isResponseError = err instanceof errors.ResponseError;
+    isUnauthorizedAPIKey =
+      isResponseError &&
+      err?.body?.error?.type === 'security_exception' &&
+      err?.body?.error?.reason?.includes('unauthorized for API key');
+
     const isAlreadyExistError =
-      err instanceof errors.ResponseError &&
-      err?.body?.error?.type === 'resource_already_exists_exception';
-    if (!isAlreadyExistError) {
+      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+
+    // swallow the error if the transform already exists or if API key has insufficient permissions
+    if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
       throw err;
     }
   }
@@ -703,18 +730,73 @@ async function handleTransformInstall({
   // start transform by default if not set in yml file
   // else, respect the setting
   if (startTransform === undefined || startTransform === true) {
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.startTransform(
-          { transform_id: transform.installationName },
-          { ignore: [409] }
-        ),
-      { logger, additionalResponseStatuses: [400] }
-    );
-    logger.debug(`Started transform: ${transform.installationName}`);
+    try {
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.startTransform(
+            { transform_id: transform.installationName },
+            { ignore: [409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+      logger.debug(`Started transform: ${transform.installationName}`);
+    } catch (err) {
+      const isResponseError = err instanceof errors.ResponseError;
+      isUnauthorizedAPIKey =
+        isResponseError &&
+        // if transform was created with insufficient permission,
+        // _start will yield an error
+        err?.body?.error?.type === 'security_exception' &&
+        err?.body?.error?.reason?.includes('lacks the required permissions');
+
+      // swallow the error if the transform can't be started if API key has insufficient permissions
+      if (!isUnauthorizedAPIKey) {
+        throw err;
+      }
+    }
+  } else {
+    // if transform was not set to start automatically in yml config,
+    // we need to check using _stats if the transform had insufficient permissions
+    try {
+      const transformStats = await retryTransientEsErrors(
+        () =>
+          esClient.transform.getTransformStats(
+            { transform_id: transform.installationName },
+            { ignore: [409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+        const transformHealth = transformStats.transforms[0].health;
+        if (
+          transformHealth &&
+          transformHealth.status === 'red' &&
+          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
+          Array.isArray(transformHealth.issues) &&
+          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
+          transformHealth.issues.find(
+            (i: { issue: string }) => i.issue === 'Privileges check failed'
+          )
+        ) {
+          isUnauthorizedAPIKey = true;
+        }
+      }
+    } catch (err) {
+      logger.debug(
+        `Error getting transform stats for transform: ${transform.installationName} cause ${err}`
+      );
+    }
   }
 
-  return { id: transform.installationName, type: ElasticsearchAssetType.transform };
+  return {
+    id: transform.installationName,
+    type: ElasticsearchAssetType.transform,
+    // If isUnauthorizedAPIKey: true (due to insufficient user permission at transform creation)
+    // that means the transform is created but not started.
+    // Note in saved object this is a deferred installation so user can later reauthorize
+    deferred: isUnauthorizedAPIKey,
+    version: transform.transformVersion,
+  };
 }
 
 const getLegacyTransformNameForInstallation = (

@@ -10,7 +10,7 @@ exposed via contract. For more information check out the example in `x-pack/exam
 When adding visualizations to a solution page, there are multiple ways to approach this with pros and cons:
 
 * #### **Use a dashboard**
-  If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. The Presentation team is currently working on making it possible to embed dashboard into the solution navigation, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
+  If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. Portable dasboards make it possible to embed a dashboard into your application, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
 
   Pros:
    * No need to write and maintain custom code
@@ -25,20 +25,22 @@ When adding visualizations to a solution page, there are multiple ways to approa
   Pros:
    * No need to manage searches and rendering logic on your own
    * "Open in Lens" comes for free
+   * Simple extended visualization options - if Lens can't do it, there's also a limited set of overrides to customize the final result
   
   Cons:
    * Each panel does its own data fetching and rendering (can lead to performance problems for high number of embeddables on a single page, e.g. more than 20)
    * Limited data processing options - if the Lens UI doesn't support it, it can't be used
-   * Limited visualization options - if Lens can't do it, it's not possible
+
+
 * #### **Using custom data fetching and rendering**
-  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
+  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
   Pros:
    * Full flexibility in data fetching optimization and chart rendering
   
   Cons:
    * "Open in Lens" requires additional logic
-   * High maintenance and development effort
+   * Should follow elastic charts api changes
 
 ## Getting started
 
@@ -78,37 +80,8 @@ On a high level there are references, datasource state, visualization state and 
 
 ### References
 
-References (`references`) are regular saved object references forming a graph of saved objects which depend on each other. For the Lens case, these references are always data views (called `type: "index-pattern"`) in code, referencing data views which are used in the current Lens visualization. Often there is just a single data view in use, but it's possible to use multiple data views for multiple layers in a Lens xy chart. The `id` of a reference needs to be the saved object id of the referenced data view (see the "Handling data views" section below). The `name` of the reference is comprised out of multiple parts used to map the data view to the correct layer : `indexpattern-datasource-layer-<id of the layer>`. Even if multiple layers are using the same data view, there has to be one reference per layer (all pointing to the same data view id).
+References (`references`) are regular saved object references forming a graph of saved objects which depend on each other. For the Lens case, these references can be annotation groups or data views (called `type: "index-pattern"` in code), referencing permanent data views which are used in the current Lens visualization. Often there is just a single data view in use, but it's possible to use multiple data views for multiple layers in a Lens xy chart. The `id` of a reference needs to be the saved object id of the referenced data view (see the "Handling data views" section below). The `name` of the reference is comprised out of multiple parts used to map the data view to the correct layer : `indexpattern-datasource-layer-<id of the layer>`. Even if multiple layers are using the same data view, there has to be one reference per layer (all pointing to the same data view id). References array can be empty in case of adhoc dataviews (see section below).
 
-### Datasource state
-
-The data source state (`state.datasourceStates.formBased.layers`) contains the configuration state of the data fetching and processing part of Lens. It's not specific to a certain representation (xy, pie, gauge, ...), but instead it defines a data table per layer made out of columns with various properties. This data table is passed over to the visualization state which maps it to various dimensions of the specific visualization. Layer and columns have unique ids which are shared amongst visualization and datasource - it's important to make sure they are always in sync. The keys of the `state.datasourceStates.formBased.layers` object are the layer ids. Lens editor chooses uuids for these, but when programmatically generating Lens attributes, any string can be used for them. The `layers[<layer id>].columns` object is constructed in a similar way (keys represent the column ids). The `operationType` property defines the type of the column, other properties depend on the specific operation. Types for individual parts of the datasource state are provided (check the `lens/public` export, e.g. there's the `MaxIndexPatternColumn` for a column of operation type `max`)
-
-### Visualization state
-
-The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYState` or `HeatmapVisualizationState`).
-
-### Filters
-
-Filters and query `state.filters`/`state.query` define the visualization-global filters and query applied to all layers of the visualization. The query is rendered in the top level search bar in the editor while filters are rendered as filter pills. Filters and query state defined this way is used for dashboards and Discover in the same way.
-
-### Callbacks
-
-The `EmbeddableComponent` also takes a set of callbacks to react to user interactions with the embedded Lens visualization to integrate the visualization with the surrounding app: `onLoad`, `onBrushEnd`, `onFilter`, `onTableRowClick`. A common pattern is to keep state in the solution app which is updated within these callbacks - re-rendering the surrounding application will change the Lens attributes passed to the component which will re-render the visualization (including re-fetching data if necessary).
-
-## Handling data views
-
-In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
-```ts
-let dataView = (await dataViews.find('my-pattern-*', 1))[0];
-if (!dataView) {
-  dataView = await dataViews.createAndSave({
-    title: 'my-pattern-*',
-    timeFieldName: '@timestamp'
-  });
-}
-const dataViewIdForLens = dataView.id;
-```
 
 ### Ad-hoc data views
 
@@ -148,6 +121,52 @@ Example:
 }
 ```
 
+### Datasource state
+
+The data source state (`state.datasourceStates.formBased.layers`) contains the configuration state of the data fetching and processing part of Lens. It's not specific to a certain representation (xy, pie, gauge, ...), but instead it defines a data table per layer made out of columns with various properties. This data table is passed over to the visualization state which maps it to various dimensions of the specific visualization. Layer and columns have unique ids which are shared amongst visualization and datasource - it's important to make sure they are always in sync. The keys of the `state.datasourceStates.formBased.layers` object are the layer ids. Lens editor chooses uuids for these, but when programmatically generating Lens attributes, any string can be used for them. The `layers[<layer id>].columns` object is constructed in a similar way (keys represent the column ids). The `operationType` property defines the type of the column, other properties depend on the specific operation. Types for individual parts of the datasource state are provided (check the `lens/public` export, e.g. there's the `MaxIndexPatternColumn` for a column of operation type `max`)
+
+### Visualization state
+
+The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYState` or `HeatmapVisualizationState`).
+
+### Filters
+
+Filters and query `state.filters`/`state.query` define the visualization-global filters and query applied to all layers of the visualization. The query is rendered in the top level search bar in the editor while filters are rendered as filter pills. Filters and query state defined this way is used for dashboards and Discover in the same way.
+
+### Callbacks
+
+The `EmbeddableComponent` also takes a set of callbacks to react to user interactions with the embedded Lens visualization to integrate the visualization with the surrounding app: `onLoad`, `onBrushEnd`, `onFilter`, `onTableRowClick`. A common pattern is to keep state in the solution app which is updated within these callbacks - re-rendering the surrounding application will change the Lens attributes passed to the component which will re-render the visualization (including re-fetching data if necessary).
+
+#### Preventing defaults
+
+In some scenarios it can be useful to customize the default behaviour and avoid the default Kibana triggers for a specific action, like add a filter on a bar chart/pie slice click. For this specific requirement the `data` object returned by the `onBrushEnd`, `onFilter`, `onTableRowClick` callbacks has a special `preventDefault()` function that will prevent other registered event triggers to execute:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  onFilter={(data) => {
+    // custom behaviour on "filter" event
+    ...
+    // now prevent to add a filter in Kibana 
+    data.preventDefault();
+  }}
+/>
+```
+
+## Handling data views
+
+In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
+```ts
+let dataView = (await dataViews.find('my-pattern-*', 1))[0];
+if (!dataView) {
+  dataView = await dataViews.createAndSave({
+    title: 'my-pattern-*',
+    timeFieldName: '@timestamp'
+  });
+}
+const dataViewIdForLens = dataView.id;
+```
+
 **Important!** To prevent conflicts, it's important to not re-use ad-hoc data view ids for different specs. If you change the spec in some way, make sure to also change its id. This even applies across multiple embeddables, sessions, etc. Ideally, the id will be globally unique. You can use the `uuid` package to generate a new unique id every time when you are changing the spec in some way. However, make sure to also not change the id on every single render either, as this will have a substantial performance impact.
 
 ## Refreshing a Lens embeddable
@@ -182,6 +201,23 @@ The Lens embeddable is handling both data fetching and rendering - all the user 
 />
 ```
 
+## Overrides
+
+The Lens embeddable offers a way to extends the current set of visualization feature provided within the Lens editor, via the `overrides` property, which enables the consumer to override some visualization configurations in the embeddable instance.
+
+```tsx
+<EmbeddableComponent
+  // ...
+  overrides={{
+    settings: {legendAction: 'ignore'},
+    axisX: {hide: true}
+  }}
+/>
+```
+
+The each override is component-specific and it inherits the prop from its `elastic-charts` definition directly. Callback/handlers are not supported as functions, but the special value `"ignore"` can be provided in order to disable them in the embeddable rendering.
+**Note**: overrides are only applied to the local embeddable instance and will disappear when the visualization is open in the Lens editor.
+
 # Lens Development
 
 The following sections are concerned with developing the Lens plugin itself.
@@ -194,7 +230,8 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
-  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group3/config.ts`
+  - ...
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group6/config.ts`
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`

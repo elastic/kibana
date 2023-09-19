@@ -6,11 +6,11 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { IndexedEndpointRuleAlerts } from '../../../security_solution_ftr/services/detections';
 
 /**
  * Test suite is meant to cover usages of endpoint functionality or access to endpoint
@@ -59,10 +59,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe('from Timeline', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/165344
+    describe.skip('from Timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {
+        log.info(
+          `Creating timeline for events from host: ${indexedData.hosts[0].host.hostname} (agent id: ${indexedData.hosts[0].agent.id})`
+        );
         timeline = await timelineTestService.createTimelineForEndpointAlerts(
           'endpoint in timeline',
           {
@@ -83,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {

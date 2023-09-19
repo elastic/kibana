@@ -13,8 +13,9 @@ import { Expression, AlertContextMeta } from './expression';
 import { act } from 'react-dom/test-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),

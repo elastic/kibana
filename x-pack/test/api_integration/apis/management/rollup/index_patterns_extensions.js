@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
-import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {
@@ -19,15 +21,16 @@ export default function ({ getService }) {
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
-      const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
-
       describe('query params validation', () => {
         let uri;
         let body;
 
         it('"pattern" is required', async () => {
           uri = `${BASE_URI}`;
-          ({ body } = await supertest.get(uri).expect(400));
+          ({ body } = await supertest
+            .get(uri)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+            .expect(400));
           expect(body.message).to.contain(
             '[request query.pattern]: expected value of type [string]'
           );
@@ -42,7 +45,10 @@ export default function ({ getService }) {
             },
             { sort: false }
           )}`;
-          ({ body } = await supertest.get(uri).expect(404));
+          ({ body } = await supertest
+            .get(uri)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+            .expect(404));
           expect(body.message).to.contain('No indices match "foo"');
         });
       });
@@ -61,7 +67,10 @@ export default function ({ getService }) {
           rollup_index: rollupIndex,
         };
         const uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
-        const { body } = await supertest.get(uri).expect(200);
+        const { body } = await supertest
+          .get(uri)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .expect(200);
 
         // Verify that the fields for wildcard correspond to our declared mappings
         // noting that testTotalField and testTagField are not shown in the field caps results

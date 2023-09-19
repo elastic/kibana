@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
-import { COMMON_REQUEST_HEADERS } from './common_api';
+import { getCommonRequestHeader } from './common_api';
 import { MlApi } from './api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -88,7 +89,7 @@ export function MachineLearningTestResourcesProvider(
         .get(
           `${space ? `/s/${space}` : ''}/api/saved_objects/_find?type=${objectType}&per_page=10000`
         )
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       mlApi.assertResponseStatusCode(200, status, findResponse);
 
       for (const savedObject of findResponse.saved_objects) {
@@ -101,13 +102,15 @@ export function MachineLearningTestResourcesProvider(
       log.debug(` > Not found`);
     },
 
-    async getSavedObjectIdsByType(objectType: SavedObjectType): Promise<string[]> {
+    async getSavedObjectIdsByType(objectType: SavedObjectType, space?: string): Promise<string[]> {
       const savedObjectIds: string[] = [];
 
       log.debug(`Searching for '${objectType}' ...`);
       const { body: findResponse, status } = await supertest
-        .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
-        .set(COMMON_REQUEST_HEADERS);
+        .get(
+          `${space ? `/s/${space}` : ''}/api/saved_objects/_find?type=${objectType}&per_page=10000`
+        )
+        .set(getCommonRequestHeader('1'));
       mlApi.assertResponseStatusCode(200, status, findResponse);
 
       findResponse.saved_objects.forEach((element: any) => {
@@ -146,7 +149,7 @@ export function MachineLearningTestResourcesProvider(
 
       const { body: createResponse, status } = await supertest
         .post(`${space ? `/s/${space}` : ''}/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ attributes: { title, timeFieldName } });
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
@@ -161,7 +164,7 @@ export function MachineLearningTestResourcesProvider(
 
       const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/_bulk_create`)
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(body);
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
@@ -192,7 +195,7 @@ export function MachineLearningTestResourcesProvider(
 
       const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.SEARCH}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(body);
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
@@ -207,7 +210,7 @@ export function MachineLearningTestResourcesProvider(
 
       const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(body);
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
@@ -336,7 +339,7 @@ export function MachineLearningTestResourcesProvider(
       } else {
         const { body, status } = await supertest
           .delete(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .query({ force });
         mlApi.assertResponseStatusCode(200, status, body);
 
@@ -514,17 +517,23 @@ export function MachineLearningTestResourcesProvider(
       await this.assertSavedObjectExistsById(id, SavedObjectType.DASHBOARD);
     },
 
-    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType) {
+    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType, space?: string) {
       const savedObjectId = `${jobType}-${jobId}`;
-      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true);
+      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true, space);
     },
 
-    async cleanMLSavedObjects() {
+    async cleanMLSavedObjects(additionalSpaces: string[] = []) {
+      // clean default space
       await this.cleanMLJobSavedObjects();
       await this.cleanMLTrainedModelsSavedObjects();
+
+      for (const space of additionalSpaces) {
+        await this.cleanMLJobSavedObjects(space);
+        await this.cleanMLTrainedModelsSavedObjects(space);
+      }
     },
 
-    async cleanMLJobSavedObjects() {
+    async cleanMLJobSavedObjects(space?: string) {
       log.debug('Deleting ML job saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
       for (const id of savedObjectIds) {
@@ -533,10 +542,11 @@ export function MachineLearningTestResourcesProvider(
       log.debug('> ML job saved objects deleted.');
     },
 
-    async cleanMLTrainedModelsSavedObjects() {
+    async cleanMLTrainedModelsSavedObjects(space?: string) {
       log.debug('Deleting ML trained model saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(
-        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
+        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+        space
       );
       for (const id of savedObjectIds) {
         if (mlApi.isInternalModelId(id)) {
@@ -546,7 +556,8 @@ export function MachineLearningTestResourcesProvider(
         await this.deleteSavedObjectById(
           id,
           SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-          true
+          true,
+          space
         );
       }
       log.debug('> ML trained model saved objects deleted.');
@@ -557,7 +568,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(2 * 60 * 1000, async () => {
         const { body, status } = await supertest
           .post(`/api/fleet/setup`)
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
       log.debug(` > Setup done`);
@@ -571,7 +582,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
           .post(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
 
@@ -585,7 +596,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
           .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
 
@@ -599,7 +610,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(10 * 1000, async () => {
         const { body, status } = await supertest
           .get(`/api/fleet/epm/packages?experimental=true`)
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
 
         packageVersion =

@@ -106,7 +106,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 />
               }
               color="danger"
-              iconType="alert"
+              iconType="warning"
             />
           </Fragment>
         )}
@@ -115,7 +115,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           <>
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
@@ -156,7 +156,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           <>
             <EuiCallOut
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
               title={
                 hasFetchFailed ? (

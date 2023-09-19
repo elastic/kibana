@@ -283,4 +283,73 @@ describe('convertToLens', () => {
     expect(result?.type).toBe('lnsMetric');
     expect(mockGetConfigurationForMetric).toBeCalledTimes(1);
   });
+
+  test('should set the ignoreGlobalFilters if set on the panel', async () => {
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetMetricsColumns.mockReturnValueOnce([metric]);
+
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+        ],
+        ignore_global_filter: 1,
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers.every((l) => l.ignoreGlobalFilters)).toBe(true);
+  });
+
+  test('should set the ignoreGlobalFilters if set on the series', async () => {
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetMetricsColumns.mockReturnValueOnce([metric]);
+
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+            ignore_global_filter: 1,
+          }),
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+        ],
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers[0].ignoreGlobalFilters).toBe(true);
+  });
+
+  test('should ignore the ignoreGlobalFilters if set on hidden series', async () => {
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetBucketsColumns.mockReturnValueOnce([bucket]);
+    mockGetMetricsColumns.mockReturnValueOnce([metric]);
+
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: true,
+            ignore_global_filter: 1,
+          }),
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+        ],
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers[0].ignoreGlobalFilters).toBe(false);
+  });
 });

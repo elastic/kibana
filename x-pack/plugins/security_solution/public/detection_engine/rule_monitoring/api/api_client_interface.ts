@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import type { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -13,9 +13,15 @@ import type {
   RuleExecutionEventType,
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 export interface IRuleMonitoringApiClient {
+  /**
+   * Installs resources (dashboards, data views, etc) related to rule monitoring
+   * and Detection Engine health, and can do any other setup work.
+   */
+  setupDetectionEngineHealthApi(): Promise<void>;
+
   /**
    * Fetches plain rule execution events (status changes, metrics, generic events) from Event Log.
    * @throws An error if response is not OK.
@@ -33,11 +39,28 @@ export interface IRuleMonitoringApiClient {
   ): Promise<GetRuleExecutionResultsResponse>;
 }
 
-export interface FetchRuleExecutionEventsArgs {
+export interface RuleMonitoringApiCallArgs {
+  /**
+   * Optional signal for cancelling the request.
+   */
+  signal?: AbortSignal;
+}
+
+export interface DateRange {
+  start?: string;
+  end?: string;
+}
+
+export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs {
   /**
    * Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`).
    */
   ruleId: string;
+
+  /**
+   * Filter by event message. If set, result will include events matching the search term.
+   */
+  searchTerm?: string;
 
   /**
    * Filter by event type. If set, result will include only events matching any of these.
@@ -48,6 +71,11 @@ export interface FetchRuleExecutionEventsArgs {
    * Filter by log level. If set, result will include only events matching any of these.
    */
   logLevels?: LogLevel[];
+
+  /**
+   * Filter by date range. If set, result will include only events recorded in the specified date range.
+   */
+  dateRange?: DateRange;
 
   /**
    * What order to sort by (e.g. `asc` or `desc`).
@@ -63,14 +91,9 @@ export interface FetchRuleExecutionEventsArgs {
    * Number of results to fetch per page.
    */
   perPage?: number;
-
-  /**
-   * Optional signal for cancelling the request.
-   */
-  signal?: AbortSignal;
 }
 
-export interface FetchRuleExecutionResultsArgs {
+export interface FetchRuleExecutionResultsArgs extends RuleMonitoringApiCallArgs {
   /**
    * Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`).
    */
@@ -116,9 +139,4 @@ export interface FetchRuleExecutionResultsArgs {
    * Number of results to fetch per page.
    */
   perPage?: number;
-
-  /**
-   * Optional signal for cancelling the request.
-   */
-  signal?: AbortSignal;
 }

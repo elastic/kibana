@@ -184,13 +184,14 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
-  const status = getHealthStatus(logger, {
+  const { status, reason } = getHealthStatus(logger, {
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
   });
   return {
     status,
+    reason,
     timestamp: new Date().toISOString(),
     value: {
       observed: mapValues(
@@ -231,27 +232,28 @@ interface GetHealthStatusParams {
   capacityPerMinutePerKibana: number;
 }
 
-function getHealthStatus(logger: Logger, params: GetHealthStatusParams): HealthStatus {
+function getHealthStatus(
+  logger: Logger,
+  params: GetHealthStatusParams
+): { status: HealthStatus; reason?: string } {
   const {
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    return HealthStatus.OK;
+    return { status: HealthStatus.OK };
   }
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    logger.debug(
-      `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
-    );
-    return HealthStatus.Warning;
+    const reason = `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+    logger.debug(reason);
+    return { status: HealthStatus.Warning, reason };
   }
 
-  logger.debug(
-    `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
-  );
-  return HealthStatus.Error;
+  const reason = `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+  logger.debug(reason);
+  return { status: HealthStatus.Error, reason };
 }
 
 export function withCapacityEstimate(

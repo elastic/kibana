@@ -22,9 +22,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
-import type { SetupPlugins } from '../../../../plugin_contract';
-import type { RunOpts } from '../types';
+import type { CreateQueryRuleAdditionalOptions, RunOpts } from '../types';
 
 export const queryExecutor = async ({
   runOpts,
@@ -34,7 +32,7 @@ export const queryExecutor = async ({
   version,
   spaceId,
   bucketHistory,
-  osqueryCreateAction,
+  scheduleNotificationResponseActionsService,
   licensing,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
@@ -44,7 +42,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -60,11 +58,11 @@ export const queryExecutor = async ({
       services,
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
+      fields: runOpts.inputIndexFields,
     });
 
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
-    const hasGoldLicense = license.hasAtLeast('gold');
 
     const result =
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
@@ -76,6 +74,7 @@ export const queryExecutor = async ({
             buildReasonMessage: buildReasonMessageForQueryAlert,
             bucketHistory,
             groupByFields: ruleParams.alertSuppression.groupBy,
+            eventsTelemetry,
           })
         : {
             ...(await searchAfterAndBulkCreate({
@@ -98,16 +97,15 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (hasGoldLicense) {
-      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-        scheduleNotificationResponseActions(
-          {
-            signals: result.createdSignals,
-            responseActions: completeRule.ruleParams.responseActions,
-          },
-          osqueryCreateAction
-        );
-      }
+    if (
+      completeRule.ruleParams.responseActions?.length &&
+      result.createdSignalsCount &&
+      scheduleNotificationResponseActionsService
+    ) {
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
     }
 
     return result;

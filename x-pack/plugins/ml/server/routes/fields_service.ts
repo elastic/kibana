@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -33,7 +34,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
-   * @api {post} /api/ml/fields_service/field_cardinality Get cardinality of fields
+   * @api {post} /internal/ml/fields_service/field_cardinality Get cardinality of fields
    * @apiName GetCardinalityOfFields
    * @apiDescription Returns the cardinality of one or more fields. Returns an Object whose keys are the names of the fields, with values equal to the cardinality of the field
    *
@@ -41,33 +42,40 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
    *
    * @apiSuccess {number} fieldName cardinality of the field.
    */
-  router.post(
-    {
-      path: '/api/ml/fields_service/field_cardinality',
-      validate: {
-        body: getCardinalityOfFieldsSchema,
-      },
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/fields_service/field_cardinality`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetFieldInfo'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const resp = await getCardinalityOfFields(client, request.body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: getCardinalityOfFieldsSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const resp = await getCardinalityOfFields(client, request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup FieldsService
    *
-   * @api {post} /api/ml/fields_service/time_field_range Get time field range
+   * @api {post} /internal/ml/fields_service/time_field_range Get time field range
    * @apiName GetTimeFieldRange
    * @apiDescription Returns the time range for the given index and query using the specified time range.
    *
@@ -76,26 +84,33 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
    * @apiSuccess {Object} start start of time range with epoch and string properties.
    * @apiSuccess {Object} end end of time range with epoch and string properties.
    */
-  router.post(
-    {
-      path: '/api/ml/fields_service/time_field_range',
-      validate: {
-        body: getTimeFieldRangeSchema,
-      },
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetFieldInfo'],
       },
-    },
-    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const resp = await getTimeFieldRange(client, request.body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: getTimeFieldRangeSchema,
+          },
+        },
+      },
+      routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const resp = await getTimeFieldRange(client, request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

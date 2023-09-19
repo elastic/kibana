@@ -6,13 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
+import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../../lib/infra_types';
-import {
-  LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
-  getLogEntryAnomaliesSuccessReponsePayloadRT,
-  getLogEntryAnomaliesRequestPayloadRT,
-  GetLogEntryAnomaliesRequestPayload,
-} from '../../../../common/http_api/log_analysis';
+
 import { AnomaliesSort, Pagination } from '../../../../common/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
@@ -20,83 +16,94 @@ import { getLogEntryAnomalies } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
-      validate: {
-        body: createValidationFunction(getLogEntryAnomaliesRequestPayloadRT),
-      },
-    },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const {
-        data: {
-          logView,
-          timeRange: { startTime, endTime },
-          sort: sortParam,
-          pagination: paginationParam,
-          datasets,
+      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createValidationFunction(
+              logAnalysisResultsV1.getLogEntryAnomaliesRequestPayloadRT
+            ),
+          },
         },
-      } = request.body;
-
-      const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
-
-      try {
-        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
-
+      },
+      framework.router.handleLegacyErrors(async (requestContext, request, response) => {
         const {
-          data: logEntryAnomalies,
-          paginationCursors,
-          hasMoreEntries,
-          timing,
-        } = await getLogEntryAnomalies(
-          infraMlContext,
-          logView,
-          startTime,
-          endTime,
-          sort,
-          pagination,
-          datasets
-        );
+          data: {
+            logView,
+            timeRange: { startTime, endTime },
+            sort: sortParam,
+            pagination: paginationParam,
+            datasets,
+          },
+        } = request.body;
 
-        return response.ok({
-          body: getLogEntryAnomaliesSuccessReponsePayloadRT.encode({
-            data: {
-              anomalies: logEntryAnomalies,
-              hasMoreEntries,
-              paginationCursors,
-            },
+        const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
+
+        try {
+          const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+
+          const {
+            data: logEntryAnomalies,
+            paginationCursors,
+            hasMoreEntries,
             timing,
-          }),
-        });
-      } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+          } = await getLogEntryAnomalies(
+            infraMlContext,
+            logView,
+            startTime,
+            endTime,
+            sort,
+            pagination,
+            datasets
+          );
 
-        if (isMlPrivilegesError(error)) {
+          return response.ok({
+            body: logAnalysisResultsV1.getLogEntryAnomaliesSuccessReponsePayloadRT.encode({
+              data: {
+                anomalies: logEntryAnomalies,
+                hasMoreEntries,
+                paginationCursors,
+              },
+              timing,
+            }),
+          });
+        } catch (error) {
+          if (Boom.isBoom(error)) {
+            throw error;
+          }
+
+          if (isMlPrivilegesError(error)) {
+            return response.customError({
+              statusCode: 403,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
-            statusCode: 403,
+            statusCode: error.statusCode ?? 500,
             body: {
-              message: error.message,
+              message: error.message ?? 'An unexpected error occurred',
             },
           });
         }
-
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    })
-  );
+      })
+    );
 };
 
 const getSortAndPagination = (
-  sort: Partial<GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
-  pagination: Partial<GetLogEntryAnomaliesRequestPayload['data']['pagination']> = {}
+  sort: Partial<logAnalysisResultsV1.GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
+  pagination: Partial<
+    logAnalysisResultsV1.GetLogEntryAnomaliesRequestPayload['data']['pagination']
+  > = {}
 ): {
   sort: AnomaliesSort;
   pagination: Pagination;

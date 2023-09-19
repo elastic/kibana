@@ -10,16 +10,13 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import pMap from 'p-map';
 import { intersection } from 'lodash';
+import { SyntheticsServerSetup } from '../../types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
-  ServiceLocation,
+  EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -37,7 +34,7 @@ export const getAllMonitors = async ({
   search?: string;
   filter?: string;
 } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
-  const finder = soClient.createPointInTimeFinder({
+  const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
     type: syntheticsMonitorType,
     perPage: 1000,
     search,
@@ -48,11 +45,9 @@ export const getAllMonitors = async ({
     searchFields,
   });
 
-  const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+  const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
   for await (const result of finder.find()) {
-    hits.push(
-      ...(result.saved_objects as Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>)
-    );
+    hits.push(...result.saved_objects);
   }
 
   // no need to wait for it
@@ -61,9 +56,9 @@ export const getAllMonitors = async ({
   return hits;
 };
 
-export const processMonitors = async (
-  allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>,
-  server: UptimeServerSetup,
+export const processMonitors = (
+  allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
+  server: SyntheticsServerSetup,
   soClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   queryLocations?: string[] | string
@@ -75,6 +70,7 @@ export const processMonitors = async (
    * latest ping for all enabled monitors.
    */
   const enabledMonitorQueryIds: string[] = [];
+  const disabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
   let maxPeriod = 0;
@@ -83,22 +79,6 @@ export const processMonitors = async (
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
   const monitorQueryIdToConfigIdMap: Record<string, string> = {};
-
-  let allLocations: ServiceLocation[] | null = null;
-
-  const getLocationLabel = async (locationId: string) => {
-    if (!allLocations) {
-      const { publicLocations, privateLocations } = await getAllLocations({
-        server,
-        syntheticsMonitorClient,
-        savedObjectsClient: soClient,
-      });
-
-      allLocations = [...publicLocations, ...privateLocations];
-    }
-
-    return allLocations.find((loc) => loc.id === locationId)?.label ?? locationId;
-  };
 
   for (const monitor of allMonitors) {
     const attrs = monitor.attributes;
@@ -109,8 +89,9 @@ export const processMonitors = async (
 
     monitorQueryIdToConfigIdMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = attrs[ConfigKey.CONFIG_ID];
 
+    const monitorLocations = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
+
     if (attrs[ConfigKey.ENABLED] === false) {
-      const monitorLocations = attrs[ConfigKey.LOCATIONS].map((location) => location.label);
       const queriedLocations = Array.isArray(queryLocations) ? queryLocations : [queryLocations];
       const intersectingLocations = intersection(
         monitorLocations,
@@ -118,33 +99,14 @@ export const processMonitors = async (
       );
       disabledCount += intersectingLocations.length;
       disabledMonitorsCount += 1;
+      disabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
     } else {
-      const missingLabels = new Set<string>();
-
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      const monLocs = new Set([
-        ...(attrs[ConfigKey.LOCATIONS]
-          .filter((loc) => {
-            if (!loc.label) {
-              missingLabels.add(loc.id);
-            }
-            return loc.label;
-          })
-          .map((location) => location.label) as string[]),
-      ]);
 
-      // since label wasn't always part of location, there can be a case where we have a location
-      // with an id but no label. We need to fetch the label from the API
-      // Adding a migration to add the label to the saved object is a future consideration
-      const locLabels = await pMap([...missingLabels], async (locationId) =>
-        getLocationLabel(locationId)
-      );
-
-      const monitorLocations = [...monLocs, ...locLabels];
       monitorLocationMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
         ? intersection(monitorLocations, queryLocations)
         : monitorLocations;
-      listOfLocationsSet = new Set([...listOfLocationsSet, ...monLocs, ...locLabels]);
+      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocations]);
 
       maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
     }
@@ -154,11 +116,12 @@ export const processMonitors = async (
     maxPeriod,
     allIds,
     enabledMonitorQueryIds,
+    disabledMonitorQueryIds,
     disabledCount,
     monitorLocationMap,
     disabledMonitorsCount,
     projectMonitorsCount,
-    listOfLocations: [...listOfLocationsSet],
+    monitorLocationIds: [...listOfLocationsSet],
     monitorQueryIdToConfigIdMap,
   };
 };

@@ -8,11 +8,13 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import type { Query } from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { buildExistsFilter } from '@kbn/es-query';
+import { EuiComboBox } from '@elastic/eui';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 
@@ -82,6 +84,7 @@ const services = {
   uiSettings: {
     get: () => {},
   },
+  settings: { client: { get: () => {} } },
   savedObjects: action('savedObjects'),
   notifications: action('notifications'),
   http: {
@@ -248,9 +251,16 @@ storiesOf('SearchBar', module)
       showDatePicker: false,
     } as SearchBarProps)
   )
-  .add('with date picker off', () =>
+  .add('with the default date picker auto refresh interval on', () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: true,
+      onRefreshChange: action('onRefreshChange'),
+    } as SearchBarProps)
+  )
+  .add('with the default date picker auto refresh interval off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      isAutoRefreshDisabled: true,
     } as SearchBarProps)
   )
   .add('with only the date picker on', () =>
@@ -259,6 +269,15 @@ storiesOf('SearchBar', module)
       showFilterBar: false,
       showQueryInput: false,
     } as SearchBarProps)
+  )
+  .add('with additional filters used for suggestions', () =>
+    wrapSearchBarInContext({
+      filtersForSuggestions: [
+        buildExistsFilter({ type: 'keyword', name: 'geo.src' }, {
+          id: undefined,
+        } as unknown as DataViewBase),
+      ],
+    } as unknown as SearchBarProps)
   )
   .add('with only the filter bar on', () =>
     wrapSearchBarInContext({
@@ -436,6 +455,28 @@ storiesOf('SearchBar', module)
       },
     } as unknown as SearchBarProps)
   )
+  .add('with prepended controls', () =>
+    wrapSearchBarInContext({
+      prependFilterBar: (
+        <EuiComboBox
+          placeholder="Select option"
+          options={[
+            {
+              label: 'Filter 1',
+            },
+          ]}
+          fullWidth={false}
+          isClearable={true}
+        />
+      ),
+      showQueryInput: true,
+    } as SearchBarProps)
+  )
+  .add('without switch query language', () =>
+    wrapSearchBarInContext({
+      disableQueryLanguageSwitcher: true,
+    } as SearchBarProps)
+  )
   .add('show only query bar without submit', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
@@ -494,7 +535,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL', () =>
+  .add('with dataviewPicker with ESQL', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -506,66 +547,66 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
     } as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL and sql query', () =>
+  .add('with dataviewPicker with ESQL and ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
-      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and large sql query', () =>
+  .add('with dataviewPicker with ESQL and large ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       query: {
-        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+        esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
       },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and errors in sql query', () =>
+  .add('with dataviewPicker with ESQL and errors in ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(
-          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+          '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
         ),
       ],
-      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field10' },
     } as unknown as SearchBarProps<Query>)
   )
   .add('in disabled state', () =>

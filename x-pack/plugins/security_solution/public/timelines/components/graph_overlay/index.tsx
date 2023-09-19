@@ -16,6 +16,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -34,8 +35,6 @@ import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -51,6 +50,7 @@ const OverlayContainer = styled.div`
 `;
 
 const FullScreenOverlayStyles = css`
+  background-color:  ${({ theme }) => `${theme.eui.euiColorEmptyShade};`}
   position: fixed;
   top: 0;
   bottom: 2em;
@@ -132,6 +132,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)
   );
+  const filters = useMemo(() => {
+    return { from, to };
+  }, [from, to]);
 
   const sessionContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -142,6 +145,24 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
       sessionContainerRef.current.setAttribute('style', OverlayStyle.join(''));
     }
   }, [fullScreen]);
+
+  const resolver = useMemo(
+    () =>
+      graphEventId !== undefined ? (
+        <StyledResolver
+          databaseDocumentID={graphEventId}
+          resolverComponentInstanceID={scopeId}
+          indices={selectedPatterns}
+          shouldUpdate={shouldUpdate}
+          filters={filters}
+        />
+      ) : (
+        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
+      ),
+    [graphEventId, scopeId, selectedPatterns, shouldUpdate, filters]
+  );
 
   if (!isActiveTimeline(scopeId) && sessionViewConfig !== null) {
     return (
@@ -165,19 +186,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
-          <StyledResolver
-            databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={scopeId}
-            indices={selectedPatterns}
-            shouldUpdate={shouldUpdate}
-            filters={{ from, to }}
-          />
-        ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexGroup>
-        )}
+        {resolver}
       </FullScreenOverlayContainer>
     );
   } else {
@@ -188,19 +197,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
-          <StyledResolver
-            databaseDocumentID={graphEventId}
-            resolverComponentInstanceID={scopeId}
-            indices={selectedPatterns}
-            shouldUpdate={shouldUpdate}
-            filters={{ from, to }}
-          />
-        ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexGroup>
-        )}
+        {resolver}
       </OverlayContainer>
     );
   }

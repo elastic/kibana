@@ -212,6 +212,7 @@ describe('configureClient', () => {
       logger,
       client,
       type: 'test',
+      apisToRedactInLogs: [],
     });
   });
 });

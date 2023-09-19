@@ -136,6 +136,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           })}
         >
           <EuiRadioGroup
+            data-test-subj="infraMetricsExplorerChartOptionsRadioGroup"
             compressed
             options={typeRadios}
             idSelected={chartOptions.type}
@@ -163,6 +164,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           })}
         >
           <EuiRadioGroup
+            data-test-subj="infraMetricsExplorerChartOptionsRadioGroup"
             compressed
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}

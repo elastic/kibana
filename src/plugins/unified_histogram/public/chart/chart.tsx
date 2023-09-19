@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo } from 'react';
-import React, { memo } from 'react';
+import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -15,8 +14,11 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -36,10 +38,12 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
+import { ChartConfigPanel } from './chart_config_panel';
 import { getLensAttributes } from './utils/get_lens_attributes';
 import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
@@ -50,7 +54,11 @@ export interface ChartProps {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters?: Filter[];
+  isPlainRecord?: boolean;
+  currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
+  relativeTimeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -61,15 +69,19 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  getRelativeTimeRange?: () => TimeRange;
+  lensTablesAdapter?: Record<string, Datatable>;
+  isOnHistogramMode?: boolean;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -81,26 +93,36 @@ export function Chart({
   query: originalQuery,
   filters: originalFilters,
   timeRange: originalTimeRange,
+  relativeTimeRange: originalRelativeTimeRange,
   request,
   hits,
   chart,
   breakdown,
+  currentSuggestion,
+  allSuggestions,
+  isPlainRecord,
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  getRelativeTimeRange: originalGetRelativeTimeRange,
+  lensTablesAdapter,
+  isOnHistogramMode,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onSuggestionChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: ChartProps) {
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -118,6 +140,7 @@ export function Chart({
     onTimeIntervalChange,
     closePopover: closeChartOptions,
     onResetChartHeight,
+    isPlainRecord,
   });
 
   const chartVisible = !!(
@@ -125,7 +148,7 @@ export function Chart({
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 
   const input$ = useMemo(
@@ -150,6 +173,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -166,6 +190,7 @@ export function Chart({
     getTimeRange,
     refetch$,
     onTotalHitsChange,
+    isPlainRecord,
   });
 
   const {
@@ -176,10 +201,11 @@ export function Chart({
     histogramCss,
     breakdownFieldSelectorGroupCss,
     breakdownFieldSelectorItemCss,
+    suggestionsSelectorItemCss,
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
-  const lensAttributes = useMemo(
+  const lensAttributesContext = useMemo(
     () =>
       getLensAttributes({
         title: chart?.title,
@@ -188,21 +214,62 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      currentSuggestion,
+      dataView,
+      filters,
+      query,
+    ]
   );
 
-  const getRelativeTimeRange = useMemo(
-    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
-    [originalGetRelativeTimeRange, relativeTimeRange]
+  const onSuggestionSelectorChange = useCallback(
+    (s: Suggestion | undefined) => {
+      onSuggestionChange?.(s);
+    },
+    [onSuggestionChange]
   );
+
+  useEffect(() => {
+    // close the flyout for dataview mode
+    // or if no chart is visible
+    if (!chartVisible && isFlyoutVisible) {
+      setIsFlyoutVisible(false);
+    }
+  }, [chartVisible, isFlyoutVisible]);
 
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    getRelativeTimeRange,
-    lensAttributes,
+    relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
+    lensAttributes: lensAttributesContext.attributes,
+    isPlainRecord,
   });
+  const LensSaveModalComponent = services.lens.SaveModalComponent;
+  const canSaveVisualization =
+    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
+
+  const renderEditButton = useMemo(
+    () => (
+      <EuiButtonIcon
+        size="xs"
+        iconType="pencil"
+        onClick={() => setIsFlyoutVisible(true)}
+        data-test-subj="unifiedHistogramEditFlyoutVisualization"
+        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
+          defaultMessage: 'Edit visualization',
+        })}
+        disabled={isFlyoutVisible}
+      />
+    ),
+    [isFlyoutVisible]
+  );
+
+  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
   return (
     <EuiFlexGroup
@@ -215,6 +282,7 @@ export function Chart({
       <EuiFlexItem grow={false} css={resultCountCss}>
         <EuiFlexGroup
           justifyContent="spaceBetween"
+          alignItems="center"
           gutterSize="none"
           responsive={false}
           css={resultCountInnerCss}
@@ -242,6 +310,51 @@ export function Chart({
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
                     />
+                  </EuiFlexItem>
+                )}
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                  <EuiFlexItem css={suggestionsSelectorItemCss}>
+                    <SuggestionSelector
+                      suggestions={allSuggestions}
+                      activeSuggestion={currentSuggestion}
+                      onSuggestionChange={onSuggestionSelectorChange}
+                    />
+                  </EuiFlexItem>
+                )}
+                {canSaveVisualization && (
+                  <>
+                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                          defaultMessage: 'Save visualization',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="save"
+                          onClick={() => setIsSaveModalVisible(true)}
+                          data-test-subj="unifiedHistogramSaveVisualization"
+                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                            defaultMessage: 'Save visualization',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
+                )}
+                {canEditVisualizationOnTheFly && (
+                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                    {!isFlyoutVisible ? (
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.editVisualizationButton', {
+                          defaultMessage: 'Edit visualization',
+                        })}
+                      >
+                        {renderEditButton}
+                      </EuiToolTip>
+                    ) : (
+                      renderEditButton
+                    )}
                   </EuiFlexItem>
                 )}
                 {onEditVisualization && (
@@ -306,6 +419,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
@@ -314,17 +435,44 @@ export function Chart({
               chart={chart}
               getTimeRange={getTimeRange}
               refetch$={refetch$}
-              lensAttributes={lensAttributes}
+              lensAttributesContext={lensAttributesContext}
+              isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}
+              withDefaultActions={withDefaultActions}
             />
           </section>
           {appendHistogram}
         </EuiFlexItem>
+      )}
+      {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
+        <LensSaveModalComponent
+          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          onSave={() => {}}
+          onClose={() => setIsSaveModalVisible(false)}
+          isSaveable={false}
+        />
+      )}
+      {isFlyoutVisible && (
+        <ChartConfigPanel
+          {...{
+            services,
+            lensAttributesContext,
+            dataView,
+            lensTablesAdapter,
+            currentSuggestion,
+            isFlyoutVisible,
+            setIsFlyoutVisible,
+            isPlainRecord,
+            query: originalQuery,
+            onSuggestionChange,
+          }}
+        />
       )}
     </EuiFlexGroup>
   );

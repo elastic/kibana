@@ -15,12 +15,12 @@ export const BASE_ACTION_API_PATH = '/api/actions';
 
 export interface GetChoicesProps {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
   fields: string[];
+  signal?: AbortSignal;
 }
 
-export async function getChoices({ http, signal, connectorId, fields }: GetChoicesProps) {
+export async function getChoices({ http, connectorId, fields, signal }: GetChoicesProps) {
   const res = await http.post<ConnectorExecutorResult<Choice[]>>(
     getExecuteConnectorUrl(connectorId),
     {

@@ -7,6 +7,19 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
+import path from 'path';
+import { safeLoad as loadYaml } from 'js-yaml';
+import { readFileSync } from 'fs';
+
+import type { YamlRoleDefinitions } from '../../test_serverless/shared/lib';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
+const ROLES_YAML_FILE_PATH = path.join(
+  `${__dirname}/cypress/support`,
+  'project_controller_osquery_roles.yml'
+);
+const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
+
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
@@ -29,12 +42,21 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#osquery-app',
     },
+    grepFilterSpecs: true,
+    grepTags: '@ess',
+    grepOmitFiltered: true,
   },
 
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 10,
+    numTestsKeptInMemory: 3,
+    setupNodeEvents(on, config) {
+      setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
+
+      return config;
+    },
   },
 });

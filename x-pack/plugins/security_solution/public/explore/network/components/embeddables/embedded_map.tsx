@@ -12,10 +12,14 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddablePanel,
+  isErrorEmbeddable,
+  type ErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { isEqual } from 'lodash/fp';
+import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { Loader } from '../../../../common/components/loader';
@@ -242,22 +246,19 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, query]);
 
+  const timeRangeFilter = useMemo(
+    () => buildTimeRangeFilter(startDate, endDate),
+    [startDate, endDate]
+  );
+
   useEffect(() => {
     if (embeddable != null) {
-      embeddable.updateInput({ filters });
+      // pass time range as filter instead of via timeRange param
+      // if user's data view does not have a time field, the timeRange param is not applied
+      // using filter will always apply the time range
+      embeddable.updateInput({ filters: [...filters, ...timeRangeFilter] });
     }
-  }, [embeddable, filters]);
-
-  // DateRange updated useEffect
-  useEffect(() => {
-    if (embeddable != null && startDate != null && endDate != null) {
-      const timeRange = {
-        from: new Date(startDate).toISOString(),
-        to: new Date(endDate).toISOString(),
-      };
-      embeddable.updateInput({ timeRange });
-    }
-  }, [embeddable, startDate, endDate]);
+  }, [embeddable, filters, timeRangeFilter]);
 
   const setDefaultMapVisibility = useCallback(
     (isOpen: boolean) => {
@@ -281,14 +282,14 @@ export const EmbeddedMapComponent = ({
           {isIndexError ? (
             <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
           ) : embeddable != null ? (
-            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+            <EmbeddablePanel embeddable={embeddable} />
           ) : (
             <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
         </EmbeddableMap>
       </Embeddable>
     );
-  }, [embeddable, isIndexError, portalNode, services, storageValue]);
+  }, [embeddable, isIndexError, portalNode, storageValue]);
 
   return isError ? null : (
     <StyledEuiAccordion

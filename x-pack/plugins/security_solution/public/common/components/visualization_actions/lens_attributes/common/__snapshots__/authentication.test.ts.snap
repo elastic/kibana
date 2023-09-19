@@ -251,7 +251,8 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
-        "position": "left",
+        "legendSize": "xlarge",
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",

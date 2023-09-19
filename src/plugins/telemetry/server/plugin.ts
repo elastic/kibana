@@ -40,6 +40,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import apm from 'elastic-apm-node';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -84,7 +85,7 @@ export interface TelemetryPluginSetup {
  */
 export interface TelemetryPluginStart {
   /**
-   * Resolves `true` if the user has opted into send Elastic usage data.
+   * Resolves `true` if sending usage to Elastic is enabled.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    *
@@ -149,9 +150,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { analytics, http, savedObjects }: CoreSetup,
+    { analytics, docLinks, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
+    this.isOptedIn$.subscribe((optedIn) => {
+      const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
+      this.logger.info(
+        `Telemetry collection is ${optInStatusMsg}. For more information on telemetry settings, refer to ${docLinks.links.telemetry.settings}.`
+      );
+    });
+
     if (this.isOptedIn !== undefined) {
       analytics.optIn({ global: { enabled: this.isOptedIn } });
     }
@@ -166,12 +174,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
-      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      context$: this.config$.pipe(
+        map(({ labels }) => ({ labels })),
+        tap(({ labels }) =>
+          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+        )
+      ),
       schema: {
         labels: {
           type: 'pass_through',
           _meta: {
-            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+            description:
+              'Custom labels added to the telemetry.labels config in the kibana.yml. Validated and limited to a known set of labels.',
           },
         },
       },
@@ -198,8 +212,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const { sendUsageTo } = await firstValueFrom(config$);
+        const { appendServerlessChannelsSuffix, sendUsageTo } = await firstValueFrom(config$);
         const telemetryUrl = getTelemetryChannelEndpoint({
+          appendServerlessChannelsSuffix,
           env: sendUsageTo,
           channelName: 'snapshot',
         });

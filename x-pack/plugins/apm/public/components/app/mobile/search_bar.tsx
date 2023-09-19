@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -14,30 +13,27 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
-import { KueryBar } from '../../shared/kuery_bar';
 import { TimeComparison } from '../../shared/time_comparison';
 import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { MobileFilters } from './service_overview/filters';
+import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 
 interface Props {
   hidden?: boolean;
-  showKueryBar?: boolean;
+  showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
   showMobileFilters?: boolean;
-  kueryBarPlaceholder?: string;
-  kueryBarBoolFilter?: QueryDslQueryContainer[];
+  searchBarPlaceholder?: string;
 }
 
 export function MobileSearchBar({
   hidden = false,
-  showKueryBar = true,
+  showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
   showMobileFilters = false,
-  kueryBarBoolFilter,
-  kueryBarPlaceholder,
+  searchBarPlaceholder,
 }: Props) {
   const { isSmall, isMedium, isLarge, isXl, isXXXL } = useBreakpoints();
 
@@ -66,17 +62,11 @@ export function MobileSearchBar({
             </EuiFlexItem>
           )}
 
-          {showKueryBar && (
+          {showUnifiedSearchBar && (
             <EuiFlexItem>
-              <KueryBar
-                placeholder={kueryBarPlaceholder}
-                boolFilter={kueryBarBoolFilter}
-              />
+              <UnifiedSearchBar placeholder={searchBarPlaceholder} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={isSmall}>
-            <ApmDatePicker />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size={isSmall ? 's' : 'm'} />

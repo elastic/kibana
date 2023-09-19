@@ -9,11 +9,11 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { latestFindingsTransform } from './latest_findings_transform';
+import { latestVulnerabilitiesTransform } from './latest_vulnerabilities_transforms';
 
-const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
-const LATEST_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
-
-const PREVIOUS_TRANSFORMS = [LATEST_TRANSFORM_V830, LATEST_TRANSFORM_V840];
+const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
+const LATEST_FINDINGS_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
+const PREVIOUS_TRANSFORMS = [LATEST_FINDINGS_TRANSFORM_V830, LATEST_FINDINGS_TRANSFORM_V840];
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -23,6 +23,7 @@ export const initializeCspTransforms = async (
   // Deletes old assets from previous versions as part of upgrade process
   await deletePreviousTransformsVersions(esClient, logger);
   await initializeTransform(esClient, latestFindingsTransform, logger);
+  await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
 };
 
 export const initializeTransform = async (
@@ -84,23 +85,27 @@ export const startTransformIfNotStarted = async (
     const transformStats = await esClient.transform.getTransformStats({
       transform_id: transformId,
     });
+
     if (transformStats.count <= 0) {
       logger.error(`Failed starting transform ${transformId}: couldn't find transform`);
       return;
     }
+
     const fetchedTransformStats = transformStats.transforms[0];
-    if (fetchedTransformStats.state === 'stopped') {
+
+    // trying to restart the transform in case it comes to a full stop or failure
+    if (fetchedTransformStats.state === 'stopped' || fetchedTransformStats.state === 'failed') {
       try {
         return await esClient.transform.startTransform({ transform_id: transformId });
       } catch (startErr) {
         const startError = transformError(startErr);
-        logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
+        logger.error(
+          `Failed to start transform ${transformId}. Transform State: Transform State: ${fetchedTransformStats.state}. Error: ${startError.message}`
+        );
       }
-    } else if (
-      fetchedTransformStats.state === 'stopping' ||
-      fetchedTransformStats.state === 'aborting' ||
-      fetchedTransformStats.state === 'failed'
-    ) {
+    }
+
+    if (fetchedTransformStats.state === 'stopping' || fetchedTransformStats.state === 'aborting') {
       logger.error(
         `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
       );

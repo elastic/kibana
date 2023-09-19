@@ -12,20 +12,27 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 
   describe('scroll_count', () => {
     describe('saved objects with hidden type', () => {
-      before(() =>
-        esArchiver.load(
+      before(async () => {
+        await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+        );
+      });
+      after(async () => {
+        await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
-      );
+        );
+        await kibanaServer.savedObjects.clean({
+          types: ['test-hidden-importable-exportable'],
+        });
+      });
 
       it('only counts hidden types that are importableAndExportable', async () => {
         const res = await supertest

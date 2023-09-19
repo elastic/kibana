@@ -14,11 +14,11 @@ import type {
 import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
-interface SingleSearchAfterParams {
+export interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];
@@ -104,14 +104,12 @@ export const singleSearchAfter = async <
         searchErrors,
       };
     } catch (exc) {
-      ruleExecutionLogger.error(`[-] nextSearchAfter threw an error ${exc}`);
+      ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
       if (
         exc.message.includes(`No mapping found for [${primaryTimestamp}] in order to sort on`) ||
         (secondaryTimestamp &&
           exc.message.includes(`No mapping found for [${secondaryTimestamp}] in order to sort on`))
       ) {
-        ruleExecutionLogger.error(`[-] failure reason: ${exc.message}`);
-
         const searchRes: SignalSearchResponse<TAggregations> = {
           took: 0,
           timed_out: false,

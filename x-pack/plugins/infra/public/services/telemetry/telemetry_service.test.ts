@@ -49,6 +49,8 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       expect(telemetry).toHaveProperty('reportHostEntryClicked');
+      expect(telemetry).toHaveProperty('reportHostFlyoutFilterRemoved');
+      expect(telemetry).toHaveProperty('reportHostFlyoutFilterAdded');
       expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
     });
   });
@@ -74,7 +76,7 @@ describe('TelemetryService', () => {
       );
     });
 
-    it('should report hosts entry click with cloud provider equal to "unknow" if not exist', async () => {
+    it('should report hosts entry click with cloud provider equal to "unknown" if not exist', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
       const telemetry = service.start();
@@ -101,20 +103,132 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       telemetry.reportHostsViewQuerySubmitted({
-        control_filters: ['test-filter'],
-        filters: [],
+        control_filter_fields: ['host.os.name'],
+        filter_fields: [],
         interval: 'interval(now-1h)',
-        query: '',
+        with_query: false,
+        limit: 100,
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED,
         {
-          control_filters: ['test-filter'],
-          filters: [],
+          control_filter_fields: ['host.os.name'],
+          filter_fields: [],
           interval: 'interval(now-1h)',
-          query: '',
+          with_query: false,
+          limit: 100,
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutFilterRemoved', () => {
+    it('should report Host Flyout Filter Removed click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutFilterRemoved({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED,
+        {
+          field_name: 'agent.version',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutFilterAdded', () => {
+    it('should report Host Flyout Filter Added click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutFilterAdded({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
+        {
+          field_name: 'agent.version',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostsViewTotalHostCountRetrieved', () => {
+    it('should report Host Flyout Filter Added click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostsViewTotalHostCountRetrieved({
+        total: 300,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+        {
+          total: 300,
+        }
+      );
+    });
+  });
+
+  describe('#reportAssetDetailsFlyoutViewed', () => {
+    it('should report asset details viewed in flyout with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAssetDetailsFlyoutViewed({
+        componentName: 'infraAssetDetailsFlyout',
+        assetType: 'host',
+        tabId: 'overview',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED,
+        {
+          componentName: 'infraAssetDetailsFlyout',
+          assetType: 'host',
+          tabId: 'overview',
+        }
+      );
+    });
+  });
+
+  describe('#reportAssetDetailsPageViewed', () => {
+    it('should report asset details viewed in full page with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAssetDetailsPageViewed({
+        componentName: 'infraAssetDetailsPage',
+        assetType: 'host',
+        tabId: 'overview',
+        integrations: ['nginx'],
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED,
+        {
+          componentName: 'infraAssetDetailsPage',
+          assetType: 'host',
+          tabId: 'overview',
+          integrations: ['nginx'],
         }
       );
     });

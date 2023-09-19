@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { ActionTypes, CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -25,7 +25,6 @@ import {
   createCase,
   createComment,
   removeServerGeneratedPropertiesFromSavedObject,
-  getComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
   bulkCreateAttachments,
@@ -37,7 +36,6 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   /**
    * Attachment types are being registered in
@@ -156,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const externalRefComment = patchedCase.comments?.find(
-          (comment) => comment.type === CommentType.persistableState
+          (comment) => comment.type === AttachmentType.persistableState
         );
 
         const esResponse = await getSOFromKibanaIndex({
@@ -261,61 +259,17 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
-    });
 
-    describe('Migrations', () => {
-      const CASE_ID = 'cdeede80-fa0f-11ec-bcb4-59410ea3e0fe';
-      const ATTACHMENT_ID = '8cf7a270-fa11-11ec-bcb4-59410ea3e0fe';
-
-      before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.4.0/persistable_state_attachment.json'
-        );
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.4.0/persistable_state_attachment.json'
-        );
-        await deleteAllCaseItems(es);
-      });
-
-      it('migrates a persistable state attachment correctly', async () => {
-        const attachment = await getComment({
+      it('400s when bulk creating a non registered persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
           supertest,
-          caseId: CASE_ID,
-          commentId: ATTACHMENT_ID,
-        });
-
-        const normalizedAttachment = removeServerGeneratedPropertiesFromSavedObject(attachment);
-
-        expect(normalizedAttachment).to.eql({
-          created_by: { email: null, full_name: null, username: 'elastic' },
-          owner: 'cases',
-          // The inject method of the attachment injects the testRef when you get the attachment
-          persistableStateAttachmentState: { migrated: true, injectedId: 'testRef' },
-          persistableStateAttachmentTypeId: '.test',
-          pushed_at: null,
-          pushed_by: null,
-          type: 'persistableState',
-          updated_by: null,
-        });
-      });
-
-      it('migrates a persistable state attachment correctly on user action', async () => {
-        const userActions = await getCaseUserActions({ supertest, caseID: CASE_ID });
-        const attachment = userActions.find(
-          (userAction) => userAction.type === ActionTypes.comment
-        );
-
-        expect(attachment?.payload).to.eql({
-          comment: {
-            owner: 'cases',
-            // The inject method of the attachment injects the testRef when you get the attachment
-            persistableStateAttachmentState: { migrated: true, injectedId: 'testRef' },
-            persistableStateAttachmentTypeId: '.test',
-            type: 'persistableState',
-          },
+          caseId: postedCase.id,
+          params: [
+            persistableStateAttachment,
+            { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
+          ],
+          expectedHttpCode: 400,
         });
       });
     });

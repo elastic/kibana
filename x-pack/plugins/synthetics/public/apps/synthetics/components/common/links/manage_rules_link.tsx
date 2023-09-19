@@ -17,7 +17,7 @@ export const ManageRulesLink = () => {
   const manageRulesUrl = observability.useRulesLink();
 
   return (
-    <EuiLink color="text" href={manageRulesUrl.href}>
+    <EuiLink data-test-subj="syntheticsManageRulesLinkLink" color="text" href={manageRulesUrl.href}>
       {ToggleFlyoutTranslations.navigateToAlertingButtonContent}
     </EuiLink>
   );

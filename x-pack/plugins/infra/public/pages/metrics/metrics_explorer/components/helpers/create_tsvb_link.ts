@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { v1 as uuidv1 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';

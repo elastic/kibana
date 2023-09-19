@@ -10,18 +10,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/data-plugin/public';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 import type {
   HostRiskScore,
   RiskScoreRequestOptions,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
 import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -73,18 +71,7 @@ const mockDeps = {
     })),
   },
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn().mockReturnValue({
-        warn: jest.fn(),
-      }),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
 };
 
@@ -96,6 +83,10 @@ export const mockOptions: RiskScoreRequestOptions = {
 
 describe('buildRiskScoreQuery search strategy', () => {
   const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
@@ -166,5 +157,30 @@ describe('buildRiskScoreQuery search strategy', () => {
     const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
 
     expect(get('data[0].oldestAlertTimestamp', result)).toBe(oldestAlertTimestamp);
+  });
+
+  test('should filter enhance query by time range', async () => {
+    await riskScore.parse(
+      {
+        ...mockOptions,
+        alertsTimerange: {
+          from: 'now-5m',
+          to: 'now',
+          interval: '1m',
+        },
+      },
+      mockSearchStrategyResponse,
+      mockDeps
+    );
+
+    expect(searchMock.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([
+        {
+          range: {
+            '@timestamp': { format: 'strict_date_optional_time', gte: 'now-5m', lte: 'now' },
+          },
+        },
+      ])
+    );
   });
 });

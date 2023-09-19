@@ -207,6 +207,8 @@ export class DataGridService extends FtrService {
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
     const toggle = await row[0].findByTestSubject(testSubj);
+
+    await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
   }
 
@@ -300,6 +302,27 @@ export class DataGridService extends FtrService {
   public async clickEditField(field: string) {
     await this.openColMenuByField(field);
     await this.testSubjects.click('gridEditFieldButton');
+  }
+
+  public async clickGridSettings() {
+    await this.testSubjects.click('dataGridDisplaySelectorButton');
+  }
+
+  public async getCurrentRowHeightValue() {
+    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    return (
+      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
+    ).getVisibleText();
+  }
+
+  public async changeRowHeightValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find('rowHeightButtonGroup');
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
+  public async resetRowHeightValue() {
+    await this.testSubjects.click('resetDisplaySelector');
   }
 
   public async getDetailsRow(): Promise<WebElementWrapper> {

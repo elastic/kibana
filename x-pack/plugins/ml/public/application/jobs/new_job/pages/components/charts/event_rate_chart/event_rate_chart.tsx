@@ -14,6 +14,7 @@ import {
   TooltipType,
   BrushEndListener,
   PartialTheme,
+  Tooltip,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { Axes } from '../common/axes';
@@ -72,8 +73,8 @@ export const EventRateChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart css={overlayRanges !== undefined ? cssOverride : undefined}>
           {showAxis === true && <Axes />}
+          <Tooltip type={TooltipType.None} />
           <Settings
-            tooltip={TooltipType.None}
             onBrushEnd={onBrushEnd}
             // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
             theme={theme}

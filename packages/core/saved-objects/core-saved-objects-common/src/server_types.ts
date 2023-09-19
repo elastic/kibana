@@ -80,10 +80,15 @@ export interface SavedObject<T = unknown> {
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritdoc SavedObjectsMigrationVersion}
+   * @deprecated Use `typeMigrationVersion` instead.
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  typeMigrationVersion?: string;
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.
@@ -96,4 +101,12 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }

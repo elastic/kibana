@@ -193,8 +193,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.dataVisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
-        render: (fieldType: SupportedFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
+        render: (fieldType: SupportedFieldType, item: DataVisualizerTableItem) => {
+          return <FieldTypeIcon type={item.secondaryType ?? fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,
         sortable: true,
@@ -396,7 +396,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`,
     },
     '.euiTableRow > .euiTableRowCel': {
-      'border-top': 0,
+      borderTop: 0,
     },
     [useEuiMinBreakpoint('s')]: {
       '& .columnHeader__title': {
@@ -485,7 +485,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isSelectable={false}
             onTableChange={onTableChange}
-            data-test-subj={'dataVisualizerTable'}
+            data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}

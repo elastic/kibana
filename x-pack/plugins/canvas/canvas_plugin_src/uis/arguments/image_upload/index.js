@@ -14,7 +14,7 @@ import {
   getElasticOutline,
   isValidHttpUrl,
   resolveFromArgs,
-} from '@kbn/presentation-util-plugin/public';
+} from '@kbn/presentation-util-plugin/common';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';

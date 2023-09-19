@@ -10,7 +10,7 @@ import { UiActionsService } from './ui_actions_service';
 import { ActionDefinition, ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
-import { Trigger } from '../triggers';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { OverlayStart } from '@kbn/core/public';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';

@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { CoreSetup } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { ExtensionsService } from '../services';
@@ -27,12 +28,12 @@ import { httpService } from './services/http';
 
 function initSetup({
   usageCollection,
-  coreSetup,
+  core,
 }: {
-  coreSetup: CoreSetup<StartDependencies>;
+  core: CoreStart;
   usageCollection: UsageCollectionSetup;
 }) {
-  const { http, notifications } = coreSetup;
+  const { http, notifications } = core;
 
   httpService.setup(http);
   notificationService.setup(notifications);
@@ -46,14 +47,31 @@ function initSetup({
   return { uiMetricService };
 }
 
-export async function mountManagementSection(
-  coreSetup: CoreSetup<StartDependencies>,
-  usageCollection: UsageCollectionSetup,
-  params: ManagementAppMountParams,
-  extensionsService: ExtensionsService,
-  isFleetEnabled: boolean,
-  kibanaVersion: SemVer
-) {
+export async function mountManagementSection({
+  coreSetup,
+  usageCollection,
+  params,
+  extensionsService,
+  isFleetEnabled,
+  kibanaVersion,
+  enableIndexActions = true,
+  enableLegacyTemplates = true,
+  enableIndexDetailsPage = false,
+  enableIndexStats = true,
+  cloud,
+}: {
+  coreSetup: CoreSetup<StartDependencies>;
+  usageCollection: UsageCollectionSetup;
+  params: ManagementAppMountParams;
+  extensionsService: ExtensionsService;
+  isFleetEnabled: boolean;
+  kibanaVersion: SemVer;
+  enableIndexActions?: boolean;
+  enableLegacyTemplates?: boolean;
+  enableIndexDetailsPage?: boolean;
+  enableIndexStats?: boolean;
+  cloud?: CloudSetup;
+}) {
   const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
@@ -63,6 +81,8 @@ export async function mountManagementSection(
     chrome: { docTitle },
     uiSettings,
     executionContext,
+    settings,
+    http,
   } = core;
 
   const { url } = startDependencies.share;
@@ -73,7 +93,7 @@ export async function mountManagementSection(
 
   const { uiMetricService } = initSetup({
     usageCollection,
-    coreSetup,
+    core,
   });
 
   const appDependencies: AppDependencies = {
@@ -82,10 +102,13 @@ export async function mountManagementSection(
       getUrlForApp: application.getUrlForApp,
       executionContext,
       application,
+      http,
     },
     plugins: {
       usageCollection,
       isFleetEnabled,
+      share: startDependencies.share,
+      cloud,
     },
     services: {
       httpService,
@@ -93,9 +116,16 @@ export async function mountManagementSection(
       uiMetricService,
       extensionsService,
     },
+    config: {
+      enableIndexActions,
+      enableLegacyTemplates,
+      enableIndexDetailsPage,
+      enableIndexStats,
+    },
     history,
     setBreadcrumbs,
     uiSettings,
+    settings,
     url,
     docLinks,
     kibanaVersion,

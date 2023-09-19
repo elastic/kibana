@@ -9,14 +9,14 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { syncEditedMonitor } from './edit_monitor';
 import { SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import {
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
+import { SyntheticsServerSetup } from '../../types';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -26,7 +26,7 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
 describe('syncEditedMonitor', () => {
   const logger = loggerMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     stackVersion: null,
     authSavedObjectsClient: {
@@ -42,19 +42,14 @@ describe('syncEditedMonitor', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         getByIDs: jest.fn().mockReturnValue([]),
         buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
-  } as unknown as UptimeServerSetup;
+    encryptedSavedObjects: mockEncryptedSO(),
+  } as unknown as SyntheticsServerSetup;
 
   const editedMonitor = {
     type: 'http',
@@ -84,7 +79,7 @@ describe('syncEditedMonitor', () => {
     attributes: { name: editedMonitor.name, locations: [] } as any,
     type: 'synthetics-monitor',
     references: [],
-  } as SavedObject<EncryptedSyntheticsMonitor>;
+  } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
@@ -97,19 +92,21 @@ describe('syncEditedMonitor', () => {
       normalizedMonitor: editedMonitor,
       previousMonitor,
       decryptedPreviousMonitor:
-        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
-      syntheticsMonitorClient,
-      server: serverMock,
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient:
-        serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext: {
+        syntheticsMonitorClient,
+        server: serverMock,
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient:
+          serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      } as any,
       spaceId: 'test-space',
     });
 
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+          configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
       ])
     );

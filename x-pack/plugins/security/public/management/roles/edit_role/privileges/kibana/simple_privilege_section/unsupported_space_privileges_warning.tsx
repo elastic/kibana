@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export class UnsupportedSpacePrivilegesWarning extends Component<{}, {}> {
   public render() {
-    return <EuiCallOut iconType="alert" color="warning" title={this.getMessage()} />;
+    return <EuiCallOut iconType="warning" color="warning" title={this.getMessage()} />;
   }
 
   private getMessage = () => {

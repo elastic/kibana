@@ -8,13 +8,13 @@
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { MlCoreSetup } from '../plugin';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyChartsFieldSelectionContext,
 } from '../embeddables';
 import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
-import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
@@ -41,7 +41,7 @@ export function createApplyEntityFieldFiltersAction(
 
       filterManager.addFilters(
         data
-          .filter((d) => d.operation === ENTITY_FIELD_OPERATIONS.ADD)
+          .filter((d) => d.operation === ML_ENTITY_FIELD_OPERATIONS.ADD)
           .map<Filter>(({ fieldName, fieldValue }) => {
             return {
               $state: {
@@ -73,7 +73,7 @@ export function createApplyEntityFieldFiltersAction(
       );
 
       data
-        .filter((field) => field.operation === ENTITY_FIELD_OPERATIONS.REMOVE)
+        .filter((field) => field.operation === ML_ENTITY_FIELD_OPERATIONS.REMOVE)
         .forEach((field) => {
           const filter = filterManager
             .getFilters()

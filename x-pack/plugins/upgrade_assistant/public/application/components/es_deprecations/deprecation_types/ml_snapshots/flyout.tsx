@@ -203,7 +203,7 @@ export const FixSnapshotsFlyout = ({
                   : i18nTexts.upgradeSnapshotErrorTitle
               }
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="resolveSnapshotError"
             >
               {snapshotState.error.message}
@@ -217,7 +217,7 @@ export const FixSnapshotsFlyout = ({
             <EuiCallOut
               title={i18nTexts.upgradeModeEnabledErrorTitle}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="mlUpgradeModeEnabledError"
             >
               <p>

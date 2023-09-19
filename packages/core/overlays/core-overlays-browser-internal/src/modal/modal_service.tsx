@@ -15,7 +15,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type {
@@ -23,6 +22,7 @@ import type {
   OverlayModalOpenOptions,
   OverlayModalStart,
 } from '@kbn/core-overlays-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to
@@ -87,11 +87,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <CoreContextProvider i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider i18n={i18n} theme={theme}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
-          </CoreContextProvider>,
+          </KibanaRenderContextProvider>,
           targetDomElement
         );
 
@@ -147,9 +147,9 @@ export class ModalService {
           };
 
           render(
-            <CoreContextProvider i18n={i18n} theme={theme}>
+            <KibanaRenderContextProvider i18n={i18n} theme={theme}>
               <EuiConfirmModal {...props} />
-            </CoreContextProvider>,
+            </KibanaRenderContextProvider>,
             targetDomElement
           );
         });

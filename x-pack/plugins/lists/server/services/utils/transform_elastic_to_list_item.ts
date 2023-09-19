@@ -56,13 +56,16 @@ export const transformElasticHitsToListItem = ({
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
     } else {
       return {
+        '@timestamp': _source?.['@timestamp'],
         _version: encodeHitVersion(hit),
         created_at,
         created_by,
         deserializer,
         id: _id,
         list_id,
-        meta,
+        // meta can be null if deleted (empty in PUT payload), since update_by_query set deleted values as null
+        // return it as undefined to keep it consistent with payload
+        meta: meta ?? undefined,
         serializer,
         tie_breaker_id,
         type,

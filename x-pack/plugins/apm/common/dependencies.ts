@@ -13,14 +13,14 @@ import {
 } from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 
-export const kueryBarPlaceholder = i18n.translate(
-  'xpack.apm.dependencies.kueryBarPlaceholder',
+export const unifiedSearchBarPlaceholder = i18n.translate(
+  'xpack.apm.dependencies.unifiedSearchBarPlaceholder',
   {
     defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
   }
 );
 
-export const getKueryBarBoolFilter = ({
+export const getSearchBarBoolFilter = ({
   dependencyName,
   environment,
 }: {

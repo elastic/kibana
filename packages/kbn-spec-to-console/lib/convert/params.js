@@ -16,6 +16,7 @@ module.exports = (params) => {
         // { description: 'TODO: ?' }
         break;
       case 'int':
+      case 'integer':
         result[param] = 0;
         break;
       case 'double':

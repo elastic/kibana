@@ -6,6 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -245,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    it('should return a 400 if there is another package policy with the same name', async function () {
+    it('should return a 409 if there is another package policy with the same name', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -279,10 +280,10 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
-    it('should return a 400 if there is a package policy with the same name on a different policy', async function () {
+    it('should return a 409 if there is a package policy with the same name on a different policy', async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -325,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
     it('should return a 400 with required variables not provided', async function () {
@@ -446,6 +447,114 @@ export default function (providerContext: FtrProviderContext) {
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
 
+    it('should return a 200 when a package has no variables or data streams', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'no-variables-or-data-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'single_input_no_streams',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
+    it('should return 200 and formatted inputs when the format=simplified query param is passed', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies?format=simplified`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-3',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+
+      expect(body.item.inputs).to.eql({ single_input: { enabled: true, streams: {} } });
+    });
+
+    it('should return 200 and arrayed inputs when the format=legacy query param is passed', async function () {
+      const inputs = [
+        {
+          enabled: true,
+          streams: [],
+          type: 'single_input',
+        },
+      ];
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies?format=legacy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-4',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs,
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+
+      expect(body.item.inputs).to.eql(inputs);
+    });
+
+    it('should return 400 if an invalid format query param is passed', async function () {
+      await supertest
+        .post(`/api/fleet/package_policies?format=foo`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-2',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+    });
+
     describe('input only packages', () => {
       it('should default dataset if not provided for input only pkg', async function () {
         await supertest
@@ -513,6 +622,37 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Simplified package policy', () => {
+      it('should support providing an id', async () => {
+        const id = `test-id-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id,
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        await await supertest.get(`/api/fleet/package_policies/${id}`).expect(200);
+      });
+
       it('should work with valid values', async () => {
         await supertest
           .post(`/api/fleet/package_policies`)
@@ -614,6 +754,98 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should return 200 and formatted inputs when the format=simplified query param is passed', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies?format=simplified`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'create-simplified-package-policy-required-variables-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        expect(body.item.inputs).to.eql({
+          'with_required_variables-test_input': {
+            enabled: true,
+            streams: {
+              'with_required_variables.log': {
+                enabled: true,
+                vars: { test_var_required: 'I am required' },
+              },
+            },
+          },
+        });
+      });
+
+      it('should return 200 and arrayed inputs when the format=legacy query param is passed', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies?format=legacy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'create-simplified-package-policy-required-variables-2',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        expect(Array.isArray(body.item.inputs));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies?format=foo`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+      });
     });
 
     describe('Package verification', () => {
@@ -624,7 +856,7 @@ export default function (providerContext: FtrProviderContext) {
       const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
         const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
           method: 'GET',
-          path: `/.kibana/_doc/epm-packages:${pkg}`,
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/epm-packages:${pkg}`,
         });
 
         return res?._source?.['epm-packages'] as Installation;
@@ -677,7 +909,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content_' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,
@@ -713,7 +945,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content-' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,

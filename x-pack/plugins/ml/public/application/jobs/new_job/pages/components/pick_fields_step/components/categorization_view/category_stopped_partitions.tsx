@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs/operators';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
-import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
 const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {

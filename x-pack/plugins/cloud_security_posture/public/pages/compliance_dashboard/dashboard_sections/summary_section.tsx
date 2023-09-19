@@ -10,11 +10,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { statusColors } from '../../../common/constants';
-import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
+import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   ComplianceDashboardData,
   Evaluation,
@@ -31,6 +31,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
 } from '../../../../common/constants';
+import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -86,7 +87,12 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title: <CompactFormattedNumber number={complianceData.clusters.length} />,
+        title:
+          dashboardType === KSPM_POLICY_TEMPLATE ? (
+            <CompactFormattedNumber number={complianceData.clusters.length} />
+          ) : (
+            <AccountsEvaluatedWidget clusters={complianceData.clusters} />
+          ),
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
@@ -116,7 +122,7 @@ export const SummarySection = ({
       },
     ],
     [
-      complianceData.clusters.length,
+      complianceData.clusters,
       complianceData.stats.resourcesEvaluated,
       complianceData.stats.totalFailed,
       dashboardType,
@@ -139,6 +145,7 @@ export const SummarySection = ({
         // height for compliance by cis section with max rows
         height: 310px;
       `}
+      data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
     >
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
@@ -151,7 +158,7 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel title={chartTitle}>
-          <CloudPostureScoreChart
+          <ComplianceScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}

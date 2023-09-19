@@ -6,10 +6,14 @@
  */
 
 export interface GroupModel {
-  groupSelector: React.ReactElement | null;
-  selectedGroup: string | null;
+  activeGroups: string[];
+  options: Array<{ key: string; label: string }>;
+}
+
+export interface Groups {
+  [tableId: string]: GroupModel;
 }
 
 export interface GroupState {
-  groups: GroupModel;
+  groups: Groups;
 }

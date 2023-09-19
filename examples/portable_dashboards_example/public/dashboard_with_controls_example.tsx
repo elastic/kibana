@@ -6,19 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { FILTER_DEBUGGER_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public';
-import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
+import {
+  AwaitingDashboardAPI,
+  DashboardRenderer,
+  DashboardCreationOptions,
+} from '@kbn/dashboard-plugin/public';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
+  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+
+  // add a filter debugger panel as soon as the dashboard becomes available
+  useEffect(() => {
+    if (!dashboard) return;
+    (async () => {
+      const embeddable = await dashboard.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
+      const prevPanelState = dashboard.getExplicitInput().panels[embeddable.id];
+      // resize the new panel so that it fills up the entire width of the dashboard
+      dashboard.updateInput({
+        panels: {
+          [embeddable.id]: {
+            ...prevPanelState,
+            gridData: { i: embeddable.id, x: 0, y: 0, w: 48, h: 12 },
+          },
+        },
+      });
+    })();
+  }, [dashboard]);
+
   return (
     <>
       <EuiTitle>
@@ -29,10 +51,10 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <DashboardContainerRenderer
-          getCreationOptions={async () => {
+        <DashboardRenderer
+          getCreationOptions={async (): Promise<DashboardCreationOptions> => {
             const builder = controlGroupInputBuilder;
-            const controlGroupInput = {};
+            const controlGroupInput = getDefaultControlGroupInput();
             await builder.addDataControlFromField(controlGroupInput, {
               dataViewId: dataView.id ?? '',
               title: 'Destintion country',
@@ -50,29 +72,14 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
 
             return {
               useControlGroupIntegration: true,
-              initialInput: {
+              getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
                 controlGroupInput,
-              },
+              }),
             };
           }}
-          onDashboardContainerLoaded={(container) => {
-            const addFilterEmbeddable = async () => {
-              const embeddable = await container.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
-              const prevPanelState = container.getExplicitInput().panels[embeddable.id];
-              // resize the new panel so that it fills up the entire width of the dashboard
-              container.updateInput({
-                panels: {
-                  [embeddable.id]: {
-                    ...prevPanelState,
-                    gridData: { i: embeddable.id, x: 0, y: 0, w: 48, h: 12 },
-                  },
-                },
-              });
-            };
-            addFilterEmbeddable();
-          }}
+          ref={setDashboard}
         />
       </EuiPanel>
     </>

@@ -1,0 +1,80 @@
+{
+  "id": "@kbn/deeplinks-observability",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"metrics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observabilityOnboarding\" | \"observability-log-explorer\""
+        ],
+        "path": "packages/deeplinks/observability/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.AppId",
+            "text": "AppId"
+          },
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:slos\" | \"metrics:settings\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:metrics-hosts\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\""
+        ],
+        "path": "packages/deeplinks/observability/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBSERVABILITY_ONBOARDING_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ONBOARDING_APP_ID",
+        "description": [],
+        "signature": [
+          "\"observabilityOnboarding\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

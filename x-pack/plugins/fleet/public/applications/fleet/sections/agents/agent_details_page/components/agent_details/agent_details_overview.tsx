@@ -129,7 +129,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
               }),
-              description: <AgentHealth agent={agent} showOfflinePreviousStatus={true} />,
+              description: <AgentHealth agent={agent} fromDetails={true} />,
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
@@ -181,7 +181,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage: 'Upgrade available',
                           })}
                         >
-                          <EuiIcon type="alert" color="warning" />
+                          <EuiIcon type="warning" color="warning" />
                         </EuiToolTip>
                       </EuiFlexItem>
                     ) : null}

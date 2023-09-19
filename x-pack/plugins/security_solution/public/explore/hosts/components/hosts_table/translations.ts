@@ -40,7 +40,7 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.hostsTable.hostRiskToolTip',
   {
     defaultMessage:
-      'Host risk classification is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+      "The host's risk score determines its risk classification. Risky hosts are labeled as critical or high.",
   }
 );
 
@@ -57,10 +57,6 @@ export const OS = i18n.translate('xpack.securitySolution.hostsTable.osTitle', {
 
 export const VERSION = i18n.translate('xpack.securitySolution.hostsTable.versionTitle', {
   defaultMessage: 'Version',
-});
-
-export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsTable.hostRiskTitle', {
-  defaultMessage: 'Host risk classification',
 });
 
 export const ROWS_5 = i18n.translate('xpack.securitySolution.hostsTable.rows', {

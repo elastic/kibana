@@ -238,7 +238,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
             showOnlyIntegration={integrationInfo?.name}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
+            validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             noTopRule={true}
           />
@@ -248,7 +248,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
                 packageInfo={packageInfo}
                 packagePolicy={packagePolicy}
                 updatePackagePolicy={updatePackagePolicy}
-                validationResults={validationResults!}
+                validationResults={validationResults}
                 submitAttempted={formState === 'INVALID'}
                 noAdvancedToggle={true}
               />

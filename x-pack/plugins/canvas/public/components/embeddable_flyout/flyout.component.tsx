@@ -38,7 +38,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
-  const { getHttp, getUISettings, getSavedObjectsManagement } = platformService;
+  const { getContentManagement, getUISettings } = platformService;
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
@@ -83,9 +83,8 @@ export const AddEmbeddableFlyout: FC<Props> = ({
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
+            contentClient: getContentManagement().client,
             uiSettings: getUISettings(),
-            http: getHttp(),
-            savedObjectsManagement: getSavedObjectsManagement(),
           }}
         />
       </EuiFlyoutBody>

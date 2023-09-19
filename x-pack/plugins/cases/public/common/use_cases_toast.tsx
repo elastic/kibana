@@ -11,8 +11,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
-import type { Case } from '../../common';
-import { CommentType } from '../../common';
+import type { CaseUI } from '../../common';
+import { AttachmentType } from '../../common/types/domain';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
@@ -43,7 +43,7 @@ const EuiTextStyled = styled(EuiText)`
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
-    if (attachment.type === CommentType.alert) {
+    if (attachment.type === AttachmentType.alert) {
       // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;
@@ -61,7 +61,7 @@ function getToastTitle({
   title,
   attachments,
 }: {
-  theCase: Case;
+  theCase: CaseUI;
   title?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }): string {
@@ -82,7 +82,7 @@ function getToastContent({
   content,
   attachments,
 }: {
-  theCase: Case;
+  theCase: CaseUI;
   content?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }): string | undefined {
@@ -91,7 +91,7 @@ function getToastContent({
   }
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === CommentType.alert && theCase.settings.syncAlerts) {
+      if (attachment.type === AttachmentType.alert && theCase.settings.syncAlerts) {
         return CASE_ALERT_SUCCESS_SYNC_TEXT;
       }
     }
@@ -131,7 +131,7 @@ export const useCasesToast = () => {
       title,
       content,
     }: {
-      theCase: Case;
+      theCase: CaseUI;
       attachments?: CaseAttachmentsWithoutOwner;
       title?: string;
       content?: string;
@@ -168,6 +168,16 @@ export const useCasesToast = () => {
     },
     showSuccessToast: (title: string) => {
       toasts.addSuccess({ title, className: 'eui-textBreakWord' });
+    },
+    showDangerToast: (title: string) => {
+      toasts.addDanger({ title, className: 'eui-textBreakWord' });
+    },
+    showInfoToast: (title: string, text?: string) => {
+      toasts.addInfo({
+        title,
+        text,
+        className: 'eui-textBreakWord',
+      });
     },
   };
 };

@@ -6,11 +6,13 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { installPackage } from '../../packages';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('APM', () => {
+    before(() => installPackage(getService('supertest'), 'beat'));
+
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instance'));
   });
 }

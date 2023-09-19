@@ -11,9 +11,9 @@ import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import { useLicense } from '../../../common/hooks/use_license';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import type { TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -30,7 +30,6 @@ import type { CellValueElementProps } from '../../../timelines/components/timeli
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';

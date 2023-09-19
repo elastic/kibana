@@ -1,0 +1,16 @@
+title: Time window
+required:
+  - duration
+  - type
+description: Defines properties for the SLO time window
+type: object
+properties:
+  duration:
+    description: "the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)"
+    type: string
+    example: 30d
+  type:
+    description: Indicates weither the time window is a rolling or a calendar aligned time window.
+    type: string
+    example: "rolling"
+    enum: ["rolling", "calendarAligned"]

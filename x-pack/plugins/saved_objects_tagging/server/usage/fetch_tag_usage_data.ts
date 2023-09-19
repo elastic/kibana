@@ -31,13 +31,13 @@ interface AggregatedTagUsage {
 
 export const fetchTagUsageData = async ({
   esClient,
-  kibanaIndex,
+  kibanaIndices,
 }: {
   esClient: ElasticsearchClient;
-  kibanaIndex: string;
+  kibanaIndices: string[];
 }): Promise<TaggingUsageData> => {
   const body = await esClient.search({
-    index: [kibanaIndex],
+    index: kibanaIndices,
     ignore_unavailable: true,
     filter_path: 'aggregations',
     body: {

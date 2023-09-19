@@ -1,0 +1,512 @@
+{
+  "id": "@kbn/security-solution-side-nav",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-solution-side-nav",
+        "id": "def-common.SolutionSideNav",
+        "type": "Function",
+        "tags": [],
+        "label": "SolutionSideNav",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/security-solution-side-nav",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+            "section": "def-common.SolutionSideNavProps",
+            "text": "SolutionSideNavProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNav.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.SolutionSideNavProps",
+                "text": "SolutionSideNavProps"
+              }
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-solution-side-nav",
+        "id": "def-common.SolutionSideNavItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SolutionSideNavItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-solution-side-nav",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+            "section": "def-common.SolutionSideNavItem",
+            "text": "SolutionSideNavItem"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.id",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "React.MouseEventHandler<Element> | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.openInNewTab",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.SolutionSideNavItem",
+                "text": "SolutionSideNavItem"
+              },
+              "<T>[] | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.categories",
+            "type": "Object",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/security-solution-navigation",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
+                "section": "def-common.LinkCategory",
+                "text": "LinkCategory"
+              },
+              "<T>[] | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.iconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.appendSeparator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appendSeparator",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.position",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.SolutionSideNavItemPosition",
+                "text": "SolutionSideNavItemPosition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.isBeta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBeta",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.betaOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "betaOptions",
+            "description": [],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-side-nav",
+        "id": "def-common.SolutionSideNavProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SolutionSideNavProps",
+        "description": [],
+        "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "All the items to display in the side navigation"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.SolutionSideNavItem",
+                "text": "SolutionSideNavItem"
+              },
+              "<string>[]"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.selectedId",
+            "type": "string",
+            "tags": [],
+            "label": "selectedId",
+            "description": [
+              "The id of the selected item to highlight. It only affects the top level items rendered in the main panel"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [
+              "The categories to group and separate the main items. Ignores `position: 'bottom'` items"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-navigation",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
+                "section": "def-common.SeparatorLinkCategory",
+                "text": "SeparatorLinkCategory"
+              },
+              "<string>[] | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.panelBottomOffset",
+            "type": "string",
+            "tags": [],
+            "label": "panelBottomOffset",
+            "description": [
+              "Css value for the bottom offset of the secondary panel. defaults to 0"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.panelTopOffset",
+            "type": "string",
+            "tags": [],
+            "label": "panelTopOffset",
+            "description": [
+              "Css value for the top offset of the secondary panel. defaults to the generic kibana header height"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavProps.tracker",
+            "type": "Function",
+            "tags": [],
+            "label": "tracker",
+            "description": [
+              "\nThe tracker function to enable navigation Telemetry, this has to be bound with the plugin `appId`\ne.g.: usageCollection?.reportUiCounter?.bind(null, appId)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.Tracker",
+                "text": "Tracker"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/security-solution-side-nav",
+        "id": "def-common.SolutionSideNavItemPosition",
+        "type": "Enum",
+        "tags": [],
+        "label": "SolutionSideNavItemPosition",
+        "description": [],
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-solution-side-nav",
+        "id": "def-common.Tracker",
+        "type": "Type",
+        "tags": [],
+        "label": "Tracker",
+        "description": [],
+        "signature": [
+          "(type: string, event: string | string[], count?: number | undefined) => void"
+        ],
+        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.Tracker.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.Tracker.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.Tracker.$3",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

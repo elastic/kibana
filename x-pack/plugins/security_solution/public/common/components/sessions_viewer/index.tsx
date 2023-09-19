@@ -7,10 +7,10 @@
 
 import React, { useMemo, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction } from '@kbn/session-view-plugin/public';
+import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
-import { TableId } from '../../../../common/types';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -22,11 +22,11 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { dataTableActions } from '../../store/data_table';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -38,9 +38,9 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             // show sessions table results by filtering events where event.action is fork, exec, or end
             should: [
-              { term: { [EVENT_ACTION]: EventAction.exec } },
-              { term: { [EVENT_ACTION]: EventAction.fork } },
-              { term: { [EVENT_ACTION]: EventAction.end } },
+              { term: { [EVENT_ACTION]: 'exec' } },
+              { term: { [EVENT_ACTION]: 'fork' } },
+              { term: { [EVENT_ACTION]: 'end' } },
             ],
           },
         },
@@ -150,6 +150,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   return (
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
+        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         pageFilters={sessionsFilter}
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}

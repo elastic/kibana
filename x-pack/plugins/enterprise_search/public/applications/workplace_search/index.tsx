@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -98,7 +98,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   }, [hasInitialized]);
 
   return (
-    <Switch>
+    <Routes>
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
@@ -109,7 +109,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <Overview />
       </Route>
       <Route path={PERSONAL_PATH}>
-        <Switch>
+        <Routes>
           <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
           <Route path={PRIVATE_SOURCES_PATH}>
             <SourcesRouter />
@@ -126,7 +126,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           <Route>
             <NotFound isOrganization={false} />
           </Route>
-        </Switch>
+        </Routes>
       </Route>
       <Route path={SOURCES_PATH}>
         <SourcesRouter />
@@ -149,17 +149,17 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 
 export const WorkplaceSearchUnconfigured: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route exact path={SETUP_GUIDE_PATH}>
       <SetupGuide />
     </Route>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
-  </Switch>
+  </Routes>
 );

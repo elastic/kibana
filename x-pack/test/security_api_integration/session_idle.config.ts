@@ -17,6 +17,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+
   return {
     testFiles: [resolve(__dirname, './tests/session_idle')],
     services,
@@ -41,6 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--xpack.security.session.idleTimeout=10s',
         '--xpack.security.session.cleanupInterval=20s',
         `--xpack.security.authc.providers=${JSON.stringify({

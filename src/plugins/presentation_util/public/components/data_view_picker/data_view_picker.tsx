@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-
-import './data_view_picker.scss';
 
 export type DataViewTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -26,12 +23,13 @@ export function DataViewPicker({
   onChangeDataViewId,
   trigger,
   selectableProps,
+  ...other
 }: {
   dataViews: DataViewListItem[];
   selectedDataViewId?: string;
   trigger: DataViewTriggerProps;
   onChangeDataViewId: (newId: string) => void;
-  selectableProps?: EuiSelectableProps;
+  selectableProps?: Partial<EuiSelectableProps>;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -61,58 +59,55 @@ export function DataViewPicker({
   };
 
   return (
-    <>
-      <EuiPopover
-        button={createTrigger()}
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
-        display="block"
-        panelPaddingSize="s"
-        ownFocus
-        panelClassName="presDataViewPicker__panel"
+    <EuiInputPopover
+      {...other}
+      ownFocus
+      fullWidth
+      display="block"
+      panelPaddingSize="s"
+      isOpen={isPopoverOpen}
+      input={createTrigger()}
+      closePopover={() => setPopoverIsOpen(false)}
+      panelProps={{
+        'data-test-subj': 'data-view-picker-popover',
+      }}
+    >
+      <EuiSelectable<{
+        key?: string;
+        label: string;
+        value?: string;
+        checked?: 'on' | 'off' | undefined;
+      }>
+        {...selectableProps}
+        searchable
+        singleSelection="always"
+        options={dataViews.map(({ name, id, title }) => ({
+          key: id,
+          label: name ?? title,
+          value: id,
+          'data-test-subj': `data-view-picker-${name ?? title}`,
+          checked: id === selectedDataViewId ? 'on' : undefined,
+        }))}
+        onChange={(choices) => {
+          const choice = choices.find(({ checked }) => checked) as unknown as {
+            value: string;
+          };
+          onChangeDataViewId(choice.value);
+          setPopoverIsOpen(false);
+        }}
+        searchProps={{
+          compressed: true,
+          ...(selectableProps ? selectableProps.searchProps : undefined),
+        }}
       >
-        <EuiPopoverTitle data-test-subj="data-view-picker-title">
-          {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
-            defaultMessage: 'Data view',
-          })}
-        </EuiPopoverTitle>
-        <EuiSelectable<{
-          key?: string;
-          label: string;
-          value?: string;
-          checked?: 'on' | 'off' | undefined;
-        }>
-          {...selectableProps}
-          searchable
-          singleSelection="always"
-          options={dataViews.map(({ name, id, title }) => ({
-            key: id,
-            label: name ?? title,
-            value: id,
-            'data-test-subj': `data-view-picker-${name ?? title}`,
-            checked: id === selectedDataViewId ? 'on' : undefined,
-          }))}
-          onChange={(choices) => {
-            const choice = choices.find(({ checked }) => checked) as unknown as {
-              value: string;
-            };
-            onChangeDataViewId(choice.value);
-            setPopoverIsOpen(false);
-          }}
-          searchProps={{
-            compressed: true,
-            ...(selectableProps ? selectableProps.searchProps : undefined),
-          }}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </>
+        {(list, search) => (
+          <>
+            {search}
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+    </EuiInputPopover>
   );
 }
 

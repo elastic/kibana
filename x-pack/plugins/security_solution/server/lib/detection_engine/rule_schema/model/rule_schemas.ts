@@ -14,6 +14,7 @@ import {
   RiskScore,
   RiskScoreMapping,
   RuleActionArrayCamel,
+  RuleActionNotifyWhen,
   RuleActionThrottle,
   RuleIntervalFrom,
   RuleIntervalTo,
@@ -56,6 +57,7 @@ import {
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
+  InvestigationFields,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
@@ -75,14 +77,14 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   savedIdOrUndefined,
   saved_id,
   anomaly_threshold,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/api/detection_engine';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
+import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 
@@ -96,6 +98,7 @@ export const baseRuleParams = t.exact(
     falsePositives: RuleFalsePositiveArray,
     from: RuleIntervalFrom,
     ruleId: RuleSignatureId,
+    investigationFields: t.union([InvestigationFields, t.undefined]),
     immutable: IsRuleImmutable,
     license: t.union([RuleLicense, t.undefined]),
     outputIndex: AlertsIndex,
@@ -259,13 +262,6 @@ export interface CompleteRule<T extends RuleParams> {
   ruleConfig: SanitizedRuleConfig;
 }
 
-export const notifyWhen = t.union([
-  t.literal('onActionGroupChange'),
-  t.literal('onActiveAlert'),
-  t.literal('onThrottleInterval'),
-  t.null,
-]);
-
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
   t.literal(EQL_RULE_TYPE_ID),
@@ -291,7 +287,7 @@ const internalRuleCreateRequired = t.type({
 });
 const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleCreate = t.intersection([
   internalRuleCreateOptional,
@@ -310,7 +306,7 @@ const internalRuleUpdateRequired = t.type({
 });
 const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleUpdate = t.intersection([
   internalRuleUpdateOptional,

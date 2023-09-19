@@ -15,15 +15,21 @@ import {
   FetchAnalyticsCollectionsApiLogicResponse,
 } from '../../api/index/fetch_analytics_collections_api_logic';
 
+const SEARCH_COOLDOWN = 200;
+
 export interface AnalyticsCollectionsActions {
   fetchAnalyticsCollections(): void;
   makeRequest: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['makeRequest'];
+  searchAnalyticsCollections(query?: string): { query: string };
 }
 export interface AnalyticsCollectionsValues {
   analyticsCollections: AnalyticsCollection[];
   data: typeof FetchAnalyticsCollectionsAPILogic.values.data;
   hasNoAnalyticsCollections: boolean;
-  isLoading: boolean;
+  isFetching: boolean;
+  isSearchRequest: boolean;
+  isSearching: boolean;
+  searchQuery: string;
   status: Status;
 }
 
@@ -31,7 +37,10 @@ export const AnalyticsCollectionsLogic = kea<
   MakeLogicType<AnalyticsCollectionsValues, AnalyticsCollectionsActions>
 >({
   actions: {
-    fetchAnalyticsCollections: () => {},
+    fetchAnalyticsCollections: true,
+    searchAnalyticsCollections: (query) => ({
+      query,
+    }),
   },
   connect: {
     actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest']],
@@ -41,14 +50,42 @@ export const AnalyticsCollectionsLogic = kea<
     fetchAnalyticsCollections: () => {
       actions.makeRequest({});
     },
+    searchAnalyticsCollections: async ({ query }, breakpoint) => {
+      if (query) {
+        await breakpoint(SEARCH_COOLDOWN);
+      }
+      actions.makeRequest({ query });
+    },
   }),
   path: ['enterprise_search', 'analytics', 'collections'],
+  reducers: {
+    isSearchRequest: [
+      false,
+      {
+        searchAnalyticsCollections: () => true,
+      },
+    ],
+    searchQuery: [
+      '',
+      {
+        searchAnalyticsCollections: (_, { query }) => query,
+      },
+    ],
+  },
   selectors: ({ selectors }) => ({
     analyticsCollections: [() => [selectors.data], (data) => data || []],
-    hasNoAnalyticsCollections: [() => [selectors.data], (data) => data?.length === 0],
-    isLoading: [
-      () => [selectors.status],
-      (status) => [Status.LOADING, Status.IDLE].includes(status),
+    hasNoAnalyticsCollections: [
+      () => [selectors.analyticsCollections, selectors.searchQuery],
+      (analyticsCollections, searchQuery) => analyticsCollections.length === 0 && !searchQuery,
+    ],
+    isFetching: [
+      () => [selectors.status, selectors.isSearchRequest],
+      (status, isSearchRequest) =>
+        [Status.LOADING, Status.IDLE].includes(status) && !isSearchRequest,
+    ],
+    isSearching: [
+      () => [selectors.status, selectors.isSearchRequest],
+      (status, isSearchRequest) => Status.LOADING === status && isSearchRequest,
     ],
   }),
 });

@@ -310,7 +310,7 @@ describe('CoreUsageDataService', () => {
                 "securityResponseHeaders": Object {
                   "crossOriginOpenerPolicy": "same-origin",
                   "disableEmbedding": false,
-                  "permissionsPolicyConfigured": false,
+                  "permissionsPolicyConfigured": true,
                   "referrerPolicy": "no-referrer-when-downgrade",
                   "strictTransportSecurity": "NULL",
                   "xContentTypeOptions": "nosniff",

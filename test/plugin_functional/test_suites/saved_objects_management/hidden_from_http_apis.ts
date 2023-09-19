@@ -188,6 +188,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                       title: 'I am hidden from http apis but the client can still see me',
                     },
                     type: 'test-hidden-from-http-apis-importable-exportable',
+                    managed: false,
                   },
                   {
                     id: 'not-hidden-from-http-apis-import1',
@@ -195,6 +196,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                       title: 'I am not hidden from http apis',
                     },
                     type: 'test-not-hidden-from-http-apis-importable-exportable',
+                    managed: false,
                   },
                 ],
                 warnings: [],

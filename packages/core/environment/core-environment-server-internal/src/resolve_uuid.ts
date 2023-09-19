@@ -65,13 +65,16 @@ export async function resolveInstanceUuid({
 
 async function readUuidFromFile(filepath: string, logger: Logger): Promise<string | undefined> {
   const content = await readFileContent(filepath);
+  if (content === undefined) {
+    return undefined;
+  }
 
   if (content === UUID_7_6_0_BUG) {
     logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
     return undefined;
   }
 
-  if (content && !content.match(uuidRegexp)) {
+  if (!content.match(uuidRegexp)) {
     throw new Error(`${filepath} contains an invalid UUID`);
   }
 

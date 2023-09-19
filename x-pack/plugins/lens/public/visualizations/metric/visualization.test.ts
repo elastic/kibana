@@ -68,6 +68,7 @@ describe('metric visualization', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: 'subtitle',
+    icon: 'empty',
     secondaryPrefix: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
@@ -303,6 +304,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "icon": Array [
+                  "empty",
+                ],
                 "inspectorTableId": Array [
                   "first",
                 ],
@@ -363,6 +367,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "icon": Array [
+                  "empty",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -746,6 +753,7 @@ describe('metric visualization', () => {
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
+        "icon": "empty",
         "layerId": "first",
         "layerType": "data",
       }
@@ -915,7 +923,6 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toBeUndefined();
       expect(supportedLayers[0]).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": true,
           "initialDimensions": undefined,
           "label": "Visualization",
@@ -925,7 +932,6 @@ describe('metric visualization', () => {
 
       expect({ ...supportedLayers[1], initialDimensions: undefined }).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": false,
           "initialDimensions": undefined,
           "label": "Trendline",

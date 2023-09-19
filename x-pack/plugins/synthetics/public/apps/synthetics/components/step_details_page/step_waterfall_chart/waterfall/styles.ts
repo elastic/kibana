@@ -41,7 +41,7 @@ export const WaterfallChartOuterContainer = euiStyled(
 export const WaterfallChartStickyHeaderContainer = euiStyled(StyledScrollDiv)`
   position: sticky;
   top: 96px;
-  z-index: ${(props) => props.theme.eui.euiZLevel5};
+  z-index: ${(props) => props.theme.eui.euiZLevel5 + 10};
   overflow: visible;
   min-height: ${CHART_HEADER_HEIGHT}px;
   border-color: ${(props) => props.theme.eui.euiColorLightShade};
@@ -50,6 +50,17 @@ export const WaterfallChartStickyHeaderContainer = euiStyled(StyledScrollDiv)`
   padding: ${(props) => props.theme.eui.euiSizeL};
   padding-bottom: ${(props) => props.theme.eui.euiSizeXL};
   padding-left: ${(props) => props.theme.eui.euiSizeM};
+`;
+
+export const WaterfallChartStickyFooterContainer = euiStyled(StyledScrollDiv)`
+  position: sticky;
+  bottom: 0px;
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
+  overflow: visible;
+  border-color: ${(props) => props.theme.eui.euiColorLightShade};
+  border-top: ${(props) => props.theme.eui.euiBorderThin};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  padding: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 export const WaterfallChartTimeTicksContainer = euiStyled(StyledScrollDiv)`

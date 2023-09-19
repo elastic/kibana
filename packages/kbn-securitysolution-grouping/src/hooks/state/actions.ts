@@ -6,55 +6,20 @@
  * Side Public License, v 1.
  */
 
-import {
-  ActionType,
-  GroupOption,
-  UpdateActiveGroup,
-  UpdateGroupActivePage,
-  UpdateGroupItemsPerPage,
-  UpdateGroupOptions,
-} from '../types';
+import { ActionType, GroupOption, UpdateActiveGroups, UpdateGroupOptions } from '../types';
 
-const updateActiveGroup = ({
-  activeGroup,
+const updateActiveGroups = ({
+  activeGroups,
   id,
 }: {
-  activeGroup: string;
+  activeGroups: string[];
   id: string;
-}): UpdateActiveGroup => ({
+}): UpdateActiveGroups => ({
   payload: {
-    activeGroup,
+    activeGroups,
     id,
   },
-  type: ActionType.updateActiveGroup,
-});
-
-const updateGroupActivePage = ({
-  activePage,
-  id,
-}: {
-  activePage: number;
-  id: string;
-}): UpdateGroupActivePage => ({
-  payload: {
-    activePage,
-    id,
-  },
-  type: ActionType.updateGroupActivePage,
-});
-
-const updateGroupItemsPerPage = ({
-  itemsPerPage,
-  id,
-}: {
-  itemsPerPage: number;
-  id: string;
-}): UpdateGroupItemsPerPage => ({
-  payload: {
-    itemsPerPage,
-    id,
-  },
-  type: ActionType.updateGroupItemsPerPage,
+  type: ActionType.updateActiveGroups,
 });
 
 const updateGroupOptions = ({
@@ -72,8 +37,6 @@ const updateGroupOptions = ({
 });
 
 export const groupActions = {
-  updateActiveGroup,
-  updateGroupActivePage,
-  updateGroupItemsPerPage,
+  updateActiveGroups,
   updateGroupOptions,
 };

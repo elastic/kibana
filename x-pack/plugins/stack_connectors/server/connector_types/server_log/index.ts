@@ -57,6 +57,8 @@ export function getConnectorType(): ServerLogConnectorType {
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       params: {
         schema: ParamsSchema,
       },

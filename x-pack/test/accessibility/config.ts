@@ -23,7 +23,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/grok_debugger'),
       require.resolve('./apps/search_profiler'),
       require.resolve('./apps/painless_lab'),
-      require.resolve('./apps/uptime'),
+      // https://github.com/elastic/kibana/issues/153601
+      // require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
       require.resolve('./apps/dashboard_panel_options'),
@@ -33,6 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/ingest_node_pipelines'),
       require.resolve('./apps/index_lifecycle_management'),
       require.resolve('./apps/ml'),
+      require.resolve('./apps/ml_anomaly_detection'),
       require.resolve('./apps/transform'),
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
@@ -45,17 +47,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // Please make sure that the remote clusters, snapshot and restore and
       // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),
-      require.resolve('./apps/snapshot_and_restore'),
-      require.resolve('./apps/cross_cluster_replication'),
+      // https://github.com/elastic/kibana/issues/153788
+      // require.resolve('./apps/snapshot_and_restore'),
+      // https://github.com/elastic/kibana/issues/153599
+      // require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
-      require.resolve('./apps/license_management'),
-      require.resolve('./apps/tags'),
-      require.resolve('./apps/search_sessions'),
-      require.resolve('./apps/stack_monitoring'),
-      require.resolve('./apps/watcher'),
-      require.resolve('./apps/rollup_jobs'),
-      require.resolve('./apps/observability'),
+      // require.resolve('./apps/license_management'),
+      // require.resolve('./apps/tags'),
+      // require.resolve('./apps/search_sessions'),
+      // require.resolve('./apps/stack_monitoring'),
+      // require.resolve('./apps/watcher'),
+      // require.resolve('./apps/rollup_jobs'),
+      // require.resolve('./apps/observability'),
     ],
 
     pageObjects,

@@ -14,6 +14,7 @@ import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';
+import { isLensSupportedType } from '../../../../common/utils/lens';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -63,11 +64,6 @@ export const useInspectButton = ({
 export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
   const subTypeNested = field?.subType as IFieldSubTypeNested;
   return !!subTypeNested?.nested?.path;
-}
-
-export function isLensSupportedType(fieldType: string | undefined) {
-  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
-  return fieldType ? supportedTypes.has(fieldType) : false;
 }
 
 export interface GetAggregatableFields {

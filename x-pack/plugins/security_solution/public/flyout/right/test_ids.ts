@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const FLYOUT_BODY_TEST_ID = 'securitySolutionDocumentDetailsFlyoutBody';
 export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
 export const TABLE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutTableTab';
 export const JSON_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutJsonTab';

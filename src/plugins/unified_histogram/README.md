@@ -3,13 +3,68 @@
 Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
 It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
-## Example
+## Basic Usage
+
+```tsx
+// Import the container component
+import {
+  UnifiedHistogramContainer,
+} from '@kbn/unified-histogram-plugin/public';
+
+// Import modules required for your application
+import {
+  useServices,
+  useResizeRef,
+  useRequestParams,
+  MyLayout,
+  MyButton,
+} from './my-modules';
+
+const services = useServices();
+const resizeRef = useResizeRef();
+const {
+  dataView,
+  query,
+  filters,
+  timeRange,
+  relativeTimeRange,
+  searchSessionId,
+  requestAdapter,
+} = useRequestParams();
+
+return (
+  <UnifiedHistogramContainer
+    // Pass the required services to Unified Histogram
+    services={services}
+    // Pass request parameters to Unified Histogram
+    dataView={dataView}
+    query={query}
+    filters={filters}
+    timeRange={timeRange}
+    // If the provided timeRange is an absolute range,
+    // a relativeTimeRange should also be provided
+    relativeTimeRange={relativeTimeRange}
+    searchSessionId={searchSessionId}
+    requestAdapter={requestAdapter}
+    // Pass a ref to the containing element to
+    // handle top panel resize functionality
+    resizeRef={resizeRef}
+    // Optionally append an element after the
+    // hits counter display
+    appendHitsCounter={<MyButton />}
+  >
+    <MyLayout />
+  </UnifiedHistogramContainer>
+);
+```
+
+## Advanced Usage
 
 ```tsx
 // Import the container component and API contract
 import {
   UnifiedHistogramContainer,
-  type UnifiedHistogramInitializedApi,
+  type UnifiedHistogramApi,
 } from '@kbn/unified-histogram-plugin/public';
 
 // Import modules required for your application
@@ -18,6 +73,7 @@ import {
   useResizeRef,
   useCallbacks,
   useRequestParams,
+  useStateParams,
   useManualRefetch,
   MyLayout,
   MyButton,
@@ -26,75 +82,48 @@ import {
 const services = useServices();
 const resizeRef = useResizeRef();
 const { onChartHiddenChange, onLensRequestAdapterChange } = useCallbacks();
+const { chartHidden, breakdownField } = useStateParams();
 const {
   dataView,
   query,
   filters,
   timeRange,
+  relativeTimeRange,
   searchSessionId,
   requestAdapter,
 } = useRequestParams();
 
 // Use a state variable instead of a ref to preserve reactivity when the API is updated
-const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramInitializedApi>();
+const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramApi>();
 
-// Create a callback to set unifiedHistogram, and initialize it if needed
-const setUnifiedHistogramApi = useCallback((api: UnifiedHistogramApi | null) => {
-  // Ignore if the ref is null
-  if (!api) {
-    return;
-  }
-
-  if (api.initialized) {
-    // Update our local reference to the API
-    setUnifiedHistogram(api);
-  } else {
-    // Initialize if not yet initialized
-    api.initialize({
-      // Pass the required services to Unified Histogram
-      services,
-      // Optionally provide a local storage key prefix to save parts of the state,
-      // such as the chart hidden state and top panel height, to local storage
-      localStorageKeyPrefix: 'myApp',
-      // By default Unified Histogram will automatically refetch based on certain
-      // state changes, such as chart hidden and request params, but this can be
-      // disabled in favour of manual fetching if preferred. Note that an initial
-      // request is always triggered when first initialized, and when the chart
-      // changes from hidden to visible, Lens will automatically trigger a refetch
-      // regardless of what this property is set to
-      disableAutoFetching: true,
-      // If passing an absolute time range, provide a function to get the relative range
-      getRelativeTimeRange: services.data.query.timefilter.timefilter.getTime,
-      // At minimum the initial state requires a data view, but additional
-      // parameters can be passed to further customize the state
-      initialState: {
-        dataView,
-        query,
-        filters,
-        timeRange,
-        searchSessionId,
-        requestAdapter,
-      },
-    });
-  }
-}, [...]);
+const getCreationOptions = useCallback(() => ({
+  // Optionally provide a local storage key prefix to save parts of the state,
+  // such as the chart hidden state and top panel height, to local storage
+  localStorageKeyPrefix: 'myApp',
+  // By default Unified Histogram will automatically refetch based on certain
+  // state changes, such as chart hidden and request params, but this can be
+  // disabled in favour of manual fetching if preferred. Note that an initial
+  // request is always triggered when first initialized, and when the chart
+  // changes from hidden to visible, Lens will automatically trigger a refetch
+  // regardless of what this property is set to
+  disableAutoFetching: true,
+  // Customize the initial state in order to override the defaults
+  initialState: { chartHidden, breakdownField },
+}), [...]);
 
 // Manually refetch if disableAutoFetching is true
 useManualRefetch(() => {
   unifiedHistogram?.refetch();
 });
 
-// Update the Unified Histogram state when our request params change
+// Update the Unified Histogram state when our state params change
 useEffect(() => {
-  unifiedHistogram?.setRequestParams({
-    dataView,
-    query,
-    filters,
-    timeRange,
-    searchSessionId,
-    requestAdapter,
-  });
-}, [...]);
+  unifiedHistogram?.setChartHidden(chartHidden);
+}, [chartHidden]);
+
+useEffect(() => {
+  unifiedHistogram?.setBreakdownField(breakdownField);
+}, [breakdownField]);
 
 // Listen for state changes if your application requires it
 useEffect(() => {
@@ -124,12 +153,18 @@ useEffect(() => {
 return (
   <UnifiedHistogramContainer
     // Pass the ref callback to receive the API
-    ref={setUnifiedHistogramApi}
-    // Pass a ref to the containing element to
-    // handle top panel resize functionality
+    ref={setUnifiedHistogram}
+    // Pass getCreationOptions to customize initialization
+    getCreationOptions={getCreationOptions}
+    services={services}
+    dataView={dataView}
+    query={query}
+    filters={filters}
+    timeRange={timeRange}
+    relativeTimeRange={relativeTimeRange}
+    searchSessionId={searchSessionId}
+    requestAdapter={requestAdapter}
     resizeRef={resizeRef}
-    // Optionally append an element after the
-    // hits counter display
     appendHitsCounter={<MyButton />}
   >
     <MyLayout />

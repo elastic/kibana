@@ -12,10 +12,10 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');
+    const es = getService('es');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -73,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
@@ -88,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
@@ -101,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
@@ -117,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();

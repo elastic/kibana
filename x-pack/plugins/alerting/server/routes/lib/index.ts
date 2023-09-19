@@ -22,3 +22,8 @@ export { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
 export { actionsSchema } from './actions_schema';
 export { rewriteRule, rewriteRuleLastRun } from './rewrite_rule';
 export { rewriteNamespaces } from './rewrite_namespaces';
+export { rRuleSchema } from './rrule_schema';
+export {
+  rewriteMaintenanceWindowRes,
+  rewritePartialMaintenanceBodyRes,
+} from './rewrite_maintenance_window';

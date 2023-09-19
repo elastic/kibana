@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { validate, validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 
@@ -18,16 +18,15 @@ import {
   SERVER_APP_ID,
 } from '../../../../../common/constants';
 
-import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
   RuleCreateProps,
-  RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
   MachineLearningPatchParams,
@@ -36,9 +35,11 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/detection_engine/rule_schema';
+  RuleResponse,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
+  transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
@@ -51,8 +52,6 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -74,14 +73,14 @@ import type {
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
-import {
-  transformActions,
-  transformFromAlertThrottle,
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-} from './rule_actions';
+import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
+import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+
+const DEFAULT_FROM = 'now-6m' as const;
+const DEFAULT_TO = 'now' as const;
+const DEFAULT_INTERVAL = '5m' as const;
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -390,27 +389,6 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
-const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const incrementVersion = (nextParams: PatchRuleRequestBody, existingRule: RuleParams) => {
-  // The the version from nextParams if it's provided
-  if (nextParams.version) {
-    return nextParams.version;
-  }
-
-  // If the rule is immutable, keep the current version
-  if (existingRule.immutable) {
-    return existingRule.version;
-  }
-
-  // For custom rules, check modified params to deicide whether version increment is needed
-  for (const key in nextParams) {
-    if (!versionExcludedKeys.includes(key)) {
-      return existingRule.version + 1;
-    }
-  }
-  return existingRule.version;
-};
-
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
@@ -422,6 +400,11 @@ export const convertPatchAPIToInternalSchema = (
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
+
+  const alertActions = nextParams.actions?.map(transformRuleToAlertAction) ?? existingRule.actions;
+  const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
+  const actions = transformToActionFrequency(alertActions, throttle);
+
   return {
     name: nextParams.name ?? existingRule.name,
     tags: nextParams.tags ?? existingRule.tags,
@@ -431,6 +414,7 @@ export const convertPatchAPIToInternalSchema = (
       description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
+      investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
       license: nextParams.license ?? existingParams.license,
@@ -456,22 +440,12 @@ export const convertPatchAPIToInternalSchema = (
       references: nextParams.references ?? existingParams.references,
       namespace: nextParams.namespace ?? existingParams.namespace,
       note: nextParams.note ?? existingParams.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version: incrementVersion(nextParams, existingParams),
+      version: nextParams.version ?? existingParams.version,
       exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
-    actions: nextParams.actions
-      ? nextParams.actions.map(transformRuleToAlertAction)
-      : existingRule.actions,
-    throttle: nextParams.throttle
-      ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle ?? null,
-    notifyWhen: nextParams.throttle
-      ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen ?? null,
+    actions,
   };
 };
 
@@ -487,6 +461,10 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
+
+  const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
+  const actions = transformToActionFrequency(alertActions, input.throttle);
+
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -498,7 +476,8 @@ export const convertCreateAPIToInternalSchema = (
       description: input.description,
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
-      from: input.from ?? 'now-6m',
+      investigationFields: input.investigation_fields,
+      from: input.from ?? DEFAULT_FROM,
       immutable,
       license: input.license,
       outputIndex: input.output_index ?? '',
@@ -514,7 +493,7 @@ export const convertCreateAPIToInternalSchema = (
       threat: input.threat ?? [],
       timestampOverride: input.timestamp_override,
       timestampOverrideFallbackDisabled: input.timestamp_override_fallback_disabled,
-      to: input.to ?? 'now',
+      to: input.to ?? DEFAULT_TO,
       references: input.references ?? [],
       namespace: input.namespace,
       note: input.note,
@@ -527,9 +506,7 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
+    actions,
   };
 };
 
@@ -649,6 +626,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
+    investigation_fields: params.investigationFields,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,
@@ -669,13 +647,16 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  legacyRuleActions?: LegacyRuleActions | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
+
+  const alertActions = rule.actions.map(transformAlertToRuleAction);
+  const throttle = transformFromAlertThrottle(rule);
+  const actions = transformToActionFrequency(alertActions, throttle);
 
   return {
     // saved object properties
@@ -692,14 +673,60 @@ export const internalRuleToAPIResponse = (
     tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
+    revision: rule.revision,
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    throttle: undefined,
+    actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
+};
+
+export const convertPrebuiltRuleAssetToRuleResponse = (
+  prebuiltRuleAsset: PrebuiltRuleAsset
+): RuleResponse => {
+  const prebuiltRuleAssetDefaults = {
+    enabled: false,
+    risk_score_mapping: [],
+    severity_mapping: [],
+    interval: DEFAULT_INTERVAL,
+    to: DEFAULT_TO,
+    from: DEFAULT_FROM,
+    exceptions_list: [],
+    false_positives: [],
+    max_signals: DEFAULT_MAX_SIGNALS,
+    actions: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
+    references: [],
+    threat: [],
+    tags: [],
+    author: [],
+  };
+
+  const ruleResponseSpecificFields = {
+    id: uuidv4(),
+    updated_at: new Date(0).toISOString(),
+    updated_by: '',
+    created_at: new Date(0).toISOString(),
+    created_by: '',
+    immutable: true,
+    revision: 1,
+  };
+
+  const [rule, error] = validate(
+    { ...prebuiltRuleAssetDefaults, ...prebuiltRuleAsset, ...ruleResponseSpecificFields },
+    RuleResponse
+  );
+
+  if (!rule) {
+    throw new Error(error);
+  }
+
+  return rule;
 };

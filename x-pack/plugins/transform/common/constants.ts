@@ -26,7 +26,26 @@ export const PLUGIN = {
   },
 };
 
-export const API_BASE_PATH = '/api/transform/';
+const INTERNAL_API_BASE_PATH = '/internal/transform/';
+const EXTERNAL_API_BASE_PATH = '/api/transform/';
+
+export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE_PATH}${uri}`;
+export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
+
+export const TRANSFORM_REACT_QUERY_KEYS = {
+  DATA_SEARCH: 'transform.data_search',
+  DATA_VIEW_EXISTS: 'transform.data_view_exists',
+  GET_DATA_VIEW_TITLES: 'transform.get_data_view_titles',
+  GET_ES_INDICES: 'transform.get_es_indices',
+  GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',
+  GET_HISTOGRAMS_FOR_FIELDS: 'transform.get_histograms_for_fields',
+  GET_TRANSFORM: 'transform.get_transform',
+  GET_TRANSFORM_NODES: 'transform.get_transform_nodes',
+  GET_TRANSFORM_AUDIT_MESSAGES: 'transform.get_transform_audit_messages',
+  GET_TRANSFORM_STATS: 'transform.get_transform_stats',
+  GET_TRANSFORMS: 'transform.get_transforms',
+  GET_TRANSFORMS_PREVIEW: 'transform.get_transforms_preview',
+} as const;
 
 // In order to create a transform, the API requires the following privileges:
 // - transform_admin (builtin)
@@ -58,6 +77,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
   'cluster:admin/transform/reset',
+  'cluster:admin/transform/schedule_now',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
@@ -66,25 +86,9 @@ export const APP_CLUSTER_PRIVILEGES = [
 // Minimum privileges required to return transform node count
 export const NODES_INFO_PRIVILEGES = ['cluster:monitor/transform/get'];
 
-// Equivalent of capabilities.canGetTransform
-export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster.cluster:monitor/transform/get',
-  'cluster.cluster:monitor/transform/stats/get',
-];
-
-// Equivalent of capabilities.canCreateTransform
-export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster.cluster:monitor/transform/get',
-  'cluster.cluster:monitor/transform/stats/get',
-  'cluster.cluster:admin/transform/preview',
-  'cluster.cluster:admin/transform/put',
-  'cluster.cluster:admin/transform/start',
-  'cluster.cluster:admin/transform/start_task',
-];
-
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L214
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',

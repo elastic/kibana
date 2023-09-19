@@ -18,6 +18,7 @@ import {
 } from '@kbn/mapbox-gl';
 import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
@@ -65,6 +66,7 @@ export interface Props {
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
   updateOpenTooltips: (openTooltips: TooltipState[]) => void;
+  executionContext: KibanaExecutionContext;
 }
 
 export class TooltipControl extends Component<Props, {}> {
@@ -179,6 +181,15 @@ export class TooltipControl extends Component<Props, {}> {
       const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
       if (!layer || !layer.canShowTooltip() || layer.areTooltipsDisabled()) {
+        continue;
+      }
+
+      // masking must use paint property "opacity" to hide features in order to support feature state
+      // therefore, there is no way to remove masked features with queryRenderedFeatures
+      // masked features must be removed via manual filtering
+      const masks = layer.getMasks();
+      const maskHiddingFeature = masks.find((mask) => mask.isFeatureMasked(mbFeature));
+      if (maskHiddingFeature) {
         continue;
       }
 
@@ -376,6 +387,7 @@ export class TooltipControl extends Component<Props, {}> {
           isLocked={isLocked}
           index={index}
           loadFeatureGeometry={this._getFeatureGeometry}
+          executionContext={this.props.executionContext}
         />
       );
     });

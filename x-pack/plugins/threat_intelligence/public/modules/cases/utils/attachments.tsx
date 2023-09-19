@@ -6,17 +6,16 @@
  */
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { JsonValue } from '@kbn/utility-types';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
+import { EMPTY_VALUE } from '../../../constants/common';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { getIndicatorFieldAndValue } from '../../indicators';
-
-const ExternalAttachmentTypeId = 'indicator';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Indicator name, type, feed name and first seen values,
@@ -28,9 +27,7 @@ export interface AttachmentMetadata {
   indicatorFeedName: string;
 }
 
-const AttachmentChildrenLazy = React.lazy(
-  () => import('../components/attachment_children/attachment_children')
-);
+const AttachmentChildrenLazy = React.lazy(() => import('../components/attachment_children'));
 
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference
@@ -43,7 +40,7 @@ const AttachmentChildrenLazy = React.lazy(
  * - the component that renders the comment in teh case attachment
  */
 export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
-  id: ExternalAttachmentTypeId,
+  id: CASE_ATTACHMENT_TYPE_ID,
   displayName: 'indicator',
   getAttachmentViewObject: () => ({
     event: (
@@ -77,12 +74,12 @@ export const generateAttachmentsWithoutOwner = (
 
   return [
     {
-      type: CommentType.externalReference,
+      type: AttachmentType.externalReference,
       externalReferenceId,
       externalReferenceStorage: {
         type: ExternalReferenceStorageType.elasticSearchDoc,
       },
-      externalReferenceAttachmentTypeId: ExternalAttachmentTypeId,
+      externalReferenceAttachmentTypeId: CASE_ATTACHMENT_TYPE_ID,
       externalReferenceMetadata: attachmentMetadata as unknown as { [p: string]: JsonValue },
     },
   ];

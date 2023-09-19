@@ -7,84 +7,35 @@
 
 import type { FC } from 'react';
 import styled from 'styled-components';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo } from 'react';
 import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
-import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
-import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
+import { Form, UseField } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { NextStep } from '../next_step';
 import { schema } from './schema';
 
 const StyledForm = styled(Form)`
   max-width: 235px !important;
 `;
 interface StepScheduleRuleProps extends RuleStepProps {
+  form: FormHook<ScheduleStepRule>;
+}
+
+interface StepScheduleRuleReadOnlyProps {
+  addPadding: boolean;
+  descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: ScheduleStepRule;
-  onRuleDataChange?: (data: ScheduleStepRule) => void;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
-  addPadding = false,
-  defaultValues: initialState,
-  descriptionColumns = 'singleSplit',
-  isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  onSubmit,
-  setForm,
-  onRuleDataChange,
+  form,
 }) => {
-  const { form } = useForm<ScheduleStepRule>({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-
-  const { getFormData, submit } = form;
-
-  useFormData<ScheduleStepRule>({
-    form,
-    watch: ['from', 'interval'],
-    onChange: (data: ScheduleStepRule) => {
-      if (onRuleDataChange) {
-        onRuleDataChange(data);
-      }
-    },
-  });
-
-  const handleSubmit = useCallback(() => {
-    if (onSubmit) {
-      onSubmit();
-    }
-  }, [onSubmit]);
-
-  const getData = useCallback(async () => {
-    const result = await submit();
-    return result?.isValid
-      ? result
-      : {
-          isValid: false,
-          data: getFormData(),
-        };
-  }, [getFormData, submit]);
-
-  useEffect(() => {
-    let didCancel = false;
-    if (setForm && !didCancel) {
-      setForm(RuleStep.scheduleRule, getData);
-    }
-    return () => {
-      didCancel = true;
-    };
-  }, [getData, setForm]);
-
-  return isReadOnlyView ? (
-    <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
-    </StepContentWrapper>
-  ) : (
+  return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <StyledForm form={form} data-test-subj="stepScheduleRule">
@@ -110,12 +61,26 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
           />
         </StyledForm>
       </StepContentWrapper>
-
-      {!isUpdateView && (
-        <NextStep dataTestSubj="schedule-continue" onClick={handleSubmit} isDisabled={isLoading} />
-      )}
     </>
   );
 };
-
 export const StepScheduleRule = memo(StepScheduleRuleComponent);
+
+const StepScheduleRuleReadOnlyComponent: FC<StepScheduleRuleReadOnlyProps> = ({
+  addPadding,
+  defaultValues: data,
+  descriptionColumns,
+  isInPanelView = false,
+}) => {
+  return (
+    <StepContentWrapper addPadding={addPadding}>
+      <StepRuleDescription
+        columns={descriptionColumns}
+        schema={schema}
+        data={data}
+        isInPanelView={isInPanelView}
+      />
+    </StepContentWrapper>
+  );
+};
+export const StepScheduleRuleReadOnly = memo(StepScheduleRuleReadOnlyComponent);

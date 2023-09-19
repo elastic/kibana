@@ -13,9 +13,9 @@ import type {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import type { RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';

@@ -98,7 +98,11 @@ export const MonitorTypeRadioGroup = ({
           </EuiText>
           <EuiText size="s" color="subdued">
             <span>{`${selectedOption.description} `}</span>
-            <EuiLink href={selectedOption.link} target="_blank">
+            <EuiLink
+              data-test-subj="syntheticsMonitorTypeRadioGroupLearnMoreLink"
+              href={selectedOption.link}
+              target="_blank"
+            >
               {i18n.translate('xpack.synthetics.monitorConfig.monitorType.learnMoreLink', {
                 defaultMessage: 'Learn more',
               })}

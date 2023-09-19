@@ -19,6 +19,7 @@ import {
   EuiFieldText,
   EuiFieldNumber,
   EuiSelect,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -55,10 +56,17 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
       id="advancedOutputOptions"
       arrowDisplay="left"
       buttonContent={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.advancedOptionsToggleLabel"
-          defaultMessage="Advanced options"
-        />
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.advancedOptionsToggleLabel"
+              defaultMessage="Advanced options"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiBetaBadge label="Experimental" color="subdued" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <>

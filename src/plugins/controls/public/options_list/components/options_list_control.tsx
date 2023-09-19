@@ -12,14 +12,14 @@ import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
-import { optionsListReducers } from '../options_list_reducers';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -29,38 +29,30 @@ export const OptionsListControl = ({
   loadMoreSubject: Subject<number>;
 }) => {
   const resizeRef = useRef(null);
+  const optionsList = useOptionsList();
   const dimensions = useResizeObserver(resizeRef.current);
 
-  // Redux embeddable Context
-  const {
-    useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString, setPopoverOpen },
-    useEmbeddableSelector: select,
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const error = optionsList.select((state) => state.componentState.error);
+  const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
+  const validSelections = optionsList.select((state) => state.componentState.validSelections);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const validSelections = select((state) => state.componentState.validSelections);
-  const isPopoverOpen = select((state) => state.componentState.popoverOpen);
+  const id = optionsList.select((state) => state.explicitInput.id);
+  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
+  const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
-  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const fieldName = select((state) => state.explicitInput.fieldName);
-  const exclude = select((state) => state.explicitInput.exclude);
-  const id = select((state) => state.explicitInput.id);
-
-  const placeholder = select((state) => state.explicitInput.placeholder);
-
-  const loading = select((state) => state.output.loading);
+  const loading = optionsList.select((state) => state.output.loading);
 
   useEffect(() => {
     return () => {
-      dispatch(setPopoverOpen(false)); // on unmount, close the popover
+      optionsList.dispatch.setPopoverOpen(false); // on unmount, close the popover
     };
-  }, [dispatch, setPopoverOpen]);
+  }, [optionsList]);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -76,16 +68,16 @@ export const OptionsListControl = ({
   // remove all other selections if this control is single select
   useEffect(() => {
     if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      dispatch(replaceSelection(selectedOptions[0]));
+      optionsList.dispatch.replaceSelection(selectedOptions[0]);
     }
-  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
+  }, [selectedOptions, singleSelect, optionsList.dispatch]);
 
   const updateSearchString = useCallback(
     (newSearchString: string) => {
       typeaheadSubject.next(newSearchString);
-      dispatch(setSearchString(newSearchString));
+      optionsList.dispatch.setSearchString(newSearchString);
     },
-    [typeaheadSubject, dispatch, setSearchString]
+    [typeaheadSubject, optionsList.dispatch]
   );
 
   const loadMoreSuggestions = useCallback(
@@ -134,6 +126,7 @@ export const OptionsListControl = ({
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
+        badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
@@ -141,7 +134,7 @@ export const OptionsListControl = ({
           'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
-        onClick={() => dispatch(setPopoverOpen(!isPopoverOpen))}
+        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
         isSelected={isPopoverOpen}
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
@@ -153,7 +146,9 @@ export const OptionsListControl = ({
     </div>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
@@ -162,14 +157,15 @@ export const OptionsListControl = ({
       <EuiPopover
         ownFocus
         button={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         anchorPosition="downCenter"
-        className="optionsList__popoverOverride"
-        closePopover={() => dispatch(setPopoverOpen(false))}
-        anchorClassName="optionsList__anchorOverride"
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
       >
         <OptionsListPopover
           width={dimensions.width}

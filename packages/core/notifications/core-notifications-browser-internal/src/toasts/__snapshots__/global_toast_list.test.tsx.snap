@@ -1,5 +1,117 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`global_toast_list with duplicate elements renders the list with a single element 1`] = `
+<EuiGlobalToastList
+  aria-label="Notification message list"
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  toastLifeTimeMs={Infinity}
+  toasts={
+    Array [
+      Object {
+        "id": "0",
+        "text": "You've got mail!",
+        "title": <TitleWithBadge
+          counter={4}
+          title="AOL Notifications"
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+    ]
+  }
+/>
+`;
+
+exports[`global_toast_list with duplicate elements, using MountPoints renders the all separate elements element: euiToastList 1`] = `
+<EuiGlobalToastList
+  aria-label="Notification message list"
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  toastLifeTimeMs={Infinity}
+  toasts={
+    Array [
+      Object {
+        "id": "0",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "1",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "2",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "3",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+    ]
+  }
+/>
+`;
+
+exports[`global_toast_list with duplicate elements, using MountPoints renders the all separate elements element: globalToastList 1`] = `
+<EuiGlobalToastList
+  aria-label="Notification message list"
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  toastLifeTimeMs={Infinity}
+  toasts={
+    Array [
+      Object {
+        "id": "0",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "1",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "2",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+      Object {
+        "id": "3",
+        "text": "You've got mail!",
+        "title": <MountWrapper
+          mount={[Function]}
+        />,
+        "toastLifeTimeMs": 5000,
+      },
+    ]
+  }
+/>
+`;
+
 exports[`renders matching snapshot 1`] = `
 <EuiGlobalToastList
   aria-label="Notification message list"

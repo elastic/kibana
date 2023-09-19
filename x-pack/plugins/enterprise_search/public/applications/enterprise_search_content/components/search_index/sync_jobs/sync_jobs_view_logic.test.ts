@@ -9,15 +9,11 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 
 import moment from 'moment';
 
+import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 
-import {
-  ConnectorSyncJob,
-  SyncStatus,
-  TriggerMethod,
-} from '../../../../../../common/types/connectors';
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -76,10 +72,12 @@ describe('SyncJobsViewLogic', () => {
         id: 'id',
         indexed_document_count: 50,
         indexed_document_volume: 40,
+        job_type: SyncJobType.FULL,
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: 'hostname_fake',
       };

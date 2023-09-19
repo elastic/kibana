@@ -58,6 +58,14 @@ for (let i = 0; i < 105; i++) {
   });
 }
 
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      navigate: async () => {},
+    }),
+  },
+};
+
 let component = null;
 
 // Resolve outstanding API requests. See https://www.benmvp.com/blog/asynchronous-testing-with-enzyme-react-jest/
@@ -136,7 +144,7 @@ const getActionMenuButtons = (rendered) => {
 describe('index table', () => {
   const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
-  beforeEach(() => {
+  const setupMockComponent = (dependenciesOverride) => {
     // Mock initialization of services
     const services = {
       extensionsService: new ExtensionsService(),
@@ -159,12 +167,19 @@ describe('index table', () => {
         executionContext: executionContextServiceMock.createStartContract(),
       },
       plugins: {},
+      url: urlServiceMock,
+      // Default stateful configuration
+      config: {
+        enableLegacyTemplates: true,
+        enableIndexActions: true,
+        enableIndexStats: true,
+      },
     };
 
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppContextProvider value={appDependencies}>
+          <AppContextProvider value={{ ...appDependencies, ...dependenciesOverride }}>
             <AppWithoutRouter />
           </AppContextProvider>
         </MemoryRouter>
@@ -172,6 +187,11 @@ describe('index table', () => {
     );
 
     store.dispatch(loadIndicesSuccess({ indices }));
+  };
+
+  beforeEach(() => {
+    // Mock initialization of services
+    setupMockComponent();
 
     httpRequestsMockHelpers.setLoadIndicesResponse(indices);
     httpRequestsMockHelpers.setReloadIndicesResponse(indices);
@@ -317,6 +337,7 @@ describe('index table', () => {
     indexNameLink.simulate('click');
     rendered.update();
     expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(1);
+    expect(findTestSubject(rendered, 'discoverIconLink').length).toBe(1);
   });
 
   test('should show the right context menu options when one index is selected and open', async () => {
@@ -495,5 +516,26 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
     testEditor(rendered, 'editIndexMenuButton');
+  });
+
+  describe('Common index actions', () => {
+    beforeEach(() => {
+      // Mock initialization of services; set enableIndexActions=false to verify config behavior
+      setupMockComponent({ config: { enableIndexActions: false, enableLegacyTemplates: true } });
+    });
+
+    test('Common index actions should be hidden when feature is turned off', async () => {
+      const rendered = mountWithIntl(component);
+      await runAllPromises();
+      rendered.update();
+
+      expect(findTestSubject(rendered, 'showStatsIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'closeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'forcemergeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
+    });
   });
 });

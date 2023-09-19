@@ -39,22 +39,40 @@ export class TodosClient implements CrudClient {
       completed: false,
     };
     this.todos.push(todo);
-    return todo;
+    return {
+      item: todo,
+    };
   }
 
   async delete(input: TodoDeleteIn): Promise<TodoDeleteOut> {
     this.todos = this.todos.filter((todo) => todo.id !== input.id);
+    return { success: true };
   }
 
   async get(input: TodoGetIn): Promise<TodoGetOut> {
-    return this.todos.find((todo) => todo.id === input.id)!;
+    return {
+      item: this.todos.find((todo) => todo.id === input.id)!,
+    };
   }
 
   async search(input: TodoSearchIn): Promise<TodoSearchOut> {
-    const filter = input.query.filter;
-    if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
-    if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
-    return { hits: [...this.todos] };
+    const filter = input.options?.filter;
+    let hits = [...this.todos];
+
+    if (filter === 'todo') {
+      hits = this.todos.filter((t) => !t.completed);
+    }
+
+    if (filter === 'completed') {
+      hits = this.todos.filter((t) => t.completed);
+    }
+
+    return {
+      hits,
+      pagination: {
+        total: hits.length,
+      },
+    };
   }
 
   async update(input: TodoUpdateIn): Promise<TodoUpdateOut> {
@@ -63,6 +81,10 @@ export class TodosClient implements CrudClient {
     if (todoToUpdate) {
       Object.assign(todoToUpdate, input.data);
     }
-    return { ...todoToUpdate };
+    return {
+      item: {
+        ...todoToUpdate,
+      },
+    };
   }
 }

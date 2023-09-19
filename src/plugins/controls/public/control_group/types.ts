@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../../common/control_group/types';
@@ -21,9 +22,12 @@ export type ControlGroupReduxState = ReduxEmbeddableState<
   ControlGroupSettings
 >;
 
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
+
 export interface ControlGroupCreationOptions {
   initialInput?: Partial<ControlGroupInput>;
   settings?: ControlGroupSettings;
+  fieldFilterPredicate?: FieldFilterPredicate;
 }
 
 export interface ControlGroupSettings {

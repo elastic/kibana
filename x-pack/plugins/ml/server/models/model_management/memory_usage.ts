@@ -22,6 +22,7 @@ import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
 } from '../../../common/types/trained_models';
+import type { MlFeatures } from '../../types';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();
@@ -33,7 +34,7 @@ const NODE_FIELDS = ['attributes', 'name', 'roles'] as const;
 export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
 export class MemoryUsageService {
-  constructor(private readonly mlClient: MlClient) {}
+  constructor(private readonly mlClient: MlClient, private readonly mlFeatures: MlFeatures) {}
 
   public async getMemorySizes(itemType?: MlSavedObjectType, node?: string, showClosedJobs = false) {
     let memories: MemoryUsageInfo[] = [];
@@ -60,11 +61,19 @@ export class MemoryUsageService {
   }
 
   private async getADJobsSizes() {
+    if (this.mlFeatures.ad === false) {
+      return [];
+    }
+
     const jobs = await this.mlClient.getJobStats();
     return jobs.jobs.map(this.getADJobMemorySize);
   }
 
   private async getTrainedModelsSizes() {
+    if (this.mlFeatures.nlp === false) {
+      return [];
+    }
+
     const [models, stats] = await Promise.all([
       this.mlClient.getTrainedModels(),
       this.mlClient.getTrainedModelsStats(),
@@ -83,6 +92,10 @@ export class MemoryUsageService {
   }
 
   private async getDFAJobsSizes() {
+    if (this.mlFeatures.dfa === false) {
+      return [];
+    }
+
     const [jobs, jobsStats] = await Promise.all([
       this.mlClient.getDataFrameAnalytics(),
       this.mlClient.getDataFrameAnalyticsStats(),
@@ -199,6 +212,7 @@ export class MemoryUsageService {
               ...rest,
               ...modelSizeState,
               node: nodeRest,
+              key: `${rest.deployment_id}_${node.name}`,
             };
           });
 

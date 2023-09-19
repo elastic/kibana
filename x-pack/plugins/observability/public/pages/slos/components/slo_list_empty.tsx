@@ -16,7 +16,7 @@ export function SloListEmpty() {
         defaultMessage: 'No results',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       {i18n.translate('xpack.observability.slo.list.emptyMessage', {
         defaultMessage: 'There are no results for your criteria.',

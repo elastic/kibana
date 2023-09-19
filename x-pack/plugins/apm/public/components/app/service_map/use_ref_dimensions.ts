@@ -13,7 +13,7 @@ export function useRefDimensions() {
   const windowHeight = useWindowSize().height;
 
   if (!ref.current) {
-    return { ref, width: 0, height: 0 };
+    return { ref, width: 0, height: windowHeight };
   }
 
   const { top, width } = ref.current.getBoundingClientRect();

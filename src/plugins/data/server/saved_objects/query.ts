@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
+import { SCHEMA_QUERY_V8_8_0 } from './schemas/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'search',
@@ -29,18 +32,14 @@ export const querySavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      query: {
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
-      },
-      filters: {
-        dynamic: false,
-        properties: {},
-      },
-      timefilter: { dynamic: false, properties: {} },
     },
   },
   migrations: savedQueryMigrations,
+  schemas: {
+    '8.8.0': SCHEMA_QUERY_V8_8_0,
+  },
 };

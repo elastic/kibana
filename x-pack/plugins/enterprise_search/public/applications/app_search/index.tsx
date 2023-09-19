@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -68,21 +68,21 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route>{showView()}</Route>
-    </Switch>
+    </Routes>
   );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
-  </Switch>
+  </Routes>
 );
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
@@ -102,7 +102,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   }, []);
 
   return (
-    <Switch>
+    <Routes>
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
           <Library />
@@ -145,6 +145,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

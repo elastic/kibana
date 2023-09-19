@@ -9,7 +9,10 @@
     "browser": true,
     "requiredPlugins": [
       "contentManagement",
-      "developerExamples"
-    ]
+      "developerExamples",
+      "kibanaReact",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredBundles": ["savedObjectsFinder"]
   }
 }

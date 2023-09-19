@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LEFT_SECTION } from './test_ids';
 
 interface LeftSectionProps {
@@ -25,11 +25,13 @@ interface LeftSectionProps {
  * Left section of the expanded flyout rendering a panel
  */
 export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: LeftSectionProps) => {
+  const style = useMemo<React.CSSProperties>(
+    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    [width]
+  );
   return (
-    <EuiFlexItem grow data-test-subj={LEFT_SECTION}>
-      <EuiFlexGroup direction="column" style={{ maxWidth: width, width: 'auto' }}>
-        {component}
-      </EuiFlexGroup>
+    <EuiFlexItem grow data-test-subj={LEFT_SECTION} style={style}>
+      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
     </EuiFlexItem>
   );
 };

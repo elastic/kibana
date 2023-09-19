@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
-import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { ESQuery } from '../../../../../common/typed_json';
 import type { SeverityCount } from '../../../components/risk_score/severity/types';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -25,6 +25,7 @@ import { useSearchStrategy } from '../../../../common/containers/use_search_stra
 import type { InspectResponse } from '../../../../types';
 import type { inputsModel } from '../../../../common/store';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -37,7 +38,7 @@ interface RiskScoreKpi {
 }
 
 interface UseRiskScoreKpiProps {
-  filterQuery?: string | ESTermQuery;
+  filterQuery?: string | ESQuery;
   skip?: boolean;
   riskEntity: RiskScoreEntity;
   timerange?: { to: string; from: string };
@@ -52,10 +53,11 @@ export const useRiskScoreKpi = ({
   const { addError } = useAppToasts();
   const spaceId = useSpaceId();
   const featureEnabled = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId)
-      : getUserRiskIndex(spaceId)
+      ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
+      : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
     : undefined;
 
   const { loading, result, search, refetch, inspect, error } =

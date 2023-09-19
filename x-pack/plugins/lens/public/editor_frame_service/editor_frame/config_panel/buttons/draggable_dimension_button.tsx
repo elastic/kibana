@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import React, { useMemo, useCallback, ReactElement } from 'react';
+import {
+  DragDrop,
+  DragDropIdentifier,
+  useDragDropContext,
+  DropType,
+  DropTargetSwapDuplicateCombine,
+} from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
   isOperation,
-  DropType,
   DatasourceLayers,
   IndexPatternMap,
   DragDropOperation,
   Visualization,
 } from '../../../../types';
-import {
-  getCustomDropTarget,
-  getAdditionalClassesOnDroppable,
-  getAdditionalClassesOnEnter,
-} from './drop_targets_utils';
 
 export function DraggableDimensionButton({
   order,
@@ -61,7 +61,7 @@ export function DraggableDimensionButton({
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
   indexPatterns: IndexPatternMap;
 }) {
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
 
@@ -139,18 +139,20 @@ export function DraggableDimensionButton({
       data-test-subj={group.dataTestSubj}
     >
       <DragDrop
-        getCustomDropTarget={getCustomDropTarget}
-        getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
-        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
-        order={order}
         draggable
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnEnter={DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
+        order={order}
         dragType={isOperation(dragging) ? 'move' : 'copy'}
         dropTypes={dropTypes}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
-        onDragStart={() => onDragStart()}
-        onDragEnd={() => onDragEnd()}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
       >
         {children}
       </DragDrop>

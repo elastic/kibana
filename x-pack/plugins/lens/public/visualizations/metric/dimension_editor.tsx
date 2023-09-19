@@ -33,12 +33,9 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
+import { DebouncedInput, useDebouncedValue, IconSelect } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import {
-  applyPaletteParams,
-  PalettePanelContainer,
-  useDebouncedValue,
-} from '../../shared_components';
+import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import {
@@ -48,7 +45,7 @@ import {
   showingBar,
 } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { DebouncedInput } from '../../shared_components/debounced_input';
+import { iconsSet } from './icon_set';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -381,6 +378,24 @@ function PrimaryMetricEditor(props: SubProps) {
           </EuiFlexGroup>
         </EuiFormRow>
       )}
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.icon', {
+          defaultMessage: 'Icon decoration',
+        })}
+      >
+        <IconSelect
+          customIconSet={iconsSet}
+          value={state?.icon}
+          onChange={(newIcon) => {
+            setState({
+              ...state,
+              icon: newIcon,
+            });
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 }

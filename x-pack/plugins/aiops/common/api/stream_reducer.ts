@@ -7,7 +7,7 @@
 
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
+import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis';
 
 interface StreamState {
   ccsWarning: boolean;
@@ -31,7 +31,7 @@ export const initialState: StreamState = {
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsExplainLogRateSpikesApiAction | AiopsExplainLogRateSpikesApiAction[]
+  action: AiopsLogRateAnalysisApiAction | AiopsLogRateAnalysisApiAction[]
 ): StreamState {
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);
@@ -66,6 +66,8 @@ export function streamReducer(
       return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET_ERRORS:
       return { ...state, errors: [] };
+    case API_ACTION_NAME.RESET_GROUPS:
+      return { ...state, significantTermsGroups: [] };
     case API_ACTION_NAME.RESET_ALL:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

@@ -9,14 +9,13 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import { ObservabilityAppServices } from '../../../application/types';
-import { TopAlert } from '../../alerts';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -24,15 +23,13 @@ export interface HeaderActionsProps {
 
 export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
-    http,
     cases: {
-      hooks: { getUseCasesAddToExistingCaseModal },
+      hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditAlertFlyout, getRuleSnoozeModal },
-  } = useKibana<ObservabilityAppServices>().services;
+    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+  } = useKibana().services;
 
-  const { rule, reloadRule } = useFetchRule({
-    http,
+  const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
 
@@ -40,7 +37,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -55,14 +52,14 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
               id: rule.id,
               name: rule.name,
             },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
           },
         ]
       : [];
 
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const handleViewRuleDetails = () => {
@@ -98,7 +95,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
-            disabled={!alert?.fields[ALERT_RULE_UUID]}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             onClick={handleViewRuleDetails}
             data-test-subj="view-rule-details-button"
           >
@@ -137,24 +134,28 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         </EuiFlexGroup>
       </EuiPopover>
 
-      {rule && ruleConditionsFlyoutOpen
-        ? getEditAlertFlyout({
-            initialRule: rule,
-            onClose: () => {
-              setRuleConditionsFlyoutOpen(false);
-            },
-            onSave: reloadRule,
-          })
-        : null}
+      {rule && ruleConditionsFlyoutOpen ? (
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={() => {
+            setRuleConditionsFlyoutOpen(false);
+          }}
+          onSave={async () => {
+            refetch();
+          }}
+        />
+      ) : null}
 
-      {rule && snoozeModalOpen
-        ? getRuleSnoozeModal({
-            rule,
-            onClose: () => setSnoozeModalOpen(false),
-            onRuleChanged: reloadRule,
-            onLoading: noop,
-          })
-        : null}
+      {rule && snoozeModalOpen ? (
+        <RuleSnoozeModal
+          rule={rule}
+          onClose={() => setSnoozeModalOpen(false)}
+          onRuleChanged={async () => {
+            refetch();
+          }}
+          onLoading={noop}
+        />
+      ) : null}
     </>
   );
 }

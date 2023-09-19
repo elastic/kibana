@@ -28,6 +28,7 @@ import {
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import useToggle from 'react-use/lib/useToggle';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
@@ -74,8 +75,8 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, setRowState] = useState(true);
-  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
+  const [isExpanded, toggle] = useToggle(true);
+
   const {
     dataView,
     children,
@@ -224,7 +225,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleRowState}
+            onClick={toggle}
+            data-test-subj="expandRow"
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
@@ -255,6 +257,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
+                            data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
                             href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
@@ -277,6 +280,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty
+                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}
                     size="xs"
@@ -312,6 +316,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   />
                 </StyledHealth>
                 <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
                   aria-label={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
@@ -320,7 +325,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
@@ -346,6 +351,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         {canDelete && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
               aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
@@ -431,7 +437,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CARDINALITY,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   rate: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {

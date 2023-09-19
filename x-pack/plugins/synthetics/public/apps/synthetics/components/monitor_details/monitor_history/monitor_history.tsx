@@ -23,7 +23,7 @@ import { AvailabilitySparklines } from '../monitor_summary/availability_sparklin
 import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 
@@ -41,114 +41,105 @@ export const MonitorHistory = () => {
     [updateUrlParams]
   );
 
-  const monitorId = useMonitorQueryId();
   const redirect = useMonitorDetailsPage();
   if (redirect) {
     return redirect;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <SyntheticsDatePicker fullWidth={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={1}>
-            {/* @ts-expect-error Current @elastic/eui has the wrong types for the ref */}
-            <EuiPanel hasShadow={false} hasBorder={true} panelRef={statsRef}>
-              <EuiTitle size="xs">
-                <h3>{STATS_LABEL}</h3>
-              </EuiTitle>
-              <EuiFlexGrid columns={statsColumns} gutterSize="s" responsive={false}>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <MonitorCompleteCount from={from} to={to} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <MonitorCompleteSparklines from={from} to={to} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <AvailabilityPanel from={from} to={to} id="availabilityPercentageHistory" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <AvailabilitySparklines
-                        from={from}
-                        to={to}
-                        id="availabilitySparklineHistory"
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      {monitorId && (
-                        <MonitorErrorsCount
+    <MonitorPendingWrapper>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <SyntheticsDatePicker fullWidth={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="m" wrap={true}>
+            <EuiFlexItem css={{ flexBasis: '36%' }}>
+              {/* @ts-expect-error Current @elastic/eui has the wrong types for the ref */}
+              <EuiPanel hasShadow={false} hasBorder={true} panelRef={statsRef}>
+                <EuiTitle size="xs">
+                  <h3>{STATS_LABEL}</h3>
+                </EuiTitle>
+                <EuiFlexGrid columns={statsColumns} gutterSize="s" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <MonitorCompleteCount from={from} to={to} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <MonitorCompleteSparklines from={from} to={to} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <AvailabilityPanel from={from} to={to} id="availabilityPercentageHistory" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <AvailabilitySparklines
                           from={from}
                           to={to}
-                          monitorId={[monitorId]}
-                          id="monitorErrorsCountHistory"
+                          id="availabilitySparklineHistory"
                         />
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      {monitorId && (
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <MonitorErrorsCount from={from} to={to} id="monitorErrorsCountHistory" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
                         <MonitorErrorSparklines
                           from={from}
                           to={to}
-                          monitorId={[monitorId]}
                           id="monitorErrorsSparklineHistory"
                         />
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <DurationPanel from={from} to={to} id="durationAvgValueHistory" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <DurationSparklines from={from} to={to} id="durationAvgSparklineHistory" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <MonitorTotalRunsCount from={from} to={to} />
-                </EuiFlexItem>
-              </EuiFlexGrid>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <EuiPanel hasShadow={false} hasBorder={true}>
-              <EuiTitle size="xs">
-                <h3>{DURATION_TREND_LABEL}</h3>
-              </EuiTitle>
-              <MonitorDurationTrend from={from} to={to} />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <MonitorStatusPanel
-          from={from}
-          to={to}
-          showViewHistoryButton={false}
-          periodCaption={''}
-          brushable={true}
-          onBrushed={handleStatusChartBrushed}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <TestRunsTable from={from} to={to} showViewHistoryButton={false} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        <DurationPanel from={from} to={to} id="durationAvgValueHistory" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <DurationSparklines from={from} to={to} id="durationAvgSparklineHistory" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <MonitorTotalRunsCount from={from} to={to} />
+                  </EuiFlexItem>
+                </EuiFlexGrid>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem css={{ flexBasis: '60%', minWidth: 260 }}>
+              <EuiPanel hasShadow={false} hasBorder={true}>
+                <EuiTitle size="xs">
+                  <h3>{DURATION_TREND_LABEL}</h3>
+                </EuiTitle>
+                <MonitorDurationTrend from={from} to={to} />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <MonitorStatusPanel
+            from={from}
+            to={to}
+            showViewHistoryButton={false}
+            periodCaption={''}
+            brushable={true}
+            onBrushed={handleStatusChartBrushed}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TestRunsTable from={from} to={to} showViewHistoryButton={false} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </MonitorPendingWrapper>
   );
 };
 

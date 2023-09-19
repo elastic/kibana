@@ -7,6 +7,7 @@ exports[`ExpressionRow should render a helpText for the of expression 1`] = `
   values={
     Object {
       "documentationLink": <EuiLink
+        data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
         href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
         target="BLANK"
       >

@@ -25,7 +25,6 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -41,14 +40,13 @@ import type {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-  RuleStepsFormData,
-  RuleStep,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
@@ -64,29 +62,12 @@ export const getTimeTypeValue = (time: string): { unit: Unit; value: number } =>
   if (
     !isEmpty(filterTimeType) &&
     filterTimeType != null &&
-    ['s', 'm', 'h'].includes(filterTimeType[0])
+    ['s', 'm', 'h', 'd'].includes(filterTimeType[0])
   ) {
     timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };
-
-export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
-  formData?: T
-): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
-  !!formData?.isValid && !!formData.data;
-
-export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
-  has('data.ruleType', input);
-
-export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
-  has('data.name', input);
-
-export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
-  has('data.interval', input);
-
-export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
-  has('data.actions', input);
 
 export interface RuleFields {
   anomalyThreshold: unknown;
@@ -448,6 +429,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
                     ? ruleFields.groupByDuration
                     : undefined,
+                missing_fields_strategy:
+                  ruleFields.suppressionMissingFields ||
+                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
               },
             }
           : {}),
@@ -501,6 +485,7 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
+    investigationFields,
     references,
     riskScore,
     severity,
@@ -517,6 +502,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+  const isinvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -540,6 +526,9 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
+    investigation_fields: isinvestigationFieldsEmpty
+      ? undefined
+      : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
@@ -563,19 +552,12 @@ export const formatAboutStepData = (
 };
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const {
-    actions = [],
-    responseActions,
-    enabled,
-    kibanaSiemAppUrl,
-    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
-  } = actionsStepData;
+  const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
     actions: actions.map(transformAlertToRuleAction),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
-    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
       kibana_siem_app_url: kibanaSiemAppUrl,
     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -38,10 +38,16 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
   };
 }
 
-export interface UpdateAlertStatusProps {
+export interface UpdateAlertStatusByQueryProps {
   query: object;
   status: Status;
-  signal?: AbortSignal; // TODO: implement cancelling
+  signal?: AbortSignal;
+}
+
+export interface UpdateAlertStatusByIdsProps {
+  signalIds: string[];
+  status: Status;
+  signal?: AbortSignal;
 }
 
 export interface AlertsIndex {

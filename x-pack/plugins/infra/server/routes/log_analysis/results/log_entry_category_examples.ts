@@ -6,11 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  getLogEntryCategoryExamplesRequestPayloadRT,
-  getLogEntryCategoryExamplesSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH,
-} from '../../../../common/http_api/log_analysis';
+import { logAnalysisResultsV1 } from '../../../../common/http_api';
+
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
@@ -21,69 +18,80 @@ export const initGetLogEntryCategoryExamplesRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH,
-      validate: {
-        body: createValidationFunction(getLogEntryCategoryExamplesRequestPayloadRT),
-      },
-    },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const {
-        data: {
-          categoryId,
-          exampleCount,
-          logView,
-          timeRange: { startTime, endTime },
+      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createValidationFunction(
+              logAnalysisResultsV1.getLogEntryCategoryExamplesRequestPayloadRT
+            ),
+          },
         },
-      } = request.body;
+      },
+      framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+        const {
+          data: {
+            categoryId,
+            exampleCount,
+            logView,
+            timeRange: { startTime, endTime },
+          },
+        } = request.body;
 
-      const [, , { logViews }] = await getStartServices();
-      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
+        const [, { logsShared }] = await getStartServices();
+        const resolvedLogView = await logsShared.logViews
+          .getScopedClient(request)
+          .getResolvedLogView(logView);
 
-      try {
-        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+        try {
+          const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
-        const { data: logEntryCategoryExamples, timing } = await getLogEntryCategoryExamples(
-          { infra: await infraMlContext.infra, core: await infraMlContext.core },
-          logView,
-          startTime,
-          endTime,
-          categoryId,
-          exampleCount,
-          resolvedLogView
-        );
+          const { data: logEntryCategoryExamples, timing } = await getLogEntryCategoryExamples(
+            { infra: await infraMlContext.infra, core: await infraMlContext.core },
+            logView,
+            startTime,
+            endTime,
+            categoryId,
+            exampleCount,
+            resolvedLogView
+          );
 
-        return response.ok({
-          body: getLogEntryCategoryExamplesSuccessReponsePayloadRT.encode({
-            data: {
-              examples: logEntryCategoryExamples,
-            },
-            timing,
-          }),
-        });
-      } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+          return response.ok({
+            body: logAnalysisResultsV1.getLogEntryCategoryExamplesSuccessReponsePayloadRT.encode({
+              data: {
+                examples: logEntryCategoryExamples,
+              },
+              timing,
+            }),
+          });
+        } catch (error) {
+          if (Boom.isBoom(error)) {
+            throw error;
+          }
 
-        if (isMlPrivilegesError(error)) {
+          if (isMlPrivilegesError(error)) {
+            return response.customError({
+              statusCode: 403,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
-            statusCode: 403,
+            statusCode: error.statusCode ?? 500,
             body: {
-              message: error.message,
+              message: error.message ?? 'An unexpected error occurred',
             },
           });
         }
-
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    })
-  );
+      })
+    );
 };

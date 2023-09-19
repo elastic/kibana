@@ -17,10 +17,10 @@ export function isPackageUnverified(
   pkg: PackageInfo | PackageListItem,
   packageVerificationKeyId?: string
 ) {
-  if (!('savedObject' in pkg)) return false;
+  if (!('installationInfo' in pkg) || !pkg.installationInfo) return false;
 
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
-    pkg.savedObject.attributes;
+    pkg?.installationInfo;
 
   const { packageVerification: isPackageVerificationEnabled } = ExperimentalFeaturesService.get();
   const isKeyOutdated = !!verificationKeyId && verificationKeyId !== packageVerificationKeyId;

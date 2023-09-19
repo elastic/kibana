@@ -54,6 +54,29 @@ export default function emailTest({ getService }: FtrProviderContext) {
       }
     });
 
+    it('does not have a footer', async () => {
+      const from = `bob@${EmailDomainAllowed}`;
+      const conn = await createConnector(from);
+      expect(conn.status).to.be(200);
+
+      const { id } = conn.body;
+      expect(id).to.be.a('string');
+
+      const to = EmailDomainsAllowed.map((domain) => `jeb@${domain}`).sort();
+      const cc = EmailDomainsAllowed.map((domain) => `jim@${domain}`).sort();
+      const bcc = EmailDomainsAllowed.map((domain) => `joe@${domain}`).sort();
+
+      const ccNames = cc.map((email) => `Jimmy Jack <${email}>`);
+
+      const run = await runConnector(id, to, ccNames, bcc);
+      expect(run.status).to.be(200);
+
+      const { status } = run.body || {};
+      expect(status).to.be('ok');
+
+      expect(run.body.data.message.text).to.be('email-message');
+    });
+
     describe('fails for invalid email domains', () => {
       it('in create when invalid "from" used', async () => {
         const from = `bob@not.allowed`;

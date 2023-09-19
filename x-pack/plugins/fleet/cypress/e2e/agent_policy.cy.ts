@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { TOAST_CLOSE_BTN } from '../screens/navigation';
-
+import { setupFleetServer } from '../tasks/fleet_server';
+import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
 describe('Edit agent policy', () => {
   beforeEach(() => {
     cy.intercept('/api/fleet/agent_policies/policy-1', {
@@ -58,5 +59,69 @@ describe('Edit agent policy', () => {
     cy.wait('@updateAgentPolicy').then((interception) => {
       expect(interception.request.body.description).to.equal('desc');
     });
+  });
+
+  it('should show correct fleet server host for custom URL', () => {
+    setupFleetServer();
+
+    cy.intercept('/api/fleet/agent_policies/policy-1', {
+      item: {
+        id: 'policy-1',
+        name: 'Agent policy 1',
+        description: 'desc',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        status: 'active',
+        fleet_server_host_id: 'fleet-server-1',
+        package_policies: [],
+      },
+    });
+
+    const apiKey = {
+      id: 'key-1',
+      active: true,
+      api_key_id: 'PefGQYoB0MXWbqVD6jhr',
+      api_key: 'this-is-the-api-key',
+      name: 'key-1',
+      policy_id: 'policy-1',
+      created_at: '2023-08-29T14:51:10.473Z',
+    };
+
+    cy.intercept('/api/fleet/enrollment_api_keys?**', {
+      items: [apiKey],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+    cy.intercept('/api/fleet/enrollment_api_keys/key-1', {
+      item: apiKey,
+    });
+    cy.intercept('/api/fleet/fleet_server_hosts', {
+      items: [
+        {
+          id: 'fleet-default-fleet-server-host',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://192.168.1.23:8220'],
+          is_preconfigured: true,
+        },
+        {
+          id: 'fleet-server-1',
+          name: 'custom host',
+          host_urls: ['https://xxx.yyy.zzz:443'],
+          is_default: false,
+          is_preconfigured: false,
+        },
+      ],
+      page: 1,
+      perPage: 10000,
+      total: 2,
+    });
+    cy.visit('/app/fleet/policies/policy-1');
+
+    cy.getBySel(AGENT_POLICY_DETAILS_PAGE.ADD_AGENT_LINK).click();
+    cy.getBySel(AGENT_FLYOUT.KUBERNETES_PLATFORM_TYPE).click();
+    cy.contains('https://xxx.yyy.zzz:443');
+    cy.contains('this-is-the-api-key');
   });
 });

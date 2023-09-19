@@ -11,15 +11,15 @@ import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } fr
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorStatus } from '../../../../../../../common/types/connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
-import { NativeConnector } from '../types';
+import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
-  nativeConnector: NativeConnector;
+  nativeConnector: ConnectorDefinition;
   status: ConnectorStatus;
 }
 
@@ -33,7 +33,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
             defaultMessage:
-              'Encryption for data source credentials is unavailable in this beta. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+              'Encryption for data source credentials is unavailable in this version. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
         )}
       </EuiText>
@@ -75,8 +75,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage:
-                  'Your connector {name} has connected to Enterprise Search successfully.',
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
                 values: { name: nativeConnector.name },
               }
             )}

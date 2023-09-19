@@ -6,13 +6,13 @@
  */
 
 import { getPieVisualization } from './visualization';
+import { PieVisualizationState } from '../../../common/types';
 import {
-  PieVisualizationState,
-  PieChartTypes,
   CategoryDisplay,
-  NumberDisplay,
   LegendDisplay,
-} from '../../../common';
+  NumberDisplay,
+  PieChartTypes,
+} from '../../../common/constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -411,6 +411,51 @@ describe('pie_visualization', () => {
         `);
       });
 
+      it("applies color swatch icons on multiple metrics if there's a collapsed slice-by", () => {
+        const palette = paletteServiceMock.get('default');
+        palette.getCategoricalColor.mockClear();
+        const state = getExampleState();
+        state.layers[0].allowMultipleMetrics = true;
+        state.layers[0].metrics = colIds;
+        state.layers[0].colorsByDimension = {};
+        state.layers[0].colorsByDimension[colIds[0]] = 'overridden-color';
+        state.layers[0].primaryGroups = ['primaryGroup'];
+        state.layers[0].collapseFns = { ['primaryGroup']: 'sum' };
+
+        const config = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        expect(findMetricGroup(config)?.accessors).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "color": "overridden-color",
+              "columnId": "1",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "2",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "3",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "4",
+              "triggerIconType": "color",
+            },
+          ]
+        `);
+
+        expect(palette.getCategoricalColor).toHaveBeenCalledTimes(3); // one for each of the defaultly assigned colors
+      });
+
       it("applies disabled icons on multiple metrics if there's a slice-by", () => {
         const state = getExampleState();
         state.layers[0].allowMultipleMetrics = true;
@@ -617,10 +662,10 @@ describe('pie_visualization', () => {
       });
     });
 
-    it.each(Object.values(PieChartTypes).filter((type) => type !== 'mosaic'))(
+    it.each(Object.values(PieChartTypes).filter((type) => type !== PieChartTypes.MOSAIC))(
       '%s adds fake dimension',
       (type) => {
-        const state = { ...getExampleState(), type };
+        const state = { ...getExampleState(), shape: type };
         state.layers[0].metrics.push('1', '2');
         state.layers[0].allowMultipleMetrics = true;
         expect(
@@ -644,5 +689,22 @@ describe('pie_visualization', () => {
         ).toBeUndefined();
       }
     );
+  });
+
+  describe('layer settings', () => {
+    describe('hasLayerSettings', () => {
+      it('should have data settings for all partition chart types but mosaic', () => {
+        for (const type of Object.values(PieChartTypes)) {
+          const state = { ...getExampleState(), shape: type };
+          expect(
+            pieVisualization.hasLayerSettings?.({
+              state,
+              frame: mockFrame(),
+              layerId: state.layers[0].layerId,
+            })
+          ).toEqual({ data: type !== PieChartTypes.MOSAIC, appearance: false });
+        }
+      });
+    });
   });
 });

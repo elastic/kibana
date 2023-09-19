@@ -15,5 +15,12 @@ interface Props {
 
 export function Documentation({ label }: Props) {
   const { docLinks } = useApmPluginContext().core;
-  return <EuiLink href={docLinks.links.apm.customLinks}>{label}</EuiLink>;
+  return (
+    <EuiLink
+      data-test-subj="apmCustomLinksDocumentationLink"
+      href={docLinks.links.apm.customLinks}
+    >
+      {label}
+    </EuiLink>
+  );
 }

@@ -9,11 +9,11 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 export interface RawQuestionAnsweringResponse {
@@ -57,14 +57,15 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
         'Provide a question and test how well the model extracts an answer from your input text.',
     }),
   ];
-  public questionText$ = new BehaviorSubject<string>('');
+  private questionText$ = new BehaviorSubject<string>('');
 
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize(
       [this.questionText$.pipe(map((questionText) => questionText !== ''))],

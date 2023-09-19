@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../__mocks__/es_results';
 import {
@@ -25,6 +25,7 @@ import {
 } from '../../../../../common/field_maps/field_names';
 
 const SPACE_ID = 'space';
+const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
 
 const ruleExecutionLoggerMock = ruleExecutionLogMock.forExecutors.create();
 
@@ -54,7 +55,8 @@ describe('buildAlert', () => {
       SPACE_ID,
       jest.fn(),
       completeRule.ruleParams.index as string[],
-      undefined
+      undefined,
+      PUBLIC_BASE_URL
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(
@@ -74,6 +76,9 @@ describe('buildAlert', () => {
         }),
       })
     );
+    expect(alertGroup[0]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/f2db3574eaf8450e3f4d1cf4f416d70b110b035ae0a7a00026242df07f0a6c90?index=.alerts-security.alerts-space'
+    );
     expect(alertGroup[1]).toEqual(
       expect.objectContaining({
         _source: expect.objectContaining({
@@ -90,6 +95,9 @@ describe('buildAlert', () => {
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),
       })
+    );
+    expect(alertGroup[1]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/1dbc416333244efbda833832eb83f13ea5d980a33c2f981ca8d2b35d82a045da?index=.alerts-security.alerts-space'
     );
     expect(alertGroup[2]).toEqual(
       expect.objectContaining({
@@ -128,7 +136,9 @@ describe('buildAlert', () => {
         }),
       })
     );
-
+    expect(alertGroup[2]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/1b7d06954e74257140f3bf73f139078483f9658fe829fd806cc307fc0388fb23?index=.alerts-security.alerts-space'
+    );
     const groupIds = alertGroup.map((alert) => alert._source[ALERT_GROUP_ID]);
     for (const groupId of groupIds) {
       expect(groupId).toEqual(groupIds[0]);

@@ -13,9 +13,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { HasDataContextProvider } from '../../context/has_data_context';
-import { PluginContext } from '../../context/plugin_context';
-import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
+import { PluginContext } from '../../context/plugin_context/plugin_context';
+import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
+import {
+  registerDataHandler,
+  unregisterDataHandler,
+} from '../../context/has_data_context/data_handler';
 import { OverviewPage } from './overview';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -31,7 +34,7 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
-  unregisterDataHandler({ appName: 'synthetics' });
+  unregisterDataHandler({ appName: 'uptime' });
 }
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
@@ -78,12 +81,14 @@ const withCore = makeDecorator({
     const config: ConfigSchema = {
       unsafe: {
         alertDetails: {
-          apm: { enabled: false },
           logs: { enabled: false },
           metrics: { enabled: false },
           uptime: { enabled: false },
+          observability: { enabled: false },
         },
+        thresholdRule: { enabled: false },
       },
+      compositeSlo: { enabled: false },
     };
 
     return (
@@ -236,7 +241,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: false, indices: 'metric-*' }),
     });
     registerDataHandler({
-      appName: 'synthetics',
+      appName: 'uptime',
       fetchData: fetchUptimeData,
       hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
     });
@@ -324,7 +329,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
-      appName: 'synthetics',
+      appName: 'uptime',
       fetchData: fetchUptimeData,
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
@@ -350,7 +355,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
-        appName: 'synthetics',
+        appName: 'uptime',
         fetchData: fetchUptimeData,
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
@@ -378,7 +383,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
-        appName: 'synthetics',
+        appName: 'uptime',
         fetchData: fetchUptimeData,
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
@@ -403,7 +408,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
-      appName: 'synthetics',
+      appName: 'uptime',
       fetchData: async () => emptyUptimeResponse,
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
@@ -435,7 +440,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
-        appName: 'synthetics',
+        appName: 'uptime',
         fetchData: async () => {
           throw new Error('Error fetching Uptime data');
         },
@@ -473,7 +478,7 @@ storiesOf('app/Overview', module)
         },
       });
       registerDataHandler({
-        appName: 'synthetics',
+        appName: 'uptime',
         fetchData: fetchUptimeData,
         // @ts-ignore throws an error instead
         hasData: async () => {
@@ -510,7 +515,7 @@ storiesOf('app/Overview', module)
       },
     });
     registerDataHandler({
-      appName: 'synthetics',
+      appName: 'uptime',
       fetchData: fetchUptimeData,
       // @ts-ignore throws an error instead
       hasData: async () => {

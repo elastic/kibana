@@ -16,7 +16,7 @@ import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
-import type { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
+import type { CasesStart } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -41,6 +41,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -65,7 +66,8 @@ export interface SecuritySolutionPluginSetupDependencies {
 
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
-  cases?: CasesPluginStart;
+  cases?: CasesStart;
+  cloud: CloudSetup;
   cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
@@ -80,8 +82,12 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SecuritySolutionPluginSetup {}
+export interface SecuritySolutionPluginSetup {
+  /**
+   * Sets the configurations for app features that are available to the Security Solution
+   */
+  setAppFeaturesConfigurator: AppFeaturesService['setAppFeaturesConfigurator'];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionPluginStart {}

@@ -9,13 +9,13 @@ import { assertUnreachable } from '../../../../../../../../common/utility_types'
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff_outcome';
-import { ThreeWayMergeOutcome } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_merge_outcome';
+  ThreeWayMergeOutcome,
+} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const simpleDiffAlgorithm = <TValue>(
   versions: ThreeVersionsOf<TValue>
@@ -29,12 +29,11 @@ export const simpleDiffAlgorithm = <TValue>(
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions(
-    baseVersion,
+  const { mergeOutcome, mergedVersion } = mergeVersions({
     currentVersion,
     targetVersion,
-    diffOutcome
-  );
+    diffOutcome,
+  });
 
   return {
     base_version: baseVersion,
@@ -54,12 +53,17 @@ interface MergeResult<TValue> {
   mergedVersion: TValue;
 }
 
-const mergeVersions = <TValue>(
-  baseVersion: TValue,
-  currentVersion: TValue,
-  targetVersion: TValue,
-  diffOutcome: ThreeWayDiffOutcome
-): MergeResult<TValue> => {
+interface MergeArgs<TValue> {
+  currentVersion: TValue;
+  targetVersion: TValue;
+  diffOutcome: ThreeWayDiffOutcome;
+}
+
+const mergeVersions = <TValue>({
+  currentVersion,
+  targetVersion,
+  diffOutcome,
+}: MergeArgs<TValue>): MergeResult<TValue> => {
   switch (diffOutcome) {
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:

@@ -19,7 +19,7 @@ export function ShowAsLabel(props: Props) {
   return (
     <EuiToolTip
       content={
-        <EuiText>
+        <EuiText size="s">
           <dl>
             <dt>{CLUSTER_LABEL}</dt>
             <dd>

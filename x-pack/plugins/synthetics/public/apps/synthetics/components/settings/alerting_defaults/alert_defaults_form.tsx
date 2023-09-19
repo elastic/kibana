@@ -93,7 +93,7 @@ export const AlertDefaultsForm = () => {
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.defaultConnectors.description"
-            defaultMessage="Selector one or more connectors to be used for alerts. These settings will be applied to all synthetics based alerts."
+            defaultMessage="Select one or more connectors to be used for alerts. These settings apply to all synthetics-based alerts."
           />
         }
       >
@@ -117,6 +117,7 @@ export const AlertDefaultsForm = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="syntheticsAlertDefaultsFormButton"
             iconType="cross"
             onClick={() => {
               setFormFields((settings ?? DYNAMIC_SETTINGS_DEFAULTS) as FormFields);
@@ -130,6 +131,7 @@ export const AlertDefaultsForm = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="syntheticsAlertDefaultsFormButton"
             onClick={(evt: React.FormEvent) => {
               evt.preventDefault();
               onApply();

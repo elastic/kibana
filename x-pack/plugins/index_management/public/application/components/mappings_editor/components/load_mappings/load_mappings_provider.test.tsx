@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 
 jest.mock('lodash', () => {
@@ -18,17 +20,39 @@ jest.mock('lodash', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  const CodeEditorMock = (props: any) => (
+    <input
+      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+      data-currentvalue={props.value}
+      value={props.value}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+      }}
+    />
+  );
+
+  return {
+    ...original,
+    CodeEditor: CodeEditorMock,
+  };
+});
+
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
-  <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
-    {(openModal) => (
-      <button onClick={openModal} data-test-subj="load-json-button">
-        Load JSON
-      </button>
-    )}
-  </LoadMappingsProvider>
+  <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
+    <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
+      {(openModal) => (
+        <button onClick={openModal} data-test-subj="load-json-button">
+          Load JSON
+        </button>
+      )}
+    </LoadMappingsProvider>
+  </KibanaContextProvider>
 );
 
 const setup = (props: any) =>
@@ -46,12 +70,8 @@ const openModalWithJsonContent =
 
     component.update();
 
-    act(() => {
-      // Set the mappings to load
-      find('mockCodeEditor').simulate('change', {
-        jsonString: JSON.stringify(json),
-      });
-    });
+    find('mockCodeEditor').getDOMNode().setAttribute('data-currentvalue', JSON.stringify(json));
+    find('mockCodeEditor').simulate('change');
   };
 
 describe('<LoadMappingsProvider />', () => {

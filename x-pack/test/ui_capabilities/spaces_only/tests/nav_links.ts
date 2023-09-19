@@ -22,6 +22,10 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
     'enterpriseSearch',
     'enterpriseSearchContent',
     'enterpriseSearchAnalytics',
+    'enterpriseSearchApplications',
+    'enterpriseSearchEsre',
+    'enterpriseSearchVectorSearch',
+    'enterpriseSearchElasticsearch',
     'appSearch',
     'workplaceSearch',
   ];

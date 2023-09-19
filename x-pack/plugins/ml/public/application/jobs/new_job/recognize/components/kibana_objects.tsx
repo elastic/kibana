@@ -18,8 +18,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KibanaObjectUi } from '../page';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 export interface KibanaObjectItemProps {
   objectType: string;

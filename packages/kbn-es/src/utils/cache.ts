@@ -18,13 +18,16 @@ export const cache = {
 
       return {
         ...JSON.parse(meta),
+        exists: true,
       };
     } catch (e) {
       if (e.code !== 'ENOENT') {
         throw e;
       }
 
-      return {};
+      return {
+        exists: false,
+      };
     }
   },
 

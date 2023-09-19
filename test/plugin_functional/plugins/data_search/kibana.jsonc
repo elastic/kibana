@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/data-search-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/kibana-data-discovery",
   "plugin": {
     "id": "dataSearchPlugin",
     "server": true,

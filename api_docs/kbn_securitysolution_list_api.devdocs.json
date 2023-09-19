@@ -317,7 +317,7 @@
             "section": "def-common.DeleteListParams",
             "text": "DeleteListParams"
           },
-          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
+          ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
         "deprecated": false,
@@ -340,6 +340,57 @@
               }
             ],
             "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.duplicateExceptionList",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "duplicateExceptionList",
+        "description": [
+          "\nDuplicate an ExceptionList and its items by providing a ExceptionList list_id\n"
+        ],
+        "signature": [
+          "({ http, includeExpiredExceptions, listId, namespaceType, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-list-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+            "section": "def-common.DuplicateExceptionListProps",
+            "text": "DuplicateExceptionListProps"
+          },
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.duplicateExceptionList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  includeExpiredExceptions,\n  listId,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.DuplicateExceptionListProps",
+                "text": "DuplicateExceptionListProps"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -650,7 +701,7 @@
             "section": "def-common.FindListsParams",
             "text": "FindListsParams"
           },
-          ") => Promise<{ largeLists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; smallLists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; }>"
+          ") => Promise<{ largeLists: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; smallLists: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; }>"
         ],
         "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
         "deprecated": false,
@@ -697,7 +748,7 @@
             "section": "def-common.FindListsParams",
             "text": "FindListsParams"
           },
-          ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+          ") => Promise<{ cursor: string; data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
         ],
         "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
         "deprecated": false,
@@ -862,7 +913,7 @@
             "section": "def-common.ImportListParams",
             "text": "ImportListParams"
           },
-          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
+          ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
         ],
         "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
         "deprecated": false,

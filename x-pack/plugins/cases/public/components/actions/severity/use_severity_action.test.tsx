@@ -12,7 +12,7 @@ import { useSeverityAction } from './use_severity_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 
@@ -103,10 +103,9 @@ describe('useSeverityAction', () => {
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
         expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith(
-          [{ severity, id: basicCase.id, version: basicCase.version }],
-          expect.anything()
-        );
+        expect(updateSpy).toHaveBeenCalledWith({
+          cases: [{ severity, id: basicCase.id, version: basicCase.version }],
+        });
       });
     }
   });

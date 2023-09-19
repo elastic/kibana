@@ -19,16 +19,26 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiBetaBadge,
+  EuiButtonGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './connector_add_modal.scss';
 import { betaBadgeProps } from './beta_badge_props';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  ActionTypeRegistryContract,
+  ActionTypeModel,
+  ActionTypeIndex,
+} from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
-import { ConnectorForm, ConnectorFormState } from './connector_form';
+import { ConnectorForm, ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorFormSchema } from './types';
+import { loadActionTypes } from '../../lib/action_connector_api';
+import { SectionLoading } from '../../components';
 
 export interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -38,27 +48,74 @@ export interface ConnectorAddModalProps {
 }
 
 const ConnectorAddModal = ({
-  actionType,
+  actionType: tempActionType,
   onClose,
   postSaveEventHandler,
   actionTypeRegistry,
 }: ConnectorAddModalProps) => {
   const {
     application: { capabilities },
+    http,
+    notifications: { toasts },
   } = useKibana().services;
-
+  const [actionType, setActionType] = useState<ActionType>(tempActionType);
+  const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
+  const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
   const isMounted = useRef(false);
-  const initialConnector = {
-    actionTypeId: actionType.id,
+  const [initialConnector, setInitialConnector] = useState({
+    actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
-    isMissingSecrets: false,
     config: {},
     secrets: {},
-  };
+    isMissingSecrets: false,
+  });
 
   const canSave = hasSaveActionsCapability(capabilities);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
+  const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
+    actionTypeModel && actionTypeModel.subtype
+      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
+          ...actionTypeRegistry.get(subtypeAction.id),
+          name: subtypeAction.name,
+        }))
+      : [];
+
+  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
+    id: gAction.id,
+    label: gAction.name,
+    'data-test-subj': `${gAction.id}Button`,
+  }));
+
+  const resetConnectorForm = useRef<ResetForm | undefined>();
+
+  const setResetForm = (reset: ResetForm) => {
+    resetConnectorForm.current = reset;
+  };
+
+  const onChangeGroupAction = (id: string) => {
+    if (allActionTypes && allActionTypes[id]) {
+      setActionType(allActionTypes[id]);
+      setInitialConnector({
+        actionTypeId: id,
+        isDeprecated: false,
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      });
+      if (resetConnectorForm.current) {
+        resetConnectorForm.current({
+          resetValues: true,
+          defaultValue: {
+            actionTypeId: id,
+            isDeprecated: false,
+            config: {},
+            secrets: {},
+          },
+        });
+      }
+    }
+  };
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -131,8 +188,39 @@ const ConnectorAddModal = ({
     };
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingActionTypes(true);
+        const availableActionTypes = await loadActionTypes({ http });
+        setLoadingActionTypes(false);
+
+        const index: ActionTypeIndex = {};
+        for (const actionTypeItem of availableActionTypes) {
+          index[actionTypeItem.id] = actionTypeItem;
+        }
+        setAllActionTypes(index);
+      } catch (e) {
+        if (toasts) {
+          toasts.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadConnectorTypesMessage',
+              { defaultMessage: 'Unable to load connector types' }
+            ),
+          });
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
+    <EuiModal
+      className="actConnectorModal"
+      data-test-subj="connectorAddModal"
+      onClose={closeModal}
+      style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
+    >
       <EuiModalHeader>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           {actionTypeModel && actionTypeModel.iconClass ? (
@@ -167,13 +255,40 @@ const ConnectorAddModal = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <ConnectorForm
-          actionTypeModel={actionTypeModel}
-          connector={initialConnector}
-          isEdit={false}
-          onChange={setFormState}
-        />
-        {preSubmitValidationErrorMessage}
+        {loadingActionTypes ? (
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
+              defaultMessage="Loading connector types…"
+            />
+          </SectionLoading>
+        ) : (
+          <>
+            {groupActionTypeModel && (
+              <>
+                <EuiButtonGroup
+                  isFullWidth
+                  buttonSize="m"
+                  color="primary"
+                  legend=""
+                  options={groupActionButtons}
+                  idSelected={actionType.id}
+                  onChange={onChangeGroupAction}
+                  data-test-subj="slackTypeChangeButton"
+                />
+                <EuiSpacer size="xs" />
+              </>
+            )}
+            <ConnectorForm
+              actionTypeModel={actionTypeModel}
+              connector={initialConnector}
+              isEdit={false}
+              onChange={setFormState}
+              setResetForm={setResetForm}
+            />
+            {preSubmitValidationErrorMessage}
+          </>
+        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={closeModal} isLoading={isSaving}>

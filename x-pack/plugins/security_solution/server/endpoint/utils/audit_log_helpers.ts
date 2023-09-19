@@ -65,9 +65,10 @@ export const getActionRequestsResult = async ({
     { term: { type: 'INPUT_ACTION' } },
   ];
   const actionsFilters = [...baseActionFilters, ...dateFilters];
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   const hasLogsEndpointActionsIndex = await doesLogsEndpointActionsIndexExist({
-    context,
+    esClient,
     logger,
     indexName: ENDPOINT_ACTIONS_INDEX,
   });
@@ -94,7 +95,6 @@ export const getActionRequestsResult = async ({
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
       return e._index.includes(ENDPOINT_ACTIONS_DS)
@@ -130,9 +130,10 @@ export const getActionResponsesResult = async ({
     { terms: { action_id: actionIds } },
   ];
   const responsesFilters = [...baseResponsesFilter, ...dateFilters];
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   const hasLogsEndpointActionResponsesIndex = await doesLogsEndpointActionsIndexExist({
-    context,
+    esClient,
     logger,
     indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
@@ -153,7 +154,6 @@ export const getActionResponsesResult = async ({
 
   let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionResponses = await esClient.search(responsesSearchQuery, { ...queryOptions, meta: true });
   } catch (error) {
     logger.error(error);

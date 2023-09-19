@@ -33,12 +33,8 @@ import {
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineStatus,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
@@ -270,7 +266,6 @@ describe('alert actions', () => {
     // spyOn. So now we're doing all three of these.
     // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
     mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
@@ -1014,9 +1009,9 @@ describe('alert actions', () => {
       });
 
       test('it uses ecs.Data.timestamp if one is provided', () => {
-        const ecsDataMock: Ecs = {
+        const ecsDataMock = {
           ...mockEcsDataWithAlert,
-          timestamp: '2020-03-20T17:59:46.349Z',
+          '@timestamp': '2020-03-20T17:59:46.349Z',
         };
         const result = determineToAndFrom({ ecs: ecsDataMock });
 
@@ -1025,7 +1020,8 @@ describe('alert actions', () => {
       });
 
       test('it uses current time timestamp if ecsData.timestamp is not provided', () => {
-        const { timestamp, ...ecsDataMock } = mockEcsDataWithAlert;
+        // @ts-ignore // TODO remove when EcsSecurityExtension has been cleaned https://github.com/elastic/kibana/issues/156879
+        const { '@timestamp': timestamp, ...ecsDataMock } = mockEcsDataWithAlert;
         const result = determineToAndFrom({ ecs: ecsDataMock });
 
         expect(result.from).toEqual('2020-03-01T17:54:46.349Z');

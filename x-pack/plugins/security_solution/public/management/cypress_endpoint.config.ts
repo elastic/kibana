@@ -7,10 +7,17 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { dataLoaders } from './cypress/support/data_loaders';
+import { dataLoaders, dataLoadersForRealEndpoints } from './cypress/support/data_loaders';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { responseActionTasks } from './cypress/support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './public/management/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -32,15 +39,24 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#security-solution-app',
     },
+    KIBANA_USERNAME: 'system_indices_superuser',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
+    ELASTICSEARCH_PASSWORD: 'changeme',
   },
 
   e2e: {
+    experimentalMemoryManagement: true,
+    experimentalInteractiveRunEvents: true,
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
-    setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+    setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
       dataLoaders(on, config);
+      // Data loaders specific to "real" Endpoint testing
+      dataLoadersForRealEndpoints(on, config);
+      responseActionTasks(on, config);
     },
   },
 });

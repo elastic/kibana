@@ -9,18 +9,23 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
+import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { AlertActions } from './alert_actions';
 import { ClientPluginsStart } from '../../../../../plugin';
+
+const MONITOR_STATUS_RULE = {
+  'kibana.alert.rule.category': ['Synthetics monitor status'],
+};
 
 export const MonitorAlerts = ({
   to,
@@ -31,21 +36,22 @@ export const MonitorAlerts = ({
   from: string;
   dateLabel: string;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
 
-  const monitorId = useMonitorQueryId();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
 
-  if (!monitorId || !selectedLocation) {
-    return <EuiLoadingContent />;
+  if (!selectedLocation || !queryIdFilter) {
+    return <EuiSkeletonText />;
   }
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -68,17 +74,10 @@ export const MonitorAlerts = ({
                       name: 'All',
                       selectedMetricField: RECORDS_FIELD,
                       reportDefinitions: {
-                        'kibana.alert.rule.category': ['Synthetics monitor status'],
-                        'monitor.id': [monitorId],
+                        ...MONITOR_STATUS_RULE,
+                        ...queryIdFilter,
                       },
-                      filters: [
-                        {
-                          field: 'observer.geo.name',
-                          // in 8.6.0, observer.geo.name was mapped to the id,
-                          // so we have to pass both values to maintain history
-                          values: [selectedLocation.label, selectedLocation.id],
-                        },
-                      ],
+                      filters: locationFilter ?? [],
                     },
                   ]}
                 />
@@ -93,10 +92,10 @@ export const MonitorAlerts = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AlertActions monitorId={monitorId} from={from} to={to} />
+          <AlertActions from={from} to={to} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" wrap={true}>
         <EuiFlexItem style={{ width: 80 }} grow={false}>
           <ExploratoryViewEmbeddable
             dataTestSubj="monitorActiveAlertsCount"
@@ -112,23 +111,18 @@ export const MonitorAlerts = ({
                 name: ACTIVE_LABEL,
                 selectedMetricField: RECORDS_FIELD,
                 reportDefinitions: {
-                  'kibana.alert.rule.category': ['Synthetics monitor status'],
-                  'monitor.id': [monitorId],
+                  ...MONITOR_STATUS_RULE,
+                  ...queryIdFilter,
                 },
                 filters: [
                   { field: 'kibana.alert.status', values: ['active'] },
-                  {
-                    field: 'observer.geo.name',
-                    // in 8.6.0, observer.geo.name was mapped to the id,
-                    // so we have to pass both values to maintain history
-                    values: [selectedLocation.label, selectedLocation.id],
-                  },
+                  ...(locationFilter ?? []),
                 ],
               },
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"
@@ -141,20 +135,15 @@ export const MonitorAlerts = ({
                   to,
                 },
                 reportDefinitions: {
-                  'kibana.alert.rule.category': ['Synthetics monitor status'],
-                  'monitor.id': [monitorId],
+                  ...MONITOR_STATUS_RULE,
+                  ...queryIdFilter,
                 },
                 dataType: 'alerts',
                 selectedMetricField: RECORDS_FIELD,
                 name: ACTIVE_LABEL,
                 filters: [
                   { field: 'kibana.alert.status', values: ['active'] },
-                  {
-                    field: 'observer.geo.name',
-                    // in 8.6.0, observer.geo.name was mapped to the id,
-                    // so we have to pass both values to maintain history
-                    values: [selectedLocation.label, selectedLocation.id],
-                  },
+                  ...(locationFilter ?? []),
                 ],
                 color: theme.eui.euiColorVis7_behindText,
               },
@@ -175,23 +164,18 @@ export const MonitorAlerts = ({
                 name: RECOVERED_LABEL,
                 selectedMetricField: RECORDS_FIELD,
                 reportDefinitions: {
-                  'kibana.alert.rule.category': ['Synthetics monitor status'],
-                  'monitor.id': [monitorId],
+                  ...MONITOR_STATUS_RULE,
+                  ...queryIdFilter,
                 },
                 filters: [
                   { field: 'kibana.alert.status', values: ['recovered'] },
-                  {
-                    field: 'observer.geo.name',
-                    // in 8.6.0, observer.geo.name was mapped to the id,
-                    // so we have to pass both values to maintain history
-                    values: [selectedLocation.label, selectedLocation.id],
-                  },
+                  ...(locationFilter ?? []),
                 ],
               },
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"
@@ -204,20 +188,15 @@ export const MonitorAlerts = ({
                   to,
                 },
                 reportDefinitions: {
-                  'kibana.alert.rule.category': ['Synthetics monitor status'],
-                  'monitor.id': [monitorId],
+                  ...MONITOR_STATUS_RULE,
+                  ...queryIdFilter,
                 },
                 dataType: 'alerts',
                 selectedMetricField: 'recovered_alerts',
                 name: RECOVERED_LABEL,
                 filters: [
                   { field: 'kibana.alert.status', values: ['recovered'] },
-                  {
-                    field: 'observer.geo.name',
-                    // in 8.6.0, observer.geo.name was mapped to the id,
-                    // so we have to pass both values to maintain history
-                    values: [selectedLocation.label, selectedLocation.id],
-                  },
+                  ...(locationFilter ?? []),
                 ],
                 color: theme.eui.euiColorVis0_behindText,
               },

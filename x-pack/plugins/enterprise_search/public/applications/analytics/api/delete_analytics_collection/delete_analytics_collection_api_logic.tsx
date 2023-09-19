@@ -12,9 +12,9 @@ import { HttpLogic } from '../../../shared/http';
 
 export type DeleteAnalyticsCollectionApiLogicResponse = void;
 
-export const deleteAnalyticsCollection = async ({ id }: { id: string }) => {
+export const deleteAnalyticsCollection = async ({ name }: { name: string }) => {
   const { http } = HttpLogic.values;
-  const route = `/internal/enterprise_search/analytics/collections/${id}`;
+  const route = `/internal/enterprise_search/analytics/collections/${name}`;
   await http.delete<DeleteAnalyticsCollectionApiLogicResponse>(route);
 
   return;

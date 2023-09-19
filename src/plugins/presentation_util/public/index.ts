@@ -40,13 +40,13 @@ export {
 } from './components';
 
 export {
-  useReduxEmbeddableContext,
-  lazyLoadReduxEmbeddablePackage,
+  lazyLoadReduxToolsPackage,
   cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
-  type ReduxEmbeddablePackage,
-} from './redux_embeddables';
+  type ReduxTools,
+  type ReduxToolsPackage,
+} from './redux_tools';
 
 export type {
   ExpressionInputEditorRef,

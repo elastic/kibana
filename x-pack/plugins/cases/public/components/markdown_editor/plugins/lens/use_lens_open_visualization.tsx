@@ -6,14 +6,15 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+
+import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
+import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
@@ -42,13 +43,9 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     actionConfig: !lensVisualization.length
       ? null
       : {
+          type: AttachmentActionType.BUTTON as const,
           iconType: 'lensApp',
-          label: i18n.translate(
-            'xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel',
-            {
-              defaultMessage: 'Open visualization',
-            }
-          ),
+          label: OPEN_IN_VISUALIZATION,
           onClick: handleClick,
         },
   };

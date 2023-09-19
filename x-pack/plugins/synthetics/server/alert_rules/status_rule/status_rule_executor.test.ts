@@ -4,24 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { StatusRuleExecutor } from './status_rule_executor';
+import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { StatusRuleExecutor } from './status_rule_executor';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import moment from 'moment';
 import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import * as locationsUtils from '../../synthetics_service/get_all_locations';
+import type { PublicLocation } from '../../../common/runtime_types';
+import { SyntheticsServerSetup } from '../../types';
 
 describe('StatusRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
+  jest.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
+    // @ts-ignore
+    publicLocations: [
+      {
+        id: 'us_central_qa',
+        label: 'US Central QA',
+      },
+      {
+        id: 'us_central_dev',
+        label: 'US Central DEV',
+      },
+    ] as unknown as PublicLocation,
+    privateLocations: [],
+  });
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
@@ -37,8 +52,8 @@ describe('StatusRuleExecutor', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
-  } as unknown as UptimeServerSetup;
+    encryptedSavedObjects: mockEncryptedSO(),
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
@@ -64,6 +79,7 @@ describe('StatusRuleExecutor', () => {
       soClient,
     });
   });
+
   it('marks deleted configs as expected', async () => {
     jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
     const statusRule = new StatusRuleExecutor(
@@ -81,7 +97,7 @@ describe('StatusRuleExecutor', () => {
 
     const staleDownConfigs = await statusRule.markDeletedConfigs({
       id1: {
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -89,7 +105,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -97,7 +113,7 @@ describe('StatusRuleExecutor', () => {
         ping: {} as any,
       },
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
-        location: 'US Central QA',
+        locationId: 'us_central_qa',
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
@@ -110,7 +126,7 @@ describe('StatusRuleExecutor', () => {
       id1: {
         configId: 'id1',
         isDeleted: true,
-        location: 'us-east-1',
+        locationId: 'us-east-1',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
@@ -119,7 +135,85 @@ describe('StatusRuleExecutor', () => {
       '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
         configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
         isLocationRemoved: true,
-        location: 'US Central DEV',
+        locationId: 'us_central_dev',
+        monitorQueryId: 'test',
+        ping: {},
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+      },
+    });
+  });
+
+  it('does not mark deleted config when monitor does not contain location label', async () => {
+    jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+      {
+        ...testMonitors[0],
+        attributes: {
+          ...testMonitors[0].attributes,
+          locations: [
+            {
+              geo: { lon: -95.86, lat: 41.25 },
+              isServiceManaged: true,
+              id: 'us_central_qa',
+            },
+          ],
+        },
+      },
+    ]);
+    const statusRule = new StatusRuleExecutor(
+      moment().toDate(),
+      {},
+      soClient,
+      mockEsClient,
+      serverMock,
+      monitorClient
+    );
+
+    const { downConfigs } = await statusRule.getDownChecks({});
+
+    expect(downConfigs).toEqual({});
+
+    const staleDownConfigs = await statusRule.markDeletedConfigs({
+      id1: {
+        locationId: 'us-east-1',
+        configId: 'id1',
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+        monitorQueryId: 'test',
+        ping: {} as any,
+      },
+      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
+        locationId: 'us_central_dev',
+        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+        monitorQueryId: 'test',
+        ping: {} as any,
+      },
+      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
+        locationId: 'us_central_qa',
+        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+        monitorQueryId: 'test',
+        ping: {} as any,
+      },
+    });
+
+    expect(staleDownConfigs).toEqual({
+      id1: {
+        configId: 'id1',
+        isDeleted: true,
+        locationId: 'us-east-1',
+        monitorQueryId: 'test',
+        ping: {},
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+      },
+      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
+        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+        isLocationRemoved: true,
+        locationId: 'us_central_dev',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
@@ -161,23 +255,23 @@ const testMonitors = [
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
       },
       'url.port': null,
-      'source.zip_url.url': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       playwright_text_assertion: '',
       urls: 'https://www.google.com',
       screenshots: 'on',
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
-      'throttling.is_enabled': true,
-      'throttling.download_speed': '5',
-      'throttling.upload_speed': '3',
-      'throttling.latency': '20',
-      'throttling.config': '5d/3u/20l',
+      throttling: {
+        id: 'custom',
+        label: 'Custom',
+        value: {
+          download: '5',
+          upload: '3',
+          latency: '20',
+        },
+      },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
       'ssl.verification_mode': 'full',

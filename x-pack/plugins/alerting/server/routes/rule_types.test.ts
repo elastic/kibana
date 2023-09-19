@@ -60,7 +60,8 @@ describe('ruleTypesRoute', () => {
         enabledInLicense: true,
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
-        hasGetSummarizedAlerts: true,
+        hasAlertsMappings: true,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
@@ -87,10 +88,11 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabled_in_license: true,
-        has_get_summarized_alerts: true,
+        has_alerts_mappings: true,
+        has_fields_for_a_a_d: false,
       },
     ];
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
@@ -113,7 +115,8 @@ describe('ruleTypesRoute', () => {
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
             "enabled_in_license": true,
-            "has_get_summarized_alerts": true,
+            "has_alerts_mappings": true,
+            "has_fields_for_a_a_d": false,
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
@@ -129,7 +132,7 @@ describe('ruleTypesRoute', () => {
       }
     `);
 
-    expect(rulesClient.listAlertTypes).toHaveBeenCalledTimes(1);
+    expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
@@ -167,10 +170,12 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -220,10 +225,12 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

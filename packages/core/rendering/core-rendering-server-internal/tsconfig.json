@@ -37,6 +37,8 @@
     "@kbn/core-custom-branding-server-internal",
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
+    "@kbn/core-user-settings-server-mocks",
+    "@kbn/core-user-settings-server-internal",
   ],
   "exclude": [
     "target/**/*",

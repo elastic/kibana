@@ -206,8 +206,8 @@ export const packageToPackagePolicy = (
   integrationToEnable?: string
 ): NewPackagePolicy => {
   const experimentalDataStreamFeatures =
-    'savedObject' in packageInfo
-      ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
+    'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.experimental_data_stream_features
       : undefined;
 
   const packagePolicy: NewPackagePolicy = {

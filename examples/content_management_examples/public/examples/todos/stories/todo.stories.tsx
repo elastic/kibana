@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import { ContentClientProvider, ContentClient } from '@kbn/content-management-plugin/public';
+import { ContentTypeRegistry } from '@kbn/content-management-plugin/public/registry';
 
 import { Todos } from '../todos';
 import { TodosClient } from './todos_client';
@@ -19,7 +20,11 @@ export default {
 };
 
 const todosClient = new TodosClient();
-const contentClient = new ContentClient((contentType: string) => {
+
+const contentTypeRegistry = new ContentTypeRegistry();
+contentTypeRegistry.register({ id: 'todos', version: { latest: 1 } });
+
+const contentClient = new ContentClient((contentType?: string) => {
   switch (contentType) {
     case 'todos':
       return todosClient;
@@ -27,7 +32,7 @@ const contentClient = new ContentClient((contentType: string) => {
     default:
       throw new Error(`Unknown content type: ${contentType}`);
   }
-});
+}, contentTypeRegistry);
 
 export const SimpleTodoApp = () => (
   <ContentClientProvider contentClient={contentClient}>

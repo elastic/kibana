@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -26,6 +26,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
+  DataViewField,
   EXCEPTION_OPERATORS_ONLY_LISTS,
   FormattedBuilderEntry,
   OperatorOption,
@@ -75,11 +76,6 @@ export interface EntryItemProps {
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
-  ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -87,6 +83,7 @@ export interface EntryItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -97,7 +94,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   indexPattern,
   osTypes,
   listType,
-  listTypeSpecificIndexPatternFilter,
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
@@ -106,6 +102,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   isDisabled = false,
   operatorsList,
   allowCustomOptions = false,
+  getExtendedFields,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -175,6 +172,22 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  const [extendedField, setExtendedField] = useState<DataViewField | null>(null);
+  useEffect(() => {
+    if (!entry.field?.name) {
+      setExtendedField(null);
+    }
+    const fetchExtendedField = async (): Promise<void> => {
+      const fieldName = entry.field?.name;
+      if (getExtendedFields && fieldName) {
+        const extendedFields = await getExtendedFields([fieldName]);
+        const field = extendedFields.find((f) => f.name === fieldName) ?? null;
+        setExtendedField(field);
+      }
+    };
+    fetchExtendedField();
+  }, [entry.field?.name, getExtendedFields]);
+
   const isFieldComponentDisabled = useMemo(
     (): boolean =>
       isDisabled ||
@@ -185,13 +198,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(
-        indexPattern,
-        entry,
-        listType,
-        listTypeSpecificIndexPatternFilter,
-        osTypes
-      );
+      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -212,8 +219,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       );
 
       const warningIconCss = { marginRight: `${sPaddingSize}` };
-      const getMappingConflictsWarning = (field: DataViewFieldBase): React.ReactNode | null => {
-        const conflictsInfo = getMappingConflictsInfo(field);
+      const getMappingConflictsWarning = (): React.ReactNode | null => {
+        if (!extendedField) {
+          return null;
+        }
+        const conflictsInfo = getMappingConflictsInfo(extendedField);
         if (!conflictsInfo) {
           return null;
         }
@@ -221,13 +231,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <>
             <EuiSpacer size="s" />
             <EuiAccordion
-              id={'1'}
+              id={`${entry.id}`}
               buttonContent={
                 <>
                   <EuiIcon
                     data-test-subj="mappingConflictsAccordionIcon"
                     tabIndex={0}
-                    type="alert"
+                    type="warning"
                     size="s"
                     css={warningIconCss}
                   />
@@ -235,15 +245,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                 </>
               }
               arrowDisplay="none"
+              data-test-subj="mappingConflictsAccordion"
             >
               <div data-test-subj="mappingConflictsDescription">
-                {conflictsInfo.map((info) => {
+                {conflictsInfo.map((info, idx) => {
                   const groupDetails = info.groupedIndices.map(
                     ({ name, count }) =>
                       `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
                   );
                   return (
-                    <>
+                    <EuiFlexItem key={`${idx}`}>
                       <EuiSpacer size="s" />
                       {`${
                         info.totalIndexCount > 1
@@ -253,7 +264,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                             )
                           : info.type
                       }: ${groupDetails.join(', ')}`}
-                    </>
+                    </EuiFlexItem>
                   );
                 })}
                 <EuiSpacer size="s" />
@@ -265,13 +276,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
       const customOptionText =
         entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+
       const helpText =
-        entry.field?.type !== 'conflict' ? (
+        extendedField?.conflictDescriptions == null ? (
           customOptionText
         ) : (
           <>
             {customOptionText}
-            {getMappingConflictsWarning(entry.field)}
+            {getMappingConflictsWarning()}
           </>
         );
       return (
@@ -288,13 +300,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [
       indexPattern,
       entry,
-      listType,
-      listTypeSpecificIndexPatternFilter,
-      osTypes,
       isDisabled,
       handleFieldChange,
-      sPaddingSize,
       allowCustomOptions,
+      sPaddingSize,
+      extendedField,
     ]
   );
 
@@ -422,7 +432,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           }
           const warning = validateFilePathInput({ os, value: wildcardValue });
           actualWarning =
-            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
+            warning === FILENAME_WILDCARD_WARNING
+              ? warning && getWildcardWarning(warning)
+              : warning;
         }
 
         return (

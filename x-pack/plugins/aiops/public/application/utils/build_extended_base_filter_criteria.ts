@@ -11,11 +11,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
-import type { GroupTableItem } from '../../components/spike_analysis_table/types';
+import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
 /*
  * Contains utility functions for building and processing queries.
@@ -36,7 +36,7 @@ export function buildExtendedBaseFilterCriteria(
 
   const groupFilter = [];
   if (selectedGroup) {
-    const allItems: FieldValuePair[] = [...selectedGroup.group, ...selectedGroup.repeatedValues];
+    const allItems = selectedGroup.groupItemsSortedByUniqueness;
     for (const item of allItems) {
       const { fieldName, fieldValue } = item;
       groupFilter.push({ term: { [fieldName]: fieldValue } });

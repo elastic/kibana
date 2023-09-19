@@ -7,6 +7,11 @@
   display: none !important;
 }
 
+/* some elements needs to be stretched to be shared */
+.stretch-for-sharing {
+  margin: 0px;
+}
+
 /**
 * Global overrides
 */

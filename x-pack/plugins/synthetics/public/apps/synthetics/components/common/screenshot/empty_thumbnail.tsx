@@ -11,8 +11,8 @@ import {
   useEuiTheme,
   useEuiBackgroundColor,
   EuiIcon,
-  EuiLoadingContent,
   EuiText,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 
 import {
@@ -63,14 +63,23 @@ export const EmptyThumbnail = ({
         ...(borderRadius ? { borderRadius } : {}),
       }}
     >
-      {isLoading ? (
-        <EuiLoadingContent
+      {isLoading && animateLoading ? (
+        <EuiSkeletonRectangle
+          data-test-subj="stepScreenshotPlaceholderLoading"
+          isLoading={isLoading}
+          height={height}
+          width={width}
+        >
+          {/* `children` is required by this component, even though we'll replace it. */}
+          <span />
+        </EuiSkeletonRectangle>
+      ) : // when we're loading and `animateLoading` is false we simply render an un-animated div to fill the space
+      isLoading ? (
+        <div
           data-test-subj="stepScreenshotPlaceholderLoading"
           style={{
             width: '100%',
-            transform: `scale(1, ${animateLoading ? '100' : '0'})`, // To create a skeleton loading effect when animateLoading is true
           }}
-          lines={1}
         />
       ) : (
         <div

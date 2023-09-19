@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsConditions } from '.';
 import { TestProviders, mockIndexPattern } from '../../../../../common/mock';
-import { getRulesEqlSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesEqlSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -41,7 +41,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -72,7 +71,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -102,7 +100,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -132,7 +129,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -165,7 +161,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );
@@ -196,7 +191,6 @@ describe('ExceptionsConditions', () => {
             onOsChange={jest.fn()}
             onExceptionItemAdd={jest.fn()}
             onSetErrorExists={jest.fn()}
-            onFilterIndexPatterns={jest.fn()}
           />
         </TestProviders>
       );

@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { panelStrings } from '../../panel_strings';
 import { ILayer } from '../../../classes/layers/layer';
 import { RemoveLayerConfirmModal } from '../../../components/remove_layer_confirm_modal';
 
@@ -34,15 +35,6 @@ export class FlyoutFooter extends Component<Props, State> {
   };
 
   render() {
-    const cancelButtonLabel = this.props.hasStateChanged ? (
-      <FormattedMessage
-        id="xpack.maps.layerPanel.footer.cancelButtonLabel"
-        defaultMessage="Cancel"
-      />
-    ) : (
-      <FormattedMessage id="xpack.maps.layerPanel.footer.closeButtonLabel" defaultMessage="Close" />
-    );
-
     const removeModal =
       this.props.selectedLayer && this.state.showRemoveModal ? (
         <RemoveLayerConfirmModal
@@ -67,7 +59,7 @@ export class FlyoutFooter extends Component<Props, State> {
               flush="left"
               data-test-subj="layerPanelCancelButton"
             >
-              {cancelButtonLabel}
+              {this.props.hasStateChanged ? panelStrings.discardChanges : panelStrings.close}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -93,10 +85,7 @@ export class FlyoutFooter extends Component<Props, State> {
               onClick={this.props.saveLayerEdits}
               fill
             >
-              <FormattedMessage
-                id="xpack.maps.layerPanel.footer.saveAndCloseButtonLabel"
-                defaultMessage="Save & close"
-              />
+              {panelStrings.keepChanges}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

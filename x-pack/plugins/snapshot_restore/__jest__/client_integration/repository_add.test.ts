@@ -593,5 +593,46 @@ describe('<RepositoryAdd />', () => {
         })
       );
     });
+
+    test('should correctly set the onezone_ia storage class', async () => {
+      const { form, actions, component } = testBed;
+
+      const s3Repository = getRepository({
+        type: 's3',
+        settings: {
+          bucket: 'test_bucket',
+          storageClass: 'onezone_ia',
+        },
+      });
+
+      // Fill step 1 required fields and go to step 2
+      form.setInputValue('nameInput', s3Repository.name);
+      actions.selectRepositoryType(s3Repository.type);
+      actions.clickNextButton();
+
+      // Fill step 2
+      form.setInputValue('bucketInput', s3Repository.settings.bucket);
+      form.setSelectValue('storageClassSelect', s3Repository.settings.storageClass);
+
+      await act(async () => {
+        actions.clickSubmitButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}repositories`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: s3Repository.name,
+            type: s3Repository.type,
+            settings: {
+              bucket: s3Repository.settings.bucket,
+              storageClass: s3Repository.settings.storageClass,
+            },
+          }),
+        })
+      );
+    });
   });
 });

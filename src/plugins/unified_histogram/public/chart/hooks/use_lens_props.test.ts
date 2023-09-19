@@ -11,6 +11,7 @@ import { act } from 'react-test-renderer';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramInputMessage } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { getLensAttributes } from '../utils/get_lens_attributes';
 import { getLensProps, useLensProps } from './use_lens_props';
 
@@ -19,7 +20,7 @@ describe('useLensProps', () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
-    const attributes = getLensAttributes({
+    const attributesContext = getLensAttributes({
       title: 'test',
       filters: [],
       query: {
@@ -29,6 +30,7 @@ describe('useLensProps', () => {
       dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+      suggestion: undefined,
     });
     const lensProps = renderHook(() => {
       return useLensProps({
@@ -38,15 +40,53 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributes,
+        attributesContext,
         onLoad,
       });
     });
-    expect(lensProps.result.current).toEqual(
+    expect(lensProps.result.current.lensProps).toEqual(
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
-        attributes,
+        attributes: attributesContext.attributes,
+        onLoad,
+      })
+    );
+  });
+
+  it('should return lens props for text based languages', () => {
+    const getTimeRange = jest.fn();
+    const refetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const onLoad = jest.fn();
+    const attributesContext = getLensAttributes({
+      title: 'test',
+      filters: [],
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      dataView: dataViewWithTimefieldMock,
+      timeInterval: 'auto',
+      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+      suggestion: currentSuggestionMock,
+    });
+    const lensProps = renderHook(() => {
+      return useLensProps({
+        request: {
+          searchSessionId: 'id',
+          adapter: undefined,
+        },
+        getTimeRange,
+        refetch$,
+        attributesContext,
+        onLoad,
+      });
+    });
+    expect(lensProps.result.current.lensProps).toEqual(
+      getLensProps({
+        searchSessionId: 'id',
+        getTimeRange,
+        attributes: attributesContext.attributes,
         onLoad,
       })
     );
@@ -63,7 +103,7 @@ describe('useLensProps', () => {
       },
       getTimeRange,
       refetch$,
-      attributes: getLensAttributes({
+      attributesContext: getLensAttributes({
         title: 'test',
         filters: [],
         query: {
@@ -73,6 +113,7 @@ describe('useLensProps', () => {
         dataView: dataViewWithTimefieldMock,
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+        suggestion: undefined,
       }),
       onLoad,
     };

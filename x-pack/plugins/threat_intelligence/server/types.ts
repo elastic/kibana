@@ -6,11 +6,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-
 import { DataPluginSetup, DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { CasesSetup } from '@kbn/cases-plugin/server';
 
 export interface ThreatIntelligencePluginSetupDependencies {
   data: DataPluginSetup;
+  cases: CasesSetup;
 }
 
 export interface ThreatIntelligencePluginStartDependencies {

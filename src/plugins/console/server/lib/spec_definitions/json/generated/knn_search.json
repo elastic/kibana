@@ -1,0 +1,23 @@
+{
+  "knn_search": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "routing": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_knn_search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -47,6 +47,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () 
   loadAlertTypes: jest.fn(),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
 const initLegacyShims = () => {
   const triggersActionsUi = {
     actionTypeRegistry: actionTypeRegistryMock.create(),
@@ -237,14 +241,18 @@ describe('alert_form', () => {
                   initialAlert.actions[index].id = id;
                 }}
                 setActions={(_updatedActions: AlertAction[]) => {}}
-                setActionParamsProperty={(key: string, value: any, index: number) =>
+                setActionParamsProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
-                setActionFrequencyProperty={(key: string, value: any, index: number) =>
+                setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
+                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                }
+                setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
                 actionTypeRegistry={actionTypeRegistry}
                 featureId="alerting"
+                producerId="alerting"
               />
             </KibanaReactContext.Provider>
           </I18nProvider>

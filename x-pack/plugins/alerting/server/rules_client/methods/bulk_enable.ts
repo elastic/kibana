@@ -7,10 +7,10 @@
 
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -26,8 +26,10 @@ import {
   scheduleTask,
   updateMeta,
   createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -36,10 +38,18 @@ const getShouldScheduleTask = async (
   if (!scheduledTaskId) return true;
   try {
     // make sure scheduledTaskId exist
-    await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, () =>
-      context.taskManager.get(scheduledTaskId)
-    );
-    return false;
+    return await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, async () => {
+      const task = await context.taskManager.get(scheduledTaskId);
+
+      // Check whether task status is unrecognized. If so, we want to delete
+      // this task and create a fresh one
+      if (task.status === TaskStatus.Unrecognized) {
+        await context.taskManager.removeIfExists(scheduledTaskId);
+        return true;
+      }
+
+      return false;
+    });
   } catch (err) {
     return true;
   }
@@ -113,94 +123,136 @@ const bulkEnableRulesWithOCC = async (
       )
   );
 
+  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  let scheduleValidationError = '';
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await pMap(response.saved_objects, async (rule) => {
-          try {
-            if (rule.attributes.actions.length) {
-              try {
-                await context.actionsAuthorization.ensureAuthorized('execute');
-              } catch (error) {
-                throw Error(`Rule not authorized for bulk enable - ${error.message}`);
-              }
-            }
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-            }
-
-            const updatedAttributes = updateMeta(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
-              enabled: true,
-              updatedBy: username,
-              updatedAt: new Date().toISOString(),
-              executionStatus: {
-                status: 'pending',
-                lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
-                error: null,
-                warning: null,
-              },
-            });
-
-            const shouldScheduleTask = await getShouldScheduleTask(
-              context,
-              rule.attributes.scheduledTaskId
-            );
-
-            let scheduledTaskId;
-            if (shouldScheduleTask) {
-              const scheduledTask = await scheduleTask(context, {
-                id: rule.id,
-                consumer: rule.attributes.consumer,
-                ruleTypeId: rule.attributes.alertTypeId,
-                schedule: rule.attributes.schedule as IntervalSchedule,
-                throwOnConflict: false,
-              });
-              scheduledTaskId = scheduledTask.id;
-            }
-
-            rulesToEnable.push({
-              ...rule,
-              attributes: {
-                ...updatedAttributes,
-                ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-              },
-            });
-
-            context.auditLogger?.log(
-              ruleAuditEvent({
-                action: RuleAuditAction.ENABLE,
-                outcome: 'unknown',
-                savedObject: { type: 'alert', id: rule.id },
-              })
-            );
-          } catch (error) {
-            errors.push({
-              message: error.message,
-              rule: {
-                id: rule.id,
-                name: rule.attributes?.name,
-              },
-            });
-            context.auditLogger?.log(
-              ruleAuditEvent({
-                action: RuleAuditAction.ENABLE,
-                error,
-              })
-            );
-          }
-        });
+        rulesFinderRules.push(...response.saved_objects);
       }
       await rulesFinder.close();
+
+      const updatedInterval = rulesFinderRules
+        .filter((rule) => !rule.attributes.enabled)
+        .map((rule) => rule.attributes.schedule?.interval);
+
+      try {
+        await validateScheduleLimit({
+          context,
+          updatedInterval,
+        });
+      } catch (error) {
+        scheduleValidationError = `Error validating enable rule data - ${error.message}`;
+      }
+
+      await pMap(rulesFinderRules, async (rule) => {
+        try {
+          if (scheduleValidationError) {
+            throw Error(scheduleValidationError);
+          }
+          if (rule.attributes.actions.length) {
+            try {
+              await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+            } catch (error) {
+              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            }
+          }
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+
+          const migratedActions = await migrateLegacyActions(context, {
+            ruleId: rule.id,
+            actions: rule.attributes.actions,
+            references: rule.references,
+            attributes: rule.attributes,
+          });
+
+          const updatedAttributes = updateMeta(context, {
+            ...rule.attributes,
+            ...(!rule.attributes.apiKey &&
+              (await createNewAPIKeySet(context, {
+                id: rule.attributes.alertTypeId,
+                ruleName: rule.attributes.name,
+                username,
+                shouldUpdateApiKey: true,
+              }))),
+            ...(migratedActions.hasLegacyActions
+              ? {
+                  actions: migratedActions.resultedActions,
+                  throttle: undefined,
+                  notifyWhen: undefined,
+                }
+              : {}),
+            enabled: true,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastDuration: 0,
+              lastExecutionDate: new Date().toISOString(),
+              error: null,
+              warning: null,
+            },
+          });
+
+          const shouldScheduleTask = await getShouldScheduleTask(
+            context,
+            rule.attributes.scheduledTaskId
+          );
+
+          let scheduledTaskId;
+          if (shouldScheduleTask) {
+            const scheduledTask = await scheduleTask(context, {
+              id: rule.id,
+              consumer: rule.attributes.consumer,
+              ruleTypeId: rule.attributes.alertTypeId,
+              schedule: rule.attributes.schedule as IntervalSchedule,
+              throwOnConflict: false,
+            });
+            scheduledTaskId = scheduledTask.id;
+          }
+
+          rulesToEnable.push({
+            ...rule,
+            attributes: {
+              ...updatedAttributes,
+              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+            },
+            ...(migratedActions.hasLegacyActions
+              ? { references: migratedActions.resultedReferences }
+              : {}),
+          });
+
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              error,
+            })
+          );
+        }
+      });
     }
   );
 

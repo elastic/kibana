@@ -309,11 +309,11 @@
             "signature": [
               "(options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -338,11 +338,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-http-server",
+                    "pluginId": "@kbn/core-http-resources-server",
                     "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.HttpResponseOptions",
-                    "text": "HttpResponseOptions"
+                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                    "section": "def-common.HttpResourcesResponseOptions",
+                    "text": "HttpResourcesResponseOptions"
                   }
                 ],
                 "path": "packages/core/http/core-http-resources-server/src/types.ts",
@@ -365,11 +365,11 @@
             "signature": [
               "(options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -394,11 +394,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-http-server",
+                    "pluginId": "@kbn/core-http-resources-server",
                     "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.HttpResponseOptions",
-                    "text": "HttpResponseOptions"
+                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                    "section": "def-common.HttpResourcesResponseOptions",
+                    "text": "HttpResourcesResponseOptions"
                   }
                 ],
                 "path": "packages/core/http/core-http-resources-server/src/types.ts",
@@ -421,11 +421,11 @@
             "signature": [
               "(options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -450,11 +450,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-http-server",
+                    "pluginId": "@kbn/core-http-resources-server",
                     "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.HttpResponseOptions",
-                    "text": "HttpResponseOptions"
+                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                    "section": "def-common.HttpResourcesResponseOptions",
+                    "text": "HttpResourcesResponseOptions"
                   }
                 ],
                 "path": "packages/core/http/core-http-resources-server/src/types.ts",
@@ -670,7 +670,8 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-common.HttpResponseOptions",
             "text": "HttpResponseOptions"
-          }
+          },
+          "<any>"
         ],
         "path": "packages/core/http/core-http-resources-server/src/types.ts",
         "deprecated": false,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -25,28 +25,63 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
+
 import { docLinks } from '../../../shared/doc_links';
 
-import { DocumentsLogic } from './documents_logic';
+import { KibanaLogic } from '../../../shared/kibana';
+
+import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
+
+import './index_mappings.scss';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { makeMappingRequest } = useActions(DocumentsLogic);
-  const { mappingData } = useValues(DocumentsLogic);
+  const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+  const { productFeatures } = useValues(KibanaLogic);
 
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
+  const indexToShow =
+    selectedIndexType === 'content-index'
+      ? indexName
+      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+  const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
+  const { data: mappingData } = useValues(mappingsWithPropsApiLogic(indexToShow));
+  const shouldShowAccessControlSwitch =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
   useEffect(() => {
-    makeMappingRequest({ indexName });
-  }, [indexName]);
+    makeMappingRequest({ indexName: indexToShow });
+  }, [indexToShow, indexName]);
 
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
-          <EuiCodeBlock language="json" isCopyable>
-            {JSON.stringify(mappingData, null, 2)}
-          </EuiCodeBlock>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {shouldShowAccessControlSwitch && (
+              <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
+                <AccessControlIndexSelector
+                  onChange={setSelectedIndexType}
+                  valueOfSelected={selectedIndexType}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow>
+              <EuiCodeBlock language="json" isCopyable>
+                {JSON.stringify(mappingData, null, 2)}
+              </EuiCodeBlock>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>

@@ -21,13 +21,6 @@ export const BACK_TO_RULES = i18n.translate(
   }
 );
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
@@ -50,3 +43,17 @@ export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
       defaultMessage: '{ruleName} was created',
     }
   );
+
+export const COMPLETE_WITHOUT_ENABLING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutEnablingTitle',
+  {
+    defaultMessage: 'Create rule without enabling it',
+  }
+);
+
+export const COMPLETE_WITH_ENABLING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithEnablingTitle',
+  {
+    defaultMessage: 'Create & enable rule',
+  }
+);

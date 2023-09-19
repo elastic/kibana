@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { IBasePath } from '@kbn/core/public';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -44,19 +43,15 @@ const createAnomalyAlertAlertLabel = i18n.translate(
 const CREATE_THRESHOLD_PANEL_ID = 'create_threshold_panel';
 
 interface Props {
-  basePath: IBasePath;
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
   canReadMlJobs: boolean;
-  includeTransactionDuration: boolean;
 }
 
 export function AlertingPopoverAndFlyout({
-  basePath,
   canSaveAlerts,
   canReadAlerts,
   canReadMlJobs,
-  includeTransactionDuration,
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ruleType, setRuleType] = useState<ApmRuleType | null>(null);
@@ -131,17 +126,13 @@ export function AlertingPopoverAndFlyout({
       title: createThresholdAlertLabel,
       items: [
         // Latency
-        ...(includeTransactionDuration
-          ? [
-              {
-                name: transactionDurationLabel,
-                onClick: () => {
-                  setRuleType(ApmRuleType.TransactionDuration);
-                  setPopoverOpen(false);
-                },
-              },
-            ]
-          : []),
+        {
+          name: transactionDurationLabel,
+          onClick: () => {
+            setRuleType(ApmRuleType.TransactionDuration);
+            setPopoverOpen(false);
+          },
+        },
         // Throughput *** TO BE ADDED ***
         // Failed transactions rate
         {

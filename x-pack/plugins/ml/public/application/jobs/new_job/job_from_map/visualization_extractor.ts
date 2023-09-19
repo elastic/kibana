@@ -10,7 +10,7 @@ import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 
 export interface LayerResult {
@@ -28,8 +28,7 @@ export class VisualizationExtractor {
 
   public async getResultLayersFromEmbeddable(embeddable: MapEmbeddable): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
-    const dataViews: DataView[] =
-      (embeddable.getRoot() as DashboardContainer)?.getAllDataViews() ?? [];
+    const dataViews: DataView[] = (embeddable.getRoot() as DashboardAPI)?.getAllDataViews() ?? [];
 
     // Keep track of geoFields for layers as they can be repeated
     const layerGeoFields: Record<string, boolean> = {};

@@ -12,12 +12,13 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
 import { AxesMap, GroupsConfiguration } from '../../helpers';
-import { getAxisGroupForReferenceLine } from './utils';
+import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
   paddingMap: Partial<Record<Position, number>>;
   xAxisFormatter: FieldFormat;
+  formatters: FormattersMap;
   axesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
@@ -28,6 +29,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   layer,
   axesConfiguration,
   xAxisFormatter,
+  formatters,
   paddingMap,
   isHorizontal,
   nextValue,
@@ -47,7 +49,8 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
-  const formatter = axisGroup?.formatter || xAxisFormatter;
+  const formatter =
+    formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
   const name = decorationConfig.textVisibility
     ? columnToLabelMap[decorationConfig.forAccessor]

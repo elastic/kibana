@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { DataGridItem } from '../../../../../components/data_grid';
-
-import { DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_INFLUENCE, OUTLIER_SCORE } from '../../../../common/constants';
+import {
+  type DataFrameAnalyticsConfig,
+  FEATURE_INFLUENCE,
+  OUTLIER_SCORE,
+} from '@kbn/ml-data-frame-analytics-utils';
+import type { DataGridItem } from '@kbn/ml-data-grid';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;

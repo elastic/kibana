@@ -8,4 +8,5 @@
 
 export * from './latest';
 
+export * as v1 from './v2'; // Just so v1 can also be used (but for some reason telemetry endpoints have always been v2 :shrug:)
 export * as v2 from './v2';

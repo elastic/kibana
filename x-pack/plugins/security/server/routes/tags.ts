@@ -25,3 +25,9 @@ export const ROUTE_TAG_CAN_REDIRECT = 'security:canRedirect';
  * parties, require special handling.
  */
 export const ROUTE_TAG_AUTH_FLOW = 'security:authFlow';
+
+/**
+ * If `xpack.security.authc.http.jwt.taggedRoutesOnly` flag is set, then only routes marked with this tag will accept
+ * JWT as a means of authentication.
+ */
+export const ROUTE_TAG_ACCEPT_JWT = 'security:acceptJWT';

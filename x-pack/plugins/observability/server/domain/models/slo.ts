@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { sloSchema, sloWithSummarySchema } from '@kbn/slo-schema';
+import { sloIdSchema, sloSchema, sloWithSummarySchema } from '@kbn/slo-schema';
 
 type SLO = t.TypeOf<typeof sloSchema>;
-type SLOId = t.TypeOf<typeof sloSchema.props.id>;
+type SLOId = t.TypeOf<typeof sloIdSchema>;
 type SLOWithSummary = t.TypeOf<typeof sloWithSummarySchema>;
 type StoredSLO = t.OutputOf<typeof sloSchema>;
 

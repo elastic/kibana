@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as Option from 'fp-ts/lib/Option';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { omit } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
@@ -15,7 +19,7 @@ import type {
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
-  CloneTempToSource,
+  CloneTempToTarget,
   CreateNewTargetState,
   CreateReindexTempState,
   InitState,
@@ -67,7 +71,13 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
+export const nextActionMap = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+) => {
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -75,11 +85,16 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
-      Actions.updateMappings({
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
+      sourceIndex,
+      sourceIndexMappings,
+      targetIndexMappings,
+    }: UpdateSourceMappingsPropertiesState) =>
+      Actions.updateSourceMappingsProperties({
         client,
-        index: state.sourceIndex.value, // attempt to update source mappings in-place
-        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        sourceIndex: sourceIndex.value,
+        sourceMappings: sourceIndexMappings.value,
+        targetMappings: targetIndexMappings,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -122,12 +137,19 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         client,
         indexName: state.targetIndex,
         mappings: state.targetIndexMappings,
+        esCapabilities: state.esCapabilities,
       }),
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex({
         client,
         indexName: state.tempIndex,
+        aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
+        esCapabilities: state.esCapabilities,
+      }),
+    READY_TO_REINDEX_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: readyToReindex,
       }),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
@@ -150,7 +172,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments({
         client,
-        index: state.tempIndex,
+        /*
+         * Since other nodes can delete the temp index while we're busy writing
+         * to it, we use the alias to prevent the auto-creation of the index if
+         * it doesn't exist.
+         */
+        index: state.tempIndexAlias,
+        useAliasToPreventAutoCreate: true,
         operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
@@ -161,15 +189,24 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          */
         refresh: false,
       }),
+    DONE_REINDEXING_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: doneReindexing,
+      }),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
-    CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
-      Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
+    CLONE_TEMP_TO_TARGET: (state: CloneTempToTarget) =>
+      Actions.cloneIndex({
+        client,
+        source: state.tempIndex,
+        target: state.targetIndex,
+        esCapabilities: state.esCapabilities,
+      }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexRawMappings,
+        actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
@@ -177,6 +214,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         client,
         index: state.targetIndex,
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        batchSize: state.batchSize,
+        query: Option.toUndefined(state.updatedTypesQuery),
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
       state: UpdateTargetMappingsPropertiesWaitForTaskState
@@ -186,12 +225,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
       }),
-    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) =>
-      Actions.updateMappings({
+    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) => {
+      return Actions.updateMappings({
         client,
         index: state.targetIndex,
-        mappings: omit(state.targetIndexMappings, 'properties'),
-      }),
+        mappings: omit(state.targetIndexMappings, ['properties']), // properties already updated on a previous step
+      });
+    },
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
       Actions.openPit({ client, index: state.targetIndex }),
@@ -203,6 +243,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         query: state.outdatedDocumentsQuery,
         batchSize: state.batchSize,
         searchAfter: state.lastHitSortValue,
+        maxResponseSizeBytes: state.maxReadBatchSizeBytes,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit({ client, pitId: state.pitId }),
@@ -225,6 +266,19 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
+    MARK_VERSION_INDEX_READY_SYNC: (state: MarkVersionIndexReady) =>
+      pipe(
+        // First, we wait for all the migrators involved in a relocation to reach this point.
+        Actions.synchronizeMigrators<Actions.AliasAction[]>({
+          waitGroup: updateRelocationAliases,
+          payload: state.versionIndexReadyActions.value,
+        }),
+        // Then, all migrators will try to update all aliases (from all indices). Only the first one will succeed.
+        // The others will receive alias_not_found_exception and cause MARK_VERSION_INDEX_READY_CONFLICT (that's acceptable).
+        TaskEither.chainW(({ data }) =>
+          Actions.updateAliases({ client, aliasActions: data.flat() })
+        )
+      ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
@@ -233,7 +287,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.sourceIndex.value,
-        mappings: state.legacyReindexTargetMappings,
+        mappings: state.sourceIndexMappings.value,
+        esCapabilities: state.esCapabilities,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({
@@ -243,6 +298,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         reindexScript: state.preMigrationScript,
         requireAlias: false,
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        batchSize: state.batchSize,
       }),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: '60s' }),
@@ -251,8 +307,20 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   };
 };
 
-export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
-  const map = nextActionMap(client, transformRawDocs);
+export const next = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+) => {
+  const map = nextActionMap(
+    client,
+    transformRawDocs,
+    readyToReindex,
+    doneReindexing,
+    updateRelocationAliases
+  );
   return (state: State) => {
     const delay = createDelayFn(state);
 

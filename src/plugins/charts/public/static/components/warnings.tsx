@@ -58,7 +58,7 @@ export function Warnings({
                 }
               `}
               iconSize="s"
-              iconType="alert"
+              iconType="warning"
               minWidth={0}
               onClick={onWarningButtonClick}
               size="s"
@@ -69,7 +69,7 @@ export function Warnings({
           ) : (
             <EuiButtonEmpty
               color="warning"
-              iconType="alert"
+              iconType="warning"
               onClick={onWarningButtonClick}
               size="xs"
               data-test-subj={dataTestSubj}

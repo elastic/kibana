@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -26,6 +26,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import {
   ConfigContext,
   FleetStatusProvider,
+  type FleetStatusProviderProps,
   KibanaVersionContext,
   useFleetStatus,
 } from '../../hooks';
@@ -61,6 +62,7 @@ export const IntegrationsAppContext: React.FC<{
   theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
+  fleetStatus?: FleetStatusProviderProps;
 }> = memo(
   ({
     children,
@@ -71,8 +73,11 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
     theme$,
+    fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const theme = useObservable(theme$);
+    const isDarkMode = theme && theme.darkMode;
+
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
@@ -87,7 +92,7 @@ export const IntegrationsAppContext: React.FC<{
                       <QueryClientProvider client={queryClient}>
                         <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                             <startServices.customIntegrations.ContextProvider>
                               <CloudContext>
                                 <Router history={history}>
@@ -127,7 +132,7 @@ export const AppRoutes = memo(() => {
 
   return (
     <>
-      <Switch>
+      <Routes>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>
@@ -151,7 +156,7 @@ export const AppRoutes = memo(() => {
             );
           }}
         />
-      </Switch>
+      </Routes>
 
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>

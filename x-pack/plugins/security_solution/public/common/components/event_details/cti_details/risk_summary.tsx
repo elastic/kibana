@@ -48,6 +48,13 @@ const RiskSummaryComponent: React.FC<RiskEntity> = ({ risk, riskEntity, original
               riskScoreEntity={riskEntity}
             />
           }
+          toolTipTitle={
+            <RiskScoreHeaderTitle
+              title={i18n.RISK_DATA_TITLE(riskEntity)}
+              riskScoreEntity={riskEntity}
+              showTechnicalPreviewBadge
+            />
+          }
           toolTipContent={
             <FormattedMessage
               id="xpack.securitySolution.alertDetails.overview.riskDataTooltipContent"

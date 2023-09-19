@@ -9,15 +9,16 @@ import { mapValues } from 'lodash';
 import type {
   FieldsDiff,
   FieldsDiffAlgorithmsFor,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+  ThreeVersionsOf,
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const calculateFieldsDiffFor = <TObject extends object>(
-  objectVersions: ThreeVersionsOf<TObject>,
+  ruleVersions: ThreeVersionsOf<TObject>,
   fieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<TObject>
 ): FieldsDiff<TObject> => {
   const result = mapValues(fieldsDiffAlgorithms, (calculateFieldDiff, fieldName) => {
-    const fieldVersions = pickField(fieldName as keyof TObject, objectVersions);
+    const fieldVersions = pickField(fieldName as keyof TObject, ruleVersions);
     const fieldDiff = calculateFieldDiff(fieldVersions);
     return fieldDiff;
   });
@@ -31,7 +32,8 @@ const pickField = <TObject extends object>(
   versions: ThreeVersionsOf<TObject>
 ): ThreeVersionsOf<TObject[typeof fieldName]> => {
   return {
-    base_version: versions.base_version[fieldName],
+    base_version:
+      versions.base_version !== MissingVersion ? versions.base_version[fieldName] : MissingVersion,
     current_version: versions.current_version[fieldName],
     target_version: versions.target_version[fieldName],
   };

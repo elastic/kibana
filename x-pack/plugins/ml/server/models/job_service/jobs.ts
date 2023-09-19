@@ -80,7 +80,6 @@ export function jobsProvider(
       job_id: jobId,
       force: true,
       wait_for_completion: false,
-      // @ts-expect-error delete_user_annotations is not in types yet
       delete_user_annotations: deleteUserAnnotations,
     });
   }
@@ -166,7 +165,6 @@ export function jobsProvider(
         const { task } = await mlClient.resetJob({
           job_id: jobId,
           wait_for_completion: false,
-          // @ts-expect-error delete_user_annotations is not in types yet
           delete_user_annotations: deleteUserAnnotations,
         });
         results[jobId] = { reset: true, task };
@@ -254,7 +252,7 @@ export function jobsProvider(
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
         jobTags: job.custom_settings?.job_tags ?? {},
-        bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span)!.asSeconds(),
+        bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span!)!.asSeconds(),
       };
 
       if (jobIds.find((j) => j === tempJob.id)) {

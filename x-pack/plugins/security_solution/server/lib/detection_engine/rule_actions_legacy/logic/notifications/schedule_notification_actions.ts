@@ -15,7 +15,7 @@ import { expandDottedObject } from '../../../../../../common/utils/expand_dotted
 import type { RuleParams } from '../../../rule_schema';
 import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
 import { isDetectionAlert } from '../../../rule_types/utils/utils';
-import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../../../common/api/detection_engine/model/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
@@ -26,13 +26,10 @@ const convertToLegacyAlert = (alert: DetectionAlert) =>
   Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
     const val = alert[aadField];
     if (val != null) {
-      return {
-        ...acc,
-        [legacyField]: val,
-      };
+      acc[legacyField] = val;
     }
     return acc;
-  }, {});
+  }, {} as Record<string, unknown>);
 
 export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
   if (isThresholdRule(alert[ALERT_RULE_TYPE])) {
@@ -50,16 +47,18 @@ export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
  * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
  */
 export const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
-  return alerts.map((alert) => {
-    if (isDetectionAlert(alert)) {
-      const normalizedAlert = normalizeAlertForNotificationActions(alert);
-      return {
-        ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
-        ...expandDottedObject(normalizedAlert),
-      };
-    }
-    return alert;
-  });
+  return alerts.map((alert) => formatAlertForNotificationActions(alert));
+};
+
+export const formatAlertForNotificationActions = (alert: unknown): unknown => {
+  if (isDetectionAlert(alert)) {
+    const normalizedAlert = normalizeAlertForNotificationActions(alert);
+    return {
+      ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
+      ...expandDottedObject(normalizedAlert),
+    };
+  }
+  return alert;
 };
 
 interface ScheduleNotificationActions {

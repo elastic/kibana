@@ -17,9 +17,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
@@ -41,7 +41,6 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
-import type { RuntimeMappings } from '../step_define/common/types';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 
@@ -228,9 +227,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 

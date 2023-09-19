@@ -9,7 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import type { Note } from '../../lib/note';
 
-import { addError, addErrorHash, addNotes, removeError, updateNote } from './actions';
+import { addError, addErrorHash, addNotes, removeError, updateNote, deleteNote } from './actions';
 import type { AppModel, NotesById } from './model';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
@@ -35,6 +35,14 @@ export const appReducer = reducerWithInitialState(initialAppState)
   .case(addNotes, (state, { notes }) => ({
     ...state,
     notesById: notes.reduce<NotesById>((acc, note: Note) => ({ ...acc, [note.id]: note }), {}),
+  }))
+  .case(deleteNote, (state, { id }) => ({
+    ...state,
+    notesById: Object.fromEntries(
+      Object.entries(state.notesById).filter(([_, note]) => {
+        return note.id !== id && note.saveObjectId !== id;
+      })
+    ),
   }))
   .case(updateNote, (state, { note }) => ({
     ...state,

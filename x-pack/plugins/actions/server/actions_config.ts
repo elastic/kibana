@@ -11,7 +11,13 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import {
+  ActionsConfig,
+  AllowedHosts,
+  EnabledActionTypes,
+  CustomHostSettings,
+  DEFAULT_QUEUED_MAX,
+} from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
@@ -53,6 +59,8 @@ export interface ActionsConfigurationUtilities {
     addresses: string[],
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
+  enableFooterInEmail: () => boolean;
+  getMaxQueued: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -215,5 +223,7 @@ export function getActionsConfigurationUtilities(
         DEFAULT_MAX_ATTEMPTS
       );
     },
+    enableFooterInEmail: () => config.enableFooterInEmail,
+    getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
   };
 }

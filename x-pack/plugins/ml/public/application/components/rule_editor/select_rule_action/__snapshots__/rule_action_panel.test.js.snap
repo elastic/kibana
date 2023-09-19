@@ -6,6 +6,12 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
   paddingSize="m"
 >
   <EuiDescriptionList
+    columnWidths={
+      Array [
+        15,
+        85,
+      ]
+    }
     listItems={
       Array [
         Object {
@@ -78,6 +84,12 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
   paddingSize="m"
 >
   <EuiDescriptionList
+    columnWidths={
+      Array [
+        15,
+        85,
+      ]
+    }
     listItems={
       Array [
         Object {
@@ -132,6 +144,12 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
   paddingSize="m"
 >
   <EuiDescriptionList
+    columnWidths={
+      Array [
+        15,
+        85,
+      ]
+    }
     listItems={
       Array [
         Object {

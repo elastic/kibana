@@ -8,7 +8,6 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
@@ -49,14 +48,12 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   if (isLoading && isInitialRequest) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
-            defaultMessage="Loading pipeline…"
-          />
-        </SectionLoading>
-      </EuiPageContent>
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
+          defaultMessage="Loading pipeline…"
+        />
+      </SectionLoading>
     );
   } else {
     // We still show the create form even if we were not able to load the

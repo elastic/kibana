@@ -72,7 +72,6 @@ export function readFieldCapsResponse(
   fieldCapsResponse: estypes.FieldCapsResponse
 ): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-
   const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;
@@ -90,17 +89,15 @@ export function readFieldCapsResponse(
         );
       });
 
-      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
-      const isTimeSeriesCounter = !!timeSeriesMetricProp.find((item) => item === 'counter');
+      const isAggregatable = types.some((type) => {
+        return (
+          !!capsByType[type].aggregatable ||
+          (!!capsByType[type].non_aggregatable_indices &&
+            capsByType[type].non_aggregatable_indices!.length > 0)
+        );
+      });
 
-      const isAggregatable =
-        types.some((type) => {
-          return (
-            !!capsByType[type].aggregatable ||
-            (!!capsByType[type].non_aggregatable_indices &&
-              capsByType[type].non_aggregatable_indices!.length > 0)
-          );
-        }) && !isTimeSeriesCounter;
+      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
 
       // If there are multiple types but they all resolve to the same kibana type
       // ignore the conflict and carry on (my wayward son)
@@ -113,13 +110,10 @@ export function readFieldCapsResponse(
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
-          conflictDescriptions: types.reduce(
-            (acc, esType) => ({
-              ...acc,
-              [esType]: capsByType[esType].indices,
-            }),
-            {}
-          ),
+          conflictDescriptions: types.reduce((acc, esType) => {
+            acc[esType] = capsByType[esType].indices;
+            return acc;
+          }, {} as Record<string, estypes.Indices | undefined>),
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
@@ -128,12 +122,16 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      let timeSeriesMetricType: 'gauge' | 'counter' | undefined;
+      let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | undefined;
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
         timeSeriesMetricType = 'gauge';
       }
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
+      }
+
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'position') {
+        timeSeriesMetricType = 'position';
       }
       const esType = types[0];
       const field = {

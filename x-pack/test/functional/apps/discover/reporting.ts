@@ -29,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await PageObjects.reporting.clearToastNotifications();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -87,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('single-timefilter-search');
 
         // get shared URL value
-        await PageObjects.share.clickShareTopNavButton();
-        const sharedURL = await PageObjects.share.getSharedUrl();
+        const sharedURL = await browser.getCurrentUrl();
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();

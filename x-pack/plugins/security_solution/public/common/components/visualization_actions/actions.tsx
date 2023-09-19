@@ -27,6 +27,7 @@ import {
   OPEN_IN_LENS,
 } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -41,8 +42,10 @@ const Wrapper = styled.div`
 `;
 
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
+  applyGlobalQueriesAndFilters = true,
   className,
   extraActions,
+  extraOptions,
   getLensAttributes,
   inputId = InputsModelId.global,
   inspectIndex = 0,
@@ -52,7 +55,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   onCloseInspect,
   queryId,
   timerange,
-  title,
+  title: inspectTitle,
+  scopeId = SourcererScopeName.default,
   stackByField,
   withDefaultActions = true,
 }) => {
@@ -71,9 +75,13 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   };
 
   const attributes = useLensAttributes({
-    lensAttributes,
+    applyGlobalQueriesAndFilters,
+    extraOptions,
     getLensAttributes,
+    lensAttributes,
+    scopeId,
     stackByField,
+    title: '',
   });
 
   const dataTestSubj = `stat-${queryId}`;
@@ -250,7 +258,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           inputId={inputId}
           request={request}
           response={response}
-          title={title}
+          title={inspectTitle}
         />
       )}
     </Wrapper>

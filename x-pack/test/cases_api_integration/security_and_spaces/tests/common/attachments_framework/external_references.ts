@@ -8,11 +8,12 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { ActionTypes, CommentRequest, CommentType } from '@kbn/cases-plugin/common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -243,7 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
       const createCommentUserAction = userActions.find(
-        (userAction) => userAction.type === ActionTypes.comment
+        (userAction) => userAction.type === UserActionTypes.comment
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -271,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === CommentType.externalReference
+        (comment) => comment.type === AttachmentType.externalReference
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -314,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === CommentType.externalReference
+        (comment) => comment.type === AttachmentType.externalReference
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -386,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return 400 when updating from so to doc', async () => {
-      const docAttachment: CommentRequest = {
+      const docAttachment: AttachmentRequest = {
         ...postExternalReferenceESReq,
         externalReferenceId: 'my-doc-id',
       };
@@ -411,7 +412,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return 400 when updating from doc to so', async () => {
-      const docAttachment: CommentRequest = {
+      const docAttachment: AttachmentRequest = {
         ...postExternalReferenceESReq,
         externalReferenceId: 'my-doc-id',
       };
@@ -467,6 +468,42 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
         expectedHttpCode: 400,
+      });
+    });
+
+    it('400s when bulk creating a non registered external reference attachment type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          postExternalReferenceSOReq,
+          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+        ],
+        expectedHttpCode: 400,
+      });
+    });
+
+    // This test is intended to fail when new external reference attachment types are registered.
+    // To resolve, add the new external reference attachment types ID to this list. This will trigger
+    // a CODEOWNERS review by Response Ops.
+    describe('check registered external reference attachment types', () => {
+      const getRegisteredTypes = () => {
+        return supertest
+          .get('/api/cases_fixture/registered_external_reference_attachments')
+          .expect(200)
+          .then((response) => response.body);
+      };
+
+      it('should check changes on all registered external reference attachment types', async () => {
+        const types = await getRegisteredTypes();
+
+        expect(types).to.eql({
+          '.files': '559a37324c84f1f2eadcc5bce43115d09501ffe4',
+          '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          indicator: 'e1ea6f0518f2e0e4b0b5c0739efe805598cf2516',
+          osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
+        });
       });
     });
   });

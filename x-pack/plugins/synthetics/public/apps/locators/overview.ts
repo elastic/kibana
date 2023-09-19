@@ -28,8 +28,8 @@ async function navigate({
   if (pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', pod));
 
   if (ip) {
-    const root = host ? 'host' : 'monitor';
-    searchParams.push(formatSearchKey(`${root}.ip`, ip));
+    searchParams.push(formatSearchKey(`host.ip`, ip));
+    searchParams.push(formatSearchKey(`monitor.ip`, ip));
   }
 
   const searchString = searchParams.join(' OR ');

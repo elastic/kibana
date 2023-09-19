@@ -12,11 +12,13 @@ import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('DefaultCell', () => {
   const casesMap = getCasesMockMap();
+  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
   const alert = {
     _id: 'alert-id',
     _index: 'alert-index',
@@ -27,6 +29,7 @@ describe('DefaultCell', () => {
     isLoading: false,
     alert,
     cases: casesMap,
+    maintenanceWindows: maintenanceWindowsMap,
     columnId: 'kibana.alert.status',
     showAlertStatusWithFlapping: false,
   };

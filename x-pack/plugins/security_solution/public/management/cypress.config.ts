@@ -6,8 +6,15 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { dataLoaders } from './cypress/support/data_loaders';
 
 export default defineCypressConfig({
+  reporter: '../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './public/management/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -26,15 +33,24 @@ export default defineCypressConfig({
   experimentalStudio: true,
 
   env: {
-    'cypress-react-selector': {
-      root: '#security-solution-app',
-    },
+    KIBANA_URL: 'http://localhost:5601',
+    ELASTICSEARCH_URL: 'http://localhost:9200',
+    FLEET_SERVER_URL: 'https://localhost:8220',
+    // Username/password used for both elastic and kibana
+    KIBANA_USERNAME: 'system_indices_superuser',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
+    ELASTICSEARCH_PASSWORD: 'changeme',
   },
 
   e2e: {
-    baseUrl: 'http://localhost:5620',
+    // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
+    baseUrl: 'http://localhost:5601',
     supportFile: 'public/management/cypress/support/e2e.ts',
-    specPattern: 'public/management/cypress/e2e/mocked_data/*.cy.{js,jsx,ts,tsx}',
+    specPattern: 'public/management/cypress/e2e/mocked_data/',
     experimentalRunAllSpecs: true,
+    setupNodeEvents: (on, config) => {
+      return dataLoaders(on, config);
+    },
   },
 });

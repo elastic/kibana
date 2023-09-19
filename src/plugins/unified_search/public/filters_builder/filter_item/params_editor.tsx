@@ -21,6 +21,7 @@ interface ParamsEditorProps {
   onHandleParamsChange: (params: Filter['meta']['params']) => void;
   onHandleParamsUpdate: (value: string) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   field?: DataViewField;
   operator?: Operator;
 }
@@ -33,8 +34,9 @@ export function ParamsEditor({
   onHandleParamsChange,
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
 }: ParamsEditorProps) {
-  const { disabled } = useContext(FiltersBuilderContextType);
+  const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const onParamsChange = useCallback(
     (selectedParams) => {
       onHandleParamsChange(selectedParams);
@@ -67,6 +69,8 @@ export function ParamsEditor({
           onParamsChange={onParamsChange}
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       </EuiToolTip>
     </EuiFormRow>

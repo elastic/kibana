@@ -7,29 +7,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleActionParams } from '../types';
+import { RuleUrl } from './execution_handler';
 
 export interface InjectActionParamsOpts {
-  ruleId: string;
-  spaceId: string | undefined;
   actionTypeId: string;
   actionParams: RuleActionParams;
+  ruleUrl?: RuleUrl;
 }
 
 export function injectActionParams({
-  ruleId,
-  spaceId,
   actionTypeId,
   actionParams,
+  ruleUrl = {},
 }: InjectActionParamsOpts) {
   // Inject kibanaFooterLink if action type is email. This is used by the email action type
   // to inject a "View alert in Kibana" with a URL in the email's footer.
   if (actionTypeId === '.email') {
-    const spacePrefix =
-      spaceId && spaceId.length > 0 && spaceId !== 'default' ? `/s/${spaceId}` : '';
+    // path should not include basePathname since it is part of kibanaBaseUrl already
+    const path = [ruleUrl.spaceIdSegment ?? '', ruleUrl.relativePath ?? ''].join('');
     return {
       ...actionParams,
       kibanaFooterLink: {
-        path: `${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+        path,
         text: i18n.translate('xpack.alerting.injectActionParams.email.kibanaFooterLinkText', {
           defaultMessage: 'View rule in Kibana',
         }),

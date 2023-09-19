@@ -9,22 +9,25 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
   binaryToString,
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getLegacyActionSO,
   getSimpleMlRule,
   getSimpleRule,
@@ -33,25 +36,36 @@ import {
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
+  waitForRuleSuccess,
 } from '../../utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   const postBulkAction = () =>
-    supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
+    supertest
+      .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
+
   const fetchRule = (ruleId: string) =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   const fetchPrebuiltRule = async () => {
     const { body: findBody } = await supertest
       .get(
         `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
       )
-      .set('kbn-xsrf', 'true');
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
     return findBody.data[0];
   };
@@ -72,11 +86,13 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {
@@ -135,6 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
         attributes: {
           actionTypeId: '.webhook',
           config: {
+            authType: WebhookAuthType.Basic,
             hasAuth: true,
             method: 'post',
             url: 'http://localhost',
@@ -164,7 +181,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
       expect(rule).to.eql({
         ...getSimpleRuleOutput(),
-        throttle: 'rule',
         actions: [
           {
             action_type_id: '.webhook',
@@ -174,6 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
               body: '{"test":"a default action"}',
             },
             uuid: rule.actions[0].uuid,
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
         ],
       });
@@ -327,8 +344,11 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
+      // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
+      await waitForRuleSuccess({ id: rule1.id, supertest, log });
     });
 
     it('should disable rules', async () => {
@@ -397,6 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
     });
@@ -410,7 +431,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
 
@@ -423,12 +444,225 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
     });
 
-    it('should duplicate rule with a legacy action and migrate new rules action', async () => {
+    it('should duplicate rules with exceptions - expired exceptions included', async () => {
+      await deleteAllExceptions(supertest, log);
+
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+
+      // create an exception list
+      const { body: exceptionList } = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getCreateExceptionListDetectionSchemaMock())
+        .expect(200);
+      // create an exception list item
+      await supertest
+        .post(EXCEPTION_LIST_ITEM_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...getCreateExceptionListItemMinimalSchemaMock(), expire_time: expiredDate })
+        .expect(200);
+
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = {
+        ...getSimpleRule(ruleId),
+        exceptions_list: [
+          {
+            type: exceptionList.type,
+            list_id: exceptionList.list_id,
+            id: exceptionList.id,
+            namespace_type: exceptionList.namespace_type,
+          },
+        ],
+      };
+      const newRule = await createRule(supertest, log, ruleToDuplicate);
+
+      // add an exception item to the rule
+      await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/${newRule.id}/exceptions`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          items: [
+            {
+              description: 'Exception item for rule default exception list',
+              entries: [
+                {
+                  field: 'some.not.nested.field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'some value',
+                },
+              ],
+              name: 'Sample exception item',
+              type: 'simple',
+              expire_time: expiredDate,
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        })
+        .expect(200);
+
+      const { body: foundItems } = await supertest
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${body.attributes.results.created[0].exceptions_list[1].list_id}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      // Item should have been duplicated, even if expired
+      expect(foundItems.total).to.eql(1);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the exceptions are duplicated
+      expect(body.attributes.results.created[0].exceptions_list).to.eql([
+        {
+          type: exceptionList.type,
+          list_id: exceptionList.list_id,
+          id: exceptionList.id,
+          namespace_type: exceptionList.namespace_type,
+        },
+        {
+          id: body.attributes.results.created[0].exceptions_list[1].id,
+          list_id: body.attributes.results.created[0].exceptions_list[1].list_id,
+          namespace_type: 'single',
+          type: 'rule_default',
+        },
+      ]);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rules with exceptions - expired exceptions excluded', async () => {
+      await deleteAllExceptions(supertest, log);
+
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+
+      // create an exception list
+      const { body: exceptionList } = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getCreateExceptionListDetectionSchemaMock())
+        .expect(200);
+      // create an exception list item
+      await supertest
+        .post(EXCEPTION_LIST_ITEM_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...getCreateExceptionListItemMinimalSchemaMock(), expire_time: expiredDate })
+        .expect(200);
+
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = {
+        ...getSimpleRule(ruleId),
+        exceptions_list: [
+          {
+            type: exceptionList.type,
+            list_id: exceptionList.list_id,
+            id: exceptionList.id,
+            namespace_type: exceptionList.namespace_type,
+          },
+        ],
+      };
+      const newRule = await createRule(supertest, log, ruleToDuplicate);
+
+      // add an exception item to the rule
+      await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/${newRule.id}/exceptions`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          items: [
+            {
+              description: 'Exception item for rule default exception list',
+              entries: [
+                {
+                  field: 'some.not.nested.field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'some value',
+                },
+              ],
+              name: 'Sample exception item',
+              type: 'simple',
+              expire_time: expiredDate,
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: false },
+        })
+        .expect(200);
+
+      const { body: foundItems } = await supertest
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${body.attributes.results.created[0].exceptions_list[1].list_id}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      // Item should NOT have been duplicated, since it is expired
+      expect(foundItems.total).to.eql(0);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the exceptions are duplicted
+      expect(body.attributes.results.created[0].exceptions_list).to.eql([
+        {
+          type: exceptionList.type,
+          list_id: exceptionList.list_id,
+          id: exceptionList.id,
+          namespace_type: exceptionList.namespace_type,
+        },
+        {
+          id: body.attributes.results.created[0].exceptions_list[1].id,
+          list_id: body.attributes.results.created[0].exceptions_list[1].list_id,
+          namespace_type: 'single',
+          type: 'rule_default',
+        },
+      ]);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('elastic-api-version', '2023-10-31')
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rule with a legacy action', async () => {
       const ruleId = 'ruleId';
       const [connector, ruleToDuplicate] = await Promise.all([
         supertest
@@ -456,7 +690,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
 
@@ -465,19 +699,17 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
 
-      // legacy sidecar action should be gone
-      const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
-
       // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
 
       rulesResponse.data.forEach((rule: RuleResponse) => {
+        const uuid = rule.actions[0].uuid;
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -487,7 +719,8 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: rule.actions[0].uuid,
+            ...(uuid ? { uuid } : {}),
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -1091,7 +1324,6 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-
         expect(setTagsBody.attributes.summary).to.eql({
           failed: 0,
           skipped: 0,
@@ -1118,6 +1350,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: setTagsRule.actions[0].uuid,
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -1402,6 +1635,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1459,6 +1693,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1515,6 +1750,77 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(readRule.actions).to.eql([]);
           });
+
+          it('should migrate legacy actions on edit when actions edited', async () => {
+            const ruleId = 'ruleId';
+            const [connector, createdRule] = await Promise.all([
+              supertest
+                .post(`/api/actions/connector`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  name: 'My action',
+                  connector_type_id: '.slack',
+                  secrets: {
+                    webhookUrl: 'http://localhost:1234',
+                  },
+                }),
+              createRule(supertest, log, getSimpleRule(ruleId, true)),
+            ]);
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
+
+            await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+
+            // check for legacy sidecar action
+            const sidecarActionsResults = await getLegacyActionSO(es);
+            expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+            expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+              createdRule.id
+            );
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: webHookConnector.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
+              {
+                ...webHookActionMock,
+                id: webHookConnector.id,
+                action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+              },
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
+
+            // Sidecar should be removed
+            const sidecarActionsPostResults = await getLegacyActionSO(es);
+            expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+          });
         });
 
         describe('add_rule_actions', () => {
@@ -1552,6 +1858,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1606,12 +1913,17 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
               {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1674,12 +1986,17 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
               {
                 ...slackConnectorMockProps,
                 id: slackConnector.id,
                 action_type_id: '.slack',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1728,20 +2045,22 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
-            ]);
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
             expect(readRule.actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: createdRule.actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
             ]);
           });
 
-          it('should change throttle if actions list in payload is empty', async () => {
+          it('should not change throttle if actions list in payload is empty', async () => {
             // create a new connector
             const webHookConnector = await createWebHookConnector();
 
@@ -1777,13 +2096,14 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].throttle).to.be('1h');
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.throttle).to.eql('1h');
+            expect(readRule.throttle).to.eql(undefined);
+            expect(readRule.actions).to.eql(createdRule.actions);
           });
         });
 
@@ -1831,6 +2151,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: editedRule.actions[0].uuid,
+                  frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
                 },
               ]);
               // version of prebuilt rule should not change
@@ -1845,6 +2166,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: readRule.actions[0].uuid,
+                  frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
                 },
               ]);
               expect(prebuiltRule.version).to.be(readRule.version);
@@ -1921,7 +2243,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ];
           casesForEmptyActions.forEach(({ payloadThrottle }) => {
-            it(`throttle is set to NOTIFICATION_THROTTLE_NO_ACTIONS, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
+            it(`should not update throttle, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
               const ruleId = 'ruleId';
               const createdRule = await createRule(supertest, log, {
                 ...getSimpleRule(ruleId),
@@ -1944,34 +2266,32 @@ export default ({ getService }: FtrProviderContext): void => {
                 })
                 .expect(200);
 
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(
-                NOTIFICATION_THROTTLE_NO_ACTIONS
-              );
+              // Check that the rule is skipped and was not updated
+              expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
               // Check that the updates have been persisted
               const { body: rule } = await fetchRule(ruleId).expect(200);
 
-              expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+              expect(rule.throttle).to.eql(undefined);
             });
           });
 
           const casesForNonEmptyActions = [
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
-              expectedThrottle: NOTIFICATION_THROTTLE_RULE,
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1h',
-              expectedThrottle: '1h',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1d',
-              expectedThrottle: '1d',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '7d',
-              expectedThrottle: '7d',
+              expectedThrottle: undefined,
             },
           ];
           [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
@@ -2009,10 +2329,23 @@ export default ({ getService }: FtrProviderContext): void => {
                   // Check that the updated rule is returned with the response
                   expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
+                  const expectedActions = body.attributes.results.updated[0].actions.map(
+                    (action: any) => ({
+                      ...action,
+                      frequency: {
+                        summary: true,
+                        throttle: payloadThrottle !== 'rule' ? payloadThrottle : null,
+                        notifyWhen:
+                          payloadThrottle !== 'rule' ? 'onThrottleInterval' : 'onActiveAlert',
+                      },
+                    })
+                  );
+
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
 
                   expect(rule.throttle).to.eql(expectedThrottle);
+                  expect(rule.actions).to.eql(expectedActions);
                 });
               });
             }
@@ -2025,11 +2358,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const cases = [
             {
               payload: { throttle: '1d' },
-              expected: { notifyWhen: 'onThrottleInterval' },
+              expected: { notifyWhen: null },
             },
             {
               payload: { throttle: NOTIFICATION_THROTTLE_RULE },
-              expected: { notifyWhen: 'onActiveAlert' },
+              expected: { notifyWhen: null },
             },
           ];
           cases.forEach(({ payload, expected }) => {

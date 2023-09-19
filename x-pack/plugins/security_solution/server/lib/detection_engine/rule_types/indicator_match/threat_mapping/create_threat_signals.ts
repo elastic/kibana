@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import chunk from 'lodash/fp/chunk';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { uniq, chunk } from 'lodash/fp';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
   CreateThreatSignalsOptions,
@@ -27,6 +27,8 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
+import { getMaxSignalsWarning } from '../../utils/utils';
+import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
 export const createThreatSignals = async ({
   alertId,
@@ -59,6 +61,7 @@ export const createThreatSignals = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
+  inputIndexFields,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -103,14 +106,10 @@ export const createThreatSignals = async ({
     primaryTimestamp,
     secondaryTimestamp,
     exceptionFilter,
+    indexFields: inputIndexFields,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
-
-  // if (eventCount === 0) {
-  //   ruleExecutionLogger.debug('Indicator matching rule has completed');
-  //   return results;
-  // }
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -122,6 +121,13 @@ export const createThreatSignals = async ({
     if (newPitId) threatPitId = newPitId;
   };
 
+  const threatIndexFields = await getFieldsForWildcard({
+    index: threatIndex,
+    language: threatLanguage ?? 'kuery',
+    dataViews: services.dataViews,
+    ruleExecutionLogger,
+  });
+
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     threatFilters: allThreatFilters,
@@ -129,6 +135,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
     exceptionFilter,
+    indexFields: threatIndexFields,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -171,6 +178,11 @@ export const createThreatSignals = async ({
         `all successes are ${results.success}`
       );
       if (results.createdSignalsCount >= params.maxSignals) {
+        if (results.warningMessages.includes(getMaxSignalsWarning())) {
+          results.warningMessages = uniq(results.warningMessages);
+        } else if (documentCount > 0) {
+          results.warningMessages.push(getMaxSignalsWarning());
+        }
         ruleExecutionLogger.debug(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
         );
@@ -203,6 +215,7 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           eventListConfig,
+          indexFields: inputIndexFields,
         }),
 
       createSignal: (slicedChunk) =>
@@ -241,6 +254,8 @@ export const createThreatSignals = async ({
           unprocessedExceptions,
           allowedFieldsForTermsQuery,
           threatMatchedFields,
+          inputIndexFields,
+          threatIndexFields,
         }),
     });
   } else {
@@ -262,6 +277,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           listClient,
           exceptionFilter,
+          indexFields: threatIndexFields,
         }),
 
       createSignal: (slicedChunk) =>
@@ -299,6 +315,8 @@ export const createThreatSignals = async ({
           threatQuery,
           reassignThreatPitId,
           allowedFieldsForTermsQuery,
+          inputIndexFields,
+          threatIndexFields,
         }),
     });
   }

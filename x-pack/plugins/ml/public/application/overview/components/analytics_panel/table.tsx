@@ -8,7 +8,8 @@
 import React, { FC, useState } from 'react';
 import { Direction, EuiBadge, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
@@ -17,7 +18,6 @@ import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
 import { useTableActions } from './actions';
 

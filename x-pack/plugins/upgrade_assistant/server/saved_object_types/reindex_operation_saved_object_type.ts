@@ -11,7 +11,7 @@ import { REINDEX_OP_TYPE } from '../../common/types';
 
 export const reindexOperationSavedObjectType: SavedObjectsType = {
   name: REINDEX_OP_TYPE,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,

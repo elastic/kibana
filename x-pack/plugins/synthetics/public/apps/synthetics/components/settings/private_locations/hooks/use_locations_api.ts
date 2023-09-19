@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { getServiceLocations } from '../../../../state/service_locations';
@@ -17,7 +17,7 @@ import {
 } from '../../../../state/private_locations/api';
 import { PrivateLocation } from '../../../../../../../common/runtime_types';
 
-export const useLocationsAPI = () => {
+export const usePrivateLocationsAPI = () => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
   const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);

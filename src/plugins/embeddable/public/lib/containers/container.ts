@@ -37,8 +37,8 @@ import {
   PanelState,
   EmbeddableContainerSettings,
 } from './i_container';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -64,7 +64,7 @@ export abstract class Container<
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: IContainer,
-    settings?: EmbeddableContainerSettings<TContainerInput>
+    settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
@@ -74,11 +74,7 @@ export abstract class Container<
       settings?.initializeSequentially || settings?.childIdInitializeOrder
     );
 
-    const initSource = settings?.readyToInitializeChildren$
-      ? settings?.readyToInitializeChildren$
-      : this.getInput$();
-
-    const init$ = initSource.pipe(
+    const init$ = this.getInput$().pipe(
       take(1),
       mergeMap(async (currentInput) => {
         const initPromise = this.initializeChildEmbeddables(currentInput, settings);
@@ -349,6 +345,7 @@ export abstract class Container<
       explicitInput: {
         ...explicitInput,
         id: embeddableId,
+        version: factory.latestVersion,
       } as TEmbeddableInput,
     };
   }
@@ -372,7 +369,7 @@ export abstract class Container<
 
   private async initializeChildEmbeddables(
     initialInput: TContainerInput,
-    initializeSettings?: EmbeddableContainerSettings<TContainerInput>
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
 
@@ -495,6 +492,7 @@ export abstract class Container<
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }
+
     return embeddable;
   }
 

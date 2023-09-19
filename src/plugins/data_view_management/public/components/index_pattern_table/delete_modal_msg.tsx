@@ -55,7 +55,7 @@ export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean)
     <div>
       <EuiCallOut
         color="warning"
-        iconType="alert"
+        iconType="warning"
         title="Data views are deleted from every space they are shared in."
       />
       <EuiSpacer size="m" />

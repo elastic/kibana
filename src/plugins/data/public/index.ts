@@ -170,6 +170,7 @@ export type {
   Reason,
   WaitUntilNextSessionCompletesOptions,
   SearchResponseWarning,
+  SearchResponseIncompleteWarning,
 } from './search';
 
 export {
@@ -181,6 +182,7 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -271,8 +273,8 @@ export type {
   GlobalQueryStateFromUrl,
 } from './query';
 
-export type { ShardFailureRequest } from './shard_failure_modal';
-export { ShardFailureOpenModalButton } from './shard_failure_modal';
+// TODO: move to @kbn/search-response-warnings
+export { OpenIncompleteResultsModalButton } from './incomplete_results_modal';
 
 export type { AggsStart } from './search/aggs';
 

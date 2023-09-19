@@ -21,10 +21,7 @@ export const useGetCaseConnectors = (caseId: string) => {
 
   return useQuery<CaseConnectors, ServerError>(
     casesQueriesKeys.caseConnectors(caseId),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return getCaseConnectors(caseId, abortCtrlRef.signal);
-    },
+    ({ signal }) => getCaseConnectors(caseId, signal),
     {
       staleTime: STALE_TIME,
       onError: (error: ServerError) => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './format';
 
 describe('Swimlane formatter', () => {
   const theCase = {
     id: 'case-id',
     connector: { fields: null },
-  } as CaseResponse;
+  } as Case;
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);

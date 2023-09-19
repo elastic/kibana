@@ -54,6 +54,7 @@ export const getLegendActions = (
       visData,
       columnIndex,
       formatter.deserialize,
+      // FIXME key could be a RangeKey see https://github.com/elastic/kibana/issues/153437
       pieSeries.key
     );
 
@@ -63,7 +64,7 @@ export const getLegendActions = (
       panelItems.push(
         {
           name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for value',
+            defaultMessage: 'Filter for',
           }),
           'data-test-subj': `legend-${title}-filterIn`,
           icon: <EuiIcon type="plusInCircle" size="m" />,
@@ -74,7 +75,7 @@ export const getLegendActions = (
         },
         {
           name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out value',
+            defaultMessage: 'Filter out',
           }),
           'data-test-subj': `legend-${title}-filterOut`,
           icon: <EuiIcon type="minusInCircle" size="m" />,

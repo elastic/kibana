@@ -423,7 +423,7 @@ export class DetailPanel extends Component {
         <EuiFlyoutBody>
           <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type="alert" color="danger" />
+              <EuiIcon size="m" type="warning" color="danger" />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

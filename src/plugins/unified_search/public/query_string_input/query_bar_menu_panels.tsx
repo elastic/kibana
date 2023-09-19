@@ -28,7 +28,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  KIBANA_USER_QUERY_LANGUAGE_KEY,
+  KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  UI_SETTINGS,
+} from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
@@ -63,27 +67,23 @@ export const strings = {
     }),
   getLoadOtherFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-      defaultMessage: 'Load other saved query',
+      defaultMessage: 'Load query',
     }),
   getLoadCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-      defaultMessage: 'Load saved query',
+      defaultMessage: 'Load query',
     }),
   getSaveAsNewFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
-      defaultMessage: 'Save as new',
+      defaultMessage: 'Save query',
     }),
   getSaveFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-      defaultMessage: 'Save saved query',
+      defaultMessage: 'Save query',
     }),
   getClearllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
       defaultMessage: 'Clear all',
-    }),
-  getSavedQueryLabel: () =>
-    i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
-      defaultMessage: 'Saved query',
     }),
   getSavedQueryPopoverSaveChangesButtonAriaLabel: (title?: string) =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel', {
@@ -92,11 +92,11 @@ export const strings = {
     }),
   getSavedQueryPopoverSaveChangesButtonText: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
-      defaultMessage: 'Save changes',
+      defaultMessage: 'Update query',
     }),
   getSavedQueryPopoverSaveAsNewButtonAriaLabel: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel', {
-      defaultMessage: 'Save as new saved query',
+      defaultMessage: 'Save as new query',
     }),
   getSavedQueryPopoverSaveAsNewButtonText: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
@@ -104,7 +104,7 @@ export const strings = {
     }),
   getSaveCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-      defaultMessage: 'Save current saved query',
+      defaultMessage: 'Save as new',
     }),
   getApplyAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
@@ -151,6 +151,7 @@ export interface QueryBarMenuPanelsProps {
   manageFilterSetComponent?: JSX.Element;
   hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -174,6 +175,7 @@ export function QueryBarMenuPanels({
   manageFilterSetComponent,
   hiddenPanelOptions,
   nonKqlMode,
+  disableQueryLanguageSwitcher = false,
   closePopover,
   onQueryBarSubmit,
   onFiltersUpdated,
@@ -242,10 +244,6 @@ export function QueryBarMenuPanels({
     };
   };
 
-  const handleSaveAsNew = useCallback(() => {
-    setRenderedComponent('saveAsNewForm');
-  }, [setRenderedComponent]);
-
   const handleSave = useCallback(() => {
     setRenderedComponent('saveForm');
   }, [setRenderedComponent]);
@@ -303,7 +301,8 @@ export function QueryBarMenuPanels({
   };
 
   const onSelectLanguage = (lang: string) => {
-    http.post('/api/kibana/kql_opt_in_stats', {
+    http.post('/internal/kql_opt_in_stats', {
+      version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
       body: JSON.stringify({ opt_in: lang === 'kuery' }),
     });
 
@@ -371,7 +370,7 @@ export function QueryBarMenuPanels({
       {
         name: strings.getClearllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-        icon: 'crossInACircleFilled',
+        icon: 'cross',
         'data-test-subj': 'filter-sets-removeAllFilters',
         onClick: () => {
           closePopover();
@@ -392,7 +391,7 @@ export function QueryBarMenuPanels({
   }
 
   // language menu appears when the showQueryInput is true
-  if (showQueryInput) {
+  if (showQueryInput && !disableQueryLanguageSwitcher) {
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
       panel: 3,
@@ -403,7 +402,7 @@ export function QueryBarMenuPanels({
   let panels = [
     {
       id: 0,
-      title: (
+      title: savedQuery?.attributes.title ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -412,50 +411,27 @@ export function QueryBarMenuPanels({
                 size="s"
                 data-test-subj="savedQueryTitle"
               >
-                <strong>
-                  {savedQuery ? savedQuery.attributes.title : strings.getSavedQueryLabel()}
-                </strong>
+                <strong>{savedQuery.attributes.title}</strong>
               </EuiText>
             </EuiFlexItem>
             {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="s"
-                  alignItems="center"
-                  justifyContent="center"
-                  responsive={false}
-                  wrap={false}
+                <EuiButton
+                  size="s"
+                  fill
+                  onClick={handleSave}
+                  aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
+                    savedQuery?.attributes.title
+                  )}
+                  data-test-subj="saved-query-management-save-changes-button"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={handleSave}
-                      aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
-                        savedQuery?.attributes.title
-                      )}
-                      data-test-subj="saved-query-management-save-changes-button"
-                    >
-                      {strings.getSavedQueryPopoverSaveChangesButtonText()}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      onClick={handleSaveAsNew}
-                      aria-label={strings.getSavedQueryPopoverSaveAsNewButtonAriaLabel()}
-                      data-test-subj="saved-query-management-save-as-new-button"
-                    >
-                      {strings.getSavedQueryPopoverSaveAsNewButtonText()}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  {strings.getSavedQueryPopoverSaveChangesButtonText()}
+                </EuiButton>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </>
-      ),
+      ) : undefined,
       items,
     },
     {

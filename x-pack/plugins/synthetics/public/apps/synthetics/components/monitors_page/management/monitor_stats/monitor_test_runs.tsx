@@ -8,18 +8,18 @@
 import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-plugin/public';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 
 import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
 export const MonitorTestRunsCount = ({ monitorIds }: { monitorIds: string[] }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   const theme = useTheme();
-
-  const { ExploratoryViewEmbeddable } = observability;
 
   const { from, to } = useRefreshedRange(30, 'days');
 

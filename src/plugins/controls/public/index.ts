@@ -35,11 +35,15 @@ export {
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  controlGroupInputBuilder,
+  type ControlGroupInputBuilder,
+  type ControlGroupAPI,
+  type AwaitingControlGroupAPI,
   type ControlGroupOutput,
+  controlGroupInputBuilder,
 } from './control_group';
 
 export {
@@ -55,8 +59,9 @@ export {
 } from './range_slider';
 
 export {
-  LazyControlGroupRenderer,
-  useControlGroupContainerContext,
+  ACTION_EDIT_CONTROL,
+  ACTION_DELETE_CONTROL,
+  ControlGroupRenderer,
   type ControlGroupRendererProps,
 } from './control_group';
 

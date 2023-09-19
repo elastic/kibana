@@ -6,10 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Query } from '@kbn/es-query';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { TimeBucketsInterval } from '../services/time_buckets';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { TimeBucketsInterval } from '../services/time_buckets';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -74,9 +75,9 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 export interface NumericFieldStats {
   fieldName: string;
   count?: number;
-  min: number;
-  max: number;
-  avg: number;
+  min?: number;
+  max?: number;
+  avg?: number;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
@@ -209,7 +210,10 @@ export interface FieldStatsCommonRequestParams {
   samplingProbability: number | null;
   browserSessionSeed: number;
   samplingOption: SamplingOption;
+  embeddableExecutionContext?: KibanaExecutionContext;
 }
+
+export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
@@ -222,11 +226,15 @@ export interface OverallStatsSearchStrategyParams {
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
-  aggregatableFields: string[];
+  aggregatableFields: Array<{
+    name: string;
+    supportedAggs: SupportedAggs;
+  }>;
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
   browserSessionSeed: number;
   samplingOption: SamplingOption;
+  embeddableExecutionContext?: KibanaExecutionContext;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
@@ -258,6 +266,7 @@ export interface Field {
   type: string;
   cardinality: number;
   safeFieldName: string;
+  supportedAggs?: Set<string>;
 }
 
 export interface Aggs {

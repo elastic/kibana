@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Ping } from '../../../../../../common/runtime_types';

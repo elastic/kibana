@@ -52,7 +52,6 @@ export function registerRoutes({
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
-
   registerGetRoute(router, { config, coreUsageData, logger });
   registerResolveRoute(router, { config, coreUsageData, logger });
   registerCreateRoute(router, { config, coreUsageData, logger });

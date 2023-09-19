@@ -79,7 +79,7 @@ export const ElasticsearchGuide: React.FC = () => {
                 'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchDescription',
                 {
                   defaultMessage:
-                    'Whether you are building a search-powered application, or designing a large-scale search implementation, Elasticsearch provides the low-level tools to create the most relevant and performant search experience.',
+                    "Elasticsearch provides the low-level tools you need to build fast, relevant search for your website or application. Because it's powerful and flexible, Elasticsearch can handle search use cases of all shapes and sizes.",
                 }
               )}
             </p>
@@ -103,7 +103,7 @@ export const ElasticsearchGuide: React.FC = () => {
                           'xpack.enterpriseSearch.overview.elasticsearchGuide.connectToElasticsearchDescription',
                           {
                             defaultMessage:
-                              "Elastic builds and maintains clients in several popular languages and our community has contributed many more. They're easy to work with, feel natural to use, and, just like Elasticsearch, don't limit what you might want to do with them.",
+                              'Elastic builds and maintains clients in several popular languages and our community has contributed many more.',
                           }
                         )}
                       </p>

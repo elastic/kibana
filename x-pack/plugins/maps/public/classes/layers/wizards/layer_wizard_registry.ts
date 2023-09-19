@@ -7,9 +7,22 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ReactElement, FunctionComponent } from 'react';
+import { ReactElement, ReactNode, FunctionComponent } from 'react';
 import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+
+export type RenderSecondaryActionButtonProps = {
+  isDisabled: boolean;
+  isLoading: boolean;
+  addLayersAndClose: () => void;
+};
+
+export type LayerWizardStep = {
+  id: string;
+  label: string;
+  nextButtonLabel?: string;
+  renderSecondaryActionButton?: (props: RenderSecondaryActionButtonProps) => ReactNode;
+};
 
 export type LayerWizard = {
   id: string;
@@ -24,7 +37,7 @@ export type LayerWizard = {
   description: string;
   icon: string | FunctionComponent<any>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
-  prerequisiteSteps?: Array<{ id: string; label: string }>;
+  prerequisiteSteps?: LayerWizardStep[];
   disabledReason?: string;
   getIsDisabled?: () => Promise<boolean> | boolean;
   isBeta?: boolean;

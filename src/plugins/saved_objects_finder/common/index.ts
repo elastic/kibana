@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const PER_PAGE_SETTING = 'savedObjects:perPage';
-export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
-export type { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from './types';
+export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '@kbn/saved-objects-settings';
+export type { FinderAttributes, SavedObjectCommon } from './types';

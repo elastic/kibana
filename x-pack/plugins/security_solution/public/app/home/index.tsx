@@ -25,7 +25,11 @@ import { TourContextProvider } from '../../common/components/guided_onboarding_t
 
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
+import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
+import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
+import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
+import { AssistantOverlay } from '../../assistant/overlay';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -37,14 +41,17 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
   useUpdateBrowserTitle();
+  useUpdateExecutionContext();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
+
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
   useUpgradeSecurityPackages();
+  useSetupDetectionEngineHealthApi();
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
@@ -56,6 +63,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
               {children}
             </DragDropContextWrapper>
             <HelpMenu />
+            <TopValuesPopover />
+            <AssistantOverlay />
           </>
         </TourContextProvider>
       </ConsoleManager>

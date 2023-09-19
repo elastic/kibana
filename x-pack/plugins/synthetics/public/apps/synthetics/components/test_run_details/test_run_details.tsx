@@ -47,8 +47,8 @@ export const TestRunDetails = () => {
     <>
       <TestRunErrorInfo journeyDetails={stepsData?.details} hasNoSteps={hasNoSteps} />
       {!hasNoSteps && (
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
+        <EuiFlexGroup gutterSize="m" wrap={true}>
+          <EuiFlexItem css={{ flexBasis: '60%', minWidth: 260 }}>
             <EuiPanel hasShadow={false} hasBorder>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
@@ -85,8 +85,16 @@ export const TestRunDetails = () => {
             </EuiPanel>
             <EuiSpacer size="m" />
             <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />
+            <EuiSpacer size="m" />
+            <EuiPanel hasShadow={false} hasBorder>
+              <TestRunErrorInfo
+                journeyDetails={stepsData?.details}
+                showErrorTitle={false}
+                showErrorLogs={true}
+              />
+            </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem css={{ flexBasis: '36%', minWidth: 'min-content' }}>
             <StepDurationPanel legendPosition="bottom" />
             <EuiSpacer size="m" />
             <MonitorDetailsPanelContainer hideEnabled hideLocations />

@@ -27,6 +27,7 @@ const MyEuiFilterGroup = styled(EuiFilterGroup)`
 `;
 
 const FilterAllButton = styled(EuiFilterButton)`
+  &,
   & .euiFilterButton__textShift {
     min-width: 28px;
   }
@@ -50,9 +51,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
-          numFilters={
-            userActionsStats && userActionsStats.total > 0 ? userActionsStats.total - 1 : 0
-          } // subtracting user action of description from total
+          numFilters={userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -77,10 +76,10 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           {i18n.COMMENTS}
         </EuiFilterButton>
         <EuiFilterButton
-          hasActiveFilters={type === 'action'} // subtracting user action of description other actions
+          hasActiveFilters={type === 'action'}
           numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0
-              ? userActionsStats.totalOtherActions - 1
+              ? userActionsStats.totalOtherActions
               : 0
           }
           onClick={() => handleFilterChange('action')}

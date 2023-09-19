@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -18,6 +23,14 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -35,6 +48,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const eventLogger = eventLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -45,16 +59,20 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
   eventLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -89,6 +107,7 @@ describe('disable()', () => {
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: true,
+      revision: 0,
       scheduledTaskId: '1',
       actions: [
         {
@@ -120,6 +139,11 @@ describe('disable()', () => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedRule);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   describe('authorization', () => {
@@ -208,6 +232,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -253,6 +278,7 @@ describe('disable()', () => {
                 group: 'default',
                 date: new Date().toISOString(),
               },
+              uuid: 'uuid-1',
             },
             state: { bar: false },
           },
@@ -260,6 +286,7 @@ describe('disable()', () => {
       },
       params: {
         alertId: '1',
+        revision: 0,
       },
       ownerId: null,
     });
@@ -279,6 +306,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -313,8 +341,10 @@ describe('disable()', () => {
       },
       kibana: {
         alert: {
+          uuid: 'uuid-1',
           rule: {
             consumer: 'myApp',
+            revision: 0,
             rule_type_id: '123',
           },
         },
@@ -361,6 +391,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -407,6 +438,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -499,6 +531,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -547,6 +580,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -568,5 +602,36 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      const existingDecryptedSiemRule = {
+        ...existingDecryptedRule,
+        attributes: { ...existingDecryptedRule.attributes, consumer: AlertConsumers.SIEM },
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
+      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+
+      await rulesClient.disable({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
+        actions: [
+          {
+            actionRef: '1',
+            actionTypeId: '1',
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        references: [],
+        ruleId: '1',
+      });
+    });
   });
 });

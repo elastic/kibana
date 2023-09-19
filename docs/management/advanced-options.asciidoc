@@ -1,12 +1,13 @@
 [[advanced-options]]
 == Advanced Settings
 
-*Advanced Settings* control the behavior of {kib}. For example, you can change the format used to display dates,
-specify the default data view, and set the precision for displayed decimal values.
+*Advanced Settings* control the behavior of {kib}. You can change the settings that apply to spaces, or to all of {kib}. For example, you can change the format used to display dates,
+specify the default data view, and apply your own branding.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
-. Scroll or search for the setting.
-. Make your change, then click *Save changes*.
+WARNING: Changing a setting can affect {kib} performance and cause problems
+that are difficult to diagnose. Setting a property value to a blank field
+reverts to the default behavior, which might not be compatible with other
+configuration settings. Deleting a custom setting permanently removes it from {kib}.
 
 [float]
 === Required permissions
@@ -25,12 +26,14 @@ For more information on granting access to {kib}, refer to <<xpack-security-auth
 
 [float]
 [[kibana-settings-reference]]
-=== {kib} settings reference
+=== Change the space settings
 
-WARNING: Changing a setting can affect {kib} performance and cause problems
-that are difficult to diagnose. Setting a property value to a blank field
-reverts to the default behavior, which might not be compatible with other
-configuration settings. Deleting a custom setting permanently removes it from {kib}.
+Change the settings that apply only to {kib} spaces.
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Click *Space Settings*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
 
 [float]
 [[kibana-general-settings]]
@@ -195,7 +198,7 @@ to be displayed).
 
 [[timepicker-refreshintervaldefaults]]`timepicker:refreshIntervalDefaults`::
 The default refresh interval for the time filter. Example:
-`{ "display": "15 seconds", "pause": true, "value": 15000 }`.
+`{ "pause": true, "value": 15000 }`.
 
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
@@ -285,8 +288,8 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover:enableSql]]`discover:enableSql`::
-experimental[] Allows SQL queries for search.
+[[discover:enableESQL]]`discover:enableESQL`::
+experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -390,11 +393,51 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+[[apm-agent-explorer]]`observability:apmAgentExplorerView`::
+beta:[] Enables the Agent explorer view.
+
+[[apm-aws-price]]`observability:apmAWSLambdaPriceFactor`::
+Set the price per Gb-second for your AWS Lambda functions.
+
+[[apm-aws-request]]`observability:apmAWSLambdaRequestCostPerMillion`::
+Set the AWS Lambda cost per million requests.
+
+[[apm-continuous-rollups]]`observability:apmEnableContinuousRollups`::
+beta:[] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution.
+On larger time ranges, lower resolution metrics will be used, which will improve loading times.
+
+[[apm-enable-service-metrics]]`observability:apmEnableServiceMetrics`::
+beta:[] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
+
+[[observability-apm-labs]]`observability:apmLabsButton`::
+Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
+See <<apm-labs>> to learn more.
+
+[[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
+When enabled, displays the critical path of a trace.
+
+[[observability-enable-progressive-loading]]`observability:apmProgressiveLoading`::
+preview:[] When enabled, uses progressive loading of some APM views.
+Data may be requested with a lower sampling rate first, with lower accuracy but faster response times,
+while the unsampled data loads in the background.
+
+[[observability-apm-max-groups]]`observability:apmServiceGroupMaxNumberOfServices`::
+Limit the number of services in a given service group.
+
 [[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
 preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
 
+[[observability-default-service-env]]`observability:apmDefaultServiceEnvironment`::
+Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
+
+[[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
+Enable the Universal Profiling integration in APM.
+
+[[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
+preview:[] Display Amazon Lambda metrics in the service metrics tab.
+
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
-Enables the comparison feature in the APM app.
+Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
 
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.
@@ -404,6 +447,9 @@ When enabled, allows you to inspect {es} queries in API responses.
 
 [[observability-apm-enable-service-groups]]`observability:enableServiceGroups`::
 preview:[] When enabled, allows users to create Service Groups from the APM Service Inventory page.
+
+[[observability-apm-trace-explorer-tab]]`observability:apmTraceExplorerTab`::
+preview:[] Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
 
 [float]
 [[kibana-reporting-settings]]
@@ -534,6 +580,7 @@ of buckets to try to represent.
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
+**This setting is deprecated and will not be supported in a future version.**
 Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
@@ -542,15 +589,42 @@ The maximum number of buckets a datasource can return. High numbers can have a n
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
-[[visualize-enablelabs]]`visualize:enableLabs`::
-Enables users to create, view, and edit experimental visualizations. When disabled,
-only production-ready visualizations are available to users.
+[float]
+[[kibana-global-settings-reference]]
+=== Change the global settings
+
+Change the settings that apply only to {kib} spaces.
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Click *Global Settings*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
 
 [float]
-[[kibana-telemetry-settings]]
-==== Usage Data
+[[kibana-custom-branding-settings]]
+==== Custom branding
 
 [horizontal]
-[[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
-When enabled, helps improve the Elastic Stack by providing usage statistics for
-basic features.
+[[custom-logo]]`xpackCustomBranding:logo`::
+A custom image that appears in the header of all {kib} pages. Images must have a transparent background, and 128 x 128 pixels or smaller.
+
+[[organization-name]]`xpackCustomBranding:customizedLogo`::
+The custom text that appears in the header of all {kib} pages. Images must have a transparent background, and 200 x 84 pixels or smaller.
+
+[[page-title]]`xpackCustomBranding:pageTitle`::
+The custom text that appears on {kib} browser tabs.
+
+[[favicon-svg]]`xpackCustomBranding:faviconSVG`::
+The URL of a custom SVG image that appears on {kib} browser tabs. Images must be 16 x 16 pixels.
+
+[[favicon-png]]`xpackCustomBranding:faviconPNG`::
+The URL of a custom PNG image that appears on {kib} browser tabs.
+
+[float]
+[[kibana-usage-collection-settings]]
+==== Usage collection
+
+[[provide-usage-data]]`telemetry:enabled`::
+Enabling data usage collection (also known as Telemetry) allows us to learn
+what our users are most interested in, so we can improve our products and services.
+Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] for more details.

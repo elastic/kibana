@@ -14,11 +14,12 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
   BrushEndListener,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EuiPageSection } from '@elastic/eui';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -29,7 +30,6 @@ import {
   seriesHasLessThen2DataPoints,
 } from './helpers';
 import { ErrorMessage } from './error_message';
-import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { VisSectionProps } from '../types';
 
@@ -45,7 +45,8 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const chartTheme = useTimelineChartTheme();
+
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
@@ -75,9 +76,9 @@ export const ChartSectionVis = ({
     },
     [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
   );
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
@@ -109,7 +110,7 @@ export const ChartSectionVis = ({
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageSection>
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
@@ -131,16 +132,16 @@ export const ChartSectionVis = ({
                 stack={stacked}
               />
             ))}
+          <Tooltip {...tooltipProps} />
           <Settings
-            tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme(isDarkMode)}
+            baseTheme={chartTheme.baseTheme}
             showLegend
             showLegendExtra
             legendPosition="right"
           />
         </Chart>
       </div>
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

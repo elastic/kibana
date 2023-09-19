@@ -56,6 +56,7 @@ const GlobalRead: User = {
           alertsRestrictedFixture: ['read'],
           actionsSimulators: ['read'],
           rulesSettings: ['read', READ_FLAPPING_SETTINGS_SUB_FEATURE_ID],
+          maintenanceWindow: ['read'],
         },
         spaces: ['*'],
       },
@@ -84,6 +85,7 @@ const Space1All: User = {
           alertsFixture: ['all'],
           actionsSimulators: ['all'],
           rulesSettings: ['all', ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID],
+          maintenanceWindow: ['all'],
         },
         spaces: ['space1'],
       },
@@ -152,6 +154,42 @@ const Space1AllWithRestrictedFixture: User = {
   },
 };
 
+/**
+ * This user is needed to test system actions.
+ * In x-pack/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+ * we registered a system action type which requires access to Cases. This user has
+ * access to Cases only in the Stack Management. The tests use this user to
+ * execute the system action and verify that the authorization is performed
+ * as expected
+ */
+const CasesAll: User = {
+  username: 'cases_all',
+  fullName: 'cases_all',
+  password: 'cases_all',
+  role: {
+    name: 'cases_all_role',
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          generalCases: ['all'],
+          actions: ['all'],
+          alertsFixture: ['all'],
+          alertsRestrictedFixture: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -159,6 +197,7 @@ export const Users: User[] = [
   Space1All,
   Space1AllWithRestrictedFixture,
   Space1AllAlertingNoneActions,
+  CasesAll,
 ];
 
 const Space1: Space = {
@@ -250,6 +289,16 @@ const Space1AllAtSpace2: Space1AllAtSpace2 = {
   id: 'space_1_all at space2',
   user: Space1All,
   space: Space2,
+};
+
+interface SystemActionSpace1 extends Scenario {
+  id: 'system_actions at space1';
+}
+
+export const systemActionScenario: SystemActionSpace1 = {
+  id: 'system_actions at space1',
+  user: CasesAll,
+  space: Space1,
 };
 
 export const UserAtSpaceScenarios: [

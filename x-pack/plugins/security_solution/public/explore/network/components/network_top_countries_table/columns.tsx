@@ -60,15 +60,13 @@ export const getNetworkTopCountriesColumns = (
         return (
           <SecurityCellActions
             key={id}
-            mode={CellActionsMode.HOVER}
+            mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
-            field={{
-              name: geoAttr,
+            data={{
               value: geo,
-              type: 'keyword',
-              aggregatable: true,
+              field: geoAttr,
             }}
           >
             <CountryFlagAndName countryCode={geo} />

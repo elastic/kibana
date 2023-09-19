@@ -84,7 +84,7 @@ describe('Stage: createTargetIndex', () => {
       });
     });
 
-    it('CREATE_TARGET_INDEX -> UPDATE_ALIASES when successful', () => {
+    it('CREATE_TARGET_INDEX -> UPDATE_ALIASES when successful and alias actions are not empty', () => {
       const state = createState();
       const res: StateActionResponse<'CREATE_TARGET_INDEX'> =
         Either.right('create_index_succeeded');
@@ -101,6 +101,27 @@ describe('Stage: createTargetIndex', () => {
         currentIndexMeta: state.indexMappings._meta,
         aliases: [],
         aliasActions,
+        skipDocumentMigration: true,
+      });
+    });
+
+    it('CREATE_TARGET_INDEX -> INDEX_STATE_UPDATE_DONE when successful and alias actions are empty', () => {
+      const state = createState();
+      const res: StateActionResponse<'CREATE_TARGET_INDEX'> =
+        Either.right('create_index_succeeded');
+
+      getAliasActionsMock.mockReturnValue([]);
+
+      const newState = createTargetIndex(state, res, context);
+
+      expect(newState).toEqual({
+        ...state,
+        controlState: 'INDEX_STATE_UPDATE_DONE',
+        previousMappings: state.indexMappings,
+        currentIndexMeta: state.indexMappings._meta,
+        aliases: [],
+        aliasActions: [],
+        skipDocumentMigration: true,
       });
     });
   });

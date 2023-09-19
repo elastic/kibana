@@ -48,10 +48,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
-        // always install Endpoint package by default when Fleet sets up
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'endpointResponseActionsEnabled',
+        ])}`,
       ],
     },
   };

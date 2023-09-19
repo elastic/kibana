@@ -6,7 +6,7 @@
  */
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { DatatableProps } from '../../../common/expressions';
-import type { FormatFactory } from '../../../common';
+import type { FormatFactory } from '../../../common/types';
 import { getDatatable } from '../../../common/expressions';
 import { getColumnCellValueActions } from './expression';
 import type { Datatable } from '@kbn/expressions-plugin/common';

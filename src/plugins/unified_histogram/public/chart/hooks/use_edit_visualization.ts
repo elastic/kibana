@@ -19,18 +19,23 @@ const visualizeFieldTrigger: typeof VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_T
 export const useEditVisualization = ({
   services,
   dataView,
-  getRelativeTimeRange,
+  relativeTimeRange,
   lensAttributes,
+  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  getRelativeTimeRange: () => TimeRange;
+  relativeTimeRange?: TimeRange;
   lensAttributes: TypedLensByValueInput['attributes'];
+  isPlainRecord?: boolean;
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataView.id || !dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
+    if (!dataView.id || isPlainRecord) {
+      return false;
+    }
+    if (!dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
       return false;
     }
 
@@ -43,7 +48,7 @@ export const useEditVisualization = ({
     );
 
     return Boolean(compatibleActions.length);
-  }, [dataView, services.uiActions]);
+  }, [dataView, isPlainRecord, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
     if (!canVisualize) {
@@ -53,11 +58,11 @@ export const useEditVisualization = ({
     return () => {
       services.lens.navigateToPrefilledEditor({
         id: '',
-        timeRange: getRelativeTimeRange(),
+        timeRange: relativeTimeRange,
         attributes: lensAttributes,
       });
     };
-  }, [canVisualize, getRelativeTimeRange, lensAttributes, services.lens]);
+  }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
 
   useEffect(() => {
     checkCanVisualize().then(setCanVisualize);

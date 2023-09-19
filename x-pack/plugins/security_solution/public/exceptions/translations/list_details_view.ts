@@ -167,3 +167,17 @@ export const EXCEPTION_EXPORT_ERROR_DESCRIPTION = i18n.translate(
     defaultMessage: 'An error occurred exporting a list',
   }
 );
+
+export const DUPLICATE_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.duplicateExceptionList',
+  {
+    defaultMessage: 'Duplicate exception list',
+  }
+);
+
+export const EXCEPTION_DUPLICATE_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.duplicateListDescription',
+  {
+    defaultMessage: 'An error occurred duplicating a list',
+  }
+);

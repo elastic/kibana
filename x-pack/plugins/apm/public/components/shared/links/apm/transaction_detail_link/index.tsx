@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -20,6 +19,7 @@ import { getComparisonEnabled } from '../../../time_comparison/get_comparison_en
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { APMQueryParams } from '../../url_helpers';
 import { APMLinkExtendProps, getLegacyApmHref } from '../apm_link';
+import { MaxGroupsMessage } from '../max_groups_message';
 
 export const txGroupsDroppedBucketName = '_other';
 
@@ -28,7 +28,7 @@ interface Props extends APMLinkExtendProps {
   traceId?: string;
   transactionId?: string;
   transactionName: string;
-  transactionType: string;
+  transactionType?: string;
   latencyAggregationType?: string;
   environment?: string;
   comparisonEnabled?: boolean;
@@ -81,7 +81,13 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={<EuiLink href={href} {...rest} />}
+        content={
+          <EuiLink
+            data-test-subj="apmTransactionDetailLinkLink"
+            href={href}
+            {...rest}
+          />
+        }
       />
     );
   }
@@ -98,16 +104,10 @@ export function TransactionDetailLink({
           ariaLabel={i18n.translate('xpack.apm.transactionDetail.tooltip', {
             defaultMessage: 'Max transaction groups reached tooltip',
           })}
-          iconType="alert"
+          iconType="warning"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <FormattedMessage
-              defaultMessage="Current APM server capacity for handling unique transaction groups has been reached. There are at least {overflowCount, plural, one {1 transaction} other {# transactions}} missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server."
-              id="xpack.apm.transactionDetail.maxGroups.message"
-              values={{
-                overflowCount,
-              }}
-            />
+            <MaxGroupsMessage />
           </EuiText>
         </PopoverTooltip>
       </EuiFlexItem>

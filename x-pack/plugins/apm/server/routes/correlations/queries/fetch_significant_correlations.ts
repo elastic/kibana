@@ -27,6 +27,13 @@ import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface SignificantCorrelationsResponse {
+  latencyCorrelations: LatencyCorrelation[];
+  ccsWarning: boolean;
+  totalDocCount: number;
+  fallbackResult?: LatencyCorrelation;
+}
+
 export const fetchSignificantCorrelations = async ({
   apmEventClient,
   start,
@@ -42,7 +49,7 @@ export const fetchSignificantCorrelations = async ({
   durationMinOverride?: number;
   durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
-}) => {
+}): Promise<SignificantCorrelationsResponse> => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
   const chartType = LatencyDistributionChartType.latencyCorrelations;

@@ -14,26 +14,27 @@ import {
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 interface TagCloudCommonParams {
-  scale: $Values<typeof ScaleOptions>;
+  scale?: $Values<typeof ScaleOptions>;
   orientation: $Values<typeof Orientation>;
   minFontSize: number;
   maxFontSize: number;
   showLabel: boolean;
   ariaLabel?: string;
+  metric: ExpressionValueVisDimension | string;
+  bucket?: ExpressionValueVisDimension | string;
+  palette: PaletteOutput;
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
-  metric: ExpressionValueVisDimension | string;
-  bucket?: ExpressionValueVisDimension | string;
+  isPreview?: boolean;
 }
 
 export interface TagCloudRendererParams extends TagCloudCommonParams {
-  palette: PaletteOutput;
-  metric: ExpressionValueVisDimension | string;
-  bucket?: ExpressionValueVisDimension | string;
+  isPreview: boolean;
 }
 
 export interface TagcloudRendererConfig {
@@ -41,15 +42,14 @@ export interface TagcloudRendererConfig {
   visData: Datatable;
   visParams: TagCloudRendererParams;
   syncColors: boolean;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
-interface Arguments extends TagCloudVisConfig {
-  palette: PaletteOutput;
-}
-
-export type ExpressionTagcloudFunction = () => ExpressionFunctionDefinition<
-  'tagcloud',
+export type ExpressionTagcloudFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_NAME,
   Datatable,
-  Arguments,
+  TagCloudVisConfig,
   ExpressionValueRender<TagcloudRendererConfig>
 >;
+
+export type ExpressionTagcloudFunction = () => ExpressionTagcloudFunctionDefinition;

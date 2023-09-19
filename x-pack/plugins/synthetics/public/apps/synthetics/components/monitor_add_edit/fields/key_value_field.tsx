@@ -46,13 +46,15 @@ export type Pair = [
   string // value
 ];
 
-interface Props {
+export interface KeyValuePairsFieldProps {
   addPairControlLabel: string | React.ReactElement;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
   onBlur?: () => void;
   'data-test-subj'?: string;
   readOnly?: boolean;
+  keyLabel?: string | React.ReactElement;
+  valueLabel?: string | React.ReactElement;
 }
 
 export const KeyValuePairsField = ({
@@ -62,7 +64,9 @@ export const KeyValuePairsField = ({
   onBlur,
   'data-test-subj': dataTestSubj,
   readOnly,
-}: Props) => {
+  keyLabel,
+  valueLabel,
+}: KeyValuePairsFieldProps) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
 
   const handleOnChange = useCallback(
@@ -121,20 +125,20 @@ export const KeyValuePairsField = ({
                 children: (
                   <EuiFlexGroup responsive={false}>
                     <EuiFlexItem>
-                      {
+                      {keyLabel || (
                         <FormattedMessage
                           id="xpack.synthetics.keyValuePairsField.key.label"
                           defaultMessage="Key"
                         />
-                      }
+                      )}
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      {
+                      {valueLabel || (
                         <FormattedMessage
                           id="xpack.synthetics.keyValuePairsField.value.label"
                           defaultMessage="Value"
                         />
-                      }
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
@@ -152,6 +156,7 @@ export const KeyValuePairsField = ({
                 append={
                   <EuiFormLabel>
                     <EuiButtonIcon
+                      data-test-subj="syntheticsKeyValuePairsFieldButton"
                       iconType="trash"
                       aria-label={i18n.translate(
                         'xpack.synthetics.keyValuePairsField.deleteItem.label',

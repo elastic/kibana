@@ -11,9 +11,9 @@ import classNames from 'classnames';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import './column_chart.scss';
+import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 
-import { isUnsupportedChartData, ChartData } from './field_histograms';
+import './column_chart.scss';
 
 import { useColumnChart } from './use_column_chart';
 

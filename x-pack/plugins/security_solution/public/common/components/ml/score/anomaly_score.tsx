@@ -16,7 +16,6 @@ interface Args {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  jobKey: string;
   index?: number;
   score: Anomaly;
   interval: string;
@@ -31,7 +30,6 @@ const Icon = styled(EuiIcon)`
 Icon.displayName = 'Icon';
 
 export const AnomalyScoreComponent = ({
-  jobKey,
   startDate,
   endDate,
   index = 0,
@@ -43,7 +41,7 @@ export const AnomalyScoreComponent = ({
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="anomaly-score">
         <Score index={index} score={score} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

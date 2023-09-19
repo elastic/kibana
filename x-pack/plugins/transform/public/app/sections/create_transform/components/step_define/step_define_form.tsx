@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { DataGrid } from '@kbn/ml-data-grid';
 import {
   mlTimefilterRefresh$,
   useTimefilter,
@@ -77,6 +78,9 @@ const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
 
+type PopulatedFields = Set<string>;
+const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
+
 export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   <>
     <EuiSpacer size="m" />
@@ -98,9 +102,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
-  const {
-    ml: { DataGrid },
-  } = useAppDependencies();
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     TransformStorageKey,
     TransformStorageMapped<typeof TRANSFORM_FROZEN_TIER_PREFERENCE>
@@ -122,8 +123,22 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
+  const appDependencies = useAppDependencies();
+  const {
+    ml: { useFieldStatsFlyoutContext },
+  } = appDependencies;
+
+  const fieldStatsContext = useFieldStatsFlyoutContext();
   const indexPreviewProps = {
-    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
+    ...useIndexData(
+      dataView,
+      transformConfigQuery,
+      runtimeMappings,
+      timeRangeMs,
+      isPopulatedFields(fieldStatsContext?.populatedFields)
+        ? [...fieldStatsContext.populatedFields]
+        : []
+    ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };

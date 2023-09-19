@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
-import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
+import type { PreviewState } from '../preview/types';
 
 const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
 const i18nTexts = {
@@ -25,7 +25,7 @@ const i18nTexts = {
 
 // Validate the painless **script**
 const painlessScriptValidator: ValidationFunc = async ({ customData: { provider } }) => {
-  const previewError = (await provider()) as Context['error'];
+  const previewError = (await provider()) as PreviewState['previewResponse']['error'];
 
   if (previewError && previewError.code === 'PAINLESS_SCRIPT_ERROR') {
     return {

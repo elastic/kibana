@@ -13,8 +13,10 @@ import {
   EuiIcon,
   EuiKeyPadMenuItem,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { useFormData } from '../../shared_imports';
@@ -25,6 +27,13 @@ interface IResponseActionsAddButtonProps {
   updateActionTypeId: (id: string) => void;
 }
 
+export const PLATINUM_ONLY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.actionForm.platinumOnly',
+  {
+    defaultMessage: 'This functionality is available only in Platinum and above.',
+  }
+);
+
 export const ResponseActionAddButton = ({
   supportedResponseActionTypes,
   addActionType,
@@ -34,7 +43,7 @@ export const ResponseActionAddButton = ({
   const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
     data.responseActions && data.responseActions.length > 0
   );
-  const isGoldLicense = useLicense().isGoldPlus();
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const handleAddActionType = useCallback(
     (item) => {
@@ -48,7 +57,7 @@ export const ResponseActionAddButton = ({
 
   const renderAddResponseActionButton = useMemo(() => {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={'row'}>
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
           <EuiButton
@@ -73,15 +82,25 @@ export const ResponseActionAddButton = ({
         const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
-            isDisabled={!isGoldLicense}
+            isDisabled={!isPlatinumPlus || item.disabled}
             data-test-subj={`${item.name}-response-action-type-selection-option`}
             label={item.name}
+            betaBadgeTooltipContent={'should be visible'}
             onClick={() => handleAddActionType(item)}
           >
             <EuiIcon size="xl" type={item.iconClass} />
           </EuiKeyPadMenuItem>
         );
 
+        if (!isPlatinumPlus) {
+          return (
+            <EuiToolTip position="top" content={PLATINUM_ONLY_TOOLTIP}>
+              <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
+                {keyPadItem}
+              </EuiFlexItem>
+            </EuiToolTip>
+          );
+        }
         return (
           <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
             {keyPadItem}
@@ -89,13 +108,17 @@ export const ResponseActionAddButton = ({
         );
       })
     );
-  }, [handleAddActionType, isGoldLicense, supportedResponseActionTypes]);
+  }, [handleAddActionType, isPlatinumPlus, supportedResponseActionTypes]);
 
   if (!supportedResponseActionTypes?.length) return <></>;
 
   return (
     <>
-      {isAddResponseActionButtonShown ? renderAddResponseActionButton : renderResponseActionTypes}
+      {isAddResponseActionButtonShown ? (
+        renderAddResponseActionButton
+      ) : (
+        <EuiFlexGroup direction={'row'}>{renderResponseActionTypes}</EuiFlexGroup>
+      )}
     </>
   );
 };

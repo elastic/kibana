@@ -13,10 +13,10 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   interface Runtime {
     name: string;
@@ -47,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
         const start = performance.now();
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         const end = performance.now();
         expect(end - start).to.be.lessThan(10000);
       });
@@ -63,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
@@ -75,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
@@ -94,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
@@ -109,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should NOT copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
@@ -166,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map(

@@ -39,7 +39,6 @@ export function fetchStreaming({
   if (!isCompressionDisabled) {
     url = appendQueryParam(url, 'compress', 'true');
   }
-
   // Begin the request
   xhr.open(method, url);
   xhr.withCredentials = true;

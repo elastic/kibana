@@ -21,8 +21,9 @@ import {
   docLinksServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { ComponentRegistry } from '../component_registry';
+import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { Search } from './components/search';
+import { EuiTab } from '@elastic/eui';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -251,11 +252,12 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={true}
+        enableSaving={{ global: true, namespace: true }}
+        enableShowing={{ global: true, namespace: true }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -269,7 +271,7 @@ describe('Settings', () => {
     ).toHaveLength(1);
   });
 
-  it('should should not render a custom setting', async () => {
+  it('should not render a custom setting', async () => {
     // The manual mock for the uiSettings client returns false for isConfig, override that
     const uiSettings = mockConfig().core.settings.client;
     uiSettings.isCustom = (key) => true;
@@ -279,11 +281,12 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={true}
+        enableSaving={{ global: true, namespace: true }}
+        enableShowing={{ global: true, namespace: true }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -304,11 +307,12 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={false}
+        enableSaving={{ global: true, namespace: false }}
+        enableShowing={{ global: true, namespace: true }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -332,16 +336,39 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={false}
+        enableSaving={{ global: false, namespace: false }}
+        enableShowing={{ global: true, namespace: true }}
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
     expect(toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(component.find(Search).prop('query').text).toEqual('');
+  });
+
+  it('does not render global settings if show is set to false', async () => {
+    const badQuery = 'category:(accessibility))';
+    mockQuery(badQuery);
+    const { toasts } = notificationServiceMock.createStartContract();
+
+    const component = mountWithI18nProvider(
+      <Settings
+        history={mockHistory}
+        enableSaving={{ global: false, namespace: false }}
+        enableShowing={{ global: false, namespace: true }}
+        toasts={toasts}
+        docLinks={docLinksServiceMock.createStartContract().links}
+        settingsService={mockConfig().core.settings}
+        sectionRegistry={new SectionRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
+      />
+    );
+
+    expect(component.find(EuiTab).length).toEqual(1);
+    expect(component.find(EuiTab).at(0).text()).toEqual('Space Settings');
   });
 });

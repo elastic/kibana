@@ -9,6 +9,7 @@
     "server/**/*.json",
   ],
   "kbn_references": [
+    "@kbn/alerting-state-types",
     "@kbn/core",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
@@ -18,6 +19,8 @@
     "@kbn/es-types",
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-test-helpers-kbn-server"
   ],
   "exclude": [
     "target/**/*",

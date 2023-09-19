@@ -18,12 +18,37 @@ import {
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { EcsFlat } from '@kbn/ecs';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
 import { styles } from './field_items.style';
-import { getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
+import {
+  getCategory,
+  getDescription,
+  getEmptyValue,
+  getExampleText,
+  getIconFromType,
+} from '../../helpers';
+
+/**
+ * For the Cases field we want to change the
+ * name of the field from kibana.alert.case_ids to Cases.
+ */
+const getFieldItemName = (name: string): string => {
+  if (name === ALERT_CASE_IDS) {
+    return i18n.CASES;
+  }
+
+  if (name === ALERT_MAINTENANCE_WINDOW_IDS) {
+    return i18n.MAINTENANCE_WINDOWS;
+  }
+
+  return name;
+};
 
 /**
  * Returns the field items of all categories selected
@@ -36,11 +61,10 @@ export const getFieldItemsData = ({
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
   columnIds: string[];
-}): { fieldItems: BrowserFieldItem[]; showDescriptionColumn: boolean } => {
+}): { fieldItems: BrowserFieldItem[] } => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnIds);
-  let showDescriptionColumn = false;
 
   const fieldItems = uniqBy(
     'name',
@@ -49,15 +73,12 @@ export const getFieldItemsData = ({
       if (categoryBrowserFields.length > 0) {
         fieldItemsAcc.push(
           ...categoryBrowserFields.map(({ name = '', ...field }) => {
-            if (!showDescriptionColumn && !!field.description) {
-              showDescriptionColumn = true;
-            }
             return {
               name,
               type: field.type,
-              description: field.description ?? '',
+              description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
               example: field.example?.toString(),
-              category: categoryId,
+              category: getCategory(name),
               selected: selectedFieldIds.has(name),
               isRuntime: !!field.runtimeField,
             };
@@ -67,16 +88,10 @@ export const getFieldItemsData = ({
       return fieldItemsAcc;
     }, [])
   );
-  return { fieldItems, showDescriptionColumn };
+  return { fieldItems };
 };
 
-const getDefaultFieldTableColumns = ({
-  highlight,
-  showDescriptionColumn = false,
-}: {
-  highlight: string;
-  showDescriptionColumn: boolean;
-}): FieldTableColumns => {
+const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): FieldTableColumns => {
   const nameColumn = {
     field: 'name',
     name: i18n.NAME,
@@ -94,7 +109,7 @@ const getDefaultFieldTableColumns = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <FieldName fieldId={name} highlight={highlight} />
+            <FieldName fieldId={getFieldItemName(name)} highlight={highlight} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -134,7 +149,7 @@ const getDefaultFieldTableColumns = ({
     width: '130px',
   };
 
-  return [nameColumn, ...(showDescriptionColumn ? [descriptionColumn] : []), categoryColumn];
+  return [nameColumn, ...[descriptionColumn], categoryColumn];
 };
 
 /**
@@ -146,13 +161,11 @@ export const getFieldColumns = ({
   highlight = '',
   onHide,
   onToggleColumn,
-  showDescriptionColumn,
 }: {
   getFieldTableColumns?: GetFieldTableColumns;
   highlight?: string;
   onHide: () => void;
   onToggleColumn: (id: string) => void;
-  showDescriptionColumn: boolean;
 }): FieldTableColumns => [
   {
     field: 'selected',
@@ -174,7 +187,7 @@ export const getFieldColumns = ({
   },
   ...(getFieldTableColumns
     ? getFieldTableColumns({ highlight, onHide })
-    : getDefaultFieldTableColumns({ highlight, showDescriptionColumn })),
+    : getDefaultFieldTableColumns({ highlight })),
 ];
 
 /** Returns whether the table column has actions attached to it */

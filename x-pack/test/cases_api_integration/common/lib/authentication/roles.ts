@@ -44,6 +44,30 @@ export const noCasesPrivilegesSpace1: Role = {
   },
 };
 
+export const noCasesConnectors: Role = {
+  name: 'no_cases_connectors',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          testNoCasesConnectorFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
@@ -133,6 +157,30 @@ export const securitySolutionOnlyDelete: Role = {
       {
         feature: {
           securitySolutionFixture: ['cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadDelete: Role = {
+  name: 'sec_only_read_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -329,11 +377,13 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
+  noCasesConnectors,
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyDelete,
+  securitySolutionOnlyReadDelete,
   securitySolutionOnlyNoDelete,
   observabilityOnlyAll,
   observabilityOnlyRead,

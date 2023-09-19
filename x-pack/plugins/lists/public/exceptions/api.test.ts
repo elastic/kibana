@@ -11,6 +11,7 @@ import {
   addExceptionListItem,
   deleteExceptionListById,
   deleteExceptionListItemById,
+  duplicateExceptionList,
   exportExceptionList,
   fetchExceptionListById,
   fetchExceptionListItemById,
@@ -34,6 +35,7 @@ import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/f
 // TODO: This really belongs as: kbn-securitysolution-list-api/src/api/index.test.ts as soon as we can.
 
 const abortCtrl = new AbortController();
+const apiVersion = '2023-10-31';
 
 describe('Exceptions Lists API', () => {
   let httpMock: ReturnType<typeof coreMock.createStart>['http'];
@@ -60,6 +62,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -108,6 +111,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -156,6 +160,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'PUT',
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -204,6 +209,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'PUT',
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -261,6 +267,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -299,6 +306,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
       expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
     });
@@ -343,6 +351,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -401,6 +410,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -429,6 +439,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -457,6 +468,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -518,6 +530,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -567,6 +580,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -616,6 +630,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -659,6 +674,7 @@ describe('Exceptions Lists API', () => {
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/endpoint_list', {
         method: 'POST',
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -688,7 +704,7 @@ describe('Exceptions Lists API', () => {
       stream: jest.fn(),
       text: jest.fn(),
       type: 'json',
-    } as Blob;
+    } as unknown as Blob;
 
     beforeEach(() => {
       httpMock.fetch.mockResolvedValue(blob);
@@ -713,6 +729,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: apiVersion,
       });
     });
 
@@ -726,6 +743,33 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(blob);
+    });
+  });
+
+  describe('#duplicateExceptionList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getExceptionListSchemaMock());
+    });
+
+    test('it invokes "duplicateExceptionList" with expected url and body values', async () => {
+      await duplicateExceptionList({
+        http: httpMock,
+        includeExpiredExceptions: false,
+        listId: 'my_list',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_duplicate', {
+        method: 'POST',
+        query: {
+          include_expired_exceptions: false,
+          list_id: 'my_list',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+        version: apiVersion,
+      });
     });
   });
 });

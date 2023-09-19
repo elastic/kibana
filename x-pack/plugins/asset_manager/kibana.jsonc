@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/assetManager-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "description": "Asset manager plugin for entity assets (inventory, topology, etc)",
+  "plugin": {
+    "id": "assetManager",
+    "configPath": [
+      "xpack",
+      "assetManager"
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredPlugins": [
+      "apmDataAccess"
+    ],
+    "browser": false,
+    "server": true,
+    "requiredBundles": [
+    ]
+  }
+}

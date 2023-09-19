@@ -12,19 +12,20 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
   createRule,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -33,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -44,12 +45,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -61,6 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', type: 'machine_learning' })
           .expect(403);
 
@@ -80,12 +83,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: createRuleBody.rule_id, name: 'some other name' })
           .expect(200);
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -97,23 +101,25 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ id: createdBody.id, name: 'some other name' })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should not change the version of a rule when it patches only enabled', async () => {
+      it('should not change the revision of a rule when it patches only enabled', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', enabled: false })
           .expect(200);
 
@@ -124,20 +130,21 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it patches enabled and another property', async () => {
+      it('should change the revision of a rule when it patches enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', severity: 'low', enabled: false })
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -150,6 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' })
           .expect(200);
 
@@ -157,6 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'rule-1', name: 'some other name' })
           .expect(200);
 
@@ -164,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
-        outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -174,6 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' })
           .expect(404);
 
@@ -187,6 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({ rule_id: 'fake_id', name: 'some other name' })
           .expect(404);
 

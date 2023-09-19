@@ -11,7 +11,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import type { ViewSelection } from '../../../../../common/types';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../../common/constants';
 
 const storage = new Storage(localStorage);
@@ -79,6 +79,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     () => [
       {
         label: gridView,
+        'data-test-subj': 'gridView',
         key: 'gridView',
         checked: (viewSelected === 'gridView' ? 'on' : undefined) as EuiSelectableOption['checked'],
         meta: [
@@ -95,6 +96,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       },
       {
         label: eventRenderedView,
+        'data-test-subj': 'eventRenderedView',
         key: 'eventRenderedView',
         checked: (viewSelected === 'eventRenderedView'
           ? 'on'

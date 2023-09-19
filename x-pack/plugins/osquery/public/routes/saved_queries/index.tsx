@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { QueriesPage } from './list';
 import { NewSavedQueryPage } from './new';
@@ -26,7 +26,7 @@ const SavedQueriesComponent = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route path={`${match.url}/new`}>
         {permissions.writeSavedQueries ? <NewSavedQueryPage /> : <MissingPrivileges />}
       </Route>
@@ -36,7 +36,7 @@ const SavedQueriesComponent = () => {
       <Route path={`${match.url}`}>
         <QueriesPage />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

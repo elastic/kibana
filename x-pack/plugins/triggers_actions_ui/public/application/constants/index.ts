@@ -68,6 +68,7 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'es_search_duration',
   'schedule_delay',
   'timed_out',
+  'maintenance_window_ids',
 ] as const;
 
 export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
@@ -94,7 +95,10 @@ export const LOCKED_COLUMNS = [
 ];
 
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
-export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
+export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'rule_name',
+  ...LOCKED_COLUMNS.slice(1),
+];
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
 export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [

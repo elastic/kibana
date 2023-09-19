@@ -7,23 +7,12 @@
 
 import React from 'react';
 
-import {
+import type {
+  AttachmentActionType,
   PersistableStateAttachmentType,
   PersistableStateAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { EuiButtonIcon } from '@elastic/eui';
 import { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-
-const AttachmentActions: React.FC = () => {
-  return (
-    <EuiButtonIcon
-      data-test-subj="test-attachment-action"
-      onClick={() => {}}
-      iconType="arrowRight"
-      aria-label="See attachment"
-    />
-  );
-};
 
 const getLazyComponent = (
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>
@@ -61,7 +50,15 @@ export const getPersistableStateAttachmentRegular = (
   getAttachmentViewObject: () => ({
     event: 'added an embeddable',
     timelineAvatar: 'casesApp',
-    actions: <AttachmentActions />,
+    getActions: () => [
+      {
+        type: 'button' as AttachmentActionType.BUTTON,
+        label: 'See attachment',
+        onClick: () => {},
+        isPrimary: true,
+        iconType: 'arrowRight',
+      },
+    ],
     children: getLazyComponent(EmbeddableComponent),
   }),
 });

@@ -11,7 +11,9 @@
       "data",
       "dataViews",
       "embeddable",
-      "inspector"
+      "inspector",
+      "expressions",
+      "visualizations"
     ]
   }
 }

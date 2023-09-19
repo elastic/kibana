@@ -32,6 +32,7 @@ export class Transaction extends BaseSpan {
       error.fields['trace.id'] = this.fields['trace.id'];
       error.fields['transaction.id'] = this.fields['transaction.id'];
       error.fields['transaction.type'] = this.fields['transaction.type'];
+      error.fields['transaction.sampled'] = this.fields['transaction.sampled'];
     });
 
     return this;
@@ -43,6 +44,7 @@ export class Transaction extends BaseSpan {
       error.fields['transaction.id'] = this.fields['transaction.id'];
       error.fields['transaction.name'] = this.fields['transaction.name'];
       error.fields['transaction.type'] = this.fields['transaction.type'];
+      error.fields['transaction.sampled'] = this.fields['transaction.sampled'];
     });
 
     this._errors.push(...errors);
@@ -56,7 +58,10 @@ export class Transaction extends BaseSpan {
   }
 
   sample(sampled: boolean = true) {
-    this._sampled = sampled;
+    this._sampled = this.fields['transaction.sampled'] = sampled;
+    this._errors.forEach((error) => {
+      error.fields['transaction.sampled'] = sampled;
+    });
     return this;
   }
 

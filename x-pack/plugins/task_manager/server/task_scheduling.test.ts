@@ -538,7 +538,8 @@ describe('TaskScheduling', () => {
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
           scheduledAt: expect.any(Date),
-        })
+        }),
+        { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
       expect(result).toEqual({ id });
@@ -560,7 +561,8 @@ describe('TaskScheduling', () => {
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
           scheduledAt: expect.any(Date),
-        })
+        }),
+        { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
       expect(result).toEqual({ id });
@@ -698,6 +700,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );
@@ -741,6 +744,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Failed,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );

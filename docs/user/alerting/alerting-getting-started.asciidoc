@@ -77,6 +77,9 @@ Rather than repeatedly entering connection information and credentials for each 
 
 The _action frequency_ defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the _action groups_ that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, some rule types support alert summaries. You can set the action frequency such that you receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.
 
+Some types of rules enable you to further refine the conditions under which actions run.
+For example, you can specify that actions run only when an alert occurs within a specific time frame or when it matches a KQL query.
+
 Each action definition is therefore a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected. 
 
 In the server monitoring example, the `email` connector type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.

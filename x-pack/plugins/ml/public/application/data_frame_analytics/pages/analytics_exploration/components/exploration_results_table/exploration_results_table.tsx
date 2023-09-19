@@ -8,14 +8,15 @@
 import React, { FC } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { DataFrameAnalyticsConfig } from '../../../../common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
-
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
 import { ExpandableSectionResults } from '../expandable_section';
 

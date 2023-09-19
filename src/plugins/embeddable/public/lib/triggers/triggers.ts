@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { BooleanRelation } from '@kbn/es-query';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
@@ -32,11 +33,14 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
 export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
-    data: {
+    data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
-      column: number;
-      value: any[];
-    };
+      cells: Array<{
+        column: number;
+        row: number;
+      }>;
+      relation?: BooleanRelation;
+    }>;
     timeFieldName?: string;
     negate?: boolean;
   };
@@ -75,6 +79,17 @@ export const contextMenuTrigger: Trigger = {
   }),
   description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
     defaultMessage: "A new action will be added to the panel's context menu",
+  }),
+};
+
+export const PANEL_HOVER_TRIGGER = 'PANEL_HOVER_TRIGGER';
+export const panelHoverTrigger: Trigger = {
+  id: PANEL_HOVER_TRIGGER,
+  title: i18n.translate('embeddableApi.panelHoverTrigger.title', {
+    defaultMessage: 'Panel hover',
+  }),
+  description: i18n.translate('embeddableApi.panelHoverTrigger.description', {
+    defaultMessage: "A new action will be added to the panel's hover menu",
   }),
 };
 
@@ -146,12 +161,27 @@ export const cellValueTrigger: Trigger = {
 
 export const isValueClickTriggerContext = (
   context: ChartActionContext
-): context is ValueClickContext => context.data && 'data' in context.data;
+): context is ValueClickContext => {
+  return (
+    context.data &&
+    'data' in context.data &&
+    Array.isArray(context.data.data) &&
+    context.data.data.length > 0 &&
+    'column' in context.data.data[0]
+  );
+};
 
 export const isMultiValueClickTriggerContext = (
   context: ChartActionContext
-): context is MultiValueClickContext =>
-  context.data && 'data' in context.data && !Array.isArray(context.data.data);
+): context is MultiValueClickContext => {
+  return (
+    context.data &&
+    'data' in context.data &&
+    Array.isArray(context.data.data) &&
+    context.data.data.length > 0 &&
+    'cells' in context.data.data[0]
+  );
+};
 
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext

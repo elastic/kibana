@@ -27,7 +27,9 @@ export const useInfraMLCapabilities = () => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const rawResponse = await services.http.fetch('/api/ml/ml_capabilities');
+        const rawResponse = await services.http.fetch('/internal/ml/ml_capabilities', {
+          version: '1',
+        });
 
         return pipe(
           getMlCapabilitiesResponsePayloadRT.decode(rawResponse),

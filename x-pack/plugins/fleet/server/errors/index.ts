@@ -50,6 +50,7 @@ export class ConcurrentInstallOperationError extends FleetError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyNameExistsError extends FleetError {}
 export class PackagePolicyNotFoundError extends FleetError {}
 export class BundledPackageNotFoundError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
@@ -76,8 +77,8 @@ export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 
-export class FleetServerHostUnauthorizedError extends FleetError {}
-export class FleetProxyUnauthorizedError extends FleetError {}
+export class FleetServerHostUnauthorizedError extends FleetUnauthorizedError {}
+export class FleetProxyUnauthorizedError extends FleetUnauthorizedError {}
 
 export class ArtifactsClientError extends FleetError {}
 export class ArtifactsClientAccessDeniedError extends FleetError {
@@ -109,3 +110,6 @@ export class ArtifactsElasticsearchError extends FleetError {
     }
   }
 }
+
+export class FleetFilesClientError extends FleetError {}
+export class FleetFileNotFound extends FleetFilesClientError {}

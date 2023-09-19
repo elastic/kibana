@@ -14,7 +14,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import {
   exportTimelinesQuerySchema,
   exportTimelinesRequestBodySchema,
-} from '../../../schemas/timelines';
+} from '../../../../../../common/api/timeline';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
 import type { SetupPlugins } from '../../../../../plugin';

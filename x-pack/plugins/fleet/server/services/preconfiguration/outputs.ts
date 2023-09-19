@@ -45,7 +45,7 @@ export async function ensurePreconfiguredOutputs(
   outputs: PreconfiguredOutput[]
 ) {
   await createOrUpdatePreconfiguredOutputs(soClient, esClient, outputs);
-  await cleanPreconfiguredOutputs(soClient, outputs);
+  await cleanPreconfiguredOutputs(soClient, esClient, outputs);
 }
 
 export async function createOrUpdatePreconfiguredOutputs(
@@ -88,15 +88,24 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isCreate = !existingOutput;
+
+      // field in allow edit are not updated through preconfiguration
+      if (!isCreate && output.allow_edit) {
+        for (const key of output.allow_edit) {
+          // @ts-expect-error
+          data[key] = existingOutput[key];
+        }
+      }
+
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
       if (isCreate) {
         logger.debug(`Creating output ${output.id}`);
-        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
+        await outputService.create(soClient, esClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
         logger.debug(`Updating output ${output.id}`);
-        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
+        await outputService.update(soClient, esClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
         if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -110,6 +119,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
 export async function cleanPreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
   const existingOutputs = await outputService.list(soClient);
@@ -129,6 +139,7 @@ export async function cleanPreconfiguredOutputs(
       logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
+        esClient,
         output.id,
         { is_preconfigured: false },
         {
@@ -139,6 +150,7 @@ export async function cleanPreconfiguredOutputs(
       logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
+        esClient,
         output.id,
         { is_preconfigured: false },
         {
@@ -156,6 +168,34 @@ function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
 ): boolean {
+  const kafkaFieldsAreDifferent = (): boolean => {
+    if (existingOutput.type !== 'kafka' || preconfiguredOutput.type !== 'kafka') {
+      return false;
+    }
+
+    return (
+      isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
+      isDifferent(existingOutput.version, preconfiguredOutput.version) ||
+      isDifferent(existingOutput.key, preconfiguredOutput.key) ||
+      isDifferent(existingOutput.compression, preconfiguredOutput.compression) ||
+      isDifferent(existingOutput.compression_level, preconfiguredOutput.compression_level) ||
+      isDifferent(existingOutput.auth_type, preconfiguredOutput.auth_type) ||
+      isDifferent(existingOutput.connection_type, preconfiguredOutput.connection_type) ||
+      isDifferent(existingOutput.username, preconfiguredOutput.username) ||
+      isDifferent(existingOutput.password, preconfiguredOutput.password) ||
+      isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
+      isDifferent(existingOutput.random, preconfiguredOutput.random) ||
+      isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
+      isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
+      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
+      isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
+      isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
+      isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
+      isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks)
+    );
+  };
+
   return (
     !existingOutput.is_preconfigured ||
     isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
@@ -178,6 +218,8 @@ function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    kafkaFieldsAreDifferent()
   );
 }

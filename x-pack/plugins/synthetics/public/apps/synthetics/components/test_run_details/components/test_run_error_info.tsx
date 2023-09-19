@@ -18,9 +18,11 @@ export const TestRunErrorInfo = ({
   journeyDetails,
   hasNoSteps,
   showErrorTitle = true,
+  showErrorLogs = false,
 }: {
   hasNoSteps?: boolean;
   showErrorTitle?: boolean;
+  showErrorLogs?: boolean;
   journeyDetails: SyntheticsJourneyApiResponse['details'];
 }) => {
   const isDownMonitor = journeyDetails?.journey?.monitor?.status === 'down';
@@ -34,20 +36,19 @@ export const TestRunErrorInfo = ({
           data-test-subj="monitorTestRunErrorCallout"
           title={ERROR_RUNNING_TEST}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <EuiText color="danger">{errorMessage ?? FAILED_TO_RUN}</EuiText>
         </EuiCallOut>
       )}
       <EuiSpacer size="m" />
-      {(hasNoSteps || isDownMonitor) &&
-        errorMessage?.includes('journey did not finish executing') && (
-          <StdErrorLogs
-            checkGroup={journeyDetails?.journey?.monitor.check_group}
-            hideTitle={false}
-            pageSize={10}
-          />
-        )}
+      {(showErrorLogs || hasNoSteps) && (
+        <StdErrorLogs
+          checkGroup={journeyDetails?.journey?.monitor.check_group}
+          hideTitle={false}
+          pageSize={10}
+        />
+      )}
     </>
   );
 };

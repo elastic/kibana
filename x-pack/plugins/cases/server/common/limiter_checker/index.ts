@@ -7,30 +7,36 @@
 
 import Boom from '@hapi/boom';
 
-import type { CommentRequest } from '../../../common/api';
+import type { FileServiceStart } from '@kbn/files-plugin/server';
+import type { AttachmentRequest } from '../../../common/types/api';
 import type { AttachmentService } from '../../services';
 import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';
 import { FileLimiter } from './limiters/files';
+import { PersistableStateAndExternalReferencesLimiter } from './limiters/persistable_state_and_external_references';
 
 export class AttachmentLimitChecker {
-  private readonly limiters: Limiter[] = [new AlertLimiter(), new FileLimiter()];
+  private readonly limiters: Limiter[];
 
   constructor(
-    private readonly attachmentService: AttachmentService,
+    attachmentService: AttachmentService,
+    fileService: FileServiceStart,
     private readonly caseId: string
-  ) {}
+  ) {
+    this.limiters = [
+      new AlertLimiter(attachmentService),
+      new FileLimiter(fileService),
+      new PersistableStateAndExternalReferencesLimiter(attachmentService),
+    ];
+  }
 
-  public async validate(requests: CommentRequest[]) {
+  public async validate(requests: AttachmentRequest[]) {
     for (const limiter of this.limiters) {
       const itemsWithinRequests = limiter.countOfItemsInRequest(requests);
       const hasItemsInRequests = itemsWithinRequests > 0;
 
       const totalAfterRequests = async () => {
-        const itemsWithinCase = await limiter.countOfItemsWithinCase(
-          this.attachmentService,
-          this.caseId
-        );
+        const itemsWithinCase = await limiter.countOfItemsWithinCase(this.caseId);
 
         return itemsWithinRequests + itemsWithinCase;
       };

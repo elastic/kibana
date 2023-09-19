@@ -7,7 +7,7 @@
 
 import { from } from 'rxjs';
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
-import { getLayerList } from '../../../selectors/map_selectors';
+import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
@@ -16,10 +16,12 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
     debounceTime(300),
     // using switchMap since switchMap will discard promise from previous state iterations in progress
     switchMap(async (state) => {
+      const zoom = getMapZoom(state);
       const promises = getLayerList(state).map(async (layer) => {
         return {
           isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
           layer,
+          zoom,
         };
       });
       const layersWithMeta = await Promise.all(promises);
@@ -28,7 +30,7 @@ export function waitUntilTimeLayersLoad$(store: MapStore) {
     first((layersWithMeta) => {
       const areTimeLayersStillLoading = layersWithMeta
         .filter(({ isFilteredByGlobalTime }) => isFilteredByGlobalTime)
-        .some(({ layer }) => layer.isLayerLoading());
+        .some(({ layer, zoom }) => layer.isLayerLoading(zoom));
       return !areTimeLayersStillLoading;
     }),
     map(() => {

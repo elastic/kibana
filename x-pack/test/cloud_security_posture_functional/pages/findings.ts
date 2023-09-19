@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'findings']);
+  const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Upper case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -44,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Another upper case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -59,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'lower case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -74,6 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'another lower case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -91,7 +95,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  describe('Findings Page', () => {
+  describe('Findings Page', function () {
+    this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;
@@ -105,12 +110,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
+      // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
+      await findings.waitForPluginInitialized();
+
+      // Prepare mocked findings
+      await findings.index.remove();
       await findings.index.add(data);
+
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
+      pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -190,13 +202,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
+          /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
+          pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+          });
         }
       });
     });

@@ -48,6 +48,7 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
+  RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
@@ -97,6 +98,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  hideInterval?: boolean;
   connectorFeatureId?: string;
   onChangeMetaData: (metadata: MetaData) => void;
 }
@@ -114,6 +116,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
 }: RuleFormProps) => {
@@ -285,6 +288,13 @@ export const RuleForm = ({
   const setActionFrequencyProperty = useCallback(
     (key: string, value: RuleActionParam, index: number) => {
       dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      dispatch({ command: { type: 'setRuleActionAlertsFilter' }, payload: { key, value, index } });
     },
     [dispatch]
   );
@@ -563,6 +573,7 @@ export const RuleForm = ({
             }
           >
             <RuleParamsExpressionComponent
+              id={rule.id}
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
               ruleThrottle={''}
@@ -582,50 +593,52 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          data-test-subj="intervalFormRow"
-          display="rowCompressed"
-          helpText={getHelpTextForInterval()}
-          isInvalid={errors['schedule.interval'].length > 0}
-          error={errors['schedule.interval']}
-        >
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={2}>
-              <EuiFieldNumber
-                prepend={labelForRuleChecked}
-                fullWidth
-                min={1}
-                isInvalid={errors['schedule.interval'].length > 0}
-                value={ruleInterval || ''}
-                name="interval"
-                data-test-subj="intervalInput"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '' || INTEGER_REGEX.test(value)) {
-                    const parsedValue = value === '' ? '' : parseInt(value, 10);
-                    setRuleInterval(parsedValue || undefined);
-                    setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <EuiSelect
-                fullWidth
-                value={ruleIntervalUnit}
-                options={getTimeOptions(ruleInterval ?? 1)}
-                onChange={(e) => {
-                  setRuleIntervalUnit(e.target.value);
-                  setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                }}
-                data-test-subj="intervalInputUnit"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiFlexItem>
+      {hideInterval !== true && (
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            data-test-subj="intervalFormRow"
+            display="rowCompressed"
+            helpText={getHelpTextForInterval()}
+            isInvalid={errors['schedule.interval'].length > 0}
+            error={errors['schedule.interval']}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={2}>
+                <EuiFieldNumber
+                  prepend={labelForRuleChecked}
+                  fullWidth
+                  min={1}
+                  isInvalid={errors['schedule.interval'].length > 0}
+                  value={ruleInterval || ''}
+                  name="interval"
+                  data-test-subj="intervalInput"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiSelect
+                  fullWidth
+                  value={ruleIntervalUnit}
+                  options={getTimeOptions(ruleInterval ?? 1)}
+                  onChange={(e) => {
+                    setRuleIntervalUnit(e.target.value);
+                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                  }}
+                  data-test-subj="intervalInputUnit"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+      )}
       <EuiSpacer size="l" />
       {canShowActions &&
       defaultActionGroupId &&
@@ -647,8 +660,11 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
-            hasSummary={selectedRuleType.hasGetSummarizedAlerts}
+            hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
+            producerId={selectedRuleType.producer}
+            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }
@@ -673,6 +689,7 @@ export const RuleForm = ({
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
+            setActionAlertsFilterProperty={setActionAlertsFilterProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />

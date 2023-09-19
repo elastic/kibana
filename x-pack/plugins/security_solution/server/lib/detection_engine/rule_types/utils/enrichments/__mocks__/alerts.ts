@@ -38,15 +38,17 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,
@@ -93,6 +95,7 @@ export const createAlert = (
     [ALERT_ORIGINAL_TIME]: undefined,
     [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     [ALERT_WORKFLOW_STATUS]: 'open',
+    [ALERT_WORKFLOW_TAGS]: [],
     [ALERT_DEPTH]: 1,
     [ALERT_REASON]: 'reasonable reason',
     [ALERT_SEVERITY]: 'high',
@@ -158,6 +161,7 @@ export const createAlert = (
     [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
     [ALERT_RULE_VERSION]: 1,
     [ALERT_UUID]: someUuid,
+    [ALERT_URL]: `http://kibanaurl.com/app/security/alerts/redirect/${someUuid}?index=myFakeSignalIndex&timestamp=2020-04-20T21:27:45`,
     'kibana.alert.rule.risk_score': 50,
     'kibana.alert.rule.severity': 'high',
     'kibana.alert.rule.building_block_type': undefined,

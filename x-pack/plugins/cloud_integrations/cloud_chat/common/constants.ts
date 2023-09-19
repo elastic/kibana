@@ -6,4 +6,4 @@
  */
 
 export const GET_CHAT_USER_DATA_ROUTE_PATH = '/internal/cloud/chat_user';
-export const DEFAULT_TRIAL_BUFFER = 60;
+export const DEFAULT_TRIAL_BUFFER = 90;

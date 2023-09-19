@@ -34,7 +34,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   showOnlyIntegration?: string;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults;
+  validationResults: PackagePolicyValidationResults | undefined;
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
@@ -104,11 +104,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       });
                     }}
                     inputValidationResults={
-                      validationResults!.inputs![
+                      validationResults?.inputs?.[
                         hasIntegrations
                           ? `${policyTemplate.name}-${packagePolicyInput.type}`
                           : packagePolicyInput.type
-                      ]
+                      ] ?? {}
                     }
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}

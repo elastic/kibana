@@ -44,6 +44,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
           )}
         </p>
         <EuiFieldText
+          data-test-subj="apmAgentKeyCallOutFieldText"
           readOnly
           value={token}
           aria-label={i18n.translate(
@@ -57,6 +58,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
             <EuiCopy textToCopy={token}>
               {(copy) => (
                 <EuiButtonIcon
+                  data-test-subj="apmAgentKeyCallOutButton"
                   iconType="copyClipboard"
                   onClick={copy}
                   color="success"

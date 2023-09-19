@@ -20,12 +20,14 @@ export function useChartPanels({
   onTimeIntervalChange,
   closePopover,
   onResetChartHeight,
+  isPlainRecord,
 }: {
   chart?: UnifiedHistogramChartContext;
   toggleHideChart: () => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   closePopover: () => void;
   onResetChartHeight?: () => void;
+  isPlainRecord?: boolean;
 }) {
   if (!chart) {
     return [];
@@ -71,16 +73,18 @@ export function useChartPanels({
       });
     }
 
-    mainPanelItems.push({
-      name: i18n.translate('unifiedHistogram.timeIntervalWithValue', {
-        defaultMessage: 'Time interval: {timeInterval}',
-        values: {
-          timeInterval: intervalDisplay,
-        },
-      }),
-      panel: 1,
-      'data-test-subj': 'unifiedHistogramTimeIntervalPanel',
-    });
+    if (!isPlainRecord) {
+      mainPanelItems.push({
+        name: i18n.translate('unifiedHistogram.timeIntervalWithValue', {
+          defaultMessage: 'Time interval: {timeInterval}',
+          values: {
+            timeInterval: intervalDisplay,
+          },
+        }),
+        panel: 1,
+        'data-test-subj': 'unifiedHistogramTimeIntervalPanel',
+      });
+    }
   }
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -92,7 +96,7 @@ export function useChartPanels({
       items: mainPanelItems,
     },
   ];
-  if (!chart.hidden) {
+  if (!chart.hidden && !isPlainRecord) {
     panels.push({
       id: 1,
       initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,

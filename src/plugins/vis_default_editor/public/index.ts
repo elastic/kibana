@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { VisDefaultEditorPlugin } from './plugin';
@@ -16,11 +13,26 @@ import { VisDefaultEditorPlugin } from './plugin';
 export { DefaultEditorController };
 export { useValidation } from './components/controls/utils';
 export { PalettePicker } from './components/controls/palette_picker';
-export * from './components/options';
+export {
+  SwitchOption,
+  TextInputOption,
+  RangeOption,
+  SelectOption,
+  ColorSchemaOptions,
+  PercentageModeOption,
+  NumberInputOption,
+  RequiredNumberInputOption,
+  LongLegendOptions,
+  LegendSizeSettings,
+  ColorRanges,
+  BasicOptions,
+  type SetColorRangeValue,
+  type SetColorSchemaOptionsValue,
+} from './components/options';
 export type { RangeValues } from './components/controls/ranges';
 export { RangesParamEditor } from './components/controls/ranges';
-export * from './editor_size';
-export * from './utils';
+export { groupAndSortBy } from './utils';
+export { DefaultEditorSize } from './editor_size';
 
 export const plugin = (context: PluginInitializerContext) => {
   return new VisDefaultEditorPlugin();

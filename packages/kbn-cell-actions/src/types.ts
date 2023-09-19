@@ -10,6 +10,8 @@ import type {
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
@@ -20,39 +22,33 @@ export interface CellActionsProviderProps {
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
 
-export interface CellActionField {
-  /**
-   * Field name.
-   * Example: 'host.name'
-   */
-  name: string;
-  /**
-   * Field type.
-   * Example: 'keyword'
-   */
-  type: string;
-  /**
-   * Field value.
-   * Example: 'My-Laptop'
-   */
-  value: string | string[] | null | undefined;
-  /**
-   * When true the field supports aggregations.
-   *
-   * It defaults to false.
-   *
-   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
-   */
-  aggregatable?: boolean;
-}
-
 type Metadata = Record<string, unknown>;
 
-export interface CellActionsProps {
+export type CellActionFieldValue =
+  | Serializable
+  // Add primitive array types to allow type guards to work.
+  // Because SerializableArray is a cyclic self referenced Array.
+  | string[]
+  | number[]
+  | boolean[]
+  | null[]
+  | undefined[];
+
+export interface CellActionsData {
+  /**
+   * The field specification
+   */
+  field: FieldSpec;
+
   /**
    * Common set of properties used by most actions.
    */
-  field: CellActionField;
+  value: CellActionFieldValue;
+}
+
+export interface CellActionsProps {
+  data: CellActionsData | CellActionsData[];
+
   /**
    * The trigger in which the actions are registered.
    */
@@ -89,7 +85,8 @@ export interface CellActionsProps {
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
-  field: CellActionField;
+  data: CellActionsData[];
+
   /**
    * Ref to the node where the cell action are rendered.
    */
@@ -104,13 +101,15 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  * Subset of `CellActionExecutionContext` used only for the compatibility check in the `isCompatible` function.
  * It omits the references and the `field.value`.
  */
+
 export interface CellActionCompatibilityContext<
   C extends CellActionExecutionContext = CellActionExecutionContext
 > extends ActionExecutionContext {
   /**
-   * The object containing the field name and type, needed for the compatibility check
+   * CellActionsData containing the field spec but not the value for the compatibility check
    */
-  field: Omit<C['field'], 'value'>;
+  data: Array<Omit<C['data'][number], 'value'>>;
+
   /**
    * Extra configurations for actions.
    */

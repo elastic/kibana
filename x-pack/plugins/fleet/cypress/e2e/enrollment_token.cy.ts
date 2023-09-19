@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FLEET, navigateTo } from '../tasks/navigation';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
-import { ENROLLMENT_TOKENS_TAB, ENROLLMENT_TOKENS } from '../screens/fleet';
+import { ENROLLMENT_TOKENS } from '../screens/fleet';
+
+import { API_VERSIONS } from '../../common/constants';
 
 describe('Enrollment token page', () => {
   before(() => {
-    navigateTo(FLEET);
     cy.request({
       method: 'POST',
       url: '/api/fleet/agent_policies',
@@ -22,11 +22,8 @@ describe('Enrollment token page', () => {
         monitoring_enabled: ['logs', 'metrics'],
         id: 'agent-policy-1',
       },
-      headers: { 'kbn-xsrf': 'cypress' },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
-    cy.getBySel(ENROLLMENT_TOKENS_TAB, {
-      timeout: 15000,
-    }).click();
   });
 
   after(() => {
@@ -34,6 +31,7 @@ describe('Enrollment token page', () => {
   });
 
   it('Create new Token', () => {
+    cy.visit('app/fleet/enrollment-tokens');
     cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
     cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).clear().type('New Token');
     cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD).contains('Agent policy 1');

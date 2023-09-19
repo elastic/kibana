@@ -21,6 +21,7 @@ import type {
   RiskSeverity,
   RiskScoreFields,
 } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
@@ -175,8 +176,8 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
         <SeverityFilterGroup
           selectedSeverities={severitySelectionRedux}
           severityCount={severityCount}
-          title={i18n.HOST_RISK}
           onSelect={onSelect}
+          riskEntity={RiskScoreEntity.host}
         />
       }
       headerSupplement={risk}

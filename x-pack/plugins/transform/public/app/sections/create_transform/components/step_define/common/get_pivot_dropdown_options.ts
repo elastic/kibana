@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
-
-import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 import {
   DropDownOption,
@@ -81,7 +81,14 @@ export function getPivotDropdownOptions(
         // even when the TS interface is a non-optional `string`.
         typeof field.type !== 'undefined'
     )
-    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
+    .map(
+      (field): Field => ({
+        name: field.name,
+        type: isCounterTimeSeriesMetric(field)
+          ? TIME_SERIES_METRIC_TYPES.COUNTER
+          : (field.type as KBN_FIELD_TYPES),
+      })
+    );
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];
@@ -128,6 +135,7 @@ export function getPivotDropdownOptions(
       options: [],
       field: { id: rawFieldName, type: field.type as KBN_FIELD_TYPES & ES_FIELD_TYPES },
     };
+
     const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {

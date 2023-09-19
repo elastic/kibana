@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -34,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
+      await headerPage.waitUntilLoadingHasFinished();
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -245,7 +246,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             lensMetricField.fieldName,
             'legacyMtrVis'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
@@ -256,7 +257,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             lensNonMetricField.fieldName,
             'legacyMtrVis'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
       });
     });

@@ -8,6 +8,7 @@
 import { adminTestUser } from '@kbn/test';
 import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 interface LoginOptions {
@@ -294,18 +295,37 @@ export class SecurityPageObject extends FtrService {
     return user as AuthenticatedUser;
   }
 
-  async forceLogout() {
+  async forceLogout(
+    { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
+  ) {
     this.log.debug('SecurityPage.forceLogout');
     if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
 
-    this.log.debug('Redirecting to /logout to force the logout');
+    this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
     const url = this.deployment.getHostPort() + '/logout';
     await this.browser.get(url);
-    this.log.debug('Waiting on the login form to appear');
-    await this.waitForLoginPage();
+
+    // After logging out, the user can be redirected to various locations depending on the context. By default, we
+    // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+    // we should simply wait until the user is redirected *elsewhere*.
+    if (waitForLoginPage) {
+      this.log.debug('Waiting on the login form to appear');
+      await this.waitForLoginPage();
+    } else {
+      this.log.debug('Waiting for logout to complete');
+      await this.retry.waitFor('Waiting for logout to complete', async () => {
+        // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+        // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+        const alert = await this.browser.getAlert();
+        if (alert?.accept) {
+          await alert.accept();
+        }
+        return !(await this.browser.getCurrentUrl()).includes('/logout');
+      });
+    }
   }
 
   async clickRolesSection() {
@@ -359,14 +379,12 @@ export class SecurityPageObject extends FtrService {
   }
 
   async addPrivilegeToRole(privilege: string) {
-    this.log.debug(`Adding privilege ${privilege} to role`);
-    const privilegeInput = await this.retry.try(() =>
-      this.find.byCssSelector('[data-test-subj="privilegesInput0"] input')
-    );
-    await privilegeInput.type(privilege);
-
-    const btn = await this.find.byButtonText(privilege);
-    await btn.click();
+    this.log.debug(`Adding privilege "${privilege}" to role`);
+    const privilegesField = await this.testSubjects.find('privilegesInput0');
+    const privilegesInput = await privilegesField.findByTagName('input');
+    await privilegesInput.type(privilege);
+    await privilegesInput.pressKeys(Key.ENTER); // Add typed privilege to combo box
+    await privilegesInput.pressKeys(Key.ESCAPE); // Close dropdown menu to avoid hiding elements from test runner
   }
 
   async assignRoleToUser(role: string) {
@@ -586,23 +604,27 @@ export class SecurityPageObject extends FtrService {
     }
 
     await this.testSubjects.click('addSpacePrivilegeButton');
-    await this.testSubjects.click('spaceSelectorComboBox');
+    const spaceSelectorComboBox = await this.testSubjects.find('spaceSelectorComboBox');
+    await spaceSelectorComboBox.click();
 
     const globalSpaceOption = await this.find.byCssSelector(`#spaceOption_\\*`);
     await globalSpaceOption.click();
 
+    // Close dropdown menu to avoid hiding elements from test runner
+    const spaceSelectorInput = await spaceSelectorComboBox.findByTagName('input');
+    await spaceSelectorInput.pressKeys(Key.ESCAPE);
+
     await this.testSubjects.click('basePrivilege_all');
     await this.testSubjects.click('createSpacePrivilegeButton');
 
-    const addPrivilege = (privileges: string[]) => {
+    const addPrivileges = (privileges: string[]) => {
       return privileges.reduce((promise: Promise<any>, privilegeName: string) => {
         return promise
           .then(() => self.addPrivilegeToRole(privilegeName))
           .then(() => this.common.sleep(250));
       }, Promise.resolve());
     };
-
-    await addPrivilege(roleObj.elasticsearch.indices[0].privileges);
+    await addPrivileges(roleObj.elasticsearch.indices[0].privileges);
 
     const addGrantedField = async (fields: string[]) => {
       for (const entry of fields) {

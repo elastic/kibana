@@ -34,6 +34,16 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
       ).to.be(true);
     });
 
+    it('should filter out system action types', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector_types`
+      );
+
+      const actionTypes = response.body as Array<{ is_system_action_type: boolean }>;
+
+      expect(actionTypes.every((actionType) => !actionType.is_system_action_type)).to.be(true);
+    });
+
     describe('legacy', () => {
       it('should return 200 with list of action types containing defaults', async () => {
         const response = await supertest.get(
@@ -52,6 +62,16 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
         expect(
           response.body.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
         ).to.be(true);
+      });
+
+      it('should filter out system action types', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/list_action_types`
+        );
+
+        const actionTypes = response.body as Array<{ is_system_action_type: boolean }>;
+
+        expect(actionTypes.every((actionType) => !actionType.is_system_action_type)).to.be(true);
       });
     });
   });

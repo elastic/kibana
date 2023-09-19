@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
 import type { SecurityJob } from '../../types';
@@ -19,20 +19,16 @@ describe('JobsTableFilters', () => {
     securityJobs = cloneDeep(mockSecurityJobs);
   });
 
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={jest.fn()} />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper.find('[data-test-subj="show-elastic-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-elastic-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
     expect(
@@ -49,7 +45,10 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
     expect(
@@ -66,10 +65,16 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
-    wrapper.find('[data-test-subj="show-elastic-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-elastic-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
     expect(
@@ -92,10 +97,16 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
-    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
+      .first()
+      .simulate('click');
     wrapper.update();
 
     expect(

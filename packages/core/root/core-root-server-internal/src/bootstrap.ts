@@ -48,6 +48,12 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   rawConfigService.loadConfig();
 
   const root = new Root(rawConfigService, env, onRootShutdown);
+  const cliLogger = root.logger.get('cli');
+  const rootLogger = root.logger.get('root');
+
+  rootLogger.info('Kibana is starting');
+
+  cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
 
@@ -63,7 +69,6 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   });
 
   function reloadConfiguration(reason = 'SIGHUP signal received') {
-    const cliLogger = root.logger.get('cli');
     cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
@@ -75,8 +80,14 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     cliLogger.info(`Reloaded Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
   }
 
-  process.on('SIGINT', () => shutdown());
-  process.on('SIGTERM', () => shutdown());
+  process.on('SIGINT', () => {
+    rootLogger.info('SIGINT received - initiating shutdown');
+    shutdown();
+  });
+  process.on('SIGTERM', () => {
+    rootLogger.info('SIGTERM received - initiating shutdown');
+    shutdown();
+  });
 
   function shutdown(reason?: Error) {
     rawConfigService.stop();
@@ -94,7 +105,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     }
 
     if (isSetupOnHold) {
-      root.logger.get().info('Holding setup until preboot stage is completed.');
+      rootLogger.info('Holding setup until preboot stage is completed.');
       const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
       if (shouldReloadConfig) {
         await reloadConfiguration('configuration might have changed during preboot stage');

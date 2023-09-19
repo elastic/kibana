@@ -69,6 +69,21 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(true);
   });
 
+  test('it renders the tooltip when provided', () => {
+    const tooltipContent = 'test tooltip content';
+    const tooltipTitle = 'test tooltip title';
+
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection title="Test title" tooltip={tooltipContent} tooltipTitle={tooltipTitle} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('EuiIconTip').exists()).toBe(true);
+    expect(wrapper.find('EuiIconTip').prop('content')).toBe(tooltipContent);
+    expect(wrapper.find('EuiIconTip').prop('title')).toBe(tooltipTitle);
+  });
+
   test('it renders supplements when children provided', () => {
     const wrapper = mount(
       <TestProviders>

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '@kbn/object-versioning';
+import { versionSchema } from './constants';
+import { GetResult, getResultSchema } from './get';
 
 import type { ProcedureSchemas } from './types';
 
@@ -13,19 +16,33 @@ export const bulkGetSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
+      version: versionSchema,
       ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.oneOf([
-    schema.object({}, { unknowns: 'allow' }),
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-  ]),
+  out: schema.object(
+    {
+      hits: schema.arrayOf(getResultSchema),
+      meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
 };
 
-export interface BulkGetIn<T extends string = string, Options extends object = object> {
+export interface BulkGetIn<T extends string = string, Options extends void | object = object> {
   contentTypeId: T;
   ids: string[];
+  version?: Version;
   options?: Options;
 }
+
+export type BulkGetResult<T = unknown, ItemMeta = void, ResultMeta = void> = ResultMeta extends void
+  ? {
+      hits: Array<GetResult<T, ItemMeta>>;
+    }
+  : {
+      hits: Array<GetResult<T, ItemMeta>>;
+      meta: ResultMeta;
+    };

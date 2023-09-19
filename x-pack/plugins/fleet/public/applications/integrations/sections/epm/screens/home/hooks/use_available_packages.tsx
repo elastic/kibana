@@ -6,29 +6,29 @@
  */
 import React, { useState, useMemo } from 'react';
 
-import { uniq, xorBy } from 'lodash';
+import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
-  useGetAppendCustomIntegrations,
-  useGetReplacementCustomIntegrations,
+  useGetAppendCustomIntegrationsQuery,
+  useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
 
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
 } from '../../../../../../../../common/services';
 
-import type { IntegrationCardItem } from '../../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '..';
 
 import { ALL_CATEGORY } from '../category_facets';
 import type { CategoryFacet } from '../category_facets';
@@ -108,6 +108,7 @@ export const useAvailablePackages = () => {
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >(undefined);
+  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
     initialSelectedCategory,
@@ -145,10 +146,13 @@ export const useAvailablePackages = () => {
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-  const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
+  const {
+    data: replacementCustomIntegrations,
+    isInitialLoading: isLoadingReplacmentCustomIntegrations,
+  } = useGetReplacementCustomIntegrationsQuery();
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+  const { isInitialLoading: isLoadingAppendCustomIntegrations, data: appendCustomIntegrations } =
+    useGetAppendCustomIntegrationsQuery();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
@@ -188,20 +192,11 @@ export const useAvailablePackages = () => {
   } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
-  // Subcategories
-  const subCategories = useMemo(() => {
-    return eprCategories?.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
-      : mergeCategoriesAndCount(
-          eprCategories
-            ? (eprCategories as Array<{ id: string; title: string; count: number }>)
-            : [],
-          cards
-        );
+      : mergeCategoriesAndCount(eprCategories ? eprCategories : [], cards);
     return [
       {
         ...ALL_CATEGORY,
@@ -212,11 +207,17 @@ export const useAvailablePackages = () => {
   }, [cards, eprCategories, isLoadingCategories]);
 
   // Filter out subcategories
-  const mainCategories = xorBy(allCategories, subCategories, 'id');
+  const mainCategories = useMemo(() => {
+    return showIntegrationsSubcategories
+      ? allCategories.filter((category) => category.parent_id === undefined)
+      : allCategories;
+  }, [allCategories, showIntegrationsSubcategories]);
 
   const availableSubCategories = useMemo(() => {
-    return subCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [selectedCategory, subCategories]);
+    return showIntegrationsSubcategories
+      ? allCategories?.filter((c) => c.parent_id === selectedCategory)
+      : [];
+  }, [allCategories, selectedCategory, showIntegrationsSubcategories]);
 
   return {
     initialSelectedCategory,
@@ -233,6 +234,11 @@ export const useAvailablePackages = () => {
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    isLoading:
+      isLoadingReplacmentCustomIntegrations ||
+      isLoadingAppendCustomIntegrations ||
+      isLoadingCategories ||
+      isLoadingAllPackages,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,

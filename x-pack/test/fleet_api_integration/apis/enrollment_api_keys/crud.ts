@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -57,6 +58,36 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/enrollment_api_keys`)
           .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
           .expect(403);
+      });
+
+      it('should return 200 if the passed kuery is correct', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 200 if the passed kuery does not have prefix fleet-enrollment-api-keys', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
       });
     });
 
@@ -294,6 +325,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
           .send({
             policy_id: 'policy1',
           })
@@ -302,11 +334,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should get and delete with deprecated API', async () => {
-        await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
-        await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
         await supertest
           .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
       });

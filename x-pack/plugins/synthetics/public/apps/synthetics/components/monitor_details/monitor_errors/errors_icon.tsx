@@ -11,5 +11,5 @@ import { useMonitorErrors } from '../hooks/use_monitor_errors';
 export const MonitorErrorsIcon = () => {
   const { hasActiveError } = useMonitorErrors();
 
-  return hasActiveError ? <EuiIcon type="alert" color="danger" /> : null;
+  return hasActiveError ? <EuiIcon type="warning" color="danger" /> : null;
 };

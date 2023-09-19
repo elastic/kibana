@@ -6,11 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { EndpointAppContext } from '../../types';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
-} from '../../../../common/endpoint/schema/policy';
+} from '../../../../common/api/endpoint';
+import type { EndpointAppContext } from '../../types';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   AGENT_POLICY_SUMMARY_ROUTE,
@@ -23,34 +23,48 @@ export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const logger = endpointAppContext.logFactory.get('endpointPolicy');
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: BASE_POLICY_RESPONSE_ROUTE,
-      validate: GetPolicyResponseSchema,
       options: { authRequired: true },
-    },
-    withEndpointAuthz(
-      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
-      logger,
-      getHostPolicyResponseHandler()
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetPolicyResponseSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canReadSecuritySolution', 'canAccessFleet'] },
+        logger,
+        getHostPolicyResponseHandler()
+      )
+    );
 
   /**
    * @deprecated
    * @removeBy 9.0.0
    *
    */
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_POLICY_SUMMARY_ROUTE,
-      validate: GetAgentPolicySummaryRequestSchema,
       options: { authRequired: true },
-    },
-    withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
-      logger,
-      getAgentPolicySummaryHandler(endpointAppContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetAgentPolicySummaryRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canAccessEndpointManagement'] },
+        logger,
+        getAgentPolicySummaryHandler(endpointAppContext)
+      )
+    );
 }
