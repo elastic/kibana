@@ -74,6 +74,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Upgrade 2 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
       expect(results.queryByText('Request diagnostics for 2 agents')).toBeNull();
+      expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeDisabled();
     });
 
     it('should show available actions for 2 selected agents if they are active', async () => {
@@ -107,6 +108,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Unenroll 2 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 2 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should add actions if mockedExperimentalFeaturesService is enabled', async () => {
@@ -178,6 +180,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show correct actions for the active agents and exclude the managed agents from the count', async () => {
@@ -211,6 +214,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 8 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show correct actions when no managed policies exist', async () => {
@@ -244,6 +248,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
     });
 
     it('should generate a correct kuery to select agents', async () => {

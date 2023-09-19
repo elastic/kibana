@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const from = 'Sep 19, 2017 @ 06:31:44.000';
       const to = 'Sep 23, 2018 @ 18:31:44.000';
       await PageObjects.common.setTime({ from, to });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
