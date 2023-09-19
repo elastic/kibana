@@ -19,6 +19,7 @@ import React, { Component, Fragment } from 'react';
 import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ClusterPrivileges } from './cluster_privileges';
@@ -40,6 +41,7 @@ interface Props {
   validator: RoleValidator;
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
+  remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
 }
 
@@ -61,6 +63,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       onChange,
       editable,
       indexPatterns,
+      remoteClusters,
       license,
       builtinESPrivileges,
       canUseRemoteIndices,
@@ -198,6 +201,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             </EuiText>
             <IndexPrivileges
               indexType="remote_indices"
+              remoteClusters={remoteClusters}
               role={role}
               indicesAPIClient={indicesAPIClient}
               validator={validator}

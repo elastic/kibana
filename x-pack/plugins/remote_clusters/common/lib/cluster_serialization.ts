@@ -28,6 +28,7 @@ export interface ClusterInfoEs {
   max_proxy_socket_connections?: number;
   num_proxy_sockets_connected?: number;
   server_name?: string;
+  cluster_credentials?: string;
 }
 
 export interface Cluster {
@@ -47,6 +48,7 @@ export interface Cluster {
   initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
+  securityModel: 'certificate' | 'api_key';
 }
 
 export interface ClusterPayloadEs {
@@ -93,6 +95,7 @@ export function deserializeCluster(
     max_proxy_socket_connections: proxySocketConnections,
     num_proxy_sockets_connected: connectedSocketsCount,
     server_name: serverName,
+    cluster_credentials: clusterCredentials,
   } = esClusterObject;
 
   let deserializedClusterObject: Cluster = {
@@ -108,6 +111,7 @@ export function deserializeCluster(
     proxySocketConnections,
     connectedSocketsCount,
     serverName,
+    securityModel: clusterCredentials ? 'api_key' : 'certificate',
   };
 
   if (transport) {
@@ -146,7 +150,9 @@ export function deserializeCluster(
   return deserializedClusterObject;
 }
 
-export function serializeCluster(deserializedClusterObject: Cluster): ClusterSettingsPayloadEs {
+export function serializeCluster(
+  deserializedClusterObject: Omit<Cluster, 'securityModel'>
+): ClusterSettingsPayloadEs {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }

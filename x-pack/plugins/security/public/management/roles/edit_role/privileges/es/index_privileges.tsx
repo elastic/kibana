@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@el
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { IndexPrivilegeForm } from './index_privilege_form';
@@ -21,6 +22,7 @@ import type { RoleValidator } from '../../validate_role';
 interface Props {
   indexType: 'indices' | 'remote_indices';
   indexPatterns?: string[];
+  remoteClusters?: Cluster[];
   role: Role;
   availableIndexPrivileges: string[];
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
@@ -51,7 +53,13 @@ export class IndexPrivileges extends Component<Props, State> {
   public render() {
     const indices = this.props.role.elasticsearch[this.props.indexType] ?? [];
 
-    const { indexPatterns = [], license, availableIndexPrivileges, indicesAPIClient } = this.props;
+    const {
+      indexPatterns = [],
+      remoteClusters,
+      license,
+      availableIndexPrivileges,
+      indicesAPIClient,
+    } = this.props;
     const {
       allowRoleDocumentLevelSecurity,
       allowRoleFieldLevelSecurity,
@@ -84,6 +92,7 @@ export class IndexPrivileges extends Component<Props, State> {
             validator={this.props.validator}
             availableIndexPrivileges={availableIndexPrivileges}
             indexPrivilege={indexPrivilege}
+            remoteClusters={remoteClusters}
             onChange={this.onIndexPrivilegeChange(i)}
             onDelete={this.onIndexPrivilegeDelete(i)}
           />
