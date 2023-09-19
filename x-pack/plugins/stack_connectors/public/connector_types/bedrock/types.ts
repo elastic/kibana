@@ -6,7 +6,6 @@
  */
 
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockRunActionParams } from '../../../common/bedrock/types';
 
@@ -30,4 +29,3 @@ export type BedrockConnector = ConnectorTypeModel<
   BedrockSecrets,
   BedrockActionParams
 >;
-export type BedrockActionConnector = UserConfiguredActionConnector<BedrockConfig, BedrockSecrets>;

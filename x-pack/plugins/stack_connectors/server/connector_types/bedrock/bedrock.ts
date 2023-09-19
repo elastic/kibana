@@ -13,6 +13,7 @@ import {
   BedrockRunActionParamsSchema,
   BedrockRunActionResponseSchema,
   BedrockDashboardActionParamsSchema,
+  BedrockRunGenAIActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import type {
   BedrockConfig,
@@ -24,6 +25,7 @@ import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/cons
 import {
   BedrockDashboardActionParams,
   BedrockDashboardActionResponse,
+  BedrockRunGenAIActionParams,
 } from '../../../common/bedrock/types';
 
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
@@ -65,6 +67,12 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.GEN_AI_RUN,
+      method: 'runGenAI',
+      schema: BedrockRunGenAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.DASHBOARD,
       method: 'getDashboard',
       schema: BedrockDashboardActionParamsSchema,
@@ -84,7 +92,6 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
   }
 
   public async runApi({ body }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
-    console.log('url', `${this.url}/model/${this.model}/invoke`);
     const response = await this.request({
       url: `${this.url}/model/${this.model}/invoke`,
       method: 'post',
@@ -96,6 +103,21 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
       interceptor: this.interceptor,
     });
     return response.data;
+  }
+
+  public async runGenAI({ body }: BedrockRunGenAIActionParams): Promise<BedrockRunActionResponse> {
+    const combinedMessages = body.reduce((acc: string, message) => {
+      const { role, content } = message;
+      const bedrockRole = role === 'user' ? '\n\nHuman:' : '\n\nAssistant:';
+      return `${acc}${bedrockRole}${content}`;
+    }, '');
+
+    const req = {
+      prompt: `${combinedMessages} \n\nAssistant:`,
+      max_tokens_to_sample: 300,
+      stop_sequences: ['\n\nHuman:'],
+    };
+    return this.runApi({ body: JSON.stringify(req) });
   }
 
   public async getDashboard({

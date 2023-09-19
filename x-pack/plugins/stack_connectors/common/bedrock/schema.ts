@@ -23,6 +23,15 @@ export const BedrockRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+export const BedrockRunGenAIActionParamsSchema = schema.object({
+  body: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.string(),
+    })
+  ),
+});
+
 export const BedrockRunActionResponseSchema = schema.object(
   {
     completion: schema.string(),

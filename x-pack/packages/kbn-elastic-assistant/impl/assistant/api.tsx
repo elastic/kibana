@@ -46,14 +46,26 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  const requestBody = {
-    params: {
-      subActionParams: {
-        body: JSON.stringify(body),
-      },
-      subAction: 'test',
-    },
-  };
+  // no api provier, Bedrock
+  if (apiConfig.provider == null) {
+  }
+
+  const requestBody =
+    apiConfig.provider != null
+      ? {
+          params: {
+            subActionParams: {
+              body: JSON.stringify(body),
+            },
+            subAction: 'test',
+          },
+        }
+      : {
+          params: {
+            subActionParams: { body: body.messages },
+            subAction: 'runGenAI',
+          },
+        };
 
   try {
     const path = assistantLangChain
@@ -79,6 +91,8 @@ export const fetchConnectorExecuteAction = async ({
     if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
       const result = data.choices[0].message.content.trim();
       return result;
+    } else if (data.completion) {
+      return data.completion.trim();
     } else {
       return API_ERROR;
     }

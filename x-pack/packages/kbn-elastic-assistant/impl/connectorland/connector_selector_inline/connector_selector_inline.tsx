@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiKeyPadMenuItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
-  GEN_AI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { css } from '@emotion/css/dist/emotion-css.cjs';
+import { ActionType } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
@@ -84,17 +94,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const { data: actionTypes } = useLoadActionTypes({ http });
-    const actionType = actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['general'],
-      isSystemActionType: false,
-      id: '.gen-ai',
-      name: 'Generative AI',
-      enabled: true,
-    };
 
+    const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
     const {
       data: connectors,
       isLoading: isLoadingActionTypes,
@@ -130,7 +131,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(() => {
       return (
         connectors?.map((connector) => {
-          const apiProvider = getGenAiConfig(connector)?.apiProvider;
+          // TO DO, get the provider from the bedrock connector
+          const apiProvider = getGenAiConfig(connector)?.apiProvider ?? 'AWS Bedrock';
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : apiProvider;
@@ -168,6 +170,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const cleanupAndCloseModal = useCallback(() => {
       onConnectorModalVisibilityChange?.(false);
       setIsConnectorModalVisible(false);
+      setSelectedActionType(null);
     }, [onConnectorModalVisibilityChange]);
 
     const onConnectorClick = useCallback(() => {
@@ -211,6 +214,38 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         </EuiText>
       ),
       []
+    );
+
+    const actionSelection = useMemo(
+      () =>
+        actionTypes && actionTypes.length > 0 ? (
+          <EuiModal onClose={() => setIsConnectorModalVisible(false)}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
+            </EuiModalHeader>
+
+            <EuiModalBody>
+              <EuiFlexGroup>
+                {actionTypes.map((actionType: ActionType) => {
+                  const fullAction = actionTypeRegistry.get(actionType.id);
+                  return (
+                    <EuiFlexItem key={actionType.id} grow={false}>
+                      <EuiKeyPadMenuItem
+                        key={actionType.id}
+                        isDisabled={!actionType.enabled}
+                        label={actionType.name}
+                        onClick={() => setSelectedActionType(actionType)}
+                      >
+                        <EuiIcon size="xl" type={fullAction.iconClass} />
+                      </EuiKeyPadMenuItem>
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            </EuiModalBody>
+          </EuiModal>
+        ) : null,
+      [actionTypeRegistry, actionTypes]
     );
 
     return (
@@ -258,9 +293,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               </EuiButtonEmpty>
             </span>
           )}
-          {isConnectorModalVisible && (
+          {isConnectorModalVisible && !selectedActionType && actionSelection}
+          {isConnectorModalVisible && selectedActionType && (
             <ConnectorAddModal
-              actionType={actionType}
+              actionType={selectedActionType}
               onClose={cleanupAndCloseModal}
               postSaveEventHandler={(connector: ActionConnector) => {
                 const config = getGenAiConfig(connector);
