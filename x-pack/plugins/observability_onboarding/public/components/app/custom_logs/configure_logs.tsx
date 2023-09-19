@@ -326,7 +326,7 @@ export function ConfigureLogsContent() {
                     color: euiTheme.colors.primaryText,
                     fontSize: xsFontSize,
                   },
-                  '.euiAccordion__arrow svg': {
+                  '.euiAccordion__iconButton svg': {
                     stroke: euiTheme.colors.primary,
                     width: euiTheme.size.m,
                     height: euiTheme.size.m,

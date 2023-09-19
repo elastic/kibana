@@ -61,6 +61,12 @@ const noPanelMessageClassName = css`
   }
 `;
 
+const accordionButtonClassName = css`
+  .euiAccordion__iconButton {
+    display: none;
+  }
+`;
+
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   display: { collapsed },
@@ -135,7 +141,7 @@ export function ChatItem({
     contentElement = (
       <EuiAccordion
         id={accordionId}
-        arrowDisplay="none"
+        className={accordionButtonClassName}
         forceState={expanded ? 'open' : 'closed'}
         onToggle={handleToggleExpand}
       >

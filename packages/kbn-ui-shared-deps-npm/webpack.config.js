@@ -146,7 +146,7 @@ module.exports = (_, argv) => {
         // @hello-pangea/dnd emits optional chaining that confuses webpack.
         // We need to transform it using babel before going further
         {
-          test: /@hello-pangea\/dnd\/dist\/dnd(\.esm)?\.js$/,
+          test: /@hello-pangea\/dnd\/dist\/dnd\.js$/,
           use: [
             {
               loader: 'babel-loader',

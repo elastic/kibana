@@ -72,14 +72,51 @@ describe('Rule Monitoring API Client', () => {
       );
     });
 
-    it('calls API correctly with filter and pagination options', async () => {
+    const ISO_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+    it.each([
+      [
+        'search term filter',
+        { searchTerm: 'something to search' },
+        { search_term: 'something to search' },
+      ],
+      [
+        'event types filter',
+        { eventTypes: [RuleExecutionEventType.message] },
+        { event_types: 'message' },
+      ],
+      [
+        'log level filter',
+        { logLevels: [LogLevel.warn, LogLevel.error] },
+        { log_levels: 'warn,error' },
+      ],
+      [
+        'start date filter in relative format',
+        { dateRange: { start: 'now-1d/d' } },
+        { date_start: expect.stringMatching(ISO_PATTERN) },
+      ],
+      [
+        'end date filter',
+        { dateRange: { end: 'now-3d/d' } },
+        { date_end: expect.stringMatching(ISO_PATTERN) },
+      ],
+      [
+        'date range filter in relative format',
+        { dateRange: { start: new Date().toISOString(), end: new Date().toISOString() } },
+        {
+          date_start: expect.stringMatching(ISO_PATTERN),
+          date_end: expect.stringMatching(ISO_PATTERN),
+        },
+      ],
+      [
+        'pagination',
+        { sortOrder: 'asc', page: 42, perPage: 146 } as const,
+        { sort_order: 'asc', page: 42, per_page: 146 },
+      ],
+    ])('calls API correctly with %s', async (_, params, expectedParams) => {
       await api.fetchRuleExecutionEvents({
         ruleId: '42',
-        eventTypes: [RuleExecutionEventType.message],
-        logLevels: [LogLevel.warn, LogLevel.error],
-        sortOrder: 'asc',
-        page: 42,
-        perPage: 146,
+        ...params,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
@@ -87,11 +124,7 @@ describe('Rule Monitoring API Client', () => {
         expect.objectContaining({
           method: 'GET',
           query: {
-            event_types: 'message',
-            log_levels: 'warn,error',
-            sort_order: 'asc',
-            page: 42,
-            per_page: 146,
+            ...expectedParams,
           },
         })
       );
