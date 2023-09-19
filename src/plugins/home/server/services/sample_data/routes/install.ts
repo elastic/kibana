@@ -50,7 +50,8 @@ export function createInstallRoute(
     async (context, req, res) => {
       const routeStartTime = performance.now();
       const scopedContext = getScopedContext(req);
-      const spaceId = getSpaceId(scopedContext);
+      const maybeSpaceId = getSpaceId(scopedContext);
+      const spaceId = maybeSpaceId.length === 0 ? 'default' : maybeSpaceId;
 
       const { params, query } = req;
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);

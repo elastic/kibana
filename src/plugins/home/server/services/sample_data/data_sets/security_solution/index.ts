@@ -19,8 +19,7 @@ const securitysolutionName = i18n.translate('home.sampleData.securitySolutionSpe
 const securitysolutionDescription = i18n.translate(
   'home.sampleData.securitySolutionSpecDescription',
   {
-    defaultMessage:
-      'Sample data, visualizations, and dashboards for monitoring Security Solution routes.',
+    defaultMessage: 'Sample data, visualizations, and dashboards for exploring Security Solution.',
   }
 );
 const securitysolutionAlertsIngestPipelineDescription = i18n.translate(
