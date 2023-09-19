@@ -41,7 +41,7 @@ import {
 // FLAKY: https://github.com/elastic/kibana/issues/165795
 describe(
   'Add, edit and delete exception',
-  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

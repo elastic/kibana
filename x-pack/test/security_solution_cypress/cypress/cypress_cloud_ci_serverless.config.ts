@@ -14,10 +14,13 @@ export default defineCypressConfig({
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
-  defaultCommandTimeout: 60000,
-  execTimeout: 60000,
-  pageLoadTimeout: 60000,
-  responseTimeout: 60000,
+  retries: {
+    runMode: 1,
+  },
+  defaultCommandTimeout: 150000,
+  execTimeout: 150000,
+  pageLoadTimeout: 150000,
+  responseTimeout: 150000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
@@ -27,10 +30,12 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
+    grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     grepIntegrationFolder: "../"
   },
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,

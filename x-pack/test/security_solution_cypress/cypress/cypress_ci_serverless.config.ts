@@ -18,7 +18,7 @@ export default defineCypressConfig({
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-    grepTags: '@serverless --@brokenInServerless --@ignoreInServerless',
+    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,

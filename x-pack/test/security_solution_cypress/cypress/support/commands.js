@@ -34,10 +34,6 @@
 import 'cypress-file-upload';
 import 'cypress-recurse/commands';
 
-
-// require('@reportportal/agent-js-cypress/lib/commands/reportPortalCommands');
-
-
 Cypress.Commands.add(
   'attachFile',
   {

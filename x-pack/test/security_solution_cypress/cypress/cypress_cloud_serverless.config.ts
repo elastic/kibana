@@ -10,10 +10,6 @@ import { esArchiver } from './support/es_archiver';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './cypress/reporter_config.json',
-  },
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
@@ -27,10 +23,12 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
+    grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     grepIntegrationFolder: "../"
   },
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
