@@ -17,8 +17,10 @@ import {
   EuiSwitch,
   EuiToolTip,
   EuiSwitchEvent,
+  EuiLink,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { useKnowledgeBaseStatus } from '../../../knowledge_base/use_knowledge_base_status/use_knowledge_base_status';
 import { useAssistantContext } from '../../../assistant_context';
@@ -44,12 +46,13 @@ export const AdvancedSettings: React.FC<Props> = React.memo(({ onAdvancedSetting
   const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
 
   const [isLangChainEnabled, setIsLangChainEnabled] = useState(assistantLangChain);
-  const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
+  const isKnowledgeBaseEnabled =
+    (kbStatus?.index_exists && kbStatus?.pipeline_exists && kbStatus?.elser_exists) ?? false;
   const isESQLEnabled = kbStatus?.esql_exists ?? false;
 
   const isLoadingKb = isLoading || isFetching || isSettingUpKB || isDeletingUpKB;
-  const isKnowledgeBaseAvailable = isLangChainEnabled;
-  const isESQLAvailable = isLangChainEnabled && isKnowledgeBaseEnabled;
+  const isKnowledgeBaseAvailable = isLangChainEnabled && kbStatus?.elser_exists;
+  const isESQLAvailable = isLangChainEnabled && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
 
   const onEnableKnowledgeBaseChange = useCallback(
     (event: EuiSwitchEvent) => {
@@ -152,7 +155,25 @@ export const AdvancedSettings: React.FC<Props> = React.memo(({ onAdvancedSetting
         {knowledgeBaseSwitch}
       </EuiFormRow>
       <EuiSpacer size="xs" />
-      <EuiTextColor color={'subdued'}>{i18n.KNOWLEDGE_BASE_DESCRIPTION}</EuiTextColor>
+      <EuiTextColor color={'subdued'}>
+        <FormattedMessage
+          defaultMessage="Initializes a local knowledge base for saving and retrieving relevant context for your conversations. Note: ELSER must be configured and started. {seeDocs}"
+          id="xpack.elasticAssistant.assistant.settings.advancedSettings.knowledgeBaseDescription"
+          values={{
+            seeDocs: (
+              <EuiLink
+                external
+                href={
+                  'https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html#download-deploy-elser'
+                }
+                target="_blank"
+              >
+                {i18n.KNOWLEDGE_BASE_DESCRIPTION_ELSER_LEARN_MORE}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiTextColor>
       <EuiSpacer size="m" />
 
       <EuiFormRow

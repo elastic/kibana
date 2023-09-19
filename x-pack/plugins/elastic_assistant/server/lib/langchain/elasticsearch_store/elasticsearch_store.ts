@@ -8,7 +8,6 @@
 import { Document } from 'langchain/document';
 import { Callbacks } from 'langchain/callbacks';
 import { VectorStore } from 'langchain/vectorstores/base';
-
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
@@ -44,16 +43,18 @@ export class ElasticsearchStore extends VectorStore {
   private readonly esClient: ElasticsearchClient;
   private readonly index: string;
   private readonly logger: Logger;
+  private readonly model: string;
 
   _vectorstoreType(): string {
     return 'elasticsearch';
   }
 
-  constructor(esClient: ElasticsearchClient, index: string, logger: Logger) {
-    super(new ElasticsearchEmbeddings(), { esClient, index });
+  constructor(esClient: ElasticsearchClient, index: string, logger: Logger, model?: string) {
+    super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
     this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
+    this.model = model ?? '.elser_model_1';
   }
 
   /**
@@ -67,7 +68,7 @@ export class ElasticsearchStore extends VectorStore {
   addDocuments = async (
     documents: Document[],
     options?: Record<string, never>
-  ): Promise<string[] | void> => {
+  ): Promise<string[]> => {
     const pipelineExists = await this.pipelineExists();
     if (!pipelineExists) {
       await this.createPipeline();
@@ -84,11 +85,21 @@ export class ElasticsearchStore extends VectorStore {
 
     try {
       const response = await this.esClient.bulk({ refresh: true, operations });
-      return response.errors
-        ? []
-        : response.items.flatMap((item) => (item.create?._id ? [item.create?._id] : []));
+      this.logger.debug(`Add Documents Response:\n ${JSON.stringify(response)}`);
+
+      const errorIds = response.items.filter((i) => i.index?.error != null);
+      operations.forEach((op, i) => {
+        if (errorIds.some((e) => e.index?._id === op.index?._id)) {
+          this.logger.error(`Error adding document to KB: ${JSON.stringify(operations?.[i + 1])}`);
+        }
+      });
+
+      return response.items.flatMap((i) =>
+        i.index?._id != null && i.index.error == null ? [i.index._id] : []
+      );
     } catch (e) {
       this.logger.error('Error loading data into KB', e);
+      return [];
     }
   };
 
@@ -106,6 +117,7 @@ export class ElasticsearchStore extends VectorStore {
     options?: {}
   ): Promise<string[] | void> => {
     // Note: implement if/when needed
+    this.logger.info('ElasticsearchStore.addVectors not implemented');
     return Promise.resolve(undefined);
   };
 
@@ -125,6 +137,7 @@ export class ElasticsearchStore extends VectorStore {
     filter?: this['FilterType']
   ): Promise<Array<[Document, number]>> => {
     // Note: Implement if needed
+    this.logger.info('ElasticsearchStore.similaritySearchVectorWithScore not implemented');
     return Promise.resolve([]);
   };
 
@@ -151,7 +164,7 @@ export class ElasticsearchStore extends VectorStore {
           {
             text_expansion: {
               'vector.tokens': {
-                model_id: '.elser_model_1',
+                model_id: this.model,
                 model_text: query,
               },
             } as unknown as QueryDslTextExpansionQuery,
@@ -171,13 +184,18 @@ export class ElasticsearchStore extends VectorStore {
         query: queryBody,
       });
 
-      return result.hits.hits.map(
+      const results = result.hits.hits.map(
         (hit) =>
           new Document({
             pageContent: hit?._source?.text ?? '',
             metadata: hit?._source?.metadata,
           })
       );
+
+      this.logger.debug(`Similarity Search Query:\n ${JSON.stringify(queryBody)}`);
+      this.logger.debug(`Similarity Search Results:\n ${JSON.stringify(results)}`);
+
+      return results;
     } catch (e) {
       this.logger.error(e);
       return [];
@@ -267,7 +285,7 @@ export class ElasticsearchStore extends VectorStore {
       processors: [
         {
           inference: {
-            model_id: '.elser_model_1',
+            model_id: this.model,
             target_field: 'vector',
             field_map: {
               text: 'text_field',
@@ -306,11 +324,16 @@ export class ElasticsearchStore extends VectorStore {
    * @returns Promise<boolean> indicating whether the model is installed
    */
   async isModelInstalled(modelId: string): Promise<boolean> {
-    const getResponse = await this.esClient.ml.getTrainedModels({
-      model_id: modelId,
-      include: 'definition_status',
-    });
+    try {
+      const getResponse = await this.esClient.ml.getTrainedModels({
+        model_id: modelId,
+        include: 'definition_status',
+      });
 
-    return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+    } catch (e) {
+      // Returns 404 if it doesn't exist
+      return false;
+    }
   }
 }

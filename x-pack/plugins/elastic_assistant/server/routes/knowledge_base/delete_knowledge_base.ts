@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { DeleteKnowledgeBaseResponse } from '@kbn/elastic-assistant';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
@@ -15,10 +16,6 @@ import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { DeleteKnowledgeBasePathParams } from '../../schemas/knowledge_base/delete_knowledge_base';
-
-export interface DeleteKnowledgeBaseResponse {
-  success: boolean;
-}
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)

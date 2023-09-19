@@ -7,7 +7,7 @@ This directory contains assets for the Knowledge Base feature. The assets are us
     * Excluding `functions/signature/*.svg`
   * ANTLR Language Definitions as from: https://github.com/elastic/elasticsearch/tree/main/x-pack/plugin/esql/src/main/antlr
 
-The assets are stored in their original source format, so `.asciidoc` for documentation, and `.g4` and `.tokens` for the ANTLR language definitions. 
+The assets are stored in their original source format, so `.asciidoc` for documentation, and `.g4` and `.tokens` for the ANTLR language definitions. File names have been updated to be snake_case to satisfy Kibana linting rules.
 
 ### Future
 

@@ -7,13 +7,16 @@
 
 import { Embeddings } from 'langchain/embeddings/base';
 import { EmbeddingsParams } from 'langchain/dist/embeddings/base';
+import { Logger } from '@kbn/core/server';
 
 /**
  * Shell class for Elasticsearch embeddings as not needed in ElasticsearchStore since ELSER embeds on index
  */
 export class ElasticsearchEmbeddings extends Embeddings {
-  constructor(params?: EmbeddingsParams) {
+  private readonly logger: Logger;
+  constructor(logger: Logger, params?: EmbeddingsParams) {
     super(params ?? {});
+    this.logger = logger;
   }
 
   /**
@@ -26,10 +29,14 @@ export class ElasticsearchEmbeddings extends Embeddings {
    */
 
   embedDocuments(documents: string[]): Promise<number[][]> {
+    // Note: implement if/when needed
+    this.logger.info('ElasticsearchEmbeddings.embedDocuments not implemented');
     return Promise.resolve([]);
   }
 
   embedQuery(_: string): Promise<number[]> {
+    // Note: implement if/when needed
+    this.logger.info('ElasticsearchEmbeddings.embedQuery not implemented');
     return Promise.resolve([]);
   }
 }

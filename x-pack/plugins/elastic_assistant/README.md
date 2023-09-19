@@ -11,5 +11,4 @@ Maintained by the Security Solution team
 
 ### Testing
 
-To run the tests for this plugin, run `node scripts/jest --watch x-pack/plugins/elastic_assistant/jest.config.js --coverage'
-` from the Kibana root directory.
+To run the tests for this plugin, run `node scripts/jest --watch x-pack/plugins/elastic_assistant/jest.config.js --coverage` from the Kibana root directory.

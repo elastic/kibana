@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { GetKnowledgeBaseStatusResponse } from '@kbn/elastic-assistant';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
@@ -20,13 +21,6 @@ import {
   ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,
 } from './constants';
-
-export interface GetKnowledgeBaseStatusResponse {
-  elser_exists: boolean;
-  esql_exists?: boolean;
-  index_exists: boolean;
-  pipeline_exists: boolean;
-}
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -63,15 +57,18 @@ export const getKnowledgeBaseStatusRoute = (
         const indexExists = await esStore.indexExists();
         const pipelineExists = await esStore.pipelineExists();
         const modelExists = await esStore.isModelInstalled(ELSER_MODEL_ID);
-        const esqlExists =
-          indexExists && (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
 
         const body: GetKnowledgeBaseStatusResponse = {
           elser_exists: modelExists,
-          esql_exists: kbResource === ESQL_RESOURCE ? esqlExists : undefined,
           index_exists: indexExists,
           pipeline_exists: pipelineExists,
         };
+
+        if (kbResource === ESQL_RESOURCE) {
+          const esqlExists =
+            indexExists && (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
+          return response.ok({ body: { ...body, esql_exists: esqlExists } });
+        }
 
         return response.ok({ body });
       } catch (err) {

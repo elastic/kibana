@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+// Note: using default ELSER model ID so when setup by user in UI, all defaults can be accepted and everything works
 export const ELSER_MODEL_ID = '.elser_model_1';
 export const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-kb';
 export const KNOWLEDGE_BASE_INGEST_PIPELINE = '.kibana-elastic-ai-assistant-kb-ingest-pipeline';
+// Query for determining if ESQL docs have been loaded, searches for a specific doc. Intended for the ElasticsearchStore.similaritySearch()
+// Note: We may want to add a tag of the resource name to the document metadata, so we can CRUD by specific resource
 export const ESQL_DOCS_LOADED_QUERY =
   'You can chain processing commands, separated by a pipe character: `|`.';
 export const ESQL_RESOURCE = 'esql';

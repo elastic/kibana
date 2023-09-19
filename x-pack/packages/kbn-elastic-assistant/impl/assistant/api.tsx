@@ -13,22 +13,6 @@ import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
 
-// TODO: Common imports from plugin
-export interface DeleteKnowledgeBaseResponse {
-  success: boolean;
-}
-
-export interface GetKnowledgeBaseStatusResponse {
-  elser_exists: boolean;
-  esql_exists?: boolean;
-  index_exists: boolean;
-  pipeline_exists: boolean;
-}
-
-export interface PostKnowledgeBaseResponse {
-  success: boolean;
-}
-
 export interface FetchConnectorExecuteAction {
   assistantLangChain: boolean;
   apiConfig: Conversation['apiConfig'];
@@ -109,9 +93,16 @@ export interface GetKnowledgeBaseStatusParams {
   signal?: AbortSignal | undefined;
 }
 
+export interface GetKnowledgeBaseStatusResponse {
+  elser_exists: boolean;
+  esql_exists?: boolean;
+  index_exists: boolean;
+  pipeline_exists: boolean;
+}
+
 /**
  * API call for getting the status of the Knowledge Base. Provide
- * a resource to get the status of that specific resource.
+ * a resource to include the status of that specific resource.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
@@ -144,8 +135,12 @@ export interface PostKnowledgeBaseParams {
   signal?: AbortSignal | undefined;
 }
 
+export interface PostKnowledgeBaseResponse {
+  success: boolean;
+}
+
 /**
- * API call for setting up the Knowledge Base. Provide as resource to set up up a specific resource.
+ * API call for setting up the Knowledge Base. Provide a resource to set up a specific resource.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
@@ -158,7 +153,7 @@ export const postKnowledgeBase = async ({
   http,
   resource,
   signal,
-}: PostKnowledgeBaseParams): Promise<PostKnowledgeBaseResponse | IHttpFetchError | unknown> => {
+}: PostKnowledgeBaseParams): Promise<PostKnowledgeBaseResponse | IHttpFetchError> => {
   try {
     const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
     const response = await http.fetch(path, {
@@ -178,15 +173,19 @@ export interface DeleteKnowledgeBaseParams {
   signal?: AbortSignal | undefined;
 }
 
+export interface DeleteKnowledgeBaseResponse {
+  success: boolean;
+}
+
 /**
- * API call for deleting the Knowledge Base. Provide as resource to delete that specific resource.
+ * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
  * @param {string} [options.resource] - Resource to be deleted from the KB, otherwise delete the entire KB
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<PostKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<DeleteKnowledgeBaseResponse | IHttpFetchError>}
  */
 export const deleteKnowledgeBase = async ({
   http,

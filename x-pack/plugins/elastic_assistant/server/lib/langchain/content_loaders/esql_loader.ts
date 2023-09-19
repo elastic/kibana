@@ -50,7 +50,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       `Loaded ${response?.length ?? 0} ESQL docs and language docs into the Knowledge Base`
     );
 
-    return response == null || response.length > 0;
+    return response.length > 0;
   } catch (e) {
     logger.error(`Failed to load ESQL docs and language docs into the Knowledge Base`, e);
     return false;

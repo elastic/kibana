@@ -10,7 +10,6 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { BaseMessage } from 'langchain/schema';
 
-import { ChatPromptTemplate, SystemMessagePromptTemplate } from 'langchain/prompts';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { ResponseBody } from '../helpers';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -33,12 +32,11 @@ export const executeCustomLlmChain = async ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any, any>;
 }): Promise<ResponseBody> => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request });
+  const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
 
   // Chat History Memory: in-memory memory, from client local storage, first message is the system prompt
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
-  const systemPrompt = langChainMessages[0].content; // the first message
   const memory = new BufferMemory({
     chatHistory: new ChatMessageHistory(pastMessages),
     memoryKey: 'chat_history',
@@ -47,21 +45,16 @@ export const executeCustomLlmChain = async ({
   // ELSER backed ElasticsearchStore for Knowledge Base
   const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
 
-  const prompt = ChatPromptTemplate.fromPromptMessages([
-    SystemMessagePromptTemplate.fromTemplate(systemPrompt),
-  ]);
-
   // Chain w/ chat history memory and knowledge base retriever
   const chain = ConversationalRetrievalQAChain.fromLLM(llm, esStore.asRetriever(), {
     memory,
-    qaChainOptions: { prompt, type: 'stuff' },
+    // See `qaChainOptions` from https://js.langchain.com/docs/modules/chains/popular/chat_vector_db
+    qaChainOptions: { type: 'stuff' },
   });
   await chain.call({ question: latestMessage[0].content });
 
   // Chain w/ just knowledge base retriever
-  // const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(), {
-  //   prompt,
-  // });
+  // const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
   // await chain.call({ query: latestMessage[0].content });
 
   // The assistant (on the client side) expects the same response returned

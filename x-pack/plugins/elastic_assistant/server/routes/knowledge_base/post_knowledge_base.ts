@@ -17,10 +17,6 @@ import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } f
 import { PostKnowledgeBasePathParams } from '../../schemas/knowledge_base/post_knowledge_base';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 
-export interface PostKnowledgeBaseResponse {
-  success: boolean;
-}
-
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
@@ -67,13 +63,19 @@ export const postKnowledgeBaseRoute = (router: IRouter<ElasticAssistantRequestHa
           const esqlExists = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
           if (!esqlExists) {
             const loadedKnowledgeBase = await loadESQL(esStore, logger);
-            return response.ok({ body: { success: loadedKnowledgeBase } });
+            return response.custom({ body: { success: loadedKnowledgeBase }, statusCode: 201 });
           } else {
-            return response.ok({ body: { success: false } });
+            return response.ok({ body: { success: true } });
           }
         }
 
-        return response.ok({ body: { success: indexExists && pipelineExists } });
+        const wasSuccessful = indexExists && pipelineExists;
+
+        if (wasSuccessful) {
+          return response.ok({ body: { success: true } });
+        } else {
+          return response.custom({ body: { success: false }, statusCode: 500 });
+        }
       } catch (err) {
         logger.log(err);
         const error = transformError(err);

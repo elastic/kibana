@@ -7,9 +7,8 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { HttpSetup, ResponseErrorBody } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { getKnowledgeBaseStatus } from '../../assistant/api';
@@ -30,8 +29,8 @@ export interface GetKnowledgeBaseStatusResponse {
 }
 
 /**
- * Hook for getting the status of the Knowledge Base. Provide a resource name to get
- * the status for that specific resource within KB.
+ * Hook for getting the status of the Knowledge Base. Provide a resource name to include
+ * the status for that specific resource within the KB.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup

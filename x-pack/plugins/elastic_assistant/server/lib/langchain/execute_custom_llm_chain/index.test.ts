@@ -64,6 +64,7 @@ describe('executeCustomLlmChain', () => {
     expect(ActionsClientLlm).toHaveBeenCalledWith({
       actions: mockActions,
       connectorId: mockConnectorId,
+      logger: mockLogger,
       request: mockRequest,
     });
   });

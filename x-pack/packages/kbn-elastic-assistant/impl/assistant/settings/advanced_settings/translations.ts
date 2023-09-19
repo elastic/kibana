@@ -45,15 +45,14 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
 export const KNOWLEDGE_BASE_LABEL_TOOLTIP = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.advancedSettings.knowledgeBaseLabelTooltip',
   {
-    defaultMessage: 'Requires `Experimental LangChain Integration` to be enabled.',
+    defaultMessage: 'Requires ELSER to be configured and started.',
   }
 );
 
-export const KNOWLEDGE_BASE_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.advancedSettings.knowledgeBaseDescription',
+export const KNOWLEDGE_BASE_DESCRIPTION_ELSER_LEARN_MORE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.advancedSettings.knowledgeBaseElserLearnMoreDescription',
   {
-    defaultMessage:
-      'Initializes a local knowledge base for saving and retrieving relevant context for your conversations.',
+    defaultMessage: 'Learn more.',
   }
 );
 
