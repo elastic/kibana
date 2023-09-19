@@ -61,7 +61,7 @@ export const getRenderCellValueFn = ({
   columnTypes?: DataTableColumnTypes;
 }) => {
   // same icons across all rows
-  const fieldIconsCache = new Map<string, React.ReactNode>();
+  const fieldTokensCache = new Map<string, React.ReactNode>();
 
   return ({
     rowIndex,
@@ -152,22 +152,22 @@ export const getRenderCellValueFn = ({
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
           {pairs.map(([key, value, fieldName]) => {
-            let fieldIcon = null;
+            let fieldToken = null;
 
             // only for "Document" column
             if (field?.type === '_source') {
-              if (fieldIconsCache.has(key)) {
-                fieldIcon = fieldIconsCache.get(key);
+              if (fieldTokensCache.has(key)) {
+                fieldToken = fieldTokensCache.get(key);
               } else {
-                fieldIcon = renderFieldToken({ dataView, fieldName, columnTypes });
-                fieldIconsCache.set(key, fieldIcon);
+                fieldToken = renderFieldToken({ dataView, fieldName, columnTypes });
+                fieldTokensCache.set(key, fieldToken);
               }
             }
 
             return (
               <Fragment key={key}>
                 <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                  {fieldIcon && <>{fieldIcon}&nbsp;</>}
+                  {fieldToken}
                   <span className="unifiedDataTable__descriptionListName">{key}</span>
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription
