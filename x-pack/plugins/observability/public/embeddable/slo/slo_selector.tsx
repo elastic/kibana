@@ -10,6 +10,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 
 interface Props {
@@ -23,13 +24,6 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, sloList } = useFetchSloList({ kqlQuery: searchValue });
-  // const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
-  //   useFetchHistoricalSummary({
-  //     list: sloList?.results.map((slo) => ({
-  //       sloId: slo.id,
-  //       instanceId: slo.instanceId ?? ALL_VALUE,
-  //     })),
-  //   });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -39,20 +33,18 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList!.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList!.results!.map((slo) => ({
-          value: slo.id,
-          label: slo.name,
-          instanceId: slo.instanceId,
-        }))
+      ? sloList!.results!.map((slo) => {
+          const label =
+            slo.instanceId !== ALL_VALUE
+              ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})`
+              : slo.name;
+          return {
+            value: slo.id,
+            label,
+            instanceId: slo.instanceId,
+          };
+        })
       : [];
-    // options.map((option) => ({
-    //   ...option,
-    //   summary: historicalSummaries.find(
-    //     (historicalSummary) =>
-    //       historicalSummary.sloId === option?.id &&
-    //       historicalSummary.instanceId === (option?.instanceId ?? ALL_VALUE)
-    //   )?.data,
-    // }));
     setOptions(opts);
   }, [isLoading, sloList]);
 
