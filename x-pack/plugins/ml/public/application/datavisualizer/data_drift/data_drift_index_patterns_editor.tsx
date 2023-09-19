@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -115,6 +115,7 @@ export function DataDriftIndexPatternsEditor({
   );
 
   const navigateToPath = useNavigateToPath();
+  const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
     let unmounted = false;
@@ -133,49 +134,56 @@ export function DataDriftIndexPatternsEditor({
     };
   }, [combinedTimeFieldOptions, timeField]);
 
-  useEffect(() => {
-    let unmounted = false;
-    const getMatchingDataView = async () => {
-      setDataViewMsg(undefined);
-      setFoundDataViewId(undefined);
-      if (!unmounted && referenceIndexPattern && comparisonIndexPattern) {
-        const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
+  useEffect(
+    function validateMatchingDataViews() {
+      let unmounted = false;
+      const getMatchingDataView = async () => {
+        abortCtrl.current.abort();
+        abortCtrl.current = new AbortController();
 
-        const matchingDataViews = await dataViews.find(indicesName);
+        setDataViewMsg(undefined);
+        setFoundDataViewId(undefined);
+        if (!unmounted && referenceIndexPattern && comparisonIndexPattern) {
+          const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
 
-        const timeFieldName =
-          Array.isArray(timeField) && timeField.length > 0 && timeField[0].value !== ''
-            ? timeField[0].value
-            : undefined;
+          const matchingDataViews = await dataViews.find(indicesName);
 
-        if (Array.isArray(matchingDataViews) && matchingDataViews.length > 0) {
-          const foundDataView = matchingDataViews.find((d) => {
-            return d.timeFieldName === timeFieldName;
-          });
+          const timeFieldName =
+            Array.isArray(timeField) && timeField.length > 0 && timeField[0].value !== ''
+              ? timeField[0].value
+              : undefined;
 
-          if (foundDataView) {
-            setFoundDataViewId(foundDataView.id);
-          } else {
-            setDataViewMsg(
-              i18n.translate(
-                'xpack.ml.dataDrift.indexPatternsEditor.hasDataViewWithDifferentTimeField',
-                {
-                  defaultMessage: `Found a data view matching pattern '{indexPattern}' but with a different time field. Creating a new data view to analyze data drift.`,
-                  values: { indexPattern: indicesName },
-                }
-              )
-            );
+          if (Array.isArray(matchingDataViews) && matchingDataViews.length > 0) {
+            const foundDataView = matchingDataViews.find((d) => {
+              return d.timeFieldName === timeFieldName;
+            });
+
+            if (foundDataView) {
+              setFoundDataViewId(foundDataView.id);
+            } else {
+              setDataViewMsg(
+                i18n.translate(
+                  'xpack.ml.dataDrift.indexPatternsEditor.hasDataViewWithDifferentTimeField',
+                  {
+                    defaultMessage: `Found a data view matching pattern '{indexPattern}' but with a different time field. Creating a new data view to analyze data drift.`,
+                    values: { indexPattern: indicesName },
+                  }
+                )
+              );
+            }
           }
         }
-      }
-    };
+      };
 
-    getMatchingDataView();
+      getMatchingDataView();
 
-    return () => {
-      unmounted = true;
-    };
-  }, [referenceIndexPattern, comparisonIndexPattern, timeField, dataViews]);
+      return () => {
+        abortCtrl.current?.abort();
+        unmounted = true;
+      };
+    },
+    [referenceIndexPattern, comparisonIndexPattern, timeField, dataViews]
+  );
   const createDataViewAndRedirectToDataDriftPage = debounce(async (createAdHocDV = false) => {
     // Create adhoc data view
     const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);

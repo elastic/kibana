@@ -178,9 +178,7 @@ export const Controls: FC<Props> = React.memo(
         pageState: { comparison: nodeLabel },
       });
       await navigateToPath(path);
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodeLabel]);
+    }, [nodeLabel, navigateToPath, mlLocator]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
