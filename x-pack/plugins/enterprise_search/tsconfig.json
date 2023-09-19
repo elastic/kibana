@@ -59,6 +59,7 @@
     "@kbn/global-search-plugin",
     "@kbn/share-plugin",
     "@kbn/search-api-panels",
-    "@kbn/search-connectors"
+    "@kbn/search-connectors",
+    "@kbn/logs-shared-plugin"
   ]
 }

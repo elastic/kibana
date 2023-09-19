@@ -158,7 +158,6 @@
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
