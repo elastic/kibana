@@ -268,50 +268,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        console.log('mount');
-        const [coreStart, startPlugins] = await core.getStartServices();
-
+        const [coreStart] = await core.getStartServices();
         const services = await startServices(params);
 
-        // setScopedHistory(params.history);
-        // setHeaderActionMenuMounter(params.setHeaderActionMenu);
-        // syncHistoryLocations();
-        // appMounted();
-
-        // dispatch synthetic hash change event to update hash history objects
-        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        // const unlistenParentHistory = params.history.listen(() => {
-        //   window.dispatchEvent(new HashChangeEvent('hashchange'));
-        // });
-
-        // const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
-        //   locator: this.locator!,
-        //   contextLocator: this.contextLocator!,
-        //   singleDocLocator: this.singleDocLocator!,
-        // });
-
-        // const services = buildServices(
-        //   coreStart,
-        //   discoverStartPlugins,
-        //   this.initializerContext,
-        //   locator,
-        //   contextLocator,
-        //   singleDocLocator
-        // );
-
-        const { renderApp } = await import('./timelines/components/timeline/discover_headless');;
-        console.log(core);
+        const { renderApp } = await import('./timelines/components/timeline/discover_headless');
         const unmount = renderApp({
           element: params.element,
           core: coreStart,
           services,
-          // profileRegistry: this.profileRegistry,
         });
         return () => {
-          unlistenParentHistory();
           unmount();
-          // appUnMounted();
-          console.log('unmount');
         };
       },
     });

@@ -5,28 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { once } from 'lodash';
-import { createHashHistory, createBrowserHistory } from 'history';
-import { useLocation } from 'react-router-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import type { CoreStart } from '@kbn/core/public';
 import { encode } from '@kbn/rison';
 import { APP_UI_ID } from '../../../../common/constants';
+import type { StartServices } from '../../../types';
 
-interface HistoryLocationState {
-  referrer: string;
-}
-
-export const getHistory = once(() => {
-  const history = createHashHistory<HistoryLocationState>();
-  history.listen(() => {
-    // keep at least one listener so that `history.location` always in sync
-  });
-  return history;
-});
-
-// Pass these via config or?
 const timelineSearchParams = {
   isOpen: 'true',
   activeTab: 'discover',
@@ -34,9 +19,8 @@ const timelineSearchParams = {
 
 export const useHeadlessRoutes = () => {
   const { application } = useKibana().services;
-  const location = useLocation();
   if (application !== undefined) {
-    const { hash, search } = location;
+    const { hash, search } = window.location;
     const currentSearchParams = new URLSearchParams(search);
     currentSearchParams.set('timeline', encode(timelineSearchParams));
     const searchString = decodeURIComponent(currentSearchParams.toString());
@@ -54,31 +38,29 @@ const HeadlessRouter = () => {
   return null;
 };
 
-export const DiscoverRedirect = ({ services }) => {
-  const { history } = services;
-  const browserHistory = createBrowserHistory();
+export const DiscoverRedirect = ({ services }: { services: StartServices }) => {
   return (
     <KibanaContextProvider services={services}>
-      <Router history={browserHistory} data-test-subj="discover-headless-react-router">
-        <Routes>
-          <Route>
-            <HeadlessRouter />
-          </Route>
-        </Routes>
-      </Router>
+      <HeadlessRouter />
     </KibanaContextProvider>
   );
 };
 
-export const renderApp = ({ element, core, services }) => {
-  const history = getHistory();
-  const unmount = toMountPoint(<DiscoverRedirect services={{ ...services, history }} />, {
+export const renderApp = ({
+  element,
+  core,
+  services,
+}: {
+  element: HTMLElement;
+  core: CoreStart;
+  services: StartServices;
+}) => {
+  const unmount = toMountPoint(<DiscoverRedirect services={services} />, {
     theme: core.theme,
     i18n: core.i18n,
   })(element);
 
   return () => {
     unmount();
-    // data.search.session.clear();
   };
 };
