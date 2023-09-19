@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/cases/create_case_form'));
     loadTestFile(require.resolve('./ftr/cases/configure'));
     loadTestFile(require.resolve('./ftr/cases/list_view'));
+    loadTestFile(require.resolve('./ftr/detection_engine/exception/create_rule_exceptions.ts'));
     loadTestFile(require.resolve('./advanced_settings'));
   });
 }
