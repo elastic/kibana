@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type {
   EmbeddableComponent as LensEmbeddableComponent,
@@ -103,6 +103,10 @@ export const GroupPreview = ({
   const [showMissingDataViewPrompt, setShowMissingDataViewPrompt] = useState<boolean>(
     !currentDataView
   );
+
+  useEffect(() => {
+    setCurrentTimeFieldName(defaultTimeFieldName);
+  }, [defaultTimeFieldName]);
 
   useDebounce(
     () => {

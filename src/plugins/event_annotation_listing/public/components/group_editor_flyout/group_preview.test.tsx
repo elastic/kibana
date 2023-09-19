@@ -15,7 +15,11 @@ import {
   DataViewFieldMap,
   IIndexPatternFieldList,
 } from '@kbn/data-views-plugin/common';
-import { EmbeddableComponent, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import {
+  EmbeddableComponent,
+  FieldBasedIndexPatternColumn,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -23,7 +27,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { GroupPreview } from './group_preview';
 import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
-import { getCurrentTimeField } from './lens_attributes';
+import { DATA_LAYER_ID, DATE_HISTOGRAM_COLUMN_ID, getCurrentTimeField } from './lens_attributes';
 import moment from 'moment';
 
 class EuiSuperDatePickerTestHarness {
@@ -137,7 +141,7 @@ describe('group editor preview', () => {
       {
         id: 'a-different-id',
         title: 'My Data View',
-        timeFieldName: '@timestamp',
+        timeFieldName: 'other-time-field',
         fields: {
           getByType: jest.fn<DataViewField[], []>(() => [
             {
@@ -230,6 +234,14 @@ describe('group editor preview', () => {
   describe('data views', () => {
     const assertDataView = (id: string, attributes: TypedLensByValueInput['attributes']) =>
       expect(attributes.references[0].id).toBe(id);
+    const assertTimeField = (fieldName: string, attributes: TypedLensByValueInput['attributes']) =>
+      expect(
+        (
+          attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+            DATE_HISTOGRAM_COLUMN_ID
+          ] as FieldBasedIndexPatternColumn
+        ).sourceField
+      ).toBe(fieldName);
 
     it('uses correct data view', async () => {
       assertDataView(group.indexPatternId, getLensAttributes());
@@ -242,6 +254,7 @@ describe('group editor preview', () => {
 
       await waitFor(() => {
         assertDataView('a-different-id', getLensAttributes());
+        assertTimeField('other-time-field', getLensAttributes());
       });
     });
 
