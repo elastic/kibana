@@ -229,11 +229,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchAISearch: EnterpriseSearchEsre } = await import(
-          './applications/ai_search'
-        );
+        const { EnterpriseSearchAISearch } = await import('./applications/ai_search');
 
-        return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
       },
       navLinkStatus: AppNavLinkStatus.hidden,
       title: AI_SEARCH_PLUGIN.NAV_TITLE,
