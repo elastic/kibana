@@ -292,7 +292,10 @@ export const startFleetServerWithDocker = async ({
       '--publish',
       `${fleetServerPort}:8220`,
 
-      `docker.elastic.co/observability-ci/fleet-server:latest`,
+      // serverless needs stand alone fleet server image
+      isServerless
+        ? `docker.elastic.co/observability-ci/fleet-server:latest`
+        : `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
 
     await execa('docker', ['kill', containerName])
