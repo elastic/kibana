@@ -11,17 +11,12 @@ import {
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
   EuiCollapsibleNavSubItemGroupTitle,
-  EuiLink,
-  EuiSideNavItemType,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
-import { isAbsoluteLink } from '../../utils';
 import { GroupAsLink } from './group_as_link';
-
-type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
@@ -29,29 +24,12 @@ const navigationNodeToEuiItem = (
 ): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
-  const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
     [`nav-item-id-${item.id}`]: item.id,
     [`nav-item-isActive`]: isSelected,
   });
-
-  // @ts-expect-error getRenderItem is not used.
-  // Existed on EuiSideNavItemProps, doesn't exist on EuiCollapsibleNavSubItemProps.
-  const getRenderItem = (): RenderItem | undefined => {
-    if (!isExternal || item.renderItem) {
-      return item.renderItem;
-    }
-
-    return () => (
-      <div className="euiSideNavItemButton" data-test-subj={dataTestSubj}>
-        <EuiLink href={href} external color="text">
-          {item.title}
-        </EuiLink>
-      </div>
-    );
-  };
 
   return {
     id,
@@ -66,7 +44,6 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
-    // renderItem: getRenderItem(),
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),
