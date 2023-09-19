@@ -29,7 +29,7 @@ export function registerGetDatasetInfoFunction({
 
       DO NOT include the user's request. It will be added internally.`,
       descriptionForUser:
-        'This function allows the assistant to get information about available dataviews and their fields.',
+        'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
         additionalProperties: false,
