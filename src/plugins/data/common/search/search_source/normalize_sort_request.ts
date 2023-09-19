@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EsQuerySortValue, SortOptions } from './types';
+import { EsQuerySortValue } from './types';
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
   indexPattern: DataView | string | undefined,
-  defaultSortOptions: SortOptions = {}
+  defaultSortOptions: estypes.SortOptions['sortField'] | string = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function (sortable) {
@@ -28,7 +29,7 @@ export function normalizeSortRequest(
 function normalize(
   sortable: EsQuerySortValue,
   indexPattern: DataView | string | undefined,
-  defaultSortOptions: any
+  defaultSortOptions: estypes.SortOptions['sortField'] | string
 ) {
   const [[sortField, sortOrder]] = Object.entries(sortable);
   const order = typeof sortOrder === 'object' ? sortOrder : { order: sortOrder };
@@ -56,9 +57,9 @@ function normalize(
   }
   // Don't include unmapped_type for _score field
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
+  const { unmapped_type, ...otherSortOptions } = defaultSortOptions as estypes.FieldSort;
   return {
-    [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },
+    [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions as object) },
   };
 }
 
