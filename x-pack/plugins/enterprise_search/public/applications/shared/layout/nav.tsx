@@ -99,7 +99,7 @@ export const useEnterpriseSearchNav = () => {
     {
       id: 'es_getting_started',
       name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Gettting started',
+        defaultMessage: 'Getting started',
       }),
       ...generateNavLink({
         shouldNotCreateHref: true,
