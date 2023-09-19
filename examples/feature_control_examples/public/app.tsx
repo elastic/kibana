@@ -49,12 +49,12 @@ export const MyPluginComponent: React.FC = () => {
         {Object.entries(
           kibana.services.application!.capabilities[FEATURE_PRIVILEGES_PLUGIN_ID]
         ).map(([capability, value]) => {
-          return (
+          return value === true ? (
             <div key={capability}>
-              <EuiHealth color={value === true ? 'success' : 'danger'}>{capability}</EuiHealth>
+              <EuiHealth color="success">{capability}</EuiHealth>
               <EuiSpacer />
             </div>
-          );
+          ) : null;
         })}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

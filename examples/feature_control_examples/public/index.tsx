@@ -30,12 +30,11 @@ interface StartDeps {
 
 export class FeatureControlsPluginExample implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(coreSetup: CoreSetup<StartDeps>, deps: SetupDeps) {
-    const { features } = deps;
     coreSetup.application.register({
       id: 'featureControlsExamples',
       title: 'FeatureControlExamples',
       async mount({ element }: AppMountParameters) {
-        const [coreStart, startDeps, something] = await coreSetup.getStartServices();
+        const [coreStart] = await coreSetup.getStartServices();
         ReactDOM.render(
           <KibanaPageTemplate>
             <KibanaContextProvider services={{ ...coreStart, ...deps }}>

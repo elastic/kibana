@@ -1,0 +1,190 @@
+# Creating Feature Privileges
+
+If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you’re after.
+
+Feature Privileges allow you to define precisely who can access your feature and what actions they can perform, all while seamlessly integrating with Kibana's role-based access control (RBAC) system.
+`
+This documentation will guide you through the process of creating and configuring Feature Privileges for your Kibana plugin or features. Whether you're building a new visualization, enhancing an existing application, or extending Kibana's capabilities, understanding how to set up Feature Privileges is vital to maintaining security, control, and user satisfaction.
+
+By the end of this guide, you'll know how to:
+
+- Define privileges for your feature, specifying who can access it.
+- Control access to your feature's user interface (UI) elements.
+- Secure server-side APIs, ensuring that only authorized users can interact with your plugin's functionality.
+
+### Registering features
+
+Kibana has an inbuilt Features plugin that enables you to control access to your plugin and its features. To start, ensure that your kibana.jsonc config file has the `features` plugin inside the requiredPlugins list
+
+```
+  "requiredPlugins": [
+      ...,
+      "features", // required
+  ]
+```
+
+This will give you access to the contract exposed by the features plugin inside the setup dependencies of your own plugin.
+
+Now, inside your plugin, you can use the contract to control access by first registering the features that your plugin has
+
+```ts
+const FEATURE_PRIVILEGES_PLUGIN_ID = 'MY_PLUGIN_IDENTIFIER';
+features.registerKibanaFeature({
+  id: FEATURE_PRIVILEGES_PLUGIN_ID,
+  name: 'Feature Plugin Examples',
+  category: DEFAULT_APP_CATEGORIES.management,
+  app: ['FeaturePluginExample'],
+  privileges: {
+    all: {
+      app: ['FeaturePluginExample'],
+    },
+    read: {
+      app: ['FeaturePluginExample'],
+    },
+  },
+});
+```
+
+### Control access to UI elements
+
+With regards to feature privileges, we control access to UI elements by declaring UI capabilities.
+
+UI capabilities determine what actions users are allowed to perform within the UI of your plugin. These are often associated with specific features inside your app and can be finely tuned to control access at a granular level.
+
+Let’s take a basic example of UI capabilities for our example plugin. Lets say that our plugin allows the following user actions in general:
+
+`view, create, edit, delete, assign`.
+
+Now we’d like to ensure that only users with the `all` privilege are granted access to all actions whereas users with the `read` privilege can only view the resources in your app.
+
+To do so, we modify the feature registration config above and include the following entries in the `privileges.all` and `privileges.read` sections respectively
+
+```
+{
+    ...,
+    privileges: {
+        all: {
+            ...,
+            ui: ['view', 'create', 'edit', 'delete', 'assign'],
+        },
+        read: {
+            ...,
+            ui: ['view'],
+        }
+    }
+}
+```
+
+Once done, you can now access this within the public part kibana plugin code using the Kibana Context Provider as follows:
+
+```tsx
+export const MyPluginComponent: React.FC = () => {
+  const kibana = useKibana<CoreStart>();
+
+  return (
+    <EuiPageTemplate>
+      <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
+        <EuiTitle size="l">
+          <h1>Feature Privileges Example</h1>
+        </EuiTitle>
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
+        <EuiText>
+          <p>Your privileges</p>
+        </EuiText>
+        <EuiSpacer />
+        {Object.entries(
+          kibana.services.application!.capabilities[FEATURE_PRIVILEGES_PLUGIN_ID]
+        ).map(([capability, value]) => {
+          return value === true ? (
+            <div key={capability}>
+              <EuiHealth color="success">{capability}</EuiHealth>
+              <EuiSpacer />
+            </div>
+          ) : null;
+        })}
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
+};
+```
+
+### Control access to API endpoints and other server side features
+
+Similarly for API access, lets modify the server side of our plugin by adding a couple of API routes as follows:
+
+```ts
+public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
+  // ...
+  const router = core.http.createRouter();
+    router.get(
+      {
+        path: '/internal/my_plugin/read',
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new Date().toISOString(),
+          },
+        });
+      }
+    );
+    router.get(
+      {
+        path: '/internal/my_plugin/sensitive_action',
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new SecretClass().secretResponse(),
+          },
+        });
+      }
+    );
+}
+```
+
+Here we've added two routes, one which returns the current date-time in ISO 8601 format and another which returns a sensitive response that we'd like to protect.
+
+To do so, we need to modify the configuration object for our route to look like this:
+
+```
+router.get(
+      {
+        path: '/internal/my_plugin/sensitive_action',
+        validate: false,
+        options: {
+          tags: ['access:my_closed_example_api'],
+        },
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new Date().toISOString(),
+          },
+        });
+      }
+    );
+```
+
+Notice, we've added an `options.tags` property for the API route that returns sensitive information. This tag is then used in the privileges object as follow
+
+```
+{
+    …,
+    privileges: {
+        all: {
+            ...,
+            api: ['my_closed_example_api'], // Notice that we’ve dropped the `access` string here
+        },
+        read: {
+            ...,
+            api: [],
+        }
+    }
+}
+```
+
+This tells the Kibana RBAC system that users with the role that has `all` access to your plugin can also access the api that is tagged with `my_closed_example_api`. This now secures your API endpoint and will throw a `403 Unauthorized` error to any users who don’t have the right permissions.
