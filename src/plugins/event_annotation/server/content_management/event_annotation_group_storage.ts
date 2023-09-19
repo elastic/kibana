@@ -121,7 +121,6 @@ export class EventAnnotationGroupStorage
     const transforms = getTransforms(cmServicesDefinition, requestVersion);
     const soClient = await savedObjectClientFromRequest(ctx);
 
-    // Save data in DB
     const {
       saved_object: savedObject,
       alias_purpose: aliasPurpose,

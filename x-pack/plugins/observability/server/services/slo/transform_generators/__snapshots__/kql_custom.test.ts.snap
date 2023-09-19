@@ -88,11 +88,24 @@ Object {
 exports[`KQL Custom Transform Generator filters the source using the kql query 1`] = `
 Object {
   "bool": Object {
-    "minimum_should_match": 1,
-    "should": Array [
+    "filter": Array [
       Object {
-        "match": Object {
-          "labels.groupId": "group-4",
+        "range": Object {
+          "log_timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "labels.groupId": "group-4",
+              },
+            },
+          ],
         },
       },
     ],
@@ -230,11 +243,24 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -447,11 +473,24 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
