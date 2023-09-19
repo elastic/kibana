@@ -305,7 +305,7 @@ export function systemRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
         const reindexRequest = {
           body: request.body,
           // Create a task and return task id instead of blocking until complete
