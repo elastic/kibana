@@ -49,6 +49,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
     <>
       <EuiHeaderLink
         color="primary"
+        data-test-subj="observabilityAiAssistantNewChatHeaderLink"
         onClick={() => {
           setIsOpen(() => true);
         }}

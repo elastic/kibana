@@ -52,67 +52,71 @@ export function getMenuSections({
     ? new Date(instanceDetails['@timestamp']).valueOf()
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
-  const infraNodeLocator = infraLocators.nodeLogsLocator;
+  const infraNodeLocator = infraLocators?.nodeLogsLocator;
 
-  const podActions: Action[] = [
-    {
-      key: 'podLogs',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs',
-        { defaultMessage: 'Pod logs' }
-      ),
-      href: infraNodeLocator.getRedirectUrl({
-        nodeId: podId!,
-        nodeType: 'pod',
-        time,
-      }),
-      condition: !!podId,
-    },
-    {
-      key: 'podMetrics',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
-        { defaultMessage: 'Pod metrics' }
-      ),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/pod-detail/${podId}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!podId,
-    },
-  ];
+  const podActions: Action[] = infraNodeLocator
+    ? [
+        {
+          key: 'podLogs',
+          label: i18n.translate(
+            'xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs',
+            { defaultMessage: 'Pod logs' }
+          ),
+          href: infraNodeLocator?.getRedirectUrl({
+            nodeId: podId!,
+            nodeType: 'pod',
+            time,
+          }),
+          condition: !!podId,
+        },
+        {
+          key: 'podMetrics',
+          label: i18n.translate(
+            'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
+            { defaultMessage: 'Pod metrics' }
+          ),
+          href: getInfraHref({
+            app: 'metrics',
+            basePath,
+            path: `/link-to/pod-detail/${podId}`,
+            query: infraMetricsQuery,
+          }),
+          condition: !!podId,
+        },
+      ]
+    : [];
 
-  const containerActions: Action[] = [
-    {
-      key: 'containerLogs',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs',
-        { defaultMessage: 'Container logs' }
-      ),
-      href: infraNodeLocator.getRedirectUrl({
-        nodeId: containerId!,
-        nodeType: 'container',
-        time,
-      }),
-      condition: !!containerId,
-    },
-    {
-      key: 'containerMetrics',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
-        { defaultMessage: 'Container metrics' }
-      ),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/container-detail/${containerId}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!containerId,
-    },
-  ];
+  const containerActions: Action[] = infraNodeLocator
+    ? [
+        {
+          key: 'containerLogs',
+          label: i18n.translate(
+            'xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs',
+            { defaultMessage: 'Container logs' }
+          ),
+          href: infraNodeLocator?.getRedirectUrl({
+            nodeId: containerId!,
+            nodeType: 'container',
+            time,
+          }),
+          condition: !!containerId,
+        },
+        {
+          key: 'containerMetrics',
+          label: i18n.translate(
+            'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
+            { defaultMessage: 'Container metrics' }
+          ),
+          href: getInfraHref({
+            app: 'metrics',
+            basePath,
+            path: `/link-to/container-detail/${containerId}`,
+            query: infraMetricsQuery,
+          }),
+          condition: !!containerId,
+        },
+      ]
+    : [];
 
   const apmActions: Action[] = [
     {

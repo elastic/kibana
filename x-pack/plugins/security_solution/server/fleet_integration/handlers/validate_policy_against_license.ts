@@ -18,8 +18,12 @@ export const validatePolicyAgainstLicense = (
   if (!isEndpointPolicyValidForLicense(policyConfig, licenseService.getLicenseInformation())) {
     logger.warn('Incorrect license tier for paid policy fields');
     // The `statusCode` below is used by Fleet API handler to ensure that the proper HTTP code is used in the API response
-    const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
+    const licenseError: Error & { statusCode?: number; passThroughApi?: boolean } = new Error(
+      'Requires Platinum license'
+    );
     licenseError.statusCode = 403;
+    licenseError.passThroughApi = true;
+
     throw licenseError;
   }
 };

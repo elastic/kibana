@@ -6,6 +6,7 @@
  */
 import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetSavedQuery } from '../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
@@ -26,7 +27,6 @@ import {
   RULE_PREVIEW_ACTIONS_TEST_ID,
   RULE_PREVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import * as i18n from './translations';
 
 /**
  * Rule summary on a preview panel on top of the right section of expandable flyout
@@ -84,7 +84,12 @@ export const RulePreview: React.FC = memo(() => {
       <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
       <ExpandableSection
-        title={i18n.RULE_PREVIEW_ABOUT_TEXT}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.preview.rule.aboutLabel"
+            defaultMessage="About"
+          />
+        }
         expanded
         data-test-subj={RULE_PREVIEW_ABOUT_TEST_ID}
       >
@@ -103,7 +108,12 @@ export const RulePreview: React.FC = memo(() => {
       {defineRuleData && !isSavedQueryLoading && (
         <>
           <ExpandableSection
-            title={i18n.RULE_PREVIEW_DEFINITION_TEXT}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.preview.rule.definitionLabel"
+                defaultMessage="Definition"
+              />
+            }
             expanded={false}
             data-test-subj={RULE_PREVIEW_DEFINITION_TEST_ID}
           >
@@ -125,7 +135,12 @@ export const RulePreview: React.FC = memo(() => {
       {scheduleRuleData && (
         <>
           <ExpandableSection
-            title={i18n.RULE_PREVIEW_SCHEDULE_TEXT}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.preview.rule.scheduleLabel"
+                defaultMessage="Schedule"
+              />
+            }
             expanded={false}
             data-test-subj={RULE_PREVIEW_SCHEDULE_TEST_ID}
           >
@@ -141,7 +156,12 @@ export const RulePreview: React.FC = memo(() => {
       )}
       {hasActions && (
         <ExpandableSection
-          title={i18n.RULE_PREVIEW_ACTIONS_TEXT}
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.preview.rule.actionsLabel"
+              defaultMessage="Actions"
+            />
+          }
           expanded={false}
           data-test-subj={RULE_PREVIEW_ACTIONS_TEST_ID}
         >

@@ -49,6 +49,7 @@ export interface FleetConfigType {
     disableILMPolicies: boolean;
     disableProxies: boolean;
     fleetServerStandalone: boolean;
+    onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     capabilities: string[];
   };

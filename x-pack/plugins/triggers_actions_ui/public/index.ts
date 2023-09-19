@@ -116,6 +116,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,

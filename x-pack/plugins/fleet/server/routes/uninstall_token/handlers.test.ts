@@ -6,11 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest, VersionedRouter } from '@kbn/core-http-server';
+import { httpServerMock, coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { RequestHandler } from '@kbn/core/server';
 
-import type { RouterMock } from '@kbn/core-http-router-server-mocks';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { makeRouterWithFleetAuthz } from '../../services/security/fleet_router';
+import type { FleetAuthzRouter } from '../../services/security/types';
 
 import type {
   UninstallToken,
@@ -185,30 +186,44 @@ describe('uninstall token handlers', () => {
 
   describe('Agent Tamper Protection feature flag', () => {
     let config: { enableExperimental: string[] };
-    let router: RouterMock;
+    let fakeRouter: jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+    let fleetAuthzRouter: FleetAuthzRouter;
 
     beforeEach(() => {
-      router = mockRouter.create();
+      fakeRouter = {
+        versioned: {
+          get: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+        },
+      } as unknown as jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+
+      const mockLogger = loggingSystemMock.createLogger();
+      fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
     });
 
     it('should register handlers if feature flag is enabled', () => {
       config = { enableExperimental: ['agentTamperProtectionEnabled'] };
 
-      registerRoutes(router, config);
+      registerRoutes(fleetAuthzRouter, config);
+      const wrappedHandler =
+        // @ts-ignore
+        fakeRouter.versioned.get.mock.results[0].value.addVersion;
 
-      expect(router.get).toHaveBeenCalledWith(
-        expect.any(Object),
-        getUninstallTokensMetadataHandler
-      );
-      expect(router.get).toHaveBeenCalledWith(expect.any(Object), getUninstallTokenHandler);
+      expect(wrappedHandler).toHaveBeenCalled();
     });
 
     it('should NOT register handlers if feature flag is disabled', async () => {
       config = { enableExperimental: [] };
+      registerRoutes(fleetAuthzRouter, config);
+      // @ts-ignore
+      const mockGet = fakeRouter.versioned.get;
 
-      registerRoutes(router, config);
-
-      expect(router.get).not.toHaveBeenCalled();
+      expect(mockGet).not.toHaveBeenCalled();
     });
   });
 });

@@ -187,39 +187,6 @@
     "functions": [
       {
         "parentPluginId": "profiling",
-        "id": "def-common.fromMapToRecord",
-        "type": "Function",
-        "tags": [],
-        "label": "fromMapToRecord",
-        "description": [],
-        "signature": [
-          "(m: Map<K, V>) => Record<string, V>"
-        ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "profiling",
-            "id": "def-common.fromMapToRecord.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "m",
-            "description": [],
-            "signature": [
-              "Map<K, V>"
-            ],
-            "path": "x-pack/plugins/profiling/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profiling",
         "id": "def-common.getRoutePaths",
         "type": "Function",
         "tags": [],

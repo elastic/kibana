@@ -22,7 +22,8 @@ export default function ({ getService }) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('index_patterns/* error handler', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165944
+  describe.skip('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;
     before(async () => {

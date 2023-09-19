@@ -96,8 +96,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
@@ -110,8 +108,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-osquery/**/*"
 
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'

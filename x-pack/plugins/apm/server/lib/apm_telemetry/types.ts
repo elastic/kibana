@@ -211,6 +211,10 @@ export interface APMUsage {
     total: number;
   };
   per_service: APMPerService[];
+  top_traces: {
+    max: number;
+    median: number;
+  };
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
@@ -226,7 +230,8 @@ export interface APMUsage {
     | 'cardinality'
     | 'environments'
     | 'service_groups'
-    | 'per_service',
+    | 'per_service'
+    | 'top_traces',
     { took: { ms: number } }
   >;
 }

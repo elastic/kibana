@@ -63,7 +63,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
-    "@kbn/field-types",
     "@kbn/search-response-warnings",
     "@kbn/content-management-plugin",
     "@kbn/unified-doc-viewer",
@@ -71,7 +70,9 @@
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/no-data-page-plugin"
+    "@kbn/unified-data-table",
+    "@kbn/no-data-page-plugin",
+    "@kbn/global-search-plugin"
   ],
   "exclude": [
     "target/**/*"

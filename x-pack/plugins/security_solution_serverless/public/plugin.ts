@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { getSecurityGetStartedComponent } from './get_started';
+import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -57,6 +58,7 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    securitySolution.setDashboardsLandingCallout(getDashboardsLandingCallout(services));
     securitySolution.setIsILMAvailable(false);
 
     configureNavigation(services, this.config);
