@@ -29,6 +29,7 @@ interface AlertsPopoverProps {
   savedQueryId?: string;
   adHocDataViews: DataView[];
   services: DiscoverServices;
+  isPlainRecord?: boolean;
 }
 
 interface EsQueryAlertMetaData {
@@ -42,8 +43,13 @@ export function AlertsPopover({
   services,
   stateContainer,
   onClose: originalOnClose,
+  isPlainRecord,
 }: AlertsPopoverProps) {
   const dataView = stateContainer.internalState.getState().dataView;
+  const query = stateContainer.appState.getState().query;
+  const dateFields = dataView?.fields.getByType('date');
+  const timeField = dataView?.timeFieldName || dateFields?.[0]?.name;
+
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
@@ -55,6 +61,13 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
+    if (isPlainRecord) {
+      return {
+        searchType: 'esqlQuery',
+        esqlQuery: query,
+        timeField,
+      };
+    }
     const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
@@ -63,7 +76,7 @@ export function AlertsPopover({
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [stateContainer]);
+  }, [isPlainRecord, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -99,7 +112,14 @@ export function AlertsPopover({
     });
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
 
-  const hasTimeFieldName = Boolean(dataView?.timeFieldName);
+  const hasTimeFieldName: boolean = useMemo(() => {
+    if (!isPlainRecord) {
+      return Boolean(dataView?.timeFieldName);
+    } else {
+      return Boolean(timeField);
+    }
+  }, [dataView?.timeFieldName, isPlainRecord, timeField]);
+
   const panels = [
     {
       id: 'mainPanel',
@@ -166,11 +186,13 @@ export function openAlertsPopover({
   stateContainer,
   services,
   adHocDataViews,
+  isPlainRecord,
 }: {
   anchorElement: HTMLElement;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   adHocDataViews: DataView[];
+  isPlainRecord?: boolean;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -189,6 +211,7 @@ export function openAlertsPopover({
           stateContainer={stateContainer}
           adHocDataViews={adHocDataViews}
           services={services}
+          isPlainRecord={isPlainRecord}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

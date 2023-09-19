@@ -39,6 +39,8 @@ post:
           discriminator:
             propertyName: connector_type_id
         examples:
+          createEmailConnectorRequest:
+            $ref: '../components/examples/create_email_connector_request.yaml'
           createIndexConnectorRequest:
             $ref: '../components/examples/create_index_connector_request.yaml'
           createWebhookConnectorRequest:
@@ -53,6 +55,8 @@ post:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
           examples:
+            createEmailConnectorResponse:
+              $ref: '../components/examples/create_email_connector_response.yaml'
             createIndexConnectorResponse:
               $ref: '../components/examples/create_index_connector_response.yaml'
             createWebhookConnectorResponse:

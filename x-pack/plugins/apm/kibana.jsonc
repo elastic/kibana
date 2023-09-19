@@ -18,6 +18,7 @@
       "logsShared",
       "inspector",
       "licensing",
+      "metricsDataAccess",
       "observability",
       "observabilityShared",
       "exploratoryView",

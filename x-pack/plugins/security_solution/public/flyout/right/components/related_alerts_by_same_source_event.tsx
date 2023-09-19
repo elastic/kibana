@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID } from './test_ids';
 
@@ -35,7 +35,13 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
     originalEventId,
     scopeId,
   });
-  const text = CORRELATIONS_SAME_SOURCE_ALERTS(dataCount);
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.sourceAlertsLabel"
+      defaultMessage="{count, plural, one {alert} other {alerts}} related by source event"
+      values={{ count: dataCount }}
+    />
+  );
 
   return (
     <InsightsSummaryRow

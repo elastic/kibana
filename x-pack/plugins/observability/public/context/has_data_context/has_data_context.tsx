@@ -16,6 +16,7 @@ import {
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
+  UNIVERSAL_PROFILING_APP,
   UPTIME_APP,
   UX_APP,
 } from '../constants';
@@ -54,6 +55,7 @@ const apps: DataContextApps[] = [
   INFRA_METRICS_APP,
   UX_APP,
   ALERT_APP,
+  UNIVERSAL_PROFILING_APP,
 ];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
@@ -122,6 +124,10 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                   hasData: resultInfraMetrics?.hasData,
                   indices: resultInfraMetrics?.indices,
                 });
+                break;
+              case UNIVERSAL_PROFILING_APP:
+                // Profiling only shows the empty section for now
+                updateState({ hasData: false });
                 break;
             }
           } catch (e) {

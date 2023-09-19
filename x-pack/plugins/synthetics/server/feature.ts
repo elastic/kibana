@@ -6,8 +6,17 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+<<<<<<< HEAD
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+=======
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
+import { i18n } from '@kbn/i18n';
+import {
+  SubFeaturePrivilegeGroupConfig,
+  SubFeaturePrivilegeGroupType,
+} from '@kbn/features-plugin/common';
+>>>>>>> 3a0ac6fb0e752749a1cbf8f9c4f46468e6948916
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
@@ -28,6 +37,24 @@ const ruleTypes = [
   ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 ];
+
+const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'elastic_managed_locations_enabled',
+      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
+        defaultMessage: 'Elastic managed locations enabled',
+      }),
+      includeIn: 'all',
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['elasticManagedLocationsEnabled'],
+    },
+  ],
+};
 
 export const uptimeFeature = {
   id: PLUGIN.ID,
@@ -96,4 +123,12 @@ export const uptimeFeature = {
       ui: ['show', 'alerting:save'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.synthetics.features.app', {
+        defaultMessage: 'Synthetics',
+      }),
+      privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+    },
+  ],
 };
