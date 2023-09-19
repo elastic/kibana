@@ -40,6 +40,11 @@ export default defineCypressConfig({
       root: '#security-solution-app',
     },
 
+    KIBANA_USERNAME: 'system_indices_superuser',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
+    ELASTICSEARCH_PASSWORD: 'changeme',
+
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     grepTags: '@ess',

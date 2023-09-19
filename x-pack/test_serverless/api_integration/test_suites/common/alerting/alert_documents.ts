@@ -19,9 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165779
-  // FLAKY: https://github.com/elastic/kibana/issues/165388
-  describe.skip('Alert documents', () => {
+  describe('Alert documents', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;

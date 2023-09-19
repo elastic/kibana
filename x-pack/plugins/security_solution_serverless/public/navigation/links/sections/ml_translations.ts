@@ -69,6 +69,18 @@ export const NOTIFICATIONS_DESC = i18n.translate(
     defaultMessage: 'Notifications page',
   }
 );
+export const MEMORY_USAGE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.title',
+  {
+    defaultMessage: 'Memory usage',
+  }
+);
+export const MEMORY_USAGE_DESC = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.desc',
+  {
+    defaultMessage: 'Memory usage page',
+  }
+);
 export const ANOMALY_DETECTION_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.title',
   {
@@ -90,7 +102,7 @@ export const ANOMALY_EXPLORER_TITLE = i18n.translate(
 export const ANOMALY_EXPLORER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyExplorer.desc',
   {
-    defaultMessage: 'Anomaly explorer Page',
+    defaultMessage: 'Anomaly explorer page',
   }
 );
 export const SINGLE_METRIC_VIEWER_TITLE = i18n.translate(
@@ -156,13 +168,13 @@ export const ANALYTICS_MAP_DESC = i18n.translate(
 export const NODES_OVERVIEW_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.title',
   {
-    defaultMessage: 'Model Management',
+    defaultMessage: 'Trained models',
   }
 );
 export const NODES_OVERVIEW_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.desc',
   {
-    defaultMessage: 'Model Management page',
+    defaultMessage: 'Trained models page',
   }
 );
 export const NODES_TITLE = i18n.translate(
