@@ -6,21 +6,21 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { CY_BASE_CONFIG } from './cypress_base.config';
+import { getCypressBaseConfig } from './cypress_base.config';
 
 import { dataLoaders } from './support/data_loaders';
 
 export default defineCypressConfig({
-  ...CY_BASE_CONFIG,
+  ...getCypressBaseConfig(),
 
   env: {
-    ...CY_BASE_CONFIG.env,
+    ...getCypressBaseConfig().env,
 
     grepTags: '@ess',
   },
 
   e2e: {
-    ...CY_BASE_CONFIG.e2e,
+    ...getCypressBaseConfig().e2e,
 
     specPattern: 'public/management/cypress/e2e/mocked_data/',
     setupNodeEvents: (on, config) => {

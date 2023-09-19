@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const CY_BASE_CONFIG = {
+export const getCypressBaseConfig = () => ({
   reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: './public/management/reporter_config.json',
@@ -51,4 +51,4 @@ export const CY_BASE_CONFIG = {
     supportFile: 'public/management/cypress/support/e2e.ts',
     experimentalRunAllSpecs: true,
   },
-};
+});

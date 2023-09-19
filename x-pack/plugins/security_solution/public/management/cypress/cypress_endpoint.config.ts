@@ -6,7 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { CY_BASE_CONFIG } from './cypress_base.config';
+import { getCypressBaseConfig } from './cypress_base.config';
 
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 
@@ -14,10 +14,10 @@ import { responseActionTasks } from './support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  ...CY_BASE_CONFIG,
+  ...getCypressBaseConfig(),
 
   env: {
-    ...CY_BASE_CONFIG.env,
+    ...getCypressBaseConfig().env,
 
     'cypress-react-selector': {
       root: '#security-solution-app',
@@ -27,7 +27,7 @@ export default defineCypressConfig({
   },
 
   e2e: {
-    ...CY_BASE_CONFIG.e2e,
+    ...getCypressBaseConfig().e2e,
 
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
