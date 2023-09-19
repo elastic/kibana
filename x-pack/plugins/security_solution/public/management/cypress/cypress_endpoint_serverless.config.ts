@@ -6,45 +6,17 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { CY_BASE_CONFIG } from './cypress_base.config';
 import { dataLoaders } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './public/management/reporter_config.json',
-  },
-
-  defaultCommandTimeout: 60000,
-  execTimeout: 120000,
-  pageLoadTimeout: 12000,
-
-  retries: {
-    runMode: 1,
-    openMode: 0,
-  },
-
-  screenshotsFolder:
-    '../../../target/kibana-security-solution/public/management/cypress/screenshots',
-  trashAssetsBeforeRuns: false,
-  video: false,
-  viewportHeight: 900,
-  viewportWidth: 1440,
-  experimentalStudio: true,
+  ...CY_BASE_CONFIG,
 
   env: {
-    KIBANA_URL: 'http://localhost:5601',
-    ELASTICSEARCH_URL: 'http://localhost:9200',
-    FLEET_SERVER_URL: 'https://localhost:8220',
-    // Username/password used for both elastic and kibana
-    KIBANA_USERNAME: 'elastic',
-    KIBANA_PASSWORD: 'changeme',
-    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-    ELASTICSEARCH_PASSWORD: 'changeme',
+    ...CY_BASE_CONFIG.env,
 
-    grepFilterSpecs: true,
-    grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless',
 
     'cypress-react-selector': {
@@ -55,11 +27,9 @@ export default defineCypressConfig({
   e2e: {
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
-    baseUrl: 'http://localhost:5620',
-    supportFile: 'public/management/cypress/support/e2e.ts',
+
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
-    experimentalRunAllSpecs: true,
+
     setupNodeEvents: (on, config) => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

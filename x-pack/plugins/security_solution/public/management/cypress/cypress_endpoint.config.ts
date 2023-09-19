@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { CY_BASE_CONFIG } from './cypress_base.config';
 
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 
@@ -13,50 +14,24 @@ import { responseActionTasks } from './support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './public/management/reporter_config.json',
-  },
-
-  defaultCommandTimeout: 60000,
-  execTimeout: 120000,
-  pageLoadTimeout: 12000,
-
-  retries: {
-    runMode: 1,
-    openMode: 0,
-  },
-
-  screenshotsFolder:
-    '../../../target/kibana-security-solution/public/management/cypress/screenshots',
-  trashAssetsBeforeRuns: false,
-  video: false,
-  viewportHeight: 900,
-  viewportWidth: 1440,
-  experimentalStudio: true,
+  ...CY_BASE_CONFIG,
 
   env: {
+    ...CY_BASE_CONFIG.env,
+
     'cypress-react-selector': {
       root: '#security-solution-app',
     },
 
-    KIBANA_USERNAME: 'system_indices_superuser',
-    KIBANA_PASSWORD: 'changeme',
-    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-    ELASTICSEARCH_PASSWORD: 'changeme',
-
-    grepFilterSpecs: true,
-    grepOmitFiltered: true,
     grepTags: '@ess',
   },
 
   e2e: {
+    ...CY_BASE_CONFIG.e2e,
+
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    baseUrl: 'http://localhost:5620',
-    supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
-    experimentalRunAllSpecs: true,
     setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
       dataLoaders(on, config);
       // Data loaders specific to "real" Endpoint testing
