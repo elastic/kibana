@@ -359,7 +359,7 @@ export class ObservabilityAIAssistantClient {
 
     try {
       const body = await this.dependencies.esClient.indices.resolveIndex({
-        name: index,
+        name: index === '' ? '*' : index,
         expand_wildcards: 'open',
       });
       indices = body.indices.map((i) => i.name);
