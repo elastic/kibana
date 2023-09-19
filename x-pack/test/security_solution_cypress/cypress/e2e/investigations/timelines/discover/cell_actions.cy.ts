@@ -23,11 +23,11 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165650
-describe(
+describe.skip(
   `Discover Datagrid Cell Actions`,
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@serverless', '@brokenInServerless'],
   },
   () => {
     beforeEach(() => {

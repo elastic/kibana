@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const nginxRequestRate: FormulaValueConfig = {
-  label: 'Request Rate',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.requestRate', {
+    defaultMessage: 'Request Rate',
+  }),
   value: 'differences(max(nginx.stubstatus.requests))',
   format: {
     id: 'number',
