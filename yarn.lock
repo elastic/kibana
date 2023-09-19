@@ -20689,10 +20689,10 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@^0.0.143:
-  version "0.0.143"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.0.143.tgz#e8d678a7010f42835dec015a2cddaa6331fcb502"
-  integrity sha512-kmVJZdjY3qAH/Uxetttv0C3cvRn61XopEaN4k2m/OG2RBB4NebwGCk7503qC0DFw54spLLRxDkPpOLJj5SDEyA==
+langchain@^0.0.151:
+  version "0.0.151"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.0.151.tgz#10c1ebdda0d772e49dbca755ada6307c9280f601"
+  integrity sha512-RA7/ELK5dqUgv5glIP5Wm5JmbnrjH/eeROYdKGDGaDUNZrRJ2CLuEu+oJH7hcE5hpPoPlkLBCs/vz4hvr/YtYw==
   dependencies:
     "@anthropic-ai/sdk" "^0.6.2"
     ansi-styles "^5.0.0"
@@ -20708,7 +20708,7 @@ langchain@^0.0.143:
     langsmith "~0.0.31"
     ml-distance "^4.0.0"
     object-hash "^3.0.0"
-    openai "^4.4.0"
+    openai "~4.4.0"
     openapi-types "^12.1.3"
     p-queue "^6.6.2"
     p-retry "4"
@@ -23396,7 +23396,7 @@ openai@^3.3.0:
     axios "^0.26.0"
     form-data "^4.0.0"
 
-openai@^4.4.0:
+openai@~4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/openai/-/openai-4.4.0.tgz#dbaab326eb044ddec479951b245850c482678031"
   integrity sha512-JN0t628Kh95T0IrXl0HdBqnlJg+4Vq0Bnh55tio+dfCnyzHvMLiWyCM9m726MAJD2YkDU4/8RQB6rNbEq9ct2w==
