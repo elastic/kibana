@@ -14,7 +14,7 @@ type FieldSortOptions = estypes.FieldSort &
   estypes.ScoreSort &
   estypes.GeoDistanceSort &
   Omit<estypes.ScriptSort, 'script'> & {
-    script?: estypes.Script;
+    script?: estypes.ScriptSort['script'];
   };
 
 export function normalizeSortRequest(
