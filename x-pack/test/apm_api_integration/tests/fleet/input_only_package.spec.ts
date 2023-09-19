@@ -97,7 +97,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     }
 
     describe('input only package', () => {
-      // let apmPackagePolicy: PackagePolicy;
       let agentPolicyId: string;
       let packagePolicyId: string;
       let permissions: SecurityRoleDescriptor;
@@ -150,28 +149,28 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
       });
 
-      it('can ingest APM data given the privileges specified in the agent policy', async () => {
-        const scenario = getSynthtraceScenario();
+      describe('when ingesting events using the scoped api key', () => {
+        let scenario: ReturnType<typeof getSynthtraceScenario>;
 
-        // get api key scoped to the specified permissions and created with the fleet-server service account. This ensures that the api key is not created with more permissions than fleet-server is able to.
-        const apiKey = await getApiKeyForServiceAccount('fleet-server', permissions);
+        before(async () => {
+          scenario = getSynthtraceScenario();
 
-        // create a synthtrace client scoped to the api key. This verifies that the api key has permissions to write to the APM indices.
-        const scopedSynthtraceEsClient = await getSynthtraceClientWithApiKey(apiKey);
-        await scopedSynthtraceEsClient.index(scenario.events);
+          // get api key scoped to the specified permissions and created with the fleet-server service account. This ensures that the api key is not created with more permissions than fleet-server is able to.
+          const apiKey = await getApiKeyForServiceAccount('fleet-server', permissions);
 
-        const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
-        expect(apmServices).to.eql([
-          {
-            serviceName: 'opbeans-java',
-            transactionType: 'request',
-            environments: ['production'],
-            agentName: 'java',
-            latency: 5000000,
-            transactionErrorRate: 0,
-            throughput: 1.0000083334027785,
-          },
-        ]);
+          // create a synthtrace client scoped to the api key. This verifies that the api key has permissions to write to the APM indices.
+          const scopedSynthtraceEsClient = await getSynthtraceClientWithApiKey(apiKey);
+          await scopedSynthtraceEsClient.index(scenario.events);
+        });
+
+        it('the events can be seen on the Service Inventory Page', async () => {
+          const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
+          expect(apmServices[0].serviceName).to.be('opbeans-java');
+          expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
+          expect(apmServices[0].latency).to.be(2550000);
+          expect(apmServices[0].throughput).to.be(2);
+          expect(apmServices[0].transactionErrorRate).to.be(0.5);
+        });
       });
     });
   });
@@ -179,7 +178,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
 function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) {
   return pRetry(async () => {
-    const services = await apmApiClient.readUser({
+    const res = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services',
       params: {
         query: {
@@ -194,20 +193,20 @@ function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) 
       },
     });
 
-    if (services.body.items.length === 0) {
+    if (res.body.items.length === 0 || !res.body.items[0].latency) {
       throw new Error(`Timed-out: No APM Services were found`);
     }
 
-    return services.body.items;
+    return res.body.items;
   });
 }
 
 function getSynthtraceScenario() {
   const start = new Date('2023-09-01T00:00:00.000Z').getTime();
-  const end = new Date('2023-09-01T00:02:00.000Z').getTime() - 1;
+  const end = new Date('2023-09-01T00:02:00.000Z').getTime();
 
   const opbeansJava = apm
-    .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+    .service({ name: 'opbeans-java', environment: 'ingested-via-fleet', agentName: 'java' })
     .instance('instance');
 
   const events = timerange(start, end)
