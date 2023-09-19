@@ -490,6 +490,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
+            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
           />
         </EuiPortal>
       )}
