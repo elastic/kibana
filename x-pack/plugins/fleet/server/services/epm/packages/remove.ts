@@ -43,6 +43,8 @@ import { removeArchiveEntries } from '../archive/storage';
 
 import { auditLoggingService } from '../../audit_logging';
 
+import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
+
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
@@ -59,17 +61,21 @@ export async function removeInstallation(options: {
   const { total, items } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 1,
-    perPage: options.force ? SO_SEARCH_LIMIT : 0,
+    perPage: SO_SEARCH_LIMIT,
   });
 
+  if (!options.force) {
+    await populatePackagePolicyAssignedAgentsCount(esClient, items);
+  }
+
   if (total > 0) {
-    if (options.force) {
+    if (options.force || items.every((item) => (item.agents ?? 0) === 0)) {
       // delete package policies
       const ids = items.map((item) => item.id);
       appContextService
         .getLogger()
         .info(
-          `deleting package policies of ${pkgName} package because force flag was enabled: ${ids}`
+          `deleting package policies of ${pkgName} package because not used by agents or force flag was enabled: ${ids}`
         );
       await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
         force: options.force,
