@@ -26,6 +26,7 @@ import { JobSelectorFlyout } from './components/job_selector_flyout';
  */
 export async function resolveJobSelection(
   coreStart: CoreStart,
+  isServerless: boolean,
   selectedJobIds?: JobId[]
 ): Promise<{ jobIds: string[]; groups: Array<{ groupId: string; jobIds: string[] }> }> {
   const {
@@ -69,7 +70,9 @@ export async function resolveJobSelection(
 
       const flyoutSession = coreStart.overlays.openFlyout(
         toMountPoint(
-          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
+          <KibanaContextProvider
+            services={{ ...coreStart, mlServices: getMlGlobalServices(http, isServerless) }}
+          >
             <JobSelectorFlyout
               selectedIds={selectedJobIds}
               withTimeRangeSelector={false}

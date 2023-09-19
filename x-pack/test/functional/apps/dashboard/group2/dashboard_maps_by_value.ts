@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   async function createNewDashboard() {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.preserveCrossAppState();
     await PageObjects.dashboard.clickNewDashboard();
   }

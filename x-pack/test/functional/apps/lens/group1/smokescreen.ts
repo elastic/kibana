@@ -762,6 +762,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasVisualOptionsButton).to.be(false);
     });
 
+    it('should allow edit meta-data for Lens chart on listing page', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Afancilenstest');
+      await listingTable.inspectVisualization();
+      await listingTable.editVisualizationDetails({
+        title: 'Anewfancilenstest',
+        description: 'new description',
+      });
+      await listingTable.searchForItemWithName('Anewfancilenstest');
+      await listingTable.expectItemsCount('visualize', 1);
+    });
+
     it('should correctly optimize multiple percentile metrics', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

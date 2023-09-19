@@ -24,6 +24,9 @@
     "@kbn/config-schema",
     "@kbn/core-application-browser",
     "@kbn/discover-plugin",
+    "@kbn/observability-onboarding-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*"

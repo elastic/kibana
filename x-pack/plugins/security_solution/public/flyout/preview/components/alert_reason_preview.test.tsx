@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { PreviewPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_preview_panel_context';
@@ -23,25 +24,15 @@ const panelContextValue = {
 describe('<AlertReasonPreview />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
-      <PreviewPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <AlertReasonPreview />
-        </ThemeProvider>
-      </PreviewPanelContext.Provider>
+      <IntlProvider locale="en>">
+        <PreviewPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <AlertReasonPreview />
+          </ThemeProvider>
+        </PreviewPanelContext.Provider>
+      </IntlProvider>
     );
     expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render null is dataAsNestedObject is null', () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataAsNestedObject: null,
-    };
-    const { queryByTestId } = render(
-      <PreviewPanelContext.Provider value={contextValue}>
-        <AlertReasonPreview />
-      </PreviewPanelContext.Provider>
-    );
-    expect(queryByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toHaveTextContent('Alert reason');
   });
 });

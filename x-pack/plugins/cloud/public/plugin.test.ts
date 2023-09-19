@@ -148,6 +148,16 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectId).toBe('my-awesome-project');
       });
+
+      it('exposes `serverless.projectName`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+          },
+        });
+        expect(setup.serverless.projectName).toBe('My Awesome Project');
+      });
     });
   });
 
@@ -221,6 +231,18 @@ describe('Cloud Plugin', () => {
       const coreStart = coreMock.createStart();
       const start = plugin.start(coreStart);
       expect(start.serverless.projectId).toBe('my-awesome-project');
+    });
+
+    it('exposes `serverless.projectName`', () => {
+      const { plugin } = startPlugin({
+        serverless: {
+          project_id: 'my-awesome-project',
+          project_name: 'My Awesome Project',
+        },
+      });
+      const coreStart = coreMock.createStart();
+      const start = plugin.start(coreStart);
+      expect(start.serverless.projectName).toBe('My Awesome Project');
     });
   });
 });
