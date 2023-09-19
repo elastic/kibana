@@ -86,6 +86,9 @@ export class Dataset {
     );
 
     // Create new datasets for the retrieved wildcards
-    return Array.from(wildcards).map((wildcard) => Dataset.create({ name: wildcard }));
+    return Array.from(wildcards).map((wildcard) => {
+      const [, dataset] = wildcard.split('-');
+      return Dataset.create({ name: wildcard, title: dataset });
+    });
   }
 }
