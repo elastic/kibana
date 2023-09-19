@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { screen, fireEvent } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -35,40 +33,27 @@ describe('CustomFieldsForm ', () => {
   it('renders text as default custom field type', async () => {
     appMockRender.render(<CustomFieldsForm onChange={onChange} />);
 
-    expect(screen.getByTestId('custom-field-type-dropdown')).toBeInTheDocument();
-    expect(screen.getByTestId('custom-field-type-text')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
+    expect(screen.getByText('Text')).toBeInTheDocument();
 
-    const fieldOptions = screen.getByTestId('custom-field-options-checkbox-group');
-
-    expect(within(fieldOptions).getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
   it('renders custom field type options', async () => {
     appMockRender.render(<CustomFieldsForm onChange={onChange} />);
 
-    expect(screen.getByTestId('custom-field-type-text')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('custom-field-type-dropdown'));
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.getByTestId('custom-field-type-toggle')).toBeInTheDocument();
+    expect(screen.getByText('Text')).toBeInTheDocument();
+    expect(screen.getByText('Toggle')).toBeInTheDocument();
   });
 
   it('renders toggle custom field type', async () => {
     appMockRender.render(<CustomFieldsForm onChange={onChange} />);
 
-    userEvent.click(screen.getByTestId('custom-field-type-dropdown'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId('custom-field-type-toggle'));
-
-    const fieldOptions = screen.getByTestId('custom-field-options-checkbox-group');
-
-    await waitFor(() => {
-      expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
+      target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    expect(within(fieldOptions).getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
+    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 });

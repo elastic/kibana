@@ -37,6 +37,7 @@ const configuration: ConnectorConfiguration = {
     fields: null,
   },
   closureType: 'close-by-pushing',
+  customFields: [],
 };
 
 describe('useConfigure', () => {
@@ -59,6 +60,7 @@ describe('useConfigure', () => {
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
         setMappings: result.current.setMappings,
+        setCustomFields: result.current.setCustomFields,
       })
     );
   });
@@ -79,6 +81,7 @@ describe('useConfigure', () => {
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
+          customFields: caseConfigurationCamelCaseResponseMock.customFields,
         },
         mappings: [],
         firstLoad: true,
@@ -89,6 +92,7 @@ describe('useConfigure', () => {
         setConnector: result.current.setConnector,
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setMappings: result.current.setMappings,
+        setCustomFields: result.current.setCustomFields,
         version: caseConfigurationCamelCaseResponseMock.version,
         id: caseConfigurationCamelCaseResponseMock.id,
       });
@@ -301,6 +305,7 @@ describe('useConfigure', () => {
         setConnector: result.current.setConnector,
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setMappings: result.current.setMappings,
+        setCustomFields: result.current.setCustomFields,
       });
     });
   });
@@ -338,6 +343,7 @@ describe('useConfigure', () => {
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
+          customFields: caseConfigurationCamelCaseResponseMock.customFields,
         },
         firstLoad: true,
         loading: false,
@@ -348,6 +354,7 @@ describe('useConfigure', () => {
         setConnector: result.current.setConnector,
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setMappings: result.current.setMappings,
+        setCustomFields: result.current.setCustomFields,
       });
     });
   });

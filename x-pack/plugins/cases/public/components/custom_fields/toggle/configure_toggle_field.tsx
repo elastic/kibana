@@ -21,14 +21,14 @@ export const configureToggleCustomFieldBuilder: CustomFieldBuilder = () => ({
     ConfigurePage: () => (
       <>
         <UseField
-          path="fieldOptions"
+          path="options.required"
           component={CheckBoxField}
           componentProps={{
-            dataTestSubj: 'text-custom-field-options',
-            label: i18n.FIELD_OPTIONS,
             euiFieldProps: {
+              'data-test-subj': 'toggle-custom-field-options',
               label: i18n.FIELD_OPTION_REQUIRED,
             },
+            label: i18n.FIELD_OPTIONS,
           }}
         />
       </>

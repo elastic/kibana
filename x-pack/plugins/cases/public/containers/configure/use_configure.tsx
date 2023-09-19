@@ -15,18 +15,19 @@ import type {
   CaseConfigure,
   CaseConnector,
   CaseConnectorMapping,
-  CustomFields,
+  CustomFieldsConfiguration,
 } from './types';
 import { useToasts } from '../../common/lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
+  customFields: CustomFieldsConfiguration;
 };
 
 export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
-  customFields: CustomFields;
+  customFields: CustomFieldsConfiguration;
   firstLoad: boolean;
   loading: boolean;
   mappings: CaseConnectorMapping[];
@@ -73,7 +74,7 @@ export type Action =
     }
   | {
       type: 'setCustomFields';
-      customFields: CustomFields;
+      customFields: CustomFieldsConfiguration;
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -139,13 +140,17 @@ export const configureCasesReducer = (state: State, action: Action) => {
 };
 
 export interface ReturnUseCaseConfigure extends State {
-  persistCaseConfigure: ({ connector, closureType }: ConnectorConfiguration) => unknown;
+  persistCaseConfigure: ({
+    connector,
+    closureType,
+    customFields,
+  }: ConnectorConfiguration) => unknown;
   refetchCaseConfigure: () => void;
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
   setMappings: (newMapping: CaseConnectorMapping[]) => void;
-  setCustomFields: (customFields: CustomFields) => void;
+  setCustomFields: (customFields: CustomFieldsConfiguration) => void;
 }
 
 export const initialState: State = {
@@ -165,6 +170,7 @@ export const initialState: State = {
       name: 'none',
       type: ConnectorTypes.none,
     },
+    customFields: [],
   },
   firstLoad: false,
   loading: true,
@@ -199,8 +205,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setCustomFields = useCallback((customFields: CustomFields) => {
-    console.log('use_configure hook dispatch', { customFields });
+  const setCustomFields = useCallback((customFields: CustomFieldsConfiguration) => {
     dispatch({
       customFields,
       type: 'setCustomFields',
@@ -276,6 +281,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
           setVersion(res.version);
           setID(res.id);
           setMappings(res.mappings);
+          setCustomFields(res.customFields);
 
           if (!state.firstLoad) {
             setFirstLoad(true);
@@ -285,6 +291,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 connector: {
                   ...res.connector,
                 },
+                customFields: [...res.customFields],
               });
             }
           }
@@ -311,7 +318,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
   }, [state.firstLoad]);
 
   const persistCaseConfigure = useCallback(
-    async ({ connector, closureType }: ConnectorConfiguration) => {
+    async ({ connector, closureType, customFields }: ConnectorConfiguration) => {
       try {
         isCancelledPersistRef.current = false;
         abortCtrlPersistRef.current.abort();
@@ -321,6 +328,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const connectorObj = {
           connector,
           closure_type: closureType,
+          customFields,
         };
 
         const res =
@@ -353,6 +361,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               connector: {
                 ...res.connector,
               },
+              customFields: [...res.customFields],
             });
           }
           if (res.error != null) {

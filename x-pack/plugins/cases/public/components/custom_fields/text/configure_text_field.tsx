@@ -24,10 +24,10 @@ export const configureTextCustomFieldBuilder: CustomFieldBuilder = () => ({
           path="options.required"
           component={CheckBoxField}
           componentProps={{
-            dataTestSubj: 'text-custom-field-options',
             label: i18n.FIELD_OPTIONS,
             euiFieldProps: {
               label: i18n.FIELD_OPTION_REQUIRED,
+              'data-test-subj': 'text-custom-field-options',
             },
           }}
         />

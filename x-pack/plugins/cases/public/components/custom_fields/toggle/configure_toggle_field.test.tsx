@@ -48,7 +48,7 @@ describe('configureToggleCustomFieldBuilder ', () => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          fieldOptions: {
+          options: {
             required: true,
           },
         },

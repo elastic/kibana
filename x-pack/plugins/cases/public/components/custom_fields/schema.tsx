@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
 import type { CustomFieldTypes } from '../../../common/types/domain';
@@ -21,7 +20,6 @@ export interface FormProps {
 export const schema = {
   label: {
     label: i18n.FIELD_LABEL,
-    type: FIELD_TYPES.TEXT,
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),
@@ -36,7 +34,6 @@ export const schema = {
   },
   type: {
     label: i18n.FIELD_TYPE,
-    type: FIELD_TYPES.SUPER_SELECT,
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),

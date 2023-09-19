@@ -15,10 +15,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 
-import type { CustomFieldTypes } from '../types';
-
+import type { CustomFieldTypes } from '../../../../common/types/domain';
+import { builderMap } from '../builder';
 export interface ListOption {
   content: string;
   id: string;
@@ -31,6 +32,12 @@ export interface Props {
 
 const DraggableComponent: React.FC<Props> = (props) => {
   const { listValues } = props;
+
+  const renderTypeLabel = (type?: CustomFieldTypes) => {
+    const createdBuilder = type && builderMap[type];
+
+    return createdBuilder && createdBuilder().label;
+  };
 
   return (
     <>
@@ -50,7 +57,7 @@ const DraggableComponent: React.FC<Props> = (props) => {
                     hasInteractiveChildren={true}
                   >
                     {(provided) => (
-                      <EuiPanel paddingSize="s">
+                      <EuiPanel paddingSize="s" data-test-subj={`custom-field-${content}-${type}`}>
                         <EuiFlexGroup alignItems="center" gutterSize="s">
                           <EuiFlexItem grow={false}>
                             <EuiPanel
@@ -59,7 +66,7 @@ const DraggableComponent: React.FC<Props> = (props) => {
                               {...provided.dragHandleProps}
                               aria-label="Drag Handle"
                             >
-                              {/* <EuiIcon type="grab" /> // icon for drag handle */}
+                              <EuiIcon type="grab" />
                             </EuiPanel>
                           </EuiFlexItem>
                           <EuiFlexItem grow={true}>
@@ -67,7 +74,7 @@ const DraggableComponent: React.FC<Props> = (props) => {
                               <EuiFlexItem grow={false}>
                                 <h4>{content}</h4>
                               </EuiFlexItem>
-                              <EuiText color="subdued">{type}</EuiText>
+                              <EuiText color="subdued">{renderTypeLabel(type)}</EuiText>
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>

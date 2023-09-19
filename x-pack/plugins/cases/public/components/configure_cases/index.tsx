@@ -29,10 +29,10 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { CustomFields as CustomFieldsComponent } from '../custom_fields';
+import { CustomFields } from '../custom_fields';
 import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import type { CustomFields } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -67,6 +67,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const {
     connector,
+    customFields,
     closureType,
     loading: loadingCaseConfigure,
     mappings,
@@ -106,11 +107,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
       await persistCaseConfigure({
         connector: caseConnector,
         closureType,
+        customFields,
       });
       onConnectorUpdated(createdConnector);
       setConnector(caseConnector);
     },
-    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
+    [onConnectorUpdated, closureType, setConnector, customFields, persistCaseConfigure]
   );
 
   const isLoadingAny =
@@ -142,9 +144,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
       persistCaseConfigure({
         connector: caseConnector,
         closureType,
+        customFields,
       });
     },
-    [connectors, closureType, persistCaseConfigure, setConnector]
+    [connectors, closureType, customFields, persistCaseConfigure, setConnector]
   );
 
   const onChangeClosureType = useCallback(
@@ -153,9 +156,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
       persistCaseConfigure({
         connector,
         closureType: type,
+        customFields,
       });
     },
-    [connector, persistCaseConfigure, setClosureType]
+    [connector, customFields, persistCaseConfigure, setClosureType]
   );
 
   useEffect(() => {
@@ -216,12 +220,25 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setAddFieldFlyoutVisibility]);
 
   const onCustomFieldCreated = useCallback(
-    (customFieldData: CustomFields) => {
-      setCustomFields(customFieldData);
+    (customFieldData: CustomFieldsConfiguration) => {
+      const data = customFields.length ? [...customFields, ...customFieldData] : customFieldData;
+      setCustomFields(data);
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields: [...customFields, ...customFieldData],
+      });
 
       setAddFieldFlyoutVisibility(false);
     },
-    [setAddFieldFlyoutVisibility, setCustomFields]
+    [
+      setAddFieldFlyoutVisibility,
+      customFields,
+      setCustomFields,
+      persistCaseConfigure,
+      connector,
+      closureType,
+    ]
   );
 
   const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
@@ -287,8 +304,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
           </SectionWrapper>
           <SectionWrapper>
             <EuiFlexItem grow={false}>
-              <CustomFieldsComponent
-                customFields={[]}
+              <CustomFields
+                customFields={customFields}
                 isLoading={loadingCaseConfigure}
                 disabled={loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}

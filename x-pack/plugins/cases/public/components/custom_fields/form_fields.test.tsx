@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
-import { customFieldTypesValues } from './schema';
 
 describe('FormFields ', () => {
   let appMockRender: AppMockRenderer;
@@ -45,11 +44,9 @@ describe('FormFields ', () => {
 
     userEvent.type(screen.getByTestId('custom-field-label-input'), 'hello');
 
-    userEvent.click(screen.getByTestId('custom-field-type-dropdown'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId(`custom-field-type-${customFieldTypesValues[1]}`));
+    fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
+      target: { value: CustomFieldTypes.TOGGLE },
+    });
 
     userEvent.click(screen.getByText('Submit'));
 
@@ -57,8 +54,8 @@ describe('FormFields ', () => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          fieldLabel: 'hello',
-          fieldType: 'toggle',
+          label: 'hello',
+          type: 'toggle',
         },
         true
       );

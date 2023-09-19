@@ -12,7 +12,6 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { AddFieldFlyout } from './add_field_flyout';
-import * as i18n from './translations';
 
 describe('AddFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
@@ -42,18 +41,19 @@ describe('AddFieldFlyout ', () => {
 
     userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
+    userEvent.click(screen.getByTestId('text-custom-field-options'));
 
     userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
 
     await waitFor(() => {
-      expect(props.onSaveField).toBeCalledWith({
-        fieldLabel: 'Summary',
-        fieldOptions: {
+      expect(props.onSaveField).toBeCalledWith([
+        {
+          key: expect.anything(),
+          label: 'Summary',
           required: true,
+          type: 'text',
         },
-        fieldType: 'text',
-      });
+      ]);
     });
   });
 

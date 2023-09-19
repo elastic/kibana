@@ -48,7 +48,7 @@ describe('configureTextCustomFieldBuilder ', () => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          fieldOptions: {
+          options: {
             required: true,
           },
         },

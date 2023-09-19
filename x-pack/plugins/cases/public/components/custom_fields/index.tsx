@@ -6,16 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import type { CustomFields as CustomFieldsDomainType } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { ListOption } from './draggable';
 import { Draggable } from './draggable';
 export interface Props {
-  customFields: CustomFieldsDomainType;
+  customFields: CustomFieldsConfiguration;
   disabled: boolean;
   isLoading: boolean;
   handleAddCustomField: () => void;
@@ -59,12 +59,22 @@ const CustomFieldsComponent: React.FC<Props> = ({
         className="eui-fullWidth"
         css={css`
           max-width: 580px;
+          .euiEmptyPrompt__main {
+            padding: 0px;
+            padding-bottom: 16px;
+          }
+          .euiEmptyPrompt__contentInner {
+            max-width: none;
+          }
         `}
         body={
           customFields?.length ? (
             <Draggable listValues={currentListValues} />
           ) : (
-            i18n.NO_CUSTOM_FIELDS
+            <>
+              <EuiSpacer size="m" />
+              {i18n.NO_CUSTOM_FIELDS}
+            </>
           )
         }
         actions={

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
-import type { CustomFields } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 
@@ -28,7 +28,7 @@ export interface AddFieldFlyoutProps {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: CustomFields) => void;
+  onSaveField: (data: CustomFieldsConfiguration) => void;
 }
 
 const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
@@ -49,14 +49,13 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   const handleSaveField = useCallback(async () => {
     const { isValid, data } = await submit();
 
-    const customFieldKey = uuidv4();
-
-    const transformedData: CustomFields = [
+    const transformedData: CustomFieldsConfiguration = [
       {
-        key: customFieldKey,
+        key: data.key ?? uuidv4(),
         label: data.label,
         type: data.type,
-        required: data.options?.required,
+        required:
+          data.options?.required && data.options?.required !== '' ? data.options.required : false,
       },
     ];
 

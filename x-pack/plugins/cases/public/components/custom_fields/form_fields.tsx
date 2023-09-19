@@ -33,7 +33,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
   const [selectedType, setSelectedType] = useState<CustomFieldTypes>(CustomFieldTypes.TEXT);
 
   const handleTypeChange = useCallback(
-    (e: CustomFieldTypes) => {
+    (e) => {
       setSelectedType(e.target.value);
     },
     [setSelectedType]
@@ -74,8 +74,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
         componentProps={{
           euiFieldProps: {
             options,
+            'data-test-subj': 'custom-field-type-selector',
           },
-          dataTestSubj: 'custom-field-type-selector',
           selectedType,
           isLoading: isSubmitting,
           onChange: handleTypeChange,
