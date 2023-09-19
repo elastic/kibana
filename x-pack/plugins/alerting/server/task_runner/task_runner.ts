@@ -417,7 +417,7 @@ export class TaskRunner<
       .filter(({ categoryIds }) => {
         // If category IDs array doesn't exist: allow all
         if (!Array.isArray(categoryIds)) {
-          return true; 
+          return true;
         }
         // If category IDs array exist: check category
         if ((categoryIds as string[]).includes(ruleType.category)) {

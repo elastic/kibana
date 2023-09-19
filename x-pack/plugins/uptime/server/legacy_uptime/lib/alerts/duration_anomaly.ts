@@ -7,7 +7,11 @@
 
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import { KibanaRequest, SavedObjectsClientContract, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_VALUE,
