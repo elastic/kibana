@@ -130,72 +130,11 @@ yarn cypress:dw:open
 yarn --cwd x-pack/plugins/security_solution cypress:dw:open
 ```
 
-For developing/debugging tests against real endpoint please use:
-
-Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-yarn cypress:dw:endpoint:open
-
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:endpoint:open
-```
-
-#### Cypress (interactive) with real Endpoints using Vagrant
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-export CI=true
-yarn cypress:dw:endpoint:open
-````
-
-Note that you can select the browser you want to use on the top right side of the interactive runner.
-
-#### Cypress against REAL Endpoint + Headless (Chrome)
-
-This requires some additional setup as mentioned in the [pre-requisites](#pre-requisites) section.
-
-Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
-
-```shell
-# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner with real endpoint
-cd x-pack/plugins/security_solution
-yarn cypress:dw:endpoint:run
-
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:endpoint:run
-```
-
 ## Folder Structure
 
 ### e2e/
 
 Contains all the tests. Within it are two sub-folders:
-
-#### cypress/endpoint
-
-Contains all the tests that are executed against real endpoints.
-
-#### cypress/mocked_data
-
-Contains all the tests that are executed against mocked endpoint and run on CI. If you want to add tests that run on CI
-then this is where you should add those.
 
 ### integration/
 
@@ -214,7 +153,6 @@ Directory also holds Cypress Plugins that are then initialized via `setupNodeEve
 ### screens/
 
 Contains the elements we want to interact with within our tests.
-
 Each file inside the screens folder represents a screen in our application.
 
 ### tasks/
