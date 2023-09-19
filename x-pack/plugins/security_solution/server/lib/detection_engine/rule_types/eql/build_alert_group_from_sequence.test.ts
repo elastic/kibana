@@ -142,60 +142,62 @@ describe('buildAlert', () => {
   });
 
   describe('recursive intersection between objects', () => {
-    test.only('should work with arrays with exact matches', () => {
-      const a = {
-        field1: [1],
-      };
-      const b = {
-        field1: [1],
-      };
-      const intersection = objectPairIntersection(a, b);
-      const expected = {
-        field1: [1],
-      };
-      expect(intersection).toEqual(expected);
-    });
+    describe('objectArrayIntersection', () => {
+      test('should work with arrays with exact matches', () => {
+        const a = {
+          field1: [1],
+        };
+        const b = {
+          field1: [1],
+        };
+        const intersection = objectArrayIntersection([a, b]);
+        const expected = {
+          field1: [1],
+        };
+        expect(intersection).toEqual(expected);
+      });
 
-    test.only('should work with arrays with differing lengths', () => {
-      const a = {
-        field1: 1,
-      };
-      const b = {
-        field1: [1, 2, 3],
-      };
-      const intersection = objectPairIntersection(a, b);
-      const expected = {
-        field1: [1],
-      };
-      expect(intersection).toEqual(expected);
-    });
+      test('should work with arrays with differing lengths', () => {
+        const a = {
+          field1: 1,
+        };
+        const b = {
+          field1: [1, 2, 3],
+        };
+        const intersection = objectArrayIntersection([a, b]);
+        const expected = {
+          field1: [1],
+        };
+        expect(intersection).toEqual(expected);
+      });
 
-    test.only('should work with arrays with same lengths but only one intersecting element', () => {
-      const a = {
-        field1: [3, 4, 5],
-      };
-      const b = {
-        field1: [1, 2, 3],
-      };
-      const intersection = objectPairIntersection(a, b);
-      const expected = {
-        field1: [3],
-      };
-      expect(intersection).toEqual(expected);
-    });
+      test('should work with arrays with same lengths but only one intersecting element', () => {
+        const a = {
+          field1: [3, 4, 5],
+        };
+        const b = {
+          field1: [1, 2, 3],
+        };
+        const intersection = objectArrayIntersection([a, b]);
+        const expected = {
+          field1: [3],
+        };
+        expect(intersection).toEqual(expected);
+      });
 
-    test.only('should work with arrays with differing lengths and two matching elements', () => {
-      const a = {
-        field1: [3, 4, 5],
-      };
-      const b = {
-        field1: [1, 2, 3, 4],
-      };
-      const intersection = objectPairIntersection(a, b);
-      const expected = {
-        field1: [3, 4],
-      };
-      expect(intersection).toEqual(expected);
+      test('should work with arrays with differing lengths and two matching elements', () => {
+        const a = {
+          field1: [3, 4, 5],
+        };
+        const b = {
+          field1: [1, 2, 3, 4],
+        };
+        const intersection = objectArrayIntersection([a, b]);
+        const expected = {
+          field1: [3, 4],
+        };
+        expect(intersection).toEqual(expected);
+      });
     });
 
     test('should treat numbers and strings as unequal', () => {
@@ -269,7 +271,7 @@ describe('buildAlert', () => {
       expect(intersection).toEqual(expected);
     });
 
-    test('should strip arrays out regardless of whether they are equal', () => {
+    test('should work with arrays', () => {
       const a = {
         array_field1: [1, 2],
         array_field2: [1, 2],
@@ -279,7 +281,7 @@ describe('buildAlert', () => {
         array_field2: [3, 4],
       };
       const intersection = objectPairIntersection(a, b);
-      const expected = undefined;
+      const expected = { array_field1: [1, 2], array_field2: [] };
       expect(intersection).toEqual(expected);
     });
 
@@ -339,6 +341,7 @@ describe('buildAlert', () => {
       const intersection = objectPairIntersection(a, b);
       const expected = {
         container_field: {
+          array_field: [1, 2],
           field1: 1,
           field6: null,
           nested_container_field: {
@@ -384,6 +387,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectPairIntersection(a, b);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
         field6: null,
         container_field: {
@@ -471,6 +475,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectArrayIntersection([a, b]);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
         field6: null,
         container_field: {
@@ -528,6 +533,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectArrayIntersection([a, b, c]);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
       };
       expect(intersection).toEqual(expected);

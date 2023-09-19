@@ -6,6 +6,7 @@
  */
 
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
+import { intersection as lodashIntersection, isArray } from 'lodash';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -180,6 +181,11 @@ export const buildAlertRoot = (
   };
 };
 
+/**
+ * Merges array of alert sources with the first item in the array
+ * @param objects array of alert _source objects
+ * @returns singular object
+ */
 export const objectArrayIntersection = (objects: object[]) => {
   if (objects.length === 0) {
     return undefined;
@@ -195,14 +201,23 @@ export const objectArrayIntersection = (objects: object[]) => {
   }
 };
 
-export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
-  if (a === undefined || b === undefined) {
+/**
+ *
+ * @param accumulated
+ * @param child
+ * @returns
+ */
+export const objectPairIntersection = (
+  accumulated: object | undefined,
+  child: object | undefined
+) => {
+  if (accumulated === undefined || child === undefined) {
     return undefined;
   }
   const intersection: Record<string, unknown> = {};
-  Object.entries(a).forEach(([key, aVal]) => {
-    if (key in b) {
-      const bVal = (b as Record<string, unknown>)[key];
+  Object.entries(accumulated).forEach(([key, aVal]) => {
+    if (key in child) {
+      const bVal = (child as Record<string, unknown>)[key];
       if (
         typeof aVal === 'object' &&
         !(aVal instanceof Array) &&
@@ -214,6 +229,12 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
         intersection[key] = objectPairIntersection(aVal, bVal);
       } else if (aVal === bVal) {
         intersection[key] = aVal;
+      } else if (isArray(aVal) && isArray(bVal)) {
+        intersection[key] = lodashIntersection(aVal, bVal);
+      } else if (isArray(aVal) && !isArray(bVal)) {
+        intersection[key] = lodashIntersection(aVal, [bVal]);
+      } else if (!isArray(aVal) && isArray(bVal)) {
+        intersection[key] = lodashIntersection([aVal], bVal);
       }
     }
   });
