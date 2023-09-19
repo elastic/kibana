@@ -74,6 +74,6 @@ export type ResetInputRef = {
 
 /**
  * A function that is called when the value of a {@link FieldInput} changes.
- * @param params The {@link OnChangeParams} parameters passed to the handler.
+ * @param change The {@link UnsavedFieldChange} passed to the handler.
  */
 export type OnChangeFn<T extends SettingType> = (change?: UnsavedFieldChange<T>) => void;

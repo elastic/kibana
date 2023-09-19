@@ -22,10 +22,10 @@ export const getFieldDefinitions = (
   settings: Record<string, UiSettingMetadata<SettingType>>,
   client: IUiSettingsClient
 ): Array<FieldDefinition<SettingType>> =>
-  Object.entries(settings).map(([id, setting]) => {
-    return getFieldDefinition({
+  Object.entries(settings).map(([id, setting]) =>
+    getFieldDefinition({
       id,
       setting,
       params: { isCustom: client.isCustom(id), isOverridden: client.isOverridden(id) },
-    });
-  });
+    })
+  );

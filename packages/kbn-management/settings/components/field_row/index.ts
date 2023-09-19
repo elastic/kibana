@@ -7,5 +7,11 @@
  */
 
 export { FieldRow, type FieldRowProps as FieldProps } from './field_row';
-export { FieldRowProvider, FieldRowKibanaProvider } from './services';
-export type { FieldRowServices, FieldRowKibanaDependencies, RowOnChangeFn } from './types';
+export { FieldRowProvider, FieldRowKibanaProvider, type FieldRowProviderProps } from './services';
+export type {
+  FieldRowServices,
+  FieldRowKibanaDependencies,
+  RowOnChangeFn,
+  KibanaDependencies,
+  Services,
+} from './types';

@@ -11,8 +11,8 @@ import isEqual from 'lodash/isEqual';
 import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
-export type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;
-export type C<T extends SettingType> = UnsavedFieldChange<T>;
+type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;
+type C<T extends SettingType> = UnsavedFieldChange<T>;
 
 /**
  * Utility function to determine if a given value is equal to the default value of

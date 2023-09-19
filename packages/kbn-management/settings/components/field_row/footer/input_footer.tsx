@@ -34,6 +34,7 @@ export interface FieldInputFooterProps<T extends SettingType> {
   field: Field<T>;
   /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
   unsavedChange?: UnsavedFieldChange<T>;
+  /** A handler for clearing, rather than resetting the field. */
   onClear: () => void;
   /** A handler for when a field is reset to its default or saved value. */
   onReset: () => void;
@@ -42,13 +43,14 @@ export interface FieldInputFooterProps<T extends SettingType> {
 }
 
 export const FieldInputFooter = <T extends SettingType>({
-  isSavingEnabled,
   field,
+  isSavingEnabled,
+  onClear,
   onReset,
   unsavedChange,
-  onClear,
 }: FieldInputFooterProps<T>) => {
   const { footerCSS } = useInputFooterStyles();
+
   if (field.isOverridden) {
     return <FieldOverriddenMessage {...{ field }} />;
   }

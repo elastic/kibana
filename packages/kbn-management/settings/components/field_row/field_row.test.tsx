@@ -18,6 +18,7 @@ import { wrap } from './mocks';
 
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 import { DATA_TEST_SUBJ_RESET_PREFIX } from './footer/reset_link';
+import { DATA_TEST_SUBJ_CHANGE_LINK_PREFIX } from './footer/change_image_link';
 
 const defaults = {
   requiresPageReload: false,
@@ -463,7 +464,9 @@ describe('Field', () => {
     expect(getByText('Setting is currently not saved.')).toBeInTheDocument();
     const input = getByTestId(`euiColorPickerAnchor ${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: '#1235' } });
+
     waitFor(() => expect(input).toHaveValue('#1235'));
+
     waitFor(() =>
       expect(getByTestId(`${DATA_TEST_SUBJ_SCREEN_READER_MESSAGE}-${field.id}`)).toBe(
         'Provide a valid color value'
@@ -495,5 +498,51 @@ describe('Field', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: field.savedValue } });
     expect(handleChange).toHaveBeenCalledWith(field.id, undefined);
+  });
+
+  it('should clear the current image when Change Image is clicked', () => {
+    const setting = settings.image;
+
+    const field = getFieldDefinition({
+      id: setting.name || setting.type,
+      setting: {
+        ...setting,
+        userValue: userInputValues.image,
+      },
+    });
+
+    const { getByTestId, getByAltText } = render(
+      wrap(<FieldRow {...{ field }} onChange={handleChange} isSavingEnabled={true} />)
+    );
+
+    const link = getByTestId(`${DATA_TEST_SUBJ_CHANGE_LINK_PREFIX}-${field.id}`);
+    fireEvent.click(link);
+    waitFor(() => expect(getByAltText(field.id)).not.toBeInTheDocument());
+  });
+
+  it('should clear the unsaved image when Change Image is clicked', () => {
+    const setting = settings.image;
+
+    const field = getFieldDefinition({
+      id: setting.name || setting.type,
+      setting: {
+        ...setting,
+      },
+    });
+
+    const { getByTestId, getByAltText } = render(
+      wrap(
+        <FieldRow
+          {...{ field }}
+          onChange={handleChange}
+          unsavedChange={{ type: 'image', unsavedValue: userInputValues.image }}
+          isSavingEnabled={true}
+        />
+      )
+    );
+
+    const link = getByTestId(`${DATA_TEST_SUBJ_CHANGE_LINK_PREFIX}-${field.id}`);
+    fireEvent.click(link);
+    waitFor(() => expect(getByAltText(field.id)).not.toBeInTheDocument());
   });
 });

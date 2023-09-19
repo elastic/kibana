@@ -9,20 +9,28 @@
 import type { FieldDefinition, SettingType, OnChangeFn } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
-export const useUpdate = <T extends SettingType>({
-  onChange,
-  field,
-}: {
+export interface UseUpdateParameters<T extends SettingType> {
+  /** The {@link OnChangeFn} to invoke. */
   onChange: OnChangeFn<T>;
+  /** The {@link FieldDefinition} to use to create an update. */
   field: Pick<FieldDefinition<T>, 'defaultValue' | 'savedValue'>;
-}) => {
-  const onUpdate: OnChangeFn<T> = (update) => {
+}
+
+/**
+ * Hook to provide a standard {@link OnChangeFn} that will send an update to the
+ * field.
+ *
+ * @param params The {@link UseUpdateParameters} to use.
+ * @returns An {@link OnChangeFn} that will send an update to the field.
+ */
+export const useUpdate = <T extends SettingType>(params: UseUpdateParameters<T>): OnChangeFn<T> => {
+  const { onChange, field } = params;
+
+  return (update) => {
     if (hasUnsavedChange(field, update)) {
       onChange(update);
     } else {
       onChange();
     }
   };
-
-  return onUpdate;
 };

@@ -14,10 +14,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 
+export const DATA_TEST_SUBJ_CHANGE_LINK_PREFIX = 'management-settings-change-image';
+
 type Field<T extends SettingType> = Pick<
   FieldDefinition<T>,
-  'name' | 'type' | 'savedValue' | 'ariaAttributes' | 'isOverridden'
+  'id' | 'type' | 'savedValue' | 'ariaAttributes' | 'isOverridden'
 >;
+
 /**
  * Props for a {@link ChangeImageLink} component.
  */
@@ -43,7 +46,6 @@ export const ChangeImageLink = <T extends SettingType>({
 
   const {
     ariaAttributes: { ariaLabel },
-    name,
     isOverridden,
     savedValue,
   } = field;
@@ -71,7 +73,7 @@ export const ChangeImageLink = <T extends SettingType>({
           },
         })}
         onClick={() => onClear()}
-        data-test-subj={`management-settings-changeImage-${name}`}
+        data-test-subj={`${DATA_TEST_SUBJ_CHANGE_LINK_PREFIX}-${field.id}`}
       >
         <FormattedMessage
           id="management.settings.changeImageLinkText"

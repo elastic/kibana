@@ -92,9 +92,7 @@ export const FieldRow = (props: FieldRowProps) => {
   };
 
   const onReset = () => {
-    if (ref.current) {
-      ref.current.reset();
-    }
+    ref.current?.reset();
 
     const update = { type: field.type, unsavedValue: field.defaultValue };
 
