@@ -125,5 +125,8 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_EMPTY_TEST_ID)).toHaveTextContent(
+      'There are no response actions defined for this event. To add some, edit the rule’s settings and set up response actionsExternal link(opens in a new tab or window).'
+    );
   });
 });

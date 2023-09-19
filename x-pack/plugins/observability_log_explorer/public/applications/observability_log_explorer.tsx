@@ -52,7 +52,6 @@ export const ObservabilityLogExplorerApp = ({
   plugins,
   pluginStart,
 }: ObservabilityLogExplorerAppProps) => {
-  const { logExplorer, observabilityShared, serverless } = plugins;
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -67,15 +66,7 @@ export const ObservabilityLogExplorerApp = ({
             <Route
               path="/"
               exact={true}
-              render={() => (
-                <ObservablityLogExplorerMainRoute
-                  appParams={appParams}
-                  core={core}
-                  logExplorer={logExplorer}
-                  observabilityShared={observabilityShared}
-                  serverless={serverless}
-                />
-              )}
+              render={() => <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />}
             />
           </Routes>
         </Router>
