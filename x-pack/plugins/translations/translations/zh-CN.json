@@ -12136,7 +12136,7 @@
     "xpack.enterpriseSearch.aiSearch.elser.description": "轻松部署 {elser}，以便只需单击几下即可实现即时文本语义搜索功能。此模型将使用“text_expansion”字段扩充您的文档和查询文本，提供开箱可用的无缝搜索功能。",
     "xpack.enterpriseSearch.aiSearch.elserPanel.step2.description": "创建索引后，请选中该索引，然后单击 {pipelinesName} 选项卡。",
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.description": "要详细了解如何开始使用并通过具体示例测试这些工具，请访问 {searchLab}。",
-    "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.description": "请访问{aiSearchDocLink}",
+    "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.description": "请访问{aiSearchDoc}。",
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.help.description": "需要帮助？请访问{discussForum}！",
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.description": "{searchLabsRepo} 包含笔记本、示例应用程序和资源。",
     "xpack.enterpriseSearch.aiSearch.measurePerformanceSection.description": "使用{behavioralAnalytics}仪表板和工具以可视化用户行为并评估您所做更改的影响。",
