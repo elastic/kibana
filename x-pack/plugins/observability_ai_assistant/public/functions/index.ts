@@ -14,7 +14,7 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
-import { registerGetDatasetInfoFunction } from './get_dataet_info';
+import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
 import { registerEsqlFunction } from './esql';
