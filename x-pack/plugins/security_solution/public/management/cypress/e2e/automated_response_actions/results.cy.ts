@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
-import { generateRandomStringName } from '../../../tasks/utils';
-import { APP_ALERTS_PATH } from '../../../../../../common/constants';
-import { closeAllToasts } from '../../../tasks/toasts';
-import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import type { ReturnTypeFromChainable } from '../../../types';
-import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
+import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
+import { generateRandomStringName } from '../../tasks/utils';
+import { APP_ALERTS_PATH } from '../../../../../common/constants';
+import { closeAllToasts } from '../../tasks/toasts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { ReturnTypeFromChainable } from '../../types';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-import { login, ROLE } from '../../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 
 describe('Results', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
