@@ -14130,7 +14130,7 @@
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.searchLabsRepoLinkText": "SearchLabs 存储库",
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.title": "学习",
     "xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.title": "通过人工智能搜索进行更深入的挖掘",
-    "xpack.enterpriseSearch.aiSearch.guide.description": "使用 Elastic 平台构建人工智能搜索驱动的应用程序，包括我们经过专有训练的 ML 模型 ELSER、矢量搜索和嵌入功能以及用于组合矢量和文本搜索的 RRF 排名。":,
+    "xpack.enterpriseSearch.aiSearch.guide.description": "使用 Elastic 平台构建人工智能搜索驱动的应用程序，包括我们经过专有训练的 ML 模型 ELSER、矢量搜索和嵌入功能以及用于组合矢量和文本搜索的 RRF 排名。",
     "xpack.enterpriseSearch.aiSearch.guide.pageTitle": "利用 AI 增强您的搜索功能",
     "xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.description": "来自多个排名的加权结果",
     "xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.title": "线性组合",
