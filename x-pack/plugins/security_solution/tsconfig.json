@@ -173,6 +173,7 @@
     "@kbn/security-solution-features",
     "@kbn/handlebars",
     "@kbn/content-management-plugin",
+    "@kbn/subscription-tracking",
     "@kbn/stack-connectors-plugin"
   ]
 }

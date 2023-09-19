@@ -51,7 +51,6 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 
 export interface Props {
   conversationId?: string;
-  isAssistantEnabled: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
@@ -64,7 +63,6 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationId,
-  isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
@@ -73,6 +71,7 @@ const AssistantComponent: React.FC<Props> = ({
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,
+    assistantAvailability: { isAssistantEnabled },
     conversations,
     defaultAllow,
     defaultAllowReplacement,
