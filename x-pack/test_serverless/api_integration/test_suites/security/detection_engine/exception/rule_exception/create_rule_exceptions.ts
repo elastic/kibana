@@ -45,7 +45,6 @@ const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
 });
 
 const ELASTIC_SERVERLESS_USER = 'elastic_serverless';
-const ELASTIC_ESS_USER = 'elastic';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
