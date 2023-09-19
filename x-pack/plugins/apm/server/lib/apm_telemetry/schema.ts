@@ -47,7 +47,7 @@ const capturedMetricStatsSchema: MakeSchemaFrom<CapturedMetricStats, true> = {
         type: 'long',
         _meta: {
           description:
-            'Total number of metric documents for the given metricset per rollup interval',
+            'Total number of metric documents in the primary shard for the given metricset per rollup interval',
         },
       },
     },
@@ -56,7 +56,7 @@ const capturedMetricStatsSchema: MakeSchemaFrom<CapturedMetricStats, true> = {
         type: 'long',
         _meta: {
           description:
-            'Size of the metric index for the given metricset per rollup interval',
+            'Size of the metric index in the primary shard for the given metricset per rollup interval',
         },
       },
     },
