@@ -626,7 +626,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     log.success('ES is ready');
   }
 
-  if (!options.skipTeardown) {
+  if (!options.skipTeardown && !options.background) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
