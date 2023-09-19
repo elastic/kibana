@@ -13,8 +13,12 @@ import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export interface FormProps {
+  key?: string;
   label: string;
-  type: CustomFieldTypes;
+  type: CustomFieldTypes.TEXT | CustomFieldTypes.TOGGLE;
+  options: {
+    required?: boolean | string;
+  };
 }
 
 export const schema = {

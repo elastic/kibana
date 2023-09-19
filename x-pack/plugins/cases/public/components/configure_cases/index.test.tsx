@@ -696,9 +696,7 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -706,16 +704,12 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
-        expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
     });
 
     it('closes fly out for when click on save field', async () => {
@@ -723,18 +717,14 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
       userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
-        expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
     });
   });
 });

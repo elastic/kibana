@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -49,18 +48,8 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   const handleSaveField = useCallback(async () => {
     const { isValid, data } = await submit();
 
-    const transformedData: CustomFieldsConfiguration = [
-      {
-        key: data.key ?? uuidv4(),
-        label: data.label,
-        type: data.type,
-        required:
-          data.options?.required && data.options?.required !== '' ? data.options.required : false,
-      },
-    ];
-
     if (isValid) {
-      onSaveField(transformedData);
+      onSaveField(data as CustomFieldsConfiguration);
     }
   }, [onSaveField, submit]);
 

@@ -57,6 +57,14 @@ describe('AddFieldFlyout ', () => {
     });
   });
 
+  it('does not call onSaveField when error', async () => {
+    appMockRender.render(<AddFieldFlyout {...props} />);
+
+    userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+
+    expect(props.onSaveField).not.toBeCalled();
+  });
+
   it('calls onCloseFlyout on cancel', async () => {
     appMockRender.render(<AddFieldFlyout {...props} />);
 

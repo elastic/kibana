@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CustomFieldBuilder } from '../types';
 import { CustomFieldTypes } from '../../../../common/types/domain';

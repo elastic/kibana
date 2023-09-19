@@ -8,9 +8,12 @@
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 export interface CustomFieldFormState {
@@ -23,10 +26,26 @@ interface Props {
 }
 
 const FormComponent: React.FC<Props> = ({ onChange }) => {
+  const formSerializer = ({ key, label, type, options }: FormProps): CustomFieldsConfiguration => {
+    const customFieldKey = key ? key : uuidv4();
+
+    const serializedData = [
+      {
+        key: customFieldKey,
+        label,
+        type,
+        required: options?.required && options?.required !== '' ? options.required : false,
+      },
+    ] as CustomFieldsConfiguration;
+
+    return serializedData;
+  };
+
   const { form } = useForm<FormProps>({
     defaultValue: { type: CustomFieldTypes.TEXT },
     options: { stripEmptyFields: false },
     schema,
+    serializer: formSerializer,
   });
 
   const { submit, isValid, isSubmitting } = form;
