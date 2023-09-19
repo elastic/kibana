@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
