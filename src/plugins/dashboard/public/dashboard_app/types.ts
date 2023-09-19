@@ -20,7 +20,6 @@ export interface DashboardEmbedSettings {
   showBackgroundColor?: boolean;
   showFullScreenButton?: boolean;
   editingToolBarCss?: SerializedStyles;
-  topNavMenuAlignRight?: boolean;
   showStickyTopNav?: boolean;
 }
 

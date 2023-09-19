@@ -33,7 +33,6 @@ type Badge = EuiBadgeProps & {
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
   StatefulSearchBarProps<QT> &
     Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
-      alignRight?: boolean;
       config?: TopNavMenuData[];
       badges?: Badge[];
       showSearchBar?: boolean;
@@ -132,11 +131,10 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderLayout() {
-    const { setMenuMountPoint, visible, alignRight } = props;
+    const { setMenuMountPoint, visible } = props;
     const menuClassName = classNames('kbnTopNavMenu', props.className);
     const wrapperClassName = classNames('kbnTopNavMenu__wrapper', {
       'kbnTopNavMenu__wrapper--hidden': visible === false,
-      'kbnTopNavMenu__wrapper--right': alignRight === true,
     });
     if (setMenuMountPoint) {
       return (

@@ -162,7 +162,6 @@ describe('DashboardToolBar', () => {
         showFullScreenButton: false,
         showQueryInput: false,
         showStickyTopNav: false,
-        topNavMenuAlignRight: true,
       })
     );
   });

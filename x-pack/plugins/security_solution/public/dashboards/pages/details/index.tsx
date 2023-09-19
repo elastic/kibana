@@ -31,6 +31,7 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
+import { DashboardTitleBadges } from '../../components/title_badges';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -101,14 +102,20 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                   />
                 )
               }
-            >
-              {shouldShowControl && (
-                <DashboardToolBar
-                  dashboardContainer={dashboardContainer}
-                  onLoad={onDashboardToolBarLoad}
-                />
-              )}
-            </HeaderPage>
+              subtitle={
+                dashboardContainer && (
+                  <DashboardTitleBadges dashboardContainer={dashboardContainer} />
+                )
+              }
+              subtitle2={
+                shouldShowControl && (
+                  <DashboardToolBar
+                    dashboardContainer={dashboardContainer}
+                    onLoad={onDashboardToolBarLoad}
+                  />
+                )
+              }
+            />
           </EuiFlexItem>
           {!errorState && (
             <EuiFlexItem grow>

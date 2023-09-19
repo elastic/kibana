@@ -17,12 +17,14 @@ const DashboardTitleComponent = ({
   onTitleLoaded: (title: string) => void;
 }) => {
   const dashboardTitle = dashboardContainer.select((state) => state.explicitInput.title).trim();
+  const title =
+    dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : `Editing new dashboard`;
 
   useEffect(() => {
     onTitleLoaded(dashboardTitle);
   }, [dashboardTitle, onTitleLoaded]);
 
-  return <span>{dashboardTitle}</span> ?? <EuiLoadingSpinner size="m" />;
+  return dashboardTitle != null ? <span>{title}</span> : <EuiLoadingSpinner size="m" />;
 };
 
 export const DashboardTitle = React.memo(DashboardTitleComponent);

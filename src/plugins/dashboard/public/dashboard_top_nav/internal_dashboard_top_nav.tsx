@@ -244,7 +244,6 @@ export function InternalDashboardTopNav({
     const showBackgroundColor = embedSettings?.showBackgroundColor ?? true;
     const showFullScreenButton = embedSettings?.showFullScreenButton ?? true;
     const editingToolBarCss = embedSettings?.editingToolBarCss ?? ({} as SerializedStyles);
-    const topNavMenuAlignRight = embedSettings?.topNavMenuAlignRight ?? false;
     const showStickyTopNav = embedSettings?.showStickyTopNav ?? true;
     return {
       showTopNavMenu,
@@ -256,7 +255,6 @@ export function InternalDashboardTopNav({
       showBackgroundColor,
       showFullScreenButton,
       editingToolBarCss,
-      topNavMenuAlignRight,
       showStickyTopNav,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
@@ -307,7 +305,6 @@ export function InternalDashboardTopNav({
     <div
       className={classNames('dashboardTopNav', {
         'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
-        'dashboardTopNav-right': visibilityProps.topNavMenuAlignRight,
         'dashboardTopNav-noSticky': !visibilityProps.showStickyTopNav,
       })}
     >
@@ -328,7 +325,6 @@ export function InternalDashboardTopNav({
         showSaveQuery={showSaveQuery}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
-        alignRight={visibilityProps.topNavMenuAlignRight}
         setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
         className={classNames({
           'kbnTopNavMenu-isFullScreen': fullScreenMode,
