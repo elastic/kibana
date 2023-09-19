@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const nodeCpuCapacity: FormulaValueConfig = {
-  label: 'Capacity',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.kubernetes.capacity', {
+    defaultMessage: 'Capacity',
+  }),
   value: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
   format: {
     id: 'number',

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const nodePodCapacity: FormulaValueConfig = {
-  label: 'Capacity',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.kubernetes.capacity', {
+    defaultMessage: 'Capacity',
+  }),
   value:
     "last_value(kubernetes.node.pod.allocatable.total,  kql='kubernetes.node.pod.allocatable.total: *')",
   format: {
