@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 
 export const MetadataErrorCallout = () => {
-  const { shouldRefetch } = useMetadataStateProviderContext();
+  const { refresh } = useMetadataStateProviderContext();
   return (
     <EuiCallOut
       title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
@@ -27,7 +27,7 @@ export const MetadataErrorCallout = () => {
         defaultMessage="There was an error loading your data. Try to {refetch} and open the host details again."
         values={{
           refetch: (
-            <EuiLink data-test-subj="infraMetadataReloadPageLink" onClick={shouldRefetch}>
+            <EuiLink data-test-subj="infraMetadataReloadPageLink" onClick={refresh}>
               {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
                 defaultMessage: 'refetch the metadata',
               })}

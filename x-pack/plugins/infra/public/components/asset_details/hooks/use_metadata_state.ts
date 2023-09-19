@@ -30,7 +30,7 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     getDateRangeInTimestamp()
   );
 
-  const shouldRefetch = useCallback(() => {
+  const refresh = useCallback(() => {
     reload();
   }, [reload]);
 
@@ -44,7 +44,7 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     loading,
     error,
     metadata,
-    shouldRefetch,
+    refresh,
   };
 }
 
