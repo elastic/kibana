@@ -46,7 +46,7 @@ export const AGENT_SELECTION_LABEL = i18n.translate('xpack.osquery.agents.select
 export const NO_AGENT_AVAILABLE_TITLE = i18n.translate(
   'xpack.osquery.agents.noAgentAvailableTitle',
   {
-    defaultMessage: `No agents available!`,
+    defaultMessage: `No agents available`,
   }
 );
 
