@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { FieldInputFooter, type FieldInputFooterProps } from './input_footer';
+export { getDefaultValue, getUserValue, IMAGE } from './values';

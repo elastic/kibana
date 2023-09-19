@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getDefaultValue, getUserValue, IMAGE } from './values';
-export { useFieldDefinition } from './field_definition';
+export { FieldInputFooter, type FieldInputFooterProps } from './input_footer';
+export { InputResetLink, type FieldResetLinkProps } from './reset_link';
