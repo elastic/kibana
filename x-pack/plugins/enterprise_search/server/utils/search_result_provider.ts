@@ -18,7 +18,6 @@ import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   ESRE_PLUGIN,
 } from '../../common/constants';
 
@@ -105,14 +104,6 @@ export function getSearchResultProvider(
                 }),
                 serviceType: 'app_search',
                 url: APP_SEARCH_PLUGIN.URL,
-              },
-              {
-                keywords: ['workplace', 'search'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.workplaceSearch.name', {
-                  defaultMessage: 'Workplace Search',
-                }),
-                serviceType: 'workplace_search',
-                url: WORKPLACE_SEARCH_PLUGIN.URL,
               },
               {
                 keywords: ['esre', 'search'],
