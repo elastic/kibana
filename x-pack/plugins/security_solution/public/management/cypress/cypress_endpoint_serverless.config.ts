@@ -6,6 +6,8 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { dataLoaders } from './support/data_loaders';
+import { responseActionTasks } from './support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -62,18 +64,14 @@ export default defineCypressConfig({
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
-      // skip dataLoaders() because of `NativeResponseError: status_exception`
-      // message: `Native role management is not enabled in this Elasticsearch instance`
-      // related: https://github.com/elastic/security-team/issues/7614
-      // dataLoaders(on, config);
+      dataLoaders(on, config);
 
       // skip dataLoadersForRealEndpoints()
       // https://github.com/elastic/security-team/issues/7467
       // Data loaders specific to "real" Endpoint testing
       // dataLoadersForRealEndpoints(on, config);
 
-      // skip responseActionTasks() because of `NativeResponseError: status_exception`
-      // responseActionTasks(on, config);
+      responseActionTasks(on, config);
     },
   },
 });
