@@ -594,7 +594,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
+          "Error validating bulk delete data - Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
         );
         objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
         await getScheduledTask(createdRule1.scheduled_task_id);
