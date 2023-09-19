@@ -59,7 +59,10 @@ function normalize(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions as estypes.FieldSort;
   return {
-    [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions as object) },
+    [sortField]: {
+      ...order,
+      ...(sortField === '_score' ? otherSortOptions : (defaultSortOptions as object)),
+    },
   };
 }
 
