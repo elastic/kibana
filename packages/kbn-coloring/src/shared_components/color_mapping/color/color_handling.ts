@@ -9,7 +9,7 @@ import chroma from 'chroma-js';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
-import { getPalette } from '../palette';
+import { getPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 

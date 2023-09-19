@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiColorPickerSwatch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
-import { NeutralPalette } from '../../palettes/default_palettes';
+import { getPalette } from '../../palettes';
 import { isSameColor } from '../../color/color_math';
-import { getPalette } from '../../palette';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export function PaletteColors({
   palette,

@@ -31,9 +31,8 @@ import {
 } from '../../state/color_mapping';
 import { generateAutoAssignmentsForCategories } from '../../config/assignment_from_categories';
 import { ColorMapping } from '../../config';
-import { NeutralPalette } from '../../palettes/default_palettes';
+import { getPalette } from '../../palettes';
 import { getUnusedColorForNewAssignment } from '../../config/assignments';
-import { getPalette } from '../../palette';
 import {
   selectColorMode,
   selectPalette,
@@ -42,6 +41,7 @@ import {
 } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export const MAX_ASSIGNABLE_COLORS = 10;
 

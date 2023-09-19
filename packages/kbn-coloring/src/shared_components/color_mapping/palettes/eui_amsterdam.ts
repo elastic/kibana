@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export const EUI_PALETTE_COLORS_LIGHT = [
+import { ColorMapping } from '../config';
+
+export const EUI_AMSTERDAM_PALETTE_COLORS = [
   '#54b399',
   '#6092c0',
   '#d36086',
@@ -18,15 +20,13 @@ export const EUI_PALETTE_COLORS_LIGHT = [
   '#aa6556',
   '#e7664c',
 ];
-export const EUI_PALETTE_COLORS_DARK = [
-  '#54b399',
-  '#6092c0',
-  '#d36086',
-  '#9170b8',
-  '#ca8eae',
-  '#d6bf57',
-  '#b9a888',
-  '#da8b45',
-  '#aa6556',
-  '#e7664c',
-];
+
+export const EUIAmsterdamColorBlindPalette: ColorMapping.CategoricalPalette = {
+  id: 'eui_amsterdam_color_blind',
+  name: 'Default',
+  colorCount: EUI_AMSTERDAM_PALETTE_COLORS.length,
+  type: 'categorical',
+  getColor(valueInRange) {
+    return EUI_AMSTERDAM_PALETTE_COLORS[valueInRange];
+  },
+};

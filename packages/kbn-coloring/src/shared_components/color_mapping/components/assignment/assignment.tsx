@@ -18,7 +18,7 @@ import {
 import { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';

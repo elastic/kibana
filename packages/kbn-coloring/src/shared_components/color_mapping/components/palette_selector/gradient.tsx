@@ -15,7 +15,7 @@ import { changeAlpha, getValidColor, combineColors } from '../../color/color_mat
 
 import { ColorMapping } from '../../config';
 import { ColorSwatch } from '../color_picker/color_swatch';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 
 import './gradient.scss';
 

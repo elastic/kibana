@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ColorMapping } from './config';
+import { ColorMapping } from '../config';
+import { ElasticBrandPalette } from './elastic_brand';
+import { EUIAmsterdamColorBlindPalette } from './eui_amsterdam';
+import { KibanaV7LegacyPalette } from './kibana_legacy';
+import { NeutralPalette } from './neutral';
+
+export const AVAILABLE_PALETTES = new Map<string, ColorMapping.CategoricalPalette>([
+  [EUIAmsterdamColorBlindPalette.id, EUIAmsterdamColorBlindPalette],
+  [ElasticBrandPalette.id, ElasticBrandPalette],
+  [KibanaV7LegacyPalette.id, KibanaV7LegacyPalette],
+  [NeutralPalette.id, NeutralPalette],
+]);
 
 /**
  * This function should be instanciated once at the root of the component with the available palettes and
@@ -19,3 +30,8 @@ export function getPalette(
 ): (paletteId: string) => ColorMapping.CategoricalPalette {
   return (paletteId) => palettes.get(paletteId) ?? defaultPalette;
 }
+
+export * from './eui_amsterdam';
+export * from './elastic_brand';
+export * from './kibana_legacy';
+export * from './neutral';

@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
 

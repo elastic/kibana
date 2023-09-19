@@ -11,8 +11,8 @@ import {
   PaletteRegistry,
   getColorFactory,
   getPalette,
-  NeutralPalette,
   AVAILABLE_PALETTES,
+  NeutralPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';

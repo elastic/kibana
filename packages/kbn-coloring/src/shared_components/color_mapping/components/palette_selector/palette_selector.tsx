@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 
 export function PaletteSelector({
   palettes,

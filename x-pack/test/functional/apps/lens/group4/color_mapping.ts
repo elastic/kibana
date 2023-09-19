@@ -6,8 +6,12 @@
  */
 import expect from '@kbn/expect';
 
-import { PASTEL_PALETTE_LIGHT } from '@kbn/coloring/src/shared_components/color_mapping/palettes/pastel';
-import { EUI_PALETTE_COLORS_LIGHT } from '@kbn/coloring/src/shared_components/color_mapping/palettes/eui';
+import {
+  EUI_AMSTERDAM_PALETTE_COLORS,
+  ELASTIC_BRAND_PALETTE_COLORS,
+  EUIAmsterdamColorBlindPalette,
+  ElasticBrandPalette,
+} from '@kbn/coloring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -31,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'extension.raw',
-        palette: { mode: 'colorMapping', id: 'pastel' },
+        palette: { mode: 'colorMapping', id: ElasticBrandPalette.id },
         keepOpen: true,
       });
     });
@@ -39,16 +43,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should render correct color mapping', async () => {
       const chart = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       const legendColors = chart?.legend?.items?.map((item) => item.color.toLowerCase()) ?? [];
-      expect(legendColors).to.eql(PASTEL_PALETTE_LIGHT.slice(0, 5).map((c) => c.toLowerCase()));
+      expect(legendColors).to.eql(
+        ELASTIC_BRAND_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
+      );
     });
     it('should allow switching color mapping palette', async () => {
       await PageObjects.lens.changeColorMappingPalette(
         'lnsXY_splitDimensionPanel > lnsLayerPanel-dimensionLink',
-        'eui'
+        EUIAmsterdamColorBlindPalette.id
       );
       const chart = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       const legendColors = chart?.legend?.items?.map((item) => item.color.toLowerCase()) ?? [];
-      expect(legendColors).to.eql(EUI_PALETTE_COLORS_LIGHT.slice(0, 5).map((c) => c.toLowerCase()));
+      expect(legendColors).to.eql(
+        ELASTIC_BRAND_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
+      );
     });
 
     it('should change categorical color', async () => {
@@ -59,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const chart = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       const firstLegendItemColor = chart?.legend?.items?.[0]?.color?.toLowerCase() ?? 'NONE';
-      expect(firstLegendItemColor).to.eql(EUI_PALETTE_COLORS_LIGHT[3].toLowerCase());
+      expect(firstLegendItemColor).to.eql(EUI_AMSTERDAM_PALETTE_COLORS[3].toLowerCase());
     });
   });
 }

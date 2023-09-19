@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getPalette } from '../palette';
+import { getPalette } from '../palettes';
 import { RootState } from './color_mapping';
 
 export function selectPalette(getPaletteFn: ReturnType<typeof getPalette>) {

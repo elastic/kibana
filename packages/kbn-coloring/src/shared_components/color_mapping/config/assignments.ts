@@ -8,8 +8,7 @@
 
 import type { ColorMapping } from '.';
 import { MAX_ASSIGNABLE_COLORS } from '../components/container/container';
-import { NeutralPalette } from '../palettes/default_palettes';
-import { getPalette } from '../palette';
+import { getPalette, NeutralPalette } from '../palettes';
 import { DEFAULT_NEUTRAL_PALETTE_INDEX } from './default_color_mapping';
 
 export function updateAssignmentsPalette(

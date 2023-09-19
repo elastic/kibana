@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';

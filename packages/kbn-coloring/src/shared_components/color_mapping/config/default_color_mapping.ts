@@ -7,8 +7,9 @@
  */
 
 import { ColorMapping } from '.';
-import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
-import { NeutralPalette, getPalette, EUIPalette } from '../palettes/default_palettes';
+import { AVAILABLE_PALETTES, getPalette } from '../palettes';
+import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
+import { NeutralPalette } from '../palettes/neutral';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
@@ -31,7 +32,7 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       touched: false,
     },
   ],
-  paletteId: EUIPalette.id,
+  paletteId: EUIAmsterdamColorBlindPalette.id,
   colorMode: {
     type: 'categorical',
   },

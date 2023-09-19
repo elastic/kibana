@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 
 import { getColorContrast } from '../../color/color_math';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 
 export function RGBPicker({
   isDarkMode,

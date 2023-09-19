@@ -11,11 +11,12 @@ import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
 } from '../config/default_color_mapping';
 import { getColorFactory } from './color_handling';
-import { getPalette } from '../palette';
-import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
-import { EUIPalette, NeutralPalette } from '../palettes/default_palettes';
-import { EUI_PALETTE_COLORS_DARK, EUI_PALETTE_COLORS_LIGHT } from '../palettes/eui';
-import { NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
+import { getPalette, AVAILABLE_PALETTES } from '../palettes';
+import {
+  EUIAmsterdamColorBlindPalette,
+  EUI_AMSTERDAM_PALETTE_COLORS,
+} from '../palettes/eui_amsterdam';
+import { NeutralPalette, NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
 import { toHex } from './color_math';
 
 import { ColorMapping } from '../config';
@@ -27,9 +28,9 @@ describe('Color mapping - color generation', () => {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
-    expect(colorFactory('catA')).toBe(EUI_PALETTE_COLORS_LIGHT[0]);
-    expect(colorFactory('catB')).toBe(EUI_PALETTE_COLORS_LIGHT[1]);
-    expect(colorFactory('catC')).toBe(EUI_PALETTE_COLORS_LIGHT[2]);
+    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
+    expect(colorFactory('catC')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
     // if the category is not available in the `categories` list then a default neutral color is used
     expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
@@ -75,9 +76,9 @@ describe('Color mapping - color generation', () => {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
-    expect(colorFactory('catA')).toBe(EUI_PALETTE_COLORS_DARK[0]);
-    expect(colorFactory('catB')).toBe(EUI_PALETTE_COLORS_DARK[1]);
-    expect(colorFactory('catC')).toBe(EUI_PALETTE_COLORS_DARK[2]);
+    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
+    expect(colorFactory('catC')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
     // if the category is not available in the `categories` list then a default neutral color is used
     expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_DARK[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
@@ -87,10 +88,10 @@ describe('Color mapping - color generation', () => {
       type: 'categories',
       categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     });
-    expect(colorFactory('__other__')).toBe(EUI_PALETTE_COLORS_LIGHT[0]);
-    expect(colorFactory(['fieldA', 'fieldB'])).toBe(EUI_PALETTE_COLORS_LIGHT[1]);
-    expect(colorFactory('__empty__')).toBe(EUI_PALETTE_COLORS_LIGHT[2]);
-    expect(colorFactory('   with-whitespaces   ')).toBe(EUI_PALETTE_COLORS_LIGHT[3]);
+    expect(colorFactory('__other__')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(colorFactory(['fieldA', 'fieldB'])).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
+    expect(colorFactory('__empty__')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
+    expect(colorFactory('   with-whitespaces   ')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[3]);
   });
 
   it('ignores configured assignments in auto mode', () => {
@@ -112,9 +113,9 @@ describe('Color mapping - color generation', () => {
         categories: ['catA', 'catB', 'assignmentToIgnore'],
       }
     );
-    expect(colorFactory('catA')).toBe(EUI_PALETTE_COLORS_LIGHT[0]);
-    expect(colorFactory('catB')).toBe(EUI_PALETTE_COLORS_LIGHT[1]);
-    expect(colorFactory('assignmentToIgnore')).toBe(EUI_PALETTE_COLORS_LIGHT[2]);
+    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
+    expect(colorFactory('assignmentToIgnore')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
   });
 
   it('color with auto rule are assigned in order of the configured data input', () => {
@@ -163,7 +164,14 @@ describe('Color mapping - color generation', () => {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
         colorMode: {
           type: 'gradient',
-          steps: [{ type: 'categorical', paletteId: EUIPalette.id, colorIndex: 0, touched: false }],
+          steps: [
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 0,
+              touched: false,
+            },
+          ],
           sort: 'desc',
         },
       },
@@ -175,7 +183,7 @@ describe('Color mapping - color generation', () => {
       }
     );
     // this matches exactly with the initial step selected
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[0]));
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0]));
     expect(toHex(colorFactory('cat2'))).toBe('#93cebc');
     expect(toHex(colorFactory('cat3'))).toBe('#cce8e0');
   });
@@ -186,7 +194,14 @@ describe('Color mapping - color generation', () => {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
         colorMode: {
           type: 'gradient',
-          steps: [{ type: 'categorical', paletteId: EUIPalette.id, colorIndex: 0, touched: false }],
+          steps: [
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 0,
+              touched: false,
+            },
+          ],
           sort: 'asc',
         },
       },
@@ -200,7 +215,7 @@ describe('Color mapping - color generation', () => {
     expect(toHex(colorFactory('cat1'))).toBe('#cce8e0');
     expect(toHex(colorFactory('cat2'))).toBe('#93cebc');
     // this matches exactly with the initial step selected
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[0]));
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0]));
   });
 
   it('returns 2 colors gradient [desc, lightMode]', () => {
@@ -210,8 +225,18 @@ describe('Color mapping - color generation', () => {
         colorMode: {
           type: 'gradient',
           steps: [
-            { type: 'categorical', paletteId: EUIPalette.id, colorIndex: 0, touched: false },
-            { type: 'categorical', paletteId: EUIPalette.id, colorIndex: 2, touched: false },
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 0,
+              touched: false,
+            },
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 2,
+              touched: false,
+            },
           ],
           sort: 'desc',
         },
@@ -223,9 +248,9 @@ describe('Color mapping - color generation', () => {
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[0])); // EUI green
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0])); // EUI green
     expect(toHex(colorFactory('cat2'))).toBe('#a4908f'); // red gray green
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[2])); // EUI pink
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[2])); // EUI pink
   });
 
   it('returns divergent gradient [asc, darkMode]', () => {
@@ -235,9 +260,19 @@ describe('Color mapping - color generation', () => {
         colorMode: {
           type: 'gradient',
           steps: [
-            { type: 'categorical', paletteId: EUIPalette.id, colorIndex: 0, touched: false },
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 0,
+              touched: false,
+            },
             { type: 'categorical', paletteId: NeutralPalette.id, colorIndex: 0, touched: false },
-            { type: 'categorical', paletteId: EUIPalette.id, colorIndex: 2, touched: false },
+            {
+              type: 'categorical',
+              paletteId: EUIAmsterdamColorBlindPalette.id,
+              colorIndex: 2,
+              touched: false,
+            },
           ],
           sort: 'asc', // testing in ascending order
         },
@@ -249,9 +284,9 @@ describe('Color mapping - color generation', () => {
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_PALETTE_COLORS_DARK[2])); // EUI pink
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[2])); // EUI pink
     expect(toHex(colorFactory('cat2'))).toBe(NEUTRAL_COLOR_DARK[0]); // NEUTRAL LIGHT GRAY
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[0])); // EUI green
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0])); // EUI green
     expect(toHex(colorFactory('not available cat'))).toBe(
       toHex(NEUTRAL_COLOR_DARK[DEFAULT_NEUTRAL_PALETTE_INDEX])
     ); // check the other

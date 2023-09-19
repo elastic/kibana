@@ -10,10 +10,10 @@ import React, { useState } from 'react';
 import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
-import { NeutralPalette } from '../../palettes/default_palettes';
-import { getPalette } from '../../palette';
+import { getPalette } from '../../palettes';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export function ColorPicker({
   palette,
