@@ -32,7 +32,6 @@
     "@kbn/use-tracked-promise",
     "@kbn/custom-integrations",
     "@kbn/share-plugin",
-    "@kbn/utility-types",
     "@kbn/deeplinks-observability"
   ],
   "exclude": [
