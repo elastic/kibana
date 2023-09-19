@@ -1122,20 +1122,26 @@ export const tasks: TelemetryTask[] = [
       const fetchRollupMetrics = async () => {
         for (const metricSet of metricSetsSupportingRollUps) {
           for (const bucketSize of rollUpIntervals) {
-            const datastream = `metrics-apm.${metricSet}.${bucketSize}-default*`;
+            const datastream = `metrics-apm.${metricSet}.${bucketSize}-*`;
             const response = await telemetryClient.indicesStats({
               index: [datastream],
               expand_wildcards: 'all',
-              filter_path: ['_all', '_shards'],
+              filter_path: [
+                '_all.primaries.docs',
+                '_all.primaries.store',
+                '_shards',
+              ],
             });
             dsRollupDictionary[metricSet] = dsRollupDictionary[metricSet] || {};
             dsRollupDictionary[metricSet][bucketSize] = {
               total: {
                 shards: response?._shards?.total ?? 0,
-                docs: { count: response?._all?.total?.docs?.count ?? 0 },
+                docs: {
+                  count: response?._all?.primaries?.docs?.count ?? 0,
+                },
                 store: {
                   size_in_bytes:
-                    response?._all?.total?.store?.size_in_bytes ?? 0,
+                    response?._all?.primaries?.store?.size_in_bytes ?? 0,
                 },
               },
             };
@@ -1149,14 +1155,19 @@ export const tasks: TelemetryTask[] = [
           const response = await telemetryClient.indicesStats({
             index: [datastream],
             expand_wildcards: 'all',
-            filter_path: ['_all', '_shards'],
+            filter_path: [
+              '_all.primaries.docs',
+              '_all.primaries.store',
+              '_shards',
+            ],
           });
           dsWithoutRollupDictionary[metricSet] = {
             total: {
               shards: response?._shards?.total ?? 0,
-              docs: { count: response?._all?.total?.docs?.count ?? 0 },
+              docs: { count: response?._all?.primaries?.docs?.count ?? 0 },
               store: {
-                size_in_bytes: response?._all?.total?.store?.size_in_bytes ?? 0,
+                size_in_bytes:
+                  response?._all?.primaries?.store?.size_in_bytes ?? 0,
               },
             },
           };
