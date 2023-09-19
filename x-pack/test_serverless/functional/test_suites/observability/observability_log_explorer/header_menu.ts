@@ -13,7 +13,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'discover',
+    'observabilityLogExplorer',
+    'svlCommonPage',
+    'timePicker',
+  ]);
 
   describe('Header menu', () => {
     before(async () => {
@@ -21,10 +26,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
     });
 
     after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
