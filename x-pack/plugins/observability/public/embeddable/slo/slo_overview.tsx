@@ -6,14 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiIcon, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { css } from '@emotion/react';
-import { SloStatusBadge } from '../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../components/slo/slo_status_badge/slo_active_alerts_badge';
-import { SloSummary } from './slo_summary';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { useKibana } from '../../utils/kibana_react';
 
