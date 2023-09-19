@@ -219,22 +219,36 @@ export class MlServerPlugin
       getEnabledFeatures: () => Object.assign({}, this.enabledFeatures),
     };
 
-    annotationRoutes(routeInit, plugins.security);
-    calendars(routeInit);
-    dataFeedRoutes(routeInit);
-    dataFrameAnalyticsRoutes(routeInit);
-    dataRecognizer(routeInit);
+    // Register Anomaly Detection routes
+    if (this.enabledFeatures.ad) {
+      annotationRoutes(routeInit, plugins.security);
+      calendars(routeInit);
+      dataFeedRoutes(routeInit);
+      dataRecognizer(routeInit);
+      filtersRoutes(routeInit);
+      jobAuditMessagesRoutes(routeInit);
+      jobRoutes(routeInit);
+      jobServiceRoutes(routeInit);
+      resultsServiceRoutes(routeInit);
+      jobValidationRoutes(routeInit);
+    }
+
+    // Register Data Frame Analytics routes
+    if (this.enabledFeatures.dfa) {
+      dataFrameAnalyticsRoutes(routeInit);
+    }
+
+    // Register Trained Model Management routes
+    if (this.enabledFeatures.dfa || this.enabledFeatures.nlp) {
+      modelManagementRoutes(routeInit);
+      trainedModelsRoutes(routeInit);
+    }
+
+    // Register Miscellaneous routes
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    filtersRoutes(routeInit);
     indicesRoutes(routeInit);
-    jobAuditMessagesRoutes(routeInit);
-    jobRoutes(routeInit);
-    jobServiceRoutes(routeInit);
     managementRoutes(routeInit);
-    modelManagementRoutes(routeInit);
-    resultsServiceRoutes(routeInit);
-    jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
@@ -244,7 +258,6 @@ export class MlServerPlugin
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
-    trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
     jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
