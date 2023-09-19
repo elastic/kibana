@@ -220,7 +220,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -243,7 +242,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="number"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -266,7 +264,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -337,7 +334,6 @@ describe('Unified data table cell rendering', function () {
             className="unifiedDataTable__descriptionListToken"
             type="murmur3"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -359,7 +355,6 @@ describe('Unified data table cell rendering', function () {
             className="unifiedDataTable__descriptionListToken"
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -523,7 +518,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -548,7 +542,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="number"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -573,7 +566,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -645,7 +637,6 @@ describe('Unified data table cell rendering', function () {
             scripted={false}
             type="string"
           />
-           
           <span
             className="unifiedDataTable__descriptionListName"
           >
