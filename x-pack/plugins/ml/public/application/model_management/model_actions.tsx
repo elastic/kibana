@@ -86,7 +86,7 @@ export function useModelActions({
         if (isMounted) {
           setCanManageIngestPipelines(
             result.hasPrivileges === undefined ||
-              result.hasPrivileges?.cluster?.manage_ingest_pipelines === true
+              result.hasPrivileges.cluster?.manage_ingest_pipelines === true
           );
         }
       });
