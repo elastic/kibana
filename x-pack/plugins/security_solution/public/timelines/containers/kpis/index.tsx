@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/public';
-import { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { TimelineEventsQueries } from '@kbn/timelines-plugin/common';
 import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import type {

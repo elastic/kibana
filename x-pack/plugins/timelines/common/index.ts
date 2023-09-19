@@ -12,6 +12,7 @@ export {
   type TimelineEventsLastEventTimeRequestOptionsInput,
   type TimelineKpiRequestOptionsInput,
   type TimelineEqlRequestOptionsInput,
+  TimelineEventsQueries,
 } from './api/search_strategy';
 
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
