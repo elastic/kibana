@@ -10,7 +10,8 @@ import { screen } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '../../../../common/types/domain';
 import { CustomFieldsList } from '.';
 
 describe('CustomFieldsList', () => {
@@ -53,16 +54,14 @@ describe('CustomFieldsList', () => {
   });
 
   it('shows single CustomFieldsList correctly', async () => {
-    appMockRender.render(
-      <CustomFieldsList customFields={[customFieldsMock[0]]} />
-    );
+    appMockRender.render(<CustomFieldsList customFields={[customFieldsMock[0]]} />);
 
     expect(screen.getByTestId('droppable')).toBeInTheDocument();
     expect(screen.getAllByTestId('draggable').length).toEqual(1);
   });
 
   it('does not show droppable field when no custom fields', () => {
-    appMockRender.render(<CustomFieldsList customFields={[]}/>);
+    appMockRender.render(<CustomFieldsList customFields={[]} />);
 
     expect(screen.queryByTestId('droppable')).not.toBeInTheDocument();
   });
