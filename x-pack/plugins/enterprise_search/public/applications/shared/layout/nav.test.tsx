@@ -228,7 +228,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
           {
             href: '/app/enterprise_search/applications',
             id: 'searchApplications',
-            name: 'Search Applications'
+            name: 'Search Applications',
           },
           {
             href: '/app/enterprise_search/analytics',
