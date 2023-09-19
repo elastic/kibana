@@ -10,7 +10,7 @@ export function cleanupAgentPolicies() {
   cy.request({
     method: 'GET',
     url: '/api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+    headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
   }).then((response: any) => {
     response.body.items
       .filter((policy: any) => policy.agents === 0)
@@ -19,36 +19,42 @@ export function cleanupAgentPolicies() {
           method: 'POST',
           url: '/api/fleet/agent_policies/delete',
           body: { agentPolicyId: policy.id },
-          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         });
       });
   });
 }
 
 export function unenrollAgent() {
-  cy.request('/api/fleet/agents?page=1&perPage=20&showInactive=false&showUpgradeable=false').then(
-    (response: any) => {
-      response.body.items.forEach((agent: any) => {
-        cy.request({
-          method: 'POST',
-          url: `api/fleet/agents/${agent.id}/unenroll`,
-          body: { revoke: true },
-          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
-        });
+  cy.request({
+    method: 'GET',
+    url: '/api/fleet/agents?page=1&perPage=20&showInactive=false&showUpgradeable=false',
+    headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+  }).then((response: any) => {
+    response.body.items.forEach((agent: any) => {
+      cy.request({
+        method: 'POST',
+        url: `api/fleet/agents/${agent.id}/unenroll`,
+        body: { revoke: true },
+        headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
       });
-    }
-  );
+    });
+  });
 }
 
 export function cleanupDownloadSources() {
-  cy.request('/api/fleet/agent_download_sources').then((response: any) => {
+  cy.request({
+    method: 'GET',
+    url: '/api/fleet/agent_download_sources',
+    headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+  }).then((response: any) => {
     response.body.items
       .filter((ds: any) => !ds.is_default)
       .forEach((ds: any) => {
         cy.request({
           method: 'DELETE',
           url: `/api/fleet/agent_download_sources/${ds.id}`,
-          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         });
       });
   });

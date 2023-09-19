@@ -19,101 +19,69 @@ describe('Uninstall token page', () => {
     generatePolicies();
   });
 
-  beforeEach(() => {
-    cy.visit('app/fleet/uninstall-tokens');
-    cy.intercept('GET', 'api/fleet/uninstall_tokens/*').as('getTokenRequest');
-
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD)
-      .first()
-      .then(($policyIdField) => $policyIdField[0].textContent)
-      .as('policyIdInFirstLine');
-  });
-
   after(() => {
     cleanupAgentPolicies();
   });
+  [true, false].forEach((removePolicies) => {
+    describe(`When ${
+      removePolicies ? 'removing policies' : 'not removing policies'
+    } before checking uninstall tokens`, () => {
+      beforeEach(() => {
+        cy.visit('app/fleet/uninstall-tokens');
+        cy.intercept('GET', 'api/fleet/uninstall_tokens/*').as('getTokenRequest');
 
-  it('should show token by clicking on the eye button', () => {
-    // tokens are hidden by default
-    cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD).each(($tokenField) => {
-      expect($tokenField).to.contain.text('••••••••••••••••••••••••••••••••');
-    });
+        cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD)
+          .first()
+          .then(($policyIdField) => $policyIdField[0].textContent)
+          .as('policyIdInFirstLine');
 
-    // token is reveiled when clicking on eye button
-    cy.getBySel(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON).first().click();
+        if (removePolicies) {
+          cleanupAgentPolicies();
+          // Force page refresh after remove policies
+          cy.visit('app/fleet/uninstall-tokens');
+        }
+      });
 
-    // we should show the correct token for the correct policy ID
-    waitForFetchingUninstallToken().then((fetchedToken) => {
-      cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
+      it('should show token by clicking on the eye button', () => {
+        // tokens are hidden by default
+        cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD).each(($tokenField) => {
+          expect($tokenField).to.contain.text('••••••••••••••••••••••••••••••••');
+        });
 
-      cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD)
-        .first()
-        .should('not.contain.text', '••••••••••••••••••••••••••••••••')
-        .should('contain.text', fetchedToken.token);
-    });
-  });
+        // token is reveiled when clicking on eye button
+        cy.getBySel(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON).first().click();
 
-  it("should show flyout by clicking on 'View uninstall command' button", () => {
-    cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
+        // we should show the correct token for the correct policy ID
+        waitForFetchingUninstallToken().then((fetchedToken) => {
+          cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
 
-    waitForFetchingUninstallToken().then((fetchedToken) => {
-      cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
+          cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD)
+            .first()
+            .should('not.contain.text', '••••••••••••••••••••••••••••••••')
+            .should('contain.text', fetchedToken.token);
+        });
+      });
 
-      cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('exist');
+      it("should show flyout by clicking on 'View uninstall command' button", () => {
+        cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
 
-      cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
-      cy.contains(`Valid for the following agent policy: ${fetchedToken.policy_id}`);
-    });
-  });
+        waitForFetchingUninstallToken().then((fetchedToken) => {
+          cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
 
-  it('should filter for policy ID by partial match', () => {
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
+          cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('exist');
 
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('licy-300');
+          cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
+          cy.contains(`Valid for the following agent policy: ${fetchedToken.policy_id}`);
+        });
+      });
 
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
-  });
+      it('should filter for policy ID by partial match', () => {
+        cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
 
-  it('should show token when policy is removed', () => {
-    cleanupAgentPolicies();
-    // Force page refresh after remove policies
-    cy.visit('app/fleet/uninstall-tokens');
+        cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('licy-300');
 
-    // tokens are hidden by default
-    cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD).each(($tokenField) => {
-      expect($tokenField).to.contain.text('••••••••••••••••••••••••••••••••');
-    });
-
-    // token is reveiled when clicking on eye button
-    cy.getBySel(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON).first().click();
-
-    // we should show the correct token for the correct policy ID
-    waitForFetchingUninstallToken().then((fetchedToken) => {
-      cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
-
-      cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD)
-        .first()
-        .should('not.contain.text', '••••••••••••••••••••••••••••••••')
-        .should('contain.text', fetchedToken.token);
-    });
-
-    // Can filter by policy id
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
-
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('licy-300');
-
-    cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
-
-    // Can open uninsall command flyout
-    cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
-
-    waitForFetchingUninstallToken().then((fetchedToken) => {
-      cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);
-
-      cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('exist');
-
-      cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
-      cy.contains(`Valid for the following agent policy: ${fetchedToken.policy_id}`);
+        cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
+      });
     });
   });
 
