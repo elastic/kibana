@@ -14,7 +14,8 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedUncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
+const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
+const expectedUncategorized = uncategorized.map((dataset) => dataset.split('-')[1]);
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
