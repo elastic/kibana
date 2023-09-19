@@ -544,55 +544,6 @@
           },
           {
             "parentPluginId": "@kbn/es",
-            "id": "def-common.Cluster.waitForClusterReady",
-            "type": "Function",
-            "tags": [],
-            "label": "waitForClusterReady",
-            "description": [],
-            "signature": [
-              "(client: ",
-              "default",
-              ", readyTimeout?: number) => Promise<void>"
-            ],
-            "path": "packages/kbn-es/src/cluster.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/es",
-                "id": "def-common.Cluster.waitForClusterReady.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "client",
-                "description": [],
-                "signature": [
-                  "default"
-                ],
-                "path": "packages/kbn-es/src/cluster.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/es",
-                "id": "def-common.Cluster.waitForClusterReady.$2",
-                "type": "number",
-                "tags": [],
-                "label": "readyTimeout",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "packages/kbn-es/src/cluster.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/es",
             "id": "def-common.Cluster.runServerless",
             "type": "Function",
             "tags": [],
