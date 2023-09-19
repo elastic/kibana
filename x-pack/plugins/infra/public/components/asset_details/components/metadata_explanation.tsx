@@ -21,7 +21,7 @@ const MetadataExplanationTooltipContent = React.memo(() => {
   };
 
   return (
-    <EuiText size="s" onClick={onClick} style={{ width: 200 }}>
+    <EuiText size="xs" onClick={onClick} style={{ width: 200 }}>
       <FormattedMessage
         id="xpack.infra.assetDetails.metadata.tooltip.documentationLabel"
         defaultMessage="{metadata} is populated from the last event detected for this {hostName} for the selected date period."
@@ -91,7 +91,6 @@ export const MetadataExplanationMessage = () => {
           iconSize="s"
           iconColor="subdued"
           icon="iInCircle"
-          panelPaddingSize="m"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent />

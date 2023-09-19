@@ -1,4 +1,3 @@
----
 system_indices_superuser:
   cluster: ['all']
   indices:

@@ -22,8 +22,9 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
+// Flaky on serverless
 const defaultPageSize = 25;
-describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'timeline' });

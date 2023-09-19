@@ -361,6 +361,7 @@ export interface DocLinks {
   readonly visualize: Record<string, string>;
   readonly apis: Readonly<{
     bulkIndexAlias: string;
+    indexStats: string;
     byteSizeUnits: string;
     createAutoFollowPattern: string;
     createFollower: string;
@@ -488,6 +489,7 @@ export interface DocLinks {
     guide: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
+    esSettings: string;
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;

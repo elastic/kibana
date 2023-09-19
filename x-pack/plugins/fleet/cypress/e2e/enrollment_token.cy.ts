@@ -8,6 +8,8 @@
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS } from '../screens/fleet';
 
+import { API_VERSIONS } from '../../common/constants';
+
 describe('Enrollment token page', () => {
   before(() => {
     cy.request({
@@ -20,7 +22,7 @@ describe('Enrollment token page', () => {
         monitoring_enabled: ['logs', 'metrics'],
         id: 'agent-policy-1',
       },
-      headers: { 'kbn-xsrf': 'cypress' },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
   });
 

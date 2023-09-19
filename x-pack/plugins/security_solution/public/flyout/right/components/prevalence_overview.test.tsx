@@ -9,7 +9,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
+import { INSIGHTS_PREVALENCE_NO_DATA_TEST_ID, INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -68,11 +68,12 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId } = render(renderPrevalenceOverview());
+    const { getByTestId, queryByTestId } = render(renderPrevalenceOverview());
 
     expect(
       getByTestId(EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID))
     ).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no-data message', () => {
@@ -84,7 +85,10 @@ describe('<PrevalenceOverview />', () => {
 
     const { getByTestId } = render(renderPrevalenceOverview());
 
-    expect(getByTestId(`${INSIGHTS_PREVALENCE_TEST_ID}Error`)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_PREVALENCE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_PREVALENCE_NO_DATA_TEST_ID)).toHaveTextContent(
+      'No prevalence data available.'
+    );
   });
 
   it('should render only data with prevalence less than 10%', () => {
@@ -127,54 +131,8 @@ describe('<PrevalenceOverview />', () => {
     const valueDataTestSubj2 = `${INSIGHTS_PREVALENCE_TEST_ID}${field2}Value`;
     expect(queryByTestId(iconDataTestSubj2)).not.toBeInTheDocument();
     expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
-  });
 
-  it('should render null if eventId is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      eventId: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render null if browserFields is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      browserFields: null,
-    };
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: null,
-    };
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
+    expect(queryByTestId(INSIGHTS_PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {

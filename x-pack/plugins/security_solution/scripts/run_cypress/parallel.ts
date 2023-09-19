@@ -63,8 +63,14 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 export const cli = () => {
   run(
     async () => {
+      const log = new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      });
+
       const { argv } = yargs(process.argv.slice(2))
-        .coerce('spec', (arg) => (_.isArray(arg) ? [_.last(arg)] : [arg]))
+        .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
+        .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
           arg.split(',').reduce((acc, curr) => {
             const [key, value] = curr.split('=');
@@ -77,22 +83,73 @@ export const cli = () => {
           }, {} as Record<string, string | number>)
         );
 
+      log.info(`
+----------------------------------------------
+Script arguments:
+----------------------------------------------
+
+${JSON.stringify(argv, null, 2)}
+
+----------------------------------------------
+`);
+
       const isOpen = argv._[0] === 'open';
-      const cypressConfigFilePath = require.resolve(
-        `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
-      ) as string;
+
+      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+
+      log.info(`
+----------------------------------------------
+Cypress config for file: ${cypressConfigFilePath}:
+----------------------------------------------
+
+${JSON.stringify(cypressConfigFile, null, 2)}
+
+----------------------------------------------
+`);
+
+      const specConfig = cypressConfigFile.e2e.specPattern;
+      const specArg = argv.spec;
+      const specPattern = specArg ?? specConfig;
+
+      log.info('Config spec pattern:', specConfig);
+      log.info('Arguments spec pattern:', specArg);
+      log.info('Resulting spec pattern:', specPattern);
+
+      // The grep function will filter Cypress specs by tags: it will include and exclude
+      // spec files according to the tags configuration.
       const grepSpecPattern = grep({
         ...cypressConfigFile,
-        specPattern: argv.spec ?? cypressConfigFile.e2e.specPattern,
+        specPattern,
         excludeSpecPattern: [],
       }).specPattern;
 
-      let files = retrieveIntegrations(
-        _.isArray(grepSpecPattern)
-          ? grepSpecPattern
-          : globby.sync(argv.spec ?? cypressConfigFile.e2e.specPattern)
-      );
+      log.info('Resolved spec files or pattern after grep:', grepSpecPattern);
+
+      const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
+      const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
+
+      // IMPORTANT!
+      // When grep returns the same spec pattern as it gets in its arguments, we treat it as
+      // it couldn't find any concrete specs to execute (maybe because all of them are skipped).
+      // In this case, we do an early return - it's important to do that.
+      // If we don't return early, these specs will start executing, and Cypress will be skipping
+      // tests at runtime: those that should be excluded according to the tags passed in the config.
+      // This can take so much time that the job can fail by timeout in CI.
+      if (grepFilterSpecs && isGrepReturnedSpecPattern) {
+        log.info('No tests found - all tests could have been skipped via Cypress tags');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
+      }
+
+      const concreteFilePaths = isGrepReturnedFilePaths
+        ? grepSpecPattern // use the returned concrete file paths
+        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+
+      let files = retrieveIntegrations(concreteFilePaths);
+
+      log.info('Resolved spec files after retrieveIntegrations:', files);
 
       if (argv.changedSpecsOnly) {
         files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
@@ -107,11 +164,6 @@ export const cli = () => {
         // we may extend this in the future
         files = files.slice(0, 3);
       }
-
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
 
       if (!files?.length) {
         log.info('No tests found');

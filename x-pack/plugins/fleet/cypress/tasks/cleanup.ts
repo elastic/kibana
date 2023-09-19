@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { API_VERSIONS } from '../../common/constants';
 
 export function cleanupAgentPolicies() {
   cy.request('/api/fleet/agent_policies').then((response: any) => {
@@ -14,7 +15,7 @@ export function cleanupAgentPolicies() {
           method: 'POST',
           url: '/api/fleet/agent_policies/delete',
           body: { agentPolicyId: policy.id },
-          headers: { 'kbn-xsrf': 'kibana' },
+          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
         });
       });
   });
@@ -28,7 +29,7 @@ export function unenrollAgent() {
           method: 'POST',
           url: `api/fleet/agents/${agent.id}/unenroll`,
           body: { revoke: true },
-          headers: { 'kbn-xsrf': 'kibana' },
+          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
         });
       });
     }
@@ -43,7 +44,7 @@ export function cleanupDownloadSources() {
         cy.request({
           method: 'DELETE',
           url: `/api/fleet/agent_download_sources/${ds.id}`,
-          headers: { 'kbn-xsrf': 'kibana' },
+          headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
         });
       });
   });

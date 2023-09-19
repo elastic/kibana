@@ -12,7 +12,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG, DEFAULT_PORT } from '../utils';
+import {
+  SERVERLESS_REPO,
+  SERVERLESS_TAG,
+  SERVERLESS_IMG,
+  DEFAULT_PORT,
+  ServerlessOptions,
+} from '../utils';
 import { Command } from './types';
 
 export const serverless: Command = {
@@ -24,11 +30,16 @@ export const serverless: Command = {
 
       --tag               Image tag of ESS to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
       --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
-      --clean             Remove existing file system object store before running
-      --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Sets up SSL on Elasticsearch
-      --kill              Kill running ESS nodes if detected
+      
       --background        Start ESS without attaching to the first node's logs
+      --basePath          Path to the directory where the ES cluster will store data
+      --clean             Remove existing file system object store before running
+      --kill              Kill running ESS nodes if detected on startup
+      --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
+      --ssl               Enable HTTP SSL on Elasticsearch
+      --teardown          If this process exits, teardown the ES cluster as well
+      --waitForReady      Wait for the ES cluster to be ready to serve requests
+      
       -E                  Additional key=value settings to pass to Elasticsearch
       -F                  Absolute paths for files to mount into containers
 
@@ -54,11 +65,11 @@ export const serverless: Command = {
         files: 'F',
       },
 
-      string: ['tag', 'image'],
-      boolean: ['clean', 'ssl', 'kill', 'background'],
+      string: ['tag', 'image', 'basePath'],
+      boolean: ['clean', 'ssl', 'kill', 'background', 'teardown', 'waitForReady'],
 
       default: defaults,
-    });
+    }) as unknown as ServerlessOptions;
 
     const cluster = new Cluster();
     await cluster.runServerless({

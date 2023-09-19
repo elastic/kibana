@@ -408,6 +408,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+  /s/{spaceId}/api/observability/slos/_delete_instances:
+    post:
+      summary: Batch delete rollup and summary data for the matching list of sloId and instanceId
+      operationId: deleteSloInstancesOp
+      description: |
+        You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_slo_instances_request'
+      responses:
+        '204':
+          description: Successful request
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+      servers:
+        - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -924,6 +964,7 @@ components:
         - enabled
         - groupBy
         - instanceId
+        - tags
         - createdAt
         - updatedAt
       properties:
@@ -980,6 +1021,11 @@ components:
           description: the value derived from the groupBy field, if present, otherwise '*'
           type: string
           example: host-abcde
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
         createdAt:
           description: The creation date
           type: string
@@ -1117,6 +1163,11 @@ components:
           description: optional group by field to use to generate an SLO per distinct value
           type: string
           example: some.field
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
     create_slo_response:
       title: Create SLO response
       type: object
@@ -1170,13 +1221,18 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
     historical_summary_request:
       title: Historical summary request
       type: object
       required:
-        - sloIds
+        - list
       properties:
-        sloIds:
+        list:
           description: The list of SLO identifiers to get the historical summary for
           type: array
           items:
@@ -1200,3 +1256,28 @@ components:
               example: 0.9836
             errorBudget:
               $ref: '#/components/schemas/error_budget'
+    delete_slo_instances_request:
+      title: Delete SLO instances request
+      description: |
+        The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data. This API can be used to remove the staled data of an instance SLO that no longer get updated.
+      type: object
+      required:
+        - list
+      properties:
+        list:
+          description: An array of slo id and instance id
+          type: array
+          items:
+            type: object
+            required:
+              - sloId
+              - instanceId
+            properties:
+              sloId:
+                description: The SLO unique identifier
+                type: string
+                example: 8853df00-ae2e-11ed-90af-09bb6422b258
+              instanceId:
+                description: The SLO instance identifier
+                type: string
+                example: 8853df00-ae2e-11ed-90af-09bb6422b258

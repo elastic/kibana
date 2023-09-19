@@ -52,5 +52,11 @@
     "@kbn/data-plugin",
     "@kbn/dev-utils",
     "@kbn/bfetch-plugin",
+    "@kbn/rison",
+    "@kbn/std",
+    "@kbn/serverless-common-settings",
+    "@kbn/serverless-observability-settings",
+    "@kbn/serverless-search-settings",
+    "@kbn/serverless-security-settings",
   ]
 }

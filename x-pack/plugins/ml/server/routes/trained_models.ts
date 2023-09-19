@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { ErrorType } from '@kbn/ml-error-utils';
-import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -25,14 +26,34 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
 } from './schemas/inference_schema';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
-export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
+export function filterForEnabledFeatureModels(
+  models: TrainedModelConfigResponse[] | estypes.MlTrainedModelConfig[],
+  enabledFeatures: MlFeatures
+) {
+  let filteredModels = models;
+  if (enabledFeatures.nlp === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
+  }
+
+  if (enabledFeatures.dfa === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type !== 'tree_ensemble');
+  }
+
+  return filteredModels;
+}
+
+export function trainedModelsRoutes({
+  router,
+  routeGuard,
+  getEnabledFeatures,
+}: RouteInitialization) {
   /**
    * @apiGroup TrainedModels
    *
@@ -62,14 +83,14 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         try {
           const { modelId } = request.params;
           const { with_pipelines: withPipelines, ...query } = request.query;
-          const body = await mlClient.getTrainedModels({
+          const resp = await mlClient.getTrainedModels({
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
           } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
-          const result = body.trained_model_configs as TrainedModelConfigResponse[];
+          const result = resp.trained_model_configs as TrainedModelConfigResponse[];
           try {
             if (withPipelines) {
               // Also need to retrieve the list of deployment IDs from stats
@@ -123,8 +144,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
             mlLog.debug(e);
           }
 
+          const body = filterForEnabledFeatureModels(result, getEnabledFeatures());
+
           return response.ok({
-            body: result,
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));

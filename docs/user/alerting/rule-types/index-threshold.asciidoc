@@ -9,7 +9,7 @@
 The index threshold rule type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 
 [float]
-=== Rule conditions
+=== Define the conditions
 
 [role="screenshot"]
 image::user/alerting/images/rule-types-index-threshold-conditions.png[Defining index threshold rule conditions in {kib}]
@@ -28,10 +28,23 @@ It also defines a time window, which determines how far back to search for docum
 If data is available and all clauses have been defined, a preview chart will render the threshold value and display a line chart showing the value for the last 30 intervals. This can provide an indication of recent values and their proximity to the threshold, and help you tune the clauses.
 
 [float]
-[[action-variables-index-threshold]]
-=== Action variables
+[[actions-index-threshold]]
+=== Add actions
 
-The following action variables are specific to the index threshold rule. You can also specify <<rule-action-variables,variables common to all rules>>.
+You can <<defining-rules-actions-details,add actions>> to your rule to generate notifications.
+
+Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications.
+
+After you choose a connector, you must choose an action group, which affects when the action runs.
+The valid action groups for an index threshold rule are: `Threshold met` and `Recovered`.
+Each connector supports a specific set of actions for each action group. For more details, refer to <<action-types>>.
+
+[float]
+[[action-variables-index-threshold]]
+=== Add action variables
+
+The following action variables are specific to the index threshold rule.
+You can also specify <<rule-action-variables,variables common to all rules>>.
 
 `context.conditions`:: A description of the threshold condition. Example: `count greater than 4`
 `context.date`:: The date, in ISO format, that the rule met the threshold condition. Example: `2020-01-01T00:00:00.000Z`.

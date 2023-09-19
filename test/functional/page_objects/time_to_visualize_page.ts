@@ -42,8 +42,8 @@ export class TimeToVisualizePageObject extends FtrService {
   }
 
   public async resetNewDashboard() {
-    await this.common.navigateToApp('dashboard');
-    await this.dashboard.gotoDashboardLandingPage(true);
+    await this.dashboard.navigateToApp();
+    await this.dashboard.gotoDashboardLandingPage();
     await this.dashboard.clickNewDashboard(false);
   }
 

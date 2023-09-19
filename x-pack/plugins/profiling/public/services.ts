@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
+import {
+  createFlameGraph,
+  type BaseFlameGraph,
+  type ElasticFlameGraph,
+} from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
-import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,
@@ -102,6 +106,7 @@ export function getServices(): Services {
         timeTo,
         kuery,
       };
+
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
       return createFlameGraph(baseFlamegraph);
     },

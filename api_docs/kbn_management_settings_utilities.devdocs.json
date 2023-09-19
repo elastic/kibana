@@ -1,0 +1,788 @@
+{
+  "id": "@kbn/management-settings-utilities",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [
+          "\nConvenience function that, given a {@link FieldDefinition} and an {@link UnsavedFieldChange},\nreturns the value to be displayed in the input field, and a boolean indicating whether the\nvalue is an unsaved value.\n"
+        ],
+        "signature": [
+          "(field: F<\"array\">, change: C<\"array\">) => [string[], boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The field to compare."
+            ],
+            "signature": [
+              "F<\"array\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [
+              "The unsaved change to compare."
+            ],
+            "signature": [
+              "C<\"array\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"color\">, change: C<\"color\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"color\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"color\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"boolean\">, change: C<\"boolean\">) => [boolean, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"boolean\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"boolean\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"image\">, change: C<\"image\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"image\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"image\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"json\">, change: C<\"json\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"json\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"json\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"markdown\">, change: C<\"markdown\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"markdown\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"markdown\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"number\">, change: C<\"number\">) => [number, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"number\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"number\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"select\">, change: C<\"select\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"select\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"select\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"string\">, change: C<\"string\">) => [string, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"string\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"string\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<\"undefined\">, change: C<\"undefined\">) => [string | null | undefined, boolean]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<\"undefined\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<\"undefined\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getInputValue",
+        "description": [],
+        "signature": [
+          "(field: F<S>, change: C<S>) => (boolean | ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.KnownTypeToValue",
+            "text": "KnownTypeToValue"
+          },
+          "<S> | null | undefined)[]"
+        ],
+        "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "F<S>"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getInputValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [],
+            "signature": [
+              "C<S>"
+            ],
+            "path": "packages/kbn-management/settings/utilities/get_input_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.hasUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "hasUnsavedChange",
+        "description": [
+          "\nCompares a given {@link FieldDefinition} to an {@link UnsavedFieldChange} to determine\nif the field has an unsaved change in the UI.\n"
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">(field: Pick<",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<T, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.KnownTypeToValue",
+            "text": "KnownTypeToValue"
+          },
+          "<T> | null>, \"savedValue\">, unsavedChange?: Pick<",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T>, \"unsavedValue\"> | undefined) => boolean"
+        ],
+        "path": "packages/kbn-management/settings/utilities/has_unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.hasUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The field to compare."
+            ],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<T, ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null>, \"savedValue\">"
+            ],
+            "path": "packages/kbn-management/settings/utilities/has_unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.hasUnsavedChange.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChange",
+            "description": [
+              "The unsaved change to compare."
+            ],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T>, \"unsavedValue\"> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/utilities/has_unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.isUnsavedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnsavedValue",
+        "description": [
+          "\nConvenience function to compare a given {@link FieldDefinition} to an {@link UnsavedFieldChange}\nto determine if the value in the unsaved change is a different value from what is saved.\n"
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">(field: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<T, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.KnownTypeToValue",
+            "text": "KnownTypeToValue"
+          },
+          "<T> | null>, unsavedValue?: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.KnownTypeToValue",
+            "text": "KnownTypeToValue"
+          },
+          "<T> | null | undefined) => boolean"
+        ],
+        "path": "packages/kbn-management/settings/utilities/is_unsaved_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.isUnsavedValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The field to compare."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<T, ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null>"
+            ],
+            "path": "packages/kbn-management/settings/utilities/is_unsaved_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.isUnsavedValue.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unsavedValue",
+            "description": [
+              "The unsaved value to compare."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null | undefined"
+            ],
+            "path": "packages/kbn-management/settings/utilities/is_unsaved_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
