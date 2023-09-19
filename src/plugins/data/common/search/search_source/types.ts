@@ -39,11 +39,6 @@ export interface ISearchStartSearchSource
   createEmpty: () => ISearchSource;
 }
 
-/**
- * @deprecated use {@link estypes.SortResults} instead.
- */
-export type EsQuerySearchAfter = [string | number, string | number];
-
 export enum SortDirection {
   asc = 'asc',
   desc = 'desc',

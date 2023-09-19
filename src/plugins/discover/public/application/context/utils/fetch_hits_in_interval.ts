@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
-import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -39,7 +39,7 @@ export async function fetchHitsInInterval(
   sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,
   interval: IntervalValue[],
-  searchAfter: EsQuerySearchAfter,
+  searchAfter: estypes.SortResults,
   maxCount: number,
   nanosValue: string,
   anchorId: string,
