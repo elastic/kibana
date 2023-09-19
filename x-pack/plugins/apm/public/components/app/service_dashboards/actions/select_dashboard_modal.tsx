@@ -29,6 +29,7 @@ import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
 
 interface Props {
   onClose: () => void;
+  onRefresh: () => void;
 }
 
 export function SelectDashboard({ onClose, onRefresh }: Props) {
@@ -46,8 +47,6 @@ export function SelectDashboard({ onClose, onRefresh }: Props) {
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/dashboards');
 
-  console.log('selectedDashboard', selectedDashboard);
-
   const reloadServiceDashboards = useCallback(() => {
     onRefresh();
   }, [onRefresh]);
@@ -60,7 +59,7 @@ export function SelectDashboard({ onClose, onRefresh }: Props) {
           params: {
             body: {
               dashboardTitle: newDashboard.label,
-              dashboardSavedObjectId: newDashboard?.value,
+              dashboardSavedObjectId: newDashboard.value,
               useContextFilter,
               linkTo: DashboardTypeEnum.single, // iteration-1: Only single supported
               serviceName,

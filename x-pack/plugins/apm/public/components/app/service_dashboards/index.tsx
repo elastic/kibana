@@ -21,6 +21,7 @@ import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
+import { DashboardSelector } from './dropdown';
 
 export function ServiceDashboards() {
   const {
@@ -28,7 +29,7 @@ export function ServiceDashboards() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/dashboards');
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  const [selectedDashboard, setSelectedDashboard] =
+  const [currentDashboard, setCurrentDashboard] =
     useState<SavedServiceDashboard>();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -56,7 +57,7 @@ export function ServiceDashboards() {
         query: { query: kuery, language: 'kuery' },
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-    }, [rangeFrom, rangeTo, kuery, selectedDashboard]);
+    }, [rangeFrom, rangeTo, kuery, currentDashboard]);
 
   const serviceDashboards = data?.serviceDashboards ?? [];
 
@@ -76,11 +77,11 @@ export function ServiceDashboards() {
     environment,
     rangeFrom,
     rangeTo,
-    selectedDashboard,
+    currentDashboard,
   ]);
 
   const handleOnChange = (selectedId: string) => {
-    setSelectedDashboard(
+    setCurrentDashboard(
       serviceDashboards.find(
         ({ dashboardSavedObjectId }) => dashboardSavedObjectId === selectedId
       )
@@ -93,34 +94,50 @@ export function ServiceDashboards() {
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              {selectedDashboard?.dashboardTitle}
+              {currentDashboard?.dashboardTitle}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ContextMenu
-                handleOnChange={handleOnChange}
-                selectedDashboard={selectedDashboard}
-                serviceDashboards={data?.serviceDashboards}
-                items={[
-                  <LinkDashboard
-                    emptyButton={true}
-                    isModalVisible={isModalVisible}
-                    setIsModalVisible={setIsModalVisible}
-                    onRefresh={refetch}
-                  />,
-                  <GotoDashboard selectedDashboard={selectedDashboard} />,
-                  <EditDashboard selectedDashboard={selectedDashboard} />,
-                  <UnlinkDashboard
-                    selectedDashboard={selectedDashboard}
-                    onRefresh={refetch}
-                  />,
-                ]}
-              />
-            </EuiFlexItem>
+            <EuiFlexGroup
+              responsive={false}
+              gutterSize="xs"
+              alignItems="center"
+            >
+              <EuiFlexItem grow={false}>
+                <DashboardSelector
+                  serviceDashboards={serviceDashboards}
+                  handleOnChange={handleOnChange}
+                  currentDashboard={currentDashboard}
+                />
+              </EuiFlexItem>
+
+              {currentDashboard && (
+                <EuiFlexItem grow={false}>
+                  <ContextMenu
+                    handleOnChange={handleOnChange}
+                    currentDashboard={currentDashboard}
+                    serviceDashboards={serviceDashboards}
+                    items={[
+                      <LinkDashboard
+                        emptyButton={true}
+                        isModalVisible={isModalVisible}
+                        setIsModalVisible={setIsModalVisible}
+                        onRefresh={refetch}
+                      />,
+                      <GotoDashboard currentDashboard={currentDashboard} />,
+                      <EditDashboard currentDashboard={currentDashboard} />,
+                      <UnlinkDashboard
+                        currentDashboard={currentDashboard}
+                        onRefresh={refetch}
+                      />,
+                    ]}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexGroup>
 
-          {selectedDashboard && (
+          {currentDashboard && (
             <DashboardRenderer
-              savedObjectId={selectedDashboard.dashboardSavedObjectId}
+              savedObjectId={currentDashboard.dashboardSavedObjectId}
               getCreationOptions={getCreationOptions}
               ref={setDashboard}
             />

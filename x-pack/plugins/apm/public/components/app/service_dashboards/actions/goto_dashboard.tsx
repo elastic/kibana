@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -12,9 +12,9 @@ import { ApmPluginStartDeps } from '../../../../plugin';
 import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 
 export function GotoDashboard({
-  selectedDashboard,
+  currentDashboard,
 }: {
-  selectedDashboard: SavedServiceDashboard;
+  currentDashboard: SavedServiceDashboard;
 }) {
   const {
     services: {
@@ -23,7 +23,7 @@ export function GotoDashboard({
   } = useKibana<ApmPluginStartDeps>();
 
   const url = dashboardLocator?.getRedirectUrl({
-    dashboardId: selectedDashboard?.dashboardSavedObjectId,
+    dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
   return (
     <EuiButtonEmpty color="text" size="s" iconType={'visGauge'} href={url}>

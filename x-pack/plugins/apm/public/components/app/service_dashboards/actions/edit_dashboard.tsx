@@ -7,16 +7,19 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SelectDashboard } from './select_dashboard_modal';
 
 export function EditDashboard({
   isModalVisible,
   setIsModalVisible,
   onRefresh,
+  currentDashboard,
 }: {
   isModalVisible: boolean;
   setIsModalVisible: (isVisible: boolean) => void;
   onRefresh: () => void;
+  currentDashboard: SavedServiceDashboard;
 }) {
   return (
     <>

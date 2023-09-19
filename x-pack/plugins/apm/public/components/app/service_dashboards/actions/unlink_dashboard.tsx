@@ -12,10 +12,10 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function UnlinkDashboard({
-  selectedDashboard,
+  currentDashboard,
   onRefresh,
 }: {
-  selectedDashboard: SavedServiceDashboard;
+  currentDashboard?: SavedServiceDashboard;
   onRefresh: () => void;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -27,7 +27,7 @@ export function UnlinkDashboard({
     async function () {
       try {
         await callApmApi('DELETE /internal/apm/service-dashboard', {
-          params: { query: { serviceDashboardId: selectedDashboard.id } },
+          params: { query: { serviceDashboardId: currentDashboard?.id } },
           signal: null,
         });
 
@@ -36,7 +36,7 @@ export function UnlinkDashboard({
             'xpack.apm.serviceDashboards.unlinkSuccess.toast.title',
             {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-              values: { dashboardName: selectedDashboard.dashboardTitle },
+              values: { dashboardName: currentDashboard?.dashboardTitle },
             }
           ),
         });
@@ -49,7 +49,7 @@ export function UnlinkDashboard({
             {
               defaultMessage:
                 'Error while unlinking "{dashboardName}" dashboard',
-              values: { dashboardName: selectedDashboard.dashboardTitle },
+              values: { dashboardName: currentDashboard?.dashboardTitle },
             }
           ),
           text: error.body.message,
@@ -57,7 +57,7 @@ export function UnlinkDashboard({
       }
       setIsModalVisible(!isModalVisible);
     },
-    [selectedDashboard, notifications.toasts]
+    [currentDashboard, notifications.toasts]
   );
   return (
     <>
