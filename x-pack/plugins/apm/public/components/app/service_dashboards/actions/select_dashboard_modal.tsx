@@ -31,7 +31,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function SelectDashboard({ onClose }: Props) {
+export function SelectDashboard({ onClose, onRefresh }: Props) {
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -50,8 +50,8 @@ export function SelectDashboard({ onClose }: Props) {
 
   // TODO need to refetch and not reload
   const reloadServiceDashboards = useCallback(() => {
-    window.location.reload();
-  }, []);
+    onRefresh();
+  }, [onRefresh]);
 
   const onSave = useCallback(
     async function () {

@@ -38,7 +38,7 @@ export function ServiceDashboards() {
     useState<SavedServiceDashboard>();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const { data, status } = useFetcher(
+  const { data, status, refetch } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
         return callApmApi(
@@ -56,7 +56,6 @@ export function ServiceDashboards() {
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
-      console.log('selectedDashboard', selectedDashboard);
       const getInitialInput = () => ({
         viewMode: ViewMode.VIEW,
         timeRange: { from: rangeFrom, to: rangeTo },
@@ -125,6 +124,7 @@ export function ServiceDashboards() {
             <AddDashboard
               isModalVisible={isModalVisible}
               setIsModalVisible={setIsModalVisible}
+              onRefresh={refetch}
             />
           }
         />

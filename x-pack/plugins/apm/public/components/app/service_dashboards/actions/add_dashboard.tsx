@@ -6,15 +6,17 @@
  */
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { SelectDashboard } from './select_dashboard_modal';
 
 export function AddDashboard({
   isModalVisible,
   setIsModalVisible,
+  onRefresh,
 }: {
   isModalVisible: boolean;
   setIsModalVisible: (isVisible: boolean) => void;
+  onRefresh: () => void;
 }) {
   return (
     <>
@@ -28,7 +30,10 @@ export function AddDashboard({
       </EuiButton>
 
       {isModalVisible && (
-        <SelectDashboard onClose={() => setIsModalVisible(false)} />
+        <SelectDashboard
+          onClose={() => setIsModalVisible(false)}
+          onRefresh={onRefresh}
+        />
       )}
     </>
   );
