@@ -31,7 +31,7 @@ open target/coverage/jest/index.html
 
 The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
 
-### Start server and run test in a single process
+#### Start server and run test (single process)
 
 ```
 node x-pack/plugins/apm/scripts/test/api [--trial/--basic] [--help]
@@ -40,7 +40,7 @@ node x-pack/plugins/apm/scripts/test/api [--trial/--basic] [--help]
 The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
 Once the tests finish, the instances will be terminated.
 
-### Start server and run test in separate processes
+#### Start server and run test (separate processes)
 
 ```sh
 
@@ -61,7 +61,7 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
 
 (The test server needs to be running)
 
-**API Test tips**
+#### API Test tips
 
 - For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) package
 - For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
@@ -85,19 +85,19 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 
 [Test tips and best practices](../ftr_e2e/README.md)
 
-### Start test server
+#### Start test server
 
 ```
 node x-pack/plugins/apm/scripts/test/e2e --server
 ```
 
-### Run tests
+#### Run tests
 
 ```
 node x-pack/plugins/apm/scripts/test/e2e --runner --open
 ```
 
-### Rum tests multiple times to check for flakiness
+### Run tests multiple times to check for flakiness
 
 ```
 node x-pack/plugins/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
@@ -111,23 +111,33 @@ Accessibility tests are added on the e2e with `checkA11y()`, they will run toget
 
 ## Functional tests (Security and Correlations tests)
 
-TODO: We could try moving this tests to the new e2e tests located at `x-pack/plugins/apm/ftr_e2e`.
-
-**Start server**
-
-```
+```sh
+# Start server
 node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
-```
 
-**Run tests**
-
-```
+# Run tests
 node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
 APM tests are located in `x-pack/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scripts/test/README.md
+
+## Serverless API tests
+
+#### Start server and run tests (single process)
+```
+node scripts/functional_tests.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+```
+
+#### Start server and run tests (separate processes)
+```sh
+# Start server
+node scripts/functional_tests_server.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+
+# Run tests
+node scripts/functional_test_runner --config=x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+```
 
 ## Storybook
 
