@@ -107,7 +107,7 @@ export const AnnotationList = ({
             key={index}
             css={css`
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-              margin-top: ${index === 0 ? '' : euiThemeVars.euiSizeS};
+              margin-bottom: ${euiThemeVars.euiSizeS};
             `}
           >
             <DragDrop
@@ -148,34 +148,28 @@ export const AnnotationList = ({
         ))}
       </ReorderProvider>
 
-      <div
-        css={css`
-          margin-top: ${euiThemeVars.euiSizeS};
-        `}
+      <DragDrop
+        order={[annotations.length]}
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
+        dropTypes={dragging ? ['duplicate_compatible'] : []}
+        value={{
+          id: 'addAnnotation',
+          humanData: {
+            label: addAnnotationText,
+          },
+        }}
+        onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
       >
-        <DragDrop
-          order={[annotations.length]}
-          getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
-          getAdditionalClassesOnDroppable={
-            DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
-          }
-          dropTypes={dragging ? ['duplicate_compatible'] : []}
-          value={{
-            id: 'addAnnotation',
-            humanData: {
-              label: addAnnotationText,
-            },
-          }}
-          onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
-        >
-          <EmptyDimensionButton
-            dataTestSubj="addAnnotation"
-            label={addAnnotationText}
-            ariaLabel={addAnnotationText}
-            onClick={() => addNewAnnotation()}
-          />
-        </DragDrop>
-      </div>
+        <EmptyDimensionButton
+          dataTestSubj="addAnnotation"
+          label={addAnnotationText}
+          ariaLabel={addAnnotationText}
+          onClick={() => addNewAnnotation()}
+        />
+      </DragDrop>
     </div>
   );
 };
