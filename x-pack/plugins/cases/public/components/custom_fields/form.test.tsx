@@ -13,7 +13,6 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CustomFieldsForm } from './form';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 
 describe('CustomFieldsForm ', () => {
