@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return hosts', async () => {
       const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
       const to = new Date().toISOString();
-      await synthtrace.index(generateHostsData({ from, to, count: 3 }));
+      await synthtrace.index(generateHostsData({ from, to, count: 5 }));
 
       const response = await supertest
         .get(HOSTS_ASSETS_ENDPOINT)
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(response.body).to.have.property('hosts');
-      expect(response.body.hosts.length).to.equal(2);
+      expect(response.body.hosts.length).to.equal(5);
     });
   });
 }
