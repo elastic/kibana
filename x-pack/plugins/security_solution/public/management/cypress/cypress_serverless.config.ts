@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { dataLoaders } from './support/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -40,6 +41,7 @@ export default defineCypressConfig({
     KIBANA_PASSWORD: 'changeme',
     ELASTICSEARCH_USERNAME: 'system_indices_superuser',
     ELASTICSEARCH_PASSWORD: 'changeme',
+    IS_SERVERLESS: true,
 
     grepFilterSpecs: true,
     grepOmitFiltered: true,
@@ -56,12 +58,7 @@ export default defineCypressConfig({
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
-      // skip dataLoaders() because of `NativeResponseError: status_exception`
-      // message: `Native role management is not enabled in this Elasticsearch instance`
-      // related: https://github.com/elastic/security-team/issues/7614
-      // return dataLoaders(on, config);
-
-      return config;
+      return dataLoaders(on, config);
     },
   },
 });
