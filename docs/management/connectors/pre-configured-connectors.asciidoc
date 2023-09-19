@@ -58,7 +58,7 @@ Sensitive properties, such as passwords, can also be stored in the
 ==============================================
 
 [float]
-[[managing-pre-configured-connectors]]
+[[managing-preconfigured-connectors]]
 === View preconfigured connectors
 
 When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
@@ -71,7 +71,7 @@ image::images/preconfigured-connectors-managing.png[Connectors managing tab with
 Clicking a preconfigured connector shows the description, but not the configuration.
 
 [float]
-[[build-in-preconfigured-connectors]]
+[[built-in-preconfigured-connectors]]
 === Built-in preconfigured connectors
 
 {kib} provides the following built-in preconfigured connectors:
@@ -104,6 +104,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 ====
 
 [float]
+[[preconfigured-connector-examples]]
 === Examples
 
 * <<preconfigured-d3security-configuration>>
@@ -116,6 +117,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-slack-configuration>>
+* <<preconfigured-swimlane-configuration>>
 * <<preconfigured-torq-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
@@ -443,6 +445,65 @@ xpack.actions.preconfigured:
       token: 'xoxb-xxxx-xxxx-xxxx' <1>
 --
 <1> The Slack bot user OAuth token.
+
+[float]
+[[preconfigured-swimlane-configuration]]
+==== Swimlane connectors
+
+The following example creates a <<swimlane-action-type,Swimlane connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-swimlane:
+    name: preconfigured-swimlane-connector-type
+    actionTypeId: .swimlane
+    config:
+      apiUrl: https://elastic.swimlaneurl.us <1>
+      appId: app-id <2>
+      mappings: <3>
+        alertIdConfig:
+          fieldType: text
+          id: agp4s
+          key: alert-id
+          name: Alert ID 
+        caseIdConfig:
+          fieldType: text
+          id: ae1mi
+          key: case-id
+          name: Case ID
+        caseNameConfig:
+          fieldType: text
+          id: anxnr
+          key: case-name
+          name: Case Name
+        commentsConfig:
+          fieldType: comments
+          id: au18d
+          key: comments
+          name: Comments
+        descriptionConfig:
+          fieldType: text 
+          id: ae1gd
+          key: description 
+          name: Description 
+        ruleNameConfig:
+          fieldType: text
+          id: avfsl
+          key: rule-name
+          name: Rule Name
+        severityConfig:
+          fieldType: text
+          id: a71ik
+          key: severity
+          name: severity
+    secrets:
+      apiToken: tokenkeystorevalue <4>
+--
+<1> The {swimlane} instance URL.
+<2> The {swimlane} application identifier.
+<3> Field mappings for properties such as the alert identifer, severity, and rule name.
+<4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
 [[preconfigured-torq-configuration]]
