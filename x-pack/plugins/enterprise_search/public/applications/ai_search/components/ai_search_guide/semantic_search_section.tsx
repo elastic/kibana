@@ -42,7 +42,7 @@ export const SemanticSearchSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
-                  defaultMessage="Combine any choice of these information retrieval tools."
+                  defaultMessage="Combine any of these information retrieval tools."
                 />
               </p>
             </EuiText>
