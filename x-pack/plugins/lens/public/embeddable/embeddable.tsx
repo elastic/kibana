@@ -1184,7 +1184,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
-      disableShardWarnings: true,
+      disableWarningToasts: true,
     };
 
     if (input.query) {
