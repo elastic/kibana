@@ -65,7 +65,7 @@ const visitArtifactTab = (tabId: string) => {
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] }, // broken due to disabled Native Role Management
   () => {
     before(() => {
       login();
