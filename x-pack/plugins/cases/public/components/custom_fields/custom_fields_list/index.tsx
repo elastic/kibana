@@ -18,20 +18,15 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import type { CustomFieldTypes } from '../../../../common/types/domain';
+import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
-export interface ListOption {
-  content: string;
-  id: string;
-  type?: CustomFieldTypes;
-}
 
 export interface Props {
-  listValues: ListOption[];
+  customFields: CustomFieldsConfiguration;
 }
 
-const DraggableComponent: React.FC<Props> = (props) => {
-  const { listValues } = props;
+const CustomFieldsListComponent: React.FC<Props> = (props) => {
+  const { customFields } = props;
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
@@ -44,35 +39,32 @@ const DraggableComponent: React.FC<Props> = (props) => {
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem>
-          {listValues.length ? (
+          {customFields.length ? (
             <EuiDragDropContext onDragEnd={() => {}}>
-              <EuiDroppable droppableId="droppable-area" spacing="m" withPanel>
-                {listValues.map(({ content, id, type }, idx) => (
+              <EuiDroppable droppableId="custom-fields-list-droppable" spacing="m">
+                {customFields.map(({ key, type, label }, idx) => (
                   <EuiDraggable
                     spacing="m"
-                    key={id}
+                    key={key}
                     index={idx}
-                    draggableId={id}
+                    draggableId={key}
                     customDragHandle={true}
                     hasInteractiveChildren={true}
                   >
-                    {(provided) => (
-                      <EuiPanel paddingSize="s" data-test-subj={`custom-field-${content}-${type}`}>
+                    {() => (
+                      <EuiPanel
+                        paddingSize="s"
+                        data-test-subj={`custom-field-${label}-${type}`}
+                        hasShadow={false}
+                      >
                         <EuiFlexGroup alignItems="center" gutterSize="s">
                           <EuiFlexItem grow={false}>
-                            <EuiPanel
-                              color="transparent"
-                              paddingSize="s"
-                              {...provided.dragHandleProps}
-                              aria-label="Drag Handle"
-                            >
-                              <EuiIcon type="grab" />
-                            </EuiPanel>
+                            <EuiIcon type="grab" />
                           </EuiFlexItem>
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
-                                <h4>{content}</h4>
+                                <h4>{label}</h4>
                               </EuiFlexItem>
                               <EuiText color="subdued">{renderTypeLabel(type)}</EuiText>
                             </EuiFlexGroup>
@@ -91,6 +83,6 @@ const DraggableComponent: React.FC<Props> = (props) => {
   );
 };
 
-DraggableComponent.displayName = 'Draggable';
+CustomFieldsListComponent.displayName = 'CustomFieldsList';
 
-export const Draggable = React.memo(DraggableComponent);
+export const CustomFieldsList = React.memo(CustomFieldsListComponent);

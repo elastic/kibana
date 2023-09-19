@@ -26,7 +26,7 @@ interface Props {
 }
 
 const FormComponent: React.FC<Props> = ({ onChange }) => {
-  const formSerializer = ({ key, label, type, options }: FormProps): CustomFieldsConfiguration => {
+  const formSerializer = ({ key, label, type, options }: FormProps) => {
     const customFieldKey = key ? key : uuidv4();
 
     const serializedData = [
@@ -34,7 +34,7 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
         key: customFieldKey,
         label,
         type,
-        required: options?.required && options?.required !== '' ? options.required : false,
+        required: options?.required ? options.required : false,
       },
     ] as CustomFieldsConfiguration;
 
@@ -42,9 +42,10 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
   };
 
   const { form } = useForm<FormProps>({
-    defaultValue: { type: CustomFieldTypes.TEXT },
+    defaultValue: { type: CustomFieldTypes.TEXT, options: { required: false } },
     options: { stripEmptyFields: false },
     schema,
+    // @ts-ignore
     serializer: formSerializer,
   });
 

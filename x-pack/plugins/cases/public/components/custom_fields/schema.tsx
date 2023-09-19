@@ -15,7 +15,7 @@ const { emptyField, maxLengthField } = fieldValidators;
 export interface FormProps {
   key?: string;
   label: string;
-  type: CustomFieldTypes.TEXT | CustomFieldTypes.TOGGLE;
+  type: CustomFieldTypes;
   options: {
     required?: boolean | string;
   };

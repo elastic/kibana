@@ -11,10 +11,26 @@ import { screen } from '@testing-library/dom';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { CustomFields } from '.';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
+  const customFieldsMock: CustomFieldsConfiguration = [
+    {
+      key: 'random_custom_key',
+      label: 'Summary',
+      type: CustomFieldTypes.TEXT,
+      required: true,
+    },
+    {
+      key: 'random_custom_key_2',
+      label: 'Maintenance',
+      type: CustomFieldTypes.TOGGLE,
+      required: false,
+    },
+  ];
 
   const props = {
     disabled: false,
@@ -33,6 +49,13 @@ describe('CustomFields', () => {
 
     expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
+  });
+
+  it('renders custom fields correctly', () => {
+    appMockRender.render(<CustomFields {...{ ...props, customFields: customFieldsMock }} />);
+
+    expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
+    expect(screen.getByTestId('droppable')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {

@@ -57,6 +57,25 @@ describe('AddFieldFlyout ', () => {
     });
   });
 
+  it('calls onSaveField with serialized data', async () => {
+    appMockRender.render(<AddFieldFlyout {...props} />);
+
+    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+
+    userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+
+    await waitFor(() => {
+      expect(props.onSaveField).toBeCalledWith([
+        {
+          key: expect.anything(),
+          label: 'Summary',
+          required: false,
+          type: 'text',
+        },
+      ]);
+    });
+  });
+
   it('does not call onSaveField when error', async () => {
     appMockRender.render(<AddFieldFlyout {...props} />);
 

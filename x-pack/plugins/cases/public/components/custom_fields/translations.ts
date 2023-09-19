@@ -14,7 +14,8 @@ export const TITLE = i18n.translate('xpack.cases.customFields.title', {
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.customFields.description', {
-  defaultMessage: 'Custom Fields description',
+  defaultMessage:
+    'Add your custom fields for a tailored case structure, and for a better case collaboration.',
 });
 
 export const NO_CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields.noCustomFields', {
