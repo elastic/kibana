@@ -619,18 +619,15 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     expect(permissions).toMatchObject({
       'package-policy-uuid-test-123': {
+        cluster: ['cluster:monitor/main'],
         indices: [
           {
             names: ['traces-*', 'logs-*', 'metrics-*'],
-            privileges: [
-              'auto_configure',
-              'read',
-              'create_doc',
-              'create',
-              'write',
-              'index',
-              'view_index_metadata',
-            ],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['traces-apm.sampled-*'],
+            privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
           },
         ],
       },
