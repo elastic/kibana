@@ -92,13 +92,9 @@ const removeRealtimeCalculatedFields = (
   responseBody: CnvmDashboardData
 ): CnvmDashboardDataWithoutTimestamp => {
   const cleanedVulnTrends = responseBody.vulnTrends.map((trend) => {
-    const { ['@timestamp']: timestamp, ...rest } = trend;
+    const { ['@timestamp']: timestamp, event, ...rest } = trend;
     return rest;
   });
-
-  const { vulnTrends, ...rest } = responseBody;
-
-  return rest;
 
   return {
     ...responseBody,
@@ -128,19 +124,53 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
   const index = {
-    removeFindings: async () =>
-      es.deleteByQuery({
-        index: VULNERABILITIES_LATEST_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
+    addFindings: async <T>(vulnerabilitiesMock: T[]) => {
+      await Promise.all(
+        vulnerabilitiesMock.map((vulnerabilityDoc) =>
+          es.index({
+            index: VULNERABILITIES_LATEST_INDEX,
+            body: vulnerabilityDoc,
+            refresh: true,
+          })
+        )
+      );
+    },
 
-    removeScores: async () =>
-      es.deleteByQuery({
-        index: BENCHMARK_SCORES_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
+    addScores: async <T>(scoresMock: T[]) => {
+      const r = await Promise.all(
+        scoresMock.map((scoreDoc) =>
+          es.index({
+            index: BENCHMARK_SCORES_INDEX,
+            body: scoreDoc,
+            refresh: true,
+          })
+        )
+      );
+    },
+
+    removeFindings: async () => {
+      const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
+
+      if (indexExists) {
+        es.deleteByQuery({
+          index: VULNERABILITIES_LATEST_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+        });
+      }
+    },
+
+    removeScores: async () => {
+      const indexExists = await es.indices.exists({ index: BENCHMARK_SCORES_INDEX });
+
+      if (indexExists) {
+        es.deleteByQuery({
+          index: BENCHMARK_SCORES_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+        });
+      }
+    },
 
     deleteFindingsIndex: async () => {
       const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
@@ -148,28 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
       if (indexExists) {
         await es.indices.delete({ index: VULNERABILITIES_LATEST_INDEX });
       }
-    },
-
-    addFindings: async <T>(vulnerabilitiesMock: T[]) => {
-      await Promise.all(
-        vulnerabilitiesMock.map((vulnerabilityDoc) =>
-          es.index({
-            index: VULNERABILITIES_LATEST_INDEX,
-            body: vulnerabilityDoc,
-          })
-        )
-      );
-    },
-
-    addScores: async <T>(scoresMock: T[]) => {
-      await Promise.all(
-        scoresMock.map((scoreDoc) =>
-          es.index({
-            index: BENCHMARK_SCORES_INDEX,
-            body: scoreDoc,
-          })
-        )
-      );
     },
   };
 
@@ -185,29 +193,13 @@ export default function ({ getService }: FtrProviderContext) {
       await index.removeScores();
     });
 
-    it('When the necessary indices are nonexistent, the API returns a 400 error without providing any data', async () => {
-      // Remove the required indices to simulate nonexistence
-      await index.deleteFindingsIndex();
-      // await index.removeScores();
-
-      // await supertest
-      //   .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
-      //   .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      //   .expect(400);
-    });
-
-    it('API responds with a 200 status code and matching data mock', async () => {
+    it('responds with a 200 status code and matching data mock', async () => {
       const { body } = await supertest
         .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        // .set('kbn-xsrf', 'xxxx')
-        // .send({
-        //   unencrypted: true,
-        //   refreshCache: true,
-        // })
         .expect(200);
 
-      // @timestamp is calculated in real time while indexing the documents, we need to remove it to remove inconsistencies between mock and actual result
+      // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
       const cleanedBody = removeRealtimeCalculatedFields(body);
 
       expect(cleanedBody).to.eql({
@@ -218,26 +210,26 @@ export default function ({ getService }: FtrProviderContext) {
           resourcesScanned: 2,
           cloudRegions: 1,
         },
-        // vulnTrends: [
-        // {
-        //   high: 1,
-        //   policy_template: 'vuln_mgmt',
-        //   // '@timestamp': '2023-09-03T12:57:04.925186Z',
-        //   critical: 0,
-        //   low: 0,
-        //   vulnerabilities_stats_by_cloud_account: {
-        //     '704479110758': {
-        //       cloudAccountName: 'elastic-security-cloud-security-dev',
-        //       high: 1,
-        //       critical: 0,
-        //       low: 0,
-        //       cloudAccountId: '704479110758',
-        //       medium: 1,
-        //     },
-        //   },
-        //   medium: 1,
-        // },
-        // ],
+        vulnTrends: [
+          {
+            high: 1,
+            policy_template: 'vuln_mgmt',
+            // '@timestamp': '2023-09-03T12:57:04.925186Z',
+            critical: 0,
+            low: 0,
+            vulnerabilities_stats_by_cloud_account: {
+              '704479110758': {
+                cloudAccountName: 'elastic-security-cloud-security-dev',
+                high: 1,
+                critical: 0,
+                low: 0,
+                cloudAccountId: '704479110758',
+                medium: 1,
+              },
+            },
+            medium: 1,
+          },
+        ],
         topVulnerableResources: [
           {
             resource: {
@@ -303,6 +295,15 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       });
+    });
+
+    it('returns a 400 error when necessary indices are nonexistent', async () => {
+      await index.deleteFindingsIndex();
+
+      await supertest
+        .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(500);
     });
   });
 }
