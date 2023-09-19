@@ -261,27 +261,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    core.application.register({
-      id: 'discover',
-      title: 'Discover',
-      order: 1000,
-      euiIconType: 'logoKibana',
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const services = await startServices(params);
+    if (this.config.hostDiscover) {
+      core.application.register({
+        id: 'discover',
+        title: 'Discover',
+        order: 1000,
+        euiIconType: 'logoKibana',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart] = await core.getStartServices();
+          const services = await startServices(params);
 
-        const { renderApp } = await import('./timelines/components/timeline/discover_headless');
-        const unmount = renderApp({
-          element: params.element,
-          core: coreStart,
-          services,
-        });
-        return () => {
-          unmount();
-        };
-      },
-    });
+          const { renderApp } = await import('./timelines/components/timeline/discover_headless');
+          const unmount = renderApp({
+            element: params.element,
+            core: coreStart,
+            services,
+          });
+          return () => {
+            unmount();
+          };
+        },
+      });
+    }
 
     return this.contract.getSetupContract();
   }

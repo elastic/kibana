@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { grantClipboardReadPerm } from '../../../../tasks/common/clipboard';
-import {
-  DISCOVER_CELL_ACTIONS,
-  DISCOVER_CONTAINER,
-  DISCOVER_FILTER_BADGES,
-  GET_DISCOVER_DATA_GRID_CELL,
-} from '../../../../screens/discover';
+import { DISCOVER_CONTAINER } from '../../../../screens/discover';
 import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login, visit } from '../../../../tasks/login';
-import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
 import { ALERTS_URL, DISCOVER_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
