@@ -56,7 +56,7 @@ import { getRuntimeServices } from './runtime';
 const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
 export const runFleetServerIfNeeded = async (): Promise<
-  { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
+  { fleetServerContainerId: string; fleetServerAgentPolicyId: string | undefined } | undefined
 > => {
   let fleetServerContainerId;
   let fleetServerAgentPolicyId;
@@ -188,8 +188,8 @@ export const startFleetServerWithDocker = async ({
   policyId,
   serviceToken,
 }: {
-  policyId: string;
-  serviceToken: string;
+  policyId?: string;
+  serviceToken?: string;
 }) => {
   let containerId;
   const {
