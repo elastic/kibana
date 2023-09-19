@@ -29,7 +29,8 @@
       "dataViews",
       "lens",
       "maps",
-      "uiActions"
+      "uiActions",
+      "observabilityAIAssistant"
     ],
     "optionalPlugins": [
       "actions",
