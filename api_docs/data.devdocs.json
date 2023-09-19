@@ -5147,6 +5147,41 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.OpenIncompleteResultsModalButton",
+        "type": "Function",
+        "tags": [],
+        "label": "OpenIncompleteResultsModalButton",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "OpenIncompleteResultsModalButtonProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.OpenIncompleteResultsModalButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "OpenIncompleteResultsModalButtonProps"
+            ],
+            "path": "src/plugins/data/public/incomplete_results_modal/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.parseSearchSourceJSON",
         "type": "Function",
         "tags": [],
@@ -5177,41 +5212,6 @@
               "string"
             ],
             "path": "src/plugins/data/common/search/search_source/parse_json.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.ShardFailureOpenModalButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ShardFailureOpenModalButton",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "ShardFailureOpenModalButtonProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureOpenModalButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "ShardFailureOpenModalButtonProps"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -9595,104 +9595,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.ShardFailureRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShardFailureRequest",
-        "description": [],
-        "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest.docvalue_fields",
-            "type": "Array",
-            "tags": [],
-            "label": "docvalue_fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest._source",
-            "type": "Unknown",
-            "tags": [],
-            "label": "_source",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest.query",
-            "type": "Unknown",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest.script_fields",
-            "type": "Unknown",
-            "tags": [],
-            "label": "script_fields",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest.sort",
-            "type": "Unknown",
-            "tags": [],
-            "label": "sort",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ShardFailureRequest.stored_fields",
-            "type": "Array",
-            "tags": [],
-            "label": "stored_fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -10152,7 +10054,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; disableShardWarnings?: boolean | undefined; }"
+          " | undefined; disableWarningToasts?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -13804,18 +13706,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
@@ -13922,6 +13812,18 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14813,12 +14715,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -21545,18 +21447,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
@@ -21663,6 +21553,18 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -22554,12 +22456,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
