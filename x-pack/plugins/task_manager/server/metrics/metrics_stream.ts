@@ -11,7 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
+import { isTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { createAggregator } from './create_aggregator';
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
@@ -54,7 +54,8 @@ export function createMetricsAggregators({
         taskPollingLifecycle,
         config,
         resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       })
     );

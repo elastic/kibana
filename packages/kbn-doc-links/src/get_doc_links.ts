@@ -506,8 +506,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
-      // TODO add valid docs URL
-      alertingRules: `${MACHINE_LEARNING_DOCS}ml-configuring-alerts.html`,
+      alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}dashboard.html`,
