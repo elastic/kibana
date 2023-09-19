@@ -14,7 +14,7 @@ import { allowedExperimentalValues } from '../../../../../../common/experimental
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 import { createFleetTestRendererMock } from '../../../../../mock';
-import { sendGetAgents, sendGetAgentStatus, sendGetAgentPolicies } from '../../../hooks';
+import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
 
 import { AgentListPage } from '.';
 
