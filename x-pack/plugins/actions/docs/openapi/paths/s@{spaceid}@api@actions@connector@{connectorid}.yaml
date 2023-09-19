@@ -176,7 +176,7 @@ put:
             - $ref: '../components/schemas/update_connector_request_swimlane.yaml' 
             - $ref: '../components/schemas/update_connector_request_teams.yaml'
 #            - $ref: '../components/schemas/update_connector_request_tines.yaml'
-#            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
+            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
             - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
         examples:
           updateIndexConnectorRequest:

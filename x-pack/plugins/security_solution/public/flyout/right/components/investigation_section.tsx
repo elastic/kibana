@@ -8,10 +8,10 @@
 import type { VFC } from 'react';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
-import { INVESTIGATION_TITLE } from './translations';
 import { InvestigationGuide } from './investigation_guide';
 export interface DescriptionSectionProps {
   /**
@@ -27,7 +27,12 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
   return (
     <ExpandableSection
       expanded={expanded}
-      title={INVESTIGATION_TITLE}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.investigation.sectionTitle"
+          defaultMessage="Investigation"
+        />
+      }
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
       <InvestigationGuide />
