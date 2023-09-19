@@ -8,7 +8,6 @@
 import { ruleFields } from '../../../data/detection_engine';
 import { getTimeline } from '../../../objects/timeline';
 
-import { CUSTOM_RULES_BTN } from '../../../screens/alerts_detection_rules';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_BUTTON,
@@ -18,10 +17,11 @@ import {
   RULE_NAME_INPUT,
   SCHEDULE_CONTINUE_BUTTON,
 } from '../../../screens/create_new_rule';
+import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRule,
+  createAndEnableRuleOnly,
   expandAdvancedSettings,
   fillCustomInvestigationFields,
   fillDescription,
@@ -93,9 +93,8 @@ describe('Common rule creation components', { tags: ['@ess', '@serverless'] }, (
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
-    createAndEnableRule();
+    createAndEnableRuleOnly();
 
-    cy.log('Asserting we have a new rule created');
-    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
+    cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
   });
 });

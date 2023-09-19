@@ -127,6 +127,11 @@ import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
+export const createAndEnableRuleOnly = () => {
+  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
+};
+
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
@@ -301,6 +306,14 @@ export const fillCustomInvestigationFields = (
     cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
   });
   return fields;
+};
+
+export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true });
+  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
+  getAboutContinueButton().should('exist').click({ force: true });
 };
 
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {

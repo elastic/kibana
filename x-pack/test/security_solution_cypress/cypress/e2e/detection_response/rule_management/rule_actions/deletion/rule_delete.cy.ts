@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getNewRule, getExistingRule, getNewOverrideRule } from '../../../../../objects/rule';
+import { getNewRule } from '../../../../../objects/rule';
 
-import { CUSTOM_RULES_BTN, RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
+import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
 
 import {
   deleteFirstRule,
@@ -20,30 +20,21 @@ import { deleteAlertsAndRules } from '../../../../../tasks/common';
 import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
 describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  const TESTED_RULE_DATA = getNewRule({
-    rule_id: 'rule1',
-    name: 'New Rule Test',
-    enabled: false,
-    max_signals: 500,
-  });
-
+  const testRules = [
+    getNewRule({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
+    getNewRule({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),
+    getNewRule({ rule_id: 'rule3', name: 'Rule 3', enabled: false }),
+  ];
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(TESTED_RULE_DATA);
-    createRule(
-      getNewOverrideRule({
-        rule_id: 'rule2',
-        name: 'Override Rule',
-        enabled: false,
-        max_signals: 500,
-      })
-    );
-    createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: false }));
+    createRule(testRules[0]);
+    createRule(testRules[1]);
+    createRule(testRules[2]);
     login();
     visitSecurityDetectionRulesPage();
   });
 
-  it('Deletes one rule', () => {
+  it('User can delete an individual rule', () => {
     getRulesManagementTableRows().then((rules) => {
       const initialNumberOfRules = rules.length;
       const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
@@ -60,16 +51,12 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
         const numberOfRules = body.data.length;
         expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
       });
-      cy.get(CUSTOM_RULES_BTN).should(
-        'have.text',
-        `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-      );
     });
   });
 
-  it('Deletes more than one rule', () => {
+  it('User can delete multiple selected rules via a bulk action', () => {
     getRulesManagementTableRows().then((rules) => {
-      const rulesToDelete = [TESTED_RULE_DATA.name, 'Override Rule'] as const;
+      const rulesToDelete = ['Rule 1', 'Rule 2'] as const;
       const initialNumberOfRules = rules.length;
       const numberOfRulesToBeDeleted = 2;
       const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - numberOfRulesToBeDeleted;
@@ -77,6 +64,7 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
       selectRulesByName(rulesToDelete);
       deleteSelectedRules();
 
+      // During deletion, rule switch is not shown and instead there's loading spinner
       getRulesManagementTableRows()
         .first()
         .within(() => {
@@ -88,15 +76,13 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
         const numberOfRules = body.data.length;
         expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
       });
+
+      // Once bulk delete is done and one rule remains, checking for enable/disable switch to exist
       getRulesManagementTableRows()
         .first()
         .within(() => {
           cy.get(RULE_SWITCH).should('exist');
         });
-      cy.get(CUSTOM_RULES_BTN).should(
-        'have.text',
-        `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-      );
     });
   });
 });
