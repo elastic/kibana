@@ -23,8 +23,7 @@
     "@kbn/core-chrome-browser-internal",
     "@kbn/cloud-plugin",
     "@kbn/serverless-common-settings",
-    "@kbn/i18n",
     "@kbn/react-kibana-context-render",
-    "@kbn/management-settings-application",
+    "@kbn/management-plugin",
   ]
 }
