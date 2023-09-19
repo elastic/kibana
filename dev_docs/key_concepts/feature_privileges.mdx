@@ -9,7 +9,7 @@ tags: ['kibana', 'dev', 'architecture', 'contributor']
 
 # Creating Feature Privileges
 
-If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you’re after.
+If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you're after.
 
 Feature Privileges allow you to define precisely who can access your feature and what actions they can perform, all while seamlessly integrating with Kibana's role-based access control (RBAC) system.
 `
@@ -56,15 +56,17 @@ features.registerKibanaFeature({
 
 ### Control access to UI elements
 
+![Alt text](../assets/feature_privileges_example_plugin.png?raw=true)
+
 With regards to feature privileges, we control access to UI elements by declaring UI capabilities.
 
 UI capabilities determine what actions users are allowed to perform within the UI of your plugin. These are often associated with specific features inside your app and can be finely tuned to control access at a granular level.
 
-Let’s take a basic example of UI capabilities for our example plugin. Lets say that our plugin allows the following user actions in general:
+Let's take a basic example of UI capabilities for our example plugin. Lets say that our plugin allows the following user actions in general:
 
 `view, create, edit, delete, assign`.
 
-Now we’d like to ensure that only users with the `all` privilege are granted access to all actions whereas users with the `read` privilege can only view the resources in your app.
+Now we'd like to ensure that only users with the `all` privilege are granted access to all actions whereas users with the `read` privilege can only view the resources in your app.
 
 To do so, we modify the feature registration config above and include the following entries in the `privileges.all` and `privileges.read` sections respectively
 
@@ -186,7 +188,7 @@ Notice, we've added an `options.tags` property for the API route that returns se
     privileges: {
         all: {
             ...,
-            api: ['my_closed_example_api'], // Notice that we’ve dropped the `access` string here
+            api: ['my_closed_example_api'], // Notice that we've dropped the `access` string here
         },
         read: {
             ...,
@@ -196,6 +198,6 @@ Notice, we've added an `options.tags` property for the API route that returns se
 }
 ```
 
-This tells the Kibana RBAC system that users with the role that has `all` access to your plugin can also access the api that is tagged with `my_closed_example_api`. This now secures your API endpoint and will throw a `403 Unauthorized` error to any users who don’t have the right permissions.
+This tells the Kibana RBAC system that users with the role that has `all` access to your plugin can also access the api that is tagged with `my_closed_example_api`. This now secures your API endpoint and will throw a `403 Unauthorized` error to any users who don't have the right permissions.
 
 We've successfully added access control to your plugin using the Kibana feature privileges.
