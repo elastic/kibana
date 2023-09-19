@@ -102,7 +102,6 @@ export class MlServerPlugin
   private isServerless: boolean = false;
   private registerCases: () => void = () => {};
   private registerSampleDatasetsIntegration: () => void = () => {};
-  private registerKibanaSettings: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -280,10 +279,7 @@ export class MlServerPlugin
       }
     };
 
-    this.registerKibanaSettings = () => {
-      // called in start once enabledFeatures is available
-      registerKibanaSettings(this.enabledFeatures, coreSetup);
-    };
+    registerKibanaSettings(coreSetup);
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
@@ -329,7 +325,6 @@ export class MlServerPlugin
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
         this.registerCases();
         this.registerSampleDatasetsIntegration();
-        this.registerKibanaSettings();
       }
       // check whether the job saved objects exist
       // and create them if needed.

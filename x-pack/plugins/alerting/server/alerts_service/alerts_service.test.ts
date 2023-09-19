@@ -141,6 +141,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
                   rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
                 },
               }),
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
         },
         mappings: {
@@ -808,6 +809,7 @@ describe('Alerts Service', () => {
                           rollover_alias: `.alerts-empty.alerts-default`,
                         },
                       }),
+                  'index.mapping.ignore_malformed': true,
                   'index.mapping.total_fields.limit': 2500,
                 },
                 mappings: {

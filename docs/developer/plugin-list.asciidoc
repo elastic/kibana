@@ -648,6 +648,10 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_data_access/README.md[metricsDataAccess]
+|Exposes utilities to access metrics data.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.

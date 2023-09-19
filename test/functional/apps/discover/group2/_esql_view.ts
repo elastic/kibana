@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
-        expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
+        expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);

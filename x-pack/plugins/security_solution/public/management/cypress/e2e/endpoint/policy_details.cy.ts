@@ -26,7 +26,7 @@ describe('Policy Details', () => {
     describe('Renders and saves protection updates', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
       let policy: PolicyData;
-      const today = moment();
+      const today = moment.utc();
       const formattedToday = today.format('MMMM DD, YYYY');
 
       beforeEach(() => {
@@ -99,7 +99,7 @@ describe('Policy Details', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
       let policy: PolicyData;
 
-      const twoMonthsAgo = moment().subtract(2, 'months').format('YYYY-MM-DD');
+      const twoMonthsAgo = moment.utc().subtract(2, 'months').format('YYYY-MM-DD');
 
       beforeEach(() => {
         login();
@@ -143,7 +143,7 @@ describe('Policy Details', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
       let policy: PolicyData;
 
-      const twoMonthsAgo = moment().subtract(2, 'months').format('YYYY-MM-DD');
+      const twoMonthsAgo = moment.utc().subtract(2, 'months').format('YYYY-MM-DD');
 
       beforeEach(() => {
         login();
@@ -186,7 +186,7 @@ describe('Policy Details', () => {
     describe('Renders read only protection updates for user without write permissions', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
       let policy: PolicyData;
-      const twoMonthsAgo = moment().subtract(2, 'months');
+      const twoMonthsAgo = moment.utc().subtract(2, 'months');
 
       beforeEach(() => {
         login(ROLE.endpoint_security_policy_management_read);
