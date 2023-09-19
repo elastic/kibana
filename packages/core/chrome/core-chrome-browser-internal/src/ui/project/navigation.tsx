@@ -19,14 +19,12 @@ export const ProjectNavigation: React.FC = ({ children }) => {
   };
 
   return (
-    <>
-      {
-        /* must render the tree to initialize the navigation, even if hidden internally in EUI */
-        <div hidden>{children}</div>
-      }
-      <EuiCollapsibleNavBeta initialIsCollapsed={isCollapsed} onCollapseToggle={onCollapseToggle}>
-        {children}
-      </EuiCollapsibleNavBeta>
-    </>
+    <EuiCollapsibleNavBeta
+      initialIsCollapsed={isCollapsed}
+      onCollapseToggle={onCollapseToggle}
+      css={isCollapsed ? { display: 'none;' } : {}}
+    >
+      {children}
+    </EuiCollapsibleNavBeta>
   );
 };
