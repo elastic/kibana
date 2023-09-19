@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -15,7 +15,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../lib/kibana';
 
+/**
+ * converts AggregateQuery type to Query
+ * it needed because unified search bar emits 2 types of queries: Query and AggregateQuery
+ * on security side we deal with one type only (Query), so we converge it to this type only
+ */
 const convertToQueryType = (query: Query | AggregateQuery): Query => {
   if ('esql' in query) {
     return {
@@ -24,7 +30,14 @@ const convertToQueryType = (query: Query | AggregateQuery): Query => {
     };
   }
 
-  return query as Query;
+  if ('sql' in query) {
+    return {
+      query: query.sql,
+      language: 'sql',
+    };
+  }
+
+  return query;
 };
 
 export interface QueryBarComponentProps {
@@ -47,6 +60,9 @@ export interface QueryBarComponentProps {
   isDisabled?: boolean;
 }
 
+export const isDataView = (obj: unknown): obj is DataView =>
+  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
+
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
     dateRangeFrom,
@@ -67,6 +83,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
+    const { data } = useKibana().services;
+    const [dataView, setDataView] = useState<DataView>();
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -117,22 +135,39 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const query = useMemo(() => {
-      if (filterQuery?.language === 'esql') {
-        return { esql: filterQuery.query as string };
+      if (filterQuery?.language === 'esql' && typeof filterQuery.query === 'string') {
+        return { esql: filterQuery.query };
       }
       return filterQuery;
     }, [filterQuery]);
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
+    useEffect(() => {
+      let dv: DataView;
+      if (isDataView(indexPattern)) {
+        setDataView(indexPattern);
+      } else {
+        const createDataView = async () => {
+          dv = await data.dataViews.create({ title: indexPattern.title });
+          setDataView(dv);
+        };
+        createDataView();
+      }
+      return () => {
+        if (dv?.id) {
+          data.dataViews.clearInstanceCache(dv?.id);
+        }
+      };
+    }, [data.dataViews, indexPattern]);
 
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
+    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
     return (
       <SearchBar
         showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns as DataView[]}
+        indexPatterns={arrDataView}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={query}

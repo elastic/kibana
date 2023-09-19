@@ -11,7 +11,7 @@
 // happens in the root of your app. Optionally provide a custom title for the assistant:
 
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
-export { AssistantProvider } from './impl/assistant_context';
+export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
 
 // Step 2: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:

@@ -39,6 +39,10 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#security-solution-app',
     },
+    KIBANA_USERNAME: 'system_indices_superuser',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
+    ELASTICSEARCH_PASSWORD: 'changeme',
   },
 
   e2e: {

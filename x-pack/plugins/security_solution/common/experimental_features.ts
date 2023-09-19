@@ -113,7 +113,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
-  protectionUpdatesEnabled: true,
+  protectionUpdatesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

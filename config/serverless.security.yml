@@ -31,3 +31,4 @@ xpack.fleet.internal.capabilities: ['security']
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
+  - esqlRulesDisabled
