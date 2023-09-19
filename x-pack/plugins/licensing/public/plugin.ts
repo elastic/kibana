@@ -8,6 +8,7 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { registerEvents as registerSubscriptionTrackingEvents } from '@kbn/subscription-tracking';
 import { ILicense } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
@@ -84,6 +85,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     );
 
     registerAnalyticsContextProvider(core.analytics, license$);
+    registerSubscriptionTrackingEvents(core.analytics);
 
     this.internalSubscription = license$.subscribe((license) => {
       if (license.isAvailable) {
