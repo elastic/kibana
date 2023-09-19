@@ -97,12 +97,7 @@ export const ColorPicker = ({
       onChange={handleColor}
       color={isDisabled ? '' : colorText}
       disabled={isDisabled}
-      placeholder={
-        defaultColor?.toUpperCase() ||
-        i18n.translate('visualizationUiComponents.colorPicker.seriesColor.auto', {
-          defaultMessage: 'Auto',
-        })
-      }
+      placeholder={' '}
       onBlur={() => {
         if (!colorText) {
           setColorText(overwriteColor ?? defaultColor);
