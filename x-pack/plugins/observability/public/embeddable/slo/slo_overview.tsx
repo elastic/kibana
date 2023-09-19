@@ -38,7 +38,7 @@ export function SloOverview({ slo }: EmbeddableSloProps) {
 
   const color =
     slo.summary.status === 'NO_DATA'
-      ? 'subdued'
+      ? '#f8e9e9'
       : slo.summary.status !== 'HEALTHY'
       ? '#f8e9e9' // #f8e9e9 (danger), #e6f9f7
       : '#e6f9f7';
@@ -48,7 +48,7 @@ export function SloOverview({ slo }: EmbeddableSloProps) {
     {
       color,
       title: slo.name,
-      subtitle: slo.groupBy === '*' ? `${slo.groupBy}:${slo.instanceId}` : '',
+      subtitle: slo.groupBy !== '*' ? `${slo.groupBy}:${slo.instanceId}` : '',
       icon: getIcon('visGauge'),
       value:
         slo.summary.status === 'NO_DATA'
