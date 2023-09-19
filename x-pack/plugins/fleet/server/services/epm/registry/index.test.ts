@@ -246,8 +246,8 @@ describe('fetchCategories', () => {
       internal: {
         registry: {
           spec: {
-            min: '3.0.0',
-            max: '3.0.0',
+            min: '3.0',
+            max: '3.0',
           },
           capabilities: [],
         },
@@ -257,8 +257,8 @@ describe('fetchCategories', () => {
     await fetchCategories();
     expect(mockFetchUrl).toBeCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
-    expect(callUrl.searchParams.get('spec.min')).toBe('3.0.0');
-    expect(callUrl.searchParams.get('spec.max')).toBe('3.0.0');
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
   });
   it('does not call registry with capabilities if none are configured', async () => {
     mockGetConfig.mockReturnValue({});
@@ -294,8 +294,8 @@ describe('fetchList', () => {
       internal: {
         registry: {
           spec: {
-            min: '3.0.0',
-            max: '3.0.0',
+            min: '3.0',
+            max: '3.0',
           },
         },
       },
@@ -304,8 +304,8 @@ describe('fetchList', () => {
     await fetchList();
     expect(mockFetchUrl).toBeCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
-    expect(callUrl.searchParams.get('spec.min')).toBe('3.0.0');
-    expect(callUrl.searchParams.get('spec.max')).toBe('3.0.0');
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
   });
 
   it('does not call registry with capabilities if none are configured', async () => {
@@ -320,12 +320,7 @@ describe('fetchList', () => {
   it('does call registry with kibana.version if not explictly disabled', async () => {
     mockGetConfig.mockReturnValue({
       internal: {
-        registry: {
-          spec: {
-            min: '3.0.0',
-            max: '3.0.0',
-          },
-        },
+        registry: {},
       },
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
@@ -340,10 +335,6 @@ describe('fetchList', () => {
       internal: {
         registry: {
           kibanaVersionCheckEnabled: false,
-          spec: {
-            min: '3.0.0',
-            max: '3.0.0',
-          },
         },
       },
     });

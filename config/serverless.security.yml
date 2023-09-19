@@ -27,10 +27,10 @@ telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
-xpack.fleet.internal.registry.spec.max: '3.0.0'
+xpack.fleet.internal.registry.spec.max: '3.0'
 # Disabled until packages implement the new spec https://github.com/elastic/kibana/issues/166742
 # xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-# xpack.fleet.internal.registry.spec.min: '3.0.0'
+# xpack.fleet.internal.registry.spec.min: '3.0'
 
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
