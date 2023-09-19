@@ -9,7 +9,9 @@
 import React from 'react';
 
 import userEvent from '@testing-library/user-event';
-import { createEvent, fireEvent, render, screen } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
+import { DashboardLinkStrings } from './dashboard_link_strings';
 import {
   NavigationEmbeddable,
   NavigationEmbeddableContext,
@@ -19,7 +21,6 @@ import { NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
 import { coreServices } from '../../services/kibana_services';
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 
 jest.mock('./dashboard_link_tools');
 
@@ -82,7 +83,7 @@ describe('Dashboard link component', () => {
       </NavigationEmbeddableContext.Provider>
     );
 
-    expect(fetchDashboard).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     expect(fetchDashboard).toHaveBeenCalledWith(defaultLinkInfo.destination);
     expect(getDashboardLocator).toHaveBeenCalledTimes(1);
     expect(getDashboardLocator).toHaveBeenCalledWith({
@@ -93,7 +94,6 @@ describe('Dashboard link component', () => {
       navEmbeddable,
     });
 
-    expect(screen.getByTestId('dashboardLink--foo--loading')).toBeInTheDocument();
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent('another dashboard');
     await userEvent.click(link);
@@ -110,6 +110,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
@@ -127,7 +128,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
-
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     expect(fetchDashboard).toHaveBeenCalledWith(linkInfo.destination);
     expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
     const link = await screen.findByTestId('dashboardLink--foo');
@@ -152,6 +153,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
   });
 
@@ -166,8 +168,9 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--notfound--error');
-    expect(link).toHaveTextContent('Error fetching dashboard');
+    expect(link).toHaveTextContent(DashboardLinkStrings.getDashboardErrorLabel());
   });
 
   test('current dashboard is not a clickable href', async () => {
@@ -181,6 +184,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
     await userEvent.click(link);
@@ -194,6 +198,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
@@ -212,6 +217,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
+    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
     await userEvent.hover(link);

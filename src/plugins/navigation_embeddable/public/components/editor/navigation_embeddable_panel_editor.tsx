@@ -159,7 +159,7 @@ const NavigationEmbeddablePanelEditor = ({
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="navEmbeddable--panelEditor--title">
           <h2>
             {isEditingExisting
               ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
@@ -201,6 +201,7 @@ const NavigationEmbeddablePanelEditor = ({
                           draggableId={link.id}
                           customDragHandle={true}
                           hasInteractiveChildren={true}
+                          data-test-subj={`navEmbeddable--panelEditor--draggableLink`}
                         >
                           {(provided) => (
                             <NavigationEmbeddablePanelEditorLink
@@ -232,7 +233,12 @@ const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} iconType="cross" flush="left">
+            <EuiButtonEmpty
+              onClick={onClose}
+              iconType="cross"
+              flush="left"
+              data-test-subj="navEmbeddable--panelEditor--closeBtn"
+            >
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -243,12 +249,14 @@ const NavigationEmbeddablePanelEditor = ({
                   <TooltipWrapper
                     condition={!hasZeroLinks}
                     tooltipContent={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
+                    data-test-subj="navEmbeddable--panelEditor--saveByReferenceTooltip"
                   >
                     <EuiSwitch
                       label={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
                       checked={saveByReference}
                       disabled={hasZeroLinks}
                       onChange={() => setSaveByReference(!saveByReference)}
+                      data-test-subj="navEmbeddable--panelEditor--saveByReferenceSwitch"
                     />
                   </TooltipWrapper>
                 </EuiFlexItem>
@@ -257,11 +265,13 @@ const NavigationEmbeddablePanelEditor = ({
                 <TooltipWrapper
                   condition={hasZeroLinks}
                   tooltipContent={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}
+                  data-test-id={'navEmbeddable--panelEditor--saveBtnTooltip'}
                 >
                   <EuiButton
                     fill
                     isLoading={isSaving}
                     disabled={hasZeroLinks}
+                    data-test-subj={'navEmbeddable--panelEditor--saveBtn'}
                     onClick={async () => {
                       if (saveByReference) {
                         setIsSaving(true);
