@@ -28,7 +28,6 @@ export const Overview = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    shouldRefetch,
   } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
 
@@ -62,11 +61,7 @@ export const Overview = () => {
         <KPIGrid assetName={asset.name} dateRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {fetchMetadataError && !metadataLoading ? (
-          <MetadataErrorCallout shouldRefetch={shouldRefetch} />
-        ) : (
-          metadataSummarySection
-        )}
+        {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

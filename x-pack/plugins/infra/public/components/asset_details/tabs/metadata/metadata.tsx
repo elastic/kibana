@@ -27,7 +27,6 @@ export const Metadata = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    shouldRefetch,
   } = useMetadataStateProviderContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
@@ -41,7 +40,7 @@ export const Metadata = () => {
   );
 
   if (fetchMetadataError && !metadataLoading) {
-    return <MetadataErrorCallout shouldRefetch={shouldRefetch} />;
+    return <MetadataErrorCallout />;
   }
 
   return (
