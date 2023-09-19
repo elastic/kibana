@@ -303,7 +303,11 @@ export function systemRoutes(
     .addVersion(
       {
         version: '1',
-        validate: false,
+        validate: {
+          request: {
+            body: schema.any(),
+          },
+        },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
         const reindexRequest = {
