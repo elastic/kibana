@@ -17,8 +17,10 @@
     "@kbn/storybook",
     "@kbn/core-http-browser",
     "@kbn/i18n",
-    "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/core-application-browser-internal",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",
