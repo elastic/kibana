@@ -48,7 +48,6 @@ export function SelectDashboard({ onClose, onRefresh }: Props) {
 
   console.log('selectedDashboard', selectedDashboard);
 
-  // TODO need to refetch and not reload
   const reloadServiceDashboards = useCallback(() => {
     onRefresh();
   }, [onRefresh]);

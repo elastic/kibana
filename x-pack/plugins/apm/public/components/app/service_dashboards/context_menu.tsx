@@ -1,7 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -9,31 +7,30 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   EuiComboBox,
-  EuiContextMenu,
-  EuiIcon,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedServiceDashboard } from '../../../../common/service_dashboards';
-import { ApmPluginStartDeps } from '../../../plugin';
 
+enum ContextMenuActionEnum {
+  Edit = 'edit',
+  Link = 'link',
+  Unlink = 'unlink',
+}
 type Props = {
   serviceDashboards: SavedServiceDashboard[];
   selectedDashboard: SavedServiceDashboard;
   handleOnChange: (selectedId: string) => void;
+  actions: { id: ContextMenuActionEnum; action: React.ReactNode }[];
+  items: React.ReactNode[];
 };
 
 export function ContextMenu({
   serviceDashboards,
   selectedDashboard,
   handleOnChange,
+  items,
 }: Props) {
-  const {
-    services: {
-      dashboard: { locator: dashboardLocator },
-    },
-  } = useKibana<ApmPluginStartDeps>();
-
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -56,63 +53,6 @@ export function ContextMenu({
       handleOnChange(serviceDashboard.dashboardSavedObjectId);
     }
   }, [selectedDashboard, serviceDashboards]);
-
-  const panels = [
-    {
-      id: 0,
-      title: '',
-      items: [
-        {
-          name: i18n.translate(
-            'xpack.apm.serviceDashboards.contextMenu.linkDashboard',
-            {
-              defaultMessage: 'Link new dashboard',
-            }
-          ),
-          icon: 'plusInCircle',
-          onClick: () => {
-            closePopover();
-          },
-        },
-        {
-          name: i18n.translate(
-            'xpack.apm.serviceDashboards.contextMenu.goToDashboard',
-            {
-              defaultMessage: 'Go to dashboard',
-            }
-          ),
-          icon: 'visGauge',
-          href: dashboardLocator?.getRedirectUrl({
-            dashboardId: selectedDashboard?.dashboardSavedObjectId,
-          }),
-        },
-        {
-          name: i18n.translate(
-            'xpack.apm.serviceDashboards.contextMenu.visGaugeDashboard',
-            {
-              defaultMessage: 'Edit dashboard link',
-            }
-          ),
-          icon: 'pencil',
-          onClick: () => {
-            closePopover();
-          },
-        },
-        {
-          name: i18n.translate(
-            'xpack.apm.serviceDashboards.contextMenu.unlinkDashboard',
-            {
-              defaultMessage: 'Unlink dashboard',
-            }
-          ),
-          icon: 'unlink',
-          onClick: () => {
-            closePopover();
-          },
-        },
-      ],
-    },
-  ];
 
   return (
     <>
@@ -167,7 +107,12 @@ export function ContextMenu({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
+            <EuiContextMenuPanel
+              size="s"
+              items={items.map((item: React.ReactNode) => (
+                <EuiContextMenuItem size="s"> {item}</EuiContextMenuItem>
+              ))}
+            />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

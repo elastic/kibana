@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SelectDashboard } from './select_dashboard_modal';
 
-export function AddDashboard({
+export function EditDashboard({
   isModalVisible,
   setIsModalVisible,
   onRefresh,
@@ -20,14 +20,17 @@ export function AddDashboard({
 }) {
   return (
     <>
-      <EuiButton
-        data-test-subj="apmAddServiceDashboard"
+      <EuiButtonEmpty
+        color="text"
+        size="s"
+        iconType={'pencil'}
+        data-test-subj="apmEditServiceDashboardMenu"
         onClick={() => setIsModalVisible(true)}
       >
-        {i18n.translate('xpack.apm.serviceDashboards.addButtonLabel', {
-          defaultMessage: 'Link dashboard',
+        {i18n.translate('xpack.apm.serviceDashboards.editEmptyButtonLabel', {
+          defaultMessage: 'Edit dashboard',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
 
       {isModalVisible && (
         <SelectDashboard

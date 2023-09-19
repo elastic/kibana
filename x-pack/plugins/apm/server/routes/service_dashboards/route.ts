@@ -14,7 +14,7 @@ import {
   SavedServiceDashboard,
 } from '../../../common/service_dashboards';
 import { getServiceDashboards } from './get_service_dashboards';
-import { fromKueryExpression } from '../../../../../../packages/kbn-es-query';
+import { deleteServiceDashboard } from './remove_service_dashboard';
 
 const linkToRt = t.union([
   t.literal(DashboardTypeEnum.single),
@@ -89,7 +89,27 @@ const serviceDashboardsRoute = createApmServerRoute({
   },
 });
 
+const serviceDashboardDeleteRoute = createApmServerRoute({
+  endpoint: 'DELETE /internal/apm/service-dashboard',
+  params: t.type({
+    query: t.type({
+      serviceDashboardId: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  handler: async (resources): Promise<void> => {
+    const { context, params } = resources;
+    const { serviceDashboardId } = params.query;
+    const savedObjectsClient = (await context.core).savedObjects.client;
+    await deleteServiceDashboard({
+      savedObjectsClient,
+      serviceDashboardId,
+    });
+  },
+});
+
 export const serviceDashboardsRouteRepository = {
   ...serviceDashboardSaveRoute,
+  ...serviceDashboardDeleteRoute,
   ...serviceDashboardsRoute,
 };

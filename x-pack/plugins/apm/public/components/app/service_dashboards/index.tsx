@@ -5,18 +5,10 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { buildPhraseFilter, Filter, TimeRange } from '@kbn/es-query';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBoxOptionOption,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { EmptyDashboards } from './empty_dashboards';
-import { AddDashboard } from './actions';
+import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -27,6 +19,8 @@ import {
 } from '@kbn/dashboard-plugin/public';
 import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { ContextMenu } from './context_menu';
+import { UnlinkDashboard } from './actions/unlink_dashboard';
+import { EditDashboard } from './actions/edit_dashboard';
 
 export function ServiceDashboards() {
   const {
@@ -106,6 +100,20 @@ export function ServiceDashboards() {
                 handleOnChange={handleOnChange}
                 selectedDashboard={selectedDashboard}
                 serviceDashboards={data?.serviceDashboards}
+                items={[
+                  <LinkDashboard
+                    emptyButton={true}
+                    isModalVisible={isModalVisible}
+                    setIsModalVisible={setIsModalVisible}
+                    onRefresh={refetch}
+                  />,
+                  <GotoDashboard selectedDashboard={selectedDashboard} />,
+                  <EditDashboard selectedDashboard={selectedDashboard} />,
+                  <UnlinkDashboard
+                    selectedDashboard={selectedDashboard}
+                    onRefresh={refetch}
+                  />,
+                ]}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -121,7 +129,7 @@ export function ServiceDashboards() {
       ) : (
         <EmptyDashboards
           actions={
-            <AddDashboard
+            <LinkDashboard
               isModalVisible={isModalVisible}
               setIsModalVisible={setIsModalVisible}
               onRefresh={refetch}
