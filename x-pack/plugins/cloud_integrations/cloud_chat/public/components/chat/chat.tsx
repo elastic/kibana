@@ -12,23 +12,26 @@ import { i18n } from '@kbn/i18n';
 // import { EuiButtonEmpty } from '@elastic/eui';
 // import { euiThemeVars } from '@kbn/ui-theme';
 
-import { useChatConfig } from './use_chat_config';
+import { useChatConfig, ChatApi } from './use_chat_config';
+export type { ChatApi } from './use_chat_config';
 
 export interface Props {
   /** Handler invoked when chat is hidden by someone. */
   onHide?: () => void;
   /** Handler invoked when the chat widget signals it is ready. */
-  onReady?: () => void;
+  onReady?: (chatApi: ChatApi) => void;
   /** Handler invoked when the chat widget signals to be resized. */
   onResize?: () => void;
+
+  onPlaybookFired?: () => void;
 }
 
 /**
  * A component that will display a trigger that will allow the user to chat with a human operator,
  * when the service is enabled; otherwise, it renders nothing.
  */
-export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
-  const config = useChatConfig({ onReady, onResize });
+export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: Props) => {
+  const config = useChatConfig({ onReady, onResize, onPlaybookFired });
   const ref = useRef<HTMLDivElement>(null);
   const [isClosed, setIsClosed] = useState(false);
 
@@ -36,13 +39,11 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
     return null;
   }
 
-  const { isReady, isResized, style } = config;
-  const { right } = style;
-
-  // clipPath: 'inset(40px 4px 72px 30px)',
+  const { isReady } = config;
 
   return (
     <iframe
+      loading="lazy"
       data-test-subj="cloud-chat-frame"
       title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
         defaultMessage: 'Chat',
@@ -59,8 +60,6 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
               // position
               top: 32,
               right: 0,
-              // trim
-              clipPath: 'inset(24px 4px 76px 30px)',
             }
           : { position: 'absolute' }
       }

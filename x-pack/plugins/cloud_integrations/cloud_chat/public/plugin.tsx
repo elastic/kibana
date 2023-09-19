@@ -16,13 +16,15 @@ import { ReplaySubject } from 'rxjs';
 import { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
 import { isTodayInDateWindow } from '../common/util';
 import { Chat } from './components';
 import chatIcon from './chat_icon.svg';
+import type { ChatApi } from './components/chat';
+import { whenIdle } from './components/chat/when_idle';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -86,29 +88,49 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
 
     function ChatHeaderMenuItem() {
       const [show, setShow] = React.useState(false);
+      const [chatApi, setChatApi] = React.useState<ChatApi | null>(null);
 
       return (
         <CloudContextProvider>
           <KibanaThemeProvider theme$={core.theme.theme$}>
             <I18nProvider>
-              <EuiHeaderSectionItemButton
-                data-test-subj="cloudChat"
-                notification={true}
-                onClick={() => setShow(!show)}
-              >
-                <EuiIcon type={chatIcon} size="m" />
-              </EuiHeaderSectionItemButton>
+              {show && (
+                <EuiButtonEmpty
+                  css={{ color: '#fff', marginRight: 12 }}
+                  size="s"
+                  iconType={chatIcon}
+                  data-test-subj="cloudChat"
+                  onClick={() => {
+                    chatApi?.toggle();
+                  }}
+                >
+                  Live Chat
+                </EuiButtonEmpty>
+              )}
             </I18nProvider>
           </KibanaThemeProvider>
-          {show && <Chat />}
+          {ReactDOM.createPortal(
+            <Chat
+              onReady={(_chatApi) => {
+                setChatApi(_chatApi);
+              }}
+              onPlaybookFired={() => {
+                setShow(true);
+              }}
+            />,
+            document.body
+          )}
         </CloudContextProvider>
       );
     }
 
-    core.chrome.navControls.registerRight({
-      order: 1000,
+    core.chrome.navControls.registerExtension({
+      order: 50,
       mount: (e) => {
-        ReactDOM.render(<ChatHeaderMenuItem />, e);
+        // postpone rendering to avoid slowing the page load
+        whenIdle(() => {
+          ReactDOM.render(<ChatHeaderMenuItem />, e);
+        });
 
         return () => {
           ReactDOM.unmountComponentAtNode(e);

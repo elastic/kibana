@@ -21,6 +21,12 @@ type UseChatType =
       isResized: boolean;
     };
 
+export interface ChatApi {
+  show: () => void;
+  hide: () => void;
+  toggle: () => void;
+}
+
 const MESSAGE_WIDGET_READY = 'driftWidgetReady';
 const MESSAGE_IFRAME_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
@@ -35,13 +41,14 @@ type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
 export const useChatConfig = ({
   onReady = () => {},
   onResize = () => {},
+  onPlaybookFired = () => {},
 }: ChatConfigParams): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
-  const history = useHistory();
   const [style, setStyle] = useState<CSSProperties>({ height: 0, width: 0 });
   const [isReady, setIsReady] = useState(false);
   const [isResized, setIsResized] = useState(false);
+  const isChatOpenRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
@@ -55,6 +62,40 @@ export const useChatConfig = ({
       const { data: message } = event;
       const { user: userConfig } = chat;
       const { id, email, jwt, trialEndDate, kbnVersion, kbnBuildNum } = userConfig;
+
+      const chatApi: ChatApi = {
+        show: () => {
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftShow`,
+            },
+            '*'
+          );
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftOpenChat`,
+            },
+            '*'
+          );
+          isChatOpenRef.current = true;
+        },
+        hide: () => {
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftHide`,
+            },
+            '*'
+          );
+          isChatOpenRef.current = false;
+        },
+        toggle: () => {
+          if (isChatOpenRef.current) {
+            chatApi.hide();
+          } else {
+            chatApi.show();
+          }
+        },
+      };
 
       switch (message.type) {
         // The IFRAME is ready to receive messages.
@@ -97,8 +138,19 @@ export const useChatConfig = ({
 
         // The chat widget is ready.
         case MESSAGE_WIDGET_READY:
+          chatApi.hide();
           setIsReady(true);
-          onReady();
+          onReady(chatApi);
+          break;
+
+        case 'driftChatClosed':
+          chatApi.hide();
+          break;
+
+        case 'driftPlaybookFired':
+          onPlaybookFired();
+          break;
+
         default:
           break;
       }
@@ -107,31 +159,17 @@ export const useChatConfig = ({
     window.addEventListener('message', handleMessage);
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [chat, style, onReady, onResize, isReady, isResized]);
-
-  useEffect(() => {
-    if (!isReady) return;
-    if (!history) return;
-
-    const unlisten = history.listen(() => {
-      // eslint-disable-next-line no-console
-      console.log('drift: posting update', getChatContext().window.location.href);
-      ref.current?.contentWindow?.postMessage(
-        {
-          type: MESSAGE_UPDATE_CONTEXT,
-          data: { context: getChatContext() },
-        },
-        '*'
-      );
-    });
-
-    return () => {
-      unlisten();
-    };
-  }, [history, isReady]);
+  }, [chat, style, onReady, onResize, isReady, isResized, onPlaybookFired]);
 
   if (chat) {
-    return { enabled: true, src: chat.chatURL, ref, style, isReady, isResized };
+    return {
+      enabled: true,
+      src: chat.chatURL,
+      ref,
+      style,
+      isReady,
+      isResized,
+    };
   }
 
   return { enabled: false };
