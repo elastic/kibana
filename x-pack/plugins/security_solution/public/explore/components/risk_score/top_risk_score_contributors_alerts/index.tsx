@@ -25,6 +25,7 @@ import { inputsSelectors } from '../../../../common/store/inputs';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { RiskInformationButtonEmpty } from '../risk_information';
 
 export interface TopRiskScoreContributorsAlertsProps {
   toggleStatus: boolean;
@@ -100,6 +101,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
             hideSubtitle
             toggleQuery={toggleQuery}
             toggleStatus={toggleStatus}
+            headerFilters={<RiskInformationButtonEmpty riskEntity={riskEntity} />}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

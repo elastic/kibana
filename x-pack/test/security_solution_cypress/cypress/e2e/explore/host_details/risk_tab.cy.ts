@@ -46,7 +46,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
     cy.get('[data-test-subj="open-risk-information-flyout-trigger"]').click();
 
     cy.get('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader').contains(
-      'How is host risk calculated?'
+      'Entity Risk Analytics'
     );
   });
 });
