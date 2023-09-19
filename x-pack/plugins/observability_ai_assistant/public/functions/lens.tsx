@@ -204,7 +204,8 @@ export function registerLensFunction({
           timeField: {
             type: 'string',
             default: '@timefield',
-            description: 'time field to use for XY chart. Use @timefield if its available on the index.'
+            description:
+              'time field to use for XY chart. Use @timefield if its available on the index.',
           },
           breakdown: {
             type: 'object',
