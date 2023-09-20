@@ -7,9 +7,9 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public/services/dashboard_content_management/lib/find_dashboards';
 import { ApmPluginStartDeps } from '../plugin';
 import { FETCH_STATUS } from './use_fetcher';
-import { SearchDashboardsResponse } from '../../../../../src/plugins/dashboard/public/services/dashboard_content_management/lib/find_dashboards';
 
 export interface SearchDashboardsResult {
   data: SearchDashboardsResponse['hits'];

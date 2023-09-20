@@ -26,7 +26,13 @@ export function GotoDashboard({
     dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
   return (
-    <EuiButtonEmpty color="text" size="s" iconType={'visGauge'} href={url}>
+    <EuiButtonEmpty
+      data-test-subj="apmGotoDashboardGoToDashboardButton"
+      color="text"
+      size="s"
+      iconType={'visGauge'}
+      href={url}
+    >
       {i18n.translate('xpack.apm.serviceDashboards.contextMenu.goToDashboard', {
         defaultMessage: 'Go to dashboard',
       })}

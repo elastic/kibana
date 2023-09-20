@@ -20,12 +20,12 @@ import {
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { DashboardItem } from '../../../../../../../../src/plugins/dashboard/common/content_management';
 import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
 import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 
@@ -181,7 +181,11 @@ export function SaveDashboardModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={onClose} fill>
+        <EuiButton
+          data-test-subj="apmSelectDashboardCancelButton"
+          onClick={onClose}
+          fill
+        >
           {i18n.translate(
             'xpack.apm.serviceDashboards.selectDashboard.cancel',
             {
@@ -189,7 +193,11 @@ export function SaveDashboardModal({
             }
           )}
         </EuiButton>
-        <EuiButton onClick={onSave} fill>
+        <EuiButton
+          data-test-subj="apmSelectDashboardButton"
+          onClick={onSave}
+          fill
+        >
           {isEditMode
             ? i18n.translate(
                 'xpack.apm.serviceDashboards.selectDashboard.edit',
