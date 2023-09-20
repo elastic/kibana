@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { ShardFailuresFlyout } from './shard_failures_flyout';
+import { ShardFailureFlyout } from './shard_failure_flyout';
 
 interface Props {
   failures: ShardFailure[];
@@ -72,7 +72,7 @@ export function ShardsOverview({ failures, shardsDetails }: Props) {
       ) : null}
 
       {showFailures ? (
-        <ShardFailuresFlyout
+        <ShardFailureFlyout
           failures={failures}
           onClose={() => {
             setShowFailures(false);

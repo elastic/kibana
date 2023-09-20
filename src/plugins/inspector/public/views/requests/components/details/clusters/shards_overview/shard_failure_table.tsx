@@ -15,7 +15,7 @@ interface Props {
   failures: estypes.ShardFailure[];
 }
 
-export function ShardFailuresTable({ failures }: Props) {
+export function ShardFailureTable({ failures }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<number, ReactNode>>({});
 
   const toggleDetails = (shard: number) => {

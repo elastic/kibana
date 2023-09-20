@@ -17,14 +17,14 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { ShardFailuresTable } from './shard_failures_table';
+import { ShardFailureTable } from './shard_failure_table';
 
 interface Props {
   failures: ShardFailure[];
   onClose: () => void;
 }
 
-export function ShardFailuresFlyout({ failures, onClose }: Props) {
+export function ShardFailureFlyout({ failures, onClose }: Props) {
   return (
     <EuiFlyout ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
@@ -41,7 +41,7 @@ export function ShardFailuresFlyout({ failures, onClose }: Props) {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <ShardFailuresTable failures={failures} />
+        <ShardFailureTable failures={failures} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
