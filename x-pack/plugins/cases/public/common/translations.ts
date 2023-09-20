@@ -197,7 +197,7 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureC
 });
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
-  defaultMessage: 'Edit configuration',
+  defaultMessage: 'Settings',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {
