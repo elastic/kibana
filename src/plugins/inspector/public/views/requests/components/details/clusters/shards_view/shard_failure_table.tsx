@@ -10,6 +10,7 @@ import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
+import { ShardFailureDetails } from './shard_failure_details';
 
 interface Props {
   failures: estypes.ShardFailure[];
@@ -23,7 +24,8 @@ export function ShardFailureTable({ failures }: Props) {
     if (shard in nextExpandedRows) {
       delete nextExpandedRows[shard];
     } else {
-      nextExpandedRows[shard] = <div />;
+      const shardFailure = failures.find(failure => shard === failure.shard);
+      nextExpandedRows[shard] = shardFailure ? <ShardFailureDetails failure={shardFailure} /> : null;
     }
     setExpandedRows(nextExpandedRows);
   };
