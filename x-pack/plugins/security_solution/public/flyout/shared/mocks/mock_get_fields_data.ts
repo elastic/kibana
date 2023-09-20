@@ -12,28 +12,19 @@ import {
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
 
+const mockFieldData: Record<string, string[]> = {
+  [ALERT_SEVERITY]: ['low'],
+  [ALERT_RISK_SCORE]: ['0'],
+  'host.name': ['host1'],
+  'user.name': ['user1'],
+  [ALERT_REASON]: ['reason'],
+  [ALERT_SUPPRESSION_DOCS_COUNT]: ['1'],
+  '@timestamp': ['2023-01-01T00:00:00.000Z'],
+};
+
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
  * @param field
  * @returns string[]
  */
-export const mockGetFieldsData = (field: string): string[] => {
-  switch (field) {
-    case ALERT_SEVERITY:
-      return ['low'];
-    case ALERT_RISK_SCORE:
-      return ['0'];
-    case 'host.name':
-      return ['host1'];
-    case 'user.name':
-      return ['user1'];
-    case ALERT_REASON:
-      return ['reason'];
-    case ALERT_SUPPRESSION_DOCS_COUNT:
-      return ['1'];
-    case '@timestamp':
-      return ['2023-01-01T00:00:00.000Z'];
-    default:
-      return [];
-  }
-};
+export const mockGetFieldsData = (field: string): string[] => mockFieldData[field] ?? [];

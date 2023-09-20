@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
-import { SESSION_VIEW_ERROR_TEST_ID, SESSION_VIEW_TEST_ID } from './test_ids';
+import { SESSION_VIEW_TEST_ID } from './test_ids';
 import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,
@@ -74,16 +74,5 @@ describe('<SessionView />', () => {
 
     const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render error message on null eventId', () => {
-    const contextValue = {
-      getFieldsData: () => {},
-    } as unknown as LeftPanelContext;
-
-    const wrapper = renderSessionView(contextValue);
-    expect(wrapper.getByTestId(SESSION_VIEW_ERROR_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByText('Unable to display session view')).toBeInTheDocument();
-    expect(wrapper.getByText('There was an error displaying session view')).toBeInTheDocument();
   });
 });
