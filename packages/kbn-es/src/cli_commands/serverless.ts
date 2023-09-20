@@ -71,6 +71,16 @@ export const serverless: Command = {
       default: defaults,
     }) as unknown as ServerlessOptions;
 
+    /*
+     * The nodes will be killed immediately if background = true and skipTeardown = false
+     * because the CLI process exits after starting the nodes. We handle this here instead of
+     * in runServerless because in FTR we run the nodes in the background but the parent
+     * process continues for testing and we want to be able to SIGINT for teardown.
+     */
+    if (options.background && !options.skipTeardown) {
+      options.skipTeardown = true;
+    }
+
     const cluster = new Cluster();
     await cluster.runServerless({
       reportTime,
