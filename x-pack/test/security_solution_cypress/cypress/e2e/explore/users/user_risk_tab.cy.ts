@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { login, visitUserDetailsPage } from '../../../tasks/login';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
