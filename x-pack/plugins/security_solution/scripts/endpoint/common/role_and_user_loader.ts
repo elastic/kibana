@@ -10,6 +10,7 @@ import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 import type { AxiosError } from 'axios';
+import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { COMMON_API_HEADERS } from './constants';
 
 const ignoreHttp409Error = (error: AxiosError) => {
@@ -53,7 +54,9 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 
     if (!role) {
       throw new Error(
-        `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
+        `Unknown role/user: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(
+          ', '
+        )}]`
       );
     }
 
@@ -88,6 +91,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
+      .catch(catchAxiosErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 
@@ -120,6 +124,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
+      .catch(catchAxiosErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 }
