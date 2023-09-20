@@ -26,6 +26,8 @@ export async function getServiceDashboards({
     page: 1,
     perPage: 100,
     filter,
+    sortField: 'updated_at',
+    sortOrder: 'desc',
   });
 
   return result.saved_objects.map(
