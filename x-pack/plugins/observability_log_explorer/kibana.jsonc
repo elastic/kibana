@@ -13,12 +13,18 @@
     ],
     "requiredPlugins": [
       "data",
+      "discover",
       "logExplorer",
-      "observabilityShared"
+      "observabilityShared",
+      "share",
+      "kibanaUtils",
     ],
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": [
+      "common",
+    ]
   }
 }

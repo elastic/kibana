@@ -14,7 +14,12 @@ export type HideExpandConversationListButtonProps = React.ComponentProps<typeof 
 
 export function HideExpandConversationListButton(props: HideExpandConversationListButtonProps) {
   return (
-    <EuiButtonEmpty iconType={props.isExpanded ? 'menuLeft' : 'menuRight'} size="xs" {...props}>
+    <EuiButtonEmpty
+      data-test-subj="observabilityAiAssistantHideExpandConversationListButton"
+      iconType={props.isExpanded ? 'menuLeft' : 'menuRight'}
+      size="xs"
+      {...props}
+    >
       {props.isExpanded
         ? i18n.translate('xpack.observabilityAiAssistant.hideExpandConversationButton.hide', {
             defaultMessage: 'Hide chats',

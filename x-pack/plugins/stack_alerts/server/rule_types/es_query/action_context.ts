@@ -11,6 +11,7 @@ import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { EsQueryRuleParams } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
+import { isEsqlQueryRule } from './util';
 
 // rule type context provided to actions
 export interface ActionContext extends EsQueryRuleActionContext {
@@ -79,6 +80,7 @@ export function addMessages({
 }
 
 interface GetContextConditionsDescriptionOpts {
+  searchType: 'searchSource' | 'esQuery' | 'esqlQuery';
   comparator: Comparator;
   threshold: number[];
   aggType: string;
@@ -88,6 +90,7 @@ interface GetContextConditionsDescriptionOpts {
 }
 
 export function getContextConditionsDescription({
+  searchType,
   comparator,
   threshold,
   aggType,
@@ -95,15 +98,23 @@ export function getContextConditionsDescription({
   isRecovered = false,
   group,
 }: GetContextConditionsDescriptionOpts) {
-  return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage:
-      'Number of matching documents{groupCondition}{aggCondition} is {negation}{thresholdComparator} {threshold}',
-    values: {
-      aggCondition: aggType === 'count' ? '' : ` where ${aggType} of ${aggField}`,
-      groupCondition: group ? ` for group "${group}"` : '',
-      thresholdComparator: getHumanReadableComparator(comparator),
-      threshold: threshold.join(' and '),
-      negation: isRecovered ? 'NOT ' : '',
-    },
-  });
+  return isEsqlQueryRule(searchType)
+    ? i18n.translate('xpack.stackAlerts.esQuery.esqlAlertTypeContextConditionsDescription', {
+        defaultMessage: 'Query{negation} documents{groupCondition}',
+        values: {
+          groupCondition: group ? ` for group "${group}"` : '',
+          negation: isRecovered ? ' did NOT match' : ' matched',
+        },
+      })
+    : i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
+        defaultMessage:
+          'Number of matching documents{groupCondition}{aggCondition} is {negation}{thresholdComparator} {threshold}',
+        values: {
+          aggCondition: aggType === 'count' ? '' : ` where ${aggType} of ${aggField}`,
+          groupCondition: group ? ` for group "${group}"` : '',
+          thresholdComparator: getHumanReadableComparator(comparator),
+          threshold: threshold.join(' and '),
+          negation: isRecovered ? 'NOT ' : '',
+        },
+      });
 }

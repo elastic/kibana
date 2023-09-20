@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'unifiedFieldList',
   ]);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+    'discover:rowHeightOption': 0, // single line
+  };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -99,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

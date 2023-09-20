@@ -196,7 +196,7 @@ export class CheckMetadataTransformsTask {
 
     if (attempts > MAX_ATTEMPTS) {
       this.logger.warn(
-        `transform ${transform.id} has failed to restart ${attempts} times. stopping auto restart attempts.`
+        `Transform ${transform.id} has failed to restart ${attempts} times. stopping auto restart attempts.`
       );
       return {
         attempts,

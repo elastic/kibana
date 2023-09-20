@@ -97,9 +97,9 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-file-types",
-    "@kbn/core-http-router-server-mocks",
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-http-common",
     "@kbn/dashboard-plugin",
   ]
 }

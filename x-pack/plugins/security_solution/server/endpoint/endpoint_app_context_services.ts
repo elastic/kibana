@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  Logger,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -46,6 +51,7 @@ import type { AppFeaturesService } from '../lib/app_features_service/app_feature
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
+  cloud: CloudSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -68,9 +74,9 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
-  cloud: CloudSetup;
   esClient: ElasticsearchClient;
   appFeaturesService: AppFeaturesService;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
@@ -102,13 +108,13 @@ export class EndpointAppContextService {
         logger,
         manifestManager,
         alerting,
-        cloud,
         licenseService,
         exceptionListsClient,
         featureUsageService,
         endpointMetadataService,
         esClient,
         appFeaturesService,
+        savedObjectsClient,
       } = dependencies;
 
       registerIngestCallback(
@@ -120,7 +126,7 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud,
+          this.setupDependencies.cloud,
           appFeaturesService
         )
       );
@@ -137,7 +143,7 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud,
+          this.setupDependencies.cloud,
           esClient,
           appFeaturesService
         )
@@ -145,7 +151,7 @@ export class EndpointAppContextService {
 
       registerIngestCallback(
         'packagePolicyPostDelete',
-        getPackagePolicyDeleteCallback(exceptionListsClient)
+        getPackagePolicyDeleteCallback(exceptionListsClient, savedObjectsClient)
       );
     }
 

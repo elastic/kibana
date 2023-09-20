@@ -14,7 +14,6 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   Rule,
-  RuleNotifyWhen,
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -409,7 +408,7 @@ describe('Task Runner', () => {
         );
         expect(logger.debug).nthCalledWith(
           5,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(
           taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -772,7 +771,7 @@ describe('Task Runner', () => {
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        notifyWhen: RuleNotifyWhen.ACTIVE,
+        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
       });
       expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();

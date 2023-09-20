@@ -62,9 +62,6 @@ export class ObservabilityAIAssistantPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-      management: {
-        insightsAndAlerting: ['triggersActionsConnectors'],
-      },
       minimumLicense: 'enterprise',
       // see x-pack/plugins/features/common/feature_kibana_privileges.ts
       privileges: {
@@ -79,9 +76,6 @@ export class ObservabilityAIAssistantPlugin
               CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             ],
             read: [],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActionsConnectors'],
           },
           ui: ['show'],
         },

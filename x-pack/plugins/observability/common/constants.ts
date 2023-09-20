@@ -10,7 +10,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
-export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
+export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 export const ALERT_STATUS_ALL = 'all';

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
@@ -69,6 +70,8 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensTablesAdapter?: Record<string, Datatable>;
+  isOnHistogramMode?: boolean;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -105,6 +108,8 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensTablesAdapter,
+  isOnHistogramMode,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -414,6 +419,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
@@ -427,7 +440,7 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={Boolean(currentSuggestion)}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}

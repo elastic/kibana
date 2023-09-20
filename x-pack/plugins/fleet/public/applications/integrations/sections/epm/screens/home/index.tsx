@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type {
@@ -144,17 +144,25 @@ export const EPMHomePage: React.FC = () => {
     prerelease: prereleaseEnabled,
   });
 
-  const installedPackages = (allPackages?.items || []).filter(
-    (pkg) => pkg.status === installationStatuses.Installed
+  const installedPackages = useMemo(
+    () => (allPackages?.items || []).filter((pkg) => pkg.status === installationStatuses.Installed),
+    [allPackages]
   );
 
-  const unverifiedPackageCount = installedPackages.filter(
-    (pkg) =>
-      pkg.installationInfo?.verification_status &&
-      pkg.installationInfo.verification_status === 'unverified'
-  ).length;
+  const unverifiedPackageCount = useMemo(
+    () =>
+      installedPackages.filter(
+        (pkg) =>
+          pkg.installationInfo?.verification_status &&
+          pkg.installationInfo.verification_status === 'unverified'
+      ).length,
+    [installedPackages]
+  );
 
-  const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;
+  const upgradeablePackageCount = useMemo(
+    () => installedPackages.filter(isPackageUpdatable).length,
+    [installedPackages]
+  );
 
   const notificationsBySection = {
     manage: unverifiedPackageCount + upgradeablePackageCount,

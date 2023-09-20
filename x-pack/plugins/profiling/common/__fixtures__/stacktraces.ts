@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StackTraceResponse } from '../stack_traces';
+import type { StackTraceResponse } from '@kbn/profiling-utils';
 
 import stackTraces1x from './stacktraces_60s_1x.json';
 import stackTraces5x from './stacktraces_3600s_5x.json';

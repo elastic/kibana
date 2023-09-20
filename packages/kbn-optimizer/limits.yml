@@ -31,7 +31,7 @@ pageLoadAssetSize:
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
-  dataViews: 47000
+  dataViews: 47300
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -40,7 +40,8 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
   esUiShared: 326654
-  eventAnnotation: 48565
+  eventAnnotation: 30000
+  eventAnnotationListing: 25841
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -142,6 +143,7 @@ pageLoadAssetSize:
   triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
+  unifiedDocViewer: 25099
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241

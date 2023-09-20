@@ -24,6 +24,7 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
+      "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
       "contentManagement"
@@ -37,7 +38,8 @@
       "savedObjectsTaggingOss",
       "lens",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "globalSearch"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
     "extraPublicDirs": ["common"]
