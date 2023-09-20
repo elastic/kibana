@@ -28,7 +28,7 @@ import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -184,7 +184,7 @@ export const useConnectorSetup = ({
     (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
       // add action type title to new connector
-      const connectorTypeTitle = actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle;
+      const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
       Object.values(conversations).forEach((c) => {
         setApiConfig({
           conversationId: c.id,

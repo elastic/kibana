@@ -16,7 +16,7 @@ import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -61,7 +61,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         connectorsWithoutActionContext
           ? connectorsWithoutActionContext.map((c) => ({
               ...c,
-              connectorTypeTitle: actionTypeRegistry.get(c.actionTypeId).actionTypeTitle,
+              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
             }))
           : [],
       [actionTypeRegistry, connectorsWithoutActionContext]
@@ -158,7 +158,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       (connector: ActionConnector) => {
         onConnectorSelectionChange({
           ...connector,
-          connectorTypeTitle: actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle,
+          connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId)),
         });
         refetchConnectors?.();
         cleanupAndCloseModal();

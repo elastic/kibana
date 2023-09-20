@@ -15,7 +15,7 @@ import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -77,7 +77,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         connectorsWithoutActionContext
           ? connectorsWithoutActionContext.map((c) => ({
               ...c,
-              connectorTypeTitle: actionTypeRegistry.get(c.actionTypeId).actionTypeTitle,
+              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
             }))
           : [],
       [actionTypeRegistry, connectorsWithoutActionContext]
