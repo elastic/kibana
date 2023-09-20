@@ -227,7 +227,6 @@ export const useConversation = (): UseConversation => {
     ({ conversationId, apiConfig }: SetApiConfigProps): void => {
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
-        console.log('apiConfig', apiConfig);
         if (prevConversation != null) {
           const updatedConversation = {
             ...prevConversation,
