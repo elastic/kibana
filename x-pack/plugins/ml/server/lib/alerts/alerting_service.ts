@@ -437,8 +437,11 @@ export function alertingServiceProvider(
             actual,
           };
         }) as RecordAnomalyAlertDoc[],
-        top_influencers: v.influencer_results.top_influencer_hits.hits
-          .hits as InfluencerAnomalyAlertDoc[],
+        top_influencers: v.influencer_results.top_influencer_hits.hits.hits.map((influencerDoc) => {
+          return {
+            ...influencerDoc._source,
+          };
+        }) as InfluencerAnomalyAlertDoc[],
       };
     };
   };
