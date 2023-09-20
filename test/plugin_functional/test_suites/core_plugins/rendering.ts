@@ -106,6 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.notTouchedTimeout (duration)',
         'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'dev_tools.deeplinks.navLinkStatus (string)',
+        'discover.headless (boolean)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',
@@ -281,6 +282,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
+        'xpack.securitySolution.hostDiscvoer (boolean)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.stack_connectors.enableExperimental (array)',
