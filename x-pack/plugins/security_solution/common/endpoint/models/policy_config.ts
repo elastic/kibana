@@ -31,7 +31,7 @@ export const policyFactory = (
     global_manifest_version: 'latest',
     windows: {
       events: {
-        credential_access: true,
+        api: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,

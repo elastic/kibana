@@ -15,12 +15,12 @@ import type { PolicyFormComponentCommonProps } from '../../types';
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.api',
       {
-        defaultMessage: 'Credential Access',
+        defaultMessage: 'API',
       }
     ),
-    protectionField: 'credential_access',
+    protectionField: 'api',
   },
   {
     name: i18n.translate(
