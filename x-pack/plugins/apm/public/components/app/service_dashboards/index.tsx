@@ -56,6 +56,7 @@ export function ServiceDashboards() {
     },
     [serviceName]
   );
+  const serviceDashboards = data?.serviceDashboards ?? [];
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -66,8 +67,6 @@ export function ServiceDashboards() {
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
     }, [rangeFrom, rangeTo, kuery, currentDashboard]);
-
-  const serviceDashboards = data?.serviceDashboards ?? [];
 
   useEffect(() => {
     if (!dashboard) return;
@@ -133,7 +132,11 @@ export function ServiceDashboards() {
               <EuiFlexItem grow={false}>
                 <ContextMenu
                   items={[
-                    <LinkDashboard emptyButton={true} onRefresh={refetch} />,
+                    <LinkDashboard
+                      emptyButton={true}
+                      onRefresh={refetch}
+                      serviceDashboards={serviceDashboards}
+                    />,
                     <GotoDashboard currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}

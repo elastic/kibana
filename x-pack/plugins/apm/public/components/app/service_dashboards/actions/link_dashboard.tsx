@@ -7,14 +7,17 @@
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function LinkDashboard({
   onRefresh,
   emptyButton = false,
+  serviceDashboards,
 }: {
   onRefresh: () => void;
   emptyButton?: Boolean;
+  serviceDashboards?: SavedServiceDashboard;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -47,6 +50,7 @@ export function LinkDashboard({
         <SaveDashboardModal
           onClose={() => setIsModalVisible(false)}
           onRefresh={onRefresh}
+          serviceDashboards={serviceDashboards}
         />
       )}
     </>

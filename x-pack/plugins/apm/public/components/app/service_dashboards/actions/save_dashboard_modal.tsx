@@ -32,17 +32,19 @@ interface Props {
   onClose: () => void;
   onRefresh: () => void;
   currentDashboard?: SavedServiceDashboard;
+  serviceDashboards?: SavedServiceDashboard[];
 }
 
 export function SaveDashboardModal({
   onClose,
   onRefresh,
   currentDashboard,
+  serviceDashboards,
 }: Props) {
   const {
     core: { notifications },
   } = useApmPluginContext();
-  const { data, status } = useDashboardFetcher();
+  const { data: allAvailableDashboards, status } = useDashboardFetcher();
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
   const [useContextFilter, setUseContextFilter] = useState(
@@ -68,6 +70,17 @@ export function SaveDashboardModal({
     onRefresh();
   }, [onRefresh]);
 
+  const options = allAvailableDashboards?.map(
+    (dashboardItem: DashboardItem) => ({
+      label: dashboardItem.attributes.title,
+      value: dashboardItem.id,
+      disabled:
+        serviceDashboards?.some(
+          ({ dashboardSavedObjectId }) =>
+            dashboardItem.id === dashboardSavedObjectId
+        ) ?? false,
+    })
+  );
   const onSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
@@ -142,10 +155,7 @@ export function SaveDashboardModal({
               }
             )}
             singleSelection={{ asPlainText: true }}
-            options={data?.map((dashboardItem: DashboardItem) => ({
-              label: dashboardItem.attributes.title,
-              value: dashboardItem.id,
-            }))}
+            options={options}
             selectedOptions={selectedDashboard}
             onChange={(newSelection) => setSelectedDashboard(newSelection)}
             isClearable={true}
