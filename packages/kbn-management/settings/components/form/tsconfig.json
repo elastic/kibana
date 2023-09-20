@@ -29,5 +29,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-components-field-input",
   ]
 }
