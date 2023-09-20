@@ -31,6 +31,8 @@ import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
 import { DashboardSelector } from './dashboard_selector';
+import { useApmDataView } from '../../../hooks/use_apm_data_view';
+import { getFilters } from '../metrics/static_dashboard';
 
 export function ServiceDashboards() {
   const {
@@ -40,6 +42,7 @@ export function ServiceDashboards() {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [currentDashboard, setCurrentDashboard] =
     useState<SavedServiceDashboard>();
+  const { dataView } = useApmDataView();
 
   const { data, status, refetch } = useFetcher(
     (callApmApi) => {
@@ -69,29 +72,29 @@ export function ServiceDashboards() {
       const getInitialInput = () => ({
         viewMode: ViewMode.VIEW,
         timeRange: { from: rangeFrom, to: rangeTo },
-        query: { query: kuery, language: 'kuery' },
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-    }, [rangeFrom, rangeTo, kuery, currentDashboard]);
+    }, []);
 
   useEffect(() => {
     if (!dashboard) return;
 
     dashboard.updateInput({
-      viewMode: ViewMode.VIEW,
       timeRange: { from: rangeFrom, to: rangeTo },
-      // TODO useContextFilter
       query: { query: kuery, language: 'kuery' },
     });
-  }, [
-    serviceDashboards,
-    kuery,
-    serviceName,
-    environment,
-    rangeFrom,
-    rangeTo,
-    currentDashboard,
-  ]);
+  }, [kuery, dashboard, rangeFrom, rangeTo]);
+
+  useEffect(() => {
+    if (!dashboard || !dataView) return;
+
+    dashboard.updateInput({
+      filters:
+        dataView && currentDashboard?.useContextFilter
+          ? getFilters(serviceName, environment, dataView)
+          : [],
+    });
+  }, [dataView, serviceName, environment, dashboard, currentDashboard]);
 
   const handleOnChange = (selectedId: string) => {
     setCurrentDashboard(

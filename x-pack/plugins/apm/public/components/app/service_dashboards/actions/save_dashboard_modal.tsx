@@ -17,6 +17,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -151,7 +152,7 @@ export function SaveDashboardModal({
             placeholder={i18n.translate(
               'xpack.apm.serviceDashboards.selectDashboard.placeholder',
               {
-                defaultMessage: 'Select dasbboard test',
+                defaultMessage: 'Select dasbboard',
               }
             )}
             singleSelection={{ asPlainText: true }}
@@ -162,12 +163,17 @@ export function SaveDashboardModal({
           />
 
           <EuiSwitch
-            label={i18n.translate(
-              'xpack.apm.dashboard.addDashboard.useContextFilterLabel',
-              {
-                defaultMessage: 'Filter by `service` and `environment`',
-              }
-            )}
+            compressed
+            label={
+              <EuiMarkdownFormat textSize="s">
+                {i18n.translate(
+                  'xpack.apm.dashboard.addDashboard.useContextFilterLabel',
+                  {
+                    defaultMessage: 'Filter by `service` and `environment`',
+                  }
+                )}
+              </EuiMarkdownFormat>
+            }
             onChange={() => setUseContextFilter(!useContextFilter)}
             checked={useContextFilter}
           />
