@@ -7,31 +7,24 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import {
-  CREATE_RULE_ACTION_SUBJ,
-  TAKE_ACTION_SUBJ,
-} from '@kbn/cloud-security-posture-plugin/common/test_subjects';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
-  const filterBar = getService('filterBar');
-  const comboBox = getService('comboBox');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
-  // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
         tags: ['CIS', 'CIS K8S'],
-        rationale: 'rationale steps',
-        references: '1. https://elastic.co',
+        rationale: 'rationale steps for rule 1.1',
+        references: '1. https://elastic.co/rules/1.1',
         name: 'Upper case rule name',
         section: 'Upper case section',
         benchmark: {
@@ -47,6 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
+      '@timestamp': '2023-09-10T14:01:00.000Z',
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -68,6 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
+      '@timestamp': '2023-09-10T14:02:00.000Z',
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -89,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
+      '@timestamp': '2023-09-10T14:03:00.000Z',
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -112,35 +108,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ];
 
   const ruleName1 = data[0].rule.name;
-  const ruleName2 = data[1].rule.name;
-
-  const resourceId1 = data[0].resource.id;
-  const ruleSection1 = data[0].rule.section;
-
-  const benchMarkName = data[0].rule.benchmark.name;
 
   describe('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
-    let findingsByResourceTable: typeof findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof findings.resourceFindingsTable;
-    let distributionBar: typeof findings.distributionBar;
+    let misconfigurationsFlyout: typeof findings.misconfigurationsFlyout;
 
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
-      findingsByResourceTable = findings.findingsByResourceTable;
-      resourceFindingsTable = findings.resourceFindingsTable;
-      distributionBar = findings.distributionBar;
-
+      misconfigurationsFlyout = findings.misconfigurationsFlyout;
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
-
       // Prepare mocked findings
       await findings.index.remove();
       await findings.index.add(data);
+    });
 
+    after(async () => {
+      await findings.index.remove();
+      await findings.detectionRuleApi.remove();
+    });
+
+    beforeEach(async () => {
+      await findings.detectionRuleApi.remove();
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
@@ -149,143 +141,96 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    after(async () => {
-      // await findings.index.remove();
-    });
+    describe('Create detection rule', () => {
+      it('Creates a detection rule from the Take Action button and navigates to rule page', async () => {
+        await latestFindingsTable.openFlyoutAt(0);
+        await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
-    describe('Flyout', () => {
-      it('Create detection rule', async () => {
-        const findingsTable = await latestFindingsTable.getElement();
+        expect(
+          await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
+        ).to.be('0 alerts');
 
-        const flyoutButton = await findingsTable.findByTestSubject('findings_table_expand_column');
+        expect(
+          await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
+        ).to.be('1 detection rule');
 
-        // flyoutButton[0].click();
-        // const flyoutButton = latestFindingsTable.getElement('findings_table_expand_column');
+        const toastMessage = await (await findings.toastMessage()).getElement();
+        expect(toastMessage).to.be.ok();
 
-        console.log('flyoutButton', flyoutButton);
-        // flyoutButton[0].click();
-        flyoutButton.click();
+        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
-        // TODO: change to findingFlyout insteaf of findingsTable
-        const takeActionButton = await findingsTable.findByTestSubject(TAKE_ACTION_SUBJ);
-        takeActionButton.click();
+        await (await findings.toastMessage()).clickToastMessageLink();
 
-        const createRuleButton = await findingsTable.findByTestSubject(CREATE_RULE_ACTION_SUBJ);
-        createRuleButton.click();
-
-        // await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
-        // expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        // expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        await pageObjects.common.sleep(100000);
+        const rulePageTitle = await testSubjects.find('header-page-title');
+        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
       });
+      it('Creates a detection rule from the Alerts section and navigates to rule page', async () => {
+        await latestFindingsTable.openFlyoutAt(0);
+        const flyout = await misconfigurationsFlyout.getElement();
 
-      // it('remove filter', async () => {
-      //   await filterBar.removeFilter('rule.name');
+        await (
+          await flyout.findByTestSubject('csp:findings-flyout-create-detection-rule-link')
+        ).click();
 
-      //   expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-      //   expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      // });
+        expect(
+          await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
+        ).to.be('0 alerts');
 
-      // it('set search query', async () => {
-      //   await queryBar.setQuery(ruleName1);
-      //   await queryBar.submitQuery();
+        expect(
+          await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
+        ).to.be('1 detection rule');
 
-      //   expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-      //   expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(false);
+        const toastMessage = await (await findings.toastMessage()).getElement();
+        expect(toastMessage).to.be.ok();
 
-      //   await queryBar.setQuery('');
-      //   await queryBar.submitQuery();
+        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
-      //   expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      // });
+        await (await findings.toastMessage()).clickToastMessageLink();
+
+        const rulePageTitle = await testSubjects.find('header-page-title');
+        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+      });
     });
+    describe('Rule details', () => {
+      it('The rule page contains the expected matching data', async () => {
+        await latestFindingsTable.openFlyoutAt(0);
+        await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
-    // describe('Table Filters', () => {
-    //   it('add cell value filter', async () => {
-    //     await latestFindingsTable.addCellFilter('Rule Name', ruleName1, false);
+        await (await findings.toastMessage()).clickToastMessageLink();
 
-    //     expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-    //     expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-    //   });
+        const rulePageDescription = await testSubjects.find(
+          'stepAboutRuleDetailsToggleDescriptionText'
+        );
+        expect(await rulePageDescription.getVisibleText()).to.be(data[0].rule.rationale);
 
-    //   it('add negated cell value filter', async () => {
-    //     await latestFindingsTable.addCellFilter('Rule Name', ruleName1, true);
+        const severity = await testSubjects.find('severity');
+        expect(await severity.getVisibleText()).to.be('Low');
 
-    //     expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-    //     expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(false);
-    //     expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(true);
+        const referenceUrls = await testSubjects.find('urlsDescriptionReferenceLinkItem');
+        expect(await referenceUrls.getVisibleText()).to.contain('https://elastic.co/rules/1.1');
+      });
+    });
+    describe('Navigation', () => {
+      it('Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter', async () => {
+        await latestFindingsTable.openFlyoutAt(0);
+        await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
+        const flyout = await misconfigurationsFlyout.getElement();
+        await (await flyout.findByTestSubject('csp:findings-flyout-detection-rule-count')).click();
 
-    //     await filterBar.removeFilter('rule.name');
-    //   });
-    // });
+        expect(await (await testSubjects.find('ruleName')).getVisibleText()).to.be(ruleName1);
+      });
+      it('Clicking on count of Alerts should navigate to the alerts page', async () => {
+        await latestFindingsTable.openFlyoutAt(0);
+        await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
+        const flyout = await misconfigurationsFlyout.getElement();
+        await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
 
-    // describe('Table Sort', () => {
-    //   type SortingMethod = (a: string, b: string) => number;
-    //   type SortDirection = 'asc' | 'desc';
-    //   // Sort by lexical order will sort by the first character of the string (case-sensitive)
-    //   const compareStringByLexicographicOrder = (a: string, b: string) => {
-    //     return a > b ? 1 : b > a ? -1 : 0;
-    //   };
-    //   const sortByAlphabeticalOrder = (a: string, b: string) => {
-    //     return a.localeCompare(b);
-    //   };
-
-    //   it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
-    //     type TestCase = [string, SortDirection, SortingMethod];
-    //     const testCases: TestCase[] = [
-    //       ['CIS Section', 'asc', sortByAlphabeticalOrder],
-    //       ['CIS Section', 'desc', sortByAlphabeticalOrder],
-    //       ['Resource ID', 'asc', compareStringByLexicographicOrder],
-    //       ['Resource ID', 'desc', compareStringByLexicographicOrder],
-    //       ['Resource Name', 'asc', sortByAlphabeticalOrder],
-    //       ['Resource Name', 'desc', sortByAlphabeticalOrder],
-    //       ['Resource Type', 'asc', sortByAlphabeticalOrder],
-    //       ['Resource Type', 'desc', sortByAlphabeticalOrder],
-    //     ];
-    //     for (const [columnName, dir, sortingMethod] of testCases) {
-    //       await latestFindingsTable.toggleColumnSort(columnName, dir);
-    //       /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-    //       pageObjects.header.waitUntilLoadingHasFinished();
-    //       const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
-    //       expect(values).to.not.be.empty();
-    //       const sorted = values
-    //         .slice()
-    //         .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-    //       values.forEach((value, i) => {
-    //         expect(value).to.be.eql(
-    //           sorted[i],
-    //           `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
-    //         );
-    //       });
-    //     }
-    //   });
-    // });
-
-    // describe('DistributionBar', () => {
-    //   (['passed', 'failed'] as const).forEach((type) => {
-    //     it(`filters by ${type} findings`, async () => {
-    //       await distributionBar.filterBy(type);
-
-    //       const items = data.filter(({ result }) => result.evaluation === type);
-    //       expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
-
-    //       await filterBar.removeFilter('result.evaluation');
-    //     });
-    //   });
-    // });
-
-    // describe('GroupBy', () => {
-    //   it('groups findings by resource', async () => {
-    //     await comboBox.set('findings_group_by_selector', 'Resource');
-    //     expect(
-    //       await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
-    //     ).to.be(true);
-    //   });
-
-    //   it('navigates to resource findings page from resource id link', async () => {
-    //     await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
-    //     expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-    //   });
-    // });
+        expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
+          'Alerts'
+        );
+      });
+    });
   });
 }
