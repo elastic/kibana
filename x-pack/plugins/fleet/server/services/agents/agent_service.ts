@@ -125,7 +125,7 @@ class AgentClientImpl implements AgentClient {
     );
   }
 
-  public async getLatestAgentAvailableVersion(includeCurrentVersion = true) {
+  public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
     await this.#runPreflight();
     return getLatestAvailableVersion(includeCurrentVersion);
   }
