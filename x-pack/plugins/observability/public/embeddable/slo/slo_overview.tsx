@@ -10,14 +10,20 @@ import { EuiIcon, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { paths } from '../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 
 export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: EmbeddableSloProps) {
-  const { uiSettings } = useKibana().services;
+  const {
+    uiSettings,
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
   const { isLoading, slo, refetch, isRefetching } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
@@ -89,7 +95,15 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       <Chart>
         <Settings
           onElementClick={([d]) => {
-            console.log('!!click');
+            console.log(d, '!!click');
+            navigateToUrl(
+              basePath.prepend(
+                paths.observability.sloDetails(
+                  slo.id,
+                  slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+                )
+              )
+            );
           }}
         />
         <Metric id="1" data={[metricData]} />
