@@ -703,7 +703,7 @@ describe('<DefaultNavigation />', () => {
         );
 
         expect(
-          await (
+          (
             await findByTestId(
               /nav-item-project_settings_project_nav.settings.cloudLinkUserAndRoles/
             )
@@ -711,9 +711,8 @@ describe('<DefaultNavigation />', () => {
         ).toBe('Mock Users & RolesExternal link');
 
         expect(
-          await (
-            await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/)
-          ).textContent
+          (await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/))
+            .textContent
         ).toBe('Mock Billing & SubscriptionsExternal link');
       });
     });
