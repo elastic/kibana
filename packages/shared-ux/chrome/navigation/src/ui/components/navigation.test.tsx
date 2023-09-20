@@ -649,11 +649,11 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
-      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+        /nav-item-isActive/
       );
 
       await act(async () => {
@@ -673,11 +673,11 @@ describe('<Navigation />', () => {
         ]);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).not.toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).not.toMatch(
+        /nav-item-isActive/
       );
-      expect(await findByTestId(/nav-item-group1.item2/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
     });
 
@@ -730,8 +730,8 @@ describe('<Navigation />', () => {
 
       jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
     });
   });
