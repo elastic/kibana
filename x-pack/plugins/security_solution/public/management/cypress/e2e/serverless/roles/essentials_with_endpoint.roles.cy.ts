@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import { login } from '../../../tasks/login';
+import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import type { EndpointArtifactPageId } from '../../../screens';
 import {
   getNoPrivilegesPage,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageMap,
   getEndpointManagementPageList,
-  EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
-} from '../../../screens/endpoint_management';
-import {
-  ensurePermissionDeniedScreen,
-  getAgentListTable,
+  ensureFleetPermissionDeniedScreen,
+  getFleetAgentListTable,
   visitFleetAgentList,
+  ensurePolicyDetailsPageAuthzAccess,
 } from '../../../screens';
-import { ServerlessRoleName } from '../../../../../../../shared/lib';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -59,12 +54,12 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
-    (['t1_analyst', `t2_analyst`] as ServerlessRoleName[]).forEach((roleName) => {
+    (['t1_analyst', `t2_analyst`] as ServerlessUser[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
         beforeEach(() => {
-          login(roleName);
+          loginServerless(roleName);
         });
 
         it('should have READ access to Endpoint list page', () => {
@@ -80,7 +75,7 @@ describe(
 
         it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+          ensureFleetPermissionDeniedScreen();
         });
       });
     });
@@ -93,7 +88,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('t3_analyst');
+        loginServerless(ServerlessUser.T3_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -124,7 +119,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -132,7 +127,7 @@ describe(
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
       beforeEach(() => {
-        login('threat_intelligence_analyst');
+        loginServerless(ServerlessUser.THREAT_INTELLIGENCE_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -155,7 +150,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -167,7 +162,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('rule_author');
+        loginServerless(ServerlessUser.RULE_AUTHOR);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -198,7 +193,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -211,7 +206,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        login('soc_manager');
+        loginServerless(ServerlessUser.SOC_MANAGER);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -236,7 +231,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -246,7 +241,7 @@ describe(
         'platform_engineer',
         `endpoint_operations_analyst`,
         'endpoint_policy_manager',
-      ] as ServerlessRoleName[]
+      ] as ServerlessUser[]
     ).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
@@ -257,7 +252,7 @@ describe(
         const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
         beforeEach(() => {
-          login(roleName);
+          loginServerless(roleName);
         });
 
         for (const { id, title } of artifactPagesFullAccess) {
@@ -282,7 +277,7 @@ describe(
 
         it('should have access to Fleet', () => {
           visitFleetAgentList();
-          getAgentListTable().should('exist');
+          getFleetAgentListTable().should('exist');
         });
       });
     });

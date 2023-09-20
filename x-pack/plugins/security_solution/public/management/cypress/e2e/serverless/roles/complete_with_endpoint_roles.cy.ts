@@ -6,10 +6,12 @@
  */
 
 import { pick } from 'lodash';
-import { login } from '../../../tasks/login';
-import { ServerlessRoleName } from '../../../../../../../shared/lib';
+import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
+import type { EndpointArtifactPageId } from '../../../screens';
 import {
-  EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
@@ -21,21 +23,12 @@ import {
   openRowActionMenu,
   visitEndpointList,
   visitPolicyList,
-} from '../../../screens/endpoint_management';
-import {
-  ensurePermissionDeniedScreen,
-  getAgentListTable,
+  ensureFleetPermissionDeniedScreen,
+  getFleetAgentListTable,
   visitFleetAgentList,
-} from '../../../screens';
-import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
-} from '../../../screens/endpoint_management/response_console';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../../tasks/endpoint_management/index_endpoint_hosts';
+} from '../../../screens';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
@@ -69,12 +62,12 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are very similar with exception of one page
-    (['t1_analyst', `t2_analyst`] as ServerlessRoleName[]).forEach((roleName) => {
+    (['t1_analyst', `t2_analyst`] as ServerlessUser[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
         beforeEach(() => {
-          login(roleName);
+          loginServerless(roleName);
         });
 
         it('should have READ access to Endpoint list page', () => {
@@ -98,7 +91,7 @@ describe(
 
         it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+          ensureFleetPermissionDeniedScreen();
         });
 
         it('should NOT have access to execute response actions', () => {
@@ -130,7 +123,7 @@ describe(
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
 
       beforeEach(() => {
-        login('t3_analyst');
+        loginServerless(ServerlessUser.T3_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -154,7 +147,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       describe('Response Actions access', () => {
@@ -182,7 +175,7 @@ describe(
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
       beforeEach(() => {
-        login('threat_intelligence_analyst');
+        loginServerless(ServerlessUser.THREAT_INTELLIGENCE_ANALYST);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -205,7 +198,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       it('should have access to Response Actions Log', () => {
@@ -227,7 +220,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('rule_author');
+        loginServerless(ServerlessUser.RULE_AUTHOR);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -254,7 +247,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       it('should have access to Response Actions Log', () => {
@@ -278,7 +271,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        login('soc_manager');
+        loginServerless(ServerlessUser.SOC_MANAGER);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -296,7 +289,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       describe('Response Actions access', () => {
@@ -325,7 +318,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        login('endpoint_operations_analyst');
+        loginServerless(ServerlessUser.ENDPOINT_OPERATIONS_ANALYST);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -352,59 +345,57 @@ describe(
 
       it('should have access to Fleet', () => {
         visitFleetAgentList();
-        getAgentListTable().should('exist');
+        getFleetAgentListTable().should('exist');
       });
     });
 
-    (['platform_engineer', 'endpoint_policy_manager'] as ServerlessRoleName[]).forEach(
-      (roleName) => {
-        describe(`for role: ${roleName}`, () => {
-          const artifactPagesFullAccess = [
-            pageById.trustedApps,
-            pageById.eventFilters,
-            pageById.blocklist,
-            pageById.hostIsolationExceptions,
-          ];
-          const grantedAccessPages = [pageById.endpointList, pageById.policyList];
+    (['platform_engineer', 'endpoint_policy_manager'] as ServerlessUser[]).forEach((roleName) => {
+      describe(`for role: ${roleName}`, () => {
+        const artifactPagesFullAccess = [
+          pageById.trustedApps,
+          pageById.eventFilters,
+          pageById.blocklist,
+          pageById.hostIsolationExceptions,
+        ];
+        const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
-          beforeEach(() => {
-            login(roleName);
-          });
-
-          for (const { id, title } of artifactPagesFullAccess) {
-            it(`should have CRUD access to: ${title}`, () => {
-              ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-            });
-          }
-
-          for (const { url, title } of grantedAccessPages) {
-            it(`should have access to: ${title}`, () => {
-              cy.visit(url);
-              getNoPrivilegesPage().should('not.exist');
-            });
-          }
-
-          it('should have access to Fleet', () => {
-            visitFleetAgentList();
-            getAgentListTable().should('exist');
-          });
-
-          it('should have access to Response Actions Log', () => {
-            cy.visit(pageById.responseActionLog);
-
-            if (roleName === 'endpoint_policy_manager') {
-              getNoPrivilegesPage().should('exist');
-            } else {
-              getNoPrivilegesPage().should('not.exist');
-            }
-          });
-
-          it('should NOT have access to execute response actions', () => {
-            visitEndpointList();
-            openRowActionMenu().findByTestSubj('console').should('not.exist');
-          });
+        beforeEach(() => {
+          loginServerless(roleName);
         });
-      }
-    );
+
+        for (const { id, title } of artifactPagesFullAccess) {
+          it(`should have CRUD access to: ${title}`, () => {
+            ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          });
+        }
+
+        for (const { url, title } of grantedAccessPages) {
+          it(`should have access to: ${title}`, () => {
+            cy.visit(url);
+            getNoPrivilegesPage().should('not.exist');
+          });
+        }
+
+        it('should have access to Fleet', () => {
+          visitFleetAgentList();
+          getFleetAgentListTable().should('exist');
+        });
+
+        it('should have access to Response Actions Log', () => {
+          cy.visit(pageById.responseActionLog);
+
+          if (roleName === 'endpoint_policy_manager') {
+            getNoPrivilegesPage().should('exist');
+          } else {
+            getNoPrivilegesPage().should('not.exist');
+          }
+        });
+
+        it('should NOT have access to execute response actions', () => {
+          visitEndpointList();
+          openRowActionMenu().findByTestSubj('console').should('not.exist');
+        });
+      });
+    });
   }
 );
