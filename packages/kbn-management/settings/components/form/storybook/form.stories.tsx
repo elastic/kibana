@@ -16,7 +16,12 @@ import { Form as Component } from '../form';
 export default {
   title: `Settings/Form/Form`,
   description: 'A form with field rows',
-  argTypes: { save: { action: 'Saved' } },
+  argTypes: {
+    isSavingEnabled: {
+      name: 'Saving is enabled?',
+      control: { type: 'boolean' },
+    },
+  },
   decorators: [
     (Story) => (
       <FormProvider

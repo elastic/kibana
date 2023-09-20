@@ -14,6 +14,7 @@ import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types'
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 
 /**
  * Contextual services used by a {@link Form} component.
@@ -33,12 +34,14 @@ export type FormServices = FieldRowServices & Services;
  * An interface containing a collection of Kibana plugins and services required to
  * render a {@link Form} component.
  */
-export interface KibanaDependencies {
+interface KibanaDependencies {
   settings: {
     client: SettingsStart['client'];
   };
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  /** The portion of the {@link ToastsStart} contract used by this component. */
+  toasts: Pick<ToastsStart, 'addError' | 'add'>;
 }
 
 /**
