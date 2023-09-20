@@ -79,7 +79,7 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
     [setIsIndiciesLoading, setIndexOptions]
   );
 
-  // Load first 10 indices on mount so that the ComboBox has some options
+  // Fetch indices on mount so that the ComboBox has some initial options
   useEffect(() => {
     if (isEmpty(field.value)) {
       onSearchChange('*');
