@@ -186,7 +186,7 @@ export const ActionTypeForm = ({
     actionItem?.useAlertDataForTemplate ?? false
   );
 
-  const { isLoading: isLoadingAadFields, fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
+  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
     http,
     ruleTypeId,
     useAadTemplateFields
@@ -492,45 +492,51 @@ export const ActionTypeForm = ({
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
-            <EuiSwitch
-              label="Use template fields from alerts index"
-              checked={useAadTemplateFields}
-              onChange={handleUseAadTemplateFields}
-            />
-            <Suspense fallback={null}>
-              <ParamsFieldsComponent
-                actionParams={actionItem.params as any}
-                errors={actionParamsErrors.errors}
-                index={index}
-                editAction={(key: string, value: RuleActionParam, i: number) => {
-                  setWarning(
-                    validateParamsForWarnings(
-                      value,
-                      http.basePath.publicBaseUrl,
-                      availableActionVariables
-                    )
-                  );
-                  setActionParamsProperty(key, value, i);
-                }}
-                messageVariables={templateFields}
-                defaultMessage={
-                  // if action is a summary action, show the default summary message
-                  isSummaryAction
-                    ? defaultSummaryMessage
-                    : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
-                }
-                useDefaultMessage={useDefaultMessage}
-                actionConnector={actionConnector}
-                executionMode={ActionConnectorMode.ActionForm}
-                ruleTypeId={ruleTypeId}
-              />
-              {warning ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut size="s" color="warning" title={warning} />
-                </>
-              ) : null}
-            </Suspense>
+            <EuiFlexGroup gutterSize="m" direction="column">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label="Use template fields from alerts index"
+                  checked={useAadTemplateFields}
+                  onChange={handleUseAadTemplateFields}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Suspense fallback={null}>
+                  <ParamsFieldsComponent
+                    actionParams={actionItem.params as any}
+                    errors={actionParamsErrors.errors}
+                    index={index}
+                    editAction={(key: string, value: RuleActionParam, i: number) => {
+                      setWarning(
+                        validateParamsForWarnings(
+                          value,
+                          http.basePath.publicBaseUrl,
+                          availableActionVariables
+                        )
+                      );
+                      setActionParamsProperty(key, value, i);
+                    }}
+                    messageVariables={templateFields}
+                    defaultMessage={
+                      // if action is a summary action, show the default summary message
+                      isSummaryAction
+                        ? defaultSummaryMessage
+                        : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+                    }
+                    useDefaultMessage={useDefaultMessage}
+                    actionConnector={actionConnector}
+                    executionMode={ActionConnectorMode.ActionForm}
+                    ruleTypeId={ruleTypeId}
+                  />
+                  {warning ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut size="s" color="warning" title={warning} />
+                    </>
+                  ) : null}
+                </Suspense>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiErrorBoundary>
         ) : null}
       </EuiSplitPanel.Inner>
