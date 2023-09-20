@@ -31,7 +31,6 @@ import { hasFailedSelector } from '../../state_machines/create/selectors';
 import {
   datasetNameWillBePrefixed,
   getDatasetNamePrefix,
-  getDatasetNameWithoutPrefix,
   prefixDatasetName,
 } from '../../state_machines/create/pipelines/fields';
 
@@ -221,7 +220,7 @@ export const CreateCustomIntegrationForm = ({
             placeholder={i18n.translate('customIntegrationsPackage.create.dataset.placeholder', {
               defaultMessage: "Give your integration's dataset a name",
             })}
-            value={getDatasetNameWithoutPrefix(datasetName, integrationName)}
+            value={datasetName}
             onChange={(event) => updateDatasetName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.datasets?.[0].name) && touchedFields.datasets}
             max={100}
