@@ -374,6 +374,23 @@ export class ObservabilityAIAssistantClient {
       };
     }
 
+    if (indices.length === 0) {
+      try {
+        const body = await this.dependencies.esClient.indices.resolveIndex({
+          name: '*',
+          expand_wildcards: 'open',
+        });
+        indices = body.indices.map((i) => i.name);
+      } catch (e) {
+        indices = [];
+      }
+
+      return {
+        indices,
+        fields: [],
+      };
+    }
+
     const fields = await this.dependencies.dataviews.getFieldsForWildcard({
       pattern: index,
     });
