@@ -39,6 +39,7 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
@@ -1481,6 +1482,50 @@ export const tasks: TelemetryTask[] = [
       });
       return {
         per_service: data,
+      };
+    },
+  },
+  {
+    name: 'top_traces',
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
+        index: [indices.transaction, indices.span, indices.error],
+        body: {
+          size: 0,
+          track_total_hits: false,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            top_traces: {
+              terms: {
+                field: TRACE_ID,
+                size: 100,
+              },
+            },
+            max: {
+              max_bucket: {
+                buckets_path: 'top_traces>_count',
+              },
+            },
+            median: {
+              percentiles_bucket: {
+                buckets_path: 'top_traces>_count',
+                percents: [50],
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        top_traces: {
+          max: response.aggregations?.max.value ?? 0,
+          median: response.aggregations?.median.values['50.0'] ?? 0,
+        },
       };
     },
   },

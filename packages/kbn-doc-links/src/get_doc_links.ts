@@ -506,8 +506,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
-      // TODO add valid docs URL
-      alertingRules: `${MACHINE_LEARNING_DOCS}ml-configuring-alerts.html`,
+      alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -651,6 +650,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
       securityApis: `${ELASTICSEARCH_DOCS}security-api.html`,
       simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
+      tasks: `${ELASTICSEARCH_DOCS}tasks.html`,
       timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,

@@ -71,7 +71,6 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
 
     expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
     expect(hookResult.result.current.threatMatchesCount).toEqual(1);
     expect(hookResult.result.current.threatEnrichments).toHaveLength(1);
@@ -121,7 +120,6 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
 
     expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(2);
     expect(hookResult.result.current.threatMatchesCount).toEqual(2);
     expect(hookResult.result.current.threatEnrichments).toHaveLength(2);
@@ -148,7 +146,6 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
 
     expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
     expect(hookResult.result.current.threatMatchesCount).toEqual(1);
     expect(hookResult.result.current.threatEnrichments).toEqual(undefined);
@@ -176,7 +173,6 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
 
     expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);
     expect(hookResult.result.current.threatMatchesCount).toEqual(0);
     expect(hookResult.result.current.threatEnrichments).toHaveLength(1);
@@ -192,28 +188,6 @@ describe('useFetchThreatIntelligence', () => {
     hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
 
     expect(hookResult.result.current.loading).toEqual(true);
-    expect(hookResult.result.current.error).toEqual(false);
-    expect(hookResult.result.current.threatMatches).toEqual(undefined);
-    expect(hookResult.result.current.threatMatchesCount).toEqual(0);
-    expect(hookResult.result.current.threatEnrichments).toEqual(undefined);
-    expect(hookResult.result.current.threatEnrichmentsCount).toEqual(0);
-  });
-
-  it('should return error true', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [],
-        totalCount: 0,
-      },
-      loading: false,
-    });
-
-    hookResult = renderHook(() =>
-      useFetchThreatIntelligence({ dataFormattedForFieldBrowser: null })
-    );
-
-    expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.error).toEqual(true);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);
     expect(hookResult.result.current.threatMatchesCount).toEqual(0);
     expect(hookResult.result.current.threatEnrichments).toEqual(undefined);

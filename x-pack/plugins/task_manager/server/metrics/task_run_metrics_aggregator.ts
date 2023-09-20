@@ -6,73 +6,121 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { isOk, unwrap } from '../lib/result_type';
+import { merge } from 'lodash';
+import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { ErroredTask, RanTask, TaskRun } from '../task_events';
-import { SuccessRate, SuccessRateCounter } from './success_rate_counter';
+import {
+  ErroredTask,
+  RanTask,
+  TaskRun,
+  isTaskManagerStatEvent,
+  isTaskRunEvent,
+  TaskManagerStat,
+} from '../task_events';
+import { MetricCounterService } from './counter/metric_counter_service';
+import { SerializedHistogram, SimpleHistogram } from './simple_histogram';
 import { ITaskMetricsAggregator } from './types';
 
 const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
 
-export interface TaskRunMetric extends JsonObject {
-  overall: SuccessRate;
-  by_type: {
-    [key: string]: SuccessRate;
+const HDR_HISTOGRAM_MAX = 1800; // 30 minutes
+const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
+
+enum TaskRunKeys {
+  SUCCESS = 'success',
+  NOT_TIMED_OUT = 'not_timed_out',
+  TOTAL = 'total',
+}
+
+enum TaskRunMetricKeys {
+  OVERALL = 'overall',
+  BY_TYPE = 'by_type',
+}
+
+interface TaskRunCounts extends JsonObject {
+  [TaskRunKeys.SUCCESS]: number;
+  [TaskRunKeys.NOT_TIMED_OUT]: number;
+  [TaskRunKeys.TOTAL]: number;
+}
+
+export interface TaskRunMetrics extends JsonObject {
+  [TaskRunMetricKeys.OVERALL]: TaskRunCounts;
+  [TaskRunMetricKeys.BY_TYPE]: {
+    [key: string]: TaskRunCounts;
   };
 }
 
+export interface TaskRunMetric extends JsonObject {
+  overall: TaskRunMetrics['overall'] & {
+    delay: SerializedHistogram;
+  };
+  by_type: TaskRunMetrics['by_type'];
+}
+
 export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
-  private taskRunSuccessRate = new SuccessRateCounter();
-  private taskRunCounter: Map<string, SuccessRateCounter> = new Map();
+  private counter: MetricCounterService<TaskRunMetric> = new MetricCounterService(
+    Object.values(TaskRunKeys),
+    TaskRunMetricKeys.OVERALL
+  );
+  private delayHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
   public initialMetric(): TaskRunMetric {
-    return {
-      overall: this.taskRunSuccessRate.initialMetric(),
+    return merge(this.counter.initialMetrics(), {
       by_type: {},
-    };
+      overall: { delay: { counts: [], values: [] } },
+    });
   }
 
   public collect(): TaskRunMetric {
-    return {
-      overall: this.taskRunSuccessRate.get(),
-      by_type: this.collectTaskTypeEntries(),
-    };
+    return merge(this.counter.collect(), { overall: { delay: this.delayHistogram.serialize() } });
   }
 
   public reset() {
-    this.taskRunSuccessRate.reset();
-    for (const taskType of this.taskRunCounter.keys()) {
-      this.taskRunCounter.get(taskType)!.reset();
-    }
+    this.counter.reset();
+    this.delayHistogram.reset();
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
-    const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
-    const taskType = task.taskType;
-
-    const taskTypeSuccessRate: SuccessRateCounter =
-      this.taskRunCounter.get(taskType) ?? new SuccessRateCounter();
-
-    const success = isOk((taskEvent as TaskRun).event);
-    this.taskRunSuccessRate.increment(success);
-    taskTypeSuccessRate.increment(success);
-    this.taskRunCounter.set(taskType, taskTypeSuccessRate);
-
-    const taskTypeGroup = this.getTaskTypeGroup(taskType);
-    if (taskTypeGroup) {
-      const taskTypeGroupSuccessRate: SuccessRateCounter =
-        this.taskRunCounter.get(taskTypeGroup) ?? new SuccessRateCounter();
-      taskTypeGroupSuccessRate.increment(success);
-      this.taskRunCounter.set(taskTypeGroup, taskTypeGroupSuccessRate);
+    if (isTaskRunEvent(taskEvent)) {
+      this.processTaskRunEvent(taskEvent);
+    } else if (isTaskManagerStatEvent(taskEvent)) {
+      this.processTaskManagerStatEvent(taskEvent);
     }
   }
 
-  private collectTaskTypeEntries() {
-    const collected: Record<string, SuccessRate> = {};
-    for (const [key, value] of this.taskRunCounter) {
-      collected[key] = value.get();
+  private processTaskRunEvent(taskEvent: TaskRun) {
+    const { task, isExpired }: RanTask | ErroredTask = unwrap(taskEvent.event);
+    const success = isOk((taskEvent as TaskRun).event);
+    const taskType = task.taskType.replaceAll('.', '__');
+    const taskTypeGroup = this.getTaskTypeGroup(taskType);
+
+    // increment the total counters
+    this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
+
+    // increment success counters
+    if (success) {
+      this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
     }
-    return collected;
+
+    // increment expired counters
+    if (!isExpired) {
+      this.incrementCounters(TaskRunKeys.NOT_TIMED_OUT, taskType, taskTypeGroup);
+    }
+  }
+
+  private processTaskManagerStatEvent(taskEvent: TaskManagerStat) {
+    if (taskEvent.id === 'runDelay') {
+      const delayInSec = Math.round((taskEvent.event as Ok<number>).value);
+      this.delayHistogram.record(delayInSec);
+    }
+  }
+
+  private incrementCounters(key: TaskRunKeys, taskType: string, group?: string) {
+    this.counter.increment(key, TaskRunMetricKeys.OVERALL);
+    this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${taskType}`);
+    if (group) {
+      this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${group}`);
+    }
   }
 
   private getTaskTypeGroup(taskType: string): string | undefined {

@@ -19,6 +19,7 @@ describe('ReportingStore', () => {
     const reportingConfig = {
       index: '.reporting-test',
       queue: { indexInterval: 'week' },
+      statefulSettings: { enabled: true },
     };
     mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
@@ -60,6 +61,7 @@ describe('ReportingStore', () => {
       const reportingConfig = {
         index: '.reporting-test',
         queue: { indexInterval: 'centurially' },
+        statefulSettings: { enabled: true },
       };
       mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 

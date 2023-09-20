@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { VISUALIZATIONS_SECTION_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
@@ -42,11 +43,13 @@ describe('<VisualizationsSection />', () => {
     } as unknown as ExpandableFlyoutContext;
 
     const { getByTestId, getAllByRole } = render(
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={contextValue}>
-          <VisualizationsSection />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <IntlProvider locale="en">
+        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+          <RightPanelContext.Provider value={contextValue}>
+            <VisualizationsSection />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </IntlProvider>
     );
 
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
