@@ -29,7 +29,6 @@ export const getSavedObjects: (spaceId?: string) => SavedObject[] = (
     created_at: '2023-09-20T18:36:52.431Z',
     id: '7e483f93-0c84-48e0-9a32-8799a7cfdc26',
     managed: false,
-    originId: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
     references: [],
     type: 'index-pattern',
     typeMigrationVersion: '8.0.0',
@@ -39,7 +38,6 @@ export const getSavedObjects: (spaceId?: string) => SavedObject[] = (
     id: SAVED_SEARCH_ID,
     type: 'search',
     namespaces: ['test'],
-    originId: '717d50d0-3c37-11ee-ae29-adafdb6b4012',
     version: 'Wzk2LDFd',
     attributes: {
       kibanaSavedObjectMeta: {
