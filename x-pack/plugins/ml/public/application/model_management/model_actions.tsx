@@ -558,7 +558,12 @@ export function useModelActions({
           );
         },
         onClick: async (item) => {
-          const indexPatterns = item?.indices?.map((o) => Object.keys(o));
+          let indexPatterns = item?.indices?.map((o) => Object.keys(o));
+
+          if (item?.metadata?.analytics_config?.dest?.index !== undefined) {
+            const destIndex = item.metadata.analytics_config.dest?.index;
+            indexPatterns = Array.isArray(destIndex) ? destIndex : [destIndex];
+          }
           const path = await urlLocator.getUrl({
             page: ML_PAGES.DATA_DRIFT_CUSTOM,
             pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
