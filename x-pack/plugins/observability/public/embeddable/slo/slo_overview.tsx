@@ -25,7 +25,6 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   });
 
   useEffect(() => {
-    console.log('!!refetch');
     refetch();
   }, [startTime, endTime, refetch]);
 
@@ -56,7 +55,6 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
     return null;
   }
 
-  console.log(slo, '!!slo');
   const color =
     slo?.summary.status === 'NO_DATA'
       ? '#f8e9e9'
@@ -64,7 +62,9 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       ? '#f8e9e9' // #f8e9e9 (danger), #e6f9f7
       : '#e6f9f7';
 
-  const extra = `Target ${numeral(slo?.objective.target).format(percentFormat)}`;
+  const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
+  // eslint-disable-next-line react/no-danger
+  const extra = <span dangerouslySetInnerHTML={{ __html: extraContent }} />;
   const metricData =
     slo !== undefined
       ? [
