@@ -7,118 +7,33 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
 
 import { Form } from './form';
-import { wrap } from './mocks';
+import { wrap, settingsMock } from './mocks';
+import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
+import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
+import { FormServices } from './types';
 
-const defaults = {
-  requiresPageReload: false,
-  readonly: false,
-  category: ['category'],
-};
-
-const defaultValues: Record<SettingType, any> = {
-  array: ['example_value'],
-  boolean: true,
-  color: '#FF00CC',
-  image: '',
-  json: "{ foo: 'bar2' }",
-  markdown: 'Hello World',
-  number: 1,
-  select: 'apple',
-  string: 'hello world',
-  undefined: 'undefined',
-};
-
-type Settings = {
-  [key in SettingType]: KnownTypeToMetadata<key>;
-};
-
-const settings: Omit<Settings, 'markdown' | 'json'> = {
-  array: {
-    description: 'Description for Array test setting',
-    name: 'array:test:setting',
-    type: 'array',
-    userValue: null,
-    value: defaultValues.array,
-    ...defaults,
-  },
-  boolean: {
-    description: 'Description for Boolean test setting',
-    name: 'boolean:test:setting',
-    type: 'boolean',
-    userValue: null,
-    value: defaultValues.boolean,
-    ...defaults,
-  },
-  color: {
-    description: 'Description for Color test setting',
-    name: 'color:test:setting',
-    type: 'color',
-    userValue: null,
-    value: defaultValues.color,
-    ...defaults,
-  },
-  image: {
-    description: 'Description for Image test setting',
-    name: 'image:test:setting',
-    type: 'image',
-    userValue: null,
-    value: defaultValues.image,
-    ...defaults,
-  },
-  number: {
-    description: 'Description for Number test setting',
-    name: 'number:test:setting',
-    type: 'number',
-    userValue: null,
-    value: defaultValues.number,
-    ...defaults,
-  },
-  select: {
-    description: 'Description for Select test setting',
-    name: 'select:test:setting',
-    options: ['apple', 'orange', 'banana'],
-    optionLabels: {
-      apple: 'Apple',
-      orange: 'Orange',
-      banana: 'Banana',
-    },
-    type: 'select',
-    userValue: null,
-    value: defaultValues.select,
-    ...defaults,
-  },
-  string: {
-    description: 'Description for String test setting',
-    name: 'string:test:setting',
-    type: 'string',
-    userValue: null,
-    value: defaultValues.string,
-    ...defaults,
-  },
-  undefined: {
-    description: 'Description for Undefined test setting',
-    name: 'undefined:test:setting',
-    type: 'undefined',
-    userValue: null,
-    value: defaultValues.undefined,
-    ...defaults,
-  },
-};
-
-const fields: Array<FieldDefinition<SettingType>> = Object.entries(settings).map(([id, setting]) =>
-  getFieldDefinition({
-    id,
-    setting,
-    params: { isCustom: false, isOverridden: setting.isOverridden },
-  })
+const fields: Array<FieldDefinition<SettingType>> = Object.entries(settingsMock).map(
+  ([id, setting]) =>
+    getFieldDefinition({
+      id,
+      setting,
+      params: { isCustom: false, isOverridden: setting.isOverridden },
+    })
 );
+
+const services: FormServices = {
+  showDanger: jest.fn(),
+  links: {},
+  saveChanges: jest.fn(),
+  showError: jest.fn(),
+  showReloadPagePrompt: jest.fn(),
+};
 
 describe('Form', () => {
   beforeEach(() => {
@@ -131,5 +46,106 @@ describe('Form', () => {
     expect(container).toBeInTheDocument();
   });
 
-  // TODO: Add more test cases
+  it('renders as read only if saving is disabled', () => {
+    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={false} />));
+
+    (Object.keys(settingsMock) as SettingType[]).forEach((type) => {
+      if (type === 'json' || type === 'markdown') {
+        return;
+      }
+
+      const inputTestSubj = `${TEST_SUBJ_PREFIX_FIELD}-${type}`;
+
+      if (type === 'color') {
+        expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeDisabled();
+      } else {
+        expect(getByTestId(inputTestSubj)).toBeDisabled();
+      }
+    });
+  });
+
+  it('renders bottom bar when a field is changed', () => {
+    const { getByTestId, queryByTestId } = render(
+      wrap(<Form fields={fields} isSavingEnabled={true} />)
+    );
+
+    expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
+    expect(queryByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).not.toBeInTheDocument();
+
+    const testFieldType = 'string';
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
+    fireEvent.change(input, { target: { value: 'test' } });
+
+    expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).toBeInTheDocument();
+  });
+
+  // TODO: fix
+  it.skip('fires saveChanges when Save button is clicked', () => {
+    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={true} />, services));
+
+    const testFieldType = 'string';
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
+    fireEvent.change(input, { target: { value: 'test' } });
+
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    fireEvent.click(saveButton);
+
+    expect(services.saveChanges).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears changes when Cancel button is clicked', () => {
+    const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={false} />));
+
+    const testFieldType = 'string';
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
+    fireEvent.change(input, { target: { value: 'test' } });
+
+    const cancelButton = getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
+    fireEvent.click(cancelButton);
+
+    expect(input).toHaveValue(settingsMock[testFieldType].value);
+  });
+
+  // TODO: fix
+  it.skip('fires showError when saving is unsuccessful', () => {
+    const saveChangesWithError = jest.fn(() => {
+      throw new Error('Unable to save');
+    });
+    const testServices = { ...services, saveChanges: saveChangesWithError };
+
+    const { getByTestId } = render(
+      wrap(<Form fields={fields} isSavingEnabled={false} />, testServices)
+    );
+
+    const testFieldType = 'string';
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
+    fireEvent.change(input, { target: { value: 'test' } });
+
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    fireEvent.click(saveButton);
+
+    expect(services.showError).toHaveBeenCalled();
+  });
+
+  // TODO: fix
+  it.skip('fires showReloadPagePrompt when changing a reloadPageRequired setting', () => {
+    // Make all settings require a page reload
+    const testFields = fields.map((field) => {
+      return { ...field, requiresPageReload: true };
+    });
+
+    const { getByTestId } = render(
+      wrap(<Form fields={testFields} isSavingEnabled={false} />, services)
+    );
+
+    const testFieldType = 'string';
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
+    fireEvent.change(input, { target: { value: 'test' } });
+
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    fireEvent.click(saveButton);
+
+    expect(services.showReloadPagePrompt).toHaveBeenCalled();
+  });
 });

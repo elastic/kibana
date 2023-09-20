@@ -66,7 +66,7 @@ export const useServices = () => {
 
   if (!context) {
     throw new Error(
-      'FormContext is missing.  Ensure your component or React root is wrapped with FormProvider.'
+      'FormContext is missing. Ensure your component or React root is wrapped with FormProvider.'
     );
   }
 

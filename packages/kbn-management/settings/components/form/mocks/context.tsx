@@ -14,7 +14,6 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFieldRowServicesMock } from '@kbn/management-settings-components-field-row/mocks';
-import type { FieldRowServices } from '@kbn/management-settings-components-field-row';
 import { FormProvider } from '../services';
 import type { FormServices } from '../types';
 
@@ -50,7 +49,6 @@ export const TestWrapper = ({
   );
 };
 
-export const wrap = (
-  component: JSX.Element,
-  services: FieldRowServices = createFieldRowServicesMock()
-) => <TestWrapper {...services}>{component}</TestWrapper>;
+export const wrap = (component: JSX.Element, services: FormServices = createFormServicesMock()) => (
+  <TestWrapper {...services}>{component}</TestWrapper>
+);
