@@ -38,7 +38,7 @@ export interface UsePrevalenceParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * User defined fields to highlight (defined on the rule)
    */
