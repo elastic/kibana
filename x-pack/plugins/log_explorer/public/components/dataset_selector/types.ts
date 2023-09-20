@@ -15,7 +15,12 @@ import {
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../hooks/use_integrations';
-import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from './constants';
+import {
+  DATA_VIEWS_TAB_ID,
+  INTEGRATIONS_PANEL_ID,
+  INTEGRATIONS_TAB_ID,
+  UNCATEGORIZED_TAB_ID,
+} from './constants';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */
@@ -41,10 +46,10 @@ export interface DatasetSelectorProps {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onUnmanagedStreamsSearch: SearchDatasets;
-  onUnmanagedStreamsSort: SearchDatasets;
+  onUncategorizedSearch: SearchDatasets;
+  onUncategorizedSort: SearchDatasets;
   /* Triggered when retrying to load the data streams */
-  onUnmanagedStreamsReload: ReloadDatasets;
+  onUncategorizedReload: ReloadDatasets;
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: LoadDatasets;
   /* Triggered when the selection is updated */
@@ -53,7 +58,10 @@ export interface DatasetSelectorProps {
 
 export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;
 
-export type TabId = typeof INTEGRATIONS_TAB_ID | typeof UNCATEGORIZED_TAB_ID;
+export type TabId =
+  | typeof INTEGRATIONS_TAB_ID
+  | typeof UNCATEGORIZED_TAB_ID
+  | typeof DATA_VIEWS_TAB_ID;
 
 export interface SearchParams {
   integrationId?: PanelId;

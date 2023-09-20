@@ -7,7 +7,7 @@
 
 import { actions, assign, createMachine, raise } from 'xstate';
 import { AllDatasetSelection, SingleDatasetSelection } from '../../../../common/dataset_selection';
-import { INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
+import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
   DatasetsSelectorContext,
@@ -55,6 +55,7 @@ export const createPureDatasetsSelectorStateMachine = (
                   entry: ['storeIntegrationsTabId'],
                   on: {
                     SWITCH_TO_UNCATEGORIZED_TAB: 'uncategorizedTab',
+                    SWITCH_TO_DATA_VIEWS_TAB: 'dataViewsTab',
                   },
                   states: {
                     hist: {
@@ -106,11 +107,30 @@ export const createPureDatasetsSelectorStateMachine = (
                   ],
                   on: {
                     SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab.hist',
+                    SWITCH_TO_DATA_VIEWS_TAB: 'dataViewsTab',
                     SEARCH_BY_NAME: {
-                      actions: ['storeSearch', 'searchUnmanagedStreams'],
+                      actions: ['storeSearch', 'searchUncategorized'],
                     },
                     SORT_BY_ORDER: {
-                      actions: ['storeSearch', 'sortUnmanagedStreams'],
+                      actions: ['storeSearch', 'sortUncategorized'],
+                    },
+                    SELECT_DATASET: '#closed',
+                  },
+                },
+                dataViewsTab: {
+                  entry: [
+                    'storeDataViewsTabId',
+                    'retrieveSearchFromCache',
+                    'maybeRestoreSearchResult',
+                  ],
+                  on: {
+                    SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab.hist',
+                    SWITCH_TO_UNCATEGORIZED_TAB: 'uncategorizedTab',
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchDataViews'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortDataViews'],
                     },
                     SELECT_DATASET: '#closed',
                   },
@@ -149,6 +169,7 @@ export const createPureDatasetsSelectorStateMachine = (
       actions: {
         storeIntegrationsTabId: assign((_context) => ({ tabId: INTEGRATIONS_TAB_ID })),
         storeUncategorizedTabId: assign((_context) => ({ tabId: UNCATEGORIZED_TAB_ID })),
+        storeDataViewsTabId: assign((_context) => ({ tabId: DATA_VIEWS_TAB_ID })),
         storePanelId: assign((_context, event) =>
           'panelId' in event ? { panelId: event.panelId } : {}
         ),
@@ -179,6 +200,9 @@ export const createPureDatasetsSelectorStateMachine = (
           if (event.type === 'SWITCH_TO_UNCATEGORIZED_TAB' && 'tabId' in context) {
             return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
           }
+          if (event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && 'tabId' in context) {
+            return { search: context.searchCache.get(context.tabId) ?? defaultSearch };
+          }
           return {};
         }),
         maybeRestoreSearchResult: actions.pure((context, event) => {
@@ -188,8 +212,15 @@ export const createPureDatasetsSelectorStateMachine = (
             event.type === 'SWITCH_TO_INTEGRATIONS_TAB' && context.searchCache.has(context.panelId);
           const hasSearchOnUncategorizedTab =
             event.type === 'SWITCH_TO_UNCATEGORIZED_TAB' && context.searchCache.has(context.tabId);
+          const hasSearchOnDataViewsTab =
+            event.type === 'SWITCH_TO_DATA_VIEWS_TAB' && context.searchCache.has(context.tabId);
 
-          if (hasSearchOnChangePanel || hasSearchOnIntegrationsTab || hasSearchOnUncategorizedTab) {
+          if (
+            hasSearchOnChangePanel ||
+            hasSearchOnIntegrationsTab ||
+            hasSearchOnUncategorizedTab ||
+            hasSearchOnDataViewsTab
+          ) {
             return raise({ type: 'SORT_BY_ORDER', search: context.search });
           }
         }),
@@ -205,10 +236,10 @@ export const createDatasetsSelectorStateMachine = ({
   onIntegrationsSort,
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
+  onUncategorizedSearch,
+  onUncategorizedSort,
   onSelectionChange,
-  onUnmanagedStreamsReload,
+  onUncategorizedReload,
 }: DatasetsSelectorStateMachineDependencies) =>
   createPureDatasetsSelectorStateMachine(initialContext).withConfig({
     actions: {
@@ -217,7 +248,7 @@ export const createDatasetsSelectorStateMachine = ({
       },
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
-      reloadUnmanagedStreams: onUnmanagedStreamsReload,
+      reloadUncategorized: onUncategorizedReload,
       // Search actions
       searchIntegrations: (_context, event) => {
         if ('search' in event) {
@@ -239,14 +270,14 @@ export const createDatasetsSelectorStateMachine = ({
           onIntegrationsStreamsSort({ ...event.search, integrationId: context.panelId });
         }
       },
-      searchUnmanagedStreams: (_context, event) => {
+      searchUncategorized: (_context, event) => {
         if ('search' in event) {
-          onUnmanagedStreamsSearch(event.search);
+          onUncategorizedSearch(event.search);
         }
       },
-      sortUnmanagedStreams: (_context, event) => {
+      sortUncategorized: (_context, event) => {
         if ('search' in event) {
-          onUnmanagedStreamsSort(event.search);
+          onUncategorizedSort(event.search);
         }
       },
     },

@@ -83,8 +83,8 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
       onIntegrationsStreamsSearch={setSearch}
       onIntegrationsStreamsSort={setSearch}
       onSelectionChange={onSelectionChange}
-      onUnmanagedStreamsSearch={setSearch}
-      onUnmanagedStreamsSort={setSearch}
+      onUncategorizedSearch={setSearch}
+      onUncategorizedSort={setSearch}
     />
   );
 };
@@ -97,7 +97,7 @@ Basic.args = {
   isLoadingStreams: false,
   onIntegrationsReload: () => alert('Reload integrations...'),
   onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
-  onUnmanagedStreamsReload: () => alert('Reloading streams...'),
+  onUncategorizedReload: () => alert('Reloading streams...'),
 };
 
 const mockIntegrations: Integration[] = [

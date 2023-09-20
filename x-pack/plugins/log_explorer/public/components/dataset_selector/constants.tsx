@@ -12,8 +12,10 @@ export const INTEGRATIONS_PANEL_ID = 'dataset-selector-integrations-panel';
 export const INTEGRATIONS_TAB_ID = 'dataset-selector-integrations-tab';
 export const UNCATEGORIZED_PANEL_ID = 'dataset-selector-uncategorized-panel';
 export const UNCATEGORIZED_TAB_ID = 'dataset-selector-uncategorized-tab';
+export const DATA_VIEWS_PANEL_ID = 'dataset-selector-data-views-panel';
+export const DATA_VIEWS_TAB_ID = 'dataset-selector-data-views-tab';
 
-export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
+export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 400;
 
 export const showAllLogsLabel = i18n.translate('xpack.logExplorer.datasetSelector.showAllLogs', {
   defaultMessage: 'Show all logs',
@@ -27,6 +29,10 @@ export const uncategorizedLabel = i18n.translate(
   'xpack.logExplorer.datasetSelector.uncategorized',
   { defaultMessage: 'Uncategorized' }
 );
+
+export const dataViewsLabel = i18n.translate('xpack.logExplorer.datasetSelector.dataViews', {
+  defaultMessage: 'Data Views',
+});
 
 export const sortOrdersLabel = i18n.translate('xpack.logExplorer.datasetSelector.sortOrders', {
   defaultMessage: 'Sort directions',

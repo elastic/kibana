@@ -57,6 +57,10 @@ export type DatasetsSelectorTypestate =
       context: DefaultDatasetsSelectorContext;
     }
   | {
+      value: 'popover.open.dataViewsTab';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
       value: 'selection';
       context: DefaultDatasetsSelectorContext;
     }
@@ -83,6 +87,9 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SWITCH_TO_UNCATEGORIZED_TAB';
+    }
+  | {
+      type: 'SWITCH_TO_DATA_VIEWS_TAB';
     }
   | {
       type: 'CHANGE_PANEL';
@@ -116,7 +123,7 @@ export interface DatasetsSelectorStateMachineDependencies {
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
   onSelectionChange: DatasetSelectionChange;
-  onUnmanagedStreamsReload: ReloadDatasets;
-  onUnmanagedStreamsSearch: SearchDatasets;
-  onUnmanagedStreamsSort: SearchDatasets;
+  onUncategorizedReload: ReloadDatasets;
+  onUncategorizedSearch: SearchDatasets;
+  onUncategorizedSort: SearchDatasets;
 }

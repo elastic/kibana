@@ -44,7 +44,7 @@ export const listenUrlChange =
     LogExplorerProfileEvent
   > =>
   (context) =>
-  (send) => {
+  async (send) => {
     const unsubscribe = stateContainer.appState.subscribe((nextState) => {
       const { index } = nextState;
       const prevIndex = stateContainer.appState.getPrevious().index;

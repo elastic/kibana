@@ -10,6 +10,9 @@ import styled from '@emotion/styled';
 import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
+  dataViewsLabel,
+  DATA_VIEWS_PANEL_ID,
+  DATA_VIEWS_TAB_ID,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
@@ -46,9 +49,9 @@ export function DatasetSelector({
   onIntegrationsStreamsSort,
   onSelectionChange,
   onStreamsEntryClick,
-  onUnmanagedStreamsReload,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
+  onUncategorizedReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
 }: DatasetSelectorProps) {
   const {
     panelId,
@@ -65,6 +68,7 @@ export function DatasetSelector({
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
@@ -74,9 +78,9 @@ export function DatasetSelector({
     onIntegrationsSort,
     onIntegrationsStreamsSearch,
     onIntegrationsStreamsSort,
-    onUnmanagedStreamsSearch,
-    onUnmanagedStreamsSort,
-    onUnmanagedStreamsReload,
+    onUncategorizedSearch,
+    onUncategorizedSort,
+    onUncategorizedReload,
     onSelectionChange,
   });
 
@@ -118,7 +122,7 @@ export function DatasetSelector({
           data: datasets,
           error: datasetsError,
           isLoading: isLoadingStreams,
-          onRetry: onUnmanagedStreamsReload,
+          onRetry: onUncategorizedReload,
         }),
       ];
     }
@@ -127,7 +131,7 @@ export function DatasetSelector({
       name: dataset.title,
       onClick: () => selectDataset(dataset),
     }));
-  }, [datasets, datasetsError, isLoadingStreams, selectDataset, onUnmanagedStreamsReload]);
+  }, [datasets, datasetsError, isLoadingStreams, selectDataset, onUncategorizedReload]);
 
   const tabs = [
     {
@@ -144,6 +148,14 @@ export function DatasetSelector({
         switchToUncategorizedTab();
       },
       'data-test-subj': 'datasetSelectorUncategorizedTab',
+    },
+    {
+      id: DATA_VIEWS_TAB_ID,
+      name: dataViewsLabel,
+      onClick: () => {
+        switchToDataViewsTab();
+      },
+      'data-test-subj': 'datasetSelectorDataViewsTab',
     },
   ];
 
@@ -213,6 +225,22 @@ export function DatasetSelector({
         ]}
         className="eui-yScroll"
         data-test-subj="uncategorizedContextMenu"
+        size="s"
+      />
+      {/* Data views tab content */}
+      <ContextMenu
+        hidden={tabId !== DATA_VIEWS_TAB_ID}
+        initialPanelId={DATA_VIEWS_PANEL_ID}
+        panels={[
+          {
+            id: DATA_VIEWS_PANEL_ID,
+            title: dataViewsLabel,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: uncategorizedItems,
+          },
+        ]}
+        className="eui-yScroll"
+        data-test-subj="dataViewsContextMenu"
         size="s"
       />
     </DatasetsPopover>

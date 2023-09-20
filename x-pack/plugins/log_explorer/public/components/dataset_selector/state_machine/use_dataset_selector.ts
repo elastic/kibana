@@ -25,9 +25,9 @@ export const useDatasetSelector = ({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
-  onUnmanagedStreamsReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
+  onUncategorizedReload,
 }: DatasetsSelectorStateMachineDependencies) => {
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
@@ -39,9 +39,9 @@ export const useDatasetSelector = ({
       onIntegrationsStreamsSearch,
       onIntegrationsStreamsSort,
       onSelectionChange,
-      onUnmanagedStreamsSearch,
-      onUnmanagedStreamsSort,
-      onUnmanagedStreamsReload,
+      onUncategorizedSearch,
+      onUncategorizedSort,
+      onUncategorizedReload,
     })
   );
 
@@ -61,6 +61,11 @@ export const useDatasetSelector = ({
 
   const switchToUncategorizedTab = useCallback(
     () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
+    [datasetsSelectorStateService]
+  );
+
+  const switchToDataViewsTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
     [datasetsSelectorStateService]
   );
 
@@ -127,6 +132,7 @@ export const useDatasetSelector = ({
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   };
 };
