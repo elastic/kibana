@@ -79,9 +79,9 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(fetchUpsertSuccessAction, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
+      state.monitorUpsertStatuses[action.payload.config_id] = {
         status: FETCH_STATUS.SUCCESS,
-        enabled: action.payload.attributes.enabled,
+        enabled: action.payload.enabled,
       };
     })
     .addCase(fetchUpsertFailureAction, (state, action) => {
@@ -94,15 +94,15 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
-        ...state.monitorUpsertStatuses[action.payload.id],
+      state.monitorUpsertStatuses[action.payload.config_id] = {
+        ...state.monitorUpsertStatuses[action.payload.config_id],
         alertStatus: FETCH_STATUS.SUCCESS,
       };
       if ('updated_at' in action.payload) {
         state.data.monitors = state.data.monitors.map<EncryptedSyntheticsSavedMonitor>(
           (monitor: any) => {
-            if (monitor.config_id === action.payload.id) {
-              return action.payload.attributes;
+            if (monitor.config_id === action.payload.config_id) {
+              return action.payload;
             }
             return monitor;
           }

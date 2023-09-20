@@ -47,6 +47,7 @@ export const stateSchemaByVersion = {
       runs: schema.number(),
       count_total: schema.number(),
       count_by_type: schema.recordOf(schema.string(), schema.number()),
+      count_gen_ai_provider_types: schema.recordOf(schema.string(), schema.number()),
       count_active_total: schema.number(),
       count_active_by_type: schema.recordOf(schema.string(), schema.number()),
       count_active_alert_history_connectors: schema.number(),
@@ -66,7 +67,7 @@ export const stateSchemaByVersion = {
       avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
       count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
         schema.string(),
-        schema.number()
+        schema.recordOf(schema.string(), schema.number())
       ),
     }),
   },
@@ -81,6 +82,7 @@ export const emptyState: LatestTaskStateSchema = {
   runs: 0,
   count_total: 0,
   count_by_type: {},
+  count_gen_ai_provider_types: {},
   count_active_total: 0,
   count_active_by_type: {},
   count_active_alert_history_connectors: 0,

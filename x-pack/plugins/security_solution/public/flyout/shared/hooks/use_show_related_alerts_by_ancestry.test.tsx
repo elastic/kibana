@@ -8,12 +8,14 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { UseShowRelatedAlertsByAncestryParams } from './use_show_related_alerts_by_ancestry';
+import type {
+  UseShowRelatedAlertsByAncestryParams,
+  UseShowRelatedAlertsByAncestryResult,
+} from './use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { licenseService } from '../../../common/hooks/use_license';
-import { mockDataAsNestedObject } from '../mocks/mock_context';
+import { mockDataAsNestedObject, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_license', () => {
@@ -30,157 +32,83 @@ jest.mock('../../../common/hooks/use_license', () => {
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
 const dataAsNestedObject = mockDataAsNestedObject as unknown as Ecs;
+const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
-const agentType = {
-  category: 'agent',
-  field: 'agent.type',
-  isObjectArray: false,
-  originalValue: ['endpoint'],
-  values: ['endpoint'],
-};
-const eventModule = {
-  category: 'event',
-  field: 'event.module',
-  isObjectArray: false,
-  originalValue: ['abc'],
-  values: ['abc'],
-};
-const processEntityId = {
-  category: 'process',
-  field: 'process.entity_id',
-  isObjectArray: false,
-  originalValue: ['abc'],
-  values: ['abc'],
-};
-const alertAncestorId = {
-  category: 'kibana',
-  field: 'kibana.alert.ancestors.id',
-  isObjectArray: false,
-  originalValue: ['abc'],
-  values: ['abc'],
-};
-const ruleParameterIndex = {
-  category: 'kibana',
-  field: 'kibana.alert.rule.parameters.index',
-  isObjectArray: false,
-  originalValue: ['abc'],
-  values: ['abc'],
-};
+describe('useShowRelatedAlertsByAncestry', () => {
+  let hookResult: RenderHookResult<
+    UseShowRelatedAlertsByAncestryParams,
+    UseShowRelatedAlertsByAncestryResult
+  >;
 
-describe('useShowRelatedAlertsBySameSourceEvent', () => {
-  let hookResult: RenderHookResult<UseShowRelatedAlertsByAncestryParams, boolean>;
-
-  it('should return false if dataFormattedForFieldBrowser is null', () => {
+  it('should return false if getFieldsData returns null', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser = null;
+    const getFieldsData = () => null;
     hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+      })
     );
 
-    expect(hookResult.result.current).toEqual(false);
+    expect(hookResult.result.current).toEqual({ show: false, indices: ['rule-parameters-index'] });
   });
 
   it(`should return false if feature isn't enabled`, () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+    const getFieldsData = () => 'value';
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      show: false,
+      documentId: 'value',
+      indices: ['rule-parameters-index'],
+    });
+  });
+
+  it(`should return false if license is lower than platinum`, () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      agentType,
-      eventModule,
-      processEntityId,
-      alertAncestorId,
-      ruleParameterIndex,
-    ];
+    const getFieldsData = () => 'value';
     hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+      })
     );
 
-    expect(hookResult.result.current).toEqual(false);
+    expect(hookResult.result.current).toEqual({
+      show: false,
+      documentId: 'value',
+      indices: ['rule-parameters-index'],
+    });
   });
 
-  it('should return false if dataFormattedForFieldBrowser is missing kibana.alert.ancestors.id field', () => {
+  it('should return true if getFieldsData has the correct fields', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      agentType,
-      eventModule,
-      processEntityId,
-      ruleParameterIndex,
-    ];
+    const getFieldsData = () => 'value';
     hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+      })
     );
 
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return false if dataFormattedForFieldBrowser is missing kibana.alert.rule.parameters.index field', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      agentType,
-      eventModule,
-      processEntityId,
-      alertAncestorId,
-    ];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
-    );
-
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return false if dataFormattedForFieldBrowser is missing process.entity_id field', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      agentType,
-      eventModule,
-      alertAncestorId,
-      ruleParameterIndex,
-    ];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
-    );
-
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return false if dataFormattedForFieldBrowser is missing event.module field', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      {
-        category: 'agent',
-        field: 'agent.type',
-        isObjectArray: false,
-        originalValue: ['winlogbeat'],
-        values: ['winlogbeat'],
-      },
-      processEntityId,
-      alertAncestorId,
-      ruleParameterIndex,
-    ];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
-    );
-
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return false if dataFormattedForFieldBrowser is missing agent.type field', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      eventModule,
-      processEntityId,
-      alertAncestorId,
-      ruleParameterIndex,
-    ];
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, dataAsNestedObject })
-    );
-
-    expect(hookResult.result.current).toEqual(false);
+    expect(hookResult.result.current).toEqual({
+      show: true,
+      documentId: 'value',
+      indices: ['rule-parameters-index'],
+    });
   });
 });

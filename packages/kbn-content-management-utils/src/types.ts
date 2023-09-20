@@ -347,7 +347,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Update item params
    */
-  UpdateIn: UpdateIn<ContentType, Attributes, UpdateOptions>;
+  UpdateIn: UpdateIn<ContentType, Partial<Attributes>, UpdateOptions>;
   /**
    * Update item result
    */

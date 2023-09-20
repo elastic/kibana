@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { DefaultExportFileName } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 
-import type { FileName, ExcludeExportDetails } from '../../model';
 import { RuleSignatureId } from '../../model';
 
 const ObjectsWithRuleId = t.array(t.exact(t.type({ rule_id: RuleSignatureId })));
@@ -30,11 +29,3 @@ export type ExportRulesRequestQuery = t.TypeOf<typeof ExportRulesRequestQuery>;
 export const ExportRulesRequestQuery = t.exact(
   t.partial({ file_name: DefaultExportFileName, exclude_export_details: DefaultStringBooleanFalse })
 );
-
-export type ExportRulesRequestQueryDecoded = Omit<
-  ExportRulesRequestQuery,
-  'file_name' | 'exclude_export_details'
-> & {
-  file_name: FileName;
-  exclude_export_details: ExcludeExportDetails;
-};

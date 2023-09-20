@@ -8,14 +8,16 @@
 import { TaskStore } from './task_store';
 import { ConcreteTaskInstance } from './task';
 import { Updatable } from './task_running';
-import { createBuffer, Operation, BufferOptions } from './lib/bulk_operation_buffer';
-import { unwrapPromise } from './lib/result_type';
+import { createBuffer, Operation, BufferOptions, Entity } from './lib/bulk_operation_buffer';
+import { unwrapPromise, asErr, asOk } from './lib/result_type';
 
 // by default allow updates to be buffered for up to 50ms
 const DEFAULT_BUFFER_MAX_DURATION = 50;
 
 export class BufferedTaskStore implements Updatable {
   private bufferedUpdate: Operation<ConcreteTaskInstance>;
+  private bufferedRemove: Operation<Entity>;
+
   constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
     this.bufferedUpdate = createBuffer<ConcreteTaskInstance>(
       // Setting validate: false because we'll validate per update call
@@ -24,6 +26,20 @@ export class BufferedTaskStore implements Updatable {
       // to .bulkUpdate per doc, but the required changes to the bulk_operation_buffer
       // to track the values are high and deffered for now.
       (docs) => taskStore.bulkUpdate(docs, { validate: false }),
+      {
+        bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
+        ...options,
+      }
+    );
+    this.bufferedRemove = createBuffer<Entity>(
+      async (ids) => {
+        const result = await taskStore.bulkRemove(ids.map(({ id }) => id));
+        return result.statuses.map((status) =>
+          status.error
+            ? asErr({ error: status.error, id: status.id, type: status.type })
+            : asOk(status)
+        );
+      },
       {
         bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
         ...options,
@@ -45,6 +61,6 @@ export class BufferedTaskStore implements Updatable {
   }
 
   public async remove(id: string): Promise<void> {
-    return this.taskStore.remove(id);
+    await unwrapPromise(this.bufferedRemove({ id }));
   }
 }

@@ -25,6 +25,10 @@
     "@kbn/es-query",
     "@kbn/utility-types-jest",
     "@kbn/expressions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

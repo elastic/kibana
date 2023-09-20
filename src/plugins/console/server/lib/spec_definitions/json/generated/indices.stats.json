@@ -1,56 +1,43 @@
 {
   "indices.stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "completion_fields": [],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
       "fielddata_fields": [],
       "fields": [],
+      "forbid_closed_indices": "__flag__",
       "groups": [],
+      "include_segment_file_sizes": "__flag__",
+      "include_unloaded_segments": "__flag__",
       "level": [
         "cluster",
         "indices",
         "shards"
-      ],
-      "include_segment_file_sizes": "__flag__",
-      "include_unloaded_segments": "__flag__",
-      "expand_wildcards": [
-        "open",
-        "closed",
-        "hidden",
-        "none",
-        "all"
-      ],
-      "forbid_closed_indices": "__flag__"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_stats",
-      "_stats/{metrics}",
-      "{indices}/_stats",
-      "{indices}/_stats/{metrics}"
+      "_stats/{metric}",
+      "{index}/_stats",
+      "{index}/_stats/{metric}"
     ],
-    "url_components": {
-      "metrics": [
-        "_all",
-        "bulk",
-        "completion",
-        "docs",
-        "fielddata",
-        "flush",
-        "get",
-        "indexing",
-        "merge",
-        "query_cache",
-        "refresh",
-        "request_cache",
-        "search",
-        "segments",
-        "store",
-        "warmer"
-      ],
-      "indices": null
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -37,7 +37,7 @@ export const GetInstalledPackagesRequestSchema = {
     ),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-    perPage: schema.number({ defaultValue: 30 }),
+    perPage: schema.number({ defaultValue: 15 }),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
@@ -218,6 +218,10 @@ export const DeletePackageRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.boolean(),

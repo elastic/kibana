@@ -28,7 +28,6 @@ const defaultProps: SloListSearchFilterSortBarProps = {
   loading: false,
   onChangeQuery: () => {},
   onChangeSort: () => {},
-  onChangeIndicatorTypeFilter: () => {},
 };
 
 export const SloListSearchFilterSortBar = Template.bind({});

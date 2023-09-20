@@ -17,10 +17,10 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { SpacesGridPage } from './spaces_grid_page';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {

@@ -79,3 +79,32 @@ export interface FieldExampleCheck {
    */
   message: string;
 }
+
+/**
+ * Validation results for a specific field.
+ */
+export interface FieldValidationResults {
+  /**
+   * An array of example objects representing category field examples.
+   * @type {CategoryFieldExample[]}
+   */
+  examples?: CategoryFieldExample[];
+
+  /**
+   * The total number of examples used for validation.
+   * @type {number}
+   */
+  sampleSize: number;
+
+  /**
+   * The overall validation status of the category examples.
+   * @type {CATEGORY_EXAMPLES_VALIDATION_STATUS}
+   */
+  overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+
+  /**
+   * An array of validation checks performed on each example.
+   * @type {FieldExampleCheck[]}
+   */
+  validationChecks: FieldExampleCheck[];
+}

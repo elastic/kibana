@@ -154,6 +154,7 @@ describe('SearchBarComponent', () => {
   it('calls useUpdateUrlParam for savedQuery', () => {
     const savedQuery: SavedQuery = {
       id: 'testSavedquery',
+      namespaces: ['default'],
       attributes: {
         title: 'testtitle',
         description: 'testDescription',
@@ -260,6 +261,7 @@ describe('SearchBarComponent', () => {
     jest.clearAllMocks();
     const savedQuery: SavedQuery = {
       id: 'testSavedQuery123',
+      namespaces: ['default'],
       attributes: {
         title: 'testtitle',
         description: 'testDescription',

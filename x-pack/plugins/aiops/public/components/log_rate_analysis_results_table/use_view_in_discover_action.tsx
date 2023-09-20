@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { TableActionButton } from './table_action_button';

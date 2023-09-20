@@ -13,5 +13,3 @@ export type {
   UserProfileBulkGetParams,
   UserProfileSuggestParams,
 } from './user_profile_api_client';
-
-export type { UpdateUserProfileHook } from './use_update_user_profile';

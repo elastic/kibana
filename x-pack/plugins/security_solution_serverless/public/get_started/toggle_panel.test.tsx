@@ -7,8 +7,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TogglePanel } from './toggle_panel';
-import { useSetUpCardSections } from './use_setup_cards';
-import type { ActiveCards, CardId, StepId } from './types';
+import { useSetUpSections } from './use_setup_cards';
+import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';
 
@@ -19,38 +19,33 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('./use_setup_cards', () => ({
-  useSetUpCardSections: jest.fn(),
+  useSetUpSections: jest.fn(),
 }));
 
 const finishedSteps = {
-  [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+  [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
 } as unknown as Record<CardId, Set<StepId>>;
 const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
-const activeCards = {
+const activeSections = {
   [SectionId.getSetUp]: {
     [GetSetUpCardId.introduction]: {
       id: GetSetUpCardId.introduction,
       timeInMins: 3,
       stepsLeft: 1,
     },
-    [GetSetUpCardId.bringInYourData]: {
-      id: GetSetUpCardId.bringInYourData,
+    [GetSetUpCardId.configure]: {
+      id: GetSetUpCardId.configure,
       timeInMins: 0,
       stepsLeft: 0,
     },
-    [GetSetUpCardId.activateAndCreateRules]: {
-      id: GetSetUpCardId.activateAndCreateRules,
-      timeInMins: 0,
-      stepsLeft: 0,
-    },
-    [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-      id: GetSetUpCardId.protectYourEnvironmentInRealtime,
+    [GetSetUpCardId.explore]: {
+      id: GetSetUpCardId.explore,
       timeInMins: 0,
       stepsLeft: 0,
     },
   },
-} as ActiveCards;
+} as ActiveSections;
 
 describe('TogglePanel', () => {
   const mockUseSetUpCardSections = {
@@ -58,10 +53,11 @@ describe('TogglePanel', () => {
   };
 
   const onStepClicked = jest.fn();
+  const onStepButtonClicked = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useSetUpCardSections as jest.Mock).mockReturnValue(mockUseSetUpCardSections);
+    (useSetUpSections as jest.Mock).mockReturnValue(mockUseSetUpCardSections);
   });
 
   it('should render empty prompt', () => {
@@ -69,8 +65,11 @@ describe('TogglePanel', () => {
       <TogglePanel
         activeProducts={new Set()}
         finishedSteps={finishedSteps}
-        activeCards={activeCards}
+        activeSections={activeSections}
+        expandedCardSteps={{} as ExpandedCardSteps}
+        onCardClicked={jest.fn()}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
       />
     );
 
@@ -85,8 +84,11 @@ describe('TogglePanel', () => {
       <TogglePanel
         activeProducts={activeProducts}
         finishedSteps={finishedSteps}
-        activeCards={activeCards}
+        activeSections={activeSections}
+        expandedCardSteps={{} as ExpandedCardSteps}
+        onCardClicked={jest.fn()}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
       />
     );
 

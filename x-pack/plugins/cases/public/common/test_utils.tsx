@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -50,6 +48,7 @@ interface FormTestComponentProps {
   onSubmit?: jest.Mock;
 }
 
+// eslint-disable-next-line react/display-name
 export const FormTestComponent: React.FC<FormTestComponentProps> = ({
   children,
   onSubmit,

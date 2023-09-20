@@ -40,6 +40,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import apm from 'elastic-apm-node';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -173,12 +174,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
-      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      context$: this.config$.pipe(
+        map(({ labels }) => ({ labels })),
+        tap(({ labels }) =>
+          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+        )
+      ),
       schema: {
         labels: {
           type: 'pass_through',
           _meta: {
-            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+            description:
+              'Custom labels added to the telemetry.labels config in the kibana.yml. Validated and limited to a known set of labels.',
           },
         },
       },

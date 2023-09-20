@@ -66,9 +66,9 @@ export const ControlGeneralViewResponse = ({
     responses.length - 1 === index ? 'open' : 'closed'
   );
 
-  const logSelected = response.actions.includes('log');
-  const alertSelected = response.actions.includes('alert');
-  const blockSelected = response.actions.includes('block');
+  const logSelected = response.actions?.includes('log');
+  const alertSelected = response.actions?.includes('alert');
+  const blockSelected = response.actions?.includes('block');
 
   const warnFIMUsingSlashStarStar = useMemo(
     () =>
@@ -84,7 +84,7 @@ export const ControlGeneralViewResponse = ({
       errs.match = [i18n.errorValueRequired];
     }
 
-    if (response.actions.length === 0) {
+    if (response.actions?.length === 0) {
       errs.actions = [i18n.errorActionRequired];
     }
 
@@ -284,12 +284,12 @@ export const ControlGeneralViewResponse = ({
                 </>
               )}
               <b>{i18n.actions}: </b>
-              {response.actions.map((action, i) => (
+              {response.actions?.map((action, i) => (
                 <span key={action}>
                   <b style={{ color: action === 'block' ? colors.danger : colors.ink }}>
                     {action[0].toUpperCase() + action.slice(1)}
                   </b>
-                  {i !== response.actions.length - 1 && ', '}
+                  {i !== (response.actions?.length || 0) - 1 && ', '}
                 </span>
               ))}
               <div css={selectorStyles.verticalDivider} />

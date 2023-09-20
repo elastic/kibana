@@ -6,7 +6,7 @@
  */
 
 import {
-  euiPaletteComplimentary,
+  euiPaletteComplementary,
   euiPaletteForTemperature,
   euiPaletteGray,
   euiPalettePositive,
@@ -27,7 +27,7 @@ export function getMemoryItemColor(typeIn: MemoryItem) {
     case 'estimated-available-memory':
       return euiPaletteGray(5)[0];
     case 'jvm-heap-size':
-      return euiPaletteComplimentary(5)[4];
+      return euiPaletteComplementary(5)[4];
     default:
       return euiPaletteGray(5)[4];
   }

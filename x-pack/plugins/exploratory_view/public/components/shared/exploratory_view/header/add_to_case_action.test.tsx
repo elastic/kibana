@@ -110,6 +110,7 @@ describe('AddToCaseAction', function () {
           update: false,
           delete: false,
           push: false,
+          connectors: false,
         },
       })
     );

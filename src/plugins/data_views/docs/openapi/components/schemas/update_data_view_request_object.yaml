@@ -1,0 +1,35 @@
+title: Update data view request
+type: object
+required:
+  - data_view
+properties:
+  data_view:
+    type: object
+    description: >
+      The data view properties you want to update.
+      Only the specified properties are updated in the data view. Unspecified fields stay as they are persisted.
+    properties:
+      allowNoIndex:
+        $ref: 'allownoindex.yaml'
+      fieldFormats:
+        $ref: 'fieldformats.yaml'
+      fields:
+        type: object
+      name:
+        type: string
+      runtimeFieldMap:
+        $ref: 'runtimefieldmap.yaml'
+      sourceFilters:
+        $ref: 'sourcefilters.yaml'
+      timeFieldName:
+        $ref: 'timefieldname.yaml'
+      title:
+        $ref: 'title.yaml'
+      type:
+        $ref: 'type.yaml'
+      typeMeta:
+        $ref: 'typemeta.yaml'
+  refresh_fields:
+    type: boolean
+    description: Reloads the data view fields after the data view is updated.
+    default: false

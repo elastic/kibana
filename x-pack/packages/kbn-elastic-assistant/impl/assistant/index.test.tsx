@@ -22,7 +22,7 @@ import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { useLocalStorage } from 'react-use';
 import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { TestProviders } from '../mock/test_providers/test_providers';
+import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -46,10 +46,10 @@ const getInitialConversations = (): Record<string, Conversation> => ({
   },
 });
 
-const renderAssistant = () =>
+const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
-    <TestProviders getInitialConversations={getInitialConversations}>
-      <Assistant isAssistantEnabled />
+    <TestProviders getInitialConversations={getInitialConversations} {...providerProps}>
+      <Assistant {...extraProps} />
     </TestProviders>
   );
 
@@ -110,9 +110,10 @@ describe('Assistant', () => {
         data: connectors,
       } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
-      const { getByLabelText } = render(
-        <TestProviders
-          getInitialConversations={() => ({
+      const { getByLabelText } = renderAssistant(
+        {},
+        {
+          getInitialConversations: () => ({
             [WELCOME_CONVERSATION_TITLE]: {
               id: WELCOME_CONVERSATION_TITLE,
               messages: [],
@@ -124,10 +125,8 @@ describe('Assistant', () => {
               apiConfig: {},
               excludeFromLastConversationStorage: true,
             },
-          })}
-        >
-          <Assistant isAssistantEnabled />
-        </TestProviders>
+          }),
+        }
       );
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -142,6 +141,22 @@ describe('Assistant', () => {
         fireEvent.click(previousConversationButton);
       });
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+    });
+    it('should call the setConversationId callback if it is defined and the conversation id changes', async () => {
+      const connectors: unknown[] = [{}];
+      const setConversationId = jest.fn();
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isSuccess: true,
+        data: connectors,
+      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
+
+      renderAssistant({ setConversationId });
+
+      await act(async () => {
+        fireEvent.click(screen.getByLabelText('Previous conversation'));
+      });
+
+      expect(setConversationId).toHaveBeenLastCalledWith('electric sheep');
     });
   });
 
@@ -158,6 +173,18 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenCalled();
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+    });
+  });
+
+  describe('when not authorized', () => {
+    it('should be disabled', async () => {
+      const { queryByTestId } = renderAssistant(
+        {},
+        {
+          assistantAvailability: { ...mockAssistantAvailability, isAssistantEnabled: false },
+        }
+      );
+      expect(queryByTestId('prompt-textarea')).toHaveProperty('disabled');
     });
   });
 });

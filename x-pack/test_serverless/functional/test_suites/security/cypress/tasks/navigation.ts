@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-const ELASTICSEARCH_USERNAME = Cypress.env('ELASTICSEARCH_USERNAME');
-const ELASTICSEARCH_PASSWORD = Cypress.env('ELASTICSEARCH_PASSWORD');
-
 export const navigatesToLandingPage = () => {
-  cy.visit('/app/security/get_started', {
-    auth: {
-      username: ELASTICSEARCH_USERNAME,
-      password: ELASTICSEARCH_PASSWORD,
-    },
-  });
+  cy.visit('/app/security/get_started');
 };

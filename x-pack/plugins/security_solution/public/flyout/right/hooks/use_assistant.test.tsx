@@ -28,9 +28,12 @@ describe('useAssistant', () => {
   let hookResult: RenderHookResult<UseAssistantParams, UseAssistantResult>;
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
-    jest
-      .mocked(useAssistantAvailability)
-      .mockReturnValue({ hasAssistantPrivilege: true, isAssistantEnabled: true });
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -42,9 +45,12 @@ describe('useAssistant', () => {
   });
 
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
-    jest
-      .mocked(useAssistantAvailability)
-      .mockReturnValue({ hasAssistantPrivilege: false, isAssistantEnabled: true });
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: false,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -53,5 +59,32 @@ describe('useAssistant', () => {
 
     expect(hookResult.result.current.showAssistant).toEqual(false);
     expect(hookResult.result.current.promptContextId).toEqual('');
+  });
+
+  it('returns anonymized prompt context data', async () => {
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
+    jest
+      .mocked(useAssistantOverlay)
+      .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
+
+    hookResult = renderUseAssistant();
+
+    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+
+    expect(await getPromptContext()).toEqual({
+      '@timestamp': ['2023-01-01T01:01:01.000Z'],
+      'kibana.alert.ancestors.id': ['ancestors-id'],
+      'kibana.alert.rule.description': ['rule-description'],
+      'kibana.alert.rule.name': ['rule-name'],
+      'kibana.alert.rule.parameters.index': ['rule-parameters-index'],
+      'kibana.alert.rule.uuid': ['rule-uuid'],
+      'kibana.alert.workflow_status': ['open'],
+      'process.entity_id': ['process-entity_id'],
+    });
   });
 });

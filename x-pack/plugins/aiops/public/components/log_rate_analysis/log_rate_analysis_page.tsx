@@ -13,9 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } fro
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import {
@@ -84,7 +84,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   const { timefilter } = useData(
     dataView,
-    'explain_log_rage_spikes',
+    'log_rate_analysis',
     searchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const memoryFree: FormulaConfig = {
-  label: 'Memory Free',
+export const memoryFree: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.memoryFree', {
+    defaultMessage: 'Memory Free',
+  }),
   value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
   format: {
     id: 'bytes',

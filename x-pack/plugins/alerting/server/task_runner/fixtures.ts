@@ -132,10 +132,7 @@ export const generateSavedObjectParams = ({
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';
 
-export const getSummarizedAlertsMock = jest.fn();
-
 export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-  getSummarizedAlerts: getSummarizedAlertsMock,
   id: RULE_TYPE_ID,
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -150,6 +147,10 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   autoRecoverAlerts: true,
   validate: {
     params: { validate: (params) => params },
+  },
+  alerts: {
+    context: 'test',
+    mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
 };
 
@@ -382,7 +383,7 @@ export const generateRunnerResult = ({
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
       ...(state && { alertTypeState: {} }),
-      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
+      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
     },
     hasError,
@@ -394,13 +395,16 @@ export const generateEnqueueFunctionInput = ({
   isBulk = false,
   isResolved,
   foo,
+  actionTypeId,
 }: {
   id: string;
   isBulk?: boolean;
   isResolved?: boolean;
   foo?: boolean;
+  actionTypeId?: string;
 }) => {
   const input = {
+    actionTypeId: actionTypeId || 'action',
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
     id,
@@ -439,7 +443,7 @@ export const generateAlertInstance = (
     meta: {
       uuid: expect.any(String),
       lastScheduledActions: {
-        date: new Date(DATE_1970),
+        date: new Date(DATE_1970).toISOString(),
         group: 'default',
         ...(actions && { actions }),
       },

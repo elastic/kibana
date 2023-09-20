@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
@@ -24,32 +26,45 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface WatchCreateJsonTestBed extends TestBed<WatchCreateJsonTestSubjects> {
   actions: {
-    selectTab: (tab: 'edit' | 'simulate') => void;
-    clickSubmitButton: () => void;
-    clickSimulateButton: () => void;
+    selectTab: (tab: 'edit' | 'simulate') => Promise<void>;
+    clickSubmitButton: () => Promise<void>;
+    clickSimulateButton: () => Promise<void>;
   };
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchCreateJsonTestBed> => {
   const initTestBed = registerTestBed(WithAppDependencies(WatchEditPage, httpSetup), testBedConfig);
   const testBed = await initTestBed();
+  const { find, component } = testBed;
 
   /**
    * User Actions
    */
 
-  const selectTab = (tab: 'edit' | 'simulate') => {
+  const selectTab = async (tab: 'edit' | 'simulate') => {
     const tabs = ['edit', 'simulate'];
 
-    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      find('tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickSubmitButton = () => {
-    testBed.find('saveWatchButton').simulate('click');
+  const clickSubmitButton = async () => {
+    await act(async () => {
+      testBed.find('saveWatchButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickSimulateButton = () => {
-    testBed.find('simulateWatchButton').simulate('click');
+  const clickSimulateButton = async () => {
+    await act(async () => {
+      testBed.find('simulateWatchButton').simulate('click');
+    });
+
+    component.update();
   };
 
   return {

@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,

@@ -13,7 +13,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { UIM_APP_LOAD } from '../../common/constants';
-import { IndexManagementHome, homeSections } from './sections/home';
+import { IndexManagementHome, homeSections, Section } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
@@ -52,6 +52,6 @@ export const AppWithoutRouter = () => (
     />
     <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
     <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
-    <Redirect from={`/`} to={`/indices`} />
+    <Redirect from={`/`} to={`/${Section.Indices}`} />
   </Routes>
 );

@@ -2,7 +2,9 @@
   "extends": "../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "../cypress.config.ts"
+    "../cypress.config.ts",
+    "../serverless_cypress.config.ts",
+    "../../../test_serverless/shared/lib"
   ],
   "exclude": [
     "target/**/*"
@@ -25,7 +27,6 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin"

@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
+import { SpacesClient } from './spaces_client';
 import type { GetAllSpacesPurpose, Space } from '../../common';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
-import { SpacesClient } from './spaces_client';
 
 const createMockDebugLogger = () => {
   return jest.fn();
 };
 
 const createMockConfig = (
-  mockConfig: ConfigType = { enabled: true, maxSpaces: 1000, allowFeatureVisibility: true }
+  mockConfig: ConfigType = {
+    enabled: true,
+    maxSpaces: 1000,
+    allowFeatureVisibility: true,
+  }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
 };
@@ -209,7 +213,11 @@ describe('#create', () => {
       total: maxSpaces - 1,
     } as any);
 
-    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+    });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
@@ -235,7 +243,11 @@ describe('#create', () => {
       total: maxSpaces,
     } as any);
 
-    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+    });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 

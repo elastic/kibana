@@ -8,9 +8,18 @@
 import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosError,
+  AxiosRequestHeaders,
+  AxiosHeaders,
+  AxiosHeaderValue,
+} from 'axios';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { finished } from 'stream/promises';
+import { IncomingMessage } from 'http';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -73,7 +82,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers?: AxiosRequestHeaders) {
+  private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
     return { ...headers, 'Content-Type': 'application/json' };
   }
 
@@ -128,7 +137,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         method,
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
-        headers: this.getHeaders(headers),
+        headers: this.getHeaders(headers as AxiosHeaders),
       });
 
       this.validateResponse(responseSchema, res.data);
@@ -137,8 +146,27 @@ export abstract class SubActionConnector<Config, Secrets> {
     } catch (error) {
       if (isAxiosError(error)) {
         this.logger.debug(
-          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config.method}. URL: ${error.config.url}`
+          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
         );
+
+        let responseBody = '';
+
+        // The error response body may also be a stream, e.g. for the GenAI connector
+        if (error.response?.config?.responseType === 'stream' && error.response?.data) {
+          try {
+            const incomingMessage = error.response.data as IncomingMessage;
+
+            incomingMessage.on('data', (chunk) => {
+              responseBody += chunk.toString();
+            });
+
+            await finished(incomingMessage);
+
+            error.response.data = JSON.parse(responseBody);
+          } catch {
+            // the response body is a nice to have, no worries if it fails
+          }
+        }
 
         const errorMessage = `Status code: ${
           error.status ?? error.response?.status

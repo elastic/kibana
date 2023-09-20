@@ -11,6 +11,9 @@ import {
   type ExpandableFlyoutProps,
   ExpandableFlyoutProvider,
 } from '@kbn/expandable-flyout';
+import type { IsolateHostPanelProps } from './isolate_host';
+import { IsolateHostPanel, IsolateHostPanelKey } from './isolate_host';
+import { IsolateHostPanelProvider } from './isolate_host/context';
 import type { RightPanelProps } from './right';
 import { RightPanel, RightPanelKey } from './right';
 import { RightPanelProvider } from './right/context';
@@ -21,6 +24,9 @@ import {
   SecuritySolutionFlyoutUrlSyncProvider,
   useSecurityFlyoutUrlSync,
 } from './shared/context/url_sync';
+import type { PreviewPanelProps } from './preview';
+import { PreviewPanel, PreviewPanelKey } from './preview';
+import { PreviewPanelProvider } from './preview/context';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -41,6 +47,22 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />
       </LeftPanelProvider>
+    ),
+  },
+  {
+    key: PreviewPanelKey,
+    component: (props) => (
+      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
+        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
+      </PreviewPanelProvider>
+    ),
+  },
+  {
+    key: IsolateHostPanelKey,
+    component: (props) => (
+      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
+        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
+      </IsolateHostPanelProvider>
     ),
   },
 ];

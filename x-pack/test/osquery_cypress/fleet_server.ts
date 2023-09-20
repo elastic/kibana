@@ -8,19 +8,15 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import { runFleetServerIfNeeded } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/fleet_server';
-import { KbnClient } from '@kbn/test';
 import { Manager } from './resource_manager';
-import { addIntegrationToAgentPolicy } from './utils';
 
 export class FleetManager extends Manager {
   private fleetContainerId?: string;
   private log: ToolingLog;
-  private kbnClient: KbnClient;
 
-  constructor(kbnClient: KbnClient, log: ToolingLog) {
+  constructor(log: ToolingLog) {
     super();
     this.log = log;
-    this.kbnClient = kbnClient;
   }
 
   public async setup(): Promise<void> {
@@ -29,13 +25,6 @@ export class FleetManager extends Manager {
     if (!fleetServerConfig) {
       throw new Error('Fleet server config not found');
     }
-
-    await addIntegrationToAgentPolicy(
-      this.kbnClient,
-      'fleet-server-policy',
-      'Default Fleet Server Policy',
-      'osquery_manager'
-    );
 
     this.fleetContainerId = fleetServerConfig.fleetServerContainerId;
   }

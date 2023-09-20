@@ -9,8 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
-import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
 export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -34,45 +32,6 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
 
     if (latestMonitor.docId) {
       return latestMonitor;
-    }
-
-    if (!server.savedObjectsClient) {
-      return null;
-    }
-
-    try {
-      const {
-        saved_objects: [monitorSavedObject],
-      } = await savedObjectsClient.find({
-        type: syntheticsMonitorType,
-        perPage: 1,
-        page: 1,
-        filter: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_QUERY_ID}: "${monitorId}"`,
-      });
-
-      if (!monitorSavedObject) {
-        return null;
-      }
-
-      const {
-        [ConfigKey.URLS]: url,
-        [ConfigKey.NAME]: name,
-        [ConfigKey.HOSTS]: host,
-        [ConfigKey.MONITOR_TYPE]: type,
-      } = monitorSavedObject.attributes as Partial<MonitorFields>;
-
-      return {
-        url: {
-          full: url || host,
-        },
-        monitor: {
-          name,
-          type,
-          id: monitorSavedObject.id,
-        },
-      };
-    } catch (e) {
-      server.logger.error(e);
     }
   },
 });

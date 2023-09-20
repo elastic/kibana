@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
@@ -337,7 +337,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               includeComments: true,
             });
 
-            const comment = theCase.comments![0] as AttributesTypeUser;
+            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });

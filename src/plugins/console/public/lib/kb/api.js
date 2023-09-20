@@ -17,7 +17,7 @@ import {
 /**
  *
  * @param urlParametrizedComponentFactories a dictionary of factory functions
- * that will be used as fallback for parametrized path part (i.e., {indices} )
+ * that will be used as fallback for parametrized path part (i.e., {index} )
  * see UrlPatternMatcher
  * @constructor
  * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation

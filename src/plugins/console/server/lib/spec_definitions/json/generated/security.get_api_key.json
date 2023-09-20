@@ -1,11 +1,15 @@
 {
   "security.get_api_key": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "id": "",
       "name": "",
-      "username": "",
-      "realm_name": "",
       "owner": "__flag__",
+      "realm_name": "",
+      "username": "",
       "with_limited_by": "__flag__"
     },
     "methods": [
@@ -14,6 +18,10 @@
     "patterns": [
       "_security/api_key"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-api-key.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-api-key.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

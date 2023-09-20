@@ -34,4 +34,6 @@ export enum API_URLS {
   DELETE_RULE = '/api/alerting/rule/',
   RULES_FIND = '/api/alerting/rules/_find',
   CONNECTOR_TYPES = '/api/actions/connector_types',
+
+  SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
 }

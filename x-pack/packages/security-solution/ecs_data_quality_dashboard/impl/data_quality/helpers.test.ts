@@ -79,6 +79,7 @@ const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<st
 
 describe('helpers', () => {
   describe('getIndexNames', () => {
+    const isILMAvailable = true;
     const ilmPhases = ['hot', 'warm', 'unmanaged'];
 
     test('returns the expected index names when they have an ILM phase included in the ilmPhases list', () => {
@@ -86,6 +87,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain, // <-- the mock indexes have 'hot' ILM phases
           ilmPhases,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([
@@ -100,6 +102,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain, // <-- the mock indexes have 'hot' and 'unmanaged' ILM phases...
           ilmPhases: ['warm', 'unmanaged'], // <-- ...but we don't ask for 'hot'
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual(['auditbeat-custom-index-1']); // <-- the 'unmanaged' index
@@ -116,6 +119,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: ilmExplainWithMissingIndex, // <-- the mock indexes have 'hot' ILM phases...
           ilmPhases: ['hot', 'warm', 'unmanaged'],
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual(['.ds-packetbeat-8.5.3-2023.02.04-000001', 'auditbeat-custom-index-1']); // <-- only includes two of the three indices, because the other one is missing an ILM explain record
@@ -126,6 +130,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain,
           ilmPhases: [],
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([]);
@@ -136,6 +141,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: null,
           ilmPhases,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toEqual([]);
@@ -146,6 +152,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: mockIlmExplain,
           ilmPhases,
+          isILMAvailable,
           stats: null,
         })
       ).toEqual([]);
@@ -156,6 +163,7 @@ describe('helpers', () => {
         getIndexNames({
           ilmExplain: null,
           ilmPhases,
+          isILMAvailable,
           stats: null,
         })
       ).toEqual([]);

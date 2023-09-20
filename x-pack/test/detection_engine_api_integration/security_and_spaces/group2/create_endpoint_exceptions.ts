@@ -6,15 +6,16 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import expect from '@kbn/expect';
+import expect from 'expect';
 
 import type SuperTest from 'supertest';
-import {
-  createListsIndex,
-  deleteAllExceptions,
-  deleteListsIndex,
-} from '../../../lists_api_integration/utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import {
   createRule,
   createRuleWithExceptionEntries,
@@ -26,6 +27,12 @@ import {
   waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  createListsIndex,
+  deleteAllExceptions,
+  deleteListsIndex,
+} from '../../../lists_api_integration/utils';
 
 interface Host {
   os: {
@@ -71,10 +78,11 @@ export const getHostHits = async (
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
 
-  describe('Rule exception operators for endpoints', () => {
+  describe('create_endpoint_exceptions', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
@@ -108,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'linux' },
           },
@@ -130,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { name: 'Linux' },
           },
@@ -173,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { name: 'Linux' },
             },
@@ -210,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { name: 'Linux' },
             },
@@ -258,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { name: 'Linux' },
             },
@@ -303,7 +311,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { name: 'Linux' },
             },
@@ -339,7 +347,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -376,7 +384,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -424,7 +432,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -469,7 +477,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -505,7 +513,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 6, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -551,7 +559,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 6, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -608,7 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -659,7 +667,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).to.eql([
+          expect(hits).toEqual([
             {
               os: { type: 'linux' },
             },
@@ -711,7 +719,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'macos' },
           },
@@ -751,7 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'macos' },
           },
@@ -784,7 +792,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'linux' },
           },
@@ -821,7 +829,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'linux' },
           },
@@ -855,7 +863,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'linux' },
           },
@@ -889,7 +897,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).to.eql([
+        expect(hits).toEqual([
           {
             os: { type: 'linux' },
           },
@@ -903,6 +911,114 @@ export default ({ getService }: FtrProviderContext) => {
             os: { type: 'windows' },
           },
         ]);
+      });
+    });
+    describe('Add/edit exception comments by different users', () => {
+      const socManager = ROLES.soc_manager;
+      const detectionAdmin = ROLES.detections_admin;
+
+      beforeEach(async () => {
+        await createUserAndRole(getService, detectionAdmin);
+        await createUserAndRole(getService, socManager);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, detectionAdmin);
+        await deleteUserAndRole(getService, socManager);
+        await deleteAllExceptions(supertest, log);
+      });
+
+      it('Add comment on a new exception, add another comment has unicode from a different user', async () => {
+        await supertestWithoutAuth
+          .post(EXCEPTION_LIST_URL)
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        // Add comment by the Detection Admin
+        await supertestWithoutAuth
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMock(),
+            comments: [{ comment: 'Comment by user@detections_admin' }],
+          })
+          .expect(200);
+
+        const { body: items } = await supertestWithoutAuth
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .auth(detectionAdmin, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Validate the first user comment
+        expect(items.total).toEqual(1);
+        const [item] = items.data;
+        const detectionAdminComments = item.comments;
+        expect(detectionAdminComments.length).toEqual(1);
+
+        expect(detectionAdminComments[0]).toEqual(
+          expect.objectContaining({
+            created_by: 'detections_admin',
+            comment: 'Comment by user@detections_admin',
+          })
+        );
+
+        const expectedId = item.id;
+
+        // Update exception comment by different user Soc-manager
+        const { item_id: _, ...updateItemWithoutItemId } =
+          getUpdateMinimalExceptionListItemSchemaMock();
+
+        const updatePayload: UpdateExceptionListItemSchema = {
+          ...updateItemWithoutItemId,
+          comments: [
+            ...(updateItemWithoutItemId.comments || []),
+            { comment: 'Comment by user@soc_manager' },
+          ],
+          id: expectedId,
+        };
+        await supertestWithoutAuth
+          .put(EXCEPTION_LIST_ITEM_URL)
+          .auth(socManager, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send(updatePayload)
+          .expect(200);
+
+        const { body: itemsAfterUpdate } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }`
+          )
+          .auth(socManager, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+        const [itemAfterUpdate] = itemsAfterUpdate.data;
+        const detectionAdminAndSocManagerComments = itemAfterUpdate.comments;
+
+        expect(detectionAdminAndSocManagerComments.length).toEqual(2);
+
+        expect(detectionAdminAndSocManagerComments).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              created_by: 'detections_admin',
+              comment: 'Comment by user@detections_admin',
+            }),
+            expect.objectContaining({
+              created_by: 'soc_manager',
+              comment: 'Comment by user@soc_manager',
+            }),
+          ])
+        );
       });
     });
   });

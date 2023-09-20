@@ -139,7 +139,7 @@ describe('risk weight schema', () => {
       });
 
       it('rejects if neither host nor user weight are specified', () => {
-        const payload = { type, value: RiskCategories.alerts };
+        const payload = { type, value: RiskCategories.category_1 };
         const decoded = riskWeightSchema.decode(payload);
         const message = pipe(decoded, foldLeftRight);
 
@@ -151,7 +151,7 @@ describe('risk weight schema', () => {
       });
 
       it('allows a single host weight', () => {
-        const payload = { type, value: RiskCategories.alerts, host: 0.1 };
+        const payload = { type, value: RiskCategories.category_1, host: 0.1 };
         const decoded = riskWeightSchema.decode(payload);
         const message = pipe(decoded, foldLeftRight);
 
@@ -160,7 +160,7 @@ describe('risk weight schema', () => {
       });
 
       it('allows a single user weight', () => {
-        const payload = { type, value: RiskCategories.alerts, user: 0.1 };
+        const payload = { type, value: RiskCategories.category_1, user: 0.1 };
         const decoded = riskWeightSchema.decode(payload);
         const message = pipe(decoded, foldLeftRight);
 
@@ -169,7 +169,7 @@ describe('risk weight schema', () => {
       });
 
       it('allows both a host and user weight', () => {
-        const payload = { type, value: RiskCategories.alerts, user: 0.1, host: 0.5 };
+        const payload = { type, value: RiskCategories.category_1, user: 0.1, host: 0.5 };
         const decoded = riskWeightSchema.decode(payload);
         const message = pipe(decoded, foldLeftRight);
 
@@ -178,7 +178,7 @@ describe('risk weight schema', () => {
       });
 
       it('rejects a weight outside of 0-1', () => {
-        const payload = { type, value: RiskCategories.alerts, host: -5 };
+        const payload = { type, value: RiskCategories.category_1, host: -5 };
         const decoded = riskWeightSchema.decode(payload);
         const message = pipe(decoded, foldLeftRight);
 
@@ -189,7 +189,7 @@ describe('risk weight schema', () => {
       it('removes extra keys if specified', () => {
         const payload = {
           type,
-          value: RiskCategories.alerts,
+          value: RiskCategories.category_1,
           host: 0.1,
           extra: 'even more',
         };
@@ -197,14 +197,14 @@ describe('risk weight schema', () => {
         const message = pipe(decoded, foldLeftRight);
 
         expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({ type, value: RiskCategories.alerts, host: 0.1 });
+        expect(message.schema).toEqual({ type, value: RiskCategories.category_1, host: 0.1 });
       });
 
       describe('allowed category values', () => {
         it('allows the alerts type for a category', () => {
           const payload = {
             type,
-            value: RiskCategories.alerts,
+            value: RiskCategories.category_1,
             host: 0.1,
           };
           const decoded = riskWeightSchema.decode(payload);

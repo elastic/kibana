@@ -22,6 +22,7 @@ export enum ErrorCode {
   SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
   SEARCH_APPLICATION_NAME_INVALID = 'search_application_name_invalid',
   SEARCH_APPLICATION_NOT_FOUND = 'search_application_not_found',
+  SEARCH_APPLICATION_ALIAS_NOT_FOUND = 'search_application_alias_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }

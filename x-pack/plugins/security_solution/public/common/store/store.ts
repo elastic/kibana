@@ -51,7 +51,7 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
-import type { AnalyzerOuterState } from '../../resolver/types';
+import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
@@ -69,6 +69,7 @@ export const createStoreFactory = async (
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
         method: 'GET',
       });
     }
@@ -133,10 +134,8 @@ export const createStoreFactory = async (
     groups: initialGroupingState,
   };
 
-  const analyzerInitialState: AnalyzerOuterState = {
-    analyzer: {
-      analyzerById: {},
-    },
+  const analyzerInitialState: AnalyzerState = {
+    analyzer: {},
   };
 
   const timelineReducer = reduceReducers(

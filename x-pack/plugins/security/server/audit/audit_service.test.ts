@@ -17,9 +17,6 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { ConfigType } from '../config';
-import { ConfigSchema, createConfig } from '../config';
 import type { AuditEvent } from './audit_events';
 import {
   AuditService,
@@ -28,6 +25,9 @@ import {
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { ConfigType } from '../config';
+import { ConfigSchema, createConfig } from '../config';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

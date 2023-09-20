@@ -234,6 +234,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: false,
             testSubj: 'mlMainTab indexDataVisualizer',
           },
+          {
+            id: 'data_comparison',
+            pathId: ML_PAGES.DATA_COMPARISON_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
+              defaultMessage: 'Data Comparison',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataComparison',
+          },
         ],
       },
     ];
@@ -246,7 +255,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       disabled: disableLinks,
       items: [
         {
-          id: 'explainlogratespikes',
+          id: 'logRateAnalysis',
           pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
             defaultMessage: 'Log Rate Analysis',

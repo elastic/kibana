@@ -7,7 +7,11 @@
 
 import { GenAiConnector } from './gen_ai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../../common/gen_ai/constants';
+import {
+  DEFAULT_OPENAI_MODEL,
+  GEN_AI_CONNECTOR_ID,
+  OpenAiProviderType,
+} from '../../../common/gen_ai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
@@ -35,6 +39,7 @@ describe('GenAiConnector', () => {
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -42,7 +47,6 @@ describe('GenAiConnector', () => {
     });
 
     const sampleOpenAiBody = {
-      model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'user',
@@ -58,6 +62,39 @@ describe('GenAiConnector', () => {
     });
 
     describe('runApi', () => {
+      it('uses the default model if none is supplied', async () => {
+        const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: GenAiRunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual({ result: 'success' });
+      });
+
+      it('overrides the default model with the default model specified in the body', async () => {
+        const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
+        const response = await connector.runApi({ body: JSON.stringify(requestBody) });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: GenAiRunActionResponseSchema,
+          data: JSON.stringify({ ...requestBody, stream: false }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual({ result: 'success' });
+      });
+
       it('the OpenAI API call is successful with correct parameters', async () => {
         const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
@@ -65,7 +102,7 @@ describe('GenAiConnector', () => {
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: GenAiRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: false }),
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
@@ -128,7 +165,7 @@ describe('GenAiConnector', () => {
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: GenAiRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: false }),
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
@@ -148,7 +185,7 @@ describe('GenAiConnector', () => {
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: GenAiStreamingResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: true }),
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',

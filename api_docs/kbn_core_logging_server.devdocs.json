@@ -223,7 +223,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"all\" | \"off\" | \"debug\" | \"warn\" | \"trace\" | \"fatal\""
+              "\"error\" | \"info\" | \"all\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\""
             ],
             "path": "packages/core/logging/core-logging-server/src/logger.ts",
             "deprecated": false,

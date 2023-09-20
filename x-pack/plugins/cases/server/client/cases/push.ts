@@ -12,16 +12,24 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { ActionConnector, ConfigurationAttributes } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
 import type {
+  ActionConnector,
+  AlertAttachmentPayload,
+  AttachmentAttributes,
   Case,
-  ExternalServiceResponse,
-  CommentRequestAlertType,
-  CommentAttributes,
-} from '../../../common/api';
-import { CaseRt, CaseStatuses, OWNER_FIELD, CommentType } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+  ConfigurationAttributes,
+} from '../../../common/types/domain';
+import {
+  CaseRt,
+  CaseStatuses,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../common/types/domain';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  OWNER_FIELD,
+} from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
@@ -36,6 +44,7 @@ import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -57,9 +66,9 @@ const changeAlertsStatusToClose = async (
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
-  })) as SavedObjectsFindResponse<CommentRequestAlertType>;
+  })) as SavedObjectsFindResponse<AlertAttachmentPayload>;
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
@@ -289,7 +298,7 @@ export const push = async (
           attributes: {
             ...origComment.attributes,
             ...updatedComment?.attributes,
-          } as CommentAttributes,
+          } as AttachmentAttributes,
           version: updatedComment?.version ?? origComment.version,
           references: origComment?.references ?? [],
         };

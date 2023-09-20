@@ -7,6 +7,7 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
@@ -87,7 +88,7 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
@@ -177,7 +178,7 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {

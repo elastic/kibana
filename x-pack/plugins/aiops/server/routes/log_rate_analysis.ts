@@ -14,7 +14,7 @@ import type { CoreStart, IRouter } from '@kbn/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { streamFactory } from '@kbn/aiops-utils';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
   SignificantTerm,
   SignificantTermGroup,

@@ -1,0 +1,31 @@
+---
+id: react/context/render
+slug: /react/context/render
+title: React Context - Rendering Provider
+description: This context provider is used to render a new component tree _without_ the initialization of EUI or Emotion.  This provider is typically used with `ReactDOM.render()` calls.
+tags: ['shared-ux', 'react', 'context']
+date: 2023-07-25
+---
+
+## Description
+
+The `KibanaRenderContextProvider` is designed to be used with ad-hoc renders of React components, (usually with `ReactDOM.render`).
+
+When Kibana starts, the `KibanaRootContextProvider` is used by the `RenderService` to initialize EUI and Emotion... it should only be rendered _once_.  Still, there are times when you need to render a new component tree and need things like `i18n` and the current theme to be made available in a consistent way.  The `KibanaRenderContextProvider` is designed to be used in these cases.  In addition, it allows us to abstract away any changes or other complexities with React context that we may introduce in the future.
+
+```ts 
+import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
+import { MyComponent } from './my_component';
+
+const App = ({i18n, theme}: CoreStart) => {
+  return (
+    <KibanaRenderContextProvider {...{i18n, theme}}>
+      <MyComponent />
+    </KibanaRenderContextProvider>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById('some_node'));
+```

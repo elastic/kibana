@@ -29,13 +29,12 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-tabbed-table-list-view",
     "@kbn/event-annotation-common",
-    "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-notifications-browser",
     "@kbn/core-saved-objects-api-browser",
     "@kbn/expressions-plugin",
+    "@kbn/content-management-plugin",
   ]
 }

@@ -21,6 +21,7 @@ export interface ServiceNode extends NodeBase {
   serviceName: string;
   agentName: AgentName;
   environment: string;
+  dependencyName?: string;
 }
 
 export interface DependencyNode extends NodeBase {

@@ -6,7 +6,11 @@
  */
 
 import { sanitizeRequest, getRequestWithStreamOption } from './openai_utils';
-import { OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL } from '../../../../common/gen_ai/constants';
+import {
+  DEFAULT_OPENAI_MODEL,
+  OPENAI_CHAT_URL,
+  OPENAI_LEGACY_COMPLETION_URL,
+} from '../../../../common/gen_ai/constants';
 
 describe('Open AI Utils', () => {
   describe('sanitizeRequest', () => {
@@ -23,7 +27,11 @@ describe('Open AI Utils', () => {
       };
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body));
+        const sanitizedBodyString = sanitizeRequest(
+          url,
+          JSON.stringify(body),
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(
           `{\"model\":\"gpt-4\",\"stream\":false,\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}]}`
         );
@@ -42,7 +50,11 @@ describe('Open AI Utils', () => {
       };
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body));
+        const sanitizedBodyString = sanitizeRequest(
+          url,
+          JSON.stringify(body),
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(
           `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":false}`
         );
@@ -62,7 +74,11 @@ describe('Open AI Utils', () => {
       };
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body));
+        const sanitizedBodyString = sanitizeRequest(
+          url,
+          JSON.stringify(body),
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(
           `{\"model\":\"gpt-4\",\"stream\":false,\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}]}`
         );
@@ -73,7 +89,7 @@ describe('Open AI Utils', () => {
       const bodyString = `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],,}`;
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, bodyString);
+        const sanitizedBodyString = sanitizeRequest(url, bodyString, DEFAULT_OPENAI_MODEL);
         expect(sanitizedBodyString).toEqual(bodyString);
       });
     });
@@ -81,7 +97,11 @@ describe('Open AI Utils', () => {
     it('does nothing when url does not accept stream parameter', () => {
       const bodyString = `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}]}`;
 
-      const sanitizedBodyString = sanitizeRequest('https://randostring.ai', bodyString);
+      const sanitizedBodyString = sanitizeRequest(
+        'https://randostring.ai',
+        bodyString,
+        DEFAULT_OPENAI_MODEL
+      );
       expect(sanitizedBodyString).toEqual(bodyString);
     });
   });
@@ -99,7 +119,12 @@ describe('Open AI Utils', () => {
       };
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), true);
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          true,
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(
           `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":true}`
         );
@@ -119,7 +144,12 @@ describe('Open AI Utils', () => {
       };
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), false);
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          false,
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(
           `{\"model\":\"gpt-4\",\"stream\":false,\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}]}`
         );
@@ -130,7 +160,12 @@ describe('Open AI Utils', () => {
       const bodyString = `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],,}`;
 
       [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = getRequestWithStreamOption(url, bodyString, false);
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          bodyString,
+          false,
+          DEFAULT_OPENAI_MODEL
+        );
         expect(sanitizedBodyString).toEqual(bodyString);
       });
     });
@@ -141,7 +176,8 @@ describe('Open AI Utils', () => {
       const sanitizedBodyString = getRequestWithStreamOption(
         'https://randostring.ai',
         bodyString,
-        true
+        true,
+        DEFAULT_OPENAI_MODEL
       );
       expect(sanitizedBodyString).toEqual(bodyString);
     });

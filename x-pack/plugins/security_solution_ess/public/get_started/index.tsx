@@ -4,16 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import type React from 'react';
 
-import { KibanaServicesProvider, type Services } from '../common/services';
+import { withServicesProvider, type Services } from '../common/services';
 import { GetStarted } from './lazy';
 
 export const getSecurityGetStartedComponent = (services: Services): React.ComponentType =>
-  function GetStartedComponent() {
-    return (
-      <KibanaServicesProvider services={services}>
-        <GetStarted />
-      </KibanaServicesProvider>
-    );
-  };
+  withServicesProvider(GetStarted, services);

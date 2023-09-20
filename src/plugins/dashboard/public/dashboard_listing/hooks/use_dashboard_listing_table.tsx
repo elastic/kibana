@@ -12,6 +12,8 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import { DashboardContainerInput } from '../../../common';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { pluginServices } from '../../services/plugin_services';
 import {
@@ -68,6 +70,7 @@ export const useDashboardListingTable = ({
   initialFilter,
   urlStateEnabled,
   useSessionStorageIntegration,
+  showCreateDashboardButton = true,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -77,12 +80,18 @@ export const useDashboardListingTable = ({
   initialFilter?: string;
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
+  showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
   const {
     dashboardSessionStorage,
     dashboardCapabilities: { showWriteControls },
-    dashboardContentManagement: { findDashboards, deleteDashboards },
     settings: { uiSettings },
+    dashboardContentManagement: {
+      findDashboards,
+      deleteDashboards,
+      updateDashboardMeta,
+      checkForDuplicateDashboardTitle,
+    },
     notifications: { toasts },
   } = pluginServices.getServices();
 
@@ -109,6 +118,49 @@ export const useDashboardListingTable = ({
     }
     goToDashboard();
   }, [dashboardSessionStorage, goToDashboard, useSessionStorageIntegration]);
+
+  const updateItemMeta = useCallback(
+    async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
+      await updateDashboardMeta(props);
+
+      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+    },
+    [dashboardSessionStorage, updateDashboardMeta]
+  );
+
+  const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
+    () => ({
+      title: [
+        {
+          type: 'warning',
+          fn: async (value: string, id: string) => {
+            if (id) {
+              try {
+                const [dashboard] = await findDashboards.findByIds([id]);
+                if (dashboard.status === 'error') {
+                  return;
+                }
+
+                const validTitle = await checkForDuplicateDashboardTitle({
+                  title: value,
+                  copyOnSave: false,
+                  lastSavedTitle: dashboard.attributes.title,
+                  isTitleDuplicateConfirmed: false,
+                });
+
+                if (!validTitle) {
+                  throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
+                }
+              } catch (e) {
+                return e.message;
+              }
+            }
+          },
+        },
+      ],
+    }),
+    [checkForDuplicateDashboardTitle, findDashboards]
+  );
 
   const emptyPrompt = useMemo(
     () => (
@@ -219,7 +271,12 @@ export const useDashboardListingTable = ({
 
   const tableListViewTableProps = useMemo(
     () => ({
-      createItem: !showWriteControls ? undefined : createItem,
+      contentEditor: {
+        isReadonly: !showWriteControls,
+        onSave: updateItemMeta,
+        customValidators: contentEditorValidators,
+      },
+      createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
       emptyPrompt,
@@ -238,6 +295,7 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
     }),
     [
+      contentEditorValidators,
       createItem,
       dashboardListingId,
       deleteItems,
@@ -252,8 +310,10 @@ export const useDashboardListingTable = ({
       initialPageSize,
       listingLimit,
       onFetchSuccess,
+      showCreateDashboardButton,
       showWriteControls,
       title,
+      updateItemMeta,
       urlStateEnabled,
     ]
   );

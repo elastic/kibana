@@ -60,6 +60,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   filters?: Filter[];
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
+  prependFilterBar?: React.ReactNode;
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
@@ -103,6 +104,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  textBasedLanguageModeWarning?: string;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
@@ -548,6 +550,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
+          prepend={this.props.prependFilterBar}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       );
@@ -595,6 +598,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
+          textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
           onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}

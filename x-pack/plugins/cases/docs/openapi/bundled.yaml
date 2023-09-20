@@ -150,6 +150,7 @@ paths:
                 properties:
                   cases:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/case_response_properties'
                   count_closed_cases:
@@ -196,6 +197,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -610,6 +612,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -696,6 +699,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: string
               examples:
@@ -1054,6 +1058,7 @@ paths:
                     type: integer
                   userActions:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/user_actions_find_response_properties'
               examples:
@@ -2565,6 +2570,7 @@ components:
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
+      maxItems: 10
       nullable: true
       items:
         type: object
@@ -3254,6 +3260,7 @@ components:
           title: Case response properties for comments
           description: An array of comment objects for the case.
           type: array
+          maxItems: 10000
           items:
             discriminator:
               propertyName: type
@@ -3525,6 +3532,7 @@ components:
         - type: array
           items:
             type: string
+          maxItems: 1000
       x-technical-preview: true
       example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
     alert_indices:
@@ -3536,6 +3544,7 @@ components:
         - type: array
           items:
             type: string
+          maxItems: 1000
       x-technical-preview: true
     rule:
       title: Alerting rule

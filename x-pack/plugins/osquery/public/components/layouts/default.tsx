@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import type { UseEuiTheme } from '@elastic/eui';
+export const containerCss = ({ euiTheme }: UseEuiTheme) => ({
+  minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
+  background: euiTheme.colors.emptyShade,
+  display: 'flex',
+  flexDirection: 'column' as const,
+});
 
-export const Container = styled.div`
-  min-height: calc(
-    100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
-  );
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-  display: flex;
-  flex-direction: column;
-`;
+export const wrapperCss = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  flex: 1,
+};
 
-export const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-`;
-
-export const Nav = styled.nav`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  padding: ${(props) =>
-    `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`};
-  .euiTabs {
-    padding-left: 3px;
-    margin-left: -3px;
-  }
-`;
+export const navCss = ({ euiTheme }: UseEuiTheme) => ({
+  background: euiTheme.colors.emptyShade,
+  borderBottom: euiTheme.border.thin,
+  padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,
+  '.euiTabs': {
+    paddingLeft: '3px',
+    marginLeft: '-3px',
+  },
+});

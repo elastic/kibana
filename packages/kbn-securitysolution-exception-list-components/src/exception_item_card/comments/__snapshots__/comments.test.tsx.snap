@@ -71,7 +71,7 @@ Object {
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
-          class="euiAccordion"
+          class="euiAccordion emotion-euiAccordion"
           data-test-subj="exceptionItemCardComments"
         >
           <div
@@ -209,7 +209,7 @@ Object {
       data-test-subj="ExceptionItemCardCommentsContainer"
     >
       <div
-        class="euiAccordion"
+        class="euiAccordion emotion-euiAccordion"
         data-test-subj="exceptionItemCardComments"
       >
         <div
@@ -404,7 +404,7 @@ Object {
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
-          class="euiAccordion euiAccordion-isOpen"
+          class="euiAccordion euiAccordion-isOpen emotion-euiAccordion"
           data-test-subj="exceptionItemCardComments"
         >
           <div
@@ -542,7 +542,7 @@ Object {
       data-test-subj="ExceptionItemCardCommentsContainer"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen"
+        class="euiAccordion euiAccordion-isOpen emotion-euiAccordion"
         data-test-subj="exceptionItemCardComments"
       >
         <div

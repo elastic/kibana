@@ -13,9 +13,8 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiTitle,
   EuiText,
@@ -82,8 +81,8 @@ export const ScreenshotModeExampleApp = ({
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
+              <EuiPageTemplate.Section>
+                <EuiPageHeader>
                   <EuiTitle>
                     <h2>
                       {isScreenshotMode ? (
@@ -99,8 +98,8 @@ export const ScreenshotModeExampleApp = ({
                       )}
                     </h2>
                   </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
+                </EuiPageHeader>
+                <EuiPageSection>
                   <EuiText>
                     {isScreenshotMode ? (
                       <p>We detected screenshot mode. The chrome navbar should be hidden.</p>
@@ -111,8 +110,8 @@ export const ScreenshotModeExampleApp = ({
                       </p>
                     )}
                   </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
+                </EuiPageSection>
+              </EuiPageTemplate.Section>
             </EuiPageBody>
           </EuiPage>
         </>

@@ -1,24 +1,35 @@
 {
   "open_point_in_time": {
     "url_params": {
-      "preference": "random",
-      "routing": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "keep_alive": [
+        "-1",
+        "0"
+      ],
       "ignore_unavailable": "__flag__",
+      "preference": "",
+      "routing": "",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
-      ],
-      "keep_alive": ""
+        "none"
+      ]
     },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{indices}/_pit"
+      "{index}/_pit"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/point-in-time-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/point-in-time-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

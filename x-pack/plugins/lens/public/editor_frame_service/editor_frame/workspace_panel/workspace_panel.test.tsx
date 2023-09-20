@@ -530,7 +530,9 @@ describe('workspace_panel', () => {
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
-    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    const eventData = {
+      data: [{ table: { rows: [], columns: [] }, cells: [{ column: 0, row: 0 }] }],
+    };
     onEvent({ name: 'multiFilter', data: eventData });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.multiFilter);
@@ -798,7 +800,7 @@ describe('workspace_panel', () => {
       lensStore.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          newDatasourceState: {},
+          newDatasourceState: 'newState',
         })
       );
     });

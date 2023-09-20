@@ -95,7 +95,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  describe('Findings Page', () => {
+  describe('Findings Page', function () {
+    this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;

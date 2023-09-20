@@ -553,6 +553,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
+          'data-test-subj': `edit-action`,
         });
       }
 
@@ -575,9 +576,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'inspect',
+          icon: 'iInCircle',
           type: 'icon',
           onClick: inspectItem,
+          'data-test-subj': `inspect-action`,
         });
       }
 

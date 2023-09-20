@@ -64,7 +64,7 @@ const draggingField = {
   },
 };
 
-const onDimensionDrop = jest.fn();
+const onDropToDimension = jest.fn();
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -109,7 +109,7 @@ describe('LayerPanel', () => {
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
       displayLayerSettings: true,
-      onDimensionDrop,
+      onDropToDimension,
     };
   }
 
@@ -144,7 +144,7 @@ describe('LayerPanel', () => {
     mockDatasource = createMockDatasource('testDatasource');
   });
 
-  afterEach(() => onDimensionDrop.mockClear());
+  afterEach(() => onDropToDimension.mockClear());
 
   describe('layer reset and remove', () => {
     it('should show the reset button when single layer', async () => {
@@ -782,7 +782,7 @@ describe('LayerPanel', () => {
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           source: draggingField,
         })
@@ -832,7 +832,7 @@ describe('LayerPanel', () => {
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(onDimensionDrop).not.toHaveBeenCalled();
+      expect(onDropToDimension).not.toHaveBeenCalled();
     });
 
     it('should allow drag to move between groups', async () => {
@@ -896,14 +896,14 @@ describe('LayerPanel', () => {
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
 
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'b' }),
           source: draggingOperation,
         })
       );
 
-      onDimensionDrop.mockClear();
+      onDropToDimension.mockClear();
 
       // Simulate drop on the empty dimension
 
@@ -914,7 +914,7 @@ describe('LayerPanel', () => {
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');
 
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'newid' }),
           source: draggingOperation,
@@ -958,7 +958,7 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
       });
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
           source: draggingOperation,
@@ -1009,7 +1009,7 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           target: expect.objectContaining({ columnId: 'newid' }),
           dropType: 'duplicate_compatible',
@@ -1060,7 +1060,7 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
           source: draggingOperation,
@@ -1120,7 +1120,7 @@ describe('LayerPanel', () => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
           source: draggingOperation,
@@ -1185,7 +1185,7 @@ describe('LayerPanel', () => {
         instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
       });
 
-      expect(onDimensionDrop).toHaveBeenCalledWith(
+      expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
           source: draggingOperation,

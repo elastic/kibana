@@ -19,6 +19,7 @@ import {
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
   binaryToString,
@@ -47,16 +48,24 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   const postBulkAction = () =>
-    supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
+    supertest
+      .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
+
   const fetchRule = (ruleId: string) =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   const fetchPrebuiltRule = async () => {
     const { body: findBody } = await supertest
       .get(
         `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
       )
-      .set('kbn-xsrf', 'true');
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
     return findBody.data[0];
   };
@@ -142,6 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
         attributes: {
           actionTypeId: '.webhook',
           config: {
+            authType: WebhookAuthType.Basic,
             hasAuth: true,
             method: 'post',
             url: 'http://localhost',
@@ -434,6 +444,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
@@ -539,6 +550,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
@@ -643,6 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('elastic-api-version', '2023-10-31')
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -690,6 +703,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);

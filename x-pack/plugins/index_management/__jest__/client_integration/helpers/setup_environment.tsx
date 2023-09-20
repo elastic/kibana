@@ -16,10 +16,14 @@ import {
   uiSettingsServiceMock,
   themeServiceMock,
   executionContextServiceMock,
+  applicationServiceMock,
+  fatalErrorsServiceMock,
+  httpServiceMock,
 } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
@@ -52,10 +56,24 @@ setUiMetricService(services.uiMetricService);
 const appDependencies = {
   services,
   core: {
-    getUrlForApp: () => {},
+    getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
+    http: httpServiceMock.createSetupContract(),
+    application: applicationServiceMock.createStartContract(),
+    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
   },
-  plugins: {},
+  plugins: {
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+    isFleetEnabled: false,
+    share: sharePluginMock.createStartContract(),
+  },
+  // Default stateful configuration
+  config: {
+    enableLegacyTemplates: true,
+    enableIndexActions: true,
+    enableIndexStats: true,
+    enableIndexDetailsPage: false,
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
@@ -82,7 +100,6 @@ export const WithAppDependencies =
   (props: any) => {
     httpService.setup(httpSetup);
     const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-
     return (
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>

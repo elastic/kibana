@@ -39,12 +39,18 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Set search input value on landing page
+   */
+  public async setSearchFilterValue(value: string) {
+    const searchFilter = await this.getSearchFilter();
+    searchFilter.type(value);
+  }
+
+  /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    const searchFilter = await this.getSearchFilter();
-    await searchFilter.clearValue();
-    await searchFilter.click();
+    this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -146,6 +152,35 @@ export class ListingTableService extends FtrService {
       }
     }
     return visualizationNames;
+  }
+
+  /**
+   * Open the inspect flyout
+   */
+  public async inspectVisualization(index: number = 0) {
+    const inspectButtons = await this.testSubjects.findAll('inspect-action');
+    await inspectButtons[index].click();
+  }
+
+  /**
+   * Edit Visualization title and description in the flyout
+   */
+  public async editVisualizationDetails(
+    { title, description }: { title?: string; description?: string } = {},
+    shouldSave: boolean = true
+  ) {
+    if (title) {
+      await this.testSubjects.setValue('nameInput', title);
+    }
+    if (description) {
+      await this.testSubjects.setValue('descriptionInput', description);
+    }
+    if (shouldSave) {
+      await this.retry.try(async () => {
+        await this.testSubjects.click('saveButton');
+        await this.testSubjects.missingOrFail('flyoutTitle');
+      });
+    }
   }
 
   /**

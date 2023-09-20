@@ -42,7 +42,7 @@ export interface EventAnnotationServiceType {
       id: string;
       type: string;
       fullName: string;
-      savedObject: SavedObjectCommon<unknown>;
+      savedObject: SavedObjectCommon;
     }) => void;
     onCreateNew: () => void;
   }) => JSX.Element;

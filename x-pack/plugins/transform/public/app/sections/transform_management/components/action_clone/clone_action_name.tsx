@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 export const cloneActionNameText = i18n.translate(
   'xpack.transform.transformList.cloneActionNameText',

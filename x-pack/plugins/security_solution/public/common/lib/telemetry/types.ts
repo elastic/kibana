@@ -7,61 +7,46 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { SecurityMetadata } from '../../../actions/types';
+import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
+import type {
+  AlertsGroupingTelemetryEvent,
+  ReportAlertsGroupingChangedParams,
+  ReportAlertsGroupingTelemetryEventParams,
+  ReportAlertsGroupingToggledParams,
+  ReportAlertsTakeActionParams,
+} from './events/alerts_grouping/types';
+import type {
+  ReportDataQualityCheckAllCompletedParams,
+  ReportDataQualityIndexCheckedParams,
+  DataQualityTelemetryEvents,
+} from './events/data_quality/types';
+import type {
+  EntityAnalyticsTelemetryEvent,
+  ReportEntityAlertsClickedParams,
+  ReportEntityAnalyticsTelemetryEventParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityRiskFilteredParams,
+} from './events/entity_analytics/types';
+import type {
+  AssistantTelemetryEvent,
+  ReportAssistantTelemetryEventParams,
+  ReportAssistantInvokedParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantMessageSentParams,
+} from './events/ai_assistant/types';
+
+export * from './events/ai_assistant/types';
+export * from './events/alerts_grouping/types';
+export * from './events/data_quality/types';
+export type {
+  ReportEntityAlertsClickedParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityRiskFilteredParams,
+} from './events/entity_analytics/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
-}
-
-export enum TelemetryEventTypes {
-  AlertsGroupingChanged = 'Alerts Grouping Changed',
-  AlertsGroupingToggled = 'Alerts Grouping Toggled',
-  AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
-  EntityDetailsClicked = 'Entity Details Clicked',
-  EntityAlertsClicked = 'Entity Alerts Clicked',
-  EntityRiskFiltered = 'Entity Risk Filtered',
-  MLJobUpdate = 'ML Job Update',
-  CellActionClicked = 'Cell Action Clicked',
-  AnomaliesCountClicked = 'Anomalies Count Clicked',
-}
-
-export interface ReportAlertsGroupingChangedParams {
-  tableId: string;
-  groupByField: string;
-}
-
-export interface ReportAlertsGroupingToggledParams {
-  isOpen: boolean;
-  tableId: string;
-  groupNumber: number;
-  groupName?: string | undefined;
-}
-
-export interface ReportAlertsTakeActionParams {
-  tableId: string;
-  groupNumber: number;
-  status: 'open' | 'closed' | 'acknowledged';
-  groupByField: string;
-}
-
-interface EntityParam {
-  entity: 'host' | 'user';
-}
-
-export type ReportEntityDetailsClickedParams = EntityParam;
-export type ReportEntityAlertsClickedParams = EntityParam;
-export interface ReportEntityRiskFilteredParams extends EntityParam {
-  selectedSeverity: RiskSeverity;
-}
-
-export enum ML_JOB_TELEMETRY_STATUS {
-  started = 'started',
-  startError = 'start_error',
-  stopped = 'stopped',
-  stopError = 'stop_error',
-  moduleInstalled = 'module_installed',
-  installationError = 'installationError',
 }
 
 export interface ReportMLJobUpdateParams {
@@ -84,22 +69,29 @@ export interface ReportAnomaliesCountClickedParams {
   count: number;
 }
 
+export interface ReportBreadcrumbClickedParams {
+  title: string;
+}
+
 export type TelemetryEventParams =
-  | ReportAlertsGroupingChangedParams
-  | ReportAlertsGroupingToggledParams
-  | ReportAlertsTakeActionParams
-  | ReportEntityDetailsClickedParams
-  | ReportEntityAlertsClickedParams
-  | ReportEntityRiskFilteredParams
+  | ReportAlertsGroupingTelemetryEventParams
+  | ReportAssistantTelemetryEventParams
+  | ReportEntityAnalyticsTelemetryEventParams
   | ReportMLJobUpdateParams
   | ReportCellActionClickedParams
-  | ReportCellActionClickedParams
-  | ReportAnomaliesCountClickedParams;
+  | ReportAnomaliesCountClickedParams
+  | ReportDataQualityIndexCheckedParams
+  | ReportDataQualityCheckAllCompletedParams
+  | ReportBreadcrumbClickedParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
   reportAlertsGroupingToggled(params: ReportAlertsGroupingToggledParams): void;
   reportAlertsGroupingTakeAction(params: ReportAlertsTakeActionParams): void;
+
+  reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
+  reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
+  reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
@@ -109,33 +101,16 @@ export interface TelemetryClientStart {
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
+  reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
+  reportDataQualityCheckAllCompleted(params: ReportDataQualityCheckAllCompletedParams): void;
+  reportBreadcrumbClicked(params: ReportBreadcrumbClickedParams): void;
 }
 
 export type TelemetryEvent =
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingToggled;
-      schema: RootSchema<ReportAlertsGroupingToggledParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingChanged;
-      schema: RootSchema<ReportAlertsGroupingChangedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AlertsGroupingTakeAction;
-      schema: RootSchema<ReportAlertsTakeActionParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityDetailsClicked;
-      schema: RootSchema<ReportEntityDetailsClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityAlertsClicked;
-      schema: RootSchema<ReportEntityAlertsClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityRiskFiltered;
-      schema: RootSchema<ReportEntityRiskFilteredParams>;
-    }
+  | AssistantTelemetryEvent
+  | AlertsGroupingTelemetryEvent
+  | EntityAnalyticsTelemetryEvent
+  | DataQualityTelemetryEvents
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;
@@ -147,4 +122,8 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AnomaliesCountClicked;
       schema: RootSchema<ReportAnomaliesCountClickedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.BreadcrumbClicked;
+      schema: RootSchema<ReportBreadcrumbClickedParams>;
     };

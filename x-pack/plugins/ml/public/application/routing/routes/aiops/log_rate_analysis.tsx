@@ -37,7 +37,9 @@ export const logRateAnalysisRouteFactory = (
   ],
 });
 
-// Deprecated since 8.10, kept here to redirect old bookmarks.
+/**
+ * @deprecated since 8.10, kept here to redirect old bookmarks.
+ */
 export const explainLogRateSpikesRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES),
   render: () => <RedirectWithQueryString />,

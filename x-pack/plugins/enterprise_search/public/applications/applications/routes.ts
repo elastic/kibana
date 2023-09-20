@@ -10,7 +10,7 @@ export const ROOT_PATH = '/';
 export const SEARCH_APPLICATIONS_PATH = `${ROOT_PATH}search_applications`;
 
 export enum SearchApplicationViewTabs {
-  PREVIEW = 'preview',
+  DOCS_EXPLORER = 'docs_explorer',
   CONTENT = 'content',
   CONNECT = 'connect',
 }

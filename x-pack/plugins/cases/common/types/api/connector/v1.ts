@@ -6,28 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseExternalServiceBasicRt } from '../../../api';
+import { ExternalServiceRt } from '../../domain/external_service/v1';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
-
-const ActionConnectorResultRt = rt.intersection([
-  rt.strict({
-    id: rt.string,
-    actionTypeId: rt.string,
-    name: rt.string,
-    isDeprecated: rt.boolean,
-    isPreconfigured: rt.boolean,
-    isSystemAction: rt.boolean,
-    referencedByCount: rt.number,
-  }),
-  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
-]);
-
-export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,
   oldestUserActionPushDate: rt.string,
-  externalService: CaseExternalServiceBasicRt,
+  externalService: ExternalServiceRt,
 });
 
 const CaseConnectorPushInfoRt = rt.intersection([
@@ -51,6 +36,21 @@ export const GetCaseConnectorsResponseRt = rt.record(
     CaseConnectorRt,
   ])
 );
+
+const ActionConnectorResultRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    actionTypeId: rt.string,
+    name: rt.string,
+    isDeprecated: rt.boolean,
+    isPreconfigured: rt.boolean,
+    isSystemAction: rt.boolean,
+    referencedByCount: rt.number,
+  }),
+  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
+]);
+
+export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 export const ConnectorMappingResponseRt = rt.strict({
   id: rt.string,

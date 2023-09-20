@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import semverLt from 'semver/functions/lt';
+import semverCoerce from 'semver/functions/coerce';
+import semverValid from 'semver/functions/valid';
+import { css } from '@emotion/react';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -16,20 +19,39 @@ import {
   EuiForm,
   EuiCallOut,
   EuiTextArea,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  CLOUDBEAT_GCP,
+  SETUP_ACCESS_CLOUD_SHELL,
+  SETUP_ACCESS_MANUAL,
+} from '../../../common/constants';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import {
+  getCspmCloudShellDefaultValue,
+  getPosturePolicy,
+  NewPackagePolicyPostureInput,
+} from './utils';
 import { MIN_VERSION_GCP_CIS } from '../../common/constants';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { ReadDocumentation } from './aws_credentials_form/aws_credentials_form';
 
+export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
+  PROJECT_ID: 'project_id_test_id',
+  CREDENTIALS_TYPE: 'credentials_type_test_id',
+  CREDENTIALS_FILE: 'credentials_file_test_id',
+  CREDENTIALS_JSON: 'credentials_json_test_id',
+};
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
   <>
-    <EuiSpacer size="l" />
-    <EuiTitle size="s">
+    <EuiHorizontalRule margin="xl" />
+    <EuiTitle size="xs">
       <h2>
         <FormattedMessage
           id="xpack.csp.gcpIntegration.setupInfoContentTitle"
@@ -49,75 +71,95 @@ const GCPSetupInfoContent = () => (
   </>
 );
 
-/* NEED TO FIND THE REAL URL HERE LATER*/
-const DocsLink = (
-  <EuiText color={'subdued'} size="s">
-    <FormattedMessage
-      id="xpack.csp.gcpIntegration.docsLink"
-      defaultMessage="Read the {docs} for more details"
-      values={{
-        docs: (
-          <EuiLink href="https://cloud.google.com/docs/authentication" external>
-            documentation
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiText>
-);
+const GoogleCloudShellSetup = () => {
+  return (
+    <>
+      <EuiText
+        color="subdued"
+        size="s"
+        data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
+      >
+        <ol
+          css={css`
+            list-style: auto;
+          `}
+        >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.login"
+              defaultMessage="Log into your Google Cloud Console"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
+              defaultMessage="Note down the GCP project ID of the project you wish to monitor"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.launch"
+              defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
+            />
+          </li>
+        </ol>
+      </EuiText>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
 
-const CredentialFileText = i18n.translate(
-  'xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText',
-  { defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe' }
-);
-const CredentialJSONText = i18n.translate(
-  'xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText',
-  { defaultMessage: 'JSON blob containing the credentials and key used to subscribe' }
-);
+const credentialOptionsList = [
+  {
+    text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
+      defaultMessage: 'Credentials File',
+    }),
+    value: 'credentials-file',
+  },
+  {
+    text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
+      defaultMessage: 'Credentials JSON',
+    }),
+    value: 'credentials-json',
+  },
+];
 
-type GcpCredentialsType = 'credentials_file' | 'credentials_json';
-type GcpFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+type GcpFields = Record<string, { label: string; type?: 'password' | 'text'; value?: string }>;
 interface GcpInputFields {
   fields: GcpFields;
 }
 
-const gcpField: GcpInputFields = {
+export const gcpField: GcpInputFields = {
   fields: {
-    project_id: {
+    'gcp.project_id': {
       label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
         defaultMessage: 'Project ID',
       }),
       type: 'text',
     },
-    credentials_file: {
-      label: i18n.translate('xpack.csp.gcpIntegration.credentialsFileFieldLabel', {
-        defaultMessage: 'Credentials File',
+    'gcp.credentials.file': {
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
+        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
       }),
       type: 'text',
     },
-    credentials_json: {
-      label: i18n.translate('xpack.csp.gcpIntegration.credentialsJSONFieldLabel', {
-        defaultMessage: 'Credentials JSON',
+    'gcp.credentials.json': {
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
       }),
+      type: 'text',
+    },
+    'gcp.credentials.type': {
+      label: i18n.translate(
+        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        {
+          defaultMessage: 'Credential',
+        }
+      ),
       type: 'text',
     },
   },
 };
-
-const credentialOptionsList = [
-  {
-    label: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
-      defaultMessage: 'Credentials File',
-    }),
-    text: 'Credentials File',
-  },
-  {
-    label: i18n.translate('xpack.csp.gcpIntegration.credentialsjsonOption', {
-      defaultMessage: 'Credentials JSON',
-    }),
-    text: 'Credentials JSON',
-  },
-];
 
 const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
@@ -125,14 +167,14 @@ const getSetupFormatOptions = (): Array<{
   disabled: boolean;
 }> => [
   {
-    id: 'google_cloud_shell',
+    id: SETUP_ACCESS_CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
       defaultMessage: 'Google Cloud Shell',
     }),
-    disabled: true,
+    disabled: false,
   },
   {
-    id: 'manual',
+    id: SETUP_ACCESS_MANUAL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -140,7 +182,7 @@ const getSetupFormatOptions = (): Array<{
   },
 ];
 
-interface Props {
+interface GcpFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<
     NewPackagePolicyPostureInput,
@@ -152,10 +194,7 @@ interface Props {
   onChange: any;
 }
 
-const getInputVarsFields = (
-  input: NewPackagePolicyInput,
-  fields: GcpInputFields[keyof GcpInputFields]
-) =>
+const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
   Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
@@ -168,6 +207,83 @@ const getInputVarsFields = (
       } as const;
     });
 
+const getSetupFormatFromInput = (
+  input: Extract<
+    NewPackagePolicyPostureInput,
+    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
+  >
+): SetupFormatGCP => {
+  const credentialsType = input.streams[0].vars?.setup_access?.value;
+  // Google Cloud shell is the default value
+  if (!credentialsType) {
+    return SETUP_ACCESS_CLOUD_SHELL;
+  }
+  if (credentialsType !== SETUP_ACCESS_CLOUD_SHELL) {
+    return SETUP_ACCESS_MANUAL;
+  }
+
+  return SETUP_ACCESS_CLOUD_SHELL;
+};
+
+const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_GCP)
+    ?.config?.cloud_shell_url?.value;
+
+  return template || undefined;
+};
+
+const updateCloudShellUrl = (
+  newPolicy: NewPackagePolicy,
+  updatePolicy: (policy: NewPackagePolicy) => void,
+  templateUrl: string | undefined
+) => {
+  updatePolicy?.({
+    ...newPolicy,
+    inputs: newPolicy.inputs.map((input) => {
+      if (input.type === CLOUDBEAT_GCP) {
+        return {
+          ...input,
+          config: { cloud_shell_url: { value: templateUrl } },
+        };
+      }
+      return input;
+    }),
+  });
+};
+
+const useCloudShellUrl = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+  setupFormat,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+  setupFormat: SetupFormatGCP;
+}) => {
+  useEffect(() => {
+    const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
+
+    if (setupFormat === SETUP_ACCESS_MANUAL) {
+      if (!!policyInputCloudShellUrl) {
+        updateCloudShellUrl(newPolicy, updatePolicy, undefined);
+      }
+      return;
+    }
+    const templateUrl = getCspmCloudShellDefaultValue(packageInfo);
+
+    // If the template is not available, do not update the policy
+    if (templateUrl === '') return;
+
+    // If the template is already set, do not update the policy
+    if (policyInputCloudShellUrl === templateUrl) return;
+
+    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
+};
+
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
@@ -175,22 +291,74 @@ export const GcpCredentialsForm = ({
   packageInfo,
   setIsValid,
   onChange,
-}: Props) => {
+}: GcpFormProps) => {
   const fields = getInputVarsFields(input, gcpField.fields);
+  const validSemantic = semverValid(packageInfo.version);
+  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
+  const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
+  const fieldsSnapshot = useRef({});
+  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const setupFormat = getSetupFormatFromInput(input);
+  const getFieldById = (id: keyof GcpInputFields['fields']) => {
+    return fields.find((element) => element.id === id);
+  };
 
+  useCloudShellUrl({
+    packageInfo,
+    newPolicy,
+    updatePolicy,
+    setupFormat,
+  });
+  const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
+    if (newSetupFormat === SETUP_ACCESS_CLOUD_SHELL) {
+      // We need to store the current manual fields to restore them later
+      fieldsSnapshot.current = Object.fromEntries(
+        fields.map((field) => [field.id, { value: field.value }])
+      );
+      // We need to store the last manual credentials type to restore it later
+      lastSetupAccessType.current = input.streams[0].vars?.setup_access?.value;
+
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          setup_access: {
+            value: SETUP_ACCESS_CLOUD_SHELL,
+            type: 'text',
+          },
+          // Clearing fields from previous setup format to prevent exposing credentials
+          // when switching from manual to cloud formation
+          ...Object.fromEntries(fields.map((field) => [field.id, { value: undefined }])),
+        })
+      );
+    } else {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          setup_access: {
+            // Restoring last manual credentials type
+            value: SETUP_ACCESS_MANUAL,
+            type: 'text',
+          },
+          // Restoring fields from manual setup format if any
+          ...fieldsSnapshot.current,
+        })
+      );
+    }
+  };
+  // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
-    const isInvalid = packageInfo.version < MIN_VERSION_GCP_CIS;
+    const isProjectIdEmpty =
+      setupFormat === SETUP_ACCESS_MANUAL && !getFieldById('gcp.project_id')?.value;
+    const isInvalidPolicy = isInvalid || isProjectIdEmpty;
 
-    setIsValid(!isInvalid);
+    setIsValid(!isInvalidPolicy);
 
     onChange({
-      isValid: !isInvalid,
+      isValid: !isInvalidPolicy,
       updatedPolicy: newPolicy,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo]);
+  }, [input, packageInfo, setupFormat]);
 
-  if (packageInfo.version < MIN_VERSION_GCP_CIS) {
+  if (isInvalid) {
     return (
       <>
         <EuiSpacer size="l" />
@@ -207,31 +375,29 @@ export const GcpCredentialsForm = ({
     <>
       <GCPSetupInfoContent />
       <EuiSpacer size="l" />
-      <GcpSetupAccessSelector
-        onChange={(optionId) => updatePolicy(getPosturePolicy(newPolicy, input.type))}
+      <RadioGroup
+        size="s"
+        options={getSetupFormatOptions()}
+        idSelected={setupFormat}
+        onChange={onSetupFormatChange}
       />
       <EuiSpacer size="l" />
-      <GcpInputVarFields
-        fields={fields}
-        onChange={(key, value) =>
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
-        }
-      />
+      {setupFormat === SETUP_ACCESS_MANUAL ? (
+        <GcpInputVarFields
+          fields={fields}
+          onChange={(key, value) =>
+            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+          }
+        />
+      ) : (
+        <GoogleCloudShellSetup />
+      )}
       <EuiSpacer size="s" />
-      {DocsLink}
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
       <EuiSpacer />
     </>
   );
 };
-
-const GcpSetupAccessSelector = ({ onChange }: { onChange(type: GcpCredentialsType): void }) => (
-  <RadioGroup
-    size="s"
-    options={getSetupFormatOptions()}
-    idSelected={'manual'}
-    onChange={(id: GcpCredentialsType) => onChange(id)}
-  />
-);
 
 const GcpInputVarFields = ({
   fields,
@@ -240,52 +406,65 @@ const GcpInputVarFields = ({
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
 }) => {
-  const [credentialOption, setCredentialOption] = useState('Credentials File');
-  const targetFieldName = (id: string) => {
+  const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
+  const projectIdFields = getFieldById('gcp.project_id');
+  const credentialsTypeFields = getFieldById('gcp.credentials.type');
+  const credentialFilesFields = getFieldById('gcp.credentials.file');
+  const credentialJSONFields = getFieldById('gcp.credentials.json');
+
+  const credentialFieldValue = credentialOptionsList[0].value;
+  const credentialJSONValue = credentialOptionsList[1].value;
+
+  const credentialsTypeValue = credentialsTypeFields?.value || credentialOptionsList[0].value;
+
   return (
     <div>
       <EuiForm component="form">
-        <EuiFormRow fullWidth label={gcpField.fields.project_id.label}>
-          <EuiFieldText
-            id={targetFieldName('project_id')!.id}
-            fullWidth
-            value={targetFieldName('project_id')!.value || ''}
-            onChange={(event) => onChange(targetFieldName('project_id')!.id, event.target.value)}
-          />
-        </EuiFormRow>
-        <EuiFormRow fullWidth label={'Credentials'}>
-          <EuiSelect
-            fullWidth
-            options={credentialOptionsList}
-            value={credentialOption}
-            onChange={(optionElem) => {
-              setCredentialOption(optionElem.target.value);
-            }}
-          />
-        </EuiFormRow>
-        {credentialOption === 'Credentials File' && (
-          <EuiFormRow fullWidth label={CredentialFileText}>
+        {projectIdFields && (
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
-              id={targetFieldName('credentials_file')!.id}
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
+              id={projectIdFields.id}
               fullWidth
-              value={targetFieldName('credentials_file')!.value || ''}
-              onChange={(event) =>
-                onChange(targetFieldName('credentials_file')!.id, event.target.value)
-              }
+              value={projectIdFields.value || ''}
+              onChange={(event) => onChange(projectIdFields.id, event.target.value)}
             />
           </EuiFormRow>
         )}
-        {credentialOption === 'Credentials JSON' && (
-          <EuiFormRow fullWidth label={CredentialJSONText}>
-            <EuiTextArea
-              id={targetFieldName('credentials_json')!.id}
+        {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
+            <EuiSelect
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
-              value={targetFieldName('credentials_json')!.value || ''}
-              onChange={(event) =>
-                onChange(targetFieldName('credentials_json')!.id, event.target.value)
-              }
+              options={credentialOptionsList}
+              value={credentialsTypeFields?.value || credentialOptionsList[0].value}
+              onChange={(optionElem) => {
+                onChange(credentialsTypeFields?.id, optionElem.target.value);
+              }}
+            />
+          </EuiFormRow>
+        )}
+        {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
+            <EuiFieldText
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
+              id={credentialFilesFields.id}
+              fullWidth
+              value={credentialFilesFields.value || ''}
+              onChange={(event) => onChange(credentialFilesFields.id, event.target.value)}
+            />
+          </EuiFormRow>
+        )}
+        {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
+            <EuiTextArea
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+              id={credentialJSONFields.id}
+              fullWidth
+              value={credentialJSONFields.value || ''}
+              onChange={(event) => onChange(credentialJSONFields.id, event.target.value)}
             />
           </EuiFormRow>
         )}

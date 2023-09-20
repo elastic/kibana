@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { CaseMetricsFeature } from '../../common/types/api';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useHttp } from '../common/lib/kibana';
@@ -25,7 +26,7 @@ export const useGetCasesMetrics = () => {
     ({ signal }) =>
       getCasesMetrics({
         http,
-        query: { owner, features: ['mttr'] },
+        query: { owner, features: [CaseMetricsFeature.MTTR] },
         signal,
       }),
     {

@@ -472,7 +472,7 @@ describe('StatefulOpenTimeline', () => {
         false
       );
 
-      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
       expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
         true

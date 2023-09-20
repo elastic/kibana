@@ -8,19 +8,21 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ABOUT_SECTION_CONTENT_TEST_ID, ABOUT_SECTION_HEADER_TEST_ID } from './test_ids';
+import { TestProviders } from '../../../common/mock';
 import { AboutSection } from './about_section';
 import { RightPanelContext } from '../context';
-
-const panelContextValue = {} as unknown as RightPanelContext;
+import { mockContextValue } from '../mocks/mock_right_panel_context';
 
 jest.mock('../../../common/components/link_to');
 
 describe('<AboutSection />', () => {
   it('should render the component collapsed', () => {
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <AboutSection />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={mockContextValue}>
+          <AboutSection />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
@@ -28,9 +30,11 @@ describe('<AboutSection />', () => {
 
   it('should render the component expanded', () => {
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <AboutSection expanded={true} />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={mockContextValue}>
+          <AboutSection expanded={true} />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
@@ -39,9 +43,11 @@ describe('<AboutSection />', () => {
 
   it('should expand the component when clicking on the arrow on header', () => {
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <AboutSection />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={mockContextValue}>
+          <AboutSection />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     getByTestId(ABOUT_SECTION_HEADER_TEST_ID).click();

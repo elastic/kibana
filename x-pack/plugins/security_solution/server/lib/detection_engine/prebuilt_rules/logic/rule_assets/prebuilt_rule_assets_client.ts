@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsTopHitsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -17,7 +16,6 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../model/rule_versions/rule_version_specifier';
 
 const MAX_PREBUILT_RULES_COUNT = 10_000;
-const MAX_ASSETS_PER_BULK_CREATE_REQUEST = 500;
 
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
@@ -25,8 +23,6 @@ export interface IPrebuiltRuleAssetsClient {
   fetchLatestVersions(): Promise<RuleVersionSpecifier[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
-
-  bulkCreateAssets(assets: PrebuiltRuleAsset[]): Promise<void>;
 }
 
 export const createPrebuiltRuleAssetsClient = (
@@ -148,27 +144,6 @@ export const createPrebuiltRuleAssetsClient = (
 
         const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
         return validatePrebuiltRuleAssets(ruleAssets);
-      });
-    },
-
-    bulkCreateAssets: (assets: PrebuiltRuleAsset[]): Promise<void> => {
-      return withSecuritySpan('IPrebuiltRuleAssetsClient.bulkCreateAssets', async () => {
-        const validAssets = validatePrebuiltRuleAssets(assets);
-        const bulkCreateObjects: Array<SavedObjectsBulkCreateObject<PrebuiltRuleAsset>> =
-          validAssets.map((asset) => ({
-            id: `${asset.rule_id}_${asset.version}`,
-            type: PREBUILT_RULE_ASSETS_SO_TYPE,
-            attributes: asset,
-          }));
-
-        const bulkCreateChunks = chunk(bulkCreateObjects, MAX_ASSETS_PER_BULK_CREATE_REQUEST);
-
-        for (const chunkOfObjects of bulkCreateChunks) {
-          await savedObjectsClient.bulkCreate<PrebuiltRuleAsset>(chunkOfObjects, {
-            refresh: false,
-            overwrite: true,
-          });
-        }
       });
     },
   };

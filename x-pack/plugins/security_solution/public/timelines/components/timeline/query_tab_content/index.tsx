@@ -278,7 +278,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-  }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
+  }, [dispatch, filterManager, timelineId]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({

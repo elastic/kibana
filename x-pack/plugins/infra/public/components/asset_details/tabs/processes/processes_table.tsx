@@ -17,14 +17,18 @@ import {
   EuiTableRowCell,
   EuiLoadingChart,
   EuiEmptyPrompt,
+  useEuiTheme,
   EuiText,
   EuiLink,
   EuiButton,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
+  EuiCode,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
+import { EuiTableRow } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import type { Process } from './types';
@@ -38,6 +42,7 @@ interface TableProps {
   currentTime: number;
   isLoading: boolean;
   sortBy: SortBy;
+  error?: string;
   setSortBy: (s: SortBy) => void;
   clearSearchBar: () => void;
 }
@@ -71,6 +76,7 @@ export const ProcessesTable = ({
   currentTime,
   isLoading,
   sortBy,
+  error,
   setSortBy,
   clearSearchBar,
 }: TableProps) => {
@@ -113,9 +119,10 @@ export const ProcessesTable = ({
         titleSize="s"
         title={
           <strong>
-            {i18n.translate('xpack.infra.metrics.nodeDetails.noProcesses', {
-              defaultMessage: 'No processes found',
-            })}
+            <FormattedMessage
+              id="xpack.infra.metrics.nodeDetails.noProcesses"
+              defaultMessage="No processes found"
+            />
           </strong>
         }
         body={
@@ -145,37 +152,47 @@ export const ProcessesTable = ({
             data-test-subj="infraProcessesTableClearFiltersButton"
             onClick={clearSearchBar}
           >
-            {i18n.translate('xpack.infra.metrics.nodeDetails.noProcessesClearFilters', {
-              defaultMessage: 'Clear filters',
-            })}
+            <FormattedMessage
+              id="xpack.infra.metrics.nodeDetails.noProcessesClearFilters"
+              defaultMessage="Clear filters"
+            />
           </EuiButton>
         }
       />
     );
 
   return (
-    <>
-      <EuiTable data-test-subj="infraProcessesTable" responsive={false}>
-        <EuiTableHeader>
-          <EuiTableHeaderCell width={24} />
-          {columns.map((column) => (
-            <EuiTableHeaderCell
-              key={`${String(column.field)}-header`}
-              align={column.align ?? LEFT_ALIGNMENT}
-              width={column.width}
-              onSort={column.sortable ? () => updateSortableProperties(column.field) : undefined}
-              isSorted={sortBy.name === column.field}
-              isSortAscending={sortBy.name === column.field && sortBy.isAscending}
-            >
-              {column.name}
-            </EuiTableHeaderCell>
-          ))}
-        </EuiTableHeader>
-        <StyledTableBody>
+    <EuiTable data-test-subj="infraAssetDetailsProcessesTable" responsive={false}>
+      <EuiTableHeader>
+        <EuiTableHeaderCell width={24} />
+        {columns.map((column) => (
+          <EuiTableHeaderCell
+            key={`${String(column.field)}-header`}
+            align={column.align ?? LEFT_ALIGNMENT}
+            width={column.width}
+            onSort={column.sortable ? () => updateSortableProperties(column.field) : undefined}
+            isSorted={sortBy.name === column.field}
+            isSortAscending={sortBy.name === column.field && sortBy.isAscending}
+          >
+            {column.name}
+          </EuiTableHeaderCell>
+        ))}
+      </EuiTableHeader>
+      <EuiTableBody
+        css={css`
+          & .euiTableCellContent {
+            padding-top: 0;
+            padding-bottom: 0;
+          }
+        `}
+      >
+        {error ? (
+          <ProcessesTableError error={error} />
+        ) : (
           <ProcessesTableBody items={currentItems} currentTime={currentTime} />
-        </StyledTableBody>
-      </EuiTable>
-    </>
+        )}
+      </EuiTableBody>
+    </EuiTable>
   );
 };
 
@@ -196,10 +213,37 @@ const LoadingPlaceholder = () => {
   );
 };
 
+interface ProcessesTableErrorProps {
+  error: string;
+}
+
+const ProcessesTableError = ({ error }: ProcessesTableErrorProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell
+        data-test-subj="infraAssetDetailsProcessesSearchInputError"
+        style={{
+          paddingTop: `${euiTheme.size.s}`,
+          paddingBottom: `${euiTheme.size.s}`,
+        }}
+        align="center"
+        colSpan={columns.length + 1}
+        mobileOptions={{ width: '100%' }}
+        textOnly={true}
+      >
+        <EuiIcon type="minusInCircle" color="danger" /> {error}
+      </EuiTableRowCell>
+    </EuiTableRow>
+  );
+};
+
 interface TableBodyProps {
   items: Process[];
   currentTime: number;
 }
+
 const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
   <>
     {items.map((item, i) => {
@@ -213,18 +257,10 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportCopilot={true} />;
+      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportAIAssistant={true} />;
     })}
   </>
 );
-
-const StyledTableBody = euiStyled(EuiTableBody)`
-  & .euiTableCellContent {
-    padding-top: 0;
-    padding-bottom: 0;
-
-  }
-`;
 
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -271,7 +307,7 @@ const columns: Array<{
     }),
     sortable: false,
     width: '40%',
-    render: (command: string) => <CodeLine>{command}</CodeLine>,
+    render: (command: string) => <CodeLine command={command} />,
   },
   {
     field: 'startTime',
@@ -302,10 +338,25 @@ const columns: Array<{
   },
 ];
 
-const CodeLine = euiStyled.div`
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
-  font-size: ${(props) => props.theme.eui.euiFontSizeS};
-  white-space: pre;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const CodeLine = ({ command }: { command: string }) => {
+  const euiTheme = useEuiTheme();
+  return (
+    <div
+      css={css`
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      `}
+    >
+      <EuiCode
+        transparentBackground
+        css={css`
+          color: ${euiTheme.euiTheme.colors.text};
+          font-weight: ${euiTheme.euiTheme.font.weight.medium};
+        `}
+      >
+        {command}
+      </EuiCode>
+    </div>
+  );
+};

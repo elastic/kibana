@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
+  DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
 
 import { ComponentTemplateListItem } from '../../../../../common';
@@ -31,7 +32,7 @@ export interface Props {
   isSelected?: boolean | ((component: ComponentTemplateListItem) => boolean);
   onViewDetail: (component: ComponentTemplateListItem) => void;
   actions?: Action[];
-  dragHandleProps?: { [key: string]: any };
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
 }
 
 export const ComponentTemplatesListItem = ({

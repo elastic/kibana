@@ -16,7 +16,12 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
-import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -533,7 +538,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });

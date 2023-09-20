@@ -10,12 +10,19 @@ import {
   DefaultNavigation,
   NavigationKibanaProvider,
   type NavigationTreeDefinition,
-  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+
+// Hiding this until page is in a better space
+const _connectorItem = {
+  link: 'serverlessConnectors',
+  title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+    defaultMessage: 'Connectors',
+  }),
+};
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -40,7 +47,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          children: getPresets('devtools').children[0].children,
+          children: [{ link: 'dev_tools:console' }, { link: 'dev_tools:searchprofiler' }],
         },
         {
           id: 'explore',
@@ -83,24 +90,19 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-                defaultMessage: 'Indices',
+                defaultMessage: 'Index Management',
               }),
-              // TODO: this will be updated to a new Indices page
               link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
             {
               title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
                 defaultMessage: 'Pipelines',
               }),
-              // TODO: this will be updated to a new Pipelines page
               link: 'management:ingest_pipelines',
-            },
-            {
-              id: 'content_indexing_api',
-              link: 'serverlessIndexingApi',
-              title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
-                defaultMessage: 'Indexing API',
-              }),
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
           ],
         },
@@ -112,14 +114,12 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               link: 'management:api_keys',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
           ],
         },
       ],
-    },
-    {
-      type: 'navGroup',
-      ...getPresets('ml'),
     },
   ],
   footer: [
@@ -139,6 +139,13 @@ const navigationTree: NavigationTreeDefinition = {
               link: 'management',
               title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
                 defaultMessage: 'Management',
+              }),
+            },
+            {
+              id: 'cloudLinkDeployment',
+              cloudLink: 'deployment',
+              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                defaultMessage: 'Performance',
               }),
             },
             {

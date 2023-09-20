@@ -37,6 +37,7 @@ import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { deleteMonitor } from './delete_monitor';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -96,7 +97,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       initDefaultAlerts(newMonitor.attributes.name, routeContext);
       setupGettingStarted(newMonitor.id, routeContext);
 
-      return response.ok({ body: newMonitor });
+      return response.ok({ body: mapSavedObjectToMonitor(newMonitor) });
     } catch (getErr) {
       server.logger.error(getErr);
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
@@ -173,7 +174,7 @@ export const syncNewMonitor = async ({
   routeContext: RouteContext;
   privateLocations: PrivateLocationAttributes[];
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
+  const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
@@ -192,7 +193,6 @@ export const syncNewMonitor = async ({
 
     const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
       [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-      request,
       savedObjectsClient,
       privateLocations,
       spaceId

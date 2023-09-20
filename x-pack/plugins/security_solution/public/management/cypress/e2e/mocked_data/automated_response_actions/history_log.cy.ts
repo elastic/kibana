@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
+import { generateRandomStringName } from '../../../tasks/utils';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
@@ -85,6 +85,6 @@ describe('Response actions history page', () => {
       cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();
     });
     // check if we were moved to Rules app after clicking Triggered by rule
-    cy.getByTestSubj('breadcrumb last').contains('Rules');
+    cy.getByTestSubj('breadcrumb last').contains('Detection rules (SIEM)');
   });
 });

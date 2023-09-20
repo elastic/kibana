@@ -18,7 +18,7 @@ import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-
+import type { ArtifactLicense } from '@kbn/es';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -77,7 +77,7 @@ export interface CreateTestEsClusterOptions {
    * you'll likely need to use `basic` or `gold` to prevent the test from failing
    * when the license expires.
    */
-  license?: 'basic' | 'gold' | 'trial'; // | 'oss'
+  license?: ArtifactLicense;
   log: ToolingLog;
   writeLogsToPath?: string;
   /**
@@ -143,6 +143,14 @@ export interface CreateTestEsClusterOptions {
    * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
    */
   onEarlyExit?: (msg: string) => void;
+  /**
+   * Is this a serverless project
+   */
+  serverless?: boolean;
+  /**
+   * Files to mount inside ES containers
+   */
+  files?: string[];
 }
 
 export function createTestEsCluster<
@@ -164,6 +172,7 @@ export function createTestEsCluster<
     ssl,
     transportPort,
     onEarlyExit,
+    files,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -215,9 +224,30 @@ export function createTestEsCluster<
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        installPath = (await firstNode.installSource(config)).installPath;
+        installPath = (
+          await firstNode.installSource({
+            sourcePath: config.sourcePath,
+            license: config.license,
+            password: config.password,
+            basePath: config.basePath,
+            esArgs: config.esArgs,
+          })
+        ).installPath;
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
+      } else if (esFrom === 'serverless') {
+        return await firstNode.runServerless({
+          basePath,
+          esArgs: customEsArgs,
+          port,
+          clean: true,
+          teardown: true,
+          background: true,
+          files,
+          ssl,
+          kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
+          waitForReady: true,
+        });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {

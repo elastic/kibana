@@ -23,14 +23,21 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
+import { PLUGIN_ID } from '../common';
+import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
+import { ObservabilityOnboardingPluginLocators } from './locators';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
 
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
+  discover: DiscoverSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -46,6 +53,8 @@ export class ObservabilityOnboardingPlugin
       ObservabilityOnboardingPluginStart
     >
 {
+  private locators?: ObservabilityOnboardingPluginLocators;
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -67,7 +76,7 @@ export class ObservabilityOnboardingPlugin
         navLinkStatus: isServerlessEnabled
           ? AppNavLinkStatus.visible
           : AppNavLinkStatus.hidden,
-        id: 'observabilityOnboarding',
+        id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
         euiIconType: 'logoObservability',
@@ -96,9 +105,23 @@ export class ObservabilityOnboardingPlugin
         },
       });
     }
+
+    this.locators = {
+      onboarding: plugins.share.url.locators.create(
+        new ObservabilityOnboardingLocatorDefinition()
+      ),
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
   public start(
     core: CoreStart,
     plugins: ObservabilityOnboardingPluginStartDeps
-  ) {}
+  ) {
+    return {
+      locators: this.locators,
+    };
+  }
 }

@@ -17,6 +17,7 @@ export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
       options: {
         authRequired: false,
         tags: ['api'],
+        access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
       },
       validate: false,
     },

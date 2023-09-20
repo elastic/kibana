@@ -917,6 +917,75 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.SearchResponseIncompleteWarning",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchResponseIncompleteWarning",
+        "description": [
+          "\nA warning object for a search response with incomplete ES results\nES returns incomplete results when:\n1) Set timeout flag on search and the timeout expires on cluster\n2) Some shard failures on a cluster\n3) skipped remote(s) (skip_unavailable=true)\n  a. all shards failed\n  b. disconnected/not-connected"
+        ],
+        "path": "src/plugins/data/public/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\ntype: for sorting out incomplete warnings"
+            ],
+            "signature": [
+              "\"incomplete\""
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "\nmessage: human-friendly message"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "clusters",
+            "description": [
+              "\nclusters: cluster details."
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ClusterDetails",
+                "text": "ClusterDetails"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.SearchSessionInfoProvider",
         "type": "Interface",
         "tags": [],
@@ -1412,14 +1481,11 @@
       {
         "parentPluginId": "data",
         "id": "def-public.noSearchSessionStorageCapabilityMessage",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "noSearchSessionStorageCapabilityMessage",
         "description": [
           "\nMessage to display in case storing\nsession session is disabled due to turned off capability"
-        ],
-        "signature": [
-          "any"
         ],
         "path": "src/plugins/data/public/search/session/i18n.ts",
         "deprecated": false,
@@ -1451,9 +1517,13 @@
           "\nA warning object for a search response with warnings"
         ],
         "signature": [
-          "SearchResponseTimeoutWarning",
-          " | ",
-          "SearchResponseShardFailureWarning"
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-public.SearchResponseIncompleteWarning",
+            "text": "SearchResponseIncompleteWarning"
+          }
         ],
         "path": "src/plugins/data/public/search/types.ts",
         "deprecated": false,
@@ -3113,19 +3183,7 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsPitParams",
-                    "text": "SavedObjectsPitParams"
-                  },
-                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
-                  "SortOrder",
-                  " | undefined; searchAfter?: ",
-                  "SortResults",
-                  " | undefined; hasReference?: ",
+                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3141,7 +3199,19 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+                  "[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsPitParams",
+                    "text": "SavedObjectsPitParams"
+                  },
+                  " | undefined; sortOrder?: ",
+                  "SortOrder",
+                  " | undefined; searchAfter?: ",
+                  "SortResults",
+                  " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3885,6 +3955,20 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchStrategyDependencies.rollupsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rollupsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -7133,7 +7217,7 @@
                 "section": "def-common.RequestAdapter",
                 "text": "RequestAdapter"
               },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableShardFailureWarning?: boolean | undefined) => Promise<",
+              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableWarningToasts?: boolean | undefined) => Promise<",
               "SearchResponse",
               "<any, Record<string, ",
               "AggregationsAggregate",
@@ -7501,7 +7585,7 @@
                 "id": "def-common.AggType.postFlightRequest.$8",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "disableShardFailureWarning",
+                "label": "disableWarningToasts",
                 "description": [],
                 "signature": [
                   "boolean | undefined"
@@ -15434,7 +15518,7 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, title, description, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableWarningToasts, getNow, executionContext, title, description, }: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -15463,7 +15547,7 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableWarningToasts,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
             "description": [],
             "signature": [
               {
@@ -29374,10 +29458,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.RequestHandlerParams.disableShardWarnings",
+            "id": "def-common.RequestHandlerParams.disableWarningToasts",
             "type": "CompoundType",
             "tags": [],
-            "label": "disableShardWarnings",
+            "label": "disableWarningToasts",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -30225,6 +30309,17 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceDependencies.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30720,12 +30815,12 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSourceSearchOptions.disableShardFailureWarning",
+            "id": "def-common.SearchSourceSearchOptions.disableWarningToasts",
             "type": "CompoundType",
             "tags": [],
-            "label": "disableShardFailureWarning",
+            "label": "disableWarningToasts",
             "description": [
-              "\nDisable default warnings of shard failures"
+              "\nSet to true to disable warning toasts and customize warning display"
             ],
             "signature": [
               "boolean | undefined"
@@ -32078,7 +32173,7 @@
         "label": "boundsDescendingRaw",
         "description": [],
         "signature": [
-          "({ bound: number; interval: moment.Duration; boundLabel: any; intervalLabel: any; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: any; intervalLabel: any; })[]"
+          "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
         "deprecated": false,
@@ -32437,6 +32532,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ESQL_SEARCH_STRATEGY",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_SEARCH_STRATEGY",
+        "description": [],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.EsQuerySearchAfter",
         "type": "Type",
         "tags": [
@@ -32458,10 +32568,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
           },
           {
             "plugin": "discover",
@@ -32591,7 +32697,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; disableShardWarnings?: boolean | undefined; }"
+          " | undefined; disableWarningToasts?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -34183,7 +34289,7 @@
         "label": "intervalOptions",
         "description": [],
         "signature": [
-          "({ display: any; val: string; enabled(agg: ",
+          "({ display: string; val: string; enabled(agg: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34191,7 +34297,7 @@
             "section": "def-common.IBucketAggConfig",
             "text": "IBucketAggConfig"
           },
-          "): boolean; } | { display: any; val: string; })[]"
+          "): boolean; } | { display: string; val: string; })[]"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/_interval_options.ts",
         "deprecated": false,
@@ -34952,13 +35058,10 @@
       {
         "parentPluginId": "data",
         "id": "def-common.parentPipelineType",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "parentPipelineType",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -35210,13 +35313,10 @@
       {
         "parentPluginId": "data",
         "id": "def-common.siblingPipelineType",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "siblingPipelineType",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -35363,13 +35463,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggGroupLabels.AggGroupNames.Buckets",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Buckets]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -35377,13 +35474,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggGroupLabels.AggGroupNames.Metrics",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Metrics]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -35391,13 +35485,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggGroupLabels.AggGroupNames.None",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.None]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -35476,13 +35567,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.cidrFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/cidr.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -35540,13 +35628,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.cidrFunction.args.mask.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/cidr.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -35675,13 +35760,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.dateRangeFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/date_range.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -35725,13 +35807,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.dateRangeFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/date_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -35766,13 +35845,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.dateRangeFunction.args.to.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/date_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36076,13 +36152,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.existsFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -36140,13 +36213,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.existsFilterFunction.args.field.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36195,13 +36265,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.existsFilterFunction.args.negate.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36332,13 +36399,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.extendedBoundsFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -36382,13 +36446,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.extendedBoundsFunction.args.min.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36423,13 +36484,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.extendedBoundsFunction.args.max.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36558,13 +36616,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.fieldFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/field.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -36622,13 +36677,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.fieldFunction.args.name.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/field.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36677,13 +36729,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.fieldFunction.args.type.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/field.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36718,13 +36767,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.fieldFunction.args.script.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/field.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36846,13 +36892,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.geoBoundingBoxFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -36896,13 +36939,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.top.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36937,13 +36977,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.left.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -36978,13 +37015,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.bottom.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37019,13 +37053,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.right.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37060,13 +37091,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.wkt.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37101,13 +37129,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.topLeft.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37142,13 +37167,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.bottomRight.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37183,13 +37205,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.topRight.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37224,13 +37243,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoBoundingBoxFunction.args.bottomLeft.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37352,13 +37368,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.geoPointFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/geo_point.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -37402,13 +37415,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoPointFunction.args.lat.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37443,13 +37453,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoPointFunction.args.lon.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37512,13 +37519,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.geoPointFunction.args.point.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/geo_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37640,13 +37644,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.ipRangeFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/ip_range.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -37704,13 +37705,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.ipRangeFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/ip_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37759,13 +37757,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.ipRangeFunction.args.to.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/ip_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -37894,13 +37889,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.kibana.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/kibana.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -38107,13 +38099,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.kibanaFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -38185,13 +38174,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaFilterFunction.args.query.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38240,13 +38226,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaFilterFunction.args.negate.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38295,13 +38278,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaFilterFunction.args.disabled.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38416,13 +38396,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.kibanaTimerangeFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -38480,13 +38457,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaTimerangeFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/timerange.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38535,13 +38509,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaTimerangeFunction.args.to.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/timerange.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38590,13 +38561,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kibanaTimerangeFunction.args.mode.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/timerange.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38725,13 +38693,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.kqlFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/kql.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -38803,13 +38768,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.kqlFunction.args.q.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/kql.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38924,13 +38886,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.luceneFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/lucene.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39002,13 +38961,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.luceneFunction.args.q.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/lucene.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39266,13 +39222,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.numericalRangeFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39316,13 +39269,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.numericalRangeFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39357,13 +39307,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.numericalRangeFunction.args.to.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39398,13 +39345,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.numericalRangeFunction.args.label.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39491,13 +39435,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.parentPipelineAggHelper.subtype",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "subtype",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39639,13 +39580,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.phraseFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39703,13 +39641,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.phraseFilterFunction.args.field.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39772,13 +39707,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.phraseFilterFunction.args.phrase.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39827,13 +39759,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.phraseFilterFunction.args.negate.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39964,13 +39893,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.queryFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/query_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -40042,13 +39968,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.queryFilterFunction.args.input.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/query_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40083,13 +40006,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.queryFilterFunction.args.label.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/query_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40211,13 +40131,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.rangeFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -40275,13 +40192,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFilterFunction.args.field.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40330,13 +40244,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFilterFunction.args.range.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40385,13 +40296,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFilterFunction.args.negate.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40522,13 +40430,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.rangeFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/range.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -40572,13 +40477,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFunction.args.gt.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40613,13 +40515,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFunction.args.lt.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40654,13 +40553,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFunction.args.gte.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40695,13 +40591,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.rangeFunction.args.lte.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40831,13 +40724,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.removeFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -40895,13 +40785,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.removeFilterFunction.args.group.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40936,13 +40823,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.removeFilterFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41005,13 +40889,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.removeFilterFunction.args.ungrouped.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41068,7 +40949,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableShardWarnings?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -41172,13 +41053,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.selectFilterFunction.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -41236,13 +41114,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.selectFilterFunction.args.group.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/select_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41291,13 +41166,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.selectFilterFunction.args.from.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/select_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41360,13 +41232,10 @@
                   {
                     "parentPluginId": "data",
                     "id": "def-common.selectFilterFunction.args.ungrouped.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/data/common/search/expressions/select_filter.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41423,7 +41292,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableShardWarnings?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false,
@@ -41485,13 +41354,10 @@
           {
             "parentPluginId": "data",
             "id": "def-common.siblingPipelineAggHelper.subtype",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "subtype",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
             "deprecated": false,
             "trackAdoption": false

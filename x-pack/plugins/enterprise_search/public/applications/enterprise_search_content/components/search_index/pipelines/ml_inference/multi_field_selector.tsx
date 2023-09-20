@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -31,13 +31,62 @@ import { MLInferenceLogic } from './ml_inference_logic';
 
 type FieldNames = Array<{ label: string }>;
 
+const TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.noFields',
+  {
+    defaultMessage: 'Select a source field',
+  }
+);
+
+const TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.multipleFields',
+  {
+    defaultMessage: 'Automatically created for multi-select',
+  }
+);
+
+const TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.textExpansionModel',
+  {
+    defaultMessage: 'Automatically created',
+  }
+);
+
+const TARGET_FIELD_HELP_TEXT_DEFAULT = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
+  {
+    defaultMessage: 'Optional. Field name where inference results should be saved.',
+  }
+);
+
+const TARGET_FIELD_HELP_TEXT_TEXT_EXPANSION_MODEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpTextTextExpansionModel',
+  {
+    defaultMessage: 'ELSER target fields are created automatically.',
+  }
+);
+
+const getInitialTargetFieldPlaceholderText = (isTextExpansionModelSelected: boolean) =>
+  isTextExpansionModelSelected
+    ? TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL
+    : TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS;
+
+const getTargetFieldHelpText = (isTextExpansionModelSelected: boolean) =>
+  isTextExpansionModelSelected
+    ? TARGET_FIELD_HELP_TEXT_TEXT_EXPANSION_MODEL
+    : TARGET_FIELD_HELP_TEXT_DEFAULT;
+
 export const MultiFieldMapping: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration, selectedSourceFields = [] },
+    isTextExpansionModelSelected,
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { addSelectedFieldsToMapping, selectFields } = useActions(MLInferenceLogic);
+  const { addSelectedFieldsToMapping, selectFields, setTargetField } = useActions(MLInferenceLogic);
+  const [placeholderText, setPlaceholderText] = useState<string>(
+    getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected)
+  );
 
   const mappedSourceFields =
     configuration.fieldMappings?.map(({ sourceField }) => sourceField) ?? [];
@@ -50,9 +99,25 @@ export const MultiFieldMapping: React.FC = () => {
   const selectedFields = selectedSourceFields.map((fieldName) => ({
     label: fieldName,
   }));
+  const targetField = configuration.targetField;
+  const isExactlyOneSourceFieldSelected = selectedSourceFields.length === 1;
 
   const onChangeSelectedFields = (selectedFieldNames: FieldNames) => {
     selectFields(selectedFieldNames.map(({ label }) => label));
+    setTargetField(
+      !isTextExpansionModelSelected && selectedFieldNames.length === 1
+        ? selectedFieldNames[0].label
+        : ''
+    );
+    setPlaceholderText(
+      isTextExpansionModelSelected
+        ? TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL
+        : selectedFieldNames.length === 0
+        ? TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
+        : selectedFieldNames.length === 1
+        ? selectedFieldNames[0].label
+        : TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS
+    );
   };
 
   const onCreateField = (fieldName: string) => {
@@ -61,6 +126,12 @@ export const MultiFieldMapping: React.FC = () => {
 
     selectedFields.push({ label: normalizedFieldName });
     selectFields([...selectedSourceFields, fieldName]);
+  };
+
+  const onAddSelectedFields = () => {
+    addSelectedFieldsToMapping(isTextExpansionModelSelected);
+    setTargetField('');
+    setPlaceholderText(getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected));
   };
 
   return (
@@ -72,7 +143,7 @@ export const MultiFieldMapping: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
               {
-                defaultMessage: 'Source field',
+                defaultMessage: 'Source text field',
               }
             )}
             helpText={i18n.translate(
@@ -109,23 +180,16 @@ export const MultiFieldMapping: React.FC = () => {
                 defaultMessage: 'Target field',
               }
             )}
-            helpText={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
-              {
-                defaultMessage: 'This name is automatically created based on your source field.',
-              }
-            )}
+            helpText={getTargetFieldHelpText(isTextExpansionModelSelected)}
             fullWidth
           >
             <EuiFieldText
+              prepend="ml.inference."
+              onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
-              disabled
-              value={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue',
-                {
-                  defaultMessage: 'This is automatically created',
-                }
-              )}
+              disabled={isTextExpansionModelSelected || !isExactlyOneSourceFieldSelected}
+              value={targetField}
+              placeholder={placeholderText}
               fullWidth
             />
           </EuiFormRow>
@@ -136,7 +200,7 @@ export const MultiFieldMapping: React.FC = () => {
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}
             iconType="plusInCircle"
-            onClick={addSelectedFieldsToMapping}
+            onClick={onAddSelectedFields}
             style={{ width: '60px' }}
           >
             {i18n.translate(
@@ -169,7 +233,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.sourceFieldHeader',
         {
-          defaultMessage: 'Source field',
+          defaultMessage: 'Source text field',
         }
       ),
     },

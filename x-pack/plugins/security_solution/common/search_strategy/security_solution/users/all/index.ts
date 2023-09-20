@@ -28,4 +28,5 @@ export interface UsersStrategyResponse extends IEsSearchResponse {
 
 export interface UsersRequestOptions extends RequestOptionsPaginated<SortableUsersFields> {
   defaultIndex: string[];
+  isNewRiskScoreModuleAvailable: boolean;
 }

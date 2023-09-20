@@ -26,6 +26,7 @@ import type {
   PackageSpecManifest,
   RegistryDataStreamRoutingRules,
   RegistryDataStreamLifecycle,
+  PackageSpecTags,
 } from '../../../../common/types';
 import {
   RegistryInputKeys,
@@ -44,6 +45,9 @@ export const MANIFEST_NAME = 'manifest.yml';
 export const DATASTREAM_MANIFEST_NAME = 'manifest.yml';
 export const DATASTREAM_ROUTING_RULES_NAME = 'routing_rules.yml';
 export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
+
+export const KIBANA_FOLDER_NAME = 'kibana';
+export const TAGS_NAME = 'tags.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
@@ -135,6 +139,7 @@ const PARSE_AND_VERIFY_ASSETS_NAME = [
   MANIFEST_NAME,
   DATASTREAM_ROUTING_RULES_NAME,
   DATASTREAM_LIFECYCLE_NAME,
+  TAGS_NAME,
 ];
 /**
  * Filter assets needed for the parse and verify archive function
@@ -146,14 +151,6 @@ export function filterAssetPathForParseAndVerifyArchive(assetPath: string): bool
 /*
   This function generates a package info object (see type `ArchivePackage`) by parsing and verifying the `manifest.yml` file as well
   as the directory structure for the given package archive and other files adhering to the package spec: https://github.com/elastic/package-spec.
-
-  Currently, this process is duplicative of logic that's already implemented in the Package Registry codebase,
-  e.g. https://github.com/elastic/package-registry/blob/main/packages/package.go. Because of this duplication, it's likely for our parsing/verification
-  logic to fall out of sync with the registry codebase's implementation.
-
-  This should be addressed in https://github.com/elastic/kibana/issues/115032
-  where we'll no longer use the package registry endpoint as a source of truth for package info objects, and instead Fleet will _always_ generate
-  them in the manner implemented below.
 */
 export async function generatePackageInfoFromArchiveBuffer(
   archiveBuffer: Buffer,
@@ -287,6 +284,22 @@ export function parseAndVerifyArchive(
   // Ensure top-level variables are parsed as well
   if (manifest.vars) {
     parsed.vars = parseAndVerifyVars(manifest.vars, 'manifest.yml');
+  }
+
+  // check that kibana/tags.yml file exists and add its content to ArchivePackage
+  const tagsFile = path.posix.join(toplevelDir, KIBANA_FOLDER_NAME, TAGS_NAME);
+  const tagsBuffer = assetsMap[tagsFile];
+
+  if (paths.includes(tagsFile) || tagsBuffer) {
+    let tags: PackageSpecTags[];
+    try {
+      tags = yaml.safeLoad(tagsBuffer.toString());
+      if (tags.length) {
+        parsed.asset_tags = tags;
+      }
+    } catch (error) {
+      throw new PackageInvalidArchiveError(`Could not parse tags file kibana/tags.yml: ${error}.`);
+    }
   }
 
   return parsed;

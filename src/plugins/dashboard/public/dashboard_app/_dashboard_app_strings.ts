@@ -51,6 +51,15 @@ export const unsavedChangesBadgeStrings = {
       defaultMessage:
         ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
     }),
+  getHasRunMigrationsText: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadge', {
+      defaultMessage: 'Save recommended',
+    }),
+  getHasRunMigrationsToolTipContent: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
+      defaultMessage:
+        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
+    }),
 };
 
 export const leaveConfirmStrings = {

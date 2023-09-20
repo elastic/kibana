@@ -104,11 +104,12 @@ export interface APMUsage {
     metric: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
-    max_transaction_groups_per_service: TimeframeMap;
-    max_error_groups_per_service: TimeframeMap;
+    max_transaction_groups_per_service: TimeframeMap1d;
+    max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
-    services: TimeframeMap;
+    services: TimeframeMap1d;
     environments: TimeframeMap1d;
+    span_destination_service_resource: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
@@ -210,6 +211,10 @@ export interface APMUsage {
     total: number;
   };
   per_service: APMPerService[];
+  top_traces: {
+    max: number;
+    median: number;
+  };
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
@@ -225,7 +230,8 @@ export interface APMUsage {
     | 'cardinality'
     | 'environments'
     | 'service_groups'
-    | 'per_service',
+    | 'per_service'
+    | 'top_traces',
     { took: { ms: number } }
   >;
 }

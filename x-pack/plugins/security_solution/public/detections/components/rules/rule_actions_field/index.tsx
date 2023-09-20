@@ -249,7 +249,7 @@ export const RuleActionsField: React.FC<Props> = ({
         defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
         defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
-        hasSummary: true,
+        hasAlertsMappings: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
         disableErrorMessages: !isFormValidated,

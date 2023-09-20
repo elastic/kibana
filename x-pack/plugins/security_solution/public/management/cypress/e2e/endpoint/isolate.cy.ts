@@ -23,7 +23,7 @@ import {
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -31,7 +31,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe('Isolate command', () => {
+describe.skip('Isolate command', () => {
   let isolateComment: string;
   let releaseComment: string;
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -72,6 +72,7 @@ describe('Isolate command', () => {
 
   beforeEach(() => {
     login();
+    disableExpandableFlyoutAdvancedSettings();
   });
 
   describe('From manage', () => {

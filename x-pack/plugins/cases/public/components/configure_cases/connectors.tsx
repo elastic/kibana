@@ -27,6 +27,7 @@ import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -63,6 +64,8 @@ const ConnectorsComponent: React.FC<Props> = ({
     () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
   );
+  const { permissions } = useCasesContext();
+  const canUseConnectors = permissions.connectors && actions.read;
 
   const connectorsName = connector?.name ?? 'none';
 
@@ -105,7 +108,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              {actions.read ? (
+              {canUseConnectors ? (
                 <ConnectorsDropdown
                   connectors={connectors}
                   disabled={disabled}

@@ -395,7 +395,7 @@
         "label": "NotAuthorizedSection",
         "description": [],
         "signature": [
-          "({ title, message }: Props) => JSX.Element"
+          "({ title, message, dataTestSubj }: Props) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
@@ -406,7 +406,7 @@
             "id": "def-public.NotAuthorizedSection.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, message }",
+            "label": "{ title, message, dataTestSubj }",
             "description": [],
             "signature": [
               "Props"

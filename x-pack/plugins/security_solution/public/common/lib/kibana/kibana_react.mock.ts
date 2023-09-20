@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -32,6 +32,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  SERVER_APP_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -47,7 +48,10 @@ import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
-import { UpsellingService } from '../upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -102,23 +106,29 @@ export const createStartServicesMock = (
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
+  const customDataService = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const navigation = navigationPluginMock.createStartContract();
+  const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
+  const cloud = cloudMock.createStart();
 
   return {
     ...core,
     apm,
     cases,
     unifiedSearch,
+    navigation,
+    discover,
     dataViews: dataViewServiceMock,
     data: {
       ...data,
@@ -168,12 +178,23 @@ export const createStartServicesMock = (
         })),
       },
     },
+    application: {
+      ...core.application,
+      capabilities: {
+        ...core.application.capabilities,
+        [SERVER_APP_ID]: {
+          crud: true,
+          read: true,
+        },
+      },
+    },
     security,
     storage,
     fleet,
     ml: {
       locator,
     },
+    telemetry: {},
     theme: {
       theme$: themeServiceMock.createTheme$(),
     },
@@ -191,14 +212,21 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    cloud: {
+      ...cloud,
+      isCloudEnabled: false,
+    },
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
+    customDataService,
+    uiActions: uiActionsPluginMock.createStartContract(),
   } as unknown as StartServices;
 };
 
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return (Component: unknown) => (props: unknown) => {
     return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };
@@ -207,8 +235,13 @@ export const createWithKibanaMock = () => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(KibanaContextProvider, { services }, children);
+    React.createElement(
+      KibanaContextProvider,
+      { services },
+      React.createElement(NavigationProvider, { core: services }, children)
+    );
 };
 
 export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>

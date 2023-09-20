@@ -8,10 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type {
-  PreviewResponse,
-  RuleCreateProps,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { PreviewResponse, RuleCreateProps } from '../../../../../common/api/detection_engine';
 
 import { previewRule } from '../../../../detection_engine/rule_management/api/api';
 import { transformOutput } from '../../../containers/detection_engine/rules/transforms';

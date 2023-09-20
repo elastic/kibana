@@ -7,19 +7,19 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiI18nNumber,
+  type CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFacetButton,
   EuiHorizontalRule,
-  RIGHT_ALIGNMENT,
+  EuiI18nNumber,
   EuiScreenReaderOnly,
+  EuiSkeletonText,
   EuiText,
   EuiToolTip,
   type HorizontalAlignment,
-  type CriteriaWithPagination,
-  EuiSkeletonText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,22 +28,21 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
+import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getActionStatus, getUiCommand } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { StatusBadge } from './status_badge';
+import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
 
 // Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton)`
+const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
@@ -129,6 +128,10 @@ const getResponseActionListTableColumns = ({
           <StyledFacetButton
             icon={
               <EuiAvatar
+                // We've a EuiTooltip that shows for createdBy below,
+                // Thus we don't need to add a title tooltip as well.
+                aria-hidden={true}
+                title=""
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
@@ -220,7 +223,7 @@ const getResponseActionListTableColumns = ({
 
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-            <StatusBadge
+            <ResponseActionStatusBadge
               color={
                 _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
               }
@@ -292,22 +295,19 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
-    const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
     const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
 
-    const actionIdsWithOpenTrays = useMemo((): string[] => {
-      // get the list of action ids from URL params on the history page
-      if (!isFlyout) {
-        return withOutputsFromUrl ?? [];
-      }
-      // get the list of action ids form the query params for flyout view
-      return queryParams.withOutputs
-        ? typeof queryParams.withOutputs === 'string'
-          ? [queryParams.withOutputs]
-          : queryParams.withOutputs
-        : [];
-    }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
+    const actionIdsWithOpenTrays = useMemo(
+      (): string[] =>
+        // get the list of action ids from the query params for flyout view
+        queryParams.withOutputs
+          ? typeof queryParams.withOutputs === 'string'
+            ? [queryParams.withOutputs]
+            : queryParams.withOutputs
+          : [],
+      [queryParams.withOutputs]
+    );
 
     const redoOpenTrays = useCallback(() => {
       if (actionIdsWithOpenTrays.length && items.length) {

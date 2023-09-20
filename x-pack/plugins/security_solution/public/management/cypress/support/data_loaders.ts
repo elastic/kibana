@@ -7,7 +7,7 @@
 
 // / <reference types="cypress" />
 
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
 import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
@@ -74,8 +74,10 @@ export const dataLoaders = (
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
     fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
 
@@ -86,7 +88,7 @@ export const dataLoaders = (
       agentPolicyName,
     }: {
       policyName: string;
-      endpointPackageVersion: string;
+      endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
       const { kbnClient } = await stackServicesPromise;
@@ -212,8 +214,10 @@ export const dataLoadersForRealEndpoints = (
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
     fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
 
@@ -222,8 +226,8 @@ export const dataLoadersForRealEndpoints = (
       kibanaUrl: config.env.KIBANA_URL,
       elasticUrl: config.env.ELASTICSEARCH_URL,
       fleetServerUrl: config.env.FLEET_SERVER_URL,
-      username: config.env.ELASTICSEARCH_USERNAME,
-      password: config.env.ELASTICSEARCH_PASSWORD,
+      username: config.env.KIBANA_USERNAME,
+      password: config.env.KIBANA_PASSWORD,
       asSuperuser: true,
     });
     const data = await runFleetServerIfNeeded();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type KueryNode, escapeKuery } from '..';
+import { type KueryNode, escapeKuery, escapeQuotes } from '..';
 
 export const KQL_NODE_TYPE_LITERAL = 'literal';
 
@@ -35,5 +35,5 @@ export function toElasticsearchQuery(node: KqlLiteralNode) {
 }
 
 export function toKqlExpression(node: KqlLiteralNode): string {
-  return node.isQuoted ? `"${node.value}"` : escapeKuery(`${node.value}`);
+  return node.isQuoted ? `"${escapeQuotes(`${node.value}`)}"` : escapeKuery(`${node.value}`);
 }

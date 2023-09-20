@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '../../common/types/api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { bulkGetCases, getCases, getCasesMetrics } from '.';
 import { allCases, allCasesSnake, casesSnake } from '../containers/mock';
@@ -36,14 +37,17 @@ describe('api', () => {
 
     it('should return the correct response', async () => {
       expect(
-        await getCasesMetrics({ http, query: { features: ['mttr'], from: 'now-1d' } })
+        await getCasesMetrics({
+          http,
+          query: { features: [CaseMetricsFeature.MTTR], from: 'now-1d' },
+        })
       ).toEqual({ mttr: 0 });
     });
 
     it('should have been called with the correct path', async () => {
-      await getCasesMetrics({ http, query: { features: ['mttr'], to: 'now-1d' } });
-      expect(http.get).toHaveBeenCalledWith('/api/cases/metrics', {
-        query: { features: ['mttr'], to: 'now-1d' },
+      await getCasesMetrics({ http, query: { features: [CaseMetricsFeature.MTTR], to: 'now-1d' } });
+      expect(http.get).toHaveBeenCalledWith('/internal/cases/metrics', {
+        query: { features: [CaseMetricsFeature.MTTR], to: 'now-1d' },
       });
     });
   });

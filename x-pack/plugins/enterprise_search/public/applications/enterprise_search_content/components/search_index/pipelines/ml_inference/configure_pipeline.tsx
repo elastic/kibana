@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { InferenceConfiguration } from './inference_config';
@@ -65,8 +66,17 @@ export const ConfigurePipeline: React.FC = () => {
   const { selectExistingPipeline, setInferencePipelineConfiguration } =
     useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
+  const { indexName } = useValues(IndexNameLogic);
 
   const { existingPipeline, modelID, pipelineName } = configuration;
+
+  useEffect(() => {
+    setInferencePipelineConfiguration({
+      ...configuration,
+      pipelineName: pipelineName || indexName,
+    });
+  }, []);
+
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
   const modelOptions: Array<EuiSuperSelectOption<string>> = [
@@ -215,9 +225,7 @@ export const ConfigurePipeline: React.FC = () => {
                             defaultMessage:
                               'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
                             values: {
-                              pipelineName: `ml-inference-${
-                                pipelineName.length > 0 ? pipelineName : '<name>'
-                              }`,
+                              pipelineName: `ml-inference-${pipelineName}`,
                             },
                           }
                         )}

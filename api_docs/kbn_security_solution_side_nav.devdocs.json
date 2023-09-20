@@ -70,196 +70,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.AccordionLinkCategory",
-        "type": "Interface",
-        "tags": [],
-        "label": "AccordionLinkCategory",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.AccordionLinkCategory",
-            "text": "AccordionLinkCategory"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.LinkCategory",
-            "text": "LinkCategory"
-          },
-          "<T>"
-        ],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.AccordionLinkCategory.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-solution-side-nav",
-                "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-                "section": "def-common.LinkCategoryType",
-                "text": "LinkCategoryType"
-              },
-              ".accordion"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.AccordionLinkCategory.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.LinkCategory",
-        "type": "Interface",
-        "tags": [],
-        "label": "LinkCategory",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.LinkCategory",
-            "text": "LinkCategory"
-          },
-          "<T>"
-        ],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.LinkCategory.linkIds",
-            "type": "Object",
-            "tags": [],
-            "label": "linkIds",
-            "description": [],
-            "signature": [
-              "readonly T[]"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.LinkCategory.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.LinkCategory.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-solution-side-nav",
-                "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-                "section": "def-common.LinkCategoryType",
-                "text": "LinkCategoryType"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.SeparatorLinkCategory",
-        "type": "Interface",
-        "tags": [],
-        "label": "SeparatorLinkCategory",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.SeparatorLinkCategory",
-            "text": "SeparatorLinkCategory"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.LinkCategory",
-            "text": "LinkCategory"
-          },
-          "<T>"
-        ],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.SeparatorLinkCategory.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-solution-side-nav",
-                "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-                "section": "def-common.LinkCategoryType",
-                "text": "LinkCategoryType"
-              },
-              ".separator"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
         "id": "def-common.SolutionSideNavItem",
         "type": "Interface",
         "tags": [],
@@ -331,6 +141,20 @@
           },
           {
             "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.openInNewTab",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
             "id": "def-common.SolutionSideNavItem.description",
             "type": "string",
             "tags": [],
@@ -374,9 +198,9 @@
             "signature": [
               "readonly ",
               {
-                "pluginId": "@kbn/security-solution-side-nav",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.LinkCategory",
                 "text": "LinkCategory"
               },
@@ -431,6 +255,20 @@
                 "text": "SolutionSideNavItemPosition"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
@@ -525,9 +363,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-solution-side-nav",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.SeparatorLinkCategory",
                 "text": "SeparatorLinkCategory"
               },
@@ -594,85 +432,9 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.TitleLinkCategory",
-        "type": "Interface",
-        "tags": [],
-        "label": "TitleLinkCategory",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.TitleLinkCategory",
-            "text": "TitleLinkCategory"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.LinkCategory",
-            "text": "LinkCategory"
-          },
-          "<T>"
-        ],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.TitleLinkCategory.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-solution-side-nav",
-                "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-                "section": "def-common.LinkCategoryType",
-                "text": "LinkCategoryType"
-              },
-              ".title | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.TitleLinkCategory.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.LinkCategoryType",
-        "type": "Enum",
-        "tags": [],
-        "label": "LinkCategoryType",
-        "description": [],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/security-solution-side-nav",
         "id": "def-common.SolutionSideNavItemPosition",
@@ -687,29 +449,6 @@
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.LinkCategories",
-        "type": "Type",
-        "tags": [],
-        "label": "LinkCategories",
-        "description": [],
-        "signature": [
-          "readonly ",
-          {
-            "pluginId": "@kbn/security-solution-side-nav",
-            "scope": "common",
-            "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-            "section": "def-common.LinkCategory",
-            "text": "LinkCategory"
-          },
-          "<T>[]"
-        ],
-        "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/security-solution-side-nav",
         "id": "def-common.Tracker",

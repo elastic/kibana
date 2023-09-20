@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable react/no-danger */
-
 import React, { FC } from 'react';
 
 interface Props {
@@ -27,6 +25,7 @@ export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
 };
 
 const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
+  /* eslint-disable react/no-danger */
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -160,4 +159,5 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
       }}
     />
   );
+  /* eslint-enable react/no-danger */
 };
