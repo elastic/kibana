@@ -596,6 +596,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     `);
   }
 
+  if (!options.skipTeardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
 
@@ -623,11 +628,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         : {}),
     });
     await waitUntilClusterReady({ client, expectedStatus: 'green', log });
-  }
-
-  if (!options.skipTeardown && !options.background) {
-    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
-    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
   if (!options.background) {
