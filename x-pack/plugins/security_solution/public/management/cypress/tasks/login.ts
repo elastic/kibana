@@ -29,7 +29,7 @@ export enum ROLE {
   t2_analyst = 't2Analyst',
   analyst_hunter = 'hunter',
   threat_intelligence_analyst = 'threatIntelligenceAnalyst',
-  detections_engineer = 'detectionsEngineer',
+  detections_engineer = 'detectionsEngineer', // OK to rename/delete
   soc_manager = 'socManager',
   platform_engineer = 'platformEngineer',
   endpoint_operations_analyst = 'endpointOperationsAnalyst',

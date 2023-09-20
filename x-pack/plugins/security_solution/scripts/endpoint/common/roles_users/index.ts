@@ -6,6 +6,8 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { getRuleAuthor } from './rule_author';
+import { getT3Analyst } from './t3_analyst';
 import { getT1Analyst } from './t1_analyst';
 import { getT2Analyst } from './t2_analyst';
 import { getHunter } from './hunter';
@@ -25,6 +27,7 @@ export * from './with_response_actions_role';
 export * from './without_response_actions_role';
 export * from './t1_analyst';
 export * from './t2_analyst';
+export * from './t3_analyst';
 export * from './hunter';
 export * from './threat_intelligence_analyst';
 export * from './soc_manager';
@@ -33,43 +36,77 @@ export * from './endpoint_operations_analyst';
 export * from './endpoint_security_policy_manager';
 export * from './detections_engineer';
 
-export const getAllRoles = (): Record<string, Role> => {
+const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
+  // --------------------------------------
+  // Set of roles used in serverless
+  t1_analyst: 't1_analyst',
+  t2_analyst: 't2_analyst',
+  t3_analyst: 't3_analyst',
+  threat_intelligence_analyst: 'threat_intelligence_analyst',
+  rule_author: 'rule_author',
+  soc_manager: 'soc_manager',
+  detections_admin: 'detections_admin',
+  platform_engineer: 'platform_engineer',
+  endpoint_operations_analyst: 'endpoint_operations_analyst',
+  endpoint_policy_manager: 'endpoint_policy_manager',
+
+  // --------------------------------------
+  // Other roles used for testing
+  analyst_hunter: 'hunter',
+  endpoint_security_policy_manager: 'endpointSecurityPolicyManager',
+  endpoint_response_actions_access: 'endpointResponseActionsAccess',
+  endpoint_response_actions_no_access: 'endpointResponseActionsNoAccess',
+  endpoint_security_policy_management_read: 'endpointSecurityPolicyManagementRead',
+});
+
+export const getAllEndpointSecurityRoles = (): {
+  [key in keyof typeof ENDPOINT_SECURITY_ROLE_NAMES]: Role;
+} => {
   return {
-    t1Analyst: {
+    t1_analyst: {
       ...getT1Analyst(),
-      name: 't1Analyst',
+      name: 't1_analyst',
     },
-    t2Analyst: {
+    t2_analyst: {
       ...getT2Analyst(),
-      name: 't2Analyst',
+      name: 't2_analyst',
     },
+    t3_analyst: {
+      ...getT3Analyst(),
+      name: 't3_analyst',
+    },
+    threat_intelligence_analyst: {
+      ...getThreatIntelligenceAnalyst(),
+      name: 'threat_intelligence_analyst',
+    },
+    rule_author: {
+      ...getRuleAuthor(),
+      name: 'rule_author',
+    },
+    soc_manager: {
+      ...getSocManager(),
+      name: 'soc_manager',
+    },
+    detections_admin: {
+      ...getDetectionsEngineer(),
+      name: 'detections_admin',
+    },
+    platform_engineer: {
+      ...getPlatformEngineer(),
+      name: 'platform_engineer',
+    },
+    endpoint_operations_analyst: {
+      ...getEndpointOperationsAnalyst(),
+      name: 'endpoint_operations_analyst',
+    },
+    endpoint_policy_manager: {
+      ...getEndpointSecurityPolicyManager(),
+      name: 'endpoint_policy_manager',
+    },
+
     hunter: {
       ...getHunter(),
       name: 'hunter',
-    },
-    threatIntelligenceAnalyst: {
-      ...getThreatIntelligenceAnalyst(),
-      name: 'threatIntelligenceAnalyst',
-    },
-    socManager: {
-      ...getSocManager(),
-      name: 'socManager',
-    },
-    platformEngineer: {
-      ...getPlatformEngineer(),
-      name: 'platformEngineer',
-    },
-    endpointOperationsAnalyst: {
-      ...getEndpointOperationsAnalyst(),
-      name: 'endpointOperationsAnalyst',
-    },
-    endpointSecurityPolicyManager: {
-      ...getEndpointSecurityPolicyManager(),
-      name: 'endpointSecurityPolicyManager',
-    },
-    detectionsEngineer: {
-      ...getDetectionsEngineer(),
-      name: 'detectionsEngineer',
     },
     endpointResponseActionsAccess: {
       ...getWithResponseActionsRole(),
