@@ -44,7 +44,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+        // ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
       },
     });
   },
