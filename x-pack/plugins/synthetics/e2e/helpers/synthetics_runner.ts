@@ -107,13 +107,14 @@ export class SyntheticsRunner {
     }
     const { headless, match, pauseOnError } = this.params;
     const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : 1;
+    const CI = process.env.CI === 'true';
     console.log(`Running ${noOfRuns} times`);
     let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
     for (let i = 0; i < noOfRuns; i++) {
       results = await syntheticsRun({
         params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
         playwrightOptions: {
-          headless,
+          headless: headless ?? !CI,
           chromiumSandbox: false,
           timeout: 60 * 1000,
           viewport: {
@@ -125,7 +126,7 @@ export class SyntheticsRunner {
           },
         },
         match: match === 'undefined' ? '' : match,
-        pauseOnError,
+        pauseOnError: pauseOnError ?? !CI,
         screenshots: 'only-on-failure',
         reporter: TestReporter,
       });

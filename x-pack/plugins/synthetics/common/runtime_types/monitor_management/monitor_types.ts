@@ -63,6 +63,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LOCATIONS]: MonitorLocationsCodec,
     [ConfigKey.MONITOR_QUERY_ID]: t.string,
     [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.MAX_ATTEMPTS]: t.number,
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,

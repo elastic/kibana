@@ -45,9 +45,9 @@ export const CLIENT_DEFAULTS = {
 };
 
 export const EXCLUDE_RUN_ONCE_FILTER = { bool: { must_not: { exists: { field: 'run_once' } } } };
-export const SUMMARY_FILTER = {
-  exists: {
-    field: 'summary',
+export const FINAL_SUMMARY_FILTER = {
+  term: {
+    'summary.final_attempt': true,
   },
 };
 

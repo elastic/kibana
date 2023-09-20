@@ -25,6 +25,17 @@ export const fetchMonitorLastRun = async ({
   return fetchMonitorRecentPings({ monitorId, locationId, size: 1 });
 };
 
+export interface MostRecentPingsRequest {
+  monitorId: string;
+  locationId: string;
+  from?: string;
+  to?: string;
+  size?: number;
+  pageIndex?: number;
+  finalAttempt?: boolean;
+  statusFilter?: 'up' | 'down';
+}
+
 export const fetchMonitorRecentPings = async ({
   monitorId,
   locationId,
@@ -32,14 +43,9 @@ export const fetchMonitorRecentPings = async ({
   to,
   size = 10,
   pageIndex = 0,
-}: {
-  monitorId: string;
-  locationId: string;
-  from?: string;
-  to?: string;
-  size?: number;
-  pageIndex?: number;
-}): Promise<PingsResponse> => {
+  finalAttempt,
+  statusFilter,
+}: MostRecentPingsRequest): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
 
@@ -53,6 +59,8 @@ export const fetchMonitorRecentPings = async ({
       sort,
       size,
       pageIndex,
+      finalAttempt,
+      status: statusFilter,
     },
     PingsResponseType
   );

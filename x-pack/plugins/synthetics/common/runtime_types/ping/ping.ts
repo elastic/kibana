@@ -143,6 +143,18 @@ export const UrlType = t.partial({
   path: t.string,
 });
 
+const SummaryCodec = t.type({
+  down: t.number,
+  up: t.number,
+  status: t.union([t.literal('up'), t.literal('down')]),
+  attempt: t.number,
+  max_attempts: t.number,
+  final_attempt: t.boolean,
+  retry_group: t.string,
+});
+
+export type TestSummary = t.TypeOf<typeof SummaryCodec>;
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -205,10 +217,7 @@ export const PingType = t.intersection([
         us: t.number,
       }),
     }),
-    summary: t.partial({
-      down: t.number,
-      up: t.number,
-    }),
+    summary: SummaryCodec,
     synthetics: SyntheticsDataType,
     tags: t.array(t.string),
     tcp: t.partial({
@@ -292,6 +301,7 @@ export const GetPingsParamsType = t.intersection([
     monitorId: t.string,
     sort: t.string,
     status: t.string,
+    finalAttempt: t.boolean,
   }),
 ]);
 
