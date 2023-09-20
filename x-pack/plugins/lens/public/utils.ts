@@ -349,29 +349,26 @@ export const getSearchWarningMessages = (
     searchService: ISearchStart;
   }
 ): UserMessage[] => {
-  const warningsMap: Map<string, UserMessage[]> = new Map();
+  const userMessages: UserMessage[] = [];
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
-    const { request, response, requestId } = meta;
+    const { request, response } = meta;
 
-    const warningMessages = datasource.getSearchWarningMessages?.(
+    const userMessagesFromWarning = datasource.getSearchWarningMessages?.(
       state,
       warning,
       request,
       response
     );
 
-    if (warningMessages?.length) {
-      const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
-      if (!warningsMap.has(key)) {
-        warningsMap.set(key, warningMessages);
-      }
+    if (userMessagesFromWarning?.length) {
+      userMessages.push(...userMessagesFromWarning);
       return true;
     }
     return false;
   });
 
-  return [...warningsMap.values()].flat();
+  return userMessages;
 };
 
 function getSafeLabel(label: string) {

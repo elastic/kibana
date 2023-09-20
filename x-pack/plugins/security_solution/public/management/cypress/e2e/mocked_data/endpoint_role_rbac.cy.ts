@@ -9,7 +9,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('When defining a kibana role for Endpoint security access', () => {
+describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
     return cy
       .get('#featurePrivilegeControls_siem')

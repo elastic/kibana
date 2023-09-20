@@ -729,6 +729,18 @@
             "path": "src/plugins/home/public/application/application.tsx"
           },
           {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
             "plugin": "management",
             "path": "src/plugins/management/public/components/management_app/management_app.tsx"
           },
@@ -923,18 +935,6 @@
           {
             "plugin": "indexManagement",
             "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
           {
             "plugin": "visualizations",
@@ -3080,11 +3080,11 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_open_modal_button.tsx"
+            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/shard_failure_modal/shard_failure_open_modal_button.tsx"
+            "path": "src/plugins/data/public/incomplete_results_modal/open_incomplete_results_modal_button.tsx"
           },
           {
             "plugin": "data",
@@ -3844,23 +3844,23 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
           },
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
           },
           {
             "plugin": "synthetics",

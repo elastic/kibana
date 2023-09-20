@@ -84,6 +84,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
   'ml-trained-model',

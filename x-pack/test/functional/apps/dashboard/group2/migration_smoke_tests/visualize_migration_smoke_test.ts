@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render all panels on the dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('[7.12.1] Visualize Test Dashboard');
 
       // dashboard should load properly
