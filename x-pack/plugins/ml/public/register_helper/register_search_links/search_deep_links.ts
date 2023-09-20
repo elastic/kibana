@@ -145,7 +145,7 @@ function createDeepLinks(
           defaultMessage: 'Memory Usage',
         }),
         path: `/${ML_PAGES.MEMORY_USAGE}`,
-        navLinkStatus: getNavStatus(isFullLicense, false),
+        navLinkStatus: getNavStatus(isFullLicense, true),
       };
     },
 
