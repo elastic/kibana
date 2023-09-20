@@ -13,40 +13,42 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetEsreChrome } from '../../../shared/kibana_chrome';
+import { SetAiSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-import { EnterpriseSearchEsrePageTemplate } from './page_template';
+import { EnterpriseSearchAISearchPageTemplate } from './page_template';
 
-describe('EnterpriseSearchEsrePageTemplate', () => {
+describe('EnterpriseSearchAISearchPageTemplate', () => {
   it('renders', () => {
     const wrapper = shallow(
-      <EnterpriseSearchEsrePageTemplate>
+      <EnterpriseSearchAISearchPageTemplate>
         <div className="hello">world</div>
-      </EnterpriseSearchEsrePageTemplate>
+      </EnterpriseSearchAISearchPageTemplate>
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ name: 'ESRE', items: [] });
+    expect(wrapper.prop('solutionNav')).toEqual({ name: 'AI Search', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
-      const wrapper = shallow(<EnterpriseSearchEsrePageTemplate pageChrome={['Some page']} />);
+      const wrapper = shallow(<EnterpriseSearchAISearchPageTemplate pageChrome={['Some page']} />);
       const setPageChrome = wrapper
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;
 
-      expect(setPageChrome.type).toEqual(SetEsreChrome);
+      expect(setPageChrome.type).toEqual(SetAiSearchChrome);
       expect(setPageChrome.props.trail).toEqual(['Some page']);
     });
   });
 
   describe('page telemetry', () => {
     it('takes a metric & renders product-specific telemetry viewed event', () => {
-      const wrapper = shallow(<EnterpriseSearchEsrePageTemplate pageViewTelemetry="some_page" />);
+      const wrapper = shallow(
+        <EnterpriseSearchAISearchPageTemplate pageViewTelemetry="some_page" />
+      );
 
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('action')).toEqual('viewed');
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('metric')).toEqual('some_page');
@@ -56,7 +58,7 @@ describe('EnterpriseSearchEsrePageTemplate', () => {
   describe('props', () => {
     it('passes down any ...pageTemplateProps that EnterpriseSearchPageTemplateWrapper accepts', () => {
       const wrapper = shallow(
-        <EnterpriseSearchEsrePageTemplate
+        <EnterpriseSearchAISearchPageTemplate
           pageHeader={{ pageTitle: 'hello world' }}
           isLoading={false}
           emptyState={<div />}

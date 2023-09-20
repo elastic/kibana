@@ -29,7 +29,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.elserPanel.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step1.title', {
       defaultMessage: 'Create an index',
     }),
     children: (
@@ -38,10 +38,10 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton
-          data-telemetry-id="entSearch-esre-semanticSearch-elserPanel-createIndexButton"
+          data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-createIndexButton"
           iconType="plusInCircle"
         >
-          {i18n.translate('xpack.enterpriseSearch.esre.elserPanel.step1.buttonLabel', {
+          {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step1.buttonLabel', {
             defaultMessage: 'Create an index',
           })}
         </EuiButton>
@@ -50,21 +50,21 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.elserPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step2.title', {
       defaultMessage: "Navigate to index's Pipelines tab",
     }),
     children: (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.esre.elserPanel.step2.description"
+            id="xpack.enterpriseSearch.aiSearch.elserPanel.step2.description"
             defaultMessage="After creating an index, select it and click the tab called {pipelinesName}."
             values={{
               pipelinesName: (
                 <strong>
                   &quot;
                   {i18n.translate(
-                    'xpack.enterpriseSearch.esre.elserPanel.step2.description.pipelinesName',
+                    'xpack.enterpriseSearch.aiSearch.elserPanel.step2.description.pipelinesName',
                     {
                       defaultMessage: 'Pipelines',
                     }
@@ -80,14 +80,14 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.elserPanel.step3.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step3.title', {
       defaultMessage: 'Follow the on-screen instructions to deploy ELSER',
     }),
     children: (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.esre.elserPanel.step3.description"
+            id="xpack.enterpriseSearch.aiSearch.elserPanel.step3.description"
             defaultMessage="Locate the panel that allows you to one click deploy ELSER and create an inference pipeline using that model."
           />
         </p>
@@ -105,14 +105,17 @@ export const ElserPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.elser.description"
+              id="xpack.enterpriseSearch.aiSearch.elser.description"
               defaultMessage="Effortlessly deploy the {elser} for instant text semantic search capabilities in just a few clicks. This model expands your document and query text using the 'text_expansion' field, delivering seamless search out of the box."
               values={{
                 elser: (
                   <EuiLink target="_blank" href={docLinks.elser} external={false}>
-                    {i18n.translate('xpack.enterpriseSearch.esre.elser.description.elserLinkText', {
-                      defaultMessage: 'Elastic Learned Sparse Encoder',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText',
+                      {
+                        defaultMessage: 'Elastic Learned Sparse Encoder v2',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}

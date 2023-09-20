@@ -15,8 +15,8 @@ import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 
+import { AISearchGuideAccordion } from './ai_search_guide_accordion';
 import { ElserPanel } from './elser_panel';
-import { EsreGuideAccordion } from './esre_guide_accordion';
 import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
 import { VectorSearchPanel } from './vector_search_panel';
 
@@ -31,7 +31,7 @@ export const SemanticSearchSection: React.FC = () => {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.semanticSearch.title"
+                  id="xpack.enterpriseSearch.aiSearch.semanticSearch.title"
                   defaultMessage="Set up semantic search"
                 />
               </h2>
@@ -41,8 +41,8 @@ export const SemanticSearchSection: React.FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.semanticSearch.description"
-                  defaultMessage="ESRE combines your choice of these information retrieval tools."
+                  id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
+                  defaultMessage="Combine any of these information retrieval tools."
                 />
               </p>
             </EuiText>
@@ -52,16 +52,16 @@ export const SemanticSearchSection: React.FC = () => {
       <EuiFlexItem grow={6}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="elserAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-elserAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-elserAccordion"
               initialIsOpen
               icon={elserIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
                 defaultMessage: 'Elastic Learned Sparse Encoder',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.elserAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.elserAccordion.description',
                 {
                   defaultMessage: 'Instant semantic search capabilities',
                 }
@@ -70,18 +70,18 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <ElserPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="vectorSearchAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchAccordion"
               icon={vectorSearchIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.vectorSearchAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchAccordion.title', {
                 defaultMessage: 'Vector Search',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.vectorSearchAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.vectorSearchAccordion.description',
                 {
                   defaultMessage: 'Powerful similarity searches for unstructured data',
                 }
@@ -90,18 +90,21 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <VectorSearchPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="nlpEnrichmentAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentAccordion"
               icon={nlpEnrichmentIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.title', {
-                defaultMessage: 'NLP Enrichment',
-              })}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title',
+                {
+                  defaultMessage: 'NLP Enrichment',
+                }
+              )}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
                 {
                   defaultMessage: 'Insightful data enrichment with trained ML models',
                 }
@@ -110,7 +113,7 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <NlpEnrichmentPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

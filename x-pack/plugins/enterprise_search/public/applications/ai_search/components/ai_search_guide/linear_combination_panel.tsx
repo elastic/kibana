@@ -28,37 +28,43 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.title', {
-      defaultMessage: 'Discover examples of using RRF in _search queries',
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step1.title', {
+      defaultMessage: 'Discover how to use linear combination in _search queries',
     }),
     children: (
       <EuiLink
-        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-rrfDocsLink"
-        href={docLinks.rrf}
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationPanel-knnSearchCombineLink"
+        href={docLinks.knnSearchCombine}
         target="_blank"
         external
       >
-        {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.rrfDocsLinkText', {
-          defaultMessage: 'Reciprocal Rank Fusion documentation',
-        })}
+        {i18n.translate(
+          'xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step1.knnSearchCombineLinkText',
+          {
+            defaultMessage: 'Combine approximate kNN with other features',
+          }
+        )}
       </EuiLink>
     ),
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.title', {
       defaultMessage: 'Try it today in Console',
     }),
     children: (
       <EuiLinkTo
-        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-devToolsConsoleButton"
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationPanel-devToolsConsoleButton"
         to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
         shouldNotCreateHref
       >
         <EuiButton>
-          {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step2.buttonLabel', {
-            defaultMessage: 'Open Console',
-          })}
+          {i18n.translate(
+            'xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.buttonLabel',
+            {
+              defaultMessage: 'Open Console',
+            }
+          )}
         </EuiButton>
       </EuiLinkTo>
     ),
@@ -66,7 +72,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const RrfRankingPanel: React.FC = () => (
+export const LinearCombinationPanel: React.FC = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">
@@ -74,18 +80,8 @@ export const RrfRankingPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.rrfRankingPanel.description"
-              data-telemetry-id="entSearch-esre-semanticSearch-rrfRankingPanel-rrfDocsLink"
-              defaultMessage="Use {rrf} to combine rankings from multiple result sets with different relevance indicators, with no fine tuning required."
-              values={{
-                rrf: (
-                  <EuiLink target="_blank" href={docLinks.rrf} external={false}>
-                    {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.rrfLinkText', {
-                      defaultMessage: 'Reciprocal Rank Fusion (RRF)',
-                    })}
-                  </EuiLink>
-                ),
-              }}
+              id="xpack.enterpriseSearch.aiSearch.linearCombinationPanel.description"
+              defaultMessage="Used to calculate a similarity score or distance between data points. Combines attributes or features using weights, which enables customized relevance factors."
             />
           </p>
         </EuiText>

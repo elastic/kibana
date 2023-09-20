@@ -23,24 +23,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import analyticsIllustration from '../../../../assets/images/analytics.svg';
 import scalableIllustration from '../../../../assets/images/scalable.svg';
 import simplifyIllustration from '../../../../assets/images/simplify.svg';
-import { SetEsreChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
+import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { EnterpriseSearchAISearchPageTemplate } from '../layout/page_template';
 
-import { EsreDocsSection } from './esre_docs_section';
+import { SetAISearchChromeSearchDocsSection } from './ai_search_docs_section';
 import { MeasurePerformanceSection } from './measure_performance_section';
 import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
 
-export const EsreGuide: React.FC = () => {
+export const AISearchGuide: React.FC = () => {
   const isMobile = useIsWithinBreakpoints(['xs']);
 
   return (
-    <EnterpriseSearchEsrePageTemplate
+    <EnterpriseSearchAISearchPageTemplate
       restrictWidth
       bottomBorder={false}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.esre.guide.pageTitle', {
-          defaultMessage: 'Enhance your search with ESRE',
+        pageTitle: i18n.translate('xpack.enterpriseSearch.aiSearch.guide.pageTitle', {
+          defaultMessage: 'Enhance your search with AI',
         }),
       }}
     >
@@ -64,10 +64,10 @@ export const EsreGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText>
-              <p data-test-subj="esre-description-text">
+              <p data-test-subj="ai-search-description-text">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.guide.description"
-                  defaultMessage="The Elasticsearch Relevance Engine™ (ESRE) enables developers to build AI search-powered applications using the Elastic platform. ESRE is a set of tools and features that include our proprietary trained ML model ELSER, our vector search and embeddings capabilities, and RRF ranking for combining vector and text search."
+                  id="xpack.enterpriseSearch.aiSearch.guide.description"
+                  defaultMessage="Build AI search-powered applications using the Elastic platform, including our proprietary trained ML model ELSER, our vector search and embeddings capabilities, and RRF ranking for combining vector and text search."
                 />
               </p>
             </EuiText>
@@ -85,10 +85,10 @@ export const EsreGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <EsreDocsSection />
+            <SetAISearchChromeSearchDocsSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </EnterpriseSearchEsrePageTemplate>
+    </EnterpriseSearchAISearchPageTemplate>
   );
 };

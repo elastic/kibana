@@ -11,18 +11,18 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EsreGuide } from './components/esre_guide/esre_guide';
+import { AISearchGuide } from './components/ai_search_guide/ai_search_guide';
 
-import { EnterpriseSearchEsre } from '.';
+import { EnterpriseSearchAISearch } from '.';
 
 describe('SearchExperiences', () => {
-  it('renders the ESRE guide', () => {
+  it('renders the AI Search guide', () => {
     setMockValues({
       errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<EnterpriseSearchEsre />);
+    const wrapper = shallow(<EnterpriseSearchAISearch />);
 
-    expect(wrapper.find(EsreGuide)).toHaveLength(1);
+    expect(wrapper.find(AISearchGuide)).toHaveLength(1);
   });
 });
