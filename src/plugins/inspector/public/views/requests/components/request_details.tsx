@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
 import {
-  Clusters,
+  ClustersView,
   RequestDetailsRequest,
   RequestDetailsResponse,
   RequestDetailsStats,
@@ -43,7 +43,7 @@ const DETAILS: DetailViewData[] = [
     label: i18n.translate('inspector.requests.clustersTabLabel', {
       defaultMessage: 'Clusters',
     }),
-    component: Clusters,
+    component: ClustersView,
   },
   {
     name: 'Request',

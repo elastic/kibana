@@ -17,7 +17,7 @@ import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
 import { LOCAL_CLUSTER_KEY } from './constants';
 
-export class Clusters extends Component<RequestDetailsProps> {
+export class ClustersView extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
     Boolean(
       (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
