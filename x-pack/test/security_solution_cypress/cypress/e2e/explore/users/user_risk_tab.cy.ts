@@ -14,6 +14,7 @@ import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 
 import { goToUserRiskScoreTab } from '../../../tasks/user_risk';
 
+describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_entities');
