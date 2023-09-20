@@ -46,6 +46,7 @@ export const caseConfigurationResposeMock: Configuration = {
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   owner: SECURITY_SOLUTION_OWNER,
   version: 'WzHJ12',
+  customFields: [],
 };
 
 export const caseConfigurationMock: ConfigurationRequest = {
@@ -76,4 +77,5 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
   owner: SECURITY_SOLUTION_OWNER,
+  customFields: [],
 };

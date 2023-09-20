@@ -79,6 +79,7 @@ export const patchCaseConfigure = async (
       signal,
     }
   );
+
   return convertToCamelCase<Configuration, CaseConfigure>(decodeCaseConfigureResponse(response));
 };
 

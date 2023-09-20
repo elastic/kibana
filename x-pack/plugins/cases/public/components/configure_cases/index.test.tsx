@@ -8,10 +8,12 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -25,7 +27,8 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -422,6 +425,7 @@ describe('ConfigureCases', () => {
           fields: null,
         },
         closureType: 'close-by-user',
+        customFields: [],
       });
     });
 
@@ -511,6 +515,7 @@ describe('ConfigureCases', () => {
           fields: null,
         },
         closureType: 'close-by-pushing',
+        customFields: [],
       });
     });
   });
@@ -595,6 +600,131 @@ describe('ConfigureCases', () => {
       expect(
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
+    });
+  });
+
+  describe('custom fields', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders custom field group when no custom fields available', () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    it('renders custom field when available', () => {
+      const customFieldsMock: CustomFieldsConfiguration = [
+        {
+          key: 'random_custom_key',
+          label: 'summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+      ];
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        customFields: customFieldsMock,
+        currentConfiguration: {
+          connector: {
+            id: 'resilient-2',
+            name: 'unchanged',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: customFieldsMock,
+        },
+      }));
+      appMockRender.render(<ConfigureCases />);
+
+      const draggable = screen.getByTestId('draggable');
+
+      expect(
+        within(draggable).getByTestId(
+          `custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('renders multiple custom field when available', () => {
+      const customFieldsMock: CustomFieldsConfiguration = [
+        {
+          key: 'random_custom_key',
+          label: 'Summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'random_custom_key_2',
+          label: 'Maintenance',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        customFields: customFieldsMock,
+        currentConfiguration: {
+          connector: {
+            id: 'resilient-2',
+            name: 'unchanged',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: customFieldsMock,
+        },
+      }));
+      appMockRender.render(<ConfigureCases />);
+
+      const droppable = screen.getByTestId('droppable');
+
+      for (const field of customFieldsMock) {
+        expect(
+          within(droppable).getByTestId(`custom-field-${field.label}-${field.type}`)
+        ).toBeInTheDocument();
+      }
+    });
+
+    it('opens fly out for when click on add field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
+
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+    });
+
+    it('closes fly out for when click on save field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+
+      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
     });
   });
 });

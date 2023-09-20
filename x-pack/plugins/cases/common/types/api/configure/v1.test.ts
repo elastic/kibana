@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_CUSTOM_FIELD_KEY_LENGTH, MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
 import { ConnectorTypes } from '../../domain/connector/v1';
+import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
   CaseConfigureRequestParamsRt,
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
+  CustomFieldConfigurationRt,
+  TextCustomFieldConfigurationRt,
+  ToggleCustomFieldConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -34,6 +40,32 @@ describe('configure', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('has expected attributes in request with customFields', () => {
+      const request = {
+        ...defaultRequest,
+        customFields: [
+          {
+            key: 'text_custom_field',
+            label: 'Text custom field',
+            type: CustomFieldTypes.TEXT,
+            required: false,
+          },
+          {
+            key: 'toggle_custom_field',
+            label: 'Toggle custom field',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+          },
+        ],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
       });
     });
 
@@ -117,6 +149,104 @@ describe('configure', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+  });
+
+  describe('CustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'custom_field_key',
+      label: 'Custom field label',
+      required: false,
+    };
+
+    it('has expected attributes in request', () => {
+      const query = CustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = CustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('limits key to 36 characters', () => {
+      const longKey = 'x'.repeat(MAX_CUSTOM_FIELD_KEY_LENGTH + 1);
+
+      expect(
+        PathReporter.report(CustomFieldConfigurationRt.decode({ ...defaultRequest, key: longKey }))
+      ).toContain('The length of the key is too long. The maximum length is 36.');
+    });
+
+    it('limits label to 50 characters', () => {
+      const longLabel = 'x'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
+
+      expect(
+        PathReporter.report(
+          CustomFieldConfigurationRt.decode({ ...defaultRequest, label: longLabel })
+        )
+      ).toContain('The length of the label is too long. The maximum length is 50.');
+    });
+  });
+
+  describe('TextCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_text_custom_field',
+      label: 'Text Custom Field',
+      type: CustomFieldTypes.TEXT,
+      required: true,
+    };
+
+    it('has expected attributes in request', () => {
+      const query = TextCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = TextCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+  });
+
+  describe('ToggleCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_toggle_custom_field',
+      label: 'Toggle Custom Field',
+      type: CustomFieldTypes.TOGGLE,
+      required: false,
+    };
+
+    it('has expected attributes in request', () => {
+      const query = ToggleCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = ToggleCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
       });
     });
   });
