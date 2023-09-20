@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.10.2>>
 * <<release-notes-8.10.1>>
 * <<release-notes-8.10.0>>
 * <<release-notes-8.9.2>>
@@ -49,6 +50,20 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.10.2]]
+== {kib} 8.10.2
+
+The 8.10.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.10.2]]
+=== Bug fixes
+
+Fleet::
+* Fixes force delete package, updated used by agents check ({kibana-pull}166623[#166623]).
+Management::
+* Fixes showing `Received partial message` instead of results when there are some remote shard errors in a {ccs} ({kibana-pull}166544[#166544]).
+
 [[release-notes-8.10.1]]
 == {kib} 8.10.1
 
