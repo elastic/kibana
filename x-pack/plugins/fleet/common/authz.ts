@@ -258,13 +258,11 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
 }
 
 export function calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
-  kibanaPrivileges:
-    | Array<{
-        resource?: string;
-        privilege: string;
-        authorized: boolean;
-      }>
-    | undefined
+  kibanaPrivileges: Array<{
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>
 ): FleetAuthz['endpointExceptionsPrivileges'] {
   const endpointExceptionsActions = Object.entries(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
     Record<string, boolean>
