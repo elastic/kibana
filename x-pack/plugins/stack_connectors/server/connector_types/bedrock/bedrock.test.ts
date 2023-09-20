@@ -16,10 +16,11 @@ import {
   DEFAULT_BEDROCK_URL,
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
-const mockInterceptor = jest.fn();
-jest.mock('aws4-axios', () => ({
-  aws4Interceptor: () => mockInterceptor,
+
+jest.mock('aws4', () => ({
+  sign: () => ({ signed: true }),
 }));
+
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -55,11 +56,11 @@ describe('BedrockConnector', () => {
         const response = await connector.runApi({ body: DEFAULT_BODY });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: BedrockRunActionResponseSchema,
           data: DEFAULT_BODY,
-          interceptor: mockInterceptor,
         });
         expect(response).toEqual({ result: 'success' });
       });
