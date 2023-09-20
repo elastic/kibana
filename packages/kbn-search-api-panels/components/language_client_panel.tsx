@@ -56,7 +56,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
             <EuiFlexItem grow={false}>
               <EuiImage
                 alt=""
-                src={src || `${assetBasePath}${language.iconType}`}
+                src={src || `${assetBasePath}/${language.iconType}`}
                 height={euiTheme.size.xl}
                 width={euiTheme.size.xl}
               />
