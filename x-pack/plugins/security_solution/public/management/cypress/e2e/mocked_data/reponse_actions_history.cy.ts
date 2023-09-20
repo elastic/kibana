@@ -10,7 +10,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('Response actions history page', () => {
+describe('Response actions history page', { tags: '@ess' }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
   // let actionData: ReturnTypeFromChainable<typeof indexActionResponses>;
 
@@ -54,16 +54,16 @@ describe('Response actions history page', () => {
   it('collapses expanded tray with a single click', () => {
     loadPage(`/app/security/administration/response_actions_history`);
     // 2nd row on 1st page
-    const row = cy.getByTestSubj('response-actions-list-expand-button').eq(1);
+    cy.getByTestSubj('response-actions-list-expand-button').eq(1).as('2nd-row');
 
     // expand the row
-    row.click();
+    cy.get('@2nd-row').click();
     cy.getByTestSubj('response-actions-list-details-tray').should('exist');
     cy.url().should('include', 'withOutputs');
 
     // collapse the row
     cy.intercept('GET', '/api/endpoint/action*').as('getResponses');
-    row.click();
+    cy.get('@2nd-row').click();
     // wait for the API response to come back
     // and then see if the tray is actually closed
     cy.wait('@getResponses', { timeout: 500 }).then(() => {

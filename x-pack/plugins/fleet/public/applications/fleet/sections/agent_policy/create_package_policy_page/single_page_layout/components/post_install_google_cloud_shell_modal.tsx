@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -25,7 +26,7 @@ import {
   sendGetEnrollmentAPIKeys,
   useCreateCloudShellUrl,
   useFleetServerHostsForPolicy,
-  useKibanaVersion,
+  useAgentVersion,
 } from '../../../../../hooks';
 import { GoogleCloudShellGuide } from '../../../../../components';
 import { ManualInstructions } from '../../../../../../../components/enrollment_instructions';
@@ -44,18 +45,22 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
     })
   );
   const { fleetServerHosts, fleetProxy } = useFleetServerHostsForPolicy(agentPolicy);
-  const kibanaVersion = useKibanaVersion();
+  const agentVersion = useAgentVersion();
+
+  const { cloudShellUrl, error, isError, isLoading } = useCreateCloudShellUrl({
+    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
+    packagePolicy,
+  });
+
+  if (!agentVersion) {
+    return <EuiLoadingSpinner />;
+  }
 
   const installManagedCommands = ManualInstructions({
     apiKey: apyKeysData?.data?.items[0]?.api_key || 'no_key',
     fleetServerHosts,
     fleetProxy,
-    kibanaVersion,
-  });
-
-  const { cloudShellUrl, error, isError, isLoading } = useCreateCloudShellUrl({
-    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
-    packagePolicy,
+    agentVersion,
   });
 
   return (

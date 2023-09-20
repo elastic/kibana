@@ -15,6 +15,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import { ActionsConfig } from './config';
 import {
@@ -361,7 +362,7 @@ describe('Actions Plugin', () => {
           eventLog: eventLogMock.createSetup(),
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           features: featuresPluginMock.createSetup(),
-          serverless: {},
+          serverless: serverlessPluginMock.createSetupContract(),
         };
       }
 
@@ -560,7 +561,7 @@ describe('Actions Plugin', () => {
           ...pluginsSetup.encryptedSavedObjects,
           canEncrypt: true,
         },
-        serverless: {},
+        serverless: serverlessPluginMock.createSetupContract(),
       });
 
       pluginSetup.registerType({
@@ -579,7 +580,10 @@ describe('Actions Plugin', () => {
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
       await expect(async () =>
-        plugin.start(coreStart, { ...pluginsStart, serverless: {} })
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );

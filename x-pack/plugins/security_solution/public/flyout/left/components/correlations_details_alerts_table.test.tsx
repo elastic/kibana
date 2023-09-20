@@ -67,7 +67,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     const { getByTestId } = render(
       <TestProviders>
         <CorrelationsDetailsAlertsTable
-          title={'title'}
+          title={<p>{'title'}</p>}
           loading={false}
           alertIds={alertIds}
           scopeId={scopeId}

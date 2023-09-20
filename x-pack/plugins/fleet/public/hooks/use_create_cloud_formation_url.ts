@@ -12,7 +12,7 @@ import type {
   CloudSecurityIntegrationAwsAccountType,
 } from '../components/agent_enrollment_flyout/types';
 
-import { useKibanaVersion } from './use_kibana_version';
+import { useAgentVersion } from './use_agent_version';
 import { useGetSettings } from './use_request';
 
 const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
@@ -28,7 +28,7 @@ export const useCreateCloudFormationUrl = ({
 }) => {
   const { isLoading } = useGetSettings();
 
-  const kibanaVersion = useKibanaVersion();
+  const agentVersion = useAgentVersion();
 
   let isError = false;
   let error: string | undefined;
@@ -48,12 +48,12 @@ export const useCreateCloudFormationUrl = ({
   }
 
   const cloudFormationUrl =
-    enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl
+    enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl && agentVersion
       ? createCloudFormationUrl(
           cloudFormationProps?.templateUrl,
           enrollmentAPIKey,
           fleetServerHost,
-          kibanaVersion,
+          agentVersion,
           cloudFormationProps?.awsAccountType
         )
       : undefined;
@@ -70,15 +70,18 @@ const createCloudFormationUrl = (
   templateURL: string,
   enrollmentToken: string,
   fleetUrl: string,
-  kibanaVersion: string,
+  agentVersion: string,
   awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined
 ) => {
   let cloudFormationUrl;
 
+  /*
+    template url has `&param_ElasticAgentVersion=KIBANA_VERSION` part. KIBANA_VERSION is used for templating as agent version used to match Kibana version, but now it's not necessarily the case
+   */
   cloudFormationUrl = templateURL
     .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
     .replace('FLEET_URL', fleetUrl)
-    .replace('KIBANA_VERSION', kibanaVersion);
+    .replace('KIBANA_VERSION', agentVersion);
 
   if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
     cloudFormationUrl = cloudFormationUrl.replace(

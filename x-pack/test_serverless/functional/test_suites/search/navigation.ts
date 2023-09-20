@@ -12,12 +12,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('navigation', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('navigate search sidenav & breadcrumbs', async () => {
@@ -63,6 +69,28 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
 
       await expectNoPageReload();
+    });
+
+    it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:triggersActions' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Explore', 'Alerts', 'Rules']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Content', 'Index Management']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Content', 'Ingest Pipelines']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Security', 'API keys']);
+    });
+
+    it('navigate management', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
+      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
     });
 
     it('navigate using search', async () => {
