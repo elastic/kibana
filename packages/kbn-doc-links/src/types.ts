@@ -390,6 +390,7 @@ export interface DocLinks {
     searchPreference: string;
     securityApis: string;
     simulatePipeline: string;
+    tasks: string;
     timeUnits: string;
     unfreezeIndex: string;
     updateTransform: string;
