@@ -139,6 +139,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
           markAcknowledgedFirstAlert();
+          waitForAlerts();
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
           sumAlertCountFromAlertCountTable((sumAlerts) => {

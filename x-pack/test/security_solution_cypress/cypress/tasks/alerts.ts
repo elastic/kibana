@@ -55,6 +55,7 @@ import {
   ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
+  ALERT_PAGE_TITLE,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -193,6 +194,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
+  cy.get(ALERT_PAGE_TITLE).scrollIntoView();
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
