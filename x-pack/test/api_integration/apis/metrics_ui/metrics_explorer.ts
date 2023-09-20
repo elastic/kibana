@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
                 { name: 'A', aggregation: 'avg', field: 'system.cpu.user.pct' },
                 { name: 'B', aggregation: 'avg', field: 'system.cpu.user.pct' },
               ],
-              equation: '(A + B) * 100',
+              equation: '((A + A + B + B) / 2) * 100',
             },
           ],
         };
