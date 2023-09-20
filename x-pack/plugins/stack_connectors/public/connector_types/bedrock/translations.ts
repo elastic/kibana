@@ -32,7 +32,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.s
   defaultMessage: 'Secret',
 });
 
-export const BEDROCK = i18n.translate('xpack.stackConnectors.components.bedrock.openAi', {
+export const BEDROCK = i18n.translate('xpack.stackConnectors.components.bedrock.title', {
   defaultMessage: 'AWS Bedrock',
 });
 

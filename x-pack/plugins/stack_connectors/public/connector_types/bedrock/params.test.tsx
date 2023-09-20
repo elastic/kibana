@@ -48,7 +48,7 @@ describe('Bedrock Params Fields renders', () => {
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
-  test('useEffect handles the case when subAction and subActionParams are undefined', (apiProvider) => {
+  test('useEffect handles the case when subAction and subActionParams are undefined', () => {
     const actionParams = {
       subAction: undefined,
       subActionParams: undefined,
@@ -57,16 +57,16 @@ describe('Bedrock Params Fields renders', () => {
     const errors = {};
     const actionConnector = {
       secrets: {
-        apiKey: 'apiKey',
+        accessKey: 'accessKey',
+        secret: 'secret',
       },
       id: 'test',
       actionTypeId: '.bedrock',
       isPreconfigured: false,
       isSystemAction: false as const,
       isDeprecated: false,
-      name: 'My GenAI Connector',
+      name: 'My Bedrock Connector',
       config: {
-        apiProvider,
         apiUrl: DEFAULT_BEDROCK_URL,
       },
     };

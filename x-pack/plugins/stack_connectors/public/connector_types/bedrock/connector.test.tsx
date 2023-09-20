@@ -37,7 +37,7 @@ describe('BedrockConnectorFields renders', () => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
   });
-  test('open ai connector fields are rendered', async () => {
+  test('Bedrock connector fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={bedrockConnector}>
         <BedrockConnectorFields
@@ -47,10 +47,15 @@ describe('BedrockConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
+
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(bedrockConnector.config.apiUrl);
-    expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.defaultModel-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
+      bedrockConnector.config.defaultModel
+    );
+    expect(getAllByTestId('bedrock-api-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('bedrock-api-model-doc')[0]).toBeInTheDocument();
   });
 
   describe('Validation', () => {

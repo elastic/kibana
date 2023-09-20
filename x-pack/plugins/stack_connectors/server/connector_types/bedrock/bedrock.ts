@@ -85,9 +85,6 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
       method: 'post',
       responseSchema: BedrockRunActionResponseSchema,
       data: body,
-      headers: {
-        accept: '*/*',
-      },
       interceptor: this.interceptor,
     });
     return response.data;

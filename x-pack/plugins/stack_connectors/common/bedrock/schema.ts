@@ -41,11 +41,3 @@ export const BedrockRunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
-
-export const BedrockDashboardActionParamsSchema = schema.object({
-  dashboardId: schema.string(),
-});
-
-export const BedrockDashboardActionResponseSchema = schema.object({
-  available: schema.boolean(),
-});

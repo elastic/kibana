@@ -11,8 +11,6 @@ import {
   BedrockSecretsSchema,
   BedrockRunActionParamsSchema,
   BedrockRunActionResponseSchema,
-  BedrockDashboardActionParamsSchema,
-  BedrockDashboardActionResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIActionResponseSchema,
 } from './schema';
@@ -23,5 +21,3 @@ export type BedrockRunActionParams = TypeOf<typeof BedrockRunActionParamsSchema>
 export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
 export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type BedrockRunActionResponse = TypeOf<typeof BedrockRunActionResponseSchema>;
-export type BedrockDashboardActionParams = TypeOf<typeof BedrockDashboardActionParamsSchema>;
-export type BedrockDashboardActionResponse = TypeOf<typeof BedrockDashboardActionResponseSchema>;

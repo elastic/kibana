@@ -10,9 +10,16 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { BedrockRunActionResponseSchema } from '../../../common/bedrock/schema';
-import { BEDROCK_CONNECTOR_ID, DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
-jest.mock('./create_dashboard');
-
+import {
+  BEDROCK_CONNECTOR_ID,
+  DEFAULT_BEDROCK_MODEL,
+  DEFAULT_BEDROCK_URL,
+} from '../../../common/bedrock/constants';
+import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
+const mockInterceptor = jest.fn();
+jest.mock('aws4-axios', () => ({
+  aws4Interceptor: () => mockInterceptor,
+}));
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -24,27 +31,18 @@ describe('BedrockConnector', () => {
     });
   });
 
-  describe('OpenAI', () => {
+  describe('Bedrock', () => {
     const connector = new BedrockConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
       config: {
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiUrl: DEFAULT_BEDROCK_URL,
         defaultModel: DEFAULT_BEDROCK_MODEL,
       },
       secrets: { accessKey: '123', secret: 'secret' },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
-
-    const sampleOpenAiBody = {
-      messages: [
-        {
-          role: 'user',
-          content: 'Hello world',
-        },
-      ],
-    };
 
     beforeEach(() => {
       // @ts-ignore
@@ -53,92 +51,15 @@ describe('BedrockConnector', () => {
     });
 
     describe('runApi', () => {
-      it('uses the default model if none is supplied', async () => {
-        const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
+      it('the Bedrock API call is successful with correct parameters', async () => {
+        const response = await connector.runApi({ body: DEFAULT_BODY });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://api.openai.com/v1/chat/completions',
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({
-            ...sampleOpenAiBody,
-            stream: false,
-            model: DEFAULT_BEDROCK_MODEL,
-          }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('overrides the default model with the default model specified in the body', async () => {
-        const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
-        const response = await connector.runApi({ body: JSON.stringify(requestBody) });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...requestBody, stream: false }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('the OpenAI API call is successful with correct parameters', async () => {
-        const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({
-            ...sampleOpenAiBody,
-            stream: false,
-            model: DEFAULT_BEDROCK_MODEL,
-          }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('overrides stream parameter if set in the body', async () => {
-        const body = {
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-          ],
-        };
-        const response = await connector.runApi({
-          body: JSON.stringify({
-            ...body,
-            stream: true,
-          }),
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({
-            ...body,
-            stream: false,
-          }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
+          data: DEFAULT_BODY,
+          interceptor: mockInterceptor,
         });
         expect(response).toEqual({ result: 'success' });
       });
@@ -147,9 +68,7 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.runApi({ body: JSON.stringify(sampleOpenAiBody) })).rejects.toThrow(
-          'API Error'
-        );
+        await expect(connector.runApi({ body: DEFAULT_BODY })).rejects.toThrow('API Error');
       });
     });
   });

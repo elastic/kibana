@@ -17,7 +17,6 @@ import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
-  actionConnector,
   actionParams,
   editAction,
   index,

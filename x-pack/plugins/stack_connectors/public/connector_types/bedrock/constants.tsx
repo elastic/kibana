@@ -34,7 +34,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
         values={{
           bedrockAPIUrlDocs: (
             <EuiLink
-              data-test-subj="open-ai-api-doc"
+              data-test-subj="bedrock-api-doc"
               href="https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html"
               target="_blank"
             >
@@ -55,7 +55,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
         values={{
           bedrockAPIModelDocs: (
             <EuiLink
-              data-test-subj="bedrock-api-doc"
+              data-test-subj="bedrock-api-model-doc"
               href="https://aws.amazon.com/bedrock/claude/"
               target="_blank"
             >
