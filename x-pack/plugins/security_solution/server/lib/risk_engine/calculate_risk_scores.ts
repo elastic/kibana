@@ -57,14 +57,7 @@ const bucketToResponse = ({
   category_1_score: bucket.risk_details.value.category_1_score,
   category_1_count: bucket.risk_details.value.category_1_count,
   notes: bucket.risk_details.value.notes,
-  inputs: bucket.inputs.hits.hits.map((riskInput) => ({
-    id: riskInput._id,
-    index: riskInput._index,
-    description: `Alert from Rule: ${riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'}`,
-    category: RiskCategories.category_1,
-    risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
-    timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
-  })),
+  inputs: [],
 });
 
 const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
@@ -156,14 +149,6 @@ const buildIdentifierTypeAggregation = ({
       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
     },
     aggs: {
-      inputs: {
-        top_hits: {
-          size: 10,
-          sort: { [ALERT_RISK_SCORE]: 'desc' },
-          _source: false,
-          docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
-        },
-      },
       risk_details: {
         scripted_metric: {
           init_script: 'state.inputs = []',
