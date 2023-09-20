@@ -215,6 +215,7 @@ export class AlertsClient<
         [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
       },
     });
+
     try {
       // Retry this updateByQuery up to 3 times to make sure the number of documents
       // updated equals the number of documents matched
@@ -225,7 +226,7 @@ export class AlertsClient<
           body: {
             conflicts: 'proceed',
             script: {
-              source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
+              source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
               lang: 'painless',
             },
             query: {
@@ -598,3 +599,11 @@ export class AlertsClient<
     return this._isUsingDataStreams;
   }
 }
+
+const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
+// Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
+if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
+  ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
+} else {
+  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
+}`;
