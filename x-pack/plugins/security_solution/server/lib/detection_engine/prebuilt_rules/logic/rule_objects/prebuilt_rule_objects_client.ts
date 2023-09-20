@@ -25,27 +25,31 @@ export const createPrebuiltRuleObjectsClient = (
 ): IPrebuiltRuleObjectsClient => {
   return {
     fetchAllInstalledRules: (): Promise<RuleResponse[]> => {
-      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
+      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', [], async () => {
         const rulesData = await getExistingPrepackagedRules({ rulesClient });
         const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
         return rules;
       });
     },
     fetchInstalledRulesByIds: (ruleIds: RuleSignatureId[]): Promise<RuleResponse[]> => {
-      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRulesByIds', async () => {
-        const { data } = await findRules({
-          rulesClient,
-          perPage: ruleIds.length,
-          page: 1,
-          sortField: 'createdAt',
-          sortOrder: 'desc',
-          fields: undefined,
-          filter: `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`,
-        });
+      return withSecuritySpan(
+        'IPrebuiltRuleObjectsClient.fetchInstalledRulesByIds',
+        [],
+        async () => {
+          const { data } = await findRules({
+            rulesClient,
+            perPage: ruleIds.length,
+            page: 1,
+            sortField: 'createdAt',
+            sortOrder: 'desc',
+            fields: undefined,
+            filter: `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`,
+          });
 
-        const rules = data.map((rule) => internalRuleToAPIResponse(rule));
-        return rules;
-      });
+          const rules = data.map((rule) => internalRuleToAPIResponse(rule));
+          return rules;
+        }
+      );
     },
   };
 };

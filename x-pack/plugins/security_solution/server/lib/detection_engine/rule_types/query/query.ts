@@ -48,7 +48,7 @@ export const queryExecutor = async ({
   const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('queryExecutor', async () => {
+  return withSecuritySpan('queryExecutor', runOpts.durationMetrics, async () => {
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
@@ -59,6 +59,7 @@ export const queryExecutor = async ({
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
       fields: runOpts.inputIndexFields,
+      durationMetrics: runOpts.durationMetrics,
     });
 
     const license = await firstValueFrom(licensing.license$);
@@ -93,6 +94,7 @@ export const queryExecutor = async ({
               runtimeMappings: runOpts.runtimeMappings,
               primaryTimestamp: runOpts.primaryTimestamp,
               secondaryTimestamp: runOpts.secondaryTimestamp,
+              durationMetrics: runOpts.durationMetrics,
             })),
             state: {},
           };

@@ -38,6 +38,7 @@ import type {
   CalculateScoresResponse,
   RiskScoreBucket,
 } from './types';
+import type { DurationMetrics } from '../detection_engine/rule_types/types';
 
 const bucketToResponse = ({
   bucket,
@@ -206,11 +207,13 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
+  durationMetrics,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  durationMetrics: DurationMetrics[];
 } & CalculateScoresParams): Promise<CalculateScoresResponse> =>
-  withSecuritySpan('calculateRiskScores', async () => {
+  withSecuritySpan('calculateRiskScores', durationMetrics, async () => {
     const now = new Date().toISOString();
 
     const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];

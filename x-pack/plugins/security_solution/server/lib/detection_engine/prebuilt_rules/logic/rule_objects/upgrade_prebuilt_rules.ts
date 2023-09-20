@@ -27,7 +27,7 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
  * @param rules The rules to apply the update for
  */
 export const upgradePrebuiltRules = async (rulesClient: RulesClient, rules: PrebuiltRuleAsset[]) =>
-  withSecuritySpan('upgradePrebuiltRules', async () => {
+  withSecuritySpan('upgradePrebuiltRules', [], async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,

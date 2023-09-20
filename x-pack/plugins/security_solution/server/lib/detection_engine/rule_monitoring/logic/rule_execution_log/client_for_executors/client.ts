@@ -80,23 +80,27 @@ export const createRuleExecutionLogClientForExecutors = (
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
-      await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
-        const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
-        const logMeta = correlationIds.getLogMeta();
+      await withSecuritySpan(
+        'IRuleExecutionLogForExecutors.logStatusChange',
+        args.metrics?.durationMetrics ?? [],
+        async () => {
+          const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
+          const logMeta = correlationIds.getLogMeta();
 
-        try {
-          const normalizedArgs = normalizeStatusChangeArgs(args);
+          try {
+            const normalizedArgs = normalizeStatusChangeArgs(args);
 
-          await Promise.all([
-            writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToRuleObject(normalizedArgs),
-            writeStatusChangeToEventLog(normalizedArgs),
-          ]);
-        } catch (e) {
-          const logMessage = `Error changing rule status to "${args.newStatus}"`;
-          writeExceptionToConsole(e, logMessage, logMeta);
+            await Promise.all([
+              writeStatusChangeToConsole(normalizedArgs, logMeta),
+              writeStatusChangeToRuleObject(normalizedArgs),
+              writeStatusChangeToEventLog(normalizedArgs),
+            ]);
+          } catch (e) {
+            const logMessage = `Error changing rule status to "${args.newStatus}"`;
+            writeExceptionToConsole(e, logMessage, logMeta);
+          }
         }
-      });
+      );
     },
   };
 

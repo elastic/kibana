@@ -68,7 +68,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
 
-      const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
+      const findResult = await withSecuritySpan('findEventsBySavedObjectIds', [], () => {
         return eventLog.findEventsBySavedObjectIds(soType, soIds, {
           // TODO: include Framework events
           filter: buildEventLogKqlFilter({

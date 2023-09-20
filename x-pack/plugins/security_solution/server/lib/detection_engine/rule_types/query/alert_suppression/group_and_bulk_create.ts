@@ -127,7 +127,7 @@ export const groupAndBulkCreate = async ({
   groupByFields,
   eventsTelemetry,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
-  return withSecuritySpan('groupAndBulkCreate', async () => {
+  return withSecuritySpan('groupAndBulkCreate', runOpts.durationMetrics, async () => {
     const tuple = runOpts.tuple;
 
     const filteredBucketHistory = filterBucketHistory({
@@ -197,6 +197,7 @@ export const groupAndBulkCreate = async ({
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
         trackTotalHits: true,
+        durationMetrics: runOpts.durationMetrics,
       };
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
         eventsSearchParams

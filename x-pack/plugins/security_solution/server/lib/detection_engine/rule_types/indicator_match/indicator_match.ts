@@ -15,7 +15,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
-import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { RuleRangeTuple, BulkCreate, WrapHits, DurationMetrics } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
@@ -41,6 +41,7 @@ export const indicatorMatchExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  durationMetrics,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -59,10 +60,11 @@ export const indicatorMatchExecutor = async ({
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  durationMetrics: DurationMetrics[];
 }) => {
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('indicatorMatchExecutor', async () => {
+  return withSecuritySpan('indicatorMatchExecutor', durationMetrics, async () => {
     return createThreatSignals({
       alertId: completeRule.alertId,
       bulkCreate,

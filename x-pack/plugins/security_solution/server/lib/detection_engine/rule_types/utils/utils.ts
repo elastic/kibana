@@ -169,6 +169,7 @@ export const checkPrivilegesFromEsClient = async (
 ): Promise<Privilege> =>
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
+    [],
     async () =>
       (await esClient.transport.request({
         path: '/_security/user/_has_privileges',

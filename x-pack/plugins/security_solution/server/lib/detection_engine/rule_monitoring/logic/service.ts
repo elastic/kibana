@@ -104,6 +104,7 @@ export const createRuleMonitoringService = (
     ): Promise<IRuleExecutionLogForExecutors> => {
       return withSecuritySpan(
         'IRuleMonitoringService.createRuleExecutionLogClientForExecutors',
+        [],
         async () => {
           const { savedObjectsClient, context, ruleMonitoringService, ruleResultService } = params;
 

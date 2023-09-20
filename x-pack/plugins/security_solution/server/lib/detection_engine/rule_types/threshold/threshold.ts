@@ -26,6 +26,7 @@ import { getThresholdSignalHistory } from './get_threshold_signal_history';
 
 import type {
   BulkCreate,
+  DurationMetrics,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
@@ -60,6 +61,7 @@ export const thresholdExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  durationMetrics,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -79,11 +81,12 @@ export const thresholdExecutor = async ({
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  durationMetrics: DurationMetrics[];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('thresholdExecutor', async () => {
+  return withSecuritySpan('thresholdExecutor', durationMetrics, async () => {
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
@@ -122,6 +125,7 @@ export const thresholdExecutor = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      durationMetrics,
     });
 
     // Look for new events over threshold

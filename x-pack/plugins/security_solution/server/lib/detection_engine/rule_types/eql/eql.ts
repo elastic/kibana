@@ -24,6 +24,7 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
+  DurationMetrics,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -56,6 +57,7 @@ export const eqlExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
+  durationMetrics,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -71,10 +73,11 @@ export const eqlExecutor = async ({
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  durationMetrics: DurationMetrics[];
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('eqlExecutor', async () => {
+  return withSecuritySpan('eqlExecutor', durationMetrics, async () => {
     const result = createSearchAfterReturnType();
 
     const request = buildEqlSearchRequest({

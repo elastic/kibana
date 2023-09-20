@@ -19,7 +19,7 @@ import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema'
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BulkCreate, DurationMetrics, RuleRangeTuple, WrapHits } from '../types';
 import { RulePhase } from '../types';
 import {
   addToSearchAfterReturn,
@@ -44,6 +44,7 @@ export const mlExecutor = async ({
   wrapHits,
   exceptionFilter,
   unprocessedExceptions,
+  durationMetrics,
 }: {
   completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
@@ -55,11 +56,12 @@ export const mlExecutor = async ({
   wrapHits: WrapHits;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  durationMetrics: DurationMetrics[];
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('mlExecutor', async () => {
+  return withSecuritySpan('mlExecutor', durationMetrics, async () => {
     if (ml == null) {
       throw new Error('ML plugin unavailable during rule execution');
     }

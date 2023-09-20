@@ -11,7 +11,12 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
+import type {
+  SignalSearchResponse,
+  SignalSource,
+  OverrideBodyQuery,
+  DurationMetrics,
+} from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -35,6 +40,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  durationMetrics: DurationMetrics[];
 }
 
 // utilize search_after for paging results into bulk.
@@ -57,12 +63,13 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
+  durationMetrics,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  return withSecuritySpan('singleSearchAfter', async () => {
+  return withSecuritySpan('singleSearchAfter', durationMetrics, async () => {
     try {
       const searchAfterQuery = buildEventsSearchQuery({
         aggregations,

@@ -24,18 +24,26 @@ export const fetchRuleExecutionSettings = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<RuleExecutionSettings> => {
   try {
-    const ruleExecutionSettings = await withSecuritySpan('fetchRuleExecutionSettings', async () => {
-      const [coreStart] = await withSecuritySpan('getCoreStartServices', () =>
-        core.getStartServices()
-      );
+    const ruleExecutionSettings = await withSecuritySpan(
+      'fetchRuleExecutionSettings',
+      [],
+      async () => {
+        const [coreStart] = await withSecuritySpan('getCoreStartServices', [], () =>
+          core.getStartServices()
+        );
 
-      const kibanaAdvancedSettings = await withSecuritySpan('getKibanaAdvancedSettings', () => {
-        const settingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
-        return settingsClient.getAll();
-      });
+        const kibanaAdvancedSettings = await withSecuritySpan(
+          'getKibanaAdvancedSettings',
+          [],
+          () => {
+            const settingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+            return settingsClient.getAll();
+          }
+        );
 
-      return getRuleExecutionSettingsFrom(config, kibanaAdvancedSettings);
-    });
+        return getRuleExecutionSettingsFrom(config, kibanaAdvancedSettings);
+      }
+    );
 
     return ruleExecutionSettings;
   } catch (e) {

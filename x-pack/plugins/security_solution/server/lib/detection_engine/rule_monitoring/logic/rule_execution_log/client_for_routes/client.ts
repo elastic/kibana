@@ -27,7 +27,7 @@ export const createRuleExecutionLogClientForRoutes = (
 ): IRuleExecutionLogForRoutes => {
   return {
     getExecutionEvents: (args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse> => {
-      return withSecuritySpan('IRuleExecutionLogForRoutes.getExecutionEvents', async () => {
+      return withSecuritySpan('IRuleExecutionLogForRoutes.getExecutionEvents', [], async () => {
         const { ruleId } = args;
         try {
           return await eventLog.getExecutionEvents(args);
@@ -48,7 +48,7 @@ export const createRuleExecutionLogClientForRoutes = (
     getExecutionResults: (
       args: GetExecutionResultsArgs
     ): Promise<GetRuleExecutionResultsResponse> => {
-      return withSecuritySpan('IRuleExecutionLogForRoutes.getExecutionResults', async () => {
+      return withSecuritySpan('IRuleExecutionLogForRoutes.getExecutionResults', [], async () => {
         const { ruleId } = args;
         try {
           return await eventLog.getExecutionResults(args);
