@@ -16,15 +16,17 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 - **MITRE ATT&CK**: The [3rd party framework](https://attack.mitre.org/) the dashboard is built upon. It is a knowledge base of attack tactics and techniques adversaries use in real world applications.
 
-- **Tactic**: A generalized category or process that advesaries use to attack a system. Envelops many relevant Mitre Att&ck techniques
+- **Tactic**: A generalized category or process that adversaries use to attack a system. Envelops many relevant Mitre Att&ck techniques
 
-- **Technique**: A specific technique advesaries use to attack a system. Can belong to one or more different Mitre Tactics and can potentially contain one or more sub-techniques further describing the process.
+- **Technique**: A specific technique adversaries use to attack a system. Can belong to one or more different Mitre Tactics and can potentially contain one or more sub-techniques further describing the process.
 
 - **Rule Activity**: The filter type defining rule status, current options are `enabled` and `disabled`.
 
 - **Rule Source**: The filter type defining rule type, current options are `prebuilt`(from elastic prebuilt rules package) and `custom`(created by user)
 
--**Initial filter state**: The filters present on initial page load. Rule activity will be set to `enabled`, rule source will be set to `prebuilt` and `custom`.
+-**Initial filter state**: The filters present on initial page load. Rule activity will be set to `enabled`, rule source will be set to `prebuilt` and `custom` simultaneously.
+
+-**Dashboard containing the rule data**: The normal render of the coverage overview dashboard. Any returned rule data mapped correctly to the tile layout of all the MITRE data in a colored grid
 
 ### Assumptions
 
@@ -35,7 +37,7 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 ### Non-functional requirements
 
-- Number of rules needs to be under 10k due to [this current bug](https://github.com/elastic/kibana/issues/160698)
+- Number of rules needs to be under 10k due to [an issue](https://github.com/elastic/kibana/issues/160698)
 
 ## Scenarios
 
@@ -43,12 +45,12 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 #### **Scenario: No rules installed**
 
-**Automation**: 1 e2e test + 1 unit test 1 integration test.
+**Automation**: 1 e2e test + 1 unit test + 1 integration test.
 
 ```Gherkin
 Given no rules installed/created
 When user navigates to Coverage Overview page
-Then an empty grid of all Mitre tactics and techniques are displayed
+Then an empty grid of all Mitre tactics and techniques is displayed
 ```
 
 #### **Scenario: Rules installed**
@@ -56,7 +58,7 @@ Then an empty grid of all Mitre tactics and techniques are displayed
 **Automation**: 1 e2e test + 1 integration test
 
 ```Gherkin
-Given rules installed/created
+Given prebuilt rules installed and/or custom rules created
 And rules enabled
 When user navigates to Coverage Overview page
 Then page should render all rule data in grid
@@ -68,11 +70,11 @@ And color tiles according to filters and dashboard legend
 **Automation**: 1 e2e test + 1 unit test.
 
 ```Gherkin
-Given rules installed/created
+Given prebuilt rules installed and/or custom rules created
 And rules enabled
 When user navigates to Coverage Overview page
-And clicks on technique tile with X rules
-Then the popover should display X rule names under their corresponding rule activity secition
+And clicks on technique tile with non zero rules
+Then the popover should display the same number of rule names under their corresponding rule activity section
 And each name should link to its own rule details page
 ```
 
@@ -84,8 +86,8 @@ And each name should link to its own rule details page
 
 ```Gherkin
 Given coverage overview page is loaded with rule data
-When no filters or search term is present
-Then all rule data is fetched and rendered
+When no filters or search term are present
+Then the dashboard is rendered according to the rule data
 ```
 
 #### **Scenario: Users enables filters**
@@ -95,7 +97,7 @@ Then all rule data is fetched and rendered
 ```Gherkin
 Given coverage overview page is loaded with rule data
 When <type> filter(s) is/are enabled
-Then all <type> rule data is fetched and rendered
+Then all <type> rule data is fetched and dashboard containing the rule data is rendered
 
 Examples:
   | type                   |
@@ -162,7 +164,7 @@ Then "enable all disabled" button should be disabled
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given non-security rules are present in instance
+Given non-security rules are present in system
 When coverage overview data is fetched
 Then only security rule data is returned
 And no error is thrown
