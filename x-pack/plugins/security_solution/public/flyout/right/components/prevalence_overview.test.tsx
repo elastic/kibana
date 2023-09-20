@@ -99,7 +99,7 @@ describe('<PrevalenceOverview />', () => {
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -107,7 +107,7 @@ describe('<PrevalenceOverview />', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -141,7 +141,7 @@ describe('<PrevalenceOverview />', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,

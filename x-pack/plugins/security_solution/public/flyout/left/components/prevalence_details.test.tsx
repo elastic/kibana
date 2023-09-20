@@ -79,7 +79,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -87,7 +87,7 @@ describe('PrevalenceDetails', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -124,7 +124,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1000,
           docCount: 2000000,
           hostPrevalence: 0.05,
@@ -163,7 +163,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -171,7 +171,7 @@ describe('PrevalenceDetails', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,

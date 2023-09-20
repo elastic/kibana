@@ -77,7 +77,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     width: '20%',
   },
   {
-    field: 'value',
+    field: 'values',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.insights.prevalence.valueColumnLabel"
@@ -85,7 +85,15 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       />
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    render: (values: string[]) => (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {values.map((value) => (
+          <EuiFlexItem>
+            <EuiText size="xs">{value}</EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
     width: '20%',
   },
   {
@@ -116,9 +124,9 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        getDataProvider(data.field, `timeline-indicator-${data.field}-${data.value}`, data.value),
-      ];
+      const dataProviders = data.values.map((value) =>
+        getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value)
+      );
       return data.alertCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
@@ -162,24 +170,18 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        {
-          ...getDataProvider(
-            data.field,
-            `timeline-indicator-${data.field}-${data.value}`,
-            data.value
+      const dataProviders = data.values.map((value) => ({
+        ...getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value),
+        and: [
+          getDataProviderAnd(
+            'event.kind',
+            `timeline-indicator-event.kind-not-signal`,
+            'signal',
+            IS_OPERATOR,
+            true
           ),
-          and: [
-            getDataProviderAnd(
-              'event.kind',
-              `timeline-indicator-event.kind-not-signal`,
-              'signal',
-              IS_OPERATOR,
-              true
-            ),
-          ],
-        },
-      ];
+        ],
+      }));
       return data.docCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
