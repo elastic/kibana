@@ -13,7 +13,7 @@ import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 
 import { Form } from './form';
-import { wrap, settingsMock } from './mocks';
+import { wrap, settingsMock, createFormServicesMock } from './mocks';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
 import { FormServices } from './types';
@@ -26,14 +26,6 @@ const fields: Array<FieldDefinition<SettingType>> = Object.entries(settingsMock)
       params: { isCustom: false, isOverridden: setting.isOverridden },
     })
 );
-
-const services: FormServices = {
-  showDanger: jest.fn(),
-  links: {},
-  saveChanges: jest.fn(),
-  showError: jest.fn(),
-  showReloadPagePrompt: jest.fn(),
-};
 
 describe('Form', () => {
   beforeEach(() => {
@@ -82,6 +74,7 @@ describe('Form', () => {
 
   // TODO: fix
   it.skip('fires saveChanges when Save button is clicked', () => {
+    const services: FormServices = createFormServicesMock();
     const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={true} />, services));
 
     const testFieldType = 'string';
@@ -91,7 +84,9 @@ describe('Form', () => {
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     fireEvent.click(saveButton);
 
-    expect(services.saveChanges).toHaveBeenCalled();
+    expect(services.saveChanges).toHaveBeenCalledWith({
+      string: { type: 'string', unsavedValue: 'test' },
+    });
   });
 
   it('clears changes when Cancel button is clicked', () => {
@@ -109,6 +104,7 @@ describe('Form', () => {
 
   // TODO: fix
   it.skip('fires showError when saving is unsuccessful', () => {
+    const services: FormServices = createFormServicesMock();
     const saveChangesWithError = jest.fn(() => {
       throw new Error('Unable to save');
     });
@@ -130,6 +126,7 @@ describe('Form', () => {
 
   // TODO: fix
   it.skip('fires showReloadPagePrompt when changing a reloadPageRequired setting', () => {
+    const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
     const testFields = fields.map((field) => {
       return { ...field, requiresPageReload: true };
