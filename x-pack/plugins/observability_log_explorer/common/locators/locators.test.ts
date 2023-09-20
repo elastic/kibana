@@ -185,7 +185,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
+        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
         state: {},
       });
     });
@@ -202,7 +202,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
+        path: `/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
         state: {},
       });
     });
@@ -222,7 +222,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D,query:(language:kuery,query:foo))`,
+        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA,query:(language:kuery,query:foo))`,
         state: {},
       });
     });
@@ -242,7 +242,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
+        path: `/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA)`,
         state: {},
       });
     });
@@ -260,7 +260,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D,sort:!(!('timestamp,%20asc')))`,
+        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA,sort:!(!('timestamp,%20asc')))`,
         state: {},
       });
     });
@@ -312,7 +312,7 @@ describe('Observability Logs Explorer Locators', () => {
           },
         ],
         index:
-          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA==',
+          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUqjzAJScipVABUmsYeChwkycQE8ADmQCuyAE5NEEAG5gMgoA',
       });
       expect(_g).toEqual({
         filters: [
