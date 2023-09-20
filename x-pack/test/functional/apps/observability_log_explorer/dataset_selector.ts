@@ -512,7 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
 
             expect(menuEntries.length).to.be(1);
-            expect(await menuEntries[0].getVisibleText()).to.be('logs-retail-*');
+            expect(await menuEntries[0].getVisibleText()).to.be('retail');
           });
         });
 
@@ -530,7 +530,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
 
-            expect(await menuEntries[0].getVisibleText()).to.be('logs-gaming-*');
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
             menuEntries[0].click();
           });
 
@@ -538,7 +538,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const selectorButton =
               await PageObjects.observabilityLogExplorer.getDatasetSelectorButton();
 
-            expect(await selectorButton.getVisibleText()).to.be('logs-gaming-*');
+            expect(await selectorButton.getVisibleText()).to.be(expectedUncategorized[0]);
           });
         });
       });
