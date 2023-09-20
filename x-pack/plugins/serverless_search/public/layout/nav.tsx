@@ -34,7 +34,6 @@ const navigationTree: NavigationTreeDefinition = {
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
       accordionProps: {
-        forceState: 'open',
         arrowProps: { css: { display: 'none' } },
       },
       breadcrumbStatus: 'hidden',

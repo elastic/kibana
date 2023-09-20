@@ -26,7 +26,6 @@ const navigationTree: NavigationTreeDefinition = {
       icon: 'logoObservability',
       defaultIsCollapsed: false,
       accordionProps: {
-        forceState: 'open',
         arrowProps: { css: { display: 'none' } },
       },
       breadcrumbStatus: 'hidden',
@@ -100,7 +99,7 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               link: 'apm:services',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
+              getIsActive: ({ pathNameSerialized }) => {
                 const regex = /app\/apm\/.*service.*/;
                 return regex.test(pathNameSerialized);
               },

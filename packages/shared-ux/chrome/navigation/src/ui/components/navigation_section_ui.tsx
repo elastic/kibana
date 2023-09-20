@@ -36,6 +36,9 @@ const navigationNodeToEuiItem = (
     isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
+    accordionProps: {
+      initialIsOpen: true, // FIXME should use item.isActive
+    },
     onClick:
       href !== undefined
         ? (event: React.MouseEvent) => {
