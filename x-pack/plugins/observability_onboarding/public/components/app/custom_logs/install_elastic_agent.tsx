@@ -53,13 +53,23 @@ export function InstallElasticAgent() {
 
   const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
+  const {
+    integrationName: integration,
+    datasetName: dataset,
+    autoDownloadConfig,
+  } = wizardState;
+
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
+  const datasetEnforcedName = `${
+    integration === dataset ? dataset : `${integration}.${dataset}`
+  }`;
+
   async function onContinue() {
     await singleDatasetLocator!.navigate({
-      integration: wizardState.integrationName,
-      dataset: `${wizardState.integrationName}.${wizardState.datasetName}`,
+      integration,
+      dataset: datasetEnforcedName,
     });
   }
 
@@ -266,7 +276,7 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        {wizardState.integrationName && (
+        {integration && (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -274,7 +284,7 @@ export function InstallElasticAgent() {
                 {
                   defaultMessage: '{integrationName} integration installed.',
                   values: {
-                    integrationName: wizardState.integrationName,
+                    integrationName: integration,
                   },
                 }
               )}
@@ -339,10 +349,10 @@ export function InstallElasticAgent() {
             apiEndpoint: setup?.apiEndpoint,
             scriptDownloadUrl: setup?.scriptDownloadUrl,
             elasticAgentVersion: setup?.elasticAgentVersion,
-            autoDownloadConfig: wizardState.autoDownloadConfig,
+            autoDownloadConfig,
             onboardingId,
           })}
-          autoDownloadConfig={wizardState.autoDownloadConfig}
+          autoDownloadConfig={autoDownloadConfig}
           onToggleAutoDownloadConfig={onAutoDownloadConfig}
           installAgentStatus={
             installShipperSetupStatus === FETCH_STATUS.LOADING
