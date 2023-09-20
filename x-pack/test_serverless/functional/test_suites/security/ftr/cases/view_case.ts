@@ -27,8 +27,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', () => {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
@@ -312,7 +321,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('initially renders user actions list correctly', async () => {
-        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+        await testSubjects.missingOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -328,7 +337,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           totalUpdates: 4,
         });
 
-        expect(testSubjects.missingOrFail('user-actions-loading'));
+        await testSubjects.missingOrFail('user-actions-loading');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -336,7 +345,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+        await testSubjects.existOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -424,8 +433,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        svlCommonNavigation.breadcrumbs.expectExists();
-        svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        await svlCommonNavigation.breadcrumbs.expectExists();
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
       });
     });
 

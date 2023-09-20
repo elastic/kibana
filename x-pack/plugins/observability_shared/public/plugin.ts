@@ -11,6 +11,7 @@ import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { updateGlobalNavigation } from './services/update_global_navigation';
@@ -20,6 +21,7 @@ export interface ObservabilitySharedStart {
   cases: CasesUiStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   setIsSidebarEnabled: (isEnabled: boolean) => void;
+  embeddable: EmbeddableStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;

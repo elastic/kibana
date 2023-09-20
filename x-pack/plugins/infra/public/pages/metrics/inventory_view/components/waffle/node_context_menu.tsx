@@ -78,12 +78,12 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
-        nodeType,
-        nodeId: node.id,
+        assetType: node.type,
+        assetId: node.id,
         search: {
           from: nodeDetailFrom,
           to: currentTime,
-          assetName: node.name,
+          name: node.name,
         },
       }),
     });

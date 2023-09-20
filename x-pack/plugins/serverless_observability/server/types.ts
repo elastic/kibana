@@ -6,6 +6,7 @@
  */
 
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginSetup {}
@@ -17,4 +18,5 @@ export interface StartDependencies {}
 
 export interface SetupDependencies {
   ml: MlPluginSetup;
+  serverless: ServerlessPluginSetup;
 }
