@@ -1398,6 +1398,9 @@ x-pack/plugins/translations/translations
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/profiling-ui
 
+# Observability shared profiling
+x-pack/plugins/observability_shared/public/components/profiling @elastic/profiling-ui
+
 # Shared UX
 packages/react @elastic/appex-sharedux
 
