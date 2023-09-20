@@ -22,8 +22,8 @@ export const ExtensionsSummary: FunctionComponent<{ index: Index }> = ({ index }
       return null;
     }
     return (
-      <Fragment key={`summaryExtension-${i}`}>
-        <EuiPanel>{summary}</EuiPanel>
+      <Fragment key={`extensionsSummary-${i}`}>
+        <EuiPanel data-test-subj={`extensionsSummary-${i}`}>{summary}</EuiPanel>
         <EuiSpacer />
       </Fragment>
     );
