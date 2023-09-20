@@ -9,8 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { MlFeatures, RouteInitialization } from '../types';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,

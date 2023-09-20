@@ -21,6 +21,7 @@ import {
 import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
 import { flatten } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { MlFeatures } from '../../../common/constants/app';
 import { modelsProvider } from '../model_management';
 import {
   type ExtendAnalyticsMapArgs,
@@ -37,7 +38,6 @@ import {
   isTransformLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
-import type { MlFeatures } from '../../types';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {

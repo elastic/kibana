@@ -53,7 +53,14 @@ import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import {
+  type ConfigSchema,
+  MlFeatures,
+  ML_APP_ROUTE,
+  PLUGIN_ICON_SOLUTION,
+  PLUGIN_ID,
+  initEnabledFeatures,
+} from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
@@ -104,9 +111,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
   private isServerless: boolean = false;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
   }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
@@ -152,7 +165,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             presentationUtil: pluginsStart.presentationUtil,
           },
           params,
-          this.isServerless
+          this.isServerless,
+          this.enabledFeatures
         );
       },
     });
@@ -196,7 +210,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (fullLicense) {
           registerMlUiActions(pluginsSetup.uiActions, core);
 
-          if (mlCapabilities.isADEnabled) {
+          if (this.enabledFeatures.ad) {
             registerEmbeddables(pluginsSetup.embeddable, core);
 
             if (pluginsSetup.cases) {

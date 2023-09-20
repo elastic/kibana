@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
@@ -16,3 +17,31 @@ export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
 export const ML_APP_ROUTE = '/app/ml';
 export const ML_INTERNAL_BASE_PATH = '/internal/ml';
 export const ML_EXTERNAL_BASE_PATH = '/api/ml';
+
+export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
+
+const enabledSchema = schema.maybe(
+  schema.object({
+    enabled: schema.boolean(),
+  })
+);
+
+export const configSchema = schema.object({
+  ad: enabledSchema,
+  dfa: enabledSchema,
+  nlp: enabledSchema,
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
+  if (config.ad?.enabled !== undefined) {
+    enabledFeatures.ad = config.ad.enabled;
+  }
+  if (config.dfa?.enabled !== undefined) {
+    enabledFeatures.dfa = config.dfa.enabled;
+  }
+  if (config.nlp?.enabled !== undefined) {
+    enabledFeatures.nlp = config.nlp.enabled;
+  }
+}

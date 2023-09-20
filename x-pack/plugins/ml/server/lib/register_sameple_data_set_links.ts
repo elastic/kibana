@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { MlFeatures } from '../types';
+import type { MlFeatures } from '../../common/constants/app';
 
 export function registerSampleDataSetLinks(
   enabledFeatures: MlFeatures,

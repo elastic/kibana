@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useContext, useMemo } from 'react';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import type { MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
   showNodeInfo: boolean;
@@ -27,24 +27,24 @@ export const EnabledFeaturesContext = createContext({
   isNLPEnabled: true,
 });
 
-export const EnabledFeaturesContextProvider: FC<{ isServerless: boolean }> = ({
+interface Props {
+  isServerless: boolean;
+  mlFeatures: MlFeatures;
+}
+
+export const EnabledFeaturesContextProvider: FC<Props> = ({
   children,
   isServerless,
+  mlFeatures,
 }) => {
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
-
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
     showFrozenDataTierChoice: !isServerless,
     showMLNavMenu: !isServerless,
     showLicenseInfo: !isServerless,
-    isADEnabled,
-    isDFAEnabled,
-    isNLPEnabled,
+    isADEnabled: mlFeatures.ad,
+    isDFAEnabled: mlFeatures.dfa,
+    isNLPEnabled: mlFeatures.nlp,
   };
 
   return (

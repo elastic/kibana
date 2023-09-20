@@ -19,6 +19,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import type { MlFeatures } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
@@ -43,6 +44,7 @@ interface AppProps {
   deps: MlDependencies;
   appMountParams: AppMountParameters;
   isServerless: boolean;
+  mlFeatures: MlFeatures;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -69,7 +71,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
@@ -141,7 +143,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) =>
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless}>
+                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
                   <MlRouter pageDeps={pageDeps} />
                 </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>
@@ -157,7 +159,8 @@ export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
   appMountParams: AppMountParameters,
-  isServerless: boolean
+  isServerless: boolean,
+  mlFeatures: MlFeatures
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -191,6 +194,7 @@ export const renderApp = (
       deps={deps}
       appMountParams={appMountParams}
       isServerless={isServerless}
+      mlFeatures={mlFeatures}
     />,
     appMountParams.element
   );
