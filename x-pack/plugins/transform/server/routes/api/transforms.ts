@@ -692,19 +692,6 @@ async function deleteTransforms(
           continue;
         }
       }
-      // If user checks box to delete the destinationIndex associated with the job
-      if (destinationIndex && deleteDestIndex) {
-        try {
-          // If user does have privilege to delete the index, then delete the index
-          // if no permission then return 403 forbidden
-          await esClient.asCurrentUser.indices.delete({
-            index: destinationIndex,
-          });
-          destIndexDeleted.success = true;
-        } catch (deleteIndexError) {
-          destIndexDeleted.error = deleteIndexError.meta.body.error;
-        }
-      }
 
       // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestDataView) {
@@ -723,6 +710,8 @@ async function deleteTransforms(
         await esClient.asCurrentUser.transform.deleteTransform({
           transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
+          // @ts-expect-error ES type needs to be updated
+          delete_dest_index: deleteDestIndex,
         });
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {
