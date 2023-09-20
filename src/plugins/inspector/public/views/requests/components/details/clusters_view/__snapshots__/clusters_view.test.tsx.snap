@@ -1,0 +1,147 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render should render local and remote cluster details from _clusters 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <ClustersHealth
+    clusters={
+      Object {
+        "(local)": Object {
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 2,
+            "total": 2,
+          },
+          "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+          "status": "successful",
+          "timed_out": false,
+          "took": 0,
+        },
+        "remote1": Object {
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 2,
+            "total": 2,
+          },
+          "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+          "status": "successful",
+          "timed_out": false,
+          "took": 1,
+        },
+      }
+    }
+  />
+  <ClustersTable
+    clusters={
+      Object {
+        "(local)": Object {
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 2,
+            "total": 2,
+          },
+          "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+          "status": "successful",
+          "timed_out": false,
+          "took": 0,
+        },
+        "remote1": Object {
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 2,
+            "total": 2,
+          },
+          "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+          "status": "successful",
+          "timed_out": false,
+          "took": 1,
+        },
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`render should render local cluster details from _shards 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <ClustersHealth
+    clusters={
+      Object {
+        "(local)": Object {
+          "_shards": Object {
+            "failed": 1,
+            "skipped": 0,
+            "successful": 1,
+            "total": 2,
+          },
+          "failures": Array [
+            Object {
+              "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
+              "node": "XPQtz28bSLW26Oynf6oUmg",
+              "reason": Object {
+                "caused_by": Object {
+                  "reason": "[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+                  "type": "runtime_exception",
+                },
+                "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
+                "index_uuid": "Pjkv7r1PQpmhbxaGL-6Chw",
+                "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+                "type": "query_shard_exception",
+              },
+              "shard": 0,
+            },
+          ],
+          "indices": "",
+          "status": "partial",
+          "timed_out": undefined,
+          "took": undefined,
+        },
+      }
+    }
+  />
+  <ClustersTable
+    clusters={
+      Object {
+        "(local)": Object {
+          "_shards": Object {
+            "failed": 1,
+            "skipped": 0,
+            "successful": 1,
+            "total": 2,
+          },
+          "failures": Array [
+            Object {
+              "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
+              "node": "XPQtz28bSLW26Oynf6oUmg",
+              "reason": Object {
+                "caused_by": Object {
+                  "reason": "[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+                  "type": "runtime_exception",
+                },
+                "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
+                "index_uuid": "Pjkv7r1PQpmhbxaGL-6Chw",
+                "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+                "type": "query_shard_exception",
+              },
+              "shard": 0,
+            },
+          ],
+          "indices": "",
+          "status": "partial",
+          "timed_out": undefined,
+          "took": undefined,
+        },
+      }
+    }
+  />
+</Fragment>
+`;
