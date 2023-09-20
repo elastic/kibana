@@ -6,12 +6,12 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { services } from './serverless_services';
-import type { CreateTestConfigOptions } from './shared/types';
+import { services } from '../../serverless_services';
+import type { CreateTestConfigOptions } from '../../shared/types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const svlSharedConfig = await readConfigFile(require.resolve('./shared/config.base.ts'));
+    const svlSharedConfig = await readConfigFile(require.resolve('./base.ts'));
 
     return {
       ...svlSharedConfig.getAll(),

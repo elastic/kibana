@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../serverless_base_config';
+import { createTestConfig } from './ftr';
 
+// eslint-disable-next-line import/no-default-export
 export default createTestConfig({
-  serverlessProject: 'security',
-  testFiles: [require.resolve('.')],
-  junit: {
-    reportName: 'Serverless Security API Integration Tests',
-  },
-  suiteTags: { exclude: ['skipSvlSec'] },
+  license: 'trial',
+  ssl: true,
 });

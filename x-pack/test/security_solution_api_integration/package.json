@@ -5,7 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "api:detection_engine:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detection_engine/serverless_config.ts",
-    "api:detection_engine:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/detection_engine/serverless_config.ts"
+    "ftr:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./config/serverless/config.ts",
+    "ftr:runner:serverless": "node ../../../scripts/functional_test_runner --config=config/serverless/config.ts",
+    "ftr:server:ess": "node ../../../scripts/functional_tests_server.js --config ./config/ess/config.ts",
+    "ftr:runner:ess": "node ../../../scripts/functional_test_runner --config=config/ess/config.ts"
   }
 }

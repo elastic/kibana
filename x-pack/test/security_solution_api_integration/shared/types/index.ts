@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { InheritedServices } from '../../api_integration/services';
+// TODO need to move serverless services
+import { InheritedServices } from '../../serverless_services';
 
 export interface CreateTestConfigOptions {
   serverlessProject: 'es' | 'oblt' | 'security';

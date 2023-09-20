@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
-  const { ELASTICSEARCH_USERNAME_SERVERLESS } = config.get('kbnTestServer.env');
+  const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
 
   // eslint-disable-next-line ban/ban
   describe.only('create_rule_exception_route', () => {
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+          updated_by: ELASTICSEARCH_USERNAME,
         },
       ]);
       expect(udpatedRule.exceptions_list.some((list) => list.type === 'rule_default')).to.eql(true);
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+          updated_by: ELASTICSEARCH_USERNAME,
         },
       ]);
     });
@@ -207,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
-        created_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+        created_by: ELASTICSEARCH_USERNAME,
         description: 'Exception item for rule default exception list',
         entries: [
           {
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
         os_types: [],
         tags: [],
         type: 'simple',
-        updated_by: ELASTICSEARCH_USERNAME_SERVERLESS,
+        updated_by: ELASTICSEARCH_USERNAME,
       });
     });
 

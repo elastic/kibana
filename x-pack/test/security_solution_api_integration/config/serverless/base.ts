@@ -18,7 +18,7 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { services } from './services';
+import { services } from '../../shared/services';
 
 // eslint-disable-next-line import/no-default-export
 export default async () => {
@@ -34,9 +34,12 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../../security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../../security_api_integration/plugins/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../../security_api_integration/plugins/saml_provider'
+  );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
@@ -80,10 +83,7 @@ export default async () => {
       buildArgs: [],
       env: {
         KBN_PATH_CONF: resolve(REPO_ROOT, 'config'),
-        ELASTICSEARCH_USERNAME_SERVERLESS: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless)
-          .username,
-        ELASTICSEARCH_PASSWORD_SERVERLESS: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless)
-          .password,
+        ELASTICSEARCH_USERNAME: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username,
       },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
