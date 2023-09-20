@@ -4393,6 +4393,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
   version "0.0.0"
   uid ""
