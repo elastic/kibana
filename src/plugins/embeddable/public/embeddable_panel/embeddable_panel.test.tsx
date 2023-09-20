@@ -514,6 +514,14 @@ test('Respects options from SelfStyledEmbeddable', async () => {
   expect(title.length).toBe(0);
 });
 
+test('Shows icon in panel title when the embeddable has a description', async () => {
+  const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
+  const component = await renderEmbeddableInPanel({ embeddable });
+
+  const descriptionIcon = findTestSubject(component, 'embeddablePanelTitleDescriptionIcon');
+  expect(descriptionIcon.length).toBe(1);
+});
+
 test('Does not hide header when parent hide header option is false', async () => {
   const { embeddable } = await setupContainerAndEmbeddable(ViewMode.VIEW, false);
 
