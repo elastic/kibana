@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
-import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
+import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
 interface ShareButtonProps {
   /**
@@ -39,7 +39,7 @@ export const ShareButton: FC<ShareButtonProps> = ({ alertUrl }) => {
             copyToClipboard(alertDetailsLink);
           }}
           iconType="share"
-          data-test-subj={FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
+          data-test-subj={SHARE_BUTTON_TEST_ID}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.header.shareButtonLabel"

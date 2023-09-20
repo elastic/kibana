@@ -27,6 +27,7 @@ import {
   TaskManagerStat,
   asTaskManagerStatEvent,
   EphemeralTaskRejectedDueToCapacity,
+  TaskManagerMetric,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -41,6 +42,10 @@ import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+
+export interface ITaskEventEmitter<T> {
+  get events(): Observable<T>;
+}
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -61,12 +66,13 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
+  | TaskManagerMetric
   | EphemeralTaskRejectedDueToCapacity;
 
 /**
  * The public interface into the task manager system.
  */
-export class TaskPollingLifecycle {
+export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEvent> {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;

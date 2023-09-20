@@ -618,12 +618,12 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         .should('exist');
     });
 
-    it('when user clicks on Explore Logs it navigates to discover', () => {
+    it('when user clicks on Explore Logs it navigates to observability log explorer', () => {
       cy.wait('@checkOnboardingProgress');
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
-      cy.url().should('include', '/app/discover');
 
-      cy.get('button[title="logs-*"]').should('exist');
+      cy.url().should('include', '/app/observability-log-explorer');
+      cy.get('button').contains('[mylogs] mylogs').should('exist');
     });
   });
 });
