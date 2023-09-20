@@ -99,7 +99,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
               basePath.prepend(
                 paths.observability.sloDetails(
                   slo.id,
-                  slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+                  slo?.groupBy !== ALL_VALUE && slo?.instanceId ? slo.instanceId : undefined
                 )
               )
             );

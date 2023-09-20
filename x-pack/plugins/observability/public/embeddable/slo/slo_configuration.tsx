@@ -39,7 +39,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
           <EuiFlexItem grow>
             <SloSelector
               onSelected={(slo) => {
-                setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                setSelectedSlo({ sloId: slo?.id, sloInstanceId: slo?.instanceId });
               }}
             />
           </EuiFlexItem>
