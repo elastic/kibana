@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -23,6 +23,12 @@ import type { SloConfigurationProps, EmbeddableSloProps } from './types';
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+  const updatedProps = useMemo(() => {
+    return {
+      ...selectedSlo,
+      title: 'SLO overview',
+    };
+  }, [selectedSlo]);
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>
@@ -49,7 +55,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          onClick={onCreate.bind(null, selectedSlo)}
+          onClick={onCreate.bind(null, updatedProps)}
           fill
         >
           <FormattedMessage
