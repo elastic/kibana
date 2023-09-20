@@ -218,6 +218,10 @@ export const DeletePackageRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.boolean(),

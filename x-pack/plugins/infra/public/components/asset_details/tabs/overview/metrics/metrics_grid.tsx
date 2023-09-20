@@ -17,6 +17,7 @@ interface Props {
   dateRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  filterFieldName: string;
   charts: Array<XYConfig & { dependsOn?: string[] }>;
   ['data-test-subj']: string;
 }
@@ -26,6 +27,7 @@ export const MetricsGrid = ({
   metricsDataView,
   logsDataView,
   dateRange,
+  filterFieldName,
   charts,
   ...props
 }: Props) => {
@@ -49,6 +51,7 @@ export const MetricsGrid = ({
             {...chartProp}
             assetName={assetName}
             dateRange={dateRange}
+            filterFieldName={filterFieldName}
             logsDataView={logsDataView}
             metricsDataView={metricsDataView}
             data-test-subj={props['data-test-subj']}
