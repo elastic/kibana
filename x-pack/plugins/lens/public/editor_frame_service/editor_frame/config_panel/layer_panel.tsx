@@ -664,6 +664,7 @@ export function LayerPanel(
           groupLabel={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
             defaultMessage: 'Layer settings',
           })}
+          hideFooter={props.hideDimensionsFlyoutFooter}
           handleClose={() => {
             // update the current layer settings
             setPanelSettingsOpen(false);
