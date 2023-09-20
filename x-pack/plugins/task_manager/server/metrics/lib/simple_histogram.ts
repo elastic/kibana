@@ -40,14 +40,14 @@ export class SimpleHistogram {
     }
   }
 
-  public record(value: number) {
+  public record(value: number, increment: number = 1) {
     if (value < 0 || value > this.maxValue) {
       return;
     }
 
     for (let i = 0; i < this.histogramBuckets.length; i++) {
       if (value >= this.histogramBuckets[i].min && value < this.histogramBuckets[i].max) {
-        this.histogramBuckets[i].count++;
+        this.histogramBuckets[i].count += increment;
 
         break;
       }

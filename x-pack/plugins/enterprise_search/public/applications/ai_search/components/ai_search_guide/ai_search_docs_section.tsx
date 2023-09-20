@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../shared/doc_links';
 
-export const EsreDocsSection: React.FC = () => (
+export const SetAISearchChromeSearchDocsSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={4}>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -22,8 +22,8 @@ export const EsreDocsSection: React.FC = () => (
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.esreDocsSection.title"
-                defaultMessage="Dive deeper with the ESRE docs"
+                id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.title"
+                defaultMessage="Dive deeper with AI Search"
               />
             </h2>
           </EuiTitle>
@@ -32,20 +32,20 @@ export const EsreDocsSection: React.FC = () => (
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.esreDocsSection.description"
-                defaultMessage="To learn more about how to get started with ESRE, and test these tools with concrete examples, visit the {esreDocumentation}."
+                id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.description"
+                defaultMessage="To learn more about how to get started and test these tools with concrete examples, visit {searchLab}."
                 values={{
-                  esreDocumentation: (
+                  searchLab: (
                     <EuiLink
-                      data-telemetry-id="entSearch-esre-documentation-esreHomeLink"
+                      data-telemetry-id="entSearch-aiSearch-documentation-searchLabsLink"
                       target="_blank"
-                      href={docLinks.esre}
+                      href={docLinks.searchLabs}
                       external
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.esre.esreDocsSection.description.esreLinkText',
+                        'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.description.searchLabsLinkText',
                         {
-                          defaultMessage: 'ESRE documentation',
+                          defaultMessage: 'Search Labs',
                         }
                       )}
                     </EuiLink>
@@ -66,7 +66,7 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.learn.title"
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.title"
                       defaultMessage="Learn"
                     />
                   </h3>
@@ -76,20 +76,20 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.learn.description"
-                      defaultMessage="These are complex subjects, so we've curated some {learningTopics} to help you get started."
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.description"
+                      defaultMessage="The {searchLabsRepo} has notebooks, sample apps, and resources."
                       values={{
-                        learningTopics: (
+                        searchLabsRepo: (
                           <EuiLink
-                            data-telemetry-id="entSearch-esre-documentation-esreLearnLink"
+                            data-telemetry-id="entSearch-aiSearch-documentation-searchLabsRepoLink"
                             target="_blank"
-                            href={docLinks.esreLearn}
-                            external={false}
+                            href={docLinks.searchLabsRepo}
+                            external
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.learningTopicsLinkText',
+                              'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.searchLabsRepoLinkText',
                               {
-                                defaultMessage: 'learning topics',
+                                defaultMessage: 'Search Labs Github repo',
                               }
                             )}
                           </EuiLink>
@@ -109,8 +109,8 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.faq.title"
-                      defaultMessage="FAQ"
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.title"
+                      defaultMessage="Docs"
                     />
                   </h3>
                 </EuiTitle>
@@ -119,20 +119,20 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.faq.description"
-                      defaultMessage="Learn what ESRE is (and isn't) from these {frequentlyAskedQuestions}."
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.description"
+                      defaultMessage="Visit the {aiSearchDoc}."
                       values={{
-                        frequentlyAskedQuestions: (
+                        aiSearchDoc: (
                           <EuiLink
-                            data-telemetry-id="entSearch-esre-documentation-esreFaqLink"
+                            data-telemetry-id="entSearch-aiSearch-documentation-aiSearchDocLink"
                             target="_blank"
-                            href={docLinks.esreFaq}
-                            external={false}
+                            href={docLinks.aiSearchDoc}
+                            external
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.frequentlyAskedQuestionsLinkText',
+                              'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.aiSearchDocLinkText',
                               {
-                                defaultMessage: 'frequently asked questions',
+                                defaultMessage: 'Elastic documentation',
                               }
                             )}
                           </EuiLink>
@@ -152,7 +152,7 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.help.title"
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.help.title"
                       defaultMessage="Help"
                     />
                   </h3>
@@ -162,20 +162,20 @@ export const EsreDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.help.description"
+                      id="xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.help.description"
                       defaultMessage="Need help? Check out the {discussForum}!"
                       values={{
                         discussForum: (
                           <EuiLink
-                            data-telemetry-id="entSearch-esre-documentation-esreHelpLink"
+                            data-telemetry-id="entSearch-aiSearch-documentation-aiSearchHelpLink"
                             target="_blank"
-                            href={docLinks.esreHelp}
+                            href={docLinks.aiSearchHelp}
                             external={false}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.discussForumLinkText',
+                              'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.help.helpLinkText',
                               {
-                                defaultMessage: 'ESRE discuss forum',
+                                defaultMessage: 'discuss forum or Elastic community Slack',
                               }
                             )}
                           </EuiLink>

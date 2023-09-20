@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import linearCombinationIllustration from '../../../../assets/images/linear.svg';
 import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
 
-import { EsreGuideAccordion } from './esre_guide_accordion';
+import { AISearchGuideAccordion } from './ai_search_guide_accordion';
 import { LinearCombinationPanel } from './linear_combination_panel';
 import { RrfRankingPanel } from './rrf_ranking_panel';
 
@@ -29,7 +29,7 @@ export const RankAggregationSection: React.FC = () => {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.rankAggregationSection.title"
+                  id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.title"
                   defaultMessage="Use a rank aggregation method"
                 />
               </h2>
@@ -39,7 +39,7 @@ export const RankAggregationSection: React.FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.rankAggregationSection.description"
+                  id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.description"
                   defaultMessage="Optional methods for fusing or combining different rankings to achieve better overall ranking performance."
                 />
               </p>
@@ -50,15 +50,15 @@ export const RankAggregationSection: React.FC = () => {
       <EuiFlexItem grow={6}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="rrfRankingAccordion"
-              data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingAccordion"
+              data-telemetry-id="entSearch-aiSearch-rankAggregation-rrfRankingAccordion"
               icon={rrfRankingIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.rrfRankingAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingAccordion.title', {
                 defaultMessage: 'RRF hybrid ranking',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.rrfRankingAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.rrfRankingAccordion.description',
                 {
                   defaultMessage: 'Intelligently combines rankings without configuration',
                 }
@@ -67,21 +67,21 @@ export const RankAggregationSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <RrfRankingPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="linearCombinationAccordion"
-              data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationAccordion"
+              data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationAccordion"
               icon={linearCombinationIllustration}
               title={i18n.translate(
-                'xpack.enterpriseSearch.esre.linearCombinationAccordion.title',
+                'xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.title',
                 {
                   defaultMessage: 'Linear combination',
                 }
               )}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.linearCombinationAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.description',
                 {
                   defaultMessage: 'Weighted results from multiple rankings',
                 }
@@ -90,7 +90,7 @@ export const RankAggregationSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <LinearCombinationPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

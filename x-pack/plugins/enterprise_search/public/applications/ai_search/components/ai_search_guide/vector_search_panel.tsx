@@ -32,47 +32,37 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step1.title', {
       defaultMessage: 'Learn how to upload ML models',
     }),
     children: (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiLink
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedNlpModelsLink"
-            href={docLinks.supportedNlpModels}
-            target="_blank"
-            external
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.supportedNlpModelsLinkText',
-              { defaultMessage: 'Supported NLP models' }
-            )}
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsLink"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-trainedModelsLink"
             href={docLinks.trainedModels}
             target="_blank"
             external
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.guideToTrainedModelsLinkText',
+              'xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step1.guideToTrainedModelsLinkText',
               { defaultMessage: 'Guide to trained models' }
             )}
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLinkTo
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsButton"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-trainedModelsButton"
             to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
             shouldNotCreateHref
           >
             <EuiButton iconType="eye">
-              {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.buttonLabel', {
-                defaultMessage: 'View trained models',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step1.buttonLabel',
+                {
+                  defaultMessage: 'View trained models',
+                }
+              )}
             </EuiButton>
           </EuiLinkTo>
         </EuiFlexItem>
@@ -81,17 +71,19 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step2.title', {
       defaultMessage: 'Create an index',
     }),
     children: (
       <EuiLinkTo
-        data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-createIndexButton"
         to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
         shouldNotCreateHref
       >
-        <EuiButton iconType="plusInCircle">
-          {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step2.buttonLabel', {
+        <EuiButton
+          data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-createIndexButton"
+          iconType="plusInCircle"
+        >
+          {i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step2.buttonLabel', {
             defaultMessage: 'Create an index',
           })}
         </EuiButton>
@@ -100,21 +92,21 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.title', {
-      defaultMessage: 'Create an ML inference pipeline',
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step3.title', {
+      defaultMessage: 'Create a ML inference pipeline',
     }),
     children: (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.description"
+            id="xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step3.description"
             defaultMessage="Navigate to your index's {pipelinesName} tab to create an inference pipeline that uses your deployed model."
             values={{
               pipelinesName: (
                 <strong>
                   &quot;
                   {i18n.translate(
-                    'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.description.pipelinesName',
+                    'xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step3.description.pipelinesName',
                     {
                       defaultMessage: 'Pipelines',
                     }
@@ -131,7 +123,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const NlpEnrichmentPanel: React.FC = () => (
+export const VectorSearchPanel: React.FC = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">
@@ -139,20 +131,20 @@ export const NlpEnrichmentPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description"
-              defaultMessage="Use Natural Language Processing (NLP) tools like sentiment analysis, summarization, or Named Entity Recognition to enhance the relevance of your search results. NLP uses several {supportedMlModels} you can load to intelligently analyze and enrich documents with additional fields."
+              id="xpack.enterpriseSearch.aiSearch.vectorSearchPanel.description"
+              defaultMessage="Use {vectorDbCapabilities} by adding embeddings from your ML models. Deploy trained models on Elastic ML nodes and set up inference pipelines to automatically add embeddings when you ingest documents, so you can use the kNN vector search method in _search."
               values={{
-                supportedMlModels: (
+                vectorDbCapabilities: (
                   <EuiLink
-                    data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedMlModelsLink"
+                    data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-knnSearchLink"
                     target="_blank"
-                    href={docLinks.supportedNlpModels}
+                    href={docLinks.knnSearch}
                     external={false}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description.supportedMlModelsLinkText',
+                      'xpack.enterpriseSearch.aiSearch.vectorSearchPanel.description.vectorDbCapabilitiesLinkText',
                       {
-                        defaultMessage: 'supported ML models',
+                        defaultMessage: "Elasticsearch's vector DB capabilities",
                       }
                     )}
                   </EuiLink>
