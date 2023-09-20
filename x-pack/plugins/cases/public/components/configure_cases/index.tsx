@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiPageBody } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -29,7 +29,10 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { CustomFields } from '../custom_fields';
+import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -60,9 +63,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
+  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
 
   const {
     connector,
+    customFields,
     closureType,
     loading: loadingCaseConfigure,
     mappings,
@@ -71,6 +76,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetchCaseConfigure,
     setConnector,
     setClosureType,
+    setCustomFields,
   } = useCaseConfigure();
 
   const {
@@ -101,11 +107,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
       await persistCaseConfigure({
         connector: caseConnector,
         closureType,
+        customFields,
       });
       onConnectorUpdated(createdConnector);
       setConnector(caseConnector);
     },
-    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
+    [onConnectorUpdated, closureType, setConnector, customFields, persistCaseConfigure]
   );
 
   const isLoadingAny =
@@ -137,9 +144,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
       persistCaseConfigure({
         connector: caseConnector,
         closureType,
+        customFields,
       });
     },
-    [connectors, closureType, persistCaseConfigure, setConnector]
+    [connectors, closureType, customFields, persistCaseConfigure, setConnector]
   );
 
   const onChangeClosureType = useCallback(
@@ -148,9 +156,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
       persistCaseConfigure({
         connector,
         closureType: type,
+        customFields,
       });
     },
-    [connector, persistCaseConfigure, setClosureType]
+    [connector, customFields, persistCaseConfigure, setClosureType]
   );
 
   useEffect(() => {
@@ -201,6 +210,45 @@ export const ConfigureCases: React.FC = React.memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [connector.id, editedConnectorItem, editFlyoutVisible]
   );
+
+  const onAddCustomFields = useCallback(() => {
+    setAddFieldFlyoutVisibility(true);
+  }, [setAddFieldFlyoutVisibility]);
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setAddFieldFlyoutVisibility(false);
+  }, [setAddFieldFlyoutVisibility]);
+
+  const onCustomFieldCreated = useCallback(
+    (customFieldData: CustomFieldsConfiguration) => {
+      const data = customFields.length ? [...customFields, ...customFieldData] : customFieldData;
+      setCustomFields(data);
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields: [...customFields, ...customFieldData],
+      });
+
+      setAddFieldFlyoutVisibility(false);
+    },
+    [
+      setAddFieldFlyoutVisibility,
+      customFields,
+      setCustomFields,
+      persistCaseConfigure,
+      connector,
+      closureType,
+    ]
+  );
+
+  const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
+    <AddFieldFlyout
+      isLoading={loadingCaseConfigure}
+      disabled={!permissions.create || !permissions.update}
+      onCloseFlyout={onCloseAddFieldFlyout}
+      onSaveField={onCustomFieldCreated}
+    />
+  ) : null;
 
   return (
     <>
@@ -254,8 +302,19 @@ export const ConfigureCases: React.FC = React.memo(() => {
               updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
             />
           </SectionWrapper>
+          <SectionWrapper>
+            <EuiFlexItem grow={false}>
+              <CustomFields
+                customFields={customFields}
+                isLoading={loadingCaseConfigure}
+                disabled={loadingCaseConfigure}
+                handleAddCustomField={onAddCustomFields}
+              />
+            </EuiFlexItem>
+          </SectionWrapper>
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
+          {CustomFieldAddFlyout}
         </FormWrapper>
       </EuiPageBody>
     </>

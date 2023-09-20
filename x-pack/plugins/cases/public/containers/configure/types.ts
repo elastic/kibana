@@ -26,6 +26,7 @@ export type {
   ConnectorMappingSource,
   ConnectorMappingTarget,
   ClosureType,
+  CustomFieldsConfiguration,
 };
 
 export interface CaseConnectorMapping {
