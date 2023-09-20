@@ -10,19 +10,24 @@ import React from 'react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { Form, FormProps } from '../form';
-import { settingsMock, uiSettingsClientMock } from '../mocks';
+import { Form } from '../form';
+import { getSettingsMock, uiSettingsClientMock } from '../mocks';
 
-export type StoryProps = Pick<FormProps, 'isSavingEnabled'>;
+export interface StoryProps {
+  /** True if saving settings is enabled, false otherwise. */
+  isSavingEnabled: boolean;
+  /** True if settings require page reload, false otherwise. */
+  requirePageReload: boolean;
+}
 
 /**
  * Utility function for returning a {@link Form} Storybook story.
  * @returns A Storybook Story.
  */
 export const getFormStory = () => {
-  const Story = ({ isSavingEnabled }: StoryProps) => {
+  const Story = ({ isSavingEnabled, requirePageReload }: StoryProps) => {
     const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
-      settingsMock,
+      getSettingsMock(requirePageReload),
       uiSettingsClientMock
     );
 
@@ -31,6 +36,7 @@ export const getFormStory = () => {
 
   Story.args = {
     isSavingEnabled: true,
+    requirePageReload: false,
   };
 
   return Story;

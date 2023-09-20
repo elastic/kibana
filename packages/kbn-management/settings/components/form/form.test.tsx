@@ -13,11 +13,12 @@ import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 
 import { Form } from './form';
-import { wrap, settingsMock, createFormServicesMock, uiSettingsClientMock } from './mocks';
+import { wrap, getSettingsMock, createFormServicesMock, uiSettingsClientMock } from './mocks';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
 import { FormServices } from './types';
 
+const settingsMock = getSettingsMock();
 const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
   settingsMock,
   uiSettingsClientMock

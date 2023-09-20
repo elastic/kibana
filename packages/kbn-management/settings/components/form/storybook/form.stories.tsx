@@ -21,6 +21,10 @@ export default {
       name: 'Saving is enabled?',
       control: { type: 'boolean' },
     },
+    requirePageReload: {
+      name: 'Settings require page reload?',
+      control: { type: 'boolean' },
+    },
   },
   decorators: [
     (Story) => (
