@@ -9,6 +9,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
+  INTERNAL_API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
   UIM_INDEX_CLEAR_CACHE_MANY,
@@ -32,7 +33,6 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
-  INTERNAL_API_BASE_PATH,
 } from '../../../common/constants';
 import {
   TemplateDeserialized,
@@ -45,6 +45,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
+import type { SerializedEnrichPolicy, FieldFromIndicesRequest } from '../../../common';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -318,6 +319,67 @@ export function useLoadNodesPlugins() {
     path: `${API_BASE_PATH}/nodes/plugins`,
     method: 'get',
   });
+}
+
+export const useLoadEnrichPolicies = () => {
+  return useRequest<SerializedEnrichPolicy[]>({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
+    method: 'get',
+  });
+};
+
+export async function deleteEnrichPolicy(policyName: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
+    method: 'delete',
+  });
+
+  return result;
+}
+
+export async function executeEnrichPolicy(policyName: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
+    method: 'put',
+  });
+
+  return result;
+}
+
+export async function createEnrichPolicy(
+  policy: SerializedEnrichPolicy,
+  executePolicyAfterCreation?: boolean
+) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
+    method: 'post',
+    body: JSON.stringify({ policy }),
+    query: {
+      executePolicyAfterCreation,
+    },
+  });
+
+  return result;
+}
+
+export async function getMatchingIndices(pattern: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+    method: 'post',
+    body: JSON.stringify({ pattern }),
+  });
+
+  return result;
+}
+
+export async function getFieldsFromIndices(indices: string[]) {
+  const result = sendRequest<FieldFromIndicesRequest>({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,
+    method: 'post',
+    body: JSON.stringify({ indices }),
+  });
+
+  return result;
 }
 
 export function loadIndex(indexName: string) {

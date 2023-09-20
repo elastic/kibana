@@ -257,7 +257,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }
 
   const onCreateOption = (searchValue: string) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+    const normalizedSearchValue = searchValue.trim();
 
     const newOption = {
       label: normalizedSearchValue,
