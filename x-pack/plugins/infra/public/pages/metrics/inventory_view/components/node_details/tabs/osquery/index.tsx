@@ -22,13 +22,12 @@ const TabComponent = (props: TabProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
-  const { loading, metadata } = useMetadata(
-    nodeId,
-    nodeType,
-    inventoryModel.requiredMetrics,
+  const { loading, metadata } = useMetadata({
+    assetId: nodeId,
+    assetType: nodeType,
     sourceId,
-    currentTimeRange
-  );
+    timeRange: currentTimeRange,
+  });
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
