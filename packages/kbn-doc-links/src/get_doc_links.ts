@@ -506,8 +506,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
-      // TODO add valid docs URL
-      alertingRules: `${MACHINE_LEARNING_DOCS}ml-configuring-alerts.html`,
+      alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -552,7 +551,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
-      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
+      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
       serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
       serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
@@ -651,6 +650,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
       securityApis: `${ELASTICSEARCH_DOCS}security-api.html`,
       simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
+      tasks: `${ELASTICSEARCH_DOCS}tasks.html`,
       timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
@@ -728,6 +728,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       settings: `${FLEET_DOCS}fleet-settings.html`,
       kafkaSettings: `${FLEET_DOCS}kafka-output-settings.html`,
       logstashSettings: `${FLEET_DOCS}ls-output-settings.html`,
+      esSettings: `${FLEET_DOCS}es-output-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,

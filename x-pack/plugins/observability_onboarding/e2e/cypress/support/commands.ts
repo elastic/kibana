@@ -96,6 +96,30 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/api/fleet/epm/custom_integrations`,
+    body: {
+      force: true,
+      integrationName,
+      datasets: [
+        { name: 'access', type: 'logs' },
+        { name: 'error', type: 'metrics' },
+        { name: 'warning', type: 'logs' },
+      ],
+    },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+      'Elastic-Api-Version': '2023-10-31',
+    },
+    auth: { user: 'editor', pass: 'changeme' },
+  });
+});
+
 Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
   const kibanaUrl = Cypress.env('KIBANA_URL');
 
@@ -107,8 +131,9 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
       'kbn-xsrf': 'e2e_test',
     },
     auth: { user: 'editor', pass: 'changeme' },
+    failOnStatusCode: false,
   }).then((response) => {
-    const status = response.body.item.status;
+    const status = response.body.item?.status;
     if (status === 'installed') {
       cy.request({
         log: false,
@@ -119,6 +144,7 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
         },
         headers: {
           'kbn-xsrf': 'e2e_test',
+          'Elastic-Api-Version': '1',
         },
         auth: { user: 'editor', pass: 'changeme' },
       });

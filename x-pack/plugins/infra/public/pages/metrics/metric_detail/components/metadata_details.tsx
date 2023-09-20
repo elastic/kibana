@@ -142,6 +142,7 @@ export const MetadataDetails = (props: Props) => {
       {filteredFields.length > NUMBER_OF_COLUMNS ? (
         <Controls>
           <EuiButtonIcon
+            data-test-subj="infraMetadataDetailsButton"
             iconType={isOpen ? 'arrowUp' : 'arrowDown'}
             onClick={toggleIsOpen}
             aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {

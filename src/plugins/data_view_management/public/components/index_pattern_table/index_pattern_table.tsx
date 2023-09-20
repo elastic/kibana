@@ -164,7 +164,9 @@ export const IndexPatternTable = ({
 
   chrome.docTitle.change(title);
 
-  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+  const isRollup =
+    new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+    dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),

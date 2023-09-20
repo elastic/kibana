@@ -243,7 +243,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request, response, options) => {
-        if (!options.disableShardFailureWarning) {
+        if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 
           handleWarnings({

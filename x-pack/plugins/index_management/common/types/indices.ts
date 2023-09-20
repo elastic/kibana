@@ -83,3 +83,8 @@ export interface Index {
   primary_size?: string;
   documents_deleted?: number;
 }
+
+export interface IndexSettingsResponse {
+  settings: IndexSettings;
+  defaults: IndexSettings;
+}

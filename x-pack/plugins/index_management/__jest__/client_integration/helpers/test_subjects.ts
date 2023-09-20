@@ -64,4 +64,8 @@ export type TestSubjects =
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
   | 'viewButton'
-  | 'detailPanelTabSelected';
+  | 'detailPanelTabSelected'
+  | 'createIndexButton'
+  | 'createIndexNameFieldText'
+  | 'createIndexCancelButton'
+  | 'createIndexSaveButton';

@@ -155,6 +155,7 @@ interface EditorFooterProps {
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
+  hideRunQueryText?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -165,6 +166,7 @@ export const EditorFooter = memo(function EditorFooter({
   detectTimestamp,
   onErrorClick,
   refreshErrors,
+  hideRunQueryText,
 }: EditorFooterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -235,27 +237,29 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
-                  defaultMessage: 'Run query',
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCode
-              transparentBackground
-              css={css`
-                font-size: 12px;
-              `}
-            >{`${COMMAND_KEY} + Enter`}</EuiCode>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!hideRunQueryText && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
+                <p>
+                  {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                    defaultMessage: 'Run query',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCode
+                transparentBackground
+                css={css`
+                  font-size: 12px;
+                `}
+              >{`${COMMAND_KEY} + Enter`}</EuiCode>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

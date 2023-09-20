@@ -1579,6 +1579,56 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-common.ROWS_HEIGHT_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "ROWS_HEIGHT_OPTIONS",
+        "description": [
+          "\nRow height might be a value from -1 to 20\nA value of -1 automatically adjusts the row height to fit the contents.\nA value of 0 displays the content in a single line.\nA value from 1 to 20 represents number of lines of Document explorer row to display."
+        ],
+        "path": "packages/kbn-unified-data-table/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.ROWS_HEIGHT_OPTIONS.auto",
+            "type": "number",
+            "tags": [],
+            "label": "auto",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.ROWS_HEIGHT_OPTIONS.single",
+            "type": "number",
+            "tags": [],
+            "label": "single",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.ROWS_HEIGHT_OPTIONS.default",
+            "type": "number",
+            "tags": [],
+            "label": "default",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

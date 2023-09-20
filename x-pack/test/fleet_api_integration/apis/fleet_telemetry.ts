@@ -22,7 +22,8 @@ export default function (providerContext: FtrProviderContext) {
 
   let agentCount = 0;
   let pkgVersion: string;
-  describe('fleet_telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164998
+  describe.skip('fleet_telemetry', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

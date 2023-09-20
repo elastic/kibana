@@ -31,6 +31,8 @@ import {
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
 
 function setupIntegrations() {
   cy.intercept(
@@ -72,30 +74,31 @@ function getAllIntegrations() {
   });
 }
 
-it('should install integration without policy', () => {
-  cy.visit('/app/integrations/detail/tomcat/settings');
-
-  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-  cy.get('.euiCallOut').contains('This action will install 1 assets');
-  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-
-  cy.getBySel(LOADING_SPINNER).should('not.exist');
-
-  cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-  cy.getBySel(LOADING_SPINNER).should('not.exist');
-  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
-});
-
 describe('Add Integration - Real API', () => {
   const integration = 'apache';
 
-  after(() => {
+  beforeEach(() => {
+    login();
+
+    cleanupAgentPolicies();
     deleteIntegrations();
   });
 
-  afterEach(() => {
-    cleanupAgentPolicies();
+  afterEach(() => {});
+
+  it('should install integration without policy', () => {
+    cy.visit('/app/integrations/detail/tomcat/settings');
+
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+    cy.get('.euiCallOut').contains('This action will install 1 assets');
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+
+    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
 
   it('should install integration without policy', () => {
@@ -125,7 +128,7 @@ describe('Add Integration - Real API', () => {
 
   it('should add integration to policy', () => {
     const agentPolicyId = 'policy_1';
-    cy.request({
+    request({
       method: 'POST',
       url: `/api/fleet/agent_policies`,
       body: {
@@ -135,10 +138,9 @@ describe('Add Integration - Real API', () => {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
       },
-      headers: { 'kbn-xsrf': 'cypress' },
     });
 
-    cy.request('/api/fleet/agent_policies').then((response: any) => {
+    request({ url: '/api/fleet/agent_policies' }).then((response: any) => {
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
 
       cy.intercept(

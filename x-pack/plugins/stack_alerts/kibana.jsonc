@@ -22,7 +22,8 @@
       "kibanaUtils"
     ],
     "requiredBundles": [
-      "esUiShared"
+      "esUiShared",
+      "textBasedLanguages"
     ]
   }
 }

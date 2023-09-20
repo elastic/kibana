@@ -28,6 +28,7 @@ export function DeleteDataView() {
           footer={
             <div>
               <EuiLink
+                data-test-subj="profilingDeleteDataViewDeleteExistingProfilingDataLink"
                 href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-upgrade.html#profiling-delete-data`}
                 target="_blank"
               >

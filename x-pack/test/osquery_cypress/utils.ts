@@ -8,7 +8,7 @@
 import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
-import { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -26,7 +26,10 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
   } = await kbnClient.request<{ item: PackagePolicy }>({
     method: 'GET',
     path: `/api/fleet/epm/packages/${integrationName}`,
-    headers: DEFAULT_HEADERS,
+    headers: {
+      ...DEFAULT_HEADERS,
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   });
 
   return item;
@@ -46,6 +49,9 @@ export const createAgentPolicy = async (
   } = await kbnClient.request<CreateAgentPolicyResponse>({
     method: 'POST',
     path: `/api/fleet/agent_policies?sys_monitoring=true`,
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
     body: {
       name: agentPolicyName,
       description: '',
@@ -62,6 +68,9 @@ export const createAgentPolicy = async (
   log.info('Getting agent enrollment key');
   const { data: apiKeys } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
     method: 'GET',
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
     path: '/api/fleet/enrollment_api_keys',
   });
 
@@ -79,6 +88,9 @@ export const addIntegrationToAgentPolicy = async (
   return kbnClient.request<CreatePackagePolicyResponse>({
     method: 'POST',
     path: '/api/fleet/package_policies',
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
     body: {
       policy_id: agentPolicyId,
       package: {
