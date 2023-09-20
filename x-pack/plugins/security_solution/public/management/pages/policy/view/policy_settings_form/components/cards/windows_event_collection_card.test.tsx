@@ -42,7 +42,7 @@ describe('Policy Windows Event Collection Card', () => {
     expect(
       getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
     ).toHaveLength(8);
-    expect(getByTestId(testSubj.credentialsCheckbox)).toBeChecked();
+    expect(getByTestId(testSubj.apiCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.dllCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.dnsCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();

@@ -962,7 +962,7 @@ export interface PolicyConfig {
       };
     };
     events: {
-      credential_access: boolean;
+      api: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
