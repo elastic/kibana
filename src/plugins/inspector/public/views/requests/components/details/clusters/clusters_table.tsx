@@ -67,8 +67,7 @@ export function ClustersTable({ clusters }: Props) {
                 ? i18n.translate('inspector.requests.clustersTable.localClusterDisplayName', {
                     defaultMessage: 'Local cluster',
                   })
-                : name
-              }
+                : name}
             </EuiText>
           </>
         );

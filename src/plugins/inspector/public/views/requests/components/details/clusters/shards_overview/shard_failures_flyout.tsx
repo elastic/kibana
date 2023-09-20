@@ -31,15 +31,15 @@ export function ShardFailuresFlyout({ failures, onClose }: Props) {
           <h1>
             <EuiButtonIcon iconType="sortLeft" onClick={onClose} />
             {i18n.translate('inspector.requests.clusters.shards.flyoutTitle', {
-              defaultMessage: '{failedShardCount} failured {failedShardCount, plural, one {shard} other {shards}}',
-              values: {failedShardCount: failures.length}
+              defaultMessage:
+                '{failedShardCount} failured {failedShardCount, plural, one {shard} other {shards}}',
+              values: { failedShardCount: failures.length },
             })}
           </h1>
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-      </EuiFlyoutBody>
+      <EuiFlyoutBody />
 
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="sortLeft" onClick={onClose} flush="left">

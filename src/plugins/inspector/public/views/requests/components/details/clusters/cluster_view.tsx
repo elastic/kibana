@@ -18,21 +18,22 @@ interface Props {
 export function ClusterView({ clusterDetails }: Props) {
   return (
     <EuiText style={{ width: '100%' }} size="xs">
-      { clusterDetails.timed_out ? <EuiCallOut
-      size="s"
-      color="warning"
-      title={i18n.translate('inspector.requests.clusterDetails.timedOutDescription', {
+      {clusterDetails.timed_out ? (
+        <EuiCallOut
+          size="s"
+          color="warning"
+          title={i18n.translate('inspector.requests.clusterDetails.timedOutDescription', {
             defaultMessage:
               'Request timed out before completion. Results may be incomplete or empty.',
           })}
-      iconType="warning"
-    /> : null
-      }
+          iconType="warning"
+        />
+      ) : null}
 
       <ShardsOverview
-            failures={clusterDetails.failures ?? []}
-            shardsDetails={clusterDetails._shards}
-          />
+        failures={clusterDetails.failures ?? []}
+        shardsDetails={clusterDetails._shards}
+      />
     </EuiText>
   );
 }
