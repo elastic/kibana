@@ -208,7 +208,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       docsLink: (
         <EuiLink href={`${docLinks.links.fleet.agentPolicy}#apply-a-policy`} target={'_blank'}>
           <FormattedMessage
-            id={'xpack.osquery.agents.noAgentAvailableDescription.docsLink'}
+            id="xpack.osquery.agents.noAgentAvailableDescription.docsLink"
             defaultMessage="Apply a policy"
           />
         </EuiLink>
@@ -220,7 +220,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         <>
           <EuiCallOut color="warning" size="s" title={NO_AGENT_AVAILABLE_TITLE}>
             <FormattedMessage
-              id={'xpack.osquery.agents.noAgentAvailableDescription'}
+              id="xpack.osquery.agents.noAgentAvailableDescription"
               defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
               values={docsLink}
             />
