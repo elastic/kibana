@@ -47,6 +47,13 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async getAssetDetailsKubernetesMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
+      );
+    },
+
     async clickOverviewLinkToAlerts() {
       return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
     },
