@@ -128,6 +128,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
       const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
 
       // IMPORTANT!
       // When grep returns the same spec pattern as it gets in its arguments, we treat it as
@@ -136,7 +137,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // If we don't return early, these specs will start executing, and Cypress will be skipping
       // tests at runtime: those that should be excluded according to the tags passed in the config.
       // This can take so much time that the job can fail by timeout in CI.
-      if (isGrepReturnedSpecPattern) {
+      if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
         // eslint-disable-next-line no-process-exit
         return process.exit(0);

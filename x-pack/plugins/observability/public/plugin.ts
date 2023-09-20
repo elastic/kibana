@@ -300,6 +300,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 

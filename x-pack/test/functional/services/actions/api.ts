@@ -17,15 +17,17 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
       config,
       secrets,
       connectorTypeId,
+      additionalRequestHeaders,
     }: {
       name: string;
       config: Record<string, unknown>;
       secrets: Record<string, unknown>;
       connectorTypeId: string;
+      additionalRequestHeaders?: object;
     }) {
       const { body: createdAction } = await kbnSupertest
         .post(`/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .send({
           name,
           config,
@@ -37,24 +39,24 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
       return createdAction;
     },
 
-    async deleteConnector(id: string) {
+    async deleteConnector(id: string, additionalRequestHeaders?: object) {
       log.debug(`Deleting connector with id '${id}'...`);
       const rsp = kbnSupertest
         .delete(`/api/actions/connector/${id}`)
-        .set('kbn-xsrf', 'foo')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .expect(204, '');
       log.debug('> Connector deleted.');
       return rsp;
     },
 
-    async deleteAllConnectors() {
+    async deleteAllConnectors(additionalRequestHeaders?: object) {
       const { body } = await kbnSupertest
         .get(`/api/actions/connectors`)
-        .set('kbn-xsrf', 'foo')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .expect(200);
 
       for (const connector of body) {
-        await this.deleteConnector(connector.id);
+        await this.deleteConnector(connector.id, additionalRequestHeaders);
       }
     },
   };

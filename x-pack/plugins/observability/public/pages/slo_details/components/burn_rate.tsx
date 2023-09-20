@@ -64,7 +64,8 @@ function getSubtitleFromStatus(
 }
 
 export function BurnRate({ threshold, burnRate, slo, isLoading }: BurnRateParams) {
-  const status: Status = !burnRate ? 'NO_DATA' : burnRate > threshold ? 'BREACHED' : 'OK';
+  const status: Status =
+    burnRate === undefined ? 'NO_DATA' : burnRate > threshold ? 'BREACHED' : 'OK';
   const color = status === 'NO_DATA' ? 'subdued' : status === 'BREACHED' ? 'danger' : 'success';
 
   return (
@@ -86,11 +87,12 @@ export function BurnRate({ threshold, burnRate, slo, isLoading }: BurnRateParams
         <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiStat
-              title={burnRate ? `${numeral(burnRate).format('0.[00]')}x` : '--'}
+              title={burnRate !== undefined ? `${numeral(burnRate).format('0.[00]')}x` : '--'}
               titleColor="default"
               titleSize="s"
               textAlign="right"
               isLoading={isLoading}
+              data-test-subj="sloDetailsBurnRateStat"
               description={
                 <EuiTextColor color="default">
                   <span>

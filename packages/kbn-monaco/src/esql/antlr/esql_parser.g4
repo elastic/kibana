@@ -98,6 +98,10 @@ mathEvalFn
     : mathFunctionIdentifier LP (mathFunctionExpressionArgument (COMMA mathFunctionExpressionArgument)*)? RP
     ;
 
+dateExpression
+   : quantifier=number DATE_LITERAL
+   ;
+
 operatorExpression
     : primaryExpression
     | mathFn
@@ -110,6 +114,7 @@ operatorExpression
 primaryExpression
     : constant
     | qualifiedName
+    | dateExpression
     | LP booleanExpression RP
     | identifier LP (booleanExpression (COMMA booleanExpression)*)? RP
     ;
@@ -173,7 +178,7 @@ mathFunctionExpressionArgument
    | string
    | number
    | operatorExpression
-   | number (DATE_LITERAL)
+   | dateExpression
    | comparison
    ;
 

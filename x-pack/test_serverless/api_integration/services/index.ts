@@ -10,7 +10,6 @@ import { GenericFtrProviderContext } from '@kbn/test';
 import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
 import { services as svlSharedServices } from '../../shared/services';
 
-import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { AlertingApiProvider } from './alerting_api';
 import { SamlToolsProvider } from './saml_tools';
 import { DataViewApiProvider } from './data_view_api';
@@ -20,7 +19,6 @@ export const services = {
   ...xpackApiIntegrationServices,
   ...svlSharedServices,
 
-  svlCommonApi: SvlCommonApiServiceProvider,
   alertingApi: AlertingApiProvider,
   samlTools: SamlToolsProvider,
   dataViewApi: DataViewApiProvider,

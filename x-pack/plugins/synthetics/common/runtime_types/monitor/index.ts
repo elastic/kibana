@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './locations';
 export * from './state';

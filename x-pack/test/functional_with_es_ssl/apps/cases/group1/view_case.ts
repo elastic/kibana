@@ -805,7 +805,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('initially renders user actions list correctly', async () => {
-        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+        await testSubjects.missingOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -821,7 +821,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           totalUpdates: 4,
         });
 
-        expect(testSubjects.missingOrFail('user-actions-loading'));
+        await testSubjects.missingOrFail('user-actions-loading');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -829,7 +829,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+        await testSubjects.existOrFail('cases-show-more-user-actions');
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'

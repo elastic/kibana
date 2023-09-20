@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 
@@ -63,6 +63,7 @@ describe('<InsightsSection />', () => {
   it('should render insights component as expanded when expanded is true', () => {
     const contextValue = {
       eventId: 'some_Id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 

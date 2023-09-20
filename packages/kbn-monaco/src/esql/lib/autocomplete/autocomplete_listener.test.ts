@@ -13,6 +13,8 @@ import { ANTLREErrorListener } from '../../../common/error_listener';
 import { getParser, ROOT_STATEMENT } from '../antlr_facade';
 
 import { isDynamicAutocompleteItem } from './dymanic_item';
+import { getDurationItemsWithQuantifier } from './helpers';
+import { mathCommandDefinition } from './autocomplete_definitions/functions_commands';
 
 describe('autocomplete_listener', () => {
   const getAutocompleteSuggestions = (text: string) => {
@@ -176,45 +178,49 @@ describe('autocomplete_listener', () => {
   });
 
   describe('eval', () => {
+    const functionSuggestions = mathCommandDefinition.map(({ label }) => String(label));
+
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);
-    testSuggestions('from a | eval a=', [
-      'round',
-      'abs',
-      'pow',
-      'log10',
-      'concat',
-      'substring',
-      'trim',
-      'starts_with',
-      'split',
-      'to_string',
-      'to_boolean',
-      'to_datetime',
-      'to_double',
-      'to_integer',
-      'to_long',
-      'to_unsigned_long',
-      'to_ip',
-      'to_version',
-      'date_format',
-      'date_trunc',
-      'date_parse',
-      'auto_bucket',
-      'is_finite',
-      'is_infinite',
-      'case',
-      'length',
-    ]);
+    testSuggestions('from a | eval a=', functionSuggestions);
     testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=round', ['(']);
     testSuggestions('from a | eval a=round(', ['FieldIdentifier']);
     testSuggestions('from a | eval a=round(b) ', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=round(b),', ['var0']);
-    testSuggestions('from a | eval a=round(b) +', ['FieldIdentifier']);
+    testSuggestions('from a | eval a=round(b) + ', ['FieldIdentifier', ...functionSuggestions]);
+    // NOTE: this is handled also partially in the suggestion wrapper with auto-injection of closing brackets
     testSuggestions('from a | eval a=round(b', [')', 'FieldIdentifier']);
     testSuggestions('from a | eval a=round(b), b=round(', ['FieldIdentifier']);
     testSuggestions('from a | stats a=round(b), b=round(', ['FieldIdentifier']);
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', ['var2']);
+
+    describe('date math', () => {
+      const dateSuggestions = [
+        'year',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+        'millisecond',
+      ].flatMap((v) => [v, `${v}s`]);
+      const dateMathSymbols = ['+', '-'];
+      testSuggestions('from a | eval a = 1 ', dateMathSymbols.concat(dateSuggestions, ['|']));
+      testSuggestions('from a | eval a = 1 year ', dateMathSymbols.concat(dateSuggestions, ['|']));
+      testSuggestions(
+        'from a | eval a = 1 day + 2 ',
+        dateMathSymbols.concat(dateSuggestions, ['|'])
+      );
+      testSuggestions(
+        'from a | eval var0=date_trunc(',
+        ['FieldIdentifier'].concat(...getDurationItemsWithQuantifier().map(({ label }) => label))
+      );
+      testSuggestions(
+        'from a | eval var0=date_trunc(2 ',
+        [')', 'FieldIdentifier'].concat(dateSuggestions)
+      );
+    });
   });
 });
