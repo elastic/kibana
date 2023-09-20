@@ -25,22 +25,22 @@ export function ClusterHealth({ count, status }: Props) {
   let statusLabel = status;
   if (status === 'successful') {
     color = HEALTH_HEX_CODES.successful;
-    statusLabel = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
+    statusLabel = i18n.translate('inspector.requests.clusters.successfulLabel', {
       defaultMessage: 'successful',
     });
   } else if (status === 'partial') {
     color = HEALTH_HEX_CODES.partial;
-    statusLabel = i18n.translate('inspector.requests.clustersTable.partialLabel', {
+    statusLabel = i18n.translate('inspector.requests.clusters.partialLabel', {
       defaultMessage: 'partial',
     });
   } else if (status === 'skipped') {
     color = HEALTH_HEX_CODES.skipped;
-    statusLabel = i18n.translate('inspector.requests.clustersTable.skippedLabel', {
+    statusLabel = i18n.translate('inspector.requests.clusters.skippedLabel', {
       defaultMessage: 'skipped',
     });
   } else if (status === 'failed') {
     color = HEALTH_HEX_CODES.failed;
-    statusLabel = i18n.translate('inspector.requests.clustersTable.failedLabel', {
+    statusLabel = i18n.translate('inspector.requests.clusters.failedLabel', {
       defaultMessage: 'failed',
     });
   }

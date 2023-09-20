@@ -56,7 +56,7 @@ export function ShardFailureDetails({ failure }: Props) {
 
   const items = [
     {
-      title: i18n.translate('inspector.requests.cluster.shard.details.nodeLabel', {
+      title: i18n.translate('inspector.requests.clusters.shards.details.nodeLabel', {
         defaultMessage: 'Node',
       }),
       description: formatValueByKey(failure.node, 'node'),

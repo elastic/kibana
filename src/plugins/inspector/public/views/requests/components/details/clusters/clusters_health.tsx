@@ -39,7 +39,7 @@ export function ClustersHealth({ clusters }: Props) {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {i18n.translate('inspector.requests.shardsDetails.totalClustersLabel', {
+            {i18n.translate('inspector.requests.clusters.totalClustersLabel', {
               defaultMessage: '{total} {total, plural, one {cluster} other {clusters}}',
               values: { total: Object.keys(clusters).length },
             })}

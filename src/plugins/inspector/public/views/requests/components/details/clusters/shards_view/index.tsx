@@ -26,7 +26,7 @@ export function ShardsView({ failures, shardsDetails }: Props) {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
             <h4>
-              {i18n.translate('inspector.requests.shards.shardsTitle', {
+              {i18n.translate('inspector.requests.clusters.shards.shardsTitle', {
                 defaultMessage: 'Shards',
               })}
             </h4>

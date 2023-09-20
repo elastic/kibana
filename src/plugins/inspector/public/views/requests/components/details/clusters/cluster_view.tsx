@@ -23,7 +23,7 @@ export function ClusterView({ clusterDetails }: Props) {
         <EuiCallOut
           size="s"
           color="warning"
-          title={i18n.translate('inspector.requests.clusterDetails.timedOutDescription', {
+          title={i18n.translate('inspector.requests.clusters.timedOutMessage', {
             defaultMessage:
               'Request timed out before completion. Results may be incomplete or empty.',
           })}

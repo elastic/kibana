@@ -49,7 +49,7 @@ export function ClustersTable({ clusters }: Props) {
   const columns: Array<EuiBasicTableColumn<ClusterColumn>> = [
     {
       field: 'name',
-      name: i18n.translate('inspector.requests.clustersTable.nameLabel', {
+      name: i18n.translate('inspector.requests.clusters.table.nameLabel', {
         defaultMessage: 'Name',
       }),
       render: (name: string) => {
@@ -59,10 +59,10 @@ export function ClustersTable({ clusters }: Props) {
               onClick={() => toggleDetails(name)}
               aria-label={
                 name in expandedRows
-                  ? i18n.translate('inspector.requests.clustersTable.collapseRow', {
+                  ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
                       defaultMessage: 'Collapse table row to hide cluster details',
                     })
-                  : i18n.translate('inspector.requests.clustersTable.expandRow', {
+                  : i18n.translate('inspector.requests.clusters.table.expandRow', {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
@@ -70,7 +70,7 @@ export function ClustersTable({ clusters }: Props) {
             />
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
-                ? i18n.translate('inspector.requests.clustersTable.localClusterDisplayName', {
+                ? i18n.translate('inspector.requests.clusters.table.localClusterDisplayName', {
                     defaultMessage: 'Local cluster',
                   })
                 : name}
@@ -82,7 +82,7 @@ export function ClustersTable({ clusters }: Props) {
     },
     {
       field: 'status',
-      name: i18n.translate('inspector.requests.clustersTable.statusLabel', {
+      name: i18n.translate('inspector.requests.clusters.table.statusLabel', {
         defaultMessage: 'Status',
       }),
       render: (status: string) => {
@@ -92,13 +92,13 @@ export function ClustersTable({ clusters }: Props) {
     {
       align: 'right' as 'right',
       field: 'responseTime',
-      name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
+      name: i18n.translate('inspector.requests.clusters.table.responseTimeLabel', {
         defaultMessage: 'Response time',
       }),
       render: (responseTime: number | undefined) => (
         <EuiText size="xs" color="subdued">
           {responseTime
-            ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
+            ? i18n.translate('inspector.requests.clusters.table.responseTimeInMilliseconds', {
                 defaultMessage: '{responseTime}ms',
                 values: { responseTime },
               })
