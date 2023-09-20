@@ -14,6 +14,7 @@ import {
   calculateEndpointExceptionsPrivilegesFromKibanaPrivileges,
   calculatePackagePrivilegesFromCapabilities,
   calculatePackagePrivilegesFromKibanaPrivileges,
+  getAuthorizationFromPrivileges,
 } from './authz';
 import { ENDPOINT_PRIVILEGES } from './constants';
 
@@ -156,6 +157,68 @@ describe('fleet authz', () => {
         endpointExceptionsPrivileges
       );
       expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('#getAuthorizationFromPrivileges', () => {
+    it('returns `false` when no `prefix` nor `searchPrivilege`', () => {
+      expect(
+        getAuthorizationFromPrivileges({
+          kibanaPrivileges: [
+            {
+              privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`,
+              authorized: true,
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('returns correct Boolean when `prefix` and `searchPrivilege` are given', () => {
+      const kibanaPrivileges = [
+        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolationExceptions`, authorized: false },
+        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolation`, authorized: true },
+        { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: false },
+      ];
+
+      expect(
+        getAuthorizationFromPrivileges({
+          kibanaPrivileges,
+          prefix: `${SECURITY_SOLUTION_ID}-`,
+          searchPrivilege: `writeHostIsolation`,
+        })
+      ).toEqual(true);
+    });
+
+    it('returns correct Boolean when only `prefix` is given', () => {
+      const kibanaPrivileges = [
+        { privilege: `ignore-me-writeHostIsolationExceptions`, authorized: false },
+        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolation`, authorized: true },
+        { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: false },
+      ];
+
+      expect(
+        getAuthorizationFromPrivileges({
+          kibanaPrivileges,
+          prefix: `${SECURITY_SOLUTION_ID}-`,
+          searchPrivilege: `writeHostIsolation`,
+        })
+      ).toEqual(true);
+    });
+
+    it('returns correct Boolean when only `searchPrivilege` is given', () => {
+      const kibanaPrivileges = [
+        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolationExceptions`, authorized: false },
+        { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolation`, authorized: true },
+        { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: false },
+      ];
+
+      expect(
+        getAuthorizationFromPrivileges({
+          kibanaPrivileges,
+          searchPrivilege: `writeHostIsolation`,
+        })
+      ).toEqual(true);
     });
   });
 });

@@ -169,19 +169,14 @@ export function getAuthorizationFromPrivileges({
   searchPrivilege = '',
   prefix = '',
 }: {
-  kibanaPrivileges:
-    | Array<{
-        resource?: string;
-        privilege: string;
-        authorized: boolean;
-      }>
-    | undefined;
+  kibanaPrivileges: Array<{
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>;
   prefix?: string;
   searchPrivilege?: string;
 }): boolean {
-  if (!kibanaPrivileges) {
-    return false;
-  }
   const privilege = kibanaPrivileges.find((p) => {
     if (prefix.length && searchPrivilege.length) {
       return p.privilege.endsWith(`${prefix}${searchPrivilege}`);
