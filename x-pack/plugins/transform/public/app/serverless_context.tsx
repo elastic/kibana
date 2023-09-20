@@ -9,11 +9,9 @@ import React, { createContext, FC, useContext, useMemo } from 'react';
 
 export interface TransformEnabledFeatures {
   showNodeInfo: boolean;
-  showFrozenDataTierChoice: boolean;
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
-  showFrozenDataTierChoice: true,
 });
 
 export const EnabledFeaturesContextProvider: FC<{ enabledFeatures: TransformEnabledFeatures }> = (

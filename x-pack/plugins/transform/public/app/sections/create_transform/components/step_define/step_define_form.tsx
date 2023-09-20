@@ -113,7 +113,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
@@ -355,7 +355,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                   query={undefined}
                   disabled={false}
                   timefilter={timefilter}
-                  hideFrozenDataTierChoice={!showFrozenDataTierChoice}
+                  hideFrozenDataTierChoice={!showNodeInfo}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

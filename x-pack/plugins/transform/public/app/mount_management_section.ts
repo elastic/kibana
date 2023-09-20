@@ -96,7 +96,6 @@ export async function mountManagementSection(
 
   const enabledFeatures: TransformEnabledFeatures = {
     showNodeInfo: !isServerless,
-    showFrozenDataTierChoice: !isServerless,
   };
   const unmountAppCallback = renderApp(element, appDependencies, enabledFeatures);
 
