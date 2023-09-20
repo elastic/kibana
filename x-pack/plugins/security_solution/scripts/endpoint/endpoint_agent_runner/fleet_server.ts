@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CA_CERT_PATH,
-  ES_CERT_PATH,
-  KBN_CERT_PATH,
-  FLEET_SERVER_CERT_PATH,
-  FLEET_SERVER_KEY_PATH,
-} from '@kbn/dev-utils';
+import { FLEET_SERVER_CERT_PATH, FLEET_SERVER_KEY_PATH } from '@kbn/dev-utils';
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
@@ -217,39 +211,27 @@ export const startFleetServerWithDocker = async ({
   try {
     const dockerArgs = [
       'run',
-
       '--restart',
       'no',
-
       '--add-host',
       'host.docker.internal:host-gateway',
-
       '--rm',
-
       '--detach',
-
       '--name',
       containerName,
-
       // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
-
       '--env',
       'FLEET_SERVER_ENABLE=1',
-
       '--env',
       `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
-
       '--env',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
-
       '--publish',
       `${fleetServerPort}:8220`,
-
       `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
 
@@ -309,75 +291,32 @@ export const startFleetServerStandAloneWithDocker = async () => {
   try {
     const dockerArgs = [
       'run',
-
       '--restart',
       'no',
-
       '--add-host',
       'host.docker.internal:host-gateway',
-
       '--rm',
-
       '--detach',
-
       '--name',
       containerName,
-
-      // The container's hostname will appear in Fleet when the agent enrolls
-      '--hostname',
-      containerName,
-
-      '--volume',
-      `${CA_CERT_PATH}:/ca.crt`,
-
-      '--volume',
-      `${KBN_CERT_PATH}:/kibana.crt`,
-
-      '--volume',
-      `${ES_CERT_PATH}:/elasticsearch.crt`,
-
       '--volume',
       `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
-
       '--volume',
       `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
-
-      `--env`,
-      `FLEET_CA=/ca.crt`,
-
       '--env',
       'FLEET_SERVER_CERT=/fleet-server.crt',
-
       '--env',
       'FLEET_SERVER_CERT_KEY=/fleet-server.key',
-
       '--env',
-      'FLEET_SERVER_ENABLE=1',
-
-      '--env',
-      `FLEET_SERVER_ELASTICSEARCH_HOST=https://host.docker.internal:9200`,
-
-      '--env',
-      'FLEET_SERVER_ELASTICSEARCH_INSECURE=1',
-
-      '--env',
-      'KIBANA_HOST=https://host.docker.internal:5620',
-
-      '--env',
-      'ES_HOST=https://host.docker.internal:9200',
-
+      `ELASTICSEARCH_HOSTS=https://host.docker.internal:9200`,
       '--env',
       'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ',
-
       '--env',
       'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
-
       '--volume',
       `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
-
       '--publish',
       `${fleetServerPort}:8220`,
-
       `docker.elastic.co/observability-ci/fleet-server:latest`,
     ];
 
