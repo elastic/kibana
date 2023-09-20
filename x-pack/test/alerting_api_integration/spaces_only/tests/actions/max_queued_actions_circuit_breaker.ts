@@ -14,7 +14,8 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('max queued actions circuit breaker', () => {
+  // Failing ES Promotion: See https://github.com/elastic/kibana/issues/166770
+  describe.skip('max queued actions circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
     const retry = getService('retry');
 
