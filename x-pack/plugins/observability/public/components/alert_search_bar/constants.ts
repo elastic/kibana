@@ -54,4 +54,5 @@ export const UNTRACKED_ALERTS: AlertStatusFilter = {
 export const ALERT_STATUS_QUERY = {
   [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
   [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
+  [UNTRACKED_ALERTS.status]: UNTRACKED_ALERTS.query,
 };
