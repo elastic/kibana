@@ -63,162 +63,166 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-describe('Artifact tabs in Policy Details page', () => {
-  before(() => {
-    login();
-    loadEndpointDataForEventFiltersIfNeeded();
-  });
+describe(
+  'Artifact tabs in Policy Details page',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] }, // broken due to disabled Native Role Management
+  () => {
+    before(() => {
+      login();
+      loadEndpointDataForEventFiltersIfNeeded();
+    });
 
-  after(() => {
-    login();
-    removeAllArtifacts();
-  });
+    after(() => {
+      login();
+      removeAllArtifacts();
+    });
 
-  for (const testData of getArtifactsListTestsData()) {
-    describe(`${testData.title} tab`, () => {
-      beforeEach(() => {
-        login();
-        removeExceptionsList(testData.createRequestBody.list_id);
-      });
-
-      it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
-        loginWithPrivilegeNone(testData.privilegePrefix);
-        visitPolicyDetailsPage();
-
-        cy.get(`#${testData.tabId}`).should('not.exist');
-      });
-
-      context(`Given there are no ${testData.title} entries`, () => {
-        it(`[READ] User CANNOT add ${testData.title} artifact`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
-
-          cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
-
-          cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
-        });
-
-        it(`[ALL] User can add ${testData.title} artifact`, () => {
-          loginWithPrivilegeAll();
-          visitArtifactTab(testData.tabId);
-
-          cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
-
-          cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
-
-          const { formActions, checkResults } = testData.create;
-
-          performUserActions(formActions);
-
-          // Add a per policy artifact - but not assign it to any policy
-          cy.get('[data-test-subj$="-perPolicy"]').click(); // test-subjects are generated in different formats, but all ends with -perPolicy
-          cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
-
-          // Check new artifact is in the list
-          for (const checkResult of checkResults) {
-            cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
-          }
-
-          cy.getByTestSubj('policyDetailsPage').should('not.exist');
-          cy.getByTestSubj('backToOrigin').contains(/^Back to .+ policy$/);
-
-          cy.getByTestSubj('backToOrigin').click();
-          cy.getByTestSubj('policyDetailsPage').should('exist');
-        });
-      });
-
-      context(`Given there are no assigned ${testData.title} entries`, () => {
+    for (const testData of getArtifactsListTestsData()) {
+      describe(`${testData.title} tab`, () => {
         beforeEach(() => {
           login();
-          createArtifactList(testData.createRequestBody.list_id);
-          createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
+          removeExceptionsList(testData.createRequestBody.list_id);
         });
 
-        it(`[READ] User CANNOT Manage or Assign ${testData.title} artifacts`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
+        it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
+          loginWithPrivilegeNone(testData.privilegePrefix);
+          visitPolicyDetailsPage();
 
-          cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
-
-          cy.getByTestSubj('unassigned-manage-artifacts-button').should('not.exist');
-          cy.getByTestSubj('unassigned-assign-artifacts-button').should('not.exist');
+          cy.get(`#${testData.tabId}`).should('not.exist');
         });
 
-        it(`[ALL] User can Manage and Assign ${testData.title} artifacts`, () => {
-          loginWithPrivilegeAll();
-          visitArtifactTab(testData.tabId);
+        context(`Given there are no ${testData.title} entries`, () => {
+          it(`[READ] User CANNOT add ${testData.title} artifact`, () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
+            cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
-          // Manage artifacts
-          cy.getByTestSubj('unassigned-manage-artifacts-button').should('exist').click();
-          cy.location('pathname').should(
-            'equal',
-            `/app/security/administration/${testData.urlPath}`
-          );
-          cy.getByTestSubj('backToOrigin').click();
+            cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+          });
 
-          // Assign artifacts
-          cy.getByTestSubj('unassigned-assign-artifacts-button').should('exist').click();
+          it(`[ALL] User can add ${testData.title} artifact`, () => {
+            loginWithPrivilegeAll();
+            visitArtifactTab(testData.tabId);
 
-          cy.getByTestSubj('artifacts-assign-flyout').should('exist');
-          cy.getByTestSubj('artifacts-assign-confirm-button').should('be.disabled');
+            cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
-          cy.getByTestSubj(`${testData.artifactName}_checkbox`).click();
-          cy.getByTestSubj('artifacts-assign-confirm-button').click();
-        });
-      });
+            cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
 
-      context(`Given there are assigned ${testData.title} entries`, () => {
-        beforeEach(() => {
-          login();
-          createArtifactList(testData.createRequestBody.list_id);
-          yieldFirstPolicyID().then((policyID) => {
-            createPerPolicyArtifact(testData.artifactName, testData.createRequestBody, policyID);
+            const { formActions, checkResults } = testData.create;
+
+            performUserActions(formActions);
+
+            // Add a per policy artifact - but not assign it to any policy
+            cy.get('[data-test-subj$="-perPolicy"]').click(); // test-subjects are generated in different formats, but all ends with -perPolicy
+            cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
+
+            // Check new artifact is in the list
+            for (const checkResult of checkResults) {
+              cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
+            }
+
+            cy.getByTestSubj('policyDetailsPage').should('not.exist');
+            cy.getByTestSubj('backToOrigin').contains(/^Back to .+ policy$/);
+
+            cy.getByTestSubj('backToOrigin').click();
+            cy.getByTestSubj('policyDetailsPage').should('exist');
           });
         });
 
-        it(`[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
+        context(`Given there are no assigned ${testData.title} entries`, () => {
+          beforeEach(() => {
+            login();
+            createArtifactList(testData.createRequestBody.list_id);
+            createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
+          });
 
-          // List of artifacts
-          cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
-            testData.artifactName
-          );
+          it(`[READ] User CANNOT Manage or Assign ${testData.title} artifacts`, () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          // Cannot assign artifacts
-          cy.getByTestSubj('artifacts-assign-button').should('not.exist');
+            cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
 
-          // Cannot remove from policy
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
-          cy.getByTestSubj('remove-from-policy-action').should('not.exist');
+            cy.getByTestSubj('unassigned-manage-artifacts-button').should('not.exist');
+            cy.getByTestSubj('unassigned-assign-artifacts-button').should('not.exist');
+          });
+
+          it(`[ALL] User can Manage and Assign ${testData.title} artifacts`, () => {
+            loginWithPrivilegeAll();
+            visitArtifactTab(testData.tabId);
+
+            cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
+
+            // Manage artifacts
+            cy.getByTestSubj('unassigned-manage-artifacts-button').should('exist').click();
+            cy.location('pathname').should(
+              'equal',
+              `/app/security/administration/${testData.urlPath}`
+            );
+            cy.getByTestSubj('backToOrigin').click();
+
+            // Assign artifacts
+            cy.getByTestSubj('unassigned-assign-artifacts-button').should('exist').click();
+
+            cy.getByTestSubj('artifacts-assign-flyout').should('exist');
+            cy.getByTestSubj('artifacts-assign-confirm-button').should('be.disabled');
+
+            cy.getByTestSubj(`${testData.artifactName}_checkbox`).click();
+            cy.getByTestSubj('artifacts-assign-confirm-button').click();
+          });
         });
 
-        it(`[ALL] User can see ${testData.title} artifacts and can assign or remove artifacts from policy`, () => {
-          loginWithPrivilegeAll();
-          visitArtifactTab(testData.tabId);
+        context(`Given there are assigned ${testData.title} entries`, () => {
+          beforeEach(() => {
+            login();
+            createArtifactList(testData.createRequestBody.list_id);
+            yieldFirstPolicyID().then((policyID) => {
+              createPerPolicyArtifact(testData.artifactName, testData.createRequestBody, policyID);
+            });
+          });
 
-          // List of artifacts
-          cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
-            testData.artifactName
-          );
+          it(`[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`, () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          // Assign artifacts
-          cy.getByTestSubj('artifacts-assign-button').should('exist').click();
-          cy.getByTestSubj('artifacts-assign-flyout').should('exist');
-          cy.getByTestSubj('artifacts-assign-cancel-button').click();
+            // List of artifacts
+            cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
+              testData.artifactName
+            );
 
-          // Remove from policy
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
-          cy.getByTestSubj('remove-from-policy-action').click();
-          cy.getByTestSubj('confirmModalConfirmButton').click();
+            // Cannot assign artifacts
+            cy.getByTestSubj('artifacts-assign-button').should('not.exist');
 
-          cy.contains('Successfully removed');
+            // Cannot remove from policy
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
+            cy.getByTestSubj('remove-from-policy-action').should('not.exist');
+          });
+
+          it(`[ALL] User can see ${testData.title} artifacts and can assign or remove artifacts from policy`, () => {
+            loginWithPrivilegeAll();
+            visitArtifactTab(testData.tabId);
+
+            // List of artifacts
+            cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
+              testData.artifactName
+            );
+
+            // Assign artifacts
+            cy.getByTestSubj('artifacts-assign-button').should('exist').click();
+            cy.getByTestSubj('artifacts-assign-flyout').should('exist');
+            cy.getByTestSubj('artifacts-assign-cancel-button').click();
+
+            // Remove from policy
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
+            cy.getByTestSubj('remove-from-policy-action').click();
+            cy.getByTestSubj('confirmModalConfirmButton').click();
+
+            cy.contains('Successfully removed');
+          });
         });
       });
-    });
+    }
   }
-});
+);

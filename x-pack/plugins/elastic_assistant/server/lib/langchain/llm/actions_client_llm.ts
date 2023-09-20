@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
@@ -17,6 +17,7 @@ const LLM_TYPE = 'ActionsClientLlm';
 export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
+  #logger: Logger;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   #request: KibanaRequest<unknown, unknown, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,10 +26,12 @@ export class ActionsClientLlm extends LLM {
   constructor({
     actions,
     connectorId,
+    logger,
     request,
   }: {
     actions: ActionsPluginStart;
     connectorId: string;
+    logger: Logger;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     request: KibanaRequest<unknown, unknown, any, any>;
   }) {
@@ -36,6 +39,7 @@ export class ActionsClientLlm extends LLM {
 
     this.#actions = actions;
     this.#connectorId = connectorId;
+    this.#logger = logger;
     this.#request = request;
     this.#actionResultData = {};
   }
@@ -52,6 +56,9 @@ export class ActionsClientLlm extends LLM {
   async _call(prompt: string): Promise<string> {
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
+    this.#logger.debug(
+      `ActionsClientLlm#_call assistantMessage:\n ${JSON.stringify(assistantMessage)} `
+    );
 
     // create a new connector request body with the assistant message:
     const requestBody = {
