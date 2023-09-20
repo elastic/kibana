@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -133,9 +134,24 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
-      render: (_, { fieldValue }) => String(fieldValue),
+      render: (_, { fieldValue }) => {
+        return (
+          <div
+            css={css`
+              display: -webkit-box;
+              line-clamp: 3;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            `}
+          >
+            {String(fieldValue)}
+          </div>
+        );
+      },
       sortable: true,
       textOnly: true,
+      truncateText: false,
       valign: 'middle',
     },
     {
