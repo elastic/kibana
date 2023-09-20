@@ -39,6 +39,8 @@ import type {
   RiskScoreBucket,
 } from './types';
 
+const MAX_RISK_INPUTS_PER_IDENTITY = 10_000;
+
 const bucketToResponse = ({
   bucket,
   now,
@@ -183,7 +185,7 @@ const buildIdentifierTypeAggregation = ({
             `,
           combine_script: 'return state;',
           params: {
-            max_risk_inputs_per_identity: 999999,
+            max_risk_inputs_per_identity: MAX_RISK_INPUTS_PER_IDENTITY,
             p: 1.5,
             risk_cap: 261.2,
           },
