@@ -18,14 +18,17 @@ import { wrap } from '../mocks';
 
 const saveAll = jest.fn();
 const clearAllUnsaved = jest.fn();
+const unsavedChangesCount = 3;
 
 const defaultProps: BottomBarProps = {
   saveAll,
   clearAllUnsaved,
   hasInvalidChanges: false,
-  unsavedChangesCount: 3,
+  unsavedChangesCount,
   isLoading: false,
 };
+
+const unsavedChangesCountText = unsavedChangesCount + ' unsaved settings';
 
 describe('BottomBar', () => {
   it('renders without errors', () => {
@@ -49,11 +52,10 @@ describe('BottomBar', () => {
     expect(saveAll).toHaveBeenCalled();
   });
 
-  // TODO: fix this
-  it.skip('renders unsaved changes count', () => {
-    // const { getByTestId } = render(wrap(<BottomBar {...defaultProps} />));
-    // const input = getByTestId(DATA_TEST_SUBJ_UNSAVED_COUNT);
-    // expect(input).toBe('3 unsaved settings');
+  it('renders unsaved changes count', () => {
+    const { getByText } = render(wrap(<BottomBar {...defaultProps} />));
+
+    expect(getByText(unsavedChangesCountText)).toBeInTheDocument();
   });
 
   it('save button is disabled when there are invalid changes', () => {
@@ -65,11 +67,13 @@ describe('BottomBar', () => {
     expect(input).toBeDisabled();
   });
 
-  // TODO: fix this
-  it.skip('save button is loading when in loading state', () => {
-    const { getByTestId } = render(wrap(<BottomBar {...{ ...defaultProps, isLoading: true }} />));
+  it('save button is loading when in loading state', () => {
+    const { getByTestId, getByLabelText } = render(
+      wrap(<BottomBar {...{ ...defaultProps, isLoading: true }} />)
+    );
 
     const input = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     expect(input).toBeDisabled();
+    expect(getByLabelText('Loading')).toBeInTheDocument();
   });
 });
