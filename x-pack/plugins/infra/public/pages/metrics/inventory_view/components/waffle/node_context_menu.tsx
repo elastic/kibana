@@ -78,7 +78,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
-        assetType: node.type,
+        assetType: nodeType,
         assetId: node.id,
         search: {
           from: nodeDetailFrom,
