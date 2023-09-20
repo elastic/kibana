@@ -56,7 +56,7 @@ The 8.10.1 release includes the following bug fixes.
 
 [float]
 [[fixes-v8.10.1]]
-=== Bug Fixes
+=== Bug fixes
 
 Dashboard::
 * Fixes content editor flyout footer ({kibana-pull}165907[#165907]).
@@ -78,7 +78,7 @@ For information about the {kib} 8.10.0 release, review the following information
 
 [float]
 [[security-updates-v8.10.0]]
-=== Security Updates
+=== Security updates
 
 * An issue was discovered by Elastic whereby sensitive information is recorded
 in {kib} logs in the event of an error. The issue impacts only {kib} version
@@ -291,7 +291,7 @@ Uptime::
 
 [float]
 [[fixes-v8.10.0]]
-=== Bug Fixes
+=== Bug fixes
 APM::
 * Fixes styling and port issue with new onboarding ({kibana-pull}163922[#163922]).
 * Fixes missing alert index issue ({kibana-pull}163600[#163600]).
@@ -363,7 +363,7 @@ Fleet::
 
 [float]
 [[fixes-v8.9.2]]
-=== Bug Fixes
+=== Bug fixes
 
 Dashboard::
 * Fixes missing state on short URLs could be lost on an alias match redirect ({kibana-pull}163658[#163658]).
@@ -401,7 +401,7 @@ To review the breaking changes in the previous release, check {kibana-ref-all}/8
 
 [float]
 [[fixes-v8.9.1]]
-=== Bug Fixes
+=== Bug fixes
 APM::
 * Fixes flame graph rendering on the transaction detail page ({kibana-pull}162968[#162968]).
 * Check if documents are missing `span.name` ({kibana-pull}162899[#162899]).
@@ -624,7 +624,7 @@ Uptime::
 
 [float]
 [[fixes-v8.9.0]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 * Fixes containment boundaries not being re-fetched when a query changes {kibana-pull}157408[#157408]
 * Fixes the charts on Log threshold breached details page {kibana-pull}160321[#160321]
@@ -738,7 +738,7 @@ In 8.9.0, we are addressing this by changing the default batch size to `2`.
 
 [float]
 [[fixes-v8.8.2]]
-=== Bug Fixes
+=== Bug fixes
 
 APM::
 * Fixes the latency graph displaying all service transactions, rather than the selected one, on the transaction detail page {kibana-pull}159085[#159085]
@@ -858,7 +858,7 @@ Fleet::
 
 [float]
 [[fixes-v8.8.1]]
-=== Bug Fixes
+=== Bug fixes
 
 Alerting::
 * Fixes a bug where ML embeddables, OsQuery, and IoCs attachments in a case render the wrong view {kibana-pull}158441[#158441]
@@ -1361,7 +1361,7 @@ Querying & Filtering::
 
 [float]
 [[fixes-v8.8.0]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 * Fixes Delete Schedule button padding issue {kibana-pull}154503[#154503]
 * Fixes error message flash and throttle value reset {kibana-pull}154497[#154497]
@@ -1863,7 +1863,7 @@ TLS rule allow monitors filtering {kibana-pull}150339[#150339]
 
 [float]
 [[fixes-v8.7.0]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 * Event log failure message {kibana-pull}149355[#149355]
 * Optimize alerting task runner for persistent (non-lifecycle rule types) {kibana-pull}149043[#149043]
@@ -2888,7 +2888,7 @@ Logs a hash of the saved objects encryption key (`xpack.encryptedSavedObjects.en
 
 [float]
 [[fixes-v8.4.2]]
-=== Bug Fixes
+=== Bug fixes
 Connectors::
 The connectors table now uses "compatibility" rather than "availability" {kibana-pull}139024[#139024]
 
@@ -4365,7 +4365,7 @@ Allow customizing {es} client maxSockets {kibana-pull}126937[#126937]
 
 [float]
 [[fixes-v8.2.0]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 * Fixes bug when providing a single value to the `fields` query parameter of the Cases find API {kibana-pull}128143[#128143]
 * Fixes the count of alerts in the cases table. Only unique alerts are being counted {kibana-pull}127721[#127721]
@@ -4794,7 +4794,7 @@ Security::
 
 [float]
 [[fixes-v8.1.0]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 * Fixes the pagination results for fetching existing alerts {kibana-pull}122474[#122474]
 * Running disabled rules are now skipped {kibana-pull}119239[#119239]
@@ -5046,7 +5046,7 @@ For the Elastic Security 8.0.0 release information, refer to {security-guide}/re
 
 [float]
 [[fixes-v8.0.0]]
-==== Bug Fixes
+==== Bug fixes
 APM::
 Restrict aggregated transaction metrics search to date range {kibana-pull}123445[#123445]
 
@@ -5129,7 +5129,7 @@ Make a monitor's steps details page work on mobile resolutions in Uptime {kibana
 
 [float]
 [[fixes-v8.0.0-rc2]]
-==== Bug Fixes
+==== Bug fixes
 Alerting::
 Fixes PagerDuty timestamp validation {kibana-pull}122321[#122321]
 Dashboard::
@@ -5377,7 +5377,7 @@ Adds user logout audit events {kibana-pull}121455[#121455]
 
 [float]
 [[fixes-v8.0.0-rc1]]
-=== Bug Fixes
+=== Bug fixes
 Canvas::
 * Fixes Error overflow {kibana-pull}122158[#122158]
 * Fixes expression input {kibana-pull}121490[#121490]

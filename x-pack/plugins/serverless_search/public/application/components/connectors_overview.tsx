@@ -30,8 +30,8 @@ import { useKibanaServices } from '../hooks/use_kibana';
 export const ConnectorsOverview = () => {
   const { http } = useKibanaServices();
 
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
-  const connectorsPath = assetBasePath + 'connectors.svg';
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+  const connectorsPath = assetBasePath + '/connectors.svg';
 
   const { data } = useQuery({
     queryKey: ['fetchConnectors'],

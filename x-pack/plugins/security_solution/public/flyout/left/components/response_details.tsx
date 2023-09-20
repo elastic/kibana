@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
+import { RESPONSE_DETAILS_TEST_ID, RESPONSE_NO_DATA_TEST_ID } from './test_ids';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
   ExpandedEventFieldsObject,
@@ -66,7 +66,7 @@ export const ResponseDetails: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       {!responseActions ? (
-        <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>
+        <InlineBlock data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.response.noDataDescription"
             defaultMessage="There are no response actions defined for this event. To add some, edit the rule’s settings and set up {link}."

@@ -8,9 +8,4 @@
 
 export { FieldInput, type FieldInputProps } from './field_input';
 
-export type {
-  FieldInputKibanaDependencies,
-  FieldInputServices,
-  OnChangeFn,
-  OnChangeParams,
-} from './types';
+export type { FieldInputKibanaDependencies, FieldInputServices, InputProps } from './types';

@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import { PREFIX } from '../../shared/test_ids';
+
 /* Visualization tab */
 
-const PREFIX = 'securitySolutionDocumentDetailsFlyout' as const;
-
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
-export const ANALYZE_GRAPH_ERROR_TEST_ID = `${PREFIX}AnalyzerGraphError` as const;
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
-export const SESSION_VIEW_ERROR_TEST_ID = `${PREFIX}SessionViewError` as const;
 
 /* Insights tab */
 
 /* Prevalence */
 
+const PREVALENCE_DETAILS_TEST_ID = `${PREFIX}PrevalenceDetails` as const;
 export const PREVALENCE_DETAILS_DATE_PICKER_TEST_ID =
-  `${PREFIX}PrevalenceDetailsDatePicker` as const;
-export const PREVALENCE_DETAILS_TABLE_TEST_ID = `${PREFIX}PrevalenceDetailsTable` as const;
-export const PREVALENCE_DETAILS_LOADING_TEST_ID = `${PREFIX}PrevalenceDetailsLoading` as const;
+  `${PREVALENCE_DETAILS_TEST_ID}DatePicker` as const;
+export const PREVALENCE_DETAILS_LOADING_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Loading` as const;
+export const PREVALENCE_DETAILS_NO_DATA_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}NoData` as const;
+export const PREVALENCE_DETAILS_UPSELL_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Upsell` as const;
+export const PREVALENCE_DETAILS_TABLE_TEST_ID = `${PREVALENCE_DETAILS_TEST_ID}Table` as const;
 export const PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}FieldCell` as const;
 export const PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID =
@@ -34,33 +35,31 @@ export const PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}HostPrevalenceCell` as const;
 export const PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}UserPrevalenceCell` as const;
-export const PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID =
-  `${PREVALENCE_DETAILS_TABLE_TEST_ID}Error` as const;
-export const PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID =
-  `${PREVALENCE_DETAILS_TABLE_TEST_ID}NoData` as const;
-export const PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID =
-  `${PREVALENCE_DETAILS_TABLE_TEST_ID}Upsell` as const;
 
 /* Entities */
 
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
 export const ENTITIES_DETAILS_NO_DATA_TEST_ID = `${ENTITIES_DETAILS_TEST_ID}NoData` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
-export const USER_DETAILS_INFO_TEST_ID = 'user-overview';
 export const USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID =
-  `${PREFIX}UsersDetailsRelatedHostsTable` as const;
+  `${USER_DETAILS_TEST_ID}RelatedHostsTable` as const;
+export const USER_DETAILS_INFO_TEST_ID = 'user-overview' as const;
 export const HOST_DETAILS_TEST_ID = `${PREFIX}HostsDetails` as const;
-export const HOST_DETAILS_INFO_TEST_ID = 'host-overview';
 export const HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID =
-  `${PREFIX}HostsDetailsRelatedUsersTable` as const;
+  `${HOST_DETAILS_TEST_ID}RelatedUsersTable` as const;
+export const HOST_DETAILS_INFO_TEST_ID = 'host-overview' as const;
 
-export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
-export const CORRELATIONS_DETAILS_NO_DATA_TEST_ID =
-  `${CORRELATIONS_DETAILS_TEST_ID}NoData` as const;
+/* Threat Intelligence */
 
 export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID = `threat-match-detected` as const;
-export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
-  `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
+export const THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID =
+  `${PREFIX}ThreatIntelligenceDetailsLoading` as const;
+
+/* Correlations */
+
+const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
+export const CORRELATIONS_DETAILS_NO_DATA_TEST_ID =
+  `${CORRELATIONS_DETAILS_TEST_ID}NoData` as const;
 
 export const CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsByAncestrySection` as const;
@@ -82,9 +81,14 @@ export const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}SuppressedAlertsSection` as const;
 export const SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}SuppressedAlertsSectionTechnicalPreview` as const;
-export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
-export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
-export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
 
-export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${PREFIX}InvestigationGuideLoading`;
-export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${PREFIX}NoData`;
+/* Response */
+
+const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
+export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_TEST_ID}Details` as const;
+export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
+
+/* Investigation */
+
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${PREFIX}InvestigationGuideLoading` as const;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${PREFIX}NoData` as const;
