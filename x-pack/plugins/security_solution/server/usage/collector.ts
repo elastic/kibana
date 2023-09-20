@@ -31,6 +31,7 @@ export const registerCollector: RegisterCollector = ({
   ml,
   usageCollection,
   logger,
+  riskEngineIndexPatterns,
 }) => {
   if (!usageCollection) {
     logger.debug('Usage collection is undefined, therefore returning early without registering it');
@@ -2464,7 +2465,7 @@ export const registerCollector: RegisterCollector = ({
             savedObjectsClient,
             logger,
           }),
-          getRiskEngineMetrics({ esClient, logger }),
+          getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
         ]);
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},

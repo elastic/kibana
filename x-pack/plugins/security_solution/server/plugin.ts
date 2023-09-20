@@ -107,6 +107,7 @@ import {
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
+import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -212,6 +213,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
       logger,
+      riskEngineIndexPatterns: {
+        all: allRiskScoreIndexPattern,
+        latest: latestRiskScoreIndexPattern,
+      },
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);

@@ -11,9 +11,9 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBody
 interface GetRiskEngineMetricsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
-  riskScoreIndexPatterns: {
-    allRiskScoreIndexPattern: string;
-    uniqueRiskScoreIndexPattern: string;
+  riskEngineIndexPatterns: {
+    all: string;
+    latest: string;
   };
 }
 
@@ -121,14 +121,14 @@ const getIndexSize = async ({
 export const getRiskEngineMetrics = async ({
   esClient,
   logger,
-  riskScoreIndexPatterns,
+  riskEngineIndexPatterns,
 }: GetRiskEngineMetricsOptions) => {
   logger.info('Fetch risk engine metrics');
 
   const results = await Promise.all([
     getEntitiesAggregationData({
       esClient,
-      index: 'risk-score.risk-score-latest-*',
+      index: riskEngineIndexPatterns.latest,
       logger,
       lastDay: false,
       hostMetricField: 'unique_user_risk_score_total',
@@ -136,7 +136,7 @@ export const getRiskEngineMetrics = async ({
     }),
     getEntitiesAggregationData({
       esClient,
-      index: 'risk-score.risk-score-latest-*',
+      index: riskEngineIndexPatterns.latest,
       logger,
       lastDay: true,
       hostMetricField: 'unique_host_risk_score_day',
@@ -144,7 +144,7 @@ export const getRiskEngineMetrics = async ({
     }),
     getEntitiesAggregationData({
       esClient,
-      index: '.ds-risk-score*',
+      index: riskEngineIndexPatterns.all,
       logger,
       lastDay: false,
       hostMetricField: 'all_host_risk_scores_total',
@@ -152,7 +152,7 @@ export const getRiskEngineMetrics = async ({
     }),
     getEntitiesAggregationData({
       esClient,
-      index: '.ds-risk-score*',
+      index: riskEngineIndexPatterns.all,
       logger,
       lastDay: true,
       hostMetricField: 'all_host_risk_scores_total_day',
@@ -161,13 +161,13 @@ export const getRiskEngineMetrics = async ({
     getIndexSize({
       esClient,
       logger,
-      index: '.ds-risk-score*',
+      index: riskEngineIndexPatterns.all,
       metricField: 'all_risk_scores_index_size',
     }),
     getIndexSize({
       esClient,
       logger,
-      index: 'risk-score.risk-score-latest-*',
+      index: riskEngineIndexPatterns.latest,
       metricField: 'unique_risk_scores_index_size',
     }),
   ]);
