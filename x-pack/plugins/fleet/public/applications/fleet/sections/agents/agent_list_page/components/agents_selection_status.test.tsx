@@ -20,7 +20,7 @@ function render(props: any) {
 const defaultProps = {
   totalAgents: 30,
   selectableAgents: 20,
-  managedAgents: 0,
+  managedAgentsOnCurrentPage: 0,
   selectionMode: 'manual',
   setSelectionMode: jest.fn(),
   selectedAgents: [],
@@ -62,7 +62,7 @@ describe('AgentsSelectionStatus', () => {
           ...defaultProps,
           totalAgents: 20,
           selectableAgents: 19,
-          managedAgents: 1,
+          managedAgentsOnCurrentPage: 1,
           selectedAgents: generateAgents(19),
         });
         expect(res.queryByTestId('selectedEverythingOnAllPagesButton')).toBeNull();

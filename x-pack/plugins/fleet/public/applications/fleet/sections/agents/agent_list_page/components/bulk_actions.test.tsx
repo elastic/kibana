@@ -26,6 +26,19 @@ jest.mock('../../../../hooks', () => ({
 
 jest.mock('../../components/agent_reassign_policy_modal');
 
+const defaultProps = {
+  shownAgents: 10,
+  inactiveShownAgents: 0,
+  totalManagedAgentIds: [],
+  selectionMode: 'manual',
+  currentQuery: '',
+  selectedAgents: [],
+  visibleAgents: [],
+  refreshAgents: () => undefined,
+  allTags: [],
+  agentPolicies: [],
+};
+
 describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
@@ -46,24 +59,13 @@ describe('AgentBulkActions', () => {
 
   describe('When in manual mode', () => {
     it('should show only disabled actions if no agents are active', async () => {
-      const selectedAgents: Agent[] = [{ id: 'agent1' }, { id: 'agent2' }] as Agent[];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 10,
-        managedAgentIds: [],
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        inactiveShownAgents: 10,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -78,27 +80,15 @@ describe('AgentBulkActions', () => {
     });
 
     it('should show available actions for 2 selected agents if they are active', async () => {
-      const selectedAgents: Agent[] = [
-        { id: 'agent1', tags: ['oldTag'], active: true },
-        { id: 'agent2', active: true },
-      ] as Agent[];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: [],
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', tags: ['oldTag'], active: true },
+          { id: 'agent2', active: true },
+        ] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -116,28 +106,15 @@ describe('AgentBulkActions', () => {
         diagnosticFileUploadEnabled: true,
       } as any);
 
-      const selectedAgents: Agent[] = [
-        { id: 'agent1', tags: ['oldTag'], active: true },
-        { id: 'agent2', active: true },
-      ] as Agent[];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: [],
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-        unselectableAgents: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', tags: ['oldTag'], active: true },
+          { id: 'agent2', active: true },
+        ] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -150,24 +127,12 @@ describe('AgentBulkActions', () => {
 
   describe('When in query mode', () => {
     it('should show correct actions for the active agents', async () => {
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: [],
+      const results = render({
+        ...defaultProps,
         selectionMode: 'query',
-        currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -184,24 +149,13 @@ describe('AgentBulkActions', () => {
     });
 
     it('should show correct actions for the active agents and exclude the managed agents from the count', async () => {
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: ['agentId1', 'agentId2'],
+      const results = render({
+        ...defaultProps,
+        totalManagedAgentIds: ['agentId1', 'agentId2'],
         selectionMode: 'query',
-        currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -218,24 +172,12 @@ describe('AgentBulkActions', () => {
     });
 
     it('should show correct actions when no managed policies exist', async () => {
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: [],
+      const results = render({
+        ...defaultProps,
         selectionMode: 'query',
-        currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -252,30 +194,18 @@ describe('AgentBulkActions', () => {
     });
 
     it('should generate a correct kuery to select agents', async () => {
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: [],
+      const results = render({
+        ...defaultProps,
         selectionMode: 'query',
         currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
 
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
-
       await act(async () => {
         fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
       });
@@ -289,30 +219,19 @@ describe('AgentBulkActions', () => {
     });
 
     it('should generate a correct kuery to select agents with managed agents too', async () => {
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgentsPaginated: 10,
-        totalInactiveAgentsPaginated: 0,
-        managedAgentIds: ['agentId1', 'agentId2'],
+      const results = render({
+        ...defaultProps,
+        totalManagedAgentIds: ['agentId1', 'agentId2'],
         selectionMode: 'query',
         currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
 
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
-
       await act(async () => {
         fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
       });

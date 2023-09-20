@@ -22,7 +22,7 @@ export const AgentTableHeader: React.FunctionComponent<{
   showInactive: boolean;
   totalAgents: number;
   selectableAgents: number;
-  managedAgents: number;
+  managedAgentsOnCurrentPage: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
   selectedAgents: Agent[];
@@ -33,7 +33,7 @@ export const AgentTableHeader: React.FunctionComponent<{
   agentStatus,
   totalAgents,
   selectableAgents,
-  managedAgents,
+  managedAgentsOnCurrentPage,
   selectionMode,
   setSelectionMode,
   selectedAgents,
@@ -50,7 +50,7 @@ export const AgentTableHeader: React.FunctionComponent<{
             <AgentsSelectionStatus
               totalAgents={totalAgents}
               selectableAgents={selectableAgents}
-              managedAgents={managedAgents}
+              managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}
               selectionMode={selectionMode}
               setSelectionMode={setSelectionMode}
               selectedAgents={selectedAgents}

@@ -35,9 +35,9 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  totalAgentsPaginated: number;
-  totalInactiveAgentsPaginated: number;
-  managedAgentIds: string[];
+  shownAgents: number;
+  inactiveShownAgents: number;
+  totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -48,9 +48,9 @@ export interface Props {
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  totalAgentsPaginated,
-  totalInactiveAgentsPaginated,
-  managedAgentIds,
+  shownAgents,
+  inactiveShownAgents,
+  totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -81,27 +81,27 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
-    if (managedAgentIds.length) {
-      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgentIds
+    if (totalManagedAgentIds.length) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
         .map((id) => `"${id}"`)
         .join(' or ')})`;
       return `${currentQuery} AND NOT (${excludedKuery})`;
     } else {
       return currentQuery;
     }
-  }, [currentQuery, managedAgentIds]);
+  }, [currentQuery, totalManagedAgentIds]);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : totalAgentsPaginated > totalInactiveAgentsPaginated;
-  const totalActiveAgents = totalAgentsPaginated - totalInactiveAgentsPaginated;
+      : shownAgents > inactiveShownAgents;
+  const totalActiveAgents = shownAgents - inactiveShownAgents;
 
   const agentCount =
     selectionMode === 'manual'
       ? selectedAgents.length
-      : totalActiveAgents - managedAgentIds?.length;
+      : totalActiveAgents - totalManagedAgentIds?.length;
 
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
 

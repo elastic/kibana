@@ -178,16 +178,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
-  const [totalAgentsPaginated, setTotalAgentsPaginated] = useState(0);
-  const [totalInactiveAgentsPaginated, setTotalInactiveAgentsPaginated] = useState(0);
+  const [shownAgents, setShownAgents] = useState(0);
+  const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
-  const [managedAgentIdsPaginated, setManagedAgentIdsPaginated] = useState<string[]>([]);
+  const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
+  const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -239,36 +240,27 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         try {
           setIsLoading(true);
-          const [
-            agentsResponse,
-            totalInactiveAgentsResponse,
-            managedPoliciesResponse,
-            agentTagsResponse,
-          ] = await Promise.all([
-            sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
-              showInactive,
-              showUpgradeable,
-              getStatusSummary: true,
-              withMetrics: displayAgentMetrics,
-            }),
-            sendGetAgentStatus({
-              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-            }),
-            sendGetAgentPolicies({
-              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-              perPage: SO_SEARCH_LIMIT,
-              full: false,
-            }),
-            sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              showInactive,
-            }),
-          ]);
+          const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
+            await Promise.all([
+              sendGetAgents({
+                page: pagination.currentPage,
+                perPage: pagination.pageSize,
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                sortField: getSortFieldForAPI(sortField),
+                sortOrder,
+                showInactive,
+                showUpgradeable,
+                getStatusSummary: true,
+                withMetrics: displayAgentMetrics,
+              }),
+              sendGetAgentStatus({
+                kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+              }),
+              sendGetAgentTags({
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                showInactive,
+              }),
+            ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -307,17 +299,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setAllTags(newAllTags);
           }
 
-          setAgents(agentsResponse.data.items);
-          setTotalAgentsPaginated(agentsResponse.data.total);
-          setTotalInactiveAgentsPaginated(
-            agentsResponse.data.items.filter((item) => item.status === 'inactive').length
-          );
+          setAgentsOnCurrentPage(agentsResponse.data.items);
+          setShownAgents(agentsResponse.data.total);
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
-          const managedPolicyIds = managedPoliciesResponse.data?.items.map((item) => item.id);
-          const managedPolicyAgents = agentsResponse.data.items.filter(
-            (item) => item.policy_id && managedPolicyIds?.includes(item.policy_id)
+          setInactiveShownAgents(
+            showInactive ? totalInactiveAgentsResponse.data.results.inactive || 0 : 0
           );
-          setManagedAgentIdsPaginated(managedPolicyAgents.map((agent) => agent.id));
+          setManagedAgentsOnCurrentPage(
+            agentsResponse.data.items
+              .map((agent) => agent.id)
+              .filter((agentId) => totalManagedAgentIds.includes(agentId)).length
+          );
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -340,6 +332,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       displayAgentMetrics,
       allTags,
       notifications.toasts,
+      totalManagedAgentIds,
     ]
   );
 
@@ -358,6 +351,50 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     perPage: SO_SEARCH_LIMIT,
     full: true,
   });
+
+  // Request to fetch all agents with managed policies
+  const fetchManagedAgents = useCallback(async () => {
+    const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
+
+    const agentPoliciesResponse = await sendGetAgentPolicies({
+      kuery: managedPoliciesKuery,
+      perPage: SO_SEARCH_LIMIT,
+      full: false,
+    });
+
+    if (agentPoliciesResponse.error) {
+      throw new Error(agentPoliciesResponse.error.message);
+    }
+
+    const managedPolicies = agentPoliciesResponse.data?.items ?? [];
+
+    if (managedPolicies.length === 0) {
+      return [];
+    }
+
+    // find all the agents that have those policies and are not unenrolled
+    const policiesKuery = managedPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or ');
+    const response = await sendGetAgents({
+      kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
+      perPage: SO_SEARCH_LIMIT,
+      showInactive: true,
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return response.data?.items ?? [];
+  }, []);
+
+  // Send request to fetch all agents with managed policies
+  useEffect(() => {
+    async function fetchDataAsync() {
+      const allManagedAgents = await fetchManagedAgents();
+      setTotalManagedAgentIds(allManagedAgents?.map((agent) => agent.id));
+    }
+    fetchDataAsync();
+  }, [fetchManagedAgents]);
 
   const agentPolicies = useMemo(
     () => (agentPoliciesRequest.data ? agentPoliciesRequest.data.items : []),
@@ -387,13 +424,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (selectionMode === 'query' && newAgents.length < selectedAgents.length) {
       // differentiating between selection changed by agents dropping from current page or user action
       const areSelectedAgentsStillVisible =
-        selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
+        selectedAgents.length > 0 &&
+        differenceBy(selectedAgents, agentsOnCurrentPage, 'id').length === 0;
       if (areSelectedAgentsStillVisible) {
         setSelectionMode('manual');
       } else {
         // force selecting all agents on current page if staying in query mode
         if (tableRef?.current) {
-          tableRef.current.setSelection(agents);
+          tableRef.current.setSelection(agentsOnCurrentPage);
         }
       }
     }
@@ -576,17 +614,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         tags={allTags ?? []}
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
-        totalAgentsPaginated={totalAgentsPaginated}
-        totalInactiveAgentsPaginated={totalInactiveAgentsPaginated}
+        shownAgents={shownAgents}
+        inactiveShownAgents={inactiveShownAgents}
         totalInactiveAgents={totalInactiveAgents}
-        managedAgentIds={managedAgentIdsPaginated}
+        totalManagedAgentIds={totalManagedAgentIds}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
-        visibleAgents={agents}
+        visibleAgents={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
       />
@@ -594,10 +632,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
-        totalAgents={totalAgentsPaginated}
+        totalAgents={shownAgents}
         agentStatus={agentsStatus}
-        selectableAgents={agents?.filter(isAgentSelectable).length || 0}
-        managedAgents={managedAgentIdsPaginated.length}
+        selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
+        managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
         selectedAgents={selectedAgents}
@@ -613,7 +651,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="s" />
       {/* Agent list table */}
       <AgentListTable
-        agents={agents}
+        agents={agentsOnCurrentPage}
         sortField={sortField}
         pageSizeOptions={pageSizeOptions}
         sortOrder={sortOrder}
@@ -625,7 +663,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
-        totalAgents={Math.min(totalAgentsPaginated, SO_SEARCH_LIMIT)}
+        totalAgents={Math.min(shownAgents, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
