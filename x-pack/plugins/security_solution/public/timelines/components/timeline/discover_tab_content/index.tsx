@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { debounce, isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -60,14 +60,15 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   const dispatch = useDispatch();
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const currentQuery = discoverDataService.query.queryString.getQuery();
+  const currentQuery = discoverDataService.query.queryString.getQuery() as AggregateQuery & {
+    esql: string;
+  };
 
   useEffect(() => {
-    if (esqlOnly && (currentQuery as Query)?.language !== 'esql' && dataViewId) {
+    if (esqlOnly && !currentQuery?.esql && dataViewId) {
       dataViewService.get(dataViewId).then((dataView) => {
         discoverDataService.query.queryString.setQuery({
           esql: `from ${dataView?.getIndexPattern()} | limit 10`,
-          language: 'esql',
         });
       });
     }
