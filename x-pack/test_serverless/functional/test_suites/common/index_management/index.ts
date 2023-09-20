@@ -11,5 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management', function () {
     loadTestFile(require.resolve('./index_templates'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./create_enrich_policy'));
   });
 };

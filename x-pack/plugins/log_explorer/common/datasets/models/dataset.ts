@@ -67,7 +67,9 @@ export class Dataset {
   }
 
   public static create(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
-    return new Dataset(dataset, parentIntegration);
+    const datasetTitle = dataset.title || dataset.name.split('-')[1];
+
+    return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 
   public static createAllLogsDataset() {
