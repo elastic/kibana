@@ -51,16 +51,11 @@ describe('EditTimelineButton', () => {
     jest.clearAllMocks();
   });
 
-  // skipping this test because popover is not getting visible by RTL gestures.
-  //
-  // Raised a bug with eui team: https://github.com/elastic/eui/issues/6065
-  xit('Show tooltip', async () => {
+  it('Show tooltip', async () => {
     render(<TestEditTimelineButton {...props} />);
     const editTimelineIcon = screen.queryAllByTestId(TEST_ID.EDIT_TIMELINE_BTN)[0];
 
     fireEvent.mouseOver(editTimelineIcon);
-
-    jest.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toBeVisible();
