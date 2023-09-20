@@ -4,23 +4,13 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 
 type Props = {
-  serviceDashboards: SavedServiceDashboard[];
-  currentDashboard: SavedServiceDashboard;
-  handleOnChange: (selectedId: string) => void;
   items: React.ReactNode[];
 };
 
-export function ContextMenu({
-  serviceDashboards,
-  currentDashboard,
-  handleOnChange,
-  items,
-}: Props) {
+export function ContextMenu({ items }: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -30,19 +20,6 @@ export function ContextMenu({
   const closePopover = () => {
     setPopover(false);
   };
-
-  const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...serviceDashboards.map(({ dashboardSavedObjectId, dashboardTitle }) => {
-      return { label: dashboardTitle, value: dashboardSavedObjectId };
-    }),
-  ];
-
-  useEffect(() => {
-    if (!currentDashboard && serviceDashboards.length > 0) {
-      const [serviceDashboard] = serviceDashboards;
-      handleOnChange(serviceDashboard.dashboardSavedObjectId);
-    }
-  }, [currentDashboard, serviceDashboards]);
 
   return (
     <EuiPopover

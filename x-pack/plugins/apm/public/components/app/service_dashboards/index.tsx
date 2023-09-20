@@ -31,7 +31,6 @@ export function ServiceDashboards() {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [currentDashboard, setCurrentDashboard] =
     useState<SavedServiceDashboard>();
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { data, status, refetch } = useFetcher(
     (callApmApi) => {
@@ -112,16 +111,8 @@ export function ServiceDashboards() {
               {currentDashboard && (
                 <EuiFlexItem grow={false}>
                   <ContextMenu
-                    handleOnChange={handleOnChange}
-                    currentDashboard={currentDashboard}
-                    serviceDashboards={serviceDashboards}
                     items={[
-                      <LinkDashboard
-                        emptyButton={true}
-                        isModalVisible={isModalVisible}
-                        setIsModalVisible={setIsModalVisible}
-                        onRefresh={refetch}
-                      />,
+                      <LinkDashboard emptyButton={true} onRefresh={refetch} />,
                       <GotoDashboard currentDashboard={currentDashboard} />,
                       <EditDashboard currentDashboard={currentDashboard} />,
                       <UnlinkDashboard
@@ -144,15 +135,7 @@ export function ServiceDashboards() {
           )}
         </>
       ) : (
-        <EmptyDashboards
-          actions={
-            <LinkDashboard
-              isModalVisible={isModalVisible}
-              setIsModalVisible={setIsModalVisible}
-              onRefresh={refetch}
-            />
-          }
-        />
+        <EmptyDashboards actions={<LinkDashboard onRefresh={refetch} />} />
       )}
     </EuiPanel>
   );

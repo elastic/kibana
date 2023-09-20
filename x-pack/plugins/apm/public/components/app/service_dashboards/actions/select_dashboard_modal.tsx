@@ -30,9 +30,14 @@ import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
 interface Props {
   onClose: () => void;
   onRefresh: () => void;
+  serviceDashboardId?: string;
 }
 
-export function SelectDashboard({ onClose, onRefresh }: Props) {
+export function SelectDashboard({
+  onClose,
+  onRefresh,
+  serviceDashboardId,
+}: Props) {
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -42,6 +47,8 @@ export function SelectDashboard({ onClose, onRefresh }: Props) {
   const [selectedDashboard, setSelectedDashboard] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+
+  const isEditMode = !!serviceDashboardId;
 
   const {
     path: { serviceName },

@@ -6,20 +6,20 @@
  */
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { SelectDashboard } from './select_dashboard_modal';
 
 export function LinkDashboard({
-  isModalVisible,
-  setIsModalVisible,
   onRefresh,
   emptyButton = false,
 }: {
-  isModalVisible: boolean;
-  setIsModalVisible: (isVisible: boolean) => void;
+  // isModalVisible: boolean;
+  // setIsModalVisible: (isVisible: boolean) => void;
   onRefresh: () => void;
   emptyButton?: Boolean;
 }) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   return (
     <>
       {emptyButton ? (

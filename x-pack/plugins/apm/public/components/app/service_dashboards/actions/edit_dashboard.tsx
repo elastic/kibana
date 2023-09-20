@@ -6,21 +6,19 @@
  */
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SelectDashboard } from './select_dashboard_modal';
 
 export function EditDashboard({
-  isModalVisible,
-  setIsModalVisible,
   onRefresh,
   currentDashboard,
 }: {
-  isModalVisible: boolean;
-  setIsModalVisible: (isVisible: boolean) => void;
   onRefresh: () => void;
   currentDashboard: SavedServiceDashboard;
 }) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   return (
     <>
       <EuiButtonEmpty
@@ -31,7 +29,7 @@ export function EditDashboard({
         onClick={() => setIsModalVisible(true)}
       >
         {i18n.translate('xpack.apm.serviceDashboards.editEmptyButtonLabel', {
-          defaultMessage: 'Edit dashboard',
+          defaultMessage: 'Edit dashboard link',
         })}
       </EuiButtonEmpty>
 
@@ -39,6 +37,7 @@ export function EditDashboard({
         <SelectDashboard
           onClose={() => setIsModalVisible(false)}
           onRefresh={onRefresh}
+          serviceDashboardId={currentDashboard.id}
         />
       )}
     </>
