@@ -7,6 +7,7 @@
 
 import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
+import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
@@ -27,6 +28,8 @@ export class ServerlessObservabilityPlugin
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: false, nlp: false });
+
+    pluginsSetup.serverless.setupProjectSettings(OBSERVABILITY_PROJECT_SETTINGS);
     return {};
   }
 

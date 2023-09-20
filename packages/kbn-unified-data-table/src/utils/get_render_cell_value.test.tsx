@@ -212,7 +212,9 @@ describe('Unified data table cell rendering', function () {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -223,7 +225,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -234,7 +238,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -245,7 +251,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -363,7 +371,9 @@ describe('Unified data table cell rendering', function () {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -376,7 +386,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -389,7 +401,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -400,7 +414,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -443,7 +459,9 @@ describe('Unified data table cell rendering', function () {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -456,7 +474,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -469,7 +489,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -480,7 +502,9 @@ describe('Unified data table cell rendering', function () {
             }
           }
         />
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -603,7 +627,9 @@ describe('Unified data table cell rendering', function () {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -646,7 +672,9 @@ describe('Unified data table cell rendering', function () {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription

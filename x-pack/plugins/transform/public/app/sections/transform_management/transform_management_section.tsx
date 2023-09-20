@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+import { useIsServerless } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
@@ -71,6 +72,7 @@ const ErrorMessageCallout: FC<{
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
+  const hideNodeInfo = useIsServerless();
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -78,7 +80,7 @@ export const TransformManagement: FC = () => {
     isInitialLoading: transformNodesInitialLoading,
     error: transformNodesErrorMessage,
     data: transformNodesData = 0,
-  } = useGetTransformNodes();
+  } = useGetTransformNodes({ enabled: true });
   const transformNodes = transformNodesErrorMessage === null ? transformNodesData : 0;
 
   const {
@@ -86,7 +88,9 @@ export const TransformManagement: FC = () => {
     isLoading: transformsLoading,
     error: transformsErrorMessage,
     data: { transforms, transformIdsWithoutConfig },
-  } = useGetTransforms({ enabled: !transformNodesInitialLoading && transformNodes > 0 });
+  } = useGetTransforms({
+    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
+  });
 
   const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
@@ -193,7 +197,7 @@ export const TransformManagement: FC = () => {
           <>
             {unauthorizedTransformsWarning}
 
-            {transformNodesErrorMessage !== null && (
+            {!hideNodeInfo && transformNodesErrorMessage !== null && (
               <ErrorMessageCallout
                 text={
                   <FormattedMessage

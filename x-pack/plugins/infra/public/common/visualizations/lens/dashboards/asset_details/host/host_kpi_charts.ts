@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { hostLensFormulas } from '../../../../constants';
+import { hostLensFormulas } from '../../../formulas';
 import type { MetricChartLayerParams } from '../../../../types';
 import { METRICS_TOOLTIP } from '../../translations';
 
@@ -97,15 +97,15 @@ export const hostKPICharts: KPIChartProps[] = [
   },
   {
     id: 'diskSpaceUsage',
-    title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.diskSpaceUsage.title', {
-      defaultMessage: 'Disk Space Usage',
+    title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.diskUsage.title', {
+      defaultMessage: 'Disk Usage',
     }),
     layers: {
       data: {
-        ...hostLensFormulas.diskSpaceUsage,
-        format: hostLensFormulas.diskSpaceUsage.format
+        ...hostLensFormulas.diskUsage,
+        format: hostLensFormulas.diskUsage.format
           ? {
-              ...hostLensFormulas.diskSpaceUsage.format,
+              ...hostLensFormulas.diskUsage.format,
               params: {
                 decimals: 1,
               },

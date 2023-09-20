@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
           dynamic: 'strict',
           properties: {
             '@timestamp': {
+              ignore_malformed: false,
               type: 'date',
             },
             host: {

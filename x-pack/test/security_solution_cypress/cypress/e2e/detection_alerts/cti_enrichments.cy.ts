@@ -27,6 +27,7 @@ import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_det
 import { ruleDetailsUrl } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
@@ -50,6 +51,7 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
     );
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161539
   // Skipped: https://github.com/elastic/kibana/issues/162818
   it.skip('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {

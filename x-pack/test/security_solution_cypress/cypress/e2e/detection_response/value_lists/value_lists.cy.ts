@@ -35,8 +35,10 @@ const TEXT_LIST_FILE_NAME = 'value_list.txt';
 const IPS_LIST_FILE_NAME = 'ip_list.txt';
 const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165699
-describe('value lists', () => {
+describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  // TODO: https://github.com/elastic/kibana/issues/161539
   describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
@@ -56,6 +58,7 @@ describe('value lists', () => {
       closeValueListsModal();
     });
 
+    // TODO: https://github.com/elastic/kibana/issues/161539
     // Flaky in serverless tests
     describe('create list types', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
@@ -115,6 +118,7 @@ describe('value lists', () => {
       });
     });
 
+    // TODO: https://github.com/elastic/kibana/issues/161539
     // Flaky in serverless tests
     describe('delete list types', { tags: ['@brokenInServerless'] }, () => {
       it('deletes a "keyword" list from an uploaded file', () => {
@@ -162,6 +166,7 @@ describe('value lists', () => {
       });
     });
 
+    // TODO: https://github.com/elastic/kibana/issues/161539
     // Flaky in serverless tests
     describe('export list types', { tags: ['@brokenInServerless'] }, () => {
       it('exports a "keyword" list from an uploaded file', () => {
@@ -259,11 +264,17 @@ describe('value lists', () => {
     });
   });
 
-  describe('user with restricted access role', { tags: '@ess' }, () => {
-    it('Does not allow a t1 analyst user to upload a value list', () => {
-      login(ROLES.t1_analyst);
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
-      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
-    });
-  });
+  // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  describe(
+    'user with restricted access role',
+    { tags: ['@ess', '@serverless', '@skipInServerless'] },
+    () => {
+      it('Does not allow a t1 analyst user to upload a value list', () => {
+        login(ROLES.t1_analyst);
+        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
+        cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
+      });
+    }
+  );
 });

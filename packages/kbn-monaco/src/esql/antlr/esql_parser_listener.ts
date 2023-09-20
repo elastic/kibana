@@ -23,6 +23,7 @@ import { ValueExpressionContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
 import { MathFnContext } from "./esql_parser";
 import { MathEvalFnContext } from "./esql_parser";
+import { DateExpressionContext } from "./esql_parser";
 import { OperatorExpressionContext } from "./esql_parser";
 import { PrimaryExpressionContext } from "./esql_parser";
 import { RowCommandContext } from "./esql_parser";
@@ -290,6 +291,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMathEvalFn?: (ctx: MathEvalFnContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.dateExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterDateExpression?: (ctx: DateExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dateExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitDateExpression?: (ctx: DateExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.operatorExpression`.

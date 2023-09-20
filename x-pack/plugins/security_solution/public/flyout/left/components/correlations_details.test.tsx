@@ -20,8 +20,8 @@ import {
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_NO_DATA_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
@@ -102,13 +102,14 @@ describe('CorrelationsDetails', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = renderCorrelationDetails();
+    const { getByTestId, queryByTestId } = renderCorrelationDetails();
 
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no section and show error message if show values are false', () => {
@@ -139,7 +140,10 @@ describe('CorrelationsDetails', () => {
     expect(
       queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
     ).not.toBeInTheDocument();
-    expect(getByTestId(`${CORRELATIONS_DETAILS_TEST_ID}Error`)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'No correlations data available.'
+    );
   });
 
   it('should render no section if values are null', () => {

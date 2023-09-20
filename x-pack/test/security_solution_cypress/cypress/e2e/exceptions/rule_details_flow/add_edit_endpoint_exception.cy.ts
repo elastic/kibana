@@ -46,10 +46,11 @@ import {
   createEndpointExceptionListItem,
 } from '../../../tasks/api_calls/exceptions';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165736
 describe(
   'Add endpoint exception from rule details',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const NEW_ITEM_NAME = 'Exception item-EDITED';

@@ -56,6 +56,7 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -137,6 +138,7 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
+  aiops: AiopsPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -298,6 +300,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 
