@@ -29,7 +29,7 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('Isolate command', () => {
+describe('Isolate command', { tags: '@ess' }, () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -165,6 +165,7 @@ describe('Isolate command', () => {
       cy.contains(`Isolation on host ${hostname} successfully submitted`);
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
       openAlertDetails();
 
