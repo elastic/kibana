@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('Cancels the changes');
-
+      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('cancelFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
 
