@@ -14,8 +14,8 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ALL_VALUE, GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import dateMath, { Unit } from '@kbn/datemath';
+import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
+import dateMath from '@kbn/datemath';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SloOverview } from './slo_overview';

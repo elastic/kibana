@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiIcon, EuiPanel, EuiLoadingChart, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
