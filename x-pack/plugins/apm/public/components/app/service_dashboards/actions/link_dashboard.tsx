@@ -14,7 +14,7 @@ export function LinkDashboard({
   emptyButton = false,
 }: {
   onRefresh: () => void;
-  emptyButton?: Boolean;
+  emptyButton?: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 

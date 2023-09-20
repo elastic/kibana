@@ -7,16 +7,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { EmptyDashboards } from './empty_dashboards';
-import { GotoDashboard, LinkDashboard } from './actions';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   AwaitingDashboardAPI,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
+import { EmptyDashboards } from './empty_dashboards';
+import { GotoDashboard, LinkDashboard } from './actions';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
