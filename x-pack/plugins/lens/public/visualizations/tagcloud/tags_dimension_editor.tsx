@@ -6,27 +6,171 @@
  */
 
 import React from 'react';
-import { PaletteRegistry } from '@kbn/coloring';
+import {
+  PaletteRegistry,
+  CategoricalColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  ColorMapping,
+  getPaletteColors,
+  SPECIAL_TOKENS_STRING_CONVERTION,
+  PaletteOutput,
+  AVAILABLE_PALETTES,
+} from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonEmpty,
+  EuiColorPaletteDisplay,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+} from '@elastic/eui';
+import { useState, MutableRefObject, useCallback } from 'react';
+import { PalettePicker } from '@kbn/coloring/src/shared_components/coloring/palette_picker';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
-import { PalettePicker } from '../../shared_components';
+import { PalettePanelContainer } from '../../shared_components';
+import { FramePublicAPI } from '../../types';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 interface Props {
   paletteService: PaletteRegistry;
   state: TagcloudState;
   setState: (state: TagcloudState) => void;
+  frame: FramePublicAPI;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
+  isDarkMode: boolean;
 }
 
-export function TagsDimensionEditor(props: Props) {
+export function TagsDimensionEditor({
+  state,
+  frame,
+  setState,
+  panelRef,
+  isDarkMode,
+  paletteService,
+}: Props) {
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<TagcloudState>({
+      value: state,
+      onChange: setState,
+    });
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
+
+  const colors = getPaletteColors(false, state.colorMapping);
+  const table = frame.activeData?.[state.layerId];
+  const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
+
+  const setColorMapping = useCallback(
+    (colorMapping?: ColorMapping.Config) => {
+      setLocalState({
+        ...localState,
+        colorMapping,
+      });
+    },
+    [localState, setLocalState]
+  );
+
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      setLocalState({
+        ...localState,
+        palette,
+        colorMapping: undefined,
+      });
+    },
+    [localState, setLocalState]
+  );
+
+  const canUseColorMapping = state.colorMapping;
+
   return (
-    <PalettePicker
-      palettes={props.paletteService}
-      activePalette={props.state.palette}
-      setPalette={(newPalette) => {
-        props.setState({
-          ...props.state,
-          palette: newPalette,
-        });
-      }}
-    />
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      className="lnsDynamicColoringClickable"
+    >
+      <EuiFlexItem>
+        <EuiColorPaletteDisplay
+          data-test-subj="lns_dynamicColoring_edit"
+          palette={colors}
+          type={'fixed'}
+          onClick={() => {
+            setIsPaletteOpen(!isPaletteOpen);
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="lns_colorEditing_trigger"
+          aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
+            defaultMessage: 'Edit palette',
+          })}
+          iconType="controlsHorizontal"
+          onClick={() => {
+            setIsPaletteOpen(!isPaletteOpen);
+          }}
+          size="xs"
+          flush="both"
+        >
+          {i18n.translate('xpack.lens.paletteXYGradient.customize', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButtonEmpty>
+        <PalettePanelContainer
+          siblingRef={panelRef}
+          isOpen={isPaletteOpen}
+          handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+          title={i18n.translate('xpack.lens.table.colorByTermsPanelTitle', {
+            defaultMessage: 'Color',
+          })}
+        >
+          <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+            <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label="Use new color mapping (tech preview)"
+                  data-test-subj="lns_colorMappingOrLegacyPalette_switch"
+                  compressed
+                  checked={useNewColorMapping}
+                  onChange={({ target: { checked } }) => {
+                    trackUiCounterEvents(
+                      `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
+                    );
+                    setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                    setUseNewColorMapping(checked);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {canUseColorMapping || useNewColorMapping ? (
+                  <CategoricalColorMapping
+                    isDarkMode={isDarkMode}
+                    model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                    onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                    palettes={AVAILABLE_PALETTES}
+                    data={{
+                      type: 'categories',
+                      categories: splitCategories,
+                    }}
+                    specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
+                  />
+                ) : (
+                  <PalettePicker
+                    palettes={paletteService}
+                    activePalette={state.palette}
+                    setPalette={(newPalette) => {
+                      setPalette(newPalette);
+                    }}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </PalettePanelContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

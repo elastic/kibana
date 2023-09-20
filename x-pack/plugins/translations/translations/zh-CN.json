@@ -21423,7 +21423,6 @@
     "xpack.lens.table.dynamicColoring.text": "文本",
     "xpack.lens.table.hide.hideLabel": "隐藏",
     "xpack.lens.table.palettePanelContainer.back": "返回",
-    "xpack.lens.table.palettePanelTitle": "颜色",
     "xpack.lens.table.resize.reset": "重置宽度",
     "xpack.lens.table.rowHeight.auto": "自动适应",
     "xpack.lens.table.rowHeight.custom": "定制",
