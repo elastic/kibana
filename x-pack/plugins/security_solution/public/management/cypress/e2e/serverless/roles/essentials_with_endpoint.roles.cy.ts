@@ -7,7 +7,7 @@
 
 import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { loginServerless, SecurityUser } from '../../../tasks/login_serverless';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
   getNoPrivilegesPage,
@@ -55,7 +55,7 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
-    (['t1_analyst', `t2_analyst`] as ServerlessUser[]).forEach((roleName) => {
+    (['t1_analyst', `t2_analyst`] as SecurityUser[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
@@ -89,7 +89,7 @@ describe(
       ];
 
       beforeEach(() => {
-        loginServerless(ServerlessUser.T3_ANALYST);
+        loginServerless(SecurityUser.t3_analyst);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -128,7 +128,7 @@ describe(
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
       beforeEach(() => {
-        loginServerless(ServerlessUser.THREAT_INTELLIGENCE_ANALYST);
+        loginServerless(SecurityUser.threat_intelligence_analyst);
       });
 
       it('should have access to Endpoint list page', () => {
@@ -163,7 +163,7 @@ describe(
       ];
 
       beforeEach(() => {
-        loginServerless(ServerlessUser.RULE_AUTHOR);
+        loginServerless(SecurityUser.rule_author);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -207,7 +207,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        loginServerless(ServerlessUser.SOC_MANAGER);
+        loginServerless(SecurityUser.soc_manager);
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -242,7 +242,7 @@ describe(
         'platform_engineer',
         `endpoint_operations_analyst`,
         'endpoint_policy_manager',
-      ] as ServerlessUser[]
+      ] as SecurityUser[]
     ).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [

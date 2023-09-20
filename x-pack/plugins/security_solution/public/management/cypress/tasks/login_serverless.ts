@@ -8,17 +8,17 @@
 import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import { COMMON_API_HEADERS, request } from './common';
 
-export enum ServerlessUser {
-  T1_ANALYST = 't1_analyst',
-  T2_ANALYST = 't2_analyst',
-  T3_ANALYST = 't3_analyst',
-  THREAT_INTELLIGENCE_ANALYST = 'threat_intelligence_analyst',
-  RULE_AUTHOR = 'rule_author',
-  SOC_MANAGER = 'soc_manager',
-  DETECTIONS_ADMIN = 'detections_admin',
-  PLATFORM_ENGINEER = 'platform_engineer',
-  ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
-  ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
+export enum SecurityUser {
+  t1_analyst = 't1_analyst',
+  t2_analyst = 't2_analyst',
+  t3_analyst = 't3_analyst',
+  threat_intelligence_analyst = 'threat_intelligence_analyst',
+  rule_author = 'rule_author',
+  soc_manager = 'soc_manager',
+  detections_admin = 'detections_admin',
+  platform_engineer = 'platform_engineer',
+  endpoint_operations_analyst = 'endpoint_operations_analyst',
+  endpoint_policy_manager = 'endpoint_policy_manager',
 }
 
 /**
@@ -59,7 +59,7 @@ const sendApiLoginRequest = (
 };
 
 interface CyLoginTask {
-  (user?: ServerlessUser | 'elastic'): ReturnType<typeof sendApiLoginRequest>;
+  (user?: SecurityUser | 'elastic'): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
@@ -76,7 +76,7 @@ interface CyLoginTask {
  * @param user Defaults to `soc_manager`
  */
 export const loginServerless: CyLoginTask = (
-  user: ServerlessUser | 'elastic' = ServerlessUser.SOC_MANAGER
+  user: SecurityUser | 'elastic' = SecurityUser.soc_manager
 ): ReturnType<typeof sendApiLoginRequest> => {
   const username = Cypress.env('KIBANA_USERNAME');
   const password = Cypress.env('KIBANA_PASSWORD');

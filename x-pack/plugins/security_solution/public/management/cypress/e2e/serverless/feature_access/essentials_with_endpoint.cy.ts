@@ -6,7 +6,7 @@
  */
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
-import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { loginServerless, SecurityUser } from '../../../tasks/login_serverless';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   getEndpointManagementPageMap,
@@ -41,7 +41,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      loginServerless(ServerlessUser.ENDPOINT_OPERATIONS_ANALYST).then((response) => {
+      loginServerless(SecurityUser.endpoint_operations_analyst).then((response) => {
         username = response.username;
         password = response.password;
       });
