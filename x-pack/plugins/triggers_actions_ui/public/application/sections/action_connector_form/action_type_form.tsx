@@ -29,6 +29,7 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiSwitch,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import {
@@ -64,6 +65,7 @@ import { validateParamsForWarnings } from '../../lib/validate_params_for_warning
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
+import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -179,6 +181,32 @@ export const ActionTypeForm = ({
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
   const isSummaryAction = actionItem.frequency?.summary;
+
+  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+    actionItem?.useAlertDataForTemplate ?? false
+  );
+
+  const { isLoading: isLoadingAadFields, fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
+    http,
+    ruleTypeId,
+    useAadTemplateFields
+  );
+
+  const templateFields = useMemo(
+    () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
+    [aadTemplateFields, availableActionVariables, useAadTemplateFields]
+  );
+
+  const handleUseAadTemplateFields = useCallback(
+    () =>
+      setUseAadTemplateField((prevVal) => {
+        if (setActionUseAlertDataForTemplate) {
+          setActionUseAlertDataForTemplate(!prevVal, index);
+        }
+        return !prevVal;
+      }),
+    [setActionUseAlertDataForTemplate, index]
+  );
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -464,13 +492,16 @@ export const ActionTypeForm = ({
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
+            <EuiSwitch
+              label="Use template fields from alerts index"
+              checked={useAadTemplateFields}
+              onChange={handleUseAadTemplateFields}
+            />
             <Suspense fallback={null}>
               <ParamsFieldsComponent
                 actionParams={actionItem.params as any}
-                useAlertDataForTemplate={actionItem.useAlertDataForTemplate}
-                index={index}
                 errors={actionParamsErrors.errors}
-                setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
+                index={index}
                 editAction={(key: string, value: RuleActionParam, i: number) => {
                   setWarning(
                     validateParamsForWarnings(
@@ -481,7 +512,7 @@ export const ActionTypeForm = ({
                   );
                   setActionParamsProperty(key, value, i);
                 }}
-                messageVariables={availableActionVariables}
+                messageVariables={templateFields}
                 defaultMessage={
                   // if action is a summary action, show the default summary message
                   isSummaryAction
@@ -492,7 +523,6 @@ export const ActionTypeForm = ({
                 actionConnector={actionConnector}
                 executionMode={ActionConnectorMode.ActionForm}
                 ruleTypeId={ruleTypeId}
-                http={http}
               />
               {warning ? (
                 <>

@@ -296,7 +296,7 @@ export class ExecutionHandler<
         } else {
           const ruleUrl = this.buildRuleUrl(spaceId);
           const executableAlert = alert!;
-          let transformActionParamsOptions: TransformActionParamsOptions = {
+          const transformActionParamsOptions: TransformActionParamsOptions = {
             actionsPlugin,
             alertId: ruleId,
             alertType: this.ruleType.id,
@@ -319,11 +319,7 @@ export class ExecutionHandler<
           };
 
           if (executableAlert.isAlertAsData()) {
-            console.log('isAlertAsData', JSON.stringify(executableAlert.getAlertAsData()));
-            transformActionParamsOptions = {
-              ...transformActionParamsOptions,
-              ...executableAlert.getAlertAsData(),
-            };
+            transformActionParamsOptions.aadAlert = executableAlert.getAlertAsData();
           }
 
           const actionToRun = {
@@ -583,9 +579,7 @@ export class ExecutionHandler<
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
-      console.log('###ACTIONS###');
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
-        console.log('###shouldGetSummarizedAlerts###');
         summarizedAlerts = await this.getSummarizedAlerts({
           action,
           spaceId: this.taskInstance.params.spaceId,
@@ -618,7 +612,6 @@ export class ExecutionHandler<
 
       for (const [alertId, alert] of alertsArray) {
         if (alert.isFilteredOut(summarizedAlerts)) {
-          console.log('###isFilteredOut###');
           continue;
         }
 
@@ -634,7 +627,6 @@ export class ExecutionHandler<
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {
-          console.log('###ruleTypeActionGroups###');
           this.logger.error(
             `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
           );
@@ -647,16 +639,13 @@ export class ExecutionHandler<
           alert.getPendingRecoveredCount() > 0 &&
           action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
         ) {
-          console.log('###getPendingRecoveredCount###');
           continue;
         }
 
         if (summarizedAlerts) {
-          console.log('###summarizedAlerts###');
           const alertAsData = summarizedAlerts.all.data.find(
             (alertHit: AlertHit) => alertHit._id === alert.getUuid()
           );
-          console.log(JSON.stringify(summarizedAlerts), alert.getUuid());
           if (alertAsData) {
             alert.setAlertAsData(alertAsData);
           }
@@ -687,7 +676,6 @@ export class ExecutionHandler<
     action: RuleAction;
     throttledSummaryActions: ThrottledActions;
   }) {
-    console.log('###canGetSummarizedAlerts###');
     if (!this.canGetSummarizedAlerts()) {
       if (action.frequency?.summary) {
         this.logger.error(
@@ -696,18 +684,13 @@ export class ExecutionHandler<
       }
       return false;
     }
-    console.log(
-      '###useAlertDataForTemplate###',
-      !isSummaryAction(action),
-      !action.useAlertDataForTemplate,
-      !action.alertsFilter
-    );
+    if (action.useAlertDataForTemplate) {
+      return true;
+    }
     // we fetch summarizedAlerts to filter alerts in memory as well
-    if (!isSummaryAction(action) && !action.useAlertDataForTemplate && !action.alertsFilter) {
+    if (!isSummaryAction(action) && !action.alertsFilter) {
       return false;
     }
-
-    console.log('###isSummaryAction/isSummaryActionThrottled###');
     if (
       isSummaryAction(action) &&
       isSummaryActionThrottled({

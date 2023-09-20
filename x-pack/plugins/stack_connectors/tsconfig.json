@@ -9,7 +9,7 @@
     "server/**/*.json",
     "common/**/*",
     "public/**/*"
-  ],
+, "../triggers_actions_ui/public/application/hooks/use_rule_aad_fields.ts", "../triggers_actions_ui/public/application/hooks/use_rule_aad_template_fields.ts"  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/actions-plugin",

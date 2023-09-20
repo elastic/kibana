@@ -36,7 +36,7 @@ export interface TransformActionParamsOptions {
   context: AlertInstanceContext;
   ruleUrl?: string;
   flapping: boolean;
-  kibana?: AADAlert;
+  aadAlert?: AADAlert;
 }
 
 interface SummarizedAlertsWithAll {
@@ -78,42 +78,44 @@ export function transformActionParams({
   alertParams,
   ruleUrl,
   flapping,
-  kibana,
+  aadAlert,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
-  const variables = {
-    alertId,
-    alertName,
-    spaceId,
-    tags,
-    alertInstanceId,
-    alertActionGroup,
-    alertActionGroupName,
-    context,
-    date: new Date().toISOString(),
-    state,
-    kibanaBaseUrl,
-    params: alertParams,
-    rule: {
-      params: alertParams,
-      id: alertId,
-      name: alertName,
-      type: alertType,
-      spaceId,
-      tags,
-      url: ruleUrl,
-    },
-    alert: {
-      id: alertInstanceId,
-      uuid: alertUuid,
-      actionGroup: alertActionGroup,
-      actionGroupName: alertActionGroupName,
-      flapping,
-    },
-    kibana,
-  };
+  const variables =
+    aadAlert !== undefined
+      ? aadAlert
+      : {
+          alertId,
+          alertName,
+          spaceId,
+          tags,
+          alertInstanceId,
+          alertActionGroup,
+          alertActionGroupName,
+          context,
+          date: new Date().toISOString(),
+          state,
+          kibanaBaseUrl,
+          params: alertParams,
+          rule: {
+            params: alertParams,
+            id: alertId,
+            name: alertName,
+            type: alertType,
+            spaceId,
+            tags,
+            url: ruleUrl,
+          },
+          alert: {
+            id: alertInstanceId,
+            uuid: alertUuid,
+            actionGroup: alertActionGroup,
+            actionGroupName: alertActionGroupName,
+            flapping,
+          },
+        };
 
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,

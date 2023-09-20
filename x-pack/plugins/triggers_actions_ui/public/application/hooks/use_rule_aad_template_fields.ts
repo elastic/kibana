@@ -11,8 +11,19 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { EcsFlat } from '@kbn/ecs';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import { isEmpty } from 'lodash';
 
-async function loadRuleTypeAADFields({
+export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) => {
+  let ecsField = ecsFlat[fieldName];
+  if (isEmpty(ecsField?.description ?? '') && fieldName.includes('kibana.alert.')) {
+    ecsField = ecsFlat[fieldName.replace('kibana.alert.', '')];
+  }
+  return ecsField?.description ?? '';
+};
+
+async function loadRuleTypeAadTemplateFields({
   http,
   ruleTypeId,
 }: {
@@ -27,17 +38,17 @@ async function loadRuleTypeAADFields({
   return fields;
 }
 
-export function useRuleTypeAADFields(
+export function useRuleTypeAadTemplateFields(
   http: HttpStart,
   ruleTypeId: string,
   enabled: boolean
 ): { isLoading: boolean; fields: ActionVariable[] } {
   const queryFn = () => {
-    return loadRuleTypeAADFields({ http, ruleTypeId });
+    return loadRuleTypeAadTemplateFields({ http, ruleTypeId });
   };
 
   const { data = [], isLoading = false } = useQuery({
-    queryKey: ['loadRuleTypeAADFields'],
+    queryKey: ['loadRuleTypeAadTemplateFields'],
     queryFn,
     refetchOnWindowFocus: false,
     enabled,
@@ -46,7 +57,10 @@ export function useRuleTypeAADFields(
   return useMemo(
     () => ({
       isLoading,
-      fields: data.map<ActionVariable>((d) => ({ name: d.name, description: d.displayName })),
+      fields: data.map<ActionVariable>((d) => ({
+        name: d.name,
+        description: getDescription(d.name, EcsFlat),
+      })),
     }),
     [data, isLoading]
   );

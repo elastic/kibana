@@ -18,15 +18,12 @@ import {
   EuiOutsideClickDetector,
   useEuiTheme,
   useEuiBackgroundColor,
-  EuiSwitch,
 } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from '../lib/template_action_variable';
-import { useRuleTypeAADFields } from '../lib/use_rule_aad_fields';
 
 export interface TextAreaWithAutocompleteProps {
   editAction: (property: string, value: any, index: number) => void;
@@ -37,10 +34,6 @@ export interface TextAreaWithAutocompleteProps {
   label: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  ruleTypeId: string;
-  http: HttpStart;
-  useAlertDataForTemplate?: boolean;
-  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
 }
 const selectableListProps = { className: 'euiSelectableMsgAutoComplete' };
 
@@ -53,10 +46,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   label,
   messageVariables,
   paramsProperty,
-  ruleTypeId,
-  http,
-  useAlertDataForTemplate = false,
-  setActionUseAlertDataForTemplate,
 }) => {
   const { euiTheme } = useEuiTheme();
   const backgroundColor = useEuiBackgroundColor('plain');
@@ -70,18 +59,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   const [autoCompleteIndex, setAutoCompleteIndex] = useState(-1);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
   const [searchWord, setSearchWord] = useState<string>('');
-  const [useAadFields, setUseAadField] = useState(useAlertDataForTemplate);
-
-  const { isLoading: isLoadingAadFields, fields: aadFields } = useRuleTypeAADFields(
-    http,
-    ruleTypeId,
-    useAadFields
-  );
-
-  const dataFields = useMemo(
-    () => (useAadFields ? aadFields : messageVariables),
-    [aadFields, messageVariables, useAadFields]
-  );
 
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
@@ -92,17 +69,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       'data-test-subj': `${variable}-selectableOption`,
     }));
   }, [matches]);
-
-  const handleUseAadFields = useCallback(
-    () =>
-      setUseAadField((prevVal) => {
-        if (setActionUseAlertDataForTemplate) {
-          setActionUseAlertDataForTemplate(!prevVal, index);
-        }
-        return !prevVal;
-      }),
-    [setActionUseAlertDataForTemplate, index]
-  );
 
   const closeList = useCallback((doNotResetAutoCompleteIndex = false) => {
     if (!doNotResetAutoCompleteIndex) {
@@ -181,7 +147,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         setAutoCompleteIndex(selectionStart - 2);
       }
       const filteredMatches = filterSuggestions({
-        actionVariablesList: dataFields
+        actionVariablesList: messageVariables
           ?.filter(({ deprecated }) => !deprecated)
           .map(({ name }) => name),
         propertyPath: currentWord.slice(2),
@@ -200,7 +166,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     closeList,
     editAction,
     index,
-    dataFields,
+    messageVariables,
     paramsProperty,
     recalcMenuPosition,
   ]);
@@ -350,14 +316,11 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        <>
-          <EuiSwitch label="Use alerts" checked={useAadFields} onChange={handleUseAadFields} />
-          <AddMessageVariables
-            messageVariables={dataFields}
-            onSelectEventHandler={onSelectMessageVariable}
-            paramsProperty={paramsProperty}
-          />
-        </>
+        <AddMessageVariables
+          messageVariables={messageVariables}
+          onSelectEventHandler={onSelectMessageVariable}
+          paramsProperty={paramsProperty}
+        />
       }
     >
       <>
