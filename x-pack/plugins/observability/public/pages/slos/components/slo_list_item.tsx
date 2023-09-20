@@ -139,7 +139,13 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    {slo.summary ? <a href={sloDetailsUrl}>{slo.name}</a> : <span>{slo.name}</span>}
+                    {slo.summary ? (
+                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                        {slo.name}
+                      </a>
+                    ) : (
+                      <span>{slo.name}</span>
+                    )}
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges
