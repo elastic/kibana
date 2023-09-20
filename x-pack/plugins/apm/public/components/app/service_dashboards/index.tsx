@@ -5,12 +5,15 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
 } from '@elastic/eui';
 
 import { EmptyDashboards } from './empty_dashboards';
@@ -95,7 +98,21 @@ export function ServiceDashboards() {
 
   return (
     <EuiPanel hasBorder={true}>
-      {status !== FETCH_STATUS.LOADING && serviceDashboards.length > 0 ? (
+      {status === FETCH_STATUS.LOADING ? (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceDashboards.loadingServiceDashboards',
+                {
+                  defaultMessage: 'Loading service dashboard',
+                }
+              )}
+            </h2>
+          }
+        />
+      ) : status === FETCH_STATUS.SUCCESS && serviceDashboards.length > 0 ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
             <EuiFlexItem grow={true}>

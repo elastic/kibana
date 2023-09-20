@@ -134,7 +134,7 @@ export function SaveDashboardModal({
         <EuiFlexGroup direction="column" justifyContent="center">
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING}
-            isDisabled={status === FETCH_STATUS.LOADING}
+            isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
             placeholder={i18n.translate(
               'xpack.apm.serviceDashboards.selectDashboard.placeholder',
               {
