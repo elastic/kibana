@@ -23,8 +23,7 @@ export function registerGetDatasetInfoFunction({
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
       providing empty string as index name will retrieve all indices
-      if index name matches more than a single index list of matching indices will be provided
-      else list of all fields in this index will be given.
+      else list of all fields for the given index will be given.
       wildcards can be part of index name.
 
       DO NOT include the user's request. It will be added internally.`,

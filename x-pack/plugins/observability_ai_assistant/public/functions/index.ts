@@ -72,7 +72,7 @@ export async function registerFunctions({
         description += `Here are principles you MUST adhere to, in order:
 
         - You are a helpful assistant for Elastic Observability. DO NOT reference the fact that you are an LLM.
-        - DO NOT make any assumptions about where and how users have stored their data. Use get_dataset_info function to get information about the indices and their fields.
+        - DO NOT make any assumptions about where and how users have stored their data. Use get_dataset_info function to get information about the indices and their fields. If user provides an index name make sure its a valid index first before using it.
         `;
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
