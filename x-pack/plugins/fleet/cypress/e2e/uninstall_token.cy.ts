@@ -12,6 +12,8 @@ import { UNINSTALL_TOKENS } from '../screens/fleet';
 import type { GetUninstallTokenResponse } from '../../common/types/rest_spec/uninstall_token';
 
 import { API_VERSIONS } from '../../common/constants';
+import { request } from '../tasks/common';
+import { login } from '../tasks/login';
 
 describe('Uninstall token page', () => {
   before(() => {
@@ -27,6 +29,8 @@ describe('Uninstall token page', () => {
       removePolicies ? 'removing policies' : 'not removing policies'
     } before checking uninstall tokens`, () => {
       beforeEach(() => {
+        login();
+
         cy.visit('app/fleet/uninstall-tokens');
         cy.intercept('GET', 'api/fleet/uninstall_tokens/*').as('getTokenRequest');
 
@@ -87,7 +91,7 @@ describe('Uninstall token page', () => {
 
   const generatePolicies = () => {
     for (let i = 1; i <= 3; i++) {
-      cy.request({
+      request({
         method: 'POST',
         url: '/api/fleet/agent_policies',
         body: { name: `Agent policy ${i}00`, namespace: 'default', id: `agent-policy-${i}00` },
