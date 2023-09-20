@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { login } from '../../tasks/login';
-import { visitPolicyDetails } from '../../screens/endpoint_management/policy_details';
+import { loginServerless } from '../../tasks/login_serverless';
+import { visitPolicyDetailsPage } from '../../screens/policy_details';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
@@ -34,8 +34,8 @@ describe(
     });
 
     beforeEach(() => {
-      login();
-      visitPolicyDetails(loadedPolicyData.integrationPolicies[0].id);
+      loginServerless();
+      visitPolicyDetailsPage(loadedPolicyData.integrationPolicies[0].id);
     });
 
     it('should display upselling section for protections', () => {

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { loginServerless } from '../../tasks/login_serverless';
 import {
   getConsoleActionMenuItem,
   getUnIsolateActionMenuItem,
   openRowActionMenu,
   visitEndpointList,
-} from '../../screens/endpoint_management';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../tasks/endpoint_management/index_endpoint_hosts';
+} from '../../screens';
 
 describe(
   'When on the Endpoint List in Security Essentials PLI',
@@ -43,7 +41,7 @@ describe(
       });
 
       beforeEach(() => {
-        login();
+        loginServerless();
         visitEndpointList();
         openRowActionMenu();
       });

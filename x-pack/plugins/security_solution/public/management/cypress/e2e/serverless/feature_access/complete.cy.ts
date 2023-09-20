@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
-import { login } from '../../../tasks/login';
-import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
-import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
-import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
+import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getNoPrivilegesPage } from '../../../screens/common';
+import { getEndpointManagementPageList } from '../../../screens';
 
 describe(
-  'App Features for Security Essential PLI',
+  'App Features for Security Complete PLI',
   {
     env: {
-      ftrConfig: {
-        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
-      },
+      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
     },
   },
   () => {
@@ -32,7 +30,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      login('endpoint_operations_analyst').then((response) => {
+      loginServerless(ServerlessUser.ENDPOINT_OPERATIONS_ANALYST).then((response) => {
         username = response.username;
         password = response.password;
       });
@@ -46,7 +44,7 @@ describe(
     }
 
     for (const { url, title } of deniedPages) {
-      it(`should NOT allow access to ${title}`, () => {
+      it(`should not allow access to ${title}`, () => {
         cy.visit(url);
         getNoPrivilegesPage().should('exist');
       });
