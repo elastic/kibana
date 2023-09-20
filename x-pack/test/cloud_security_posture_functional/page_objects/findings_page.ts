@@ -247,6 +247,15 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
 
+  const vulnerabilityDataGrid = {
+    getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
+
+    getVulnerabilityTableRows: async () => {
+      const element = await vulnerabilityDataGrid.getVulnerabilityTable();
+      return await element.findAllByIds('dataGridRowCell');
+    },
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToVulnerabilities,
@@ -259,5 +268,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     index,
     waitForPluginInitialized,
     distributionBar,
+    vulnerabilityDataGrid,
   };
 }

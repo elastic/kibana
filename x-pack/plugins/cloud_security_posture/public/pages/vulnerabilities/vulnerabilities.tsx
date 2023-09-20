@@ -295,6 +295,7 @@ const VulnerabilitiesDataGrid = ({
         }}
       />
       <EuiDataGrid
+        data-test-subj={'ADSFASDF'}
         className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
         aria-label={VULNERABILITIES}
         columns={columns}
