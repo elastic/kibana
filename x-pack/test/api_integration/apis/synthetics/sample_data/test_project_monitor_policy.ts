@@ -9,7 +9,7 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { getDataStream } from './test_policy';
 
-const commonVars = {
+export const commonVars = {
   max_attempts: {
     type: 'integer',
     value: 2,

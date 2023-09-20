@@ -9,6 +9,7 @@ import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
   name?: string;
@@ -167,6 +168,7 @@ export const getHttpInput = ({
     'ssl.supported_protocols': { type: 'yaml' },
     location_id: { value: 'fleet_managed', type: 'text' },
     location_name: { value: 'Fleet managed', type: 'text' },
+    ...commonVars,
     id: { type: 'text' },
     origin: { type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -242,6 +244,7 @@ export const getHttpInput = ({
       value: JSON.stringify(location.name) ?? '"Test private location 0"',
       type: 'text',
     },
+    ...commonVars,
     id: { value: JSON.stringify(id), type: 'text' },
     origin: { value: projectId ? 'project' : 'ui', type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -262,6 +265,7 @@ export const getHttpInput = ({
     schedule: '@every 5m',
     timeout: '3ms',
     max_redirects: 3,
+    max_attempts: 2,
     proxy_url: proxyUrl ?? 'http://proxy.com',
     tags: ['tag1', 'tag2'],
     username: 'test-username',
