@@ -8,6 +8,7 @@
 jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
+jest.mock('./versions');
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
