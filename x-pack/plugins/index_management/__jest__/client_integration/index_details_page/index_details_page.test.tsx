@@ -206,12 +206,6 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('documents tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Documents);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Documents');
-  });
-
   describe('Mappings tab', () => {
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
@@ -373,12 +367,6 @@ describe('<IndexDetailsPage />', () => {
         expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
       });
     });
-  });
-
-  it('pipelines tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Pipelines);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Pipelines');
   });
 
   it('navigates back to indices', async () => {

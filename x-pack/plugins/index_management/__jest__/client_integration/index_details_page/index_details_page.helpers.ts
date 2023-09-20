@@ -23,8 +23,8 @@ import { testIndexName } from './mocks';
 let routerMock: typeof reactRouterMock;
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
-    initialEntries: [`/indices/${testIndexName}`],
-    componentRoutePath: `/indices/:indexName/:indexDetailsSection?`,
+    initialEntries: [`/indices/index_details?indexName=${testIndexName}`],
+    componentRoutePath: `/indices/index_details`,
     onRouter: (router) => {
       routerMock = router;
     },

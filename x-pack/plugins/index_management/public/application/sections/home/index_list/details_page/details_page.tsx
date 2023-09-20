@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
@@ -19,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { Index } from '../../../../../../common';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { Error } from '../../../../../shared_imports';
@@ -35,10 +35,8 @@ import { DetailsPageSettings } from './details_page_settings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
-  Documents = 'documents',
   Mappings = 'mappings',
   Settings = 'settings',
-  Pipelines = 'pipelines',
   Stats = 'stats',
 }
 const defaultTabs = [
@@ -46,12 +44,6 @@ const defaultTabs = [
     id: IndexDetailsSection.Overview,
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.overviewTitle" defaultMessage="Overview" />
-    ),
-  },
-  {
-    id: IndexDetailsSection.Documents,
-    name: (
-      <FormattedMessage id="xpack.idxMgmt.indexDetails.documentsTitle" defaultMessage="Documents" />
     ),
   },
   {
@@ -66,12 +58,6 @@ const defaultTabs = [
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
   },
-  {
-    id: IndexDetailsSection.Pipelines,
-    name: (
-      <FormattedMessage id="xpack.idxMgmt.indexDetails.pipelinesTitle" defaultMessage="Pipelines" />
-    ),
-  },
 ];
 
 const statsTab = {
@@ -79,19 +65,52 @@ const statsTab = {
   name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Stats" />,
 };
 
-export const DetailsPage: React.FunctionComponent<
-  RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
-> = ({
-  match: {
-    params: { indexName, indexDetailsSection },
-  },
-  history,
+const getSelectedTabContent = ({
+  tab,
+  index,
+  indexName,
+}: {
+  tab: IndexDetailsSection;
+  index?: Index | null;
+  indexName: string;
 }) => {
+  // if there is no index data, the tab content won't be rendered, to it's safe to return null here
+  if (!index) {
+    return null;
+  }
+  switch (tab) {
+    case IndexDetailsSection.Overview:
+      return <DetailsPageOverview indexDetails={index} />;
+    case IndexDetailsSection.Mappings:
+      return <DetailsPageMappings indexName={indexName} />;
+    case IndexDetailsSection.Settings:
+      return (
+        <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
+      );
+    case IndexDetailsSection.Stats:
+      return <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />;
+    default:
+      return <DetailsPageOverview indexDetails={index} />;
+  }
+};
+export const DetailsPage: FunctionComponent<
+  RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
+> = ({ location: { search }, history }) => {
   const { config } = useAppContext();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const indexName = queryParams.get('indexName') ?? '';
+  const tab = queryParams.get('tab') ?? IndexDetailsSection.Overview;
+  let indexDetailsSection = IndexDetailsSection.Overview;
+  if (Object.values(IndexDetailsSection).includes(tab as IndexDetailsSection)) {
+    indexDetailsSection = tab as IndexDetailsSection;
+  }
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
-
+  const selectedTabContent = useMemo(() => {
+    return getSelectedTabContent({ tab: indexDetailsSection, index, indexName });
+  }, [index, indexDetailsSection, indexName]);
   const fetchIndexDetails = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -111,7 +130,7 @@ export const DetailsPage: React.FunctionComponent<
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsSection) => {
-      return history.push(encodeURI(`/indices/${indexName}/${newSection}`));
+      return history.push(getIndexDetailsLink(indexName, newSection));
     },
     [history, indexName]
   );
@@ -123,12 +142,12 @@ export const DetailsPage: React.FunctionComponent<
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     const visibleTabs = config.enableIndexStats ? [...defaultTabs, statsTab] : defaultTabs;
 
-    return visibleTabs.map((tab) => ({
-      onClick: () => onSectionChange(tab.id),
-      isSelected: tab.id === indexDetailsSection,
-      key: tab.id,
-      'data-test-subj': `indexDetailsTab-${tab.id}`,
-      label: tab.name,
+    return visibleTabs.map((visibleTab) => ({
+      onClick: () => onSectionChange(visibleTab.id),
+      isSelected: visibleTab.id === indexDetailsSection,
+      key: visibleTab.id,
+      'data-test-subj': `indexDetailsTab-${visibleTab.id}`,
+      label: visibleTab.name,
     }));
   }, [indexDetailsSection, onSectionChange, config]);
 
@@ -187,42 +206,7 @@ export const DetailsPage: React.FunctionComponent<
           height: 100%;
         `}
       >
-        <Routes>
-          <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-            render={() => <DetailsPageOverview indexDetails={index} />}
-          />
-          <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Documents}`}
-            render={() => <div>Documents</div>}
-          />
-          <Route
-            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Mappings}`}
-            component={DetailsPageMappings}
-          />
-          <Route
-            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Settings}`}
-            render={(props: RouteComponentProps<{ indexName: string }>) => (
-              <DetailsPageSettings {...props} isIndexOpen={index.status === INDEX_OPEN} />
-            )}
-          />
-          <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
-            render={() => <div>Pipelines</div>}
-          />
-          {config.enableIndexStats && (
-            <Route
-              path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Stats}`}
-              render={(routerProps: RouteComponentProps<{ indexName: string }>) => (
-                <DetailsPageStats {...routerProps} isIndexOpen={index.status === INDEX_OPEN} />
-              )}
-            />
-          )}
-          <Redirect
-            from={`/${Section.Indices}/${indexName}`}
-            to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-          />
-        </Routes>
+        {selectedTabContent}
       </div>
     </>
   );

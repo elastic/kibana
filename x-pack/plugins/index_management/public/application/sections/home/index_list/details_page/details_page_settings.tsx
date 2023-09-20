@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,14 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLoadIndexSettings } from '../../../../services';
 import { DetailsPageSettingsContent } from './details_page_settings_content';
 
-export const DetailsPageSettings: FunctionComponent<
-  RouteComponentProps<{ indexName: string }> & { isIndexOpen: boolean }
-> = ({
-  match: {
-    params: { indexName },
-  },
-  isIndexOpen,
-}) => {
+export const DetailsPageSettings: FunctionComponent<{
+  indexName: string;
+  isIndexOpen: boolean;
+}> = ({ indexName, isIndexOpen }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
 
   if (isLoading) {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { IndexDetailsSection } from '../sections/home/index_list/details_page';
+import { Section } from '../sections/home/home';
+
 export const getTemplateListLink = () => `/templates`;
 
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
@@ -53,4 +56,12 @@ export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean)
 
 export const getDataStreamDetailsLink = (name: string) => {
   return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
+};
+
+export const getIndexDetailsLink = (indexName: string, tab?: IndexDetailsSection) => {
+  let link = `/${Section.Indices}/index_details?indexName=${encodeURIComponent(indexName)}`;
+  if (tab) {
+    link = `${link}&tab=${tab}`;
+  }
+  return link;
 };
