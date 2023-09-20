@@ -5,13 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 import { useTheme } from '../../../hooks/use_theme';

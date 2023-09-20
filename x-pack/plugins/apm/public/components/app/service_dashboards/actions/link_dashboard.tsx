@@ -16,7 +16,7 @@ export function LinkDashboard({
   serviceDashboards,
 }: {
   onRefresh: () => void;
-  emptyButton?: Boolean;
+  emptyButton?: boolean;
   serviceDashboards?: SavedServiceDashboard;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
