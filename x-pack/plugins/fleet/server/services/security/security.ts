@@ -9,10 +9,7 @@ import { pick } from 'lodash';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import {
-  AppFeaturesPrivilegeId,
-  AppFeaturesPrivileges,
-} from '@kbn/security-solution-features/src/app_features_privileges';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import { TRANSFORM_PLUGIN_ID } from '../../../common/constants/plugin';
 
@@ -26,7 +23,12 @@ import {
 } from '../../../common/authz';
 
 import { appContextService } from '..';
-import { ENDPOINT_PRIVILEGES, PLUGIN_ID } from '../../constants';
+import {
+  ENDPOINT_EXCEPTIONS_PRIVILEGES,
+  ENDPOINT_PRIVILEGES,
+  PLUGIN_ID,
+  type PrivilegeMapObject,
+} from '../../constants';
 
 import type {
   FleetAuthzRequirements,
@@ -58,24 +60,28 @@ export function checkSuperuser(req: KibanaRequest) {
   return true;
 }
 
+const computeUiApiPrivileges = (
+  security: SecurityPluginStart,
+  privileges: Record<string, PrivilegeMapObject>
+): string[] => {
+  return Object.entries(privileges).map(([_, { appId, privilegeType, privilegeName }]) => {
+    if (privilegeType === 'ui') {
+      return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+    }
+    return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
+  });
+};
+
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const endpointPrivileges = Object.entries(ENDPOINT_PRIVILEGES).map(
-      ([_, { appId, privilegeType, privilegeName }]) => {
-        if (privilegeType === 'ui') {
-          return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
-        }
-        return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
-      }
+    const endpointPrivileges = computeUiApiPrivileges(security, ENDPOINT_PRIVILEGES);
+    const endpointExceptionsPrivileges = computeUiApiPrivileges(
+      security,
+      ENDPOINT_EXCEPTIONS_PRIVILEGES
     );
-    const endpointExceptionsPrivileges = AppFeaturesPrivileges[
-      AppFeaturesPrivilegeId.endpointExceptions
-    ].all.api.map((privilegeName) => {
-      return security.authz.actions.api.get(privilegeName);
-    });
 
     const { privileges } = await checkPrivileges({
       kibana: [

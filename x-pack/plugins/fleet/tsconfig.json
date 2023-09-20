@@ -100,7 +100,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-http-common",
-    "@kbn/dashboard-plugin",
-    "@kbn/security-solution-features",
+    "@kbn/dashboard-plugin"
   ]
 }

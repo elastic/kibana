@@ -151,7 +151,7 @@ export function calculateEndpointExceptionsPrivilegesFromCapabilities(
 
   const endpointExceptionsActions = Object.keys(capabilities.siem).reduce<Record<string, boolean>>(
     (acc, privilegeName) => {
-      if (['crudEndpointExceptions', 'showEndpointExceptions'].includes(privilegeName)) {
+      if (Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).includes(privilegeName)) {
         acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
       }
       return acc;
@@ -178,7 +178,7 @@ export function getAuthorizationFromPrivileges({
     | undefined;
   prefix?: string;
   searchPrivilege?: string;
-}) {
+}): boolean {
   if (!kibanaPrivileges) {
     return false;
   }
@@ -271,10 +271,9 @@ export function calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
       }>
     | undefined
 ): FleetAuthz['endpointExceptionsPrivileges'] {
-  const endpointExceptionsActions = Object.entries(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<{
-    crudEndpointExceptions: boolean;
-    showEndpointExceptions: boolean;
-  }>((acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+  const endpointExceptionsActions = Object.entries(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
+    Record<string, boolean>
+  >((acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
     acc[privilege] = getAuthorizationFromPrivileges({
       kibanaPrivileges,
       searchPrivilege: privilegeName,
@@ -282,5 +281,5 @@ export function calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
     return acc;
   }, {});
 
-  return { actions: endpointExceptionsActions };
+  return { actions: endpointExceptionsActions } as FleetAuthz['endpointExceptionsPrivileges'];
 }
