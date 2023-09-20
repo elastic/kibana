@@ -62,7 +62,7 @@ The 8.10.2 release includes the following bug fixes.
 Fleet::
 * Fixes force delete package, updated used by agents check ({kibana-pull}166623[#166623]).
 Management::
-* Fixes showing `Received partial message` instead of results when there are some remote shard errors ({kibana-pull}166544[#166544]).
+* Fixes showing `Received partial message` instead of results when there are some remote shard errors in a {ccs} ({kibana-pull}166544[#166544]).
 
 [[release-notes-8.10.1]]
 == {kib} 8.10.1
