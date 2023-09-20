@@ -27,7 +27,6 @@ import {
   logsSpecProvider,
   ecommerceSpecProvider,
   logsTSDBSpecProvider,
-  securitySolutionSpecProvider,
 } from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
@@ -123,7 +122,6 @@ export class SampleDataRegistry {
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
     this.registerSampleDataSet(ecommerceSpecProvider);
-    this.registerSampleDataSet(securitySolutionSpecProvider);
     if (isDevMode) {
       this.registerSampleDataSet(logsTSDBSpecProvider);
     }
@@ -132,6 +130,7 @@ export class SampleDataRegistry {
     }
 
     return {
+      registerSampleDataSet: this.registerSampleDataSet.bind(this),
       getSampleDatasets: () => this.sampleDatasets,
 
       addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {

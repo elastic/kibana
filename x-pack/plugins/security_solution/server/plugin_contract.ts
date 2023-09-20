@@ -41,6 +41,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 
 export interface SecuritySolutionPluginSetupDependencies {
@@ -62,6 +63,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   osquery: OsqueryPluginSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
+  home: HomeServerPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

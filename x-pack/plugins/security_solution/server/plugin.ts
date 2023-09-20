@@ -106,6 +106,7 @@ import {
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
+import { registerSampleData } from './sample_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -129,6 +130,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private _sampleDataRegistered?: boolean = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -331,6 +333,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointContext,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
+    registerSampleData(plugins.home);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });

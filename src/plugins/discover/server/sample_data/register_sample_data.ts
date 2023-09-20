@@ -28,6 +28,7 @@ export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) 
     const sampleSavedSearchObject = sampleDataset.savedObjects.find(
       (object) => object.type === 'search'
     );
+    console.log('sampleDataset====', sampleDataset.id);
 
     if (sampleSavedSearchObject) {
       addAppLinksToSampleDataset(sampleDataset.id, [
