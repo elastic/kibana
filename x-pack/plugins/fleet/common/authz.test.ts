@@ -11,6 +11,7 @@ import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
 
 import {
   calculateEndpointExceptionsPrivilegesFromCapabilities,
+  calculateEndpointExceptionsPrivilegesFromKibanaPrivileges,
   calculatePackagePrivilegesFromCapabilities,
   calculatePackagePrivilegesFromKibanaPrivileges,
 } from './authz';
@@ -134,6 +135,26 @@ describe('fleet authz', () => {
         },
       };
       const actual = calculatePackagePrivilegesFromKibanaPrivileges(endpointPrivileges);
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('#calculateEndpointExceptionsPrivilegesFromKibanaPrivileges', () => {
+    it('calculates endpoint exceptions privileges correctly', () => {
+      const endpointExceptionsPrivileges = [
+        { privilege: `${SECURITY_SOLUTION_ID}-showEndpointExceptions`, authorized: true },
+        { privilege: `${SECURITY_SOLUTION_ID}-crudEndpointExceptions`, authorized: false },
+        { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: true },
+      ];
+      const expected = {
+        actions: {
+          showEndpointExceptions: true,
+          crudEndpointExceptions: false,
+        },
+      };
+      const actual = calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
+        endpointExceptionsPrivileges
+      );
       expect(actual).toEqual(expected);
     });
   });

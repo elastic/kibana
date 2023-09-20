@@ -9,7 +9,7 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 
 import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
 
-import { ENDPOINT_PRIVILEGES } from './constants';
+import { ENDPOINT_EXCEPTIONS_PRIVILEGES, ENDPOINT_PRIVILEGES } from './constants';
 
 export type TransformPrivilege =
   | 'canGetTransform'
@@ -151,7 +151,9 @@ export function calculateEndpointExceptionsPrivilegesFromCapabilities(
 
   const endpointExceptionsActions = Object.keys(capabilities.siem).reduce<Record<string, boolean>>(
     (acc, privilegeName) => {
-      acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
+      if (['crudEndpointExceptions', 'showEndpointExceptions'].includes(privilegeName)) {
+        acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
+      }
       return acc;
     },
     {}
@@ -162,19 +164,36 @@ export function calculateEndpointExceptionsPrivilegesFromCapabilities(
   } as FleetAuthz['endpointExceptionsPrivileges'];
 }
 
-function getAuthorizationFromPrivileges(
-  kibanaPrivileges: Array<{
-    resource?: string;
-    privilege: string;
-    authorized: boolean;
-  }>,
-  prefix: string,
-  searchPrivilege: string
-): boolean {
-  const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${prefix}${searchPrivilege}`)
-  );
-  return privilege?.authorized || false;
+export function getAuthorizationFromPrivileges({
+  kibanaPrivileges,
+  searchPrivilege = '',
+  prefix = '',
+}: {
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined;
+  prefix?: string;
+  searchPrivilege?: string;
+}) {
+  if (!kibanaPrivileges) {
+    return false;
+  }
+  const privilege = kibanaPrivileges.find((p) => {
+    if (prefix.length && searchPrivilege.length) {
+      return p.privilege.endsWith(`${prefix}${searchPrivilege}`);
+    } else if (prefix.length) {
+      return p.privilege.endsWith(`${prefix}`);
+    } else if (searchPrivilege.length) {
+      return p.privilege.endsWith(`${searchPrivilege}`);
+    }
+    return false;
+  });
+
+  return !!privilege?.authorized;
 }
 
 export function calculatePackagePrivilegesFromKibanaPrivileges(
@@ -192,11 +211,11 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
 
   const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<PrivilegeMap>(
     (acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
-      const kibanaPrivilege = getAuthorizationFromPrivileges(
+      const kibanaPrivilege = getAuthorizationFromPrivileges({
         kibanaPrivileges,
-        `${appId}${privilegeSplit}`,
-        privilegeName
-      );
+        prefix: `${appId}${privilegeSplit}`,
+        searchPrivilege: privilegeName,
+      });
       acc[privilege] = {
         executePackageAction: kibanaPrivilege,
       };
@@ -205,11 +224,11 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     {}
   );
 
-  const hasTransformAdmin = getAuthorizationFromPrivileges(
+  const hasTransformAdmin = getAuthorizationFromPrivileges({
     kibanaPrivileges,
-    `${TRANSFORM_PLUGIN_ID}-`,
-    `admin`
-  );
+    prefix: `${TRANSFORM_PLUGIN_ID}-`,
+    searchPrivilege: `admin`,
+  });
   const transformActions: {
     [key in TransformPrivilege]: {
       executePackageAction: boolean;
@@ -225,11 +244,11 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
       executePackageAction: hasTransformAdmin,
     },
     canGetTransform: {
-      executePackageAction: getAuthorizationFromPrivileges(
+      executePackageAction: getAuthorizationFromPrivileges({
         kibanaPrivileges,
-        `${TRANSFORM_PLUGIN_ID}-`,
-        `read`
-      ),
+        prefix: `${TRANSFORM_PLUGIN_ID}-`,
+        searchPrivilege: `read`,
+      }),
     },
   };
 
@@ -241,4 +260,27 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
       actions: transformActions,
     },
   };
+}
+
+export function calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined
+): FleetAuthz['endpointExceptionsPrivileges'] {
+  const endpointExceptionsActions = Object.entries(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<{
+    crudEndpointExceptions: boolean;
+    showEndpointExceptions: boolean;
+  }>((acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+    acc[privilege] = getAuthorizationFromPrivileges({
+      kibanaPrivileges,
+      searchPrivilege: privilegeName,
+    });
+    return acc;
+  }, {});
+
+  return { actions: endpointExceptionsActions };
 }
