@@ -12,6 +12,7 @@ import type { RequestDetailsProps } from '../../types';
 import { getLocalClusterDetails } from './utils';
 import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
+import { LOCAL_CLUSTER_KEY } from './constants';
 
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
@@ -32,7 +33,7 @@ export class Clusters extends Component<RequestDetailsProps> {
           }
         ).details
       : {
-          local: getLocalClusterDetails(rawResponse),
+          [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
         };
 
     return this.props.request.response?.json ? (

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterDescriptionList } from './cluster_description_list';
 import { ClusterHealth } from './cluster_health';
+import { LOCAL_CLUSTER_KEY } from './constants';
 
 function getInitialExpandedRow(clusters) {
   const clusterNames = Object.keys(clusters);
@@ -62,7 +63,12 @@ export function ClustersTable({ clusters }: Props) {
               iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
             />
             <EuiText size="xs" color="subdued">
-              {name}
+              {name === LOCAL_CLUSTER_KEY
+                ? i18n.translate('inspector.requests.clustersTable.localClusterDisplayName', {
+                    defaultMessage: 'Local cluster',
+                  })
+                : name
+              }
             </EuiText>
           </>
         );
