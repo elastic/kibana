@@ -9,7 +9,7 @@ import { rootRequest } from '../common';
 export const deleteIndex = (index: string) => {
   rootRequest({
     method: 'DELETE',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}?refresh=wait_for`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
