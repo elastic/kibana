@@ -207,13 +207,20 @@ export default function ({ getService }: FtrProviderContext) {
             .send({ task: { id: ruleId } })
             .expect(200);
 
-          await getMetrics(
-            false,
-            (metrics) =>
-              metrics?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
-              metrics?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === i + 2 &&
-              metrics?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
-          );
+          const metrics = (
+            await getMetrics(
+              false,
+              (m) =>
+                m?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === i + 2 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
+            )
+          ).metrics;
+
+          // check that delay histogram exists
+          expect(metrics?.task_run?.value?.overall?.delay).not.to.be(null);
+          expect(Array.isArray(metrics?.task_run?.value?.overall?.delay.counts)).to.be(true);
+          expect(Array.isArray(metrics?.task_run?.value?.overall?.delay.values)).to.be(true);
         }
 
         // counter should reset on its own
