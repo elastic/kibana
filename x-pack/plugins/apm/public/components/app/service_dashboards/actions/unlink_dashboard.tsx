@@ -15,7 +15,7 @@ export function UnlinkDashboard({
   currentDashboard,
   onRefresh,
 }: {
-  currentDashboard?: SavedServiceDashboard;
+  currentDashboard: SavedServiceDashboard;
   onRefresh: () => void;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -27,7 +27,7 @@ export function UnlinkDashboard({
     async function () {
       try {
         await callApmApi('DELETE /internal/apm/service-dashboard', {
-          params: { query: { serviceDashboardId: currentDashboard?.id } },
+          params: { query: { serviceDashboardId: currentDashboard.id } },
           signal: null,
         });
 
@@ -36,7 +36,7 @@ export function UnlinkDashboard({
             'xpack.apm.serviceDashboards.unlinkSuccess.toast.title',
             {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-              values: { dashboardName: currentDashboard?.dashboardTitle },
+              values: { dashboardName: currentDashboard.dashboardTitle },
             }
           ),
         });

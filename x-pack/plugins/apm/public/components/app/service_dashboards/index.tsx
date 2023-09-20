@@ -114,7 +114,10 @@ export function ServiceDashboards() {
                     items={[
                       <LinkDashboard emptyButton={true} onRefresh={refetch} />,
                       <GotoDashboard currentDashboard={currentDashboard} />,
-                      <EditDashboard currentDashboard={currentDashboard} />,
+                      <EditDashboard
+                        currentDashboard={currentDashboard}
+                        onRefresh={refetch}
+                      />,
                       <UnlinkDashboard
                         currentDashboard={currentDashboard}
                         onRefresh={refetch}

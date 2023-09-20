@@ -13,8 +13,6 @@ export function LinkDashboard({
   onRefresh,
   emptyButton = false,
 }: {
-  // isModalVisible: boolean;
-  // setIsModalVisible: (isVisible: boolean) => void;
   onRefresh: () => void;
   emptyButton?: Boolean;
 }) {

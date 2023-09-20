@@ -26,29 +26,39 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { DashboardItem } from '../../../../../../../../src/plugins/dashboard/common/content_management';
 import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
+import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 
 interface Props {
   onClose: () => void;
   onRefresh: () => void;
-  serviceDashboardId?: string;
+  currentDashboard?: SavedServiceDashboard;
 }
 
 export function SelectDashboard({
   onClose,
   onRefresh,
-  serviceDashboardId,
+  currentDashboard,
 }: Props) {
   const {
     core: { notifications },
   } = useApmPluginContext();
-
   const { data, status } = useDashboardFetcher();
-  const [useContextFilter, setUseContextFilter] = useState(true);
-  const [selectedDashboard, setSelectedDashboard] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
+  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
-  const isEditMode = !!serviceDashboardId;
+  const [useContextFilter, setUseContextFilter] = useState(
+    currentDashboard?.useContextFilter ?? true
+  );
+
+  if (currentDashboard) {
+    const { dashboardTitle, dashboardSavedObjectId } = currentDashboard;
+    defaultOption = { label: dashboardTitle, value: dashboardSavedObjectId };
+  }
+
+  const [selectedDashboard, setSelectedDashboard] = useState(
+    defaultOption ? [defaultOption] : []
+  );
+
+  const isEditMode = !!currentDashboard?.id;
 
   const {
     path: { serviceName },
@@ -64,6 +74,7 @@ export function SelectDashboard({
       try {
         await callApmApi('POST /internal/apm/service-dashboard', {
           params: {
+            query: { serviceDashboardId: currentDashboard?.id },
             body: {
               dashboardTitle: newDashboard.label,
               dashboardSavedObjectId: newDashboard.value,
@@ -106,14 +117,14 @@ export function SelectDashboard({
       }
       onClose();
     },
-    [selectedDashboard, notifications.toasts]
+    [selectedDashboard, notifications.toasts, useContextFilter]
   );
 
+  console.log('isEditMode', isEditMode);
   return (
     <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {' '}
           {i18n.translate(
             'xpack.apm.serviceDashboards.selectDashboard.modalTitle',
             {
@@ -128,12 +139,21 @@ export function SelectDashboard({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING}
             isDisabled={status === FETCH_STATUS.LOADING}
-            placeholder={i18n.translate(
-              'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-              {
-                defaultMessage: 'Select dasbboard',
-              }
-            )}
+            placeholder={
+              isEditMode
+                ? i18n.translate(
+                    'xpack.apm.serviceDashboards.selectDashboard.placeholder.edit',
+                    {
+                      defaultMessage: 'Edit dasbboard',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+                    {
+                      defaultMessage: 'Select dasbboard',
+                    }
+                  )
+            }
             singleSelection={{ asPlainText: true }}
             options={data?.map((dashboardItem: DashboardItem) => ({
               label: dashboardItem.attributes.title,
@@ -167,9 +187,19 @@ export function SelectDashboard({
           )}
         </EuiButton>
         <EuiButton onClick={onSave} fill>
-          {i18n.translate('xpack.apm.serviceDashboards.selectDashboard.add', {
-            defaultMessage: 'Link dashboard',
-          })}
+          {isEditMode
+            ? i18n.translate(
+                'xpack.apm.serviceDashboards.selectDashboard.edit',
+                {
+                  defaultMessage: 'Save',
+                }
+              )
+            : i18n.translate(
+                'xpack.apm.serviceDashboards.selectDashboard.add',
+                {
+                  defaultMessage: 'Link dashboard',
+                }
+              )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

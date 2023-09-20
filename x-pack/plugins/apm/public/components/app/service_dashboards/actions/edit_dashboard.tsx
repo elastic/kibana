@@ -26,7 +26,7 @@ export function EditDashboard({
         size="s"
         iconType={'pencil'}
         data-test-subj="apmEditServiceDashboardMenu"
-        onClick={() => setIsModalVisible(true)}
+        onClick={() => setIsModalVisible(!isModalVisible)}
       >
         {i18n.translate('xpack.apm.serviceDashboards.editEmptyButtonLabel', {
           defaultMessage: 'Edit dashboard link',
@@ -35,9 +35,9 @@ export function EditDashboard({
 
       {isModalVisible && (
         <SelectDashboard
-          onClose={() => setIsModalVisible(false)}
+          onClose={() => setIsModalVisible(!isModalVisible)}
           onRefresh={onRefresh}
-          serviceDashboardId={currentDashboard.id}
+          currentDashboard={currentDashboard}
         />
       )}
     </>
