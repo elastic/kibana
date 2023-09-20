@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { EuiIcon, EuiPanel, EuiLoadingChart, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape } from '@elastic/charts';
 import numeral from '@elastic/numeral';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 
 import { EmbeddableSloProps } from './types';
 
-export function SloOverview({ sloId, sloInstanceId }: EmbeddableSloProps) {
+export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: EmbeddableSloProps) {
   const { uiSettings } = useKibana().services;
-  const { isLoading, slo } = useFetchSloDetails({ sloId, instanceId: sloInstanceId });
+  const { isLoading, slo, refetch, isRefetching } = useFetchSloDetails({
+    sloId,
+    instanceId: sloInstanceId,
+    shouldRefetch: true,
+  });
+
+  useEffect(() => {
+    console.log('!!refetch');
+    refetch();
+  }, [startTime, endTime, refetch]);
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloNotFound = !isLoading && slo === undefined;
@@ -30,6 +40,18 @@ export function SloOverview({ sloId, sloInstanceId }: EmbeddableSloProps) {
     []
   );
 
+  if (isRefetching) {
+    return (
+      <LoadingPanel>
+        <LoadingContentPanel>
+          <EuiLoadingSpinner size="m" />
+          <EuiText>
+            <p>reloading</p>
+          </EuiText>
+        </LoadingContentPanel>
+      </LoadingPanel>
+    );
+  }
   if (isSloNotFound) {
     return null;
   }
@@ -63,8 +85,26 @@ export function SloOverview({ sloId, sloInstanceId }: EmbeddableSloProps) {
         ]
       : [];
   return (
-    <Chart>
-      <Metric id="1" data={[metricData]} />
-    </Chart>
+    <>
+      <Chart>
+        <Metric id="1" data={[metricData]} />
+      </Chart>
+    </>
   );
 }
+
+export const LoadingPanel = euiStyled.div`
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+`;
+
+export const LoadingContentPanel = euiStyled.div`
+  flex: 0 0 auto;
+  align-self: center;
+  text-align: center;
+`;
