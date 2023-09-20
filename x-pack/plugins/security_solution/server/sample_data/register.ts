@@ -26,7 +26,7 @@ export const registerSampleData = (home: HomeServerPluginSetup) => {
         id: SAVED_SEARCH_ID,
       },
       getPath: getDiscoverPathForSampleDataset,
-      label: i18n.translate('securitySolution.sampleData.discover.viewLinkLabel', {
+      label: i18n.translate('xpack.securitySolution.sampleData.discover.viewLinkLabel', {
         defaultMessage: 'Discover',
       }),
       icon: 'discoverApp',
@@ -38,7 +38,7 @@ export const registerSampleData = (home: HomeServerPluginSetup) => {
     {
       sampleObject: null,
       getPath: getSecurityPathForSampleDataset,
-      label: i18n.translate('securitySolution.sampleData.securitySolution.viewLinkLabel', {
+      label: i18n.translate('xpack.securitySolution.sampleData.securitySolution.viewLinkLabel', {
         defaultMessage: 'Security Solution',
       }),
       icon: 'securityApp',

@@ -15,17 +15,20 @@ import { OVERVIEW_DASHBOARD_ID, SAMPLE_DATA_VIEW_ID } from './constants';
 
 export { registerSampleData } from './register';
 
-const securitysolutionName = i18n.translate('home.sampleData.securitySolutionSpecTitle', {
-  defaultMessage: 'Sample Security Solution data',
-});
+const securitysolutionName = i18n.translate(
+  'xpack.securitySolution.sampleData.securitySolutionSpecTitle',
+  {
+    defaultMessage: 'Sample Security Solution data',
+  }
+);
 const securitysolutionDescription = i18n.translate(
-  'home.sampleData.securitySolutionSpecDescription',
+  'xpack.securitySolution.sampleData.securitySolutionSpecDescription',
   {
     defaultMessage: 'Sample data, visualizations, and dashboards for exploring Security Solution.',
   }
 );
 const securitysolutionAlertsIngestPipelineDescription = i18n.translate(
-  'home.sampleData.securitySolutionSpecAlertsIngestPipelineDescription',
+  'xpack.securitySolution.sampleData.securitySolutionSpecAlertsIngestPipelineDescription',
   {
     defaultMessage:
       'This set kibana.space_ids to current space and adjust @timestamp field to the time when data was ingested.',
@@ -33,7 +36,7 @@ const securitysolutionAlertsIngestPipelineDescription = i18n.translate(
 );
 
 const securitysolutionIngestPipelineDescription = i18n.translate(
-  'home.sampleData.securitySolutionSpecAuditbeatIngestPipelineDescription',
+  'xpack.securitySolution.sampleData.securitySolutionSpecAuditbeatIngestPipelineDescription',
   {
     defaultMessage: 'This adjust @timestamp field to the time when data was ingested.',
   }
