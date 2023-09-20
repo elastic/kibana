@@ -8,7 +8,7 @@ steps:
     build:
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
       env:
-        TARGET_ENV: ${ENVIRONMENT}
+        TARGET_ENV: staging
         CHECK_SLO: true
         CHECK_SLO_TAG: kibana
     soft_fail: true

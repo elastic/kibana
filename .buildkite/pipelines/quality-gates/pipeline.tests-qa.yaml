@@ -8,7 +8,7 @@ steps:
     build:
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
       env:
-        TARGET_ENV: ${ENVIRONMENT}
+        TARGET_ENV: qa
         CHECK_SLO: true
         CHECK_SLO_TAG: kibana
         CHECK_SLO_WAITING_PERIOD: 10m
