@@ -153,7 +153,7 @@ export const getCreateNewTermsRulesSchemaMock = (
   history_window_start: 'now-7d',
 });
 
-export const getEsqlRulesSchemaMock = (
+export const getCreateEsqlRulesSchemaMock = (
   ruleId = 'rule-1',
   enabled = false
 ): EsqlRuleCreateProps => ({

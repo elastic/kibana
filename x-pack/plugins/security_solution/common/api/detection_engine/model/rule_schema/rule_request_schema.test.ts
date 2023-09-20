@@ -20,6 +20,7 @@ import {
   getCreateThresholdRulesSchemaMock,
   getCreateRulesSchemaMockWithDataView,
   getCreateMachineLearningRulesSchemaMock,
+  getCreateEsqlRulesSchemaMock,
 } from './rule_request_schema.mock';
 import { buildResponseRuleSchema } from './build_rule_schemas';
 
@@ -1203,6 +1204,38 @@ describe('rules schema', () => {
         'Invalid value "[]" supplied to "threat_mapping"',
       ]);
       expect(message.schema).toEqual({});
+    });
+  });
+
+  describe('esql rule type', () => {
+    it('should validate correct payload', () => {
+      const payload = getCreateEsqlRulesSchemaMock();
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+    it('should not validate index property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), index: ['test*'] };
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "index,["test*"]"']);
+    });
+    it('should not validate data_view_id property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), data_view_id: 'test' };
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
+    });
+    it('should not validate filters property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), filters: [] };
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "filters,[]"']);
     });
   });
 

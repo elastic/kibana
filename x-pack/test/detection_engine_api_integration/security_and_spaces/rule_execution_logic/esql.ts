@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import { getEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('Esql type rules', () => {
+  describe.only('Esql type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         id
       )} | where agent.name=="test-1"`;
       const rule: EsqlRuleCreateProps = {
-        ...getEsqlRulesSchemaMock('rule-1', true),
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
         query: ruleQuery,
         from: '2020-10-28T06:00:00.000Z',
         interval: '1h',
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
       const doc2 = { agent: { name: 'test-2' } };
 
       const rule: EsqlRuleCreateProps = {
-        ...getEsqlRulesSchemaMock('rule-1', true),
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
         query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
         from: 'now-1h',
         interval: '1h',
@@ -208,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
       const doc2 = { agent: { name: 'test-2' } };
 
       const rule: EsqlRuleCreateProps = {
-        ...getEsqlRulesSchemaMock('rule-1', true),
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
         query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
         from: 'now-1h',
         interval: '1h',
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           // only _id and agent.name is projected at the end of query pipeline
           query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
           from: 'now-1h',
@@ -289,7 +289,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // ESQL query drops agent type and renames agent.name
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
           )} | where agent.name=="test-1" | keep agent.name | rename agent.name as custom_named_agent`,
@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // ESQL query counts each distinct value in agent.name
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
           )} | stats counted_agents=count(agent.name) by agent.name`,
@@ -404,7 +404,7 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
 
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -434,7 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
 
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -476,7 +476,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [doc1, doc2, doc3], interval, id });
 
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -509,7 +509,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('generates max signals warning when circuit breaker is exceeded', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -546,7 +546,7 @@ export default ({ getService }: FtrProviderContext) => {
       it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -582,7 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should work for max signals > 100', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -633,7 +633,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [doc1], interval, id });
 
         const rule: EsqlRuleCreateProps = {
-          ...getEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(id)} | where host.name=="host-0"`,
           from: 'now-1h',
           interval: '1h',
