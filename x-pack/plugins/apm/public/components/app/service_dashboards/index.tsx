@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
@@ -91,51 +97,50 @@ export function ServiceDashboards() {
     <EuiPanel hasBorder={true}>
       {status !== FETCH_STATUS.LOADING && serviceDashboards.length > 0 ? (
         <>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {currentDashboard?.dashboardTitle}
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+            <EuiFlexItem grow={true}>
+              <EuiTitle>
+                <h2>{currentDashboard?.dashboardTitle}</h2>
+              </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexGroup
-              responsive={false}
-              gutterSize="xs"
-              alignItems="center"
-            >
+
+            <EuiFlexItem grow={false}>
+              <DashboardSelector
+                serviceDashboards={serviceDashboards}
+                handleOnChange={handleOnChange}
+                currentDashboard={currentDashboard}
+              />
+            </EuiFlexItem>
+
+            {currentDashboard && (
               <EuiFlexItem grow={false}>
-                <DashboardSelector
-                  serviceDashboards={serviceDashboards}
-                  handleOnChange={handleOnChange}
-                  currentDashboard={currentDashboard}
+                <ContextMenu
+                  items={[
+                    <LinkDashboard emptyButton={true} onRefresh={refetch} />,
+                    <GotoDashboard currentDashboard={currentDashboard} />,
+                    <EditDashboard
+                      currentDashboard={currentDashboard}
+                      onRefresh={refetch}
+                    />,
+                    <UnlinkDashboard
+                      currentDashboard={currentDashboard}
+                      onRefresh={refetch}
+                    />,
+                  ]}
                 />
               </EuiFlexItem>
-
-              {currentDashboard && (
-                <EuiFlexItem grow={false}>
-                  <ContextMenu
-                    items={[
-                      <LinkDashboard emptyButton={true} onRefresh={refetch} />,
-                      <GotoDashboard currentDashboard={currentDashboard} />,
-                      <EditDashboard
-                        currentDashboard={currentDashboard}
-                        onRefresh={refetch}
-                      />,
-                      <UnlinkDashboard
-                        currentDashboard={currentDashboard}
-                        onRefresh={refetch}
-                      />,
-                    ]}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            )}
           </EuiFlexGroup>
-
-          {currentDashboard && (
-            <DashboardRenderer
-              savedObjectId={currentDashboard.dashboardSavedObjectId}
-              getCreationOptions={getCreationOptions}
-              ref={setDashboard}
-            />
-          )}
+          <EuiFlexItem grow={true}>
+            <EuiSpacer size="l" />
+            {currentDashboard && (
+              <DashboardRenderer
+                savedObjectId={currentDashboard.dashboardSavedObjectId}
+                getCreationOptions={getCreationOptions}
+                ref={setDashboard}
+              />
+            )}
+          </EuiFlexItem>
         </>
       ) : (
         <EmptyDashboards actions={<LinkDashboard onRefresh={refetch} />} />

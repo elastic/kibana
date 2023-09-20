@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
@@ -26,9 +27,16 @@ export function EmptyDashboards({ actions }: Props) {
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.apm.serviceDashboards.selectDashboard.title', {
-            defaultMessage: 'Custom',
-          })}
+          <EuiTitle>
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceDashboards.selectDashboard.title',
+                {
+                  defaultMessage: 'Custom',
+                }
+              )}
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiEmptyPrompt
