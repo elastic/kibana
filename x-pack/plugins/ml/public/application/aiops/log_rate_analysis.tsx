@@ -20,7 +20,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -45,7 +45,7 @@ export const LogRateAnalysisPage: FC = () => {
           stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
-          showFrozenDataTierChoice={showFrozenDataTierChoice}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'application',
             'data',

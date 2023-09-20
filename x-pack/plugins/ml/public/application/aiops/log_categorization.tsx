@@ -19,7 +19,7 @@ import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -42,7 +42,7 @@ export const LogCategorizationPage: FC = () => {
         <LogCategorization
           dataView={dataView}
           savedSearch={savedSearch}
-          showFrozenDataTierChoice={showFrozenDataTierChoice}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'application',
             'data',

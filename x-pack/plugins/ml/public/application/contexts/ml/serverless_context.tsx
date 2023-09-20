@@ -10,7 +10,6 @@ import type { MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
   showNodeInfo: boolean;
-  showFrozenDataTierChoice: boolean;
   showMLNavMenu: boolean;
   showLicenseInfo: boolean;
   isADEnabled: boolean;
@@ -19,7 +18,6 @@ export interface EnabledFeatures {
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
-  showFrozenDataTierChoice: true,
   showMLNavMenu: true,
   showLicenseInfo: true,
   isADEnabled: true,
@@ -39,7 +37,6 @@ export const EnabledFeaturesContextProvider: FC<Props> = ({
 }) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
-    showFrozenDataTierChoice: !isServerless,
     showMLNavMenu: !isServerless,
     showLicenseInfo: !isServerless,
     isADEnabled: mlFeatures.ad,

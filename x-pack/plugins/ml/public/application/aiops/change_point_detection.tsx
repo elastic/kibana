@@ -24,7 +24,7 @@ import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -47,7 +47,7 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
-          showFrozenDataTierChoice={showFrozenDataTierChoice}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={{
             ...pick(services, [
               'application',

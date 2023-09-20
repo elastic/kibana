@@ -33,7 +33,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const dataSourceContext = useDataSource();
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -138,7 +138,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
                 apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
-                showFrozenDataTierChoice={showFrozenDataTierChoice}
+                showFrozenDataTierChoice={showNodeInfo}
               />
             </EuiFlexItem>
             <EuiFlexItem />

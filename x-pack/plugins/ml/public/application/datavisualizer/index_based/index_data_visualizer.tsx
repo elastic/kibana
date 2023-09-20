@@ -38,7 +38,7 @@ export const IndexDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
-  const { showFrozenDataTierChoice } = useEnabledFeatures();
+  const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
@@ -192,7 +192,7 @@ export const IndexDataVisualizerPage: FC = () => {
           </MlPageHeader>
           <IndexDataVisualizer
             getAdditionalLinks={getAdditionalLinks}
-            showFrozenDataTierChoice={showFrozenDataTierChoice}
+            showFrozenDataTierChoice={showNodeInfo}
           />
         </>
       ) : null}
