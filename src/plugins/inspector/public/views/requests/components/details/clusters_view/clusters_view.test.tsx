@@ -86,9 +86,7 @@ describe('render', () => {
     const wrapper = shallow(<ClustersView request={request} />);
     expect(wrapper).toMatchSnapshot();
   });
-});
-
-describe('render', () => {
+  
   test('should render local and remote cluster details from _clusters', () => {
     const request = {
       response: {
