@@ -429,3 +429,6 @@ enabled:
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detection_engine/config.ts
+
+
