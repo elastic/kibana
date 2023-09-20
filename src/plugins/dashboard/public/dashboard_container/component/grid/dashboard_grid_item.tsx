@@ -72,8 +72,18 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         if (highlightPanelId === id) {
           container.highlightPanel(ref.current);
         }
+
+        ref.current.querySelectorAll('*').forEach((e) => {
+          if (focusPanelId && focusPanelId !== id) {
+            // remove blurred panels and nested elements from tab order
+            e.setAttribute('tabindex', '-1');
+          } else {
+            // restore tab order
+            e.removeAttribute('tabindex');
+          }
+        });
       }
-    }, [id, container, scrollToPanelId, highlightPanelId, ref]);
+    }, [id, container, scrollToPanelId, highlightPanelId, ref, focusPanelId]);
 
     const focusStyles =
       focusPanelId && focusPanelId !== id
@@ -90,7 +100,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
         ref={ref}
-        tabIndex={focusPanelId && focusPanelId !== id ? -1 : 0}
         {...rest}
       >
         {isRenderable ? (
