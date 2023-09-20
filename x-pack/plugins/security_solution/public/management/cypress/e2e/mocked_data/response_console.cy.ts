@@ -24,7 +24,7 @@ import {
 } from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 
-describe('Response console', () => {
+describe('Response console', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
   });
