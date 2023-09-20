@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 
@@ -66,9 +66,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   const memoNonDataViewIndexPatterns = useMemo(() => {
     if (isEsqlRule) {
-      return getIndexPatternFromESQLQuery(rules?.[0].query)
-        .split(',')
-        .map((index) => index.trim());
+      return getIndexListFromEsqlQuery(rules?.[0].query);
     }
     return !memoDataViewId && rules != null && isSingleRule && rules[0].index != null
       ? rules[0].index

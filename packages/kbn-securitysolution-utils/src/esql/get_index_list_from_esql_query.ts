@@ -10,7 +10,10 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 /**
  * parses ES|QL query and returns array of indices
  */
-export const getIndexListFromEsqlQuery = (query: string): string[] =>
-  getIndexPatternFromESQLQuery(query)
-    .split(',')
-    .map((index) => index.trim());
+export const getIndexListFromEsqlQuery = (query: string | undefined): string[] => {
+  const indexString = getIndexPatternFromESQLQuery(query);
+  if (!indexString) {
+    return [];
+  }
+  return indexString.split(',').map((index) => index.trim());
+};
