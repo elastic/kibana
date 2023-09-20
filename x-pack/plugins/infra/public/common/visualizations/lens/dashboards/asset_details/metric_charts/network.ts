@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { hostLensFormulas } from '../../../../constants';
+import { hostLensFormulas } from '../../../formulas';
 import { XY_OVERRIDES } from '../../constants';
 import type { XYConfig } from '../../types';
 

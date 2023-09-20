@@ -19,6 +19,7 @@ export interface ChartProps extends XYConfig {
   visualOptions?: XYVisualOptions;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  filterFieldName: string;
   dateRange: TimeRange;
   assetName: string;
   ['data-test-subj']: string;
@@ -30,6 +31,7 @@ export const Chart = ({
   layers,
   metricsDataView,
   logsDataView,
+  filterFieldName,
   visualOptions,
   dataViewOrigin,
   overrides,
@@ -46,12 +48,12 @@ export const Chart = ({
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
-        field: 'host.name',
+        field: filterFieldName,
         values: [assetName],
         dataView,
       }),
     ];
-  }, [assetName, dataView]);
+  }, [assetName, dataView, filterFieldName]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {

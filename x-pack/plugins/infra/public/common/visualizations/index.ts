@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './types';
-
 export * from './lens/dashboards';
-export { hostLensFormulas } from './constants';
+export * from './lens/formulas';
