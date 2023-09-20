@@ -204,17 +204,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const isFetched = groupsFetched && agentsFetched && agentGroupsData;
 
   const renderNoAgentAvailableWarning = () => {
-    const docsLink = {
-      docsLink: (
-        <EuiLink href={`${docLinks.links.fleet.agentPolicy}#apply-a-policy`} target={'_blank'}>
-          <FormattedMessage
-            id="xpack.osquery.agents.noAgentAvailableDescription.docsLink"
-            defaultMessage="Apply a policy"
-          />
-        </EuiLink>
-      ),
-    };
-
     if (isFetched && !options.length) {
       return (
         <>
@@ -222,7 +211,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             <FormattedMessage
               id="xpack.osquery.agents.noAgentAvailableDescription"
               defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
-              values={docsLink}
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                docsLink: (
+                  <EuiLink
+                    href={`${docLinks.links.fleet.agentPolicy}#apply-a-policy`}
+                    target={'_blank'}
+                  >
+                    <FormattedMessage
+                      id="xpack.osquery.agents.noAgentAvailableDescription.docsLink"
+                      defaultMessage="Apply a policy"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </EuiCallOut>
           <EuiSpacer size="s" />
