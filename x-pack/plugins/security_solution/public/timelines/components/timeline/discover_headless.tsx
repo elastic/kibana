@@ -25,11 +25,11 @@ export const useHeadlessRoutes = () => {
     currentSearchParams.set('timeline', encode(timelineSearchParams));
     const searchString = decodeURIComponent(currentSearchParams.toString());
     const pathWithSearchAndHash = hash ? `?${searchString}#${hash}` : `?${searchString}`;
-    const newUrl = application.getUrlForApp(APP_UI_ID, {
+    application.navigateToApp(APP_UI_ID, {
       deepLinkId: 'alerts',
       path: pathWithSearchAndHash,
+      replace: true,
     });
-    application.navigateToUrl(newUrl);
   }
 };
 
