@@ -10,14 +10,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
-import { configureTextCustomFieldBuilder } from './configure_text_field';
+import { configureTextCustomFieldFactory } from './configure_text_field';
 import * as i18n from '../translations';
 
 describe('configureTextCustomFieldBuilder ', () => {
   const onSubmit = jest.fn();
-  const builder = configureTextCustomFieldBuilder();
+  const builder = configureTextCustomFieldFactory();
 
-  const BuiltCustomField = builder.build().ConfigurePage;
+  const BuiltCustomField = builder.build().Configure;
 
   beforeEach(() => {
     jest.clearAllMocks();

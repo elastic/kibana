@@ -10,14 +10,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
-import { configureToggleCustomFieldBuilder } from './configure_toggle_field';
+import { configureToggleCustomFieldFactory } from './configure_toggle_field';
 import * as i18n from '../translations';
 
-describe('configureToggleCustomFieldBuilder ', () => {
+describe('configureToggleCustomFieldFactory ', () => {
   const onSubmit = jest.fn();
-  const builder = configureToggleCustomFieldBuilder();
+  const builder = configureToggleCustomFieldFactory();
 
-  const BuiltCustomField = builder.build().ConfigurePage;
+  const BuiltCustomField = builder.build().Configure;
 
   beforeEach(() => {
     jest.clearAllMocks();

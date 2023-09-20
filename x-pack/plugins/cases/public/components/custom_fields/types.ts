@@ -7,15 +7,28 @@
 
 import type React from 'react';
 import type { CustomFieldTypes } from '../../../common/types/domain';
+import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 
-export interface CustomFieldBuildType {
-  ConfigurePage: React.FC;
+export interface CustomFieldType {
+  Configure: React.FC;
+  View: React.FC<{
+    customField: CaseUI['customFields'][number];
+  }>;
+  Edit: React.FC<{
+    customField: CaseUI['customFields'][number];
+    customFieldConfiguration: CasesConfigurationUI['customFields'][number];
+    onSubmit: (customField: CaseUI['customFields'][number]) => void;
+    isLoading: boolean;
+    canUpdate: boolean;
+  }>;
 }
 
-export type CustomFieldBuilder = () => {
+export type CustomFieldFactory = () => {
   id: string;
   label: string;
-  build: () => CustomFieldBuildType;
+  build: () => CustomFieldType;
 };
 
-export type CustomFieldBuilderMap = Record<CustomFieldTypes, CustomFieldBuilder>;
+export type CustomFieldBuilderMap = {
+  readonly [key in CustomFieldTypes]: CustomFieldFactory;
+};
