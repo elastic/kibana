@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
+  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",

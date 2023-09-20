@@ -18,7 +18,7 @@ export const NavigationEmbeddablePanelEditorEmptyPrompt = ({
   addLink: () => Promise<void>;
 }) => {
   return (
-    <EuiFormRow>
+    <EuiFormRow data-test-subj="navEmbeddable--panelEditor--emptyPrompt">
       <EuiPanel paddingSize="m" hasBorder={true}>
         <EuiEmptyPrompt
           color="plain"

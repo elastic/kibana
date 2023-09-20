@@ -134,6 +134,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
       hasShadow={false}
       color={destinationError ? 'warning' : 'plain'}
       className={`navEmbeddableLinkPanel ${destinationError ? 'linkError' : ''}`}
+      data-test-subj={`panelEditorLink${linkLabelLoading ? '--loading' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
