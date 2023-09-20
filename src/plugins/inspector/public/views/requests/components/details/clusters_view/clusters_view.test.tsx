@@ -17,10 +17,10 @@ describe('shouldShow', () => {
       response: {
         json: {
           rawResponse: {
-            _shards: {}
-          }
-        }
-      }
+            _shards: {},
+          },
+        },
+      },
     } as unknown as Request;
     expect(ClustersView.shouldShow(request)).toBe(true);
   });
@@ -30,10 +30,10 @@ describe('shouldShow', () => {
       response: {
         json: {
           rawResponse: {
-            _clusters: {}
-          }
-        }
-      }
+            _clusters: {},
+          },
+        },
+      },
     } as unknown as Request;
     expect(ClustersView.shouldShow(request)).toBe(true);
   });
@@ -42,9 +42,9 @@ describe('shouldShow', () => {
     const request = {
       response: {
         json: {
-          rawResponse: {}
-        }
-      }
+          rawResponse: {},
+        },
+      },
     } as unknown as Request;
     expect(ClustersView.shouldShow(request)).toBe(false);
   });
@@ -56,76 +56,78 @@ describe('render', () => {
       response: {
         json: {
           rawResponse: {
-            "_shards": {
-              "total": 2,
-              "successful": 1,
-              "skipped": 0,
-              "failed": 1,
-              "failures": [
+            _shards: {
+              total: 2,
+              successful: 1,
+              skipped: 0,
+              failed: 1,
+              failures: [
                 {
-                  "shard": 0,
-                  "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-                  "node": "XPQtz28bSLW26Oynf6oUmg",
-                  "reason": {
-                    "type": "query_shard_exception",
-                    "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                    "index_uuid": "Pjkv7r1PQpmhbxaGL-6Chw",
-                    "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-                    "caused_by": {
-                      "type": "runtime_exception",
-                      "reason": "[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123"
-                    }
-                  }
-                }
-              ]
+                  shard: 0,
+                  index: '.ds-kibana_sample_data_logs-2023.08.21-000001',
+                  node: 'XPQtz28bSLW26Oynf6oUmg',
+                  reason: {
+                    type: 'query_shard_exception',
+                    reason:
+                      'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    index_uuid: 'Pjkv7r1PQpmhbxaGL-6Chw',
+                    index: '.ds-kibana_sample_data_logs-2023.08.21-000001',
+                    caused_by: {
+                      type: 'runtime_exception',
+                      reason:
+                        '[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    },
+                  },
+                },
+              ],
             },
-          }
-        }
-      }
+          },
+        },
+      },
     } as unknown as Request;
     const wrapper = shallow(<ClustersView request={request} />);
     expect(wrapper).toMatchSnapshot();
   });
-  
+
   test('should render local and remote cluster details from _clusters', () => {
     const request = {
       response: {
         json: {
           rawResponse: {
-            "_clusters": {
-    "total": 2,
-    "successful": 2,
-    "skipped": 0,
-    "details": {
-      "(local)": {
-        "status": "successful",
-        "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-        "took": 0,
-        "timed_out": false,
-        "_shards": {
-          "total": 2,
-          "successful": 2,
-          "skipped": 0,
-          "failed": 0
-        }
+            _clusters: {
+              total: 2,
+              successful: 2,
+              skipped: 0,
+              details: {
+                '(local)': {
+                  status: 'successful',
+                  indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+                  took: 0,
+                  timed_out: false,
+                  _shards: {
+                    total: 2,
+                    successful: 2,
+                    skipped: 0,
+                    failed: 0,
+                  },
+                },
+                remote1: {
+                  status: 'successful',
+                  indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+                  took: 1,
+                  timed_out: false,
+                  _shards: {
+                    total: 2,
+                    successful: 2,
+                    skipped: 0,
+                    failed: 0,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      "remote1": {
-        "status": "successful",
-        "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-        "took": 1,
-        "timed_out": false,
-        "_shards": {
-          "total": 2,
-          "successful": 2,
-          "skipped": 0,
-          "failed": 0
-        }
-      }
-    }
-  },
-          }
-        }
-      }
     } as unknown as Request;
     const wrapper = shallow(<ClustersView request={request} />);
     expect(wrapper).toMatchSnapshot();
