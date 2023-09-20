@@ -23,6 +23,7 @@ export function registerGetDatasetInfoFunction({
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
       providing empty string as index name will retrieve all indices
+      if index is provided and it doesnt match any indices in elasticsearch list of all indices will be provoded as well
       else list of all fields for the given index will be given.
       wildcards can be part of index name.
 
