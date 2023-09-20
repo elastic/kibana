@@ -67,7 +67,9 @@ export class Dataset {
   }
 
   public static create(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
-    return new Dataset(dataset, parentIntegration);
+    const datasetTitle = dataset.title || dataset.name.split('-')[1];
+
+    return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 
   public static createAllLogsDataset() {
@@ -86,9 +88,6 @@ export class Dataset {
     );
 
     // Create new datasets for the retrieved wildcards
-    return Array.from(wildcards).map((wildcard) => {
-      const [, dataset] = wildcard.split('-');
-      return Dataset.create({ name: wildcard, title: dataset });
-    });
+    return Array.from(wildcards).map((wildcard) => Dataset.create({ name: wildcard }));
   }
 }
