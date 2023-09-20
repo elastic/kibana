@@ -44,7 +44,6 @@ export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
 export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const FUNCTIONS_TAB = 'FUNCTIONS_TAB' as const;
 export const ADVANCED_TAB = 'ADVANCED_TAB' as const;
 
 export type SettingsTabs =
@@ -52,7 +51,6 @@ export type SettingsTabs =
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
-  | typeof FUNCTIONS_TAB
   | typeof ADVANCED_TAB;
 interface Props {
   defaultConnectorId?: string;
@@ -78,8 +76,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { actionTypeRegistry, http, selectedSettingsTab, setSelectedSettingsTab } =
-      useAssistantContext();
+    const {
+      actionTypeRegistry,
+      assistantLangChain,
+      http,
+      selectedSettingsTab,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
     const {
       conversationSettings,
       defaultAllow,
@@ -235,6 +238,16 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
+              {assistantLangChain && (
+                <EuiKeyPadMenuItem
+                  id={ADVANCED_TAB}
+                  label={i18n.ADVANCED_MENU_ITEM}
+                  isSelected={selectedSettingsTab === ADVANCED_TAB}
+                  onClick={() => setSelectedSettingsTab(ADVANCED_TAB)}
+                >
+                  <EuiIcon type="advancedSettingsApp" size="l" />
+                </EuiKeyPadMenuItem>
+              )}
             </EuiKeyPadMenu>
           </EuiPageSidebar>
           <EuiPageBody paddingSize="none" panelled={true}>
@@ -287,7 +300,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
                   />
                 )}
-                {selectedSettingsTab === FUNCTIONS_TAB && <></>}
                 {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner

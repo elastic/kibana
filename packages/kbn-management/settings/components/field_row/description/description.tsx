@@ -75,7 +75,7 @@ export const FieldDescription = <T extends SettingType>({
     <div css={cssDescription}>
       <FieldDeprecation {...{ field }} />
       {content}
-      <FieldDefaultValue {...{ field }} />
+      <FieldDefaultValue {...{ field, unsavedChange }} />
     </div>
   );
 };
