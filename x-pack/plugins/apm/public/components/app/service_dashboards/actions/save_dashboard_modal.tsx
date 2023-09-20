@@ -34,7 +34,7 @@ interface Props {
   currentDashboard?: SavedServiceDashboard;
 }
 
-export function SelectDashboard({
+export function SaveDashboardModal({
   onClose,
   onRefresh,
   currentDashboard,
@@ -85,22 +85,12 @@ export function SelectDashboard({
           },
           signal: null,
         });
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.apm.serviceDashboards.addSuccess.toast.title',
-            {
-              defaultMessage: 'Added "{dashboardName}" dashboard',
-              values: { dashboardName: newDashboard.label },
-            }
-          ),
-          text: i18n.translate(
-            'xpack.apm.serviceDashboards.addSuccess.toast.text',
-            {
-              defaultMessage:
-                'Your dashboard is now visible in the service overview page.',
-            }
-          ),
-        });
+
+        notifications.toasts.addSuccess(
+          isEditMode
+            ? getEditSuccessToastLabels(newDashboard.label)
+            : getLinkSuccessToastLabels(newDashboard.label)
+        );
         reloadServiceDashboards();
       } catch (error) {
         console.error(error);
@@ -120,17 +110,23 @@ export function SelectDashboard({
     [selectedDashboard, notifications.toasts, useContextFilter]
   );
 
-  console.log('isEditMode', isEditMode);
   return (
     <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate(
-            'xpack.apm.serviceDashboards.selectDashboard.modalTitle',
-            {
-              defaultMessage: 'Select dashboard',
-            }
-          )}
+          {isEditMode
+            ? i18n.translate(
+                'xpack.apm.serviceDashboards.selectDashboard.modalTitle.edit',
+                {
+                  defaultMessage: 'Edit dashboard',
+                }
+              )
+            : i18n.translate(
+                'xpack.apm.serviceDashboards.selectDashboard.modalTitle.link',
+                {
+                  defaultMessage: 'Select dashboard',
+                }
+              )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -139,21 +135,12 @@ export function SelectDashboard({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING}
             isDisabled={status === FETCH_STATUS.LOADING}
-            placeholder={
-              isEditMode
-                ? i18n.translate(
-                    'xpack.apm.serviceDashboards.selectDashboard.placeholder.edit',
-                    {
-                      defaultMessage: 'Edit dasbboard',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-                    {
-                      defaultMessage: 'Select dasbboard',
-                    }
-                  )
-            }
+            placeholder={i18n.translate(
+              'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+              {
+                defaultMessage: 'Select dasbboard test',
+              }
+            )}
             singleSelection={{ asPlainText: true }}
             options={data?.map((dashboardItem: DashboardItem) => ({
               label: dashboardItem.attributes.title,
@@ -204,4 +191,35 @@ export function SelectDashboard({
       </EuiModalFooter>
     </EuiModal>
   );
+}
+
+function getLinkSuccessToastLabels(dashboardName: string) {
+  return {
+    title: i18n.translate(
+      'xpack.apm.serviceDashboards.linkSuccess.toast.title',
+      {
+        defaultMessage: 'Added "{dashboardName}" dashboard',
+        values: { dashboardName },
+      }
+    ),
+    text: i18n.translate('xpack.apm.serviceDashboards.linkSuccess.toast.text', {
+      defaultMessage:
+        'Your dashboard is now visible in the service overview page.',
+    }),
+  };
+}
+
+function getEditSuccessToastLabels(dashboardName: string) {
+  return {
+    title: i18n.translate(
+      'xpack.apm.serviceDashboards.linkSuccess.toast.title',
+      {
+        defaultMessage: 'Edited "{dashboardName}" dashboard',
+        values: { dashboardName },
+      }
+    ),
+    text: i18n.translate('xpack.apm.serviceDashboards.linkSuccess.toast.text', {
+      defaultMessage: 'Your dashboard link have been updated',
+    }),
+  };
 }

@@ -7,7 +7,7 @@
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { SelectDashboard } from './select_dashboard_modal';
+import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function LinkDashboard({
   onRefresh,
@@ -44,7 +44,7 @@ export function LinkDashboard({
       )}
 
       {isModalVisible && (
-        <SelectDashboard
+        <SaveDashboardModal
           onClose={() => setIsModalVisible(false)}
           onRefresh={onRefresh}
         />

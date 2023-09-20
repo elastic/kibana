@@ -21,7 +21,7 @@ import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
-import { DashboardSelector } from './dropdown';
+import { DashboardSelector } from './dashboard_selector';
 
 export function ServiceDashboards() {
   const {
