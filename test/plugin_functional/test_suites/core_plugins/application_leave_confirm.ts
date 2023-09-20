@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/75963
+  // Failing: See https://github.com/elastic/kibana/issues/166838
   describe.skip('application using leave confirmation', () => {
     describe('when navigating to another app', () => {
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
