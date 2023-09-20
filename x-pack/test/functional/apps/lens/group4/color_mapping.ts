@@ -11,7 +11,7 @@ import {
   ELASTIC_BRAND_PALETTE_COLORS,
   EUIAmsterdamColorBlindPalette,
   ElasticBrandPalette,
-} from '@kbn/coloring';
+} from '@kbn/coloring/src/shared_components/color_mapping/palettes';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
