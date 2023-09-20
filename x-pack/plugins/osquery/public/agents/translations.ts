@@ -50,13 +50,6 @@ export const NO_AGENT_AVAILABLE_TITLE = i18n.translate(
   }
 );
 
-export const NO_AGENT_AVAILABLE_DESCRIPTION = i18n.translate(
-  'xpack.osquery.agents.noAgentAvailableDescription',
-  {
-    defaultMessage: `It appears that no agents are currently available. Please ensure that at least one agent is enrolled to proceed.`,
-  }
-);
-
 export const AGENT_QUERY = i18n.translate('xpack.osquery.agents.query', {
   defaultMessage: `Query`,
 });
