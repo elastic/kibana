@@ -27,7 +27,11 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
-    setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
+    setSelectedOptions(
+      initialSlo
+        ? [{ value: `${initialSlo.id}-${initialSlo.instanceId}`, label: initialSlo.name }]
+        : []
+    );
   }, [initialSlo]);
 
   useEffect(() => {
@@ -39,7 +43,7 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
               ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})`
               : slo.name;
           return {
-            value: slo.id,
+            value: `${slo.id}-${slo.instanceId}`,
             label,
             instanceId: slo.instanceId,
           };
@@ -50,8 +54,12 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
+    console.log(opts, '!!opts');
     const selectedSlo =
-      opts.length === 1 ? sloList!.results?.find((slo) => slo.id === opts[0].value) : undefined;
+      opts.length === 1
+        ? sloList!.results?.find((slo) => opts[0].value === `${slo.id}-${slo.instanceId}`)
+        : undefined;
+    console.log(selectedSlo, '!!selectedSlo');
     onSelected(selectedSlo);
   };
 
