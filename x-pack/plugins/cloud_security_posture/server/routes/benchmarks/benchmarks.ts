@@ -9,7 +9,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspRuleTemplate } from '../../../common/schemas';
 import {
-  CNVM_POLICY_TEMPLATE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
@@ -31,6 +30,7 @@ import {
   type AgentStatusByAgentPolicyMap,
   getCspAgentPolicies,
   getCspPackagePolicies,
+  getPaginatedItems,
 } from '../../lib/fleet_util';
 import { BenchmarkId } from '../../../common/types';
 
@@ -122,10 +122,16 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             POSTURE_TYPE_ALL
           );
 
-          const cspPackagePolicies = packagePolicies.items.filter(
+          const filteredCspPackagePolicies: PackagePolicy[] = packagePolicies.items.filter(
             (item: PackagePolicy) =>
               item.vars?.type?.value !== VULN_MGMT_POLICY_TEMPLATE &&
-              item.vars?.type?.value !== CNVM_POLICY_TEMPLATE
+              item.vars?.posture?.value !== VULN_MGMT_POLICY_TEMPLATE
+          );
+
+          const cspPackagePolicies: PackagePolicy[] = getPaginatedItems(
+            filteredCspPackagePolicies,
+            packagePolicies.page,
+            packagePolicies.perPage
           );
 
           const agentPolicies = await getCspAgentPolicies(

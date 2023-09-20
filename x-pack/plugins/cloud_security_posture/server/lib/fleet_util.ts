@@ -42,6 +42,10 @@ const getPackageNameQuery = (): string => {
   return `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}"`;
 };
 
+export const getPaginatedItems = <T>(filteredItems: T[], page: number, perPage: number) => {
+  return filteredItems.slice((page - 1) * perPage, Math.min(filteredItems.length, page * perPage));
+};
+
 export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse['results']>;
 
 export const getAgentStatusesByAgentPolicies = async (
@@ -113,10 +117,7 @@ export const getCspPackagePolicies = async (
   const perPage = queryParams?.per_page ?? DEFAULT_BENCHMARKS_PER_PAGE;
 
   return {
-    items: filteredItems.slice(
-      (page - 1) * perPage,
-      Math.min(filteredItems.length, page * perPage)
-    ),
+    items: getPaginatedItems(filteredItems, page, perPage),
     total: filteredItems.length,
     page,
     perPage,
