@@ -14,10 +14,10 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing ES Promotion: See https://github.com/elastic/kibana/issues/166770
-  describe.skip('max queued actions circuit breaker', () => {
+  describe('max queued actions circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
     const retry = getService('retry');
+    const logger = getService('log');
 
     after(() => objectRemover.removeAll());
 
@@ -92,6 +92,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       // check that there's a warning in the execute event
       const executeEvent = events[0];
+      logger.info(`execute event - ${JSON.stringify(executeEvent)}`);
       expect(executeEvent?.event?.outcome).to.eql('success');
       expect(executeEvent?.event?.reason).to.eql('maxQueuedActions');
       expect(executeEvent?.kibana?.alerting?.status).to.eql('warning');
