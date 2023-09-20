@@ -16,6 +16,7 @@ export const OPEN_AI_TITLE = i18n.translate(
 export const GEN_AI_CONNECTOR_ID = '.gen-ai';
 export enum SUB_ACTION {
   RUN = 'run',
+  INVOKE_AI = 'invokeAI',
   STREAM = 'stream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',

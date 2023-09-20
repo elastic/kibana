@@ -13,7 +13,7 @@ import {
   BedrockRunActionParamsSchema,
   BedrockRunActionResponseSchema,
   BedrockDashboardActionParamsSchema,
-  BedrockRunGenAIActionParamsSchema,
+  InvokeAIActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import type {
   BedrockConfig,
@@ -25,7 +25,8 @@ import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/cons
 import {
   BedrockDashboardActionParams,
   BedrockDashboardActionResponse,
-  BedrockRunGenAIActionParams,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
 } from '../../../common/bedrock/types';
 
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
@@ -67,9 +68,9 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.GEN_AI_RUN,
-      method: 'runGenAI',
-      schema: BedrockRunGenAIActionParamsSchema,
+      name: SUB_ACTION.INVOKE_AI,
+      method: 'invokeAI',
+      schema: InvokeAIActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -105,19 +106,23 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     return response.data;
   }
 
-  public async runGenAI({ body }: BedrockRunGenAIActionParams): Promise<BedrockRunActionResponse> {
-    const combinedMessages = body.reduce((acc: string, message) => {
+  public async invokeAI({ messages }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    const combinedMessages = messages.reduce((acc: string, message) => {
       const { role, content } = message;
       const bedrockRole = role === 'user' ? '\n\nHuman:' : '\n\nAssistant:';
       return `${acc}${bedrockRole}${content}`;
     }, '');
 
     const req = {
+      // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
       prompt: `${combinedMessages} \n\nAssistant:`,
       max_tokens_to_sample: 300,
+      // prevent model from talking to itself
       stop_sequences: ['\n\nHuman:'],
     };
-    return this.runApi({ body: JSON.stringify(req) });
+
+    const res = await this.runApi({ body: JSON.stringify(req) });
+    return res.completion.trim();
   }
 
   public async getDashboard({

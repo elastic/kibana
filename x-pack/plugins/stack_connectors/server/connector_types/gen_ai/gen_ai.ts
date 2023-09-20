@@ -14,6 +14,7 @@ import {
   GenAiDashboardActionParamsSchema,
   GenAiStreamActionParamsSchema,
   GenAiStreamingResponseSchema,
+  InvokeAIActionParamsSchema,
 } from '../../../common/gen_ai/schema';
 import type {
   GenAiConfig,
@@ -26,6 +27,8 @@ import { SUB_ACTION } from '../../../common/gen_ai/constants';
 import {
   GenAiDashboardActionParams,
   GenAiDashboardActionResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
 } from '../../../common/gen_ai/types';
 import {
   getAxiosOptions,
@@ -72,6 +75,12 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       name: SUB_ACTION.DASHBOARD,
       method: 'getDashboard',
       schema: GenAiDashboardActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI,
+      method: 'invokeAI',
+      schema: InvokeAIActionParamsSchema,
     });
   }
 
@@ -156,5 +165,17 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     });
 
     return { available: response.success };
+  }
+
+  public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    const res = await this.runApi({ body: JSON.stringify(body) });
+
+    if (res.choices && res.choices.length > 0 && res.choices[0].message.content) {
+      const result = res.choices[0].message.content.trim();
+      return result;
+    }
+
+    // TO DO: Pass actual error
+    return 'An error occurred sending your message. If the problem persists, please test the connector configuration.';
   }
 }

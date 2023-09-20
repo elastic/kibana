@@ -28,6 +28,23 @@ export const GenAiRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+// Run action schema
+export const InvokeAIActionParamsSchema = schema.object({
+  messages: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.string(),
+    })
+  ),
+  model: schema.maybe(schema.string()),
+  n: schema.maybe(schema.number()),
+  stop: schema.maybe(
+    schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
+  ),
+  temperature: schema.maybe(schema.number()),
+});
+export const InvokeAIActionResponseSchema = schema.string();
+
 // Execute action schema
 export const GenAiStreamActionParamsSchema = schema.object({
   body: schema.string(),

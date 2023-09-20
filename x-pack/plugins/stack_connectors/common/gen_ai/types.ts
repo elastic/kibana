@@ -14,11 +14,15 @@ import {
   GenAiDashboardActionParamsSchema,
   GenAiDashboardActionResponseSchema,
   GenAiStreamActionParamsSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
 } from './schema';
 
 export type GenAiConfig = TypeOf<typeof GenAiConfigSchema>;
 export type GenAiSecrets = TypeOf<typeof GenAiSecretsSchema>;
 export type GenAiRunActionParams = TypeOf<typeof GenAiRunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type GenAiRunActionResponse = TypeOf<typeof GenAiRunActionResponseSchema>;
 export type GenAiDashboardActionParams = TypeOf<typeof GenAiDashboardActionParamsSchema>;
 export type GenAiDashboardActionResponse = TypeOf<typeof GenAiDashboardActionResponseSchema>;
