@@ -89,6 +89,7 @@ export const ActionTypeMenu = ({
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
+        actionTypeTitle: actionTypeModel ? actionTypeModel.actionTypeTitle : '',
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,

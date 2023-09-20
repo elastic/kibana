@@ -67,6 +67,9 @@ const placeholderButtonClassName = css`
   padding-top: 2px;
 `;
 
+type AIConnector = ActionConnector & {
+  connectorTypeTitle: string;
+};
 /**
  * A minimal and connected version of the ConnectorSelector component used in the Settings modal.
  */
@@ -86,14 +89,30 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
     const {
-      data: connectors,
-      isLoading: isLoadingActionTypes,
-      isFetching: isFetchingActionTypes,
+      data: connectorsWithoutActionContext,
+      isLoading: isLoadingConnectors,
+      isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
     } = useLoadConnectors({ http });
-    const isLoading = isLoadingActionTypes || isFetchingActionTypes;
+
+    const aiConnectors: AIConnector[] = useMemo(
+      () =>
+        connectorsWithoutActionContext
+          ? connectorsWithoutActionContext.map((c) => ({
+              ...c,
+              connectorTypeTitle: actionTypeRegistry.get(c.actionTypeId).actionTypeTitle,
+            }))
+          : [],
+      [actionTypeRegistry, connectorsWithoutActionContext]
+    );
+
+    const isLoading = isLoadingConnectors || isFetchingConnectors;
+    if (isLoadingConnectors !== isFetchingConnectors) {
+      console.log('WHAT THE HECK IS THE DIFFERENCE HERE???');
+    }
+
     const selectedConnectorName =
-      connectors?.find((c) => c.id === selectedConnectorId)?.name ??
+      aiConnectors.find((c) => c.id === selectedConnectorId)?.name ??
       i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
@@ -119,9 +138,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
     const connectorOptions = useMemo(() => {
       return (
-        connectors?.map((connector) => {
-          // TO DO, get the provider from the bedrock connector
-          const apiProvider = getGenAiConfig(connector)?.apiProvider ?? 'AWS Bedrock';
+        aiConnectors.map((connector) => {
+          const apiProvider =
+            // OpenAI puts provider in apiProvider field, else default to connector type title (ex: AWS Bedrock)
+            getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : apiProvider;
@@ -145,7 +165,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           };
         }) ?? []
       );
-    }, [connectors]);
+    }, [aiConnectors]);
 
     // Only include add new connector option if user has privilege
     const allConnectorOptions = useMemo(
@@ -178,15 +198,15 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           return;
         }
 
-        const connector = connectors?.find((c) => c.id === connectorId);
+        const connector = aiConnectors.find((c) => c.id === connectorId);
         const config = getGenAiConfig(connector);
-        if (selectedConversation != null) {
+        if (selectedConversation != null && connector) {
           setApiConfig({
             conversationId: selectedConversation.id,
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,
-              connectorType: connector?.actionTypeId,
+              connectorTypeTitle: connector.connectorTypeTitle,
               // With the inline component, prefer config args to handle 'new connector' case
               provider: apiProvider ?? config?.apiProvider,
               model: model ?? config?.defaultModel,
@@ -194,7 +214,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           });
         }
       },
-      [connectors, selectedConversation, onConnectorModalVisibilityChange, setApiConfig]
+      [aiConnectors, selectedConversation, onConnectorModalVisibilityChange, setApiConfig]
     );
 
     const placeholderComponent = useMemo(

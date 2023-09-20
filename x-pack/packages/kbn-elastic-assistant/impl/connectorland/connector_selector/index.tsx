@@ -51,11 +51,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const {
       data: connectors,
-      isLoading: isLoadingActionTypes,
-      isFetching: isFetchingActionTypes,
+      isLoading: isLoadingConnectors,
+      isFetching: isFetchingConnectors,
       refetch: refetchConnectors,
     } = useLoadConnectors({ http });
-    const isLoading = isLoadingActionTypes || isFetchingActionTypes;
+    const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
@@ -81,7 +81,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(() => {
       return (
         connectors?.map((connector) => {
-          const apiProvider = getGenAiConfig(connector)?.apiProvider;
+          const apiProvider =
+            getGenAiConfig(connector)?.apiProvider ?? connector.connectorTypeTitle;
+          console.log('connectorOptions', connector);
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
             : apiProvider;

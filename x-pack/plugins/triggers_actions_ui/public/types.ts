@@ -246,7 +246,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   id: string;
   iconClass: IconType;
   selectMessage: string;
-  actionTypeTitle?: string;
+  actionTypeTitle: string;
   validateParams: (
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;

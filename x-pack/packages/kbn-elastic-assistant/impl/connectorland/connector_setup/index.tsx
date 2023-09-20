@@ -10,8 +10,10 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionConnector,
+  ConnectorAddModal,
+} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
@@ -181,14 +183,15 @@ export const useConnectorSetup = ({
   const onSaveConnector = useCallback(
     (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
-      // Add connector to all conversations
+      // add action type title to new connector
+      const connectorTypeTitle = actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle;
       Object.values(conversations).forEach((c) => {
         setApiConfig({
           conversationId: c.id,
           apiConfig: {
             ...c.apiConfig,
             connectorId: connector.id,
-            connectorType: connector.actionTypeId,
+            connectorTypeTitle,
             provider: config?.apiProvider,
             model: config?.defaultModel,
           },
@@ -206,7 +209,14 @@ export const useConnectorSetup = ({
         },
       });
     },
-    [appendMessage, conversation.id, conversations, refetchConnectors, setApiConfig]
+    [
+      actionTypeRegistry,
+      appendMessage,
+      conversation.id,
+      conversations,
+      refetchConnectors,
+      setApiConfig,
+    ]
   );
 
   return {
