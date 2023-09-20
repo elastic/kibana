@@ -95,7 +95,7 @@ export function LayerPanel(
     indexPatternService?: IndexPatternServiceAPI;
     getUserMessages?: UserMessagesGetter;
     displayLayerSettings: boolean;
-    hideDimensionsFlyoutFooter?: boolean;
+    setIsInlineFlyoutFooterVisible?: (status: boolean) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -135,6 +135,12 @@ export function LayerPanel(
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
+
+  useEffect(() => {
+    // is undefined when the dimension panel is closed
+    const activeDimensionId = activeDimension.activeId;
+    props?.setIsInlineFlyoutFooterVisible?.(!Boolean(activeDimensionId));
+  }, [activeDimension.activeId, activeVisualization.id, props]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
@@ -736,8 +742,8 @@ export function LayerPanel(
         panelRef={(el) => (panelRef.current = el)}
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
-        hideFooter={props.hideDimensionsFlyoutFooter}
         groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
+        isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
         handleClose={() => {
           if (layerDatasource) {
             if (layerDatasource.updateStateOnCloseDimension) {
