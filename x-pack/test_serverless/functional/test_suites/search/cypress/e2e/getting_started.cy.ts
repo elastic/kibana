@@ -13,6 +13,7 @@
 
 import { LEFT_NAV_TOGGLE_BUTTON, LEFT_NAVIGATION, LEFT_NAVIGATION_TITLE } from '../screens/common';
 import * as GETTING_STARTED_PAGE from '../screens/getting_started_page';
+import { FAST_TIMEOUT } from '../support/timeouts';
 import { deleteApiKeys } from '../tasks/api_keys';
 import { login } from '../tasks/login';
 import { navigatesToGettingStartedPage } from '../tasks/navigation';
@@ -87,6 +88,11 @@ describe('Getting Started', () => {
     cy.get(GETTING_STARTED_PAGE.SECTION_INSTALL_CLIENT)
       .find(GETTING_STARTED_PAGE.CODE_BLOCK_CONTROL_PANEL)
       .contains('npm install');
+
+    cy.get(GETTING_STARTED_PAGE.CLIENT_SELECT_PYTHON).click();
+    cy.get(GETTING_STARTED_PAGE.SECTION_INSTALL_CLIENT)
+      .find(GETTING_STARTED_PAGE.CODE_BLOCK_CONTROL_PANEL)
+      .contains('pip install');
   });
 });
 
@@ -117,7 +123,8 @@ describe('API Keys', () => {
       .should('exist')
       .find(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS_CODEBLOCK)
       .contains('"name": "test-defaults-api-key"');
-    cy.get(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS, { timeout: 100 })
+    // We expect the success code block to always be there since we just found it
+    cy.get(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS, { timeout: FAST_TIMEOUT })
       .find(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS_CODEBLOCK)
       .contains('"expiration":')
       .should('exist');
@@ -138,7 +145,10 @@ describe('API Keys', () => {
       .should('exist')
       .find(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS_CODEBLOCK)
       .contains('"name": "test-unlimited-key"');
-    cy.get(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS, { timeout: 100 })
+    // We expect the success code block to always be there since we just found it,
+    // so we use a fast timeout and we want to pass / fail fast since were looking for something to NOT be found
+    // inside the code block.
+    cy.get(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS, { timeout: FAST_TIMEOUT })
       .find(GETTING_STARTED_PAGE.CREATE_API_KEY_SUCCESS_CODEBLOCK)
       .contains('"expiration":')
       .should('not.exist');
