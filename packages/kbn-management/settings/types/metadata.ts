@@ -12,7 +12,7 @@ import { KnownTypeToValue, SettingType } from './setting_type';
 /**
  * Creating this type based on {@link UiSettingsClientCommon} and exporting for ease.
  */
-type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
+export type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
 
 /**
  * This is an type-safe abstraction over the {@link UiSetting} type, whose fields
