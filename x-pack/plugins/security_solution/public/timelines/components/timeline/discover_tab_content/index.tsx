@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { debounce, isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -43,9 +43,10 @@ const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
 
 interface DiscoverTabContentProps {
   timelineId: string;
+  esqlOnly?: boolean;
 }
 
-export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
+export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, timelineId }) => {
   const history = useHistory();
   const {
     services: {
@@ -59,6 +60,18 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const currentQuery = discoverDataService.query.queryString.getQuery();
+
+  useEffect(() => {
+    if (esqlOnly && (currentQuery as Query)?.language !== 'esql' && dataViewId) {
+      dataViewService.get(dataViewId).then((dataView) => {
+        discoverDataService.query.queryString.setQuery({
+          esql: `from ${dataView?.getIndexPattern()} | limit 10`,
+          language: 'esql',
+        });
+      });
+    }
+  }, [currentQuery, dataViewId, dataViewService, discoverDataService.query.queryString, esqlOnly]);
 
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
@@ -242,7 +255,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
         next: (state) => {
           setDiscoverAppState(state);
-          dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
+          if (title) dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
         },
       });
 
@@ -264,7 +277,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         .subscribe({
           next: () => {
             setDiscoverTimerange(discoverDataService.query.timefilter.timefilter.getTime());
-            dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
+            if (title) dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
           },
         });
 
@@ -282,6 +295,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       getAppStateFromSavedSearch,
       dataView,
       setDiscoverAppState,
+      title,
       dispatch,
       timelineId,
       setDiscoverSavedSearchState,

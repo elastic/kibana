@@ -114,6 +114,8 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+  const dataViewCustomization = useDiscoverCustomization('data_view');
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -175,6 +177,7 @@ export const DiscoverTopNav = ({
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
+      isDisabled: dataViewCustomization?.disableDataViewPicker,
       title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,

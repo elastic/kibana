@@ -8,6 +8,7 @@
 
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
 import type {
+  DataViewCustomization,
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,
@@ -15,6 +16,7 @@ import type {
 
 export type DiscoverCustomization =
   | SearchBarCustomization
+  | DataViewCustomization
   | TopNavCustomization
   | UnifiedHistogramCustomization;
 
