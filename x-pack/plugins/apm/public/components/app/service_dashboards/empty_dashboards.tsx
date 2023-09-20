@@ -25,20 +25,6 @@ export function EmptyDashboards({ actions }: Props) {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate(
-                'xpack.apm.serviceDashboards.selectDashboard.title',
-                {
-                  defaultMessage: 'Custom',
-                }
-              )}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiEmptyPrompt
         hasShadow={false}
         hasBorder={false}

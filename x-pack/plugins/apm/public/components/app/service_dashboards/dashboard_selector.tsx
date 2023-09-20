@@ -14,19 +14,6 @@ export function DashboardSelector({
   currentDashboard,
   handleOnChange,
 }: Props) {
-  const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...serviceDashboards.map(({ dashboardSavedObjectId, dashboardTitle }) => {
-      return { label: dashboardTitle, value: dashboardSavedObjectId };
-    }),
-  ];
-
-  useEffect(() => {
-    if (!currentDashboard && serviceDashboards.length > 0) {
-      const [serviceDashboard] = serviceDashboards;
-      handleOnChange(serviceDashboard.dashboardSavedObjectId);
-    }
-  }, [currentDashboard, serviceDashboards]);
-
   return (
     <EuiComboBox
       compressed
@@ -44,7 +31,11 @@ export function DashboardSelector({
         }
       )}
       singleSelection={{ asPlainText: true }}
-      options={options}
+      options={serviceDashboards.map(
+        ({ dashboardSavedObjectId, dashboardTitle }) => {
+          return { label: dashboardTitle, value: dashboardSavedObjectId };
+        }
+      )}
       selectedOptions={
         currentDashboard
           ? [

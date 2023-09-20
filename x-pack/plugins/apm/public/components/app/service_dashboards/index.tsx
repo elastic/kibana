@@ -56,7 +56,13 @@ export function ServiceDashboards() {
     },
     [serviceName]
   );
+
   const serviceDashboards = data?.serviceDashboards ?? [];
+
+  useEffect(() => {
+    // preselect dashboard
+    setCurrentDashboard(data?.serviceDashboards[0]);
+  }, [serviceDashboards]);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -101,22 +107,22 @@ export function ServiceDashboards() {
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={
-            <h2>
+            <h4>
               {i18n.translate(
                 'xpack.apm.serviceDashboards.loadingServiceDashboards',
                 {
                   defaultMessage: 'Loading service dashboard',
                 }
               )}
-            </h2>
+            </h4>
           }
         />
       ) : status === FETCH_STATUS.SUCCESS && serviceDashboards.length > 0 ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
             <EuiFlexItem grow={true}>
-              <EuiTitle>
-                <h2>{currentDashboard?.dashboardTitle}</h2>
+              <EuiTitle size="s">
+                <h3>{currentDashboard?.dashboardTitle}</h3>
               </EuiTitle>
             </EuiFlexItem>
 
