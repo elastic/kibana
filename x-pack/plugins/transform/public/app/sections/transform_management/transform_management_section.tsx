@@ -291,7 +291,7 @@ export const TransformManagement: FC = () => {
           className="transformCreateTransformSearchDialog"
           data-test-subj="transformSelectSourceModal"
         >
-          <SearchSelection onSearchSelected={onSearchSelected} />
+          <SearchSelection onSearchSelected={onSearchSelected} onCloseModal={onCloseModal} />
         </EuiModal>
       )}
     </>
