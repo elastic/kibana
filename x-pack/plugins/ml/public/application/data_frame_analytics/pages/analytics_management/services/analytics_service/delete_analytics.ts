@@ -147,7 +147,10 @@ export const canDeleteIndex = async (
     if (!privilege) {
       return false;
     }
-    return privilege.securityDisabled === true || privilege.has_all_requested === true;
+
+    return (
+      privilege.hasPrivileges === undefined || privilege.hasPrivileges.has_all_requested === true
+    );
   } catch (e) {
     const error = extractErrorMessage(e);
     toastNotificationService.displayDangerToast(

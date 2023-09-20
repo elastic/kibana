@@ -29,6 +29,16 @@ If you also want to run the tests against real endpoints as on the CI pipeline, 
 See [running interactive tests on real endpoint with vagrant](#cypress-interactive-with-real-endpoints-using-vagrant)
 for more information.
 
+## Adding new tests - tagging for ESS vs Serverless
+
+Similarly to Security Solution cypress tests, we use tags in order to select which tests we want to execute on which environment:
+
+- `@serverless` includes a test in the Serverless test suite. You need to explicitly add this tag to any test you want to run against a Serverless environment.
+- `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
+- `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
+
+Important: if you don't provide any tag, your test won't be executed.
+
 ## Running the tests
 
 There are currently three ways to run the tests, comprised of two execution modes and two target environments, which
@@ -102,14 +112,11 @@ failures locally, etc.
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
 yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:dw:run-as-ci
+# launch the cypress test runner against ESS
+yarn --cwd x-pack/plugins/security_solution cypress:dw:run
 
-# or
-
-# launch without changing directory from kibana/
-yarn --cwd x-pack/plugins/security_solution cypress:dw:run-as-ci
+# or against Serverless
+yarn --cwd x-pack/plugins/security_solution cypress:dw:serverless:run
 ```
 
 #### Cypress
@@ -120,14 +127,11 @@ This is the preferred mode for developing new tests against mocked data
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
 yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:dw:open
-
-# or
-
-# launch without changing directory from kibana/
+# launch the cypress test runner against ESS
 yarn --cwd x-pack/plugins/security_solution cypress:dw:open
+
+# or against Serverless
+yarn --cwd x-pack/plugins/security_solution cypress:dw:serverless:open
 ```
 
 ## Folder Structure

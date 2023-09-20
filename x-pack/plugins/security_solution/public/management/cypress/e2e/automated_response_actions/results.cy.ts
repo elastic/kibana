@@ -15,7 +15,7 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 import { login, ROLE } from '../../tasks/login';
 
-describe('Results', () => {
+describe('Results', { tags: '@ess' }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);

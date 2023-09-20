@@ -60,5 +60,6 @@ export function useMetadata(
         response.info.cloud.instance &&
         response.info.cloud.instance.id) ||
       '',
+    reload: makeRequest,
   };
 }

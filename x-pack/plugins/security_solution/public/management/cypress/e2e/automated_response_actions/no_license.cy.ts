@@ -15,7 +15,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
+describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } }, () => {
   describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
