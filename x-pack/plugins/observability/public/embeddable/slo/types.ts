@@ -7,13 +7,11 @@
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
-// export interface EmbeddableSloProps {
-//   slo: SLOWithSummaryResponse;
-// }
-
 export interface EmbeddableSloProps {
   sloId: string;
   sloInstanceId: string;
+  startTime: number | null;
+  endTime: number | null;
 }
 
 export interface SloConfigurationProps {

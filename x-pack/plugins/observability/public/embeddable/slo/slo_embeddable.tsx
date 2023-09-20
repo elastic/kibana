@@ -14,7 +14,6 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ALL_VALUE, GetSLOResponse } from '@kbn/slo-schema';
 import dateMath from '@kbn/datemath';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,7 +24,7 @@ import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
-export function datemathToEpochMillis(
+function datemathToEpochMillis(
   value: string,
   round: 'down' | 'up' = 'down',
   forceNow?: Date
@@ -59,26 +58,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       parent
     );
 
-    this.initOutput().finally(() => this.setInitializationFinished());
     this.subscription = new Subscription();
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
-  }
-
-  private async initOutput() {
-    const { sloId, sloInstanceId: instanceId } = this.getInput();
-    console.log(sloId, '!!sloId');
-    console.log(instanceId, '!!sloInstanceId');
-    const http = this.deps.http;
-    try {
-      const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
-        query: {
-          ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
-        },
-      });
-      console.log(response, '!!response');
-    } catch (error) {
-      // ignore error for retrieving slos
-    }
   }
 
   /**
@@ -88,8 +69,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
    */
   public render(node: HTMLElement) {
     this.node = node;
-    const start = this.input.timeRange.from;
-    const end = this.input.timeRange.to;
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
     const endTimestamp = datemathToEpochMillis(this.input.timeRange.to, 'up');
     const { sloId, sloInstanceId } = this.getInput();

@@ -65,7 +65,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
     slo?.summary.status === 'NO_DATA'
       ? '#f8e9e9'
       : slo?.summary.status !== 'HEALTHY'
-      ? '#f8e9e9' // #f8e9e9 (danger), #e6f9f7
+      ? '#f8e9e9'
       : '#e6f9f7';
 
   const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
@@ -95,7 +95,6 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       <Chart>
         <Settings
           onElementClick={([d]) => {
-            console.log(d, '!!click');
             navigateToUrl(
               basePath.prepend(
                 paths.observability.sloDetails(
