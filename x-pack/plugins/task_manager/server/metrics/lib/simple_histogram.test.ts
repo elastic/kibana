@@ -53,6 +53,8 @@ describe('SimpleHistogram', () => {
 
   test('should correctly record values', () => {
     const histogram = new SimpleHistogram(100, 10);
+    histogram.record(0);
+    histogram.record(10);
     histogram.record(23);
     histogram.record(34);
     histogram.record(21);
@@ -64,8 +66,8 @@ describe('SimpleHistogram', () => {
     histogram.record(2);
 
     expect(histogram.get()).toEqual([
-      { value: 10, count: 2 },
-      { value: 20, count: 0 },
+      { value: 10, count: 3 },
+      { value: 20, count: 1 },
       { value: 30, count: 2 },
       { value: 40, count: 2 },
       { value: 50, count: 0 },
@@ -74,6 +76,33 @@ describe('SimpleHistogram', () => {
       { value: 80, count: 1 },
       { value: 90, count: 0 },
       { value: 100, count: 1 },
+    ]);
+  });
+
+  test('should correctly record values with specific increment', () => {
+    const histogram = new SimpleHistogram(100, 10);
+    histogram.record(0);
+    histogram.record(23, 2);
+    histogram.record(34);
+    histogram.record(21);
+    histogram.record(56);
+    histogram.record(78);
+    histogram.record(33, 4);
+    histogram.record(99, 5);
+    histogram.record(1);
+    histogram.record(2);
+
+    expect(histogram.get()).toEqual([
+      { value: 10, count: 3 },
+      { value: 20, count: 0 },
+      { value: 30, count: 3 },
+      { value: 40, count: 5 },
+      { value: 50, count: 0 },
+      { value: 60, count: 1 },
+      { value: 70, count: 0 },
+      { value: 80, count: 1 },
+      { value: 90, count: 0 },
+      { value: 100, count: 5 },
     ]);
   });
 
