@@ -6,10 +6,15 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { connectorResponseSchemaV1, connectorTypesResponseSchemaV1 } from '..';
+import {
+  connectorResponseSchemaV1,
+  connectorTypesResponseSchemaV1,
+  allConnectorsResponseSchema,
+} from '..';
 
 export type ActionTypeConfig = Record<string, unknown>;
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
+type AllConnectorsResponseSchemaType = TypeOf<typeof allConnectorsResponseSchema>;
 
 export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: ConnectorResponseSchemaType['id'];
@@ -20,7 +25,11 @@ export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeC
   is_preconfigured: ConnectorResponseSchemaType['is_preconfigured'];
   is_deprecated: ConnectorResponseSchemaType['is_deprecated'];
   is_system_action: ConnectorResponseSchemaType['is_system_action'];
-  referenced_by_count: ConnectorResponseSchemaType['referenced_by_count'];
+}
+
+export interface AllConnectorsResponse<Config extends ActionTypeConfig = ActionTypeConfig>
+  extends ConnectorResponse {
+  referenced_by_count: AllConnectorsResponseSchemaType['referenced_by_count'];
 }
 
 type ConnectorTypesResponseSchemaType = TypeOf<typeof connectorTypesResponseSchemaV1>;

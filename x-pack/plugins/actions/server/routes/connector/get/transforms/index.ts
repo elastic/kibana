@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { Connector, ConnectorWithExtraFindData } from './connector';
-export type { ConnectorType } from './connector_type';
+export { transformGetConnectorResponse } from './transform_connector_response/latest';
+
+export { transformGetConnectorResponse as transformGetConnectorResponseV1 } from './transform_connector_response/v1';

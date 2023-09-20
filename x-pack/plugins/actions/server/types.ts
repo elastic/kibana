@@ -35,7 +35,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import type { ActionExecutionSource } from './lib';
-import { Connector, FindConnectorResult } from './application/connector/types';
+import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 export type { ActionExecutionSource } from './lib';
 
 export { ActionExecutionSourceType } from './lib';
@@ -88,7 +88,7 @@ export interface InMemoryConnector<
   config: Config;
 }
 
-export type FindActionResult = FindConnectorResult;
+export type FindActionResult = ConnectorWithExtraFindData;
 
 // signature of the action type executor function
 export type ExecutorType<

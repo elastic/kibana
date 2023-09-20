@@ -17,3 +17,7 @@ export const connectorSchema = schema.object({
   isDeprecated: schema.boolean(),
   isSystemAction: schema.boolean(),
 });
+
+export const connectorWithExtraFindDataSchema = connectorSchema.extends({
+  referencedByCount: schema.number(),
+});

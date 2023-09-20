@@ -24,8 +24,9 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
 import { ConnectorType } from '../application/connector/types';
+import { get } from '../application/connector/methods/get';
 import { getAll } from '../application/connector/methods/get_all';
 import { listTypes } from '../application/connector/methods/list_types';
 import {
@@ -396,7 +397,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get an action
+   * Get a connector
    */
   public async get({
     id,
@@ -405,79 +406,15 @@ export class ActionsClient {
     id: string;
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    /**
-     * Getting system connector is not allowed
-     * if throwIfSystemAction is set to true.
-     * Default behavior is to throw
-     */
-    if (
-      foundInMemoryConnector !== undefined &&
-      foundInMemoryConnector.isSystemAction &&
-      throwIfSystemAction
-    ) {
-      throw Boom.notFound(`Connector ${id} not found`);
-    }
-
-    if (foundInMemoryConnector !== undefined) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      );
-
-      return {
-        id,
-        actionTypeId: foundInMemoryConnector.actionTypeId,
-        name: foundInMemoryConnector.name,
-        isPreconfigured: foundInMemoryConnector.isPreconfigured,
-        isSystemAction: foundInMemoryConnector.isSystemAction,
-        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-      };
-    }
-
-    const result = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        savedObject: { type: 'action', id },
-      })
-    );
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+    return get({ context: this.context, id, throwIfSystemAction });
   }
 
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<FindConnectorResult[]> {
+  public async getAll({ includeSystemActions = false } = {}): Promise<
+    ConnectorWithExtraFindData[]
+  > {
     return getAll({ context: this.context, includeSystemActions });
   }
 

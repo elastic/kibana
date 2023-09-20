@@ -6,10 +6,11 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { connectorSchema } from '../schemas';
+import { connectorSchema, connectorWithExtraFindDataSchema } from '../schemas';
 import { ActionTypeConfig } from '../../../types';
 
 type ConnectorSchemaType = TypeOf<typeof connectorSchema>;
+type ConnectorWithExtraFindDataSchema = TypeOf<typeof connectorWithExtraFindDataSchema>;
 
 export interface Connector<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: ConnectorSchemaType['id'];
@@ -22,6 +23,6 @@ export interface Connector<Config extends ActionTypeConfig = ActionTypeConfig> {
   isSystemAction: ConnectorSchemaType['isSystemAction'];
 }
 
-export interface FindConnectorResult extends Connector {
-  referencedByCount: number;
+export interface ConnectorWithExtraFindData extends Connector {
+  referencedByCount: ConnectorWithExtraFindDataSchema['referencedByCount'];
 }

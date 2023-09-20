@@ -6,29 +6,34 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
-import { transformGetAllConnectorsResponseV1 } from './transforms';
-import { ActionsRequestHandlerContext } from '../../../types';
-import { BASE_ACTION_API_PATH } from '../../../../common';
+import {
+  getConnectorParamsSchemaV1,
+  GetConnectorParamsV1,
+} from '../../../../common/routes/connector/apis/get';
+import { transformGetConnectorResponseV1 } from './transforms';
 import { ILicenseState } from '../../../lib';
+import { BASE_ACTION_API_PATH } from '../../../../common';
+import { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-export const getAllConnectorsRoute = (
+export const getConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/connectors`,
-      validate: {},
+      path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      validate: {
+        params: getConnectorParamsSchemaV1,
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const result = await actionsClient.getAll();
-
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
-        return res.ok({ body: responseBody });
+        const { id }: GetConnectorParamsV1 = req.params;
+        return res.ok({
+          body: transformGetConnectorResponseV1(await actionsClient.get({ id })),
+        });
       })
     )
   );
