@@ -94,9 +94,7 @@ export const esqlExecutor = async ({
     ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
     const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
-    const results = response.values
-      .slice(0, completeRule.ruleParams.maxSignals)
-      .map((row) => rowToDocument(response.columns, row));
+    const results = response.values.map((row) => rowToDocument(response.columns, row));
 
     const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
@@ -129,7 +127,7 @@ export const esqlExecutor = async ({
     addToSearchAfterReturn({ current: result, next: bulkCreateResult });
     ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
 
-    if (response.values.length > ruleParams.maxSignals) {
+    if (bulkCreateResult.alertsWereTruncated) {
       result.warningMessages.push(getMaxSignalsWarning());
     }
 
