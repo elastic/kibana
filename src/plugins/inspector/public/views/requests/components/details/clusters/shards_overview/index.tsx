@@ -6,42 +6,78 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Failures } from './failures';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { ShardFailuresFlyout } from './shard_failures_flyout';
 
 interface Props {
   failures: ShardFailure[];
-  shardsDetails: ShardStatistics;
+  shardsDetails?: ShardStatistics;
 }
 
 export function ShardsOverview({ failures, shardsDetails }: Props) {
-  return (
+  const [showFailures, setShowFailures] = useState(false);
+
+  return !shardsDetails || failures.length === 0 ? null : (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {i18n.translate('inspector.requests.shardsDetails.totalShardsLabel', {
+          <EuiTitle size="xxxs">
+            <h4>
+            {i18n.translate('inspector.requests.shards.shardsTitle', {
+              defaultMessage: 'Shards',
+            })}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        {failures.length ?
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            onClick={() => {
+              setShowFailures(!showFailures);
+            }}
+            size="xs"
+          >
+            {i18n.translate('inspector.requests.clusters.shards.hideFailuresLabel', {
+                  defaultMessage: 'View {failedShardCount} failed {failedShardCount, plural, one {shard} other {shards}}',
+                  values: { failedShardCount: failures.length }
+                })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        : null}
+      </EuiFlexGroup>
+
+      {shardsDetails ? 
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {i18n.translate('inspector.requests.clusters.shards.totalShardsLabel', {
             defaultMessage: '{total} total shards',
             values: { total: shardsDetails.total },
           })}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {i18n.translate('inspector.requests.shardsDetails.successfulShardsLabel', {
+          {i18n.translate('inspector.requests.clusters.shards.successfulShardsLabel', {
             defaultMessage: '{successful} of {total} successful',
             values: {
-              // _shards.skipped is count of shards excluded via search optimization.
-              // Add skipped to successful count to avoid missing shards in message
-              successful: shardsDetails.successful + shardsDetails.skipped,
+              successful: shardsDetails.successful,
               total: shardsDetails.total,
             },
           })}
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiFlexGroup>  : null
+      }
 
-      <EuiSpacer size="xs" />
-
-      <Failures failures={failures} />
+      {showFailures ? (
+        <ShardFailuresFlyout
+          failures={failures}
+          onClose={() => {
+            setShowFailures(false);
+          }}
+        />
+      ) : null}
     </>
   );
 }

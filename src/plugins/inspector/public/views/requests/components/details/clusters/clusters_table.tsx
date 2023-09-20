@@ -10,14 +10,14 @@ import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
-import { ClusterDescriptionList } from './cluster_description_list';
+import { ClusterView } from './cluster_view';
 import { ClusterHealth } from './cluster_health';
 import { LOCAL_CLUSTER_KEY } from './constants';
 
 function getInitialExpandedRow(clusters) {
   const clusterNames = Object.keys(clusters);
   return clusterNames.length === 1
-    ? { [clusterNames[0]]: <ClusterDescriptionList clusterDetails={clusters[clusterNames[0]]} /> }
+    ? { [clusterNames[0]]: <ClusterView clusterDetails={clusters[clusterNames[0]]} /> }
     : {};
 }
 
@@ -35,7 +35,7 @@ export function ClustersTable({ clusters }: Props) {
     if (name in nextExpandedRows) {
       delete nextExpandedRows[name];
     } else {
-      nextExpandedRows[name] = <ClusterDescriptionList clusterDetails={clusters[name]} />;
+      nextExpandedRows[name] = <ClusterView clusterDetails={clusters[name]} />;
     }
     setExpandedRows(nextExpandedRows);
   };

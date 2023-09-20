@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
+
+interface Props {
+  failures: ShardFailure[];
+  onClose: () => void;
+}
+
+export function ShardFailuresFlyout({ failures, onClose }: Props) {
+  return (
+    <EuiFlyout ownFocus={false}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h1>
+            <EuiButtonIcon iconType="sortLeft" onClick={onClose} />
+            {i18n.translate('inspector.requests.clusters.shards.flyoutTitle', {
+              defaultMessage: '{failedShardCount} failured {failedShardCount, plural, one {shard} other {shards}}',
+              values: {failedShardCount: failures.length}
+            })}
+          </h1>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty iconType="sortLeft" onClick={onClose} flush="left">
+          {i18n.translate('inspector.requests.clusters.shards.backButtonLabel', {
+            defaultMessage: 'Back',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}
