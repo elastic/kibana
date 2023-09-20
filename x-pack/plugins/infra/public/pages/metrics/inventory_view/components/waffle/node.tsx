@@ -26,6 +26,8 @@ import { NodeContextPopover } from '../node_details/overlay';
 import { NodeContextMenu } from './node_context_menu';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { findInventoryFields } from '../../../../../../common/inventory_models';
+import AssetDetails from '../../../../../components/asset_details/asset_details';
+import { orderedFlyoutTabs } from './flyout_tabs';
 
 const initialState = {
   isPopoverOpen: false,
@@ -44,12 +46,14 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
+  metricAlias?: string;
 }
 
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
+    const { nodeType, node, options, squareSize, bounds, formatter, currentTime, metricAlias } =
+      this.props;
     const { isPopoverOpen, isAlertFlyoutVisible, isToolTipOpen } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
@@ -139,8 +143,28 @@ export class Node extends React.PureComponent<Props, State> {
         ) : (
           nodeSquare
         )}
-
-        {this.state.isOverlayOpen && (
+        {/* TODO */}
+        {metricAlias && this.state.isOverlayOpen && this.props.nodeType === 'host' ? (
+          <AssetDetails
+            asset={{ id: node.name, name: node.name }}
+            assetType="host"
+            overrides={{
+              metadata: {
+                showActionsColumn: false,
+              },
+              alertRule: {
+                onCreateRuleClick: this.openAlertFlyout,
+              },
+            }}
+            tabs={orderedFlyoutTabs}
+            links={['alertRule', 'nodeDetails']}
+            renderMode={{
+              mode: 'flyout',
+              closeFlyout: this.togglePopover,
+            }}
+            metricAlias={metricAlias}
+          />
+        ) : (
           <NodeContextPopover
             openAlertFlyout={this.openAlertFlyout}
             node={node}
@@ -151,7 +175,6 @@ export class Node extends React.PureComponent<Props, State> {
             onClose={this.toggleNewOverlay}
           />
         )}
-
         {isAlertFlyoutVisible && (
           <AlertFlyout
             filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}

@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -44,6 +45,8 @@ const isEqualGroupOfNodes = (prevProps: Props, nextProps: Props) => {
 export const GroupOfNodes = React.memo<Props>(
   ({ group, options, formatter, onDrilldown, isChild = false, bounds, nodeType, currentTime }) => {
     const width = group.width > 200 ? group.width : 200;
+    const { source } = useSourceContext();
+
     return (
       <GroupOfNodesContainer style={{ width }}>
         <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
@@ -59,6 +62,7 @@ export const GroupOfNodes = React.memo<Props>(
                 bounds={bounds}
                 nodeType={nodeType}
                 currentTime={currentTime}
+                metricAlias={source?.configuration?.metricAlias}
               />
             ))
           ) : (
