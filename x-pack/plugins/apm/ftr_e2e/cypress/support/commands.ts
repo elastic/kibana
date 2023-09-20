@@ -153,6 +153,12 @@ Cypress.Commands.add('dismissServiceGroupsTour', () => {
   );
 });
 
+Cypress.Commands.add('withHidden', (selector, callback) => {
+  cy.get(selector).invoke('attr', 'style', 'display: none');
+  callback();
+  cy.get(selector).invoke('attr', 'style', '');
+});
+
 // A11y configuration
 
 const axeConfig = {

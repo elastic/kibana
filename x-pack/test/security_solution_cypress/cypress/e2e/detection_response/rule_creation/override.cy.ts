@@ -47,8 +47,8 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -61,7 +61,8 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_deta
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -90,7 +91,7 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
     cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(rule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);

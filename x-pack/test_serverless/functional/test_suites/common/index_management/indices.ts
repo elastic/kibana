@@ -9,26 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
-  const retry = getService('retry');
 
-  // Flaky on serverless
-  describe.skip('Indices', function () {
+  describe('Indices', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
+      // Navigate to the index management page
+      await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('indicesTab');
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('renders the indices tab', async () => {
-      await retry.waitFor('indices list to be visible', async () => {
-        return await testSubjects.exists('indicesList');
-      });
-
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });

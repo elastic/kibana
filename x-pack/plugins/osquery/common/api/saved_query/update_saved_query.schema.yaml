@@ -11,12 +11,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/UpdateSavedQueryRequestParams'
-    UpdateSavedQueryRequestQueryBody:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateSavedQueryRequestBody'
   schemas:
     UpdateSavedQueryRequestParams:
       type: object

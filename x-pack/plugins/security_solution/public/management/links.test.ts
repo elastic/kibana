@@ -115,6 +115,7 @@ describe('links', () => {
   });
 
   describe('Host Isolation Exception', () => {
+    const apiVersion = '2023-10-31';
     it('should return HIE if user has access permission (licensed)', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({ canAccessHostIsolationExceptions: true })
@@ -154,6 +155,7 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        version: apiVersion,
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
@@ -174,6 +176,7 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        version: apiVersion,
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),

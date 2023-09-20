@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FrameType } from '@kbn/profiling-data-access-plugin/common/profiling';
+import { FrameType } from '@kbn/profiling-utils';
 
 /*
  * Helper to calculate the color of a given block to be drawn. The desirable outcomes of this are:

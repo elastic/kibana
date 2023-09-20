@@ -48,7 +48,8 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/ti
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165661
+describe('Timeline Templates', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

@@ -10,7 +10,7 @@ import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
-import { FlyoutTabIds } from '../types';
+import { ContentTabIds } from '../types';
 
 export const Content = () => {
   return (
@@ -18,31 +18,31 @@ export const Content = () => {
       <EuiFlexItem grow={false}>
         <DatePickerWrapper
           visibleFor={[
-            FlyoutTabIds.OVERVIEW,
-            FlyoutTabIds.LOGS,
-            FlyoutTabIds.METADATA,
-            FlyoutTabIds.PROCESSES,
-            FlyoutTabIds.ANOMALIES,
+            ContentTabIds.OVERVIEW,
+            ContentTabIds.LOGS,
+            ContentTabIds.METADATA,
+            ContentTabIds.PROCESSES,
+            ContentTabIds.ANOMALIES,
           ]}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
+        <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
           <Anomalies />
         </TabPanel>
-        <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
+        <TabPanel activeWhen={ContentTabIds.OVERVIEW}>
           <Overview />
         </TabPanel>
-        <TabPanel activeWhen={FlyoutTabIds.LOGS}>
+        <TabPanel activeWhen={ContentTabIds.LOGS}>
           <Logs />
         </TabPanel>
-        <TabPanel activeWhen={FlyoutTabIds.METADATA}>
+        <TabPanel activeWhen={ContentTabIds.METADATA}>
           <Metadata />
         </TabPanel>
-        <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
+        <TabPanel activeWhen={ContentTabIds.OSQUERY}>
           <Osquery />
         </TabPanel>
-        <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
+        <TabPanel activeWhen={ContentTabIds.PROCESSES}>
           <Processes />
         </TabPanel>
       </EuiFlexItem>
@@ -50,11 +50,11 @@ export const Content = () => {
   );
 };
 
-const DatePickerWrapper = ({ visibleFor }: { visibleFor: FlyoutTabIds[] }) => {
+const DatePickerWrapper = ({ visibleFor }: { visibleFor: ContentTabIds[] }) => {
   const { activeTabId } = useTabSwitcherContext();
 
   return (
-    <div hidden={!visibleFor.includes(activeTabId as FlyoutTabIds)}>
+    <div hidden={!visibleFor.includes(activeTabId as ContentTabIds)}>
       <DatePicker />
     </div>
   );
@@ -64,7 +64,7 @@ const TabPanel = ({
   activeWhen,
   children,
 }: {
-  activeWhen: FlyoutTabIds;
+  activeWhen: ContentTabIds;
   children: React.ReactNode;
 }) => {
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();

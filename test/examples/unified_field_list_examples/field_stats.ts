@@ -52,8 +52,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/165608
-    describe.skip('field distribution', () => {
+    describe('field distribution', () => {
       before(async () => {
         await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
       });

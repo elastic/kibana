@@ -10,6 +10,14 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
+export enum IndexManagementBreadcrumb {
+  /**
+   * Enrich policies tab
+   */
+  enrichPolicies = 'enrichPolicies',
+  enrichPoliciesCreate = 'enrichPoliciesCreate',
+}
+
 class BreadcrumbService {
   private breadcrumbs: {
     [key: string]: Array<{
@@ -67,6 +75,26 @@ class BreadcrumbService {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.cloneTemplateLabel', {
           defaultMessage: 'Clone template',
         }),
+      },
+    ];
+
+    this.breadcrumbs.enrichPolicies = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyLabel', {
+          defaultMessage: 'Enrich policies',
+        }),
+        href: `/enrich_policies`,
+      },
+    ];
+
+    this.breadcrumbs.enrichPoliciesCreate = [
+      ...this.breadcrumbs.enrichPolicies,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyCreateLabel', {
+          defaultMessage: 'Create enrich policy',
+        }),
+        href: `/enrich_policies/create`,
       },
     ];
   }

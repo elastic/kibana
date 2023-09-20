@@ -42,7 +42,7 @@ export async function fetchEsqlQuery({
 
   const { query, dateStart, dateEnd } = getEsqlQuery(dataView, params, alertLimit);
 
-  logger.debug(`ESQL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
+  logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',

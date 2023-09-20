@@ -39,9 +39,10 @@ import {
   ruleUpdatesTabClick,
 } from '../../../tasks/prebuilt_rules';
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();

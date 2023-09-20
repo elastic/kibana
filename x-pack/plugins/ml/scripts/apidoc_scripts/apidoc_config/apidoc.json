@@ -123,6 +123,7 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlReindexWithPipeline",
     "MlSpecificIndexExists",
 
     "JobAuditMessages",

@@ -11,13 +11,14 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
 import { useDataSource } from '../contexts/ml/data_source_context';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana, useIsServerless } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
+  const isServerless = useIsServerless();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -40,6 +41,7 @@ export const LogCategorizationPage: FC = () => {
         <LogCategorization
           dataView={dataView}
           savedSearch={savedSearch}
+          isServerless={isServerless}
           appDependencies={pick(services, [
             'application',
             'data',
