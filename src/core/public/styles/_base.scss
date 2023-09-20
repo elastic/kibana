@@ -26,6 +26,11 @@
   margin-left: 320px; // Hard-coded for now -- @cchaos
 }
 
+// For serverless
+body.euiBody--hasFlyout[style*="padding-left: 248px"] .euiBottomBar {
+  margin-left: 248px; // Hard-coded for serverless
+}
+
 // Temporary fix for EuiPageHeader with a bottom border but no tabs or padding
 // Will fix in EUI -- @cchaos
 .euiPageHeader--bottomBorder:not(.euiPageHeader--tabsAtBottom):not([class*='euiPageHeader--padding']) {
