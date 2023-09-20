@@ -316,6 +316,10 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
+export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
+export const DETECTION_ENGINE_ALERT_USER_PROFILES_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/user_profiles` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;

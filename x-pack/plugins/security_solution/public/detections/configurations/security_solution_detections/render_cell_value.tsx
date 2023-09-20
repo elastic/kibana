@@ -23,7 +23,10 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
-import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  SIGNAL_ASSIGNEE_IDS_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -33,6 +36,7 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
+import { useUserProfiles } from '../../containers/detection_engine/alerts/use_user_profiles';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -42,7 +46,7 @@ import { eventRenderedViewColumns, getColumns } from './columns';
 export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
   props
 ) => {
-  const { columnId, rowIndex, scopeId } = props;
+  const { columnId, rowIndex, scopeId, userProfiles } = props;
   const isTourAnchor = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
@@ -61,6 +65,16 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   const actualSuppressionCount = ecsSuppressionCount
     ? parseInt(ecsSuppressionCount, 10)
     : dataSuppressionCount;
+
+  const ecsAssignees = props.ecsData?.kibana?.alert.workflow_assignee_ids;
+  const dataAssignees = find({ field: 'kibana.alert.workflow_assignee_ids' }, props.data) as
+    | string[]
+    | undefined;
+  const actualAssignees = ecsAssignees ?? dataAssignees ?? [];
+  const assignees = userProfiles?.filter((user) => actualAssignees.includes(user.uid)) ?? [];
+  if (columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME && assignees.length) {
+    return <>{assignees.map((user) => user.user.full_name ?? user.user.username).join(', ')}</>;
+  }
 
   const component = (
     <GuidedOnboardingTourStep
@@ -107,6 +121,8 @@ export const getRenderCellValueHook = ({
 
     const columnHeaders =
       viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
+
+    const { userProfiles } = useUserProfiles();
 
     const result = useCallback(
       ({
@@ -173,10 +189,11 @@ export const getRenderCellValueHook = ({
             scopeId={tableId}
             truncate={truncate}
             asPlainText={false}
+            userProfiles={userProfiles}
           />
         );
       },
-      [browserFieldsByName, browserFields, columnHeaders]
+      [browserFieldsByName, columnHeaders, browserFields, userProfiles]
     );
     return result;
   };

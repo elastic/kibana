@@ -7,6 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ColumnHeaderOptions, RowRenderer } from '../..';
 import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
@@ -28,4 +29,5 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   truncate?: boolean;
   key?: string;
   closeCellPopover?: () => void;
+  userProfiles?: UserProfileWithAvatar[];
 };

@@ -48,6 +48,9 @@ export const signal_status_query = t.object;
 export const alert_tag_ids = t.array(t.string);
 export type AlertTagIds = t.TypeOf<typeof alert_tag_ids>;
 
+export const alert_assignee_ids = t.array(t.string);
+export type AlertAssigneeIds = t.TypeOf<typeof alert_assignee_ids>;
+
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
@@ -135,3 +138,10 @@ export const alert_tags = t.type({
 });
 
 export type AlertTags = t.TypeOf<typeof alert_tags>;
+
+export const alert_assignees = t.type({
+  assignees_to_add: t.array(t.string),
+  assignees_to_remove: t.array(t.string),
+});
+
+export type AlertAssignees = t.TypeOf<typeof alert_assignees>;
