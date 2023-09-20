@@ -16,7 +16,6 @@ export const panelPlacementStrategies = {
     const otherPanels = { ...currentPanels };
     for (const [id, panel] of Object.entries(currentPanels)) {
       const currentPanel = cloneDeep(panel);
-      console.log('MOVING PANEL', currentPanel.explicitInput.title);
       currentPanel.gridData.y = currentPanel.gridData.y + height;
       otherPanels[id] = currentPanel;
     }
