@@ -7045,7 +7045,6 @@
     "visualizationUiComponents.dimensionButtonIcon.colorIndicatorLabel": "此维度的颜色：{hex}",
     "visualizationUiComponents.queryInput.queryPlaceholderKql": "{example}",
     "visualizationUiComponents.queryInput.queryPlaceholderLucene": "{example}",
-    "visualizationUiComponents.colorPicker.seriesColor.auto": "自动",
     "visualizationUiComponents.colorPicker.seriesColor.label": "系列颜色",
     "visualizationUiComponents.colorPicker.tooltip.auto": "Lens 自动为您选取颜色，除非您指定定制颜色。",
     "visualizationUiComponents.colorPicker.tooltip.custom": "清除定制颜色以返回到“自动”模式。",
