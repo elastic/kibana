@@ -138,6 +138,7 @@ export async function getEditLensConfiguration(
           attributes,
           id: panelId ?? generateId(),
         },
+        inlineEditing: true,
       })
     );
 

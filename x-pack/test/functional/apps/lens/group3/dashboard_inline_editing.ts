@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
         keepOpen: true,
       });
-
+      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('applyFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
       const data = await PageObjects.lens.getMetricVisualizationData();
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.selectOptionFromComboBox('lns-icon-select', 'bell');
-
+      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('applyFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
 
