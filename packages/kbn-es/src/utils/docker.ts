@@ -38,9 +38,12 @@ import {
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
-interface BaseOptions {
-  tag?: string;
+interface ImageOptions {
   image?: string;
+  tag?: string;
+}
+
+interface BaseOptions extends ImageOptions {
   port?: number;
   ssl?: boolean;
   /** Kill running cluster before starting a new cluster  */
@@ -520,9 +523,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
  */
-function getServerlessImage(options: { image?: string; tag?: string }) {
+function getServerlessImage({ image, tag }: ImageOptions) {
   return resolveDockerImage({
-    ...options,
+    image,
+    tag,
     repo: ES_SERVERLESS_REPO_ELASTICSEARCH,
     defaultImg: ES_SERVERLESS_DEFAULT_IMAGE,
   });
@@ -568,7 +572,10 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  const image = getServerlessImage(options);
+  const image = getServerlessImage({
+    image: options.image,
+    tag: options.tag,
+  });
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
@@ -685,9 +692,10 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
 /**
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
-function getDockerImage(options: { tag?: string; image?: string }) {
+function getDockerImage({ image, tag }: ImageOptions) {
   return resolveDockerImage({
-    ...options,
+    image,
+    tag,
     repo: DOCKER_REPO,
     defaultImg: DOCKER_IMG,
   });
@@ -716,7 +724,10 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   let image;
 
   if (!options.dockerCmd) {
-    image = getDockerImage(options);
+    image = getDockerImage({
+      image: options.image,
+      tag: options.tag,
+    });
     await setupDocker({ log, image, options });
   }
 
