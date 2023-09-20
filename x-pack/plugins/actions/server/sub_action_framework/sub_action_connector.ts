@@ -118,7 +118,6 @@ export abstract class SubActionConnector<Config, Secrets> {
     method = 'get',
     responseSchema,
     headers,
-    interceptor,
     ...config
   }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
     try {
@@ -129,10 +128,6 @@ export abstract class SubActionConnector<Config, Secrets> {
       this.logger.debug(
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
-
-      if (interceptor) {
-        this.axiosInstance.interceptors.request.use(interceptor);
-      }
 
       const res = await request({
         ...config,

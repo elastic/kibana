@@ -6,8 +6,8 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import aws from 'aws4';
 import type { AxiosError } from 'axios';
-import { aws4Interceptor } from 'aws4-axios';
 import {
   BedrockRunActionParamsSchema,
   BedrockRunActionResponseSchema,
@@ -22,27 +22,25 @@ import type {
 import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/constants';
 import { InvokeAIActionParams, InvokeAIActionResponse } from '../../../common/bedrock/types';
 
+interface SignedRequest {
+  method: string;
+  service: string;
+  region: string;
+  host: string;
+  headers: Record<string, string>;
+  body: string;
+  path: string;
+}
+
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
   private url;
   private model;
-  private interceptor;
 
   constructor(params: ServiceParams<BedrockConfig, BedrockSecrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
-
-    this.interceptor = aws4Interceptor({
-      options: {
-        region: DEFAULT_BEDROCK_REGION,
-        service: 'bedrock',
-      },
-      credentials: {
-        accessKeyId: this.secrets.accessKey,
-        secretAccessKey: this.secrets.secret,
-      },
-    });
 
     this.registerSubActions();
   }
@@ -79,13 +77,37 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     }`;
   }
 
+  private signRequest(body: string, path: string) {
+    const host = this.url.split('://')[1];
+    return aws.sign(
+      {
+        method: 'POST',
+        service: 'bedrock',
+        region: DEFAULT_BEDROCK_REGION,
+        host,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+        },
+        body,
+        path,
+        url: `${this.url}${path}`,
+      },
+      {
+        secretAccessKey: this.secrets.secret,
+        accessKeyId: this.secrets.accessKey,
+      }
+    ) as SignedRequest;
+  }
+
   public async runApi({ body }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
+    const signed = this.signRequest(body, `/model/${this.model}/invoke`);
     const response = await this.request({
+      ...signed,
       url: `${this.url}/model/${this.model}/invoke`,
       method: 'post',
       responseSchema: BedrockRunActionResponseSchema,
       data: body,
-      interceptor: this.interceptor,
     });
     return response.data;
   }
