@@ -184,8 +184,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     setSearchValue(v);
   }, []);
 
-  const isFetched = groupsFetched && agentsFetched && agentGroupsData;
-
   return (
     <div>
       <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
@@ -193,7 +191,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           data-test-subj="agentSelection"
           placeholder={SELECT_AGENT_LABEL}
           isLoading={modifyingSearch || groupsLoading || agentsLoading}
-          isDisabled={!isFetched}
           options={options}
           isClearable={true}
           fullWidth={true}

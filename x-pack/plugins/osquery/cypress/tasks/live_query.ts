@@ -16,7 +16,7 @@ export const selectAllAgents = () => {
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').click();
   });
-  cy.contains('All agents').should('exist');
+  cy.contains('All agents', { timeout: 20000 }).should('exist');
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').type('{downArrow}{enter}{esc}');
   });
