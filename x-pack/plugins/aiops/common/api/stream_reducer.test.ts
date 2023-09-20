@@ -48,6 +48,7 @@ describe('streamReducer', () => {
           score: 0.1,
           pValue: 0.01,
           normalizedScore: 0.123,
+          type: 'keyword',
         },
       ])
     );

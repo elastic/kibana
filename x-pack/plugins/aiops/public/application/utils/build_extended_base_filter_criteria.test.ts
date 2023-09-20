@@ -21,6 +21,7 @@ const selectedSignificantTermMock: SignificantTerm = {
   score: 708.3964185322641,
   total_bg_count: 179657,
   total_doc_count: 114011,
+  type: 'keyword',
 };
 
 const selectedGroupMock: GroupTableItem = {

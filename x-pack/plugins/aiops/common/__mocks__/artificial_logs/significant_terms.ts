@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const significantTerms = [
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
+
+export const significantTerms: SignificantTerm[] = [
   {
     fieldName: 'user',
     fieldValue: 'Peter',
@@ -16,6 +18,7 @@ export const significantTerms = [
     score: 47.38899434932384,
     pValue: 2.62555579103777e-21,
     normalizedScore: 0.8328439168064725,
+    type: 'keyword',
   },
   {
     fieldName: 'response_code',
@@ -27,6 +30,7 @@ export const significantTerms = [
     score: 26.347710713220195,
     pValue: 3.6085657805889595e-12,
     normalizedScore: 0.7809229492301661,
+    type: 'keyword',
   },
   {
     fieldName: 'url',
@@ -38,6 +42,7 @@ export const significantTerms = [
     score: 4.631197208465419,
     pValue: 0.00974308761016614,
     normalizedScore: 0.12006631193078789,
+    type: 'keyword',
   },
   {
     fieldName: 'url',
@@ -49,5 +54,6 @@ export const significantTerms = [
     score: 4.359614926663956,
     pValue: 0.012783309213417932,
     normalizedScore: 0.07472703283204607,
+    type: 'keyword',
   },
 ];
