@@ -11,7 +11,7 @@ import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { BaseMessage } from 'langchain/schema';
 
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
-import { ResponseBody } from '../helpers';
+import { RequestBody, ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -29,8 +29,7 @@ export const executeCustomLlmChain = async ({
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
   logger: Logger;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<unknown, unknown, any, any>;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
 }): Promise<ResponseBody> => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
 

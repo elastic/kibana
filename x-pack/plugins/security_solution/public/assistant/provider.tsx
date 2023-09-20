@@ -52,7 +52,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
       actionTypeRegistry={actionTypeRegistry}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      assistantLangChain={false}
+      // TO DO, switch back to false before merging
+      assistantLangChain={true}
       assistantTelemetry={assistantTelemetry}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}

@@ -109,7 +109,8 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
   public async invokeAI({ messages }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const combinedMessages = messages.reduce((acc: string, message) => {
       const { role, content } = message;
-      const bedrockRole = role === 'user' ? '\n\nHuman:' : '\n\nAssistant:';
+      // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
+      const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
       return `${acc}${bedrockRole}${content}`;
     }, '');
 
