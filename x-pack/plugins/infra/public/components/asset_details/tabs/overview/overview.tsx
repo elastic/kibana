@@ -6,9 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -21,6 +19,7 @@ import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state'
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { SectionSeparator } from './section_separator';
+import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 
 export const Overview = () => {
   const { getParsedDateRange } = useDateRangeProviderContext();
@@ -62,35 +61,7 @@ export const Overview = () => {
         <KPIGrid assetName={asset.name} dateRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {fetchMetadataError ? (
-          <EuiCallOut
-            title={i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorTitle', {
-              defaultMessage: 'Sorry, there was an error',
-            })}
-            color="danger"
-            iconType="error"
-            data-test-subj="infraMetadataErrorCallout"
-          >
-            <FormattedMessage
-              id="xpack.infra.assetDetailsEmbeddable.overview.errorMessage"
-              defaultMessage="There was an error loading your host metadata. Try to {reload} and open the host details again."
-              values={{
-                reload: (
-                  <EuiLink
-                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
-                    onClick={() => window.location.reload()}
-                  >
-                    {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
-                      defaultMessage: 'reload the page',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
-        ) : (
-          metadataSummarySection
-        )}
+        {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
