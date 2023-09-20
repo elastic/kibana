@@ -4727,6 +4727,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
           },
           {

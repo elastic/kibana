@@ -163,6 +163,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
             rollover_alias: '.alerts-test.patternfiring.alerts-default',
           },
           mapping: {
+            ignore_malformed: 'true',
             total_fields: {
               limit: '2500',
             },
@@ -196,6 +197,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       });
 
       expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
+        ignore_malformed: 'true',
         total_fields: {
           limit: '2500',
         },

@@ -77,27 +77,27 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/custom_threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/components/alert_details_app_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -496,18 +496,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
@@ -614,6 +602,18 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1525,12 +1525,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -8070,27 +8070,27 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/custom_threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/components/alert_details_app_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8489,18 +8489,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
@@ -8607,6 +8595,18 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -9518,12 +9518,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -15124,27 +15124,27 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/hooks/use_metrics_explorer_data.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/custom_threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+                "path": "x-pack/plugins/observability/public/components/custom_threshold/components/alert_details_app_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15543,18 +15543,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
@@ -15661,6 +15649,18 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16572,12 +16572,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",

@@ -25,7 +25,7 @@ export const createIndex = async ({
       index: options.index,
     });
     if (isIndexExist) {
-      logger.info('${options.index} already exist');
+      logger.info(`${options.index} already exist`);
       return;
     }
 

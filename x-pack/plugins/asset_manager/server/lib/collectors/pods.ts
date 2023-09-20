@@ -10,9 +10,9 @@ import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 
 export async function collectPods({ client, from, to, sourceIndices, afterKey }: CollectorOptions) {
-  const { metrics, logs, traces } = sourceIndices;
+  const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [metrics, logs, traces],
+    index: [metrics, logs],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'kubernetes.pod.uid',
