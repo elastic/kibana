@@ -20,7 +20,9 @@
     "@kbn/data-plugin",
     "@kbn/unified-field-list",
     "@kbn/core-application-browser",
+    "@kbn/share-plugin",
     "@kbn/unified-data-table",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }
