@@ -626,7 +626,8 @@ describe('ConfigureCases', () => {
           required: true,
         },
       ];
-      useCaseConfigureMock.mockImplementation(() => ({
+
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         customFields: customFieldsMock,
         currentConfiguration: {
@@ -640,6 +641,7 @@ describe('ConfigureCases', () => {
           customFields: customFieldsMock,
         },
       }));
+
       appMockRender.render(<ConfigureCases />);
 
       const draggable = screen.getByTestId('draggable');
@@ -666,7 +668,8 @@ describe('ConfigureCases', () => {
           required: false,
         },
       ];
-      useCaseConfigureMock.mockImplementation(() => ({
+
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         customFields: customFieldsMock,
         currentConfiguration: {
@@ -680,6 +683,7 @@ describe('ConfigureCases', () => {
           customFields: customFieldsMock,
         },
       }));
+
       appMockRender.render(<ConfigureCases />);
 
       const droppable = screen.getByTestId('droppable');

@@ -13,6 +13,7 @@ import type {
   ConnectorMappingTarget,
   ConnectorMappingSource,
   ConnectorMappingActionType,
+  CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 
 export type {

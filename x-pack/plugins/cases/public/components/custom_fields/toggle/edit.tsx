@@ -66,7 +66,6 @@ const EditComponent: CustomFieldType['Edit'] = ({
             onChange={onSubmitCustomField}
             componentProps={{
               euiFieldProps: {
-                fullWidth: true,
                 disabled: isLoading || !canUpdate,
                 'data-test-subj': `case-toggle-custom-field-form-field-${customField.key}`,
               },

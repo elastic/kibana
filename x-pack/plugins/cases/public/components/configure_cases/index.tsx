@@ -34,7 +34,6 @@ import { CustomFields } from '../custom_fields';
 import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -185,7 +184,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
         id: configurationId,
         version: configurationVersion,
         closureType: type,
-        customFields,
       });
     },
     [configurationId, configurationVersion, connector, customFields, persistCaseConfigure]
