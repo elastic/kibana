@@ -61,11 +61,7 @@ import {
   shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type {
-  DataViewsContract,
-  DataView,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
   CoreStart,
@@ -140,7 +136,6 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -420,22 +415,6 @@ const MessagesBadge = ({ onMount }: { onMount: (el: HTMLDivElement) => void }) =
   />
 );
 
-const getIndexPatternsObject = async (attrs: Document, dataViews: DataViewsPublicPluginStart) => {
-  const { indexPatterns } = await getIndexPatternsObjects(
-    attrs?.references.map(({ id }) => id) || [],
-    dataViews
-  );
-
-  const indexPatternsObject = indexPatterns?.reduce(
-    (acc, indexPattern) => ({
-      [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
-      ...acc,
-    }),
-    {}
-  );
-  return indexPatternsObject;
-};
-
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
@@ -488,7 +467,6 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
       .then(() => {
-        this.loadUserMessages();
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -622,53 +600,29 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterAndSortUserMessages(
-      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
-    );
-  };
-
-  private _userMessages: UserMessage[] = [];
-
-  // loads all available user messages
-  private async loadUserMessages(attrs?: Document) {
     const userMessages: UserMessage[] = [];
-    const viz = attrs ?? this.savedVis;
-    const activeVisualizationState = attrs
-      ? attrs.state.visualization
-      : this.activeVisualizationState;
-
-    const activeDatasourceState = attrs
-      ? attrs.state.datasourceStates[this.activeDatasourceId ?? 'formBased']
-      : this.activeDatasourceState;
-
-    const indexPatterns = attrs
-      ? await getIndexPatternsObject(attrs, this.deps.dataViews)
-      : this.indexPatterns;
-
     userMessages.push(
       ...getApplicationUserMessages({
-        visualizationType: viz?.visualizationType,
+        visualizationType: this.savedVis?.visualizationType,
         visualization: {
-          state: activeVisualizationState,
+          state: this.activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
-          isLoading: !activeDatasourceState,
-          state: activeDatasourceState,
+          isLoading: !this.activeDatasourceState,
+          state: this.activeDatasourceState,
         },
         dataViews: {
-          indexPatterns,
+          indexPatterns: this.indexPatterns,
           indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
         },
         core: this.deps.coreStart,
       })
     );
 
-    if (!viz) {
+    if (!this.savedVis) {
       return userMessages;
     }
     const mergedSearchContext = this.getMergedSearchContext();
@@ -681,14 +635,14 @@ export class Embeddable
       datasourceLayers: getDatasourceLayers(
         {
           [this.activeDatasourceId!]: {
-            isLoading: !activeDatasourceState,
-            state: activeDatasourceState,
+            isLoading: !this.activeDatasourceState,
+            state: this.activeDatasourceState,
           },
         },
         this.deps.datasourceMap,
         this.indexPatterns
       ),
-      query: viz.state.query,
+      query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
@@ -698,21 +652,25 @@ export class Embeddable
     };
 
     userMessages.push(
-      ...(this.activeDatasource?.getUserMessages(activeDatasourceState, {
+      ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
-          activeVisualizationState,
+          this.activeVisualizationState,
           frameDatasourceAPI
         ),
       }) ?? []),
-      ...(this.activeVisualization?.getUserMessages?.(activeVisualizationState, {
+      ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
         frame: frameDatasourceAPI,
       }) ?? [])
     );
 
-    this._userMessages = userMessages;
-  }
+    return filterAndSortUserMessages(
+      [...userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters ?? {}
+    );
+  };
 
   private additionalUserMessages: Record<string, UserMessage> = {};
 
@@ -827,7 +785,7 @@ export class Embeddable
        * Should load again the user messages,
        * otherwise the embeddable state is stuck in an error state
        */
-      await this.loadUserMessages(attrs);
+      this.renderUserMessages();
     }
   }
 
@@ -1004,12 +962,7 @@ export class Embeddable
 
     this.activeData = newActiveData;
 
-    // Refresh messanges if info type is found as with active data
-    // these messages can be enriched
-    if (this._userMessages.some(({ severity }) => severity === 'info')) {
-      this.loadUserMessages();
-      this.renderUserMessages();
-    }
+    this.renderUserMessages();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -1088,6 +1041,7 @@ export class Embeddable
       return;
     }
     super.render(domNode as HTMLElement);
+
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -1387,7 +1341,6 @@ export class Embeddable
 
       this.expression = ast;
 
-      this.loadUserMessages();
       this.reload();
     }
   };

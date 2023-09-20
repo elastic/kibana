@@ -14,12 +14,8 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  mapAndFlattenFilters,
-  getTime,
-  type SavedQuery,
-  type ISearchSource,
-} from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
+import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -51,7 +47,9 @@ interface LocalState extends CommonRuleParams {
 
 interface LocalStateAction {
   type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
-  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean | undefined);
+  payload:
+    | SearchSourceParamsAction['payload']
+    | (number[] | number | string | string[] | boolean | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -201,7 +199,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onChangeSelectedTermField = useCallback(
-    (selectedTermField?: string) => dispatch({ type: 'termField', payload: selectedTermField }),
+    (selectedTermField?: string | string[]) =>
+      dispatch({ type: 'termField', payload: selectedTermField }),
     []
   );
 
@@ -372,6 +371,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
       <EuiSpacer />
     </Fragment>
