@@ -41,6 +41,7 @@ export const useFlyoutActions = (navigationProps: UseNavigationProps) => {
     viewSingleDocument = { disabled: false },
     viewSurroundingDocument = { disabled: false },
   } = flyoutCustomization?.actions?.defaultActions ?? {};
+  const customActions = [...(flyoutCustomization?.actions?.getActionItems?.() ?? [])];
 
   const flyoutActions = [
     {
@@ -53,6 +54,7 @@ export const useFlyoutActions = (navigationProps: UseNavigationProps) => {
       enabled: Boolean(!viewSurroundingDocument.disabled && dataView.isTimeBased() && dataView.id),
       Content: () => <SurroundingDocuments onClick={onOpenContextView} href={contextViewHref} />,
     },
+    ...customActions,
   ];
 
   const hasEnabledActions = flyoutActions.some((action) => action.enabled);

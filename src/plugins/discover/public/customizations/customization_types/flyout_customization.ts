@@ -16,8 +16,9 @@ export interface FlyoutDefaultActions {
 }
 
 export interface FlyoutActionItem {
-  content: React.ReactNode;
-  disabled: boolean;
+  id: string;
+  Content: React.ElementType;
+  enabled: boolean;
 }
 
 export interface FlyoutCustomization {
