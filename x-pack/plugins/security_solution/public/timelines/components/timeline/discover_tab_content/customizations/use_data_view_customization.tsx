@@ -6,12 +6,14 @@
  */
 
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const useDataViewCustomization = () => {
+  const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
   const setDataViewCustomization: CustomizationCallback = ({ customizations }) => {
     customizations.set({
       id: 'data_view',
-      disableDataViewPicker: true,
+      disableDataViewPicker: !isDiscoverInTimelineEnabled,
     });
   };
 
