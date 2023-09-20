@@ -42,7 +42,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -109,9 +109,9 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe.skip(
+  describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: '@brokenInServerless' },
+    { tags: ['@ess', '@brokenInServerless'] },
     () => {
       beforeEach(() => {
         login();
@@ -138,7 +138,8 @@ describe('Timelines', (): void => {
         cy.get(LOCKED_ICON).should('be.visible');
       });
 
-      it('can be added notes', () => {
+      // TO-DO: Issue 163398
+      it.skip('can be added notes', () => {
         addNotesToTimeline(getTimeline().notes);
         cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
           .find(NOTES_TEXT)

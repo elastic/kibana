@@ -14,11 +14,11 @@
  */
 
 import words from 'lodash/words';
-import isEqual from 'lodash/isEqual';
 
 import { Query } from '@elastic/eui';
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { UiSettingMetadata } from '@kbn/management-settings-types/metadata';
+import { UiSettingMetadata } from '@kbn/management-settings-types';
+import { isSettingDefaultValue } from '@kbn/management-settings-utilities';
 
 /**
  * The portion of the setting name that defines the category of the setting.
@@ -39,6 +39,10 @@ const mapWords = (name?: string): string =>
  * Derive the aria-label for a given setting based on its name and category.
  */
 const getAriaLabel = (name: string = '') => {
+  if (!name) {
+    return '';
+  }
+
   const query = Query.parse(name);
 
   if (query.hasOrFieldClause(CATEGORY_FIELD)) {
@@ -121,7 +125,7 @@ export const getFieldDefinition = <T extends SettingType>(
 
   const definition: FieldDefinition<T> = {
     ariaAttributes: {
-      ariaLabel: getAriaLabel(name),
+      ariaLabel: name || getAriaLabel(name),
       // ariaDescribedBy: unsavedChange.value ? `${groupId} ${unsavedId}` : undefined,
     },
     categories,
@@ -133,7 +137,7 @@ export const getFieldDefinition = <T extends SettingType>(
     groupId: `${name || id}-group`,
     id,
     isCustom: isCustom || false,
-    isDefaultValue: isEqual(defaultValue, setting.userValue),
+    isDefaultValue: isSettingDefaultValue(setting),
     isOverridden: isOverridden || false,
     isReadOnly: !!readonly,
     metric,
