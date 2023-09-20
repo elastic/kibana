@@ -6,18 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxRequestRate: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.requestRate', {
-    defaultMessage: 'Request Rate',
+export const nodeCpuCapacity: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.kubernetes.capacity', {
+    defaultMessage: 'Capacity',
   }),
-  value: 'differences(max(nginx.stubstatus.requests))',
+  value: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
   format: {
     id: 'number',
     params: {
-      decimals: 0,
+      decimals: 1,
+      compact: true,
     },
   },
-  timeScale: 's',
 };

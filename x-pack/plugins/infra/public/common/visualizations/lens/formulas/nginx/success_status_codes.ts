@@ -8,7 +8,7 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 import { defaultPalette, Color } from '../../../../../../common/color_palette';
 
-export const nginxSuccessStatusCodes: FormulaValueConfig = {
+export const successStatusCodes: FormulaValueConfig = {
   label: '200-299',
   value: `count(kql='http.response.status_code >= 200 and http.response.status_code <= 299')`,
   format: {

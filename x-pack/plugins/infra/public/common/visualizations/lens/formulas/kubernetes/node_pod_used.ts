@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxActiveConnections: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.activeConnections', {
-    defaultMessage: 'Active Connections',
+export const nodePodUsed: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.kubernetes.used', {
+    defaultMessage: 'Used',
   }),
-  value: 'average(nginx.stubstatus.active)',
+  value: 'unique_count(kubernetes.pod.uid)',
   format: {
     id: 'number',
     params: {

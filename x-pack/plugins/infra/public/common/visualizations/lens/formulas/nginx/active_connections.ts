@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
-import { defaultPalette, Color } from '../../../../../../common/color_palette';
 
-export const nginxClientErrorStatusCodes: FormulaValueConfig = {
-  label: '400-499',
-  value: `count(kql='http.response.status_code >= 400 and http.response.status_code <= 499')`,
+export const activeConnections: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.activeConnections', {
+    defaultMessage: 'Active Connections',
+  }),
+  value: 'average(nginx.stubstatus.active)',
   format: {
     id: 'number',
     params: {
       decimals: 0,
     },
   },
-  color: defaultPalette[Color.color5],
 };
