@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiIcon, EuiText, EuiLoadingSpinner } from '@elastic/eui';
-import { Chart, Metric, MetricTrendShape } from '@elastic/charts';
+import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
@@ -87,6 +87,11 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   return (
     <>
       <Chart>
+        <Settings
+          onElementClick={([d]) => {
+            console.log('!!click');
+          }}
+        />
         <Metric id="1" data={[metricData]} />
       </Chart>
     </>
