@@ -21,6 +21,8 @@
     "@kbn/unified-field-list",
     "@kbn/core-application-browser",
     "@kbn/unified-data-table",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
