@@ -1041,6 +1041,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
+/x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
 
 # Core
 /config/ @elastic/kibana-core
@@ -1397,6 +1398,9 @@ x-pack/plugins/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/profiling-ui
+
+# Observability shared profiling
+x-pack/plugins/observability_shared/public/components/profiling @elastic/profiling-ui
 
 # Shared UX
 packages/react @elastic/appex-sharedux
