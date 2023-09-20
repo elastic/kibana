@@ -7,6 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
 import { mockActionResultData } from '../../../__mocks__/action_result_data';
@@ -17,6 +18,8 @@ const mockExecute = jest.fn().mockImplementation(() => ({
   data: mockActionResultData,
   status: 'ok',
 }));
+
+const mockLogger = loggerMock.create();
 
 const mockActions = {
   getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
@@ -50,6 +53,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -64,6 +68,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -76,6 +81,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -100,6 +106,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: badActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -135,6 +142,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -161,6 +169,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 

@@ -12,7 +12,8 @@ import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_u
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
 
-  describe('Browser apps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/166007
+  describe.skip('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
