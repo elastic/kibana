@@ -635,14 +635,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
-    }).catch((error) => {
+    }).catch(() => {
       /**
-       * 255 is a generic exit code which is triggered from docker logs command
-       * if we teardown the cluster since the entrypoint doesn't exit normally
+       * docker logs will through errors when the nodes are killed through SIGINT
+       * and the entrypoint doesn't exit normally, so we silence the errors.
        */
-      if (error.exitCode !== 255) {
-        log.error(error.message);
-      }
     });
   }
 
