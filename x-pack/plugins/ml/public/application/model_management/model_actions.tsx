@@ -456,7 +456,11 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel = item.metadata?.analytics_config !== undefined;
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.classification !== undefined;
+
           return (
             isDfaTrainedModel &&
             !isBuiltInModel(item) &&
@@ -530,7 +534,9 @@ export function useModelActions({
         isPrimary: true,
         available: isTestable,
         onClick: (item) => onTestAction(item),
-        enabled: (item) => canTestTrainedModels && isTestable(item, true) && !isLoading,
+        enabled: (item) => {
+          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+        },
       },
     ],
     [

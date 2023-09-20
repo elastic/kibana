@@ -34,7 +34,8 @@
       "share",
       "spaces",
       "savedObjectsTaggingOss",
-      "serverless"
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": [
       "kibanaUtils",

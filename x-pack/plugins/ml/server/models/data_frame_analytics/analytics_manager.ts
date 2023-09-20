@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   getAnalysisType,
   INDEX_CREATED_BY,
@@ -23,20 +23,21 @@ import { flatten } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { modelsProvider } from '../model_management';
 import {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-  InitialElementsReturnType,
+  type ExtendAnalyticsMapArgs,
+  type GetAnalyticsMapArgs,
+  type InitialElementsReturnType,
+  type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  NextLinkReturnType,
-  GetAnalyticsJobIdArg,
-  GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
+import type { MlFeatures } from '../../types';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
@@ -44,12 +45,20 @@ export class AnalyticsManager {
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private readonly _mlClient: MlClient,
+    private readonly _client: IScopedClusterClient,
+    private readonly _enabledFeatures: MlFeatures
+  ) {}
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE }),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._enabledFeatures.nlp || this._enabledFeatures.dfa
+        ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
+        : { trained_model_configs: [] },
+      this._enabledFeatures.dfa
+        ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
+        : { data_frame_analytics: [] },
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;

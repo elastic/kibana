@@ -112,6 +112,9 @@ export interface RouteDependencies {
 export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  /**
+   * Exposed services
+   */
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
@@ -191,7 +194,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
-          elasticsearch: showEnterpriseSearch,
+          enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
@@ -203,7 +206,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
-          elasticsearch: showEnterpriseSearch,
+          enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,

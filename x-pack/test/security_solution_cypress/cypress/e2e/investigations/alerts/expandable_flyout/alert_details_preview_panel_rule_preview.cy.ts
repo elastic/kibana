@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import {
@@ -51,7 +50,7 @@ describe('Alert details expandable flyout rule preview panel', () => {
   describe('rule preview', () => {
     it(
       'should display rule preview and its sub sections',
-      { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+      { tags: ['@ess', '@brokenInServerless'] },
       () => {
         cy.log('rule preview panel');
 

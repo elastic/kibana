@@ -172,7 +172,10 @@
             "tags": [],
             "label": "docsLink",
             "description": [
-              "\nRequired to set the docs link for the whole solution"
+              "\nRequired in \"kibana\" flavor to set the docs link for the whole solution, otherwise optional"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,

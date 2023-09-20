@@ -19,6 +19,7 @@ export type TestSubjects =
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesConfirmation'
+  | 'descriptionTitle'
   | 'documentationLink'
   | 'emptyPrompt'
   | 'forcemergeIndexMenuButton'
@@ -63,4 +64,8 @@ export type TestSubjects =
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
   | 'viewButton'
-  | 'detailPanelTabSelected';
+  | 'detailPanelTabSelected'
+  | 'createIndexButton'
+  | 'createIndexNameFieldText'
+  | 'createIndexCancelButton'
+  | 'createIndexSaveButton';

@@ -917,6 +917,75 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.SearchResponseIncompleteWarning",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchResponseIncompleteWarning",
+        "description": [
+          "\nA warning object for a search response with incomplete ES results\nES returns incomplete results when:\n1) Set timeout flag on search and the timeout expires on cluster\n2) Some shard failures on a cluster\n3) skipped remote(s) (skip_unavailable=true)\n  a. all shards failed\n  b. disconnected/not-connected"
+        ],
+        "path": "src/plugins/data/public/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\ntype: for sorting out incomplete warnings"
+            ],
+            "signature": [
+              "\"incomplete\""
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "\nmessage: human-friendly message"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchResponseIncompleteWarning.clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "clusters",
+            "description": [
+              "\nclusters: cluster details."
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ClusterDetails",
+                "text": "ClusterDetails"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.SearchSessionInfoProvider",
         "type": "Interface",
         "tags": [],
@@ -1448,9 +1517,13 @@
           "\nA warning object for a search response with warnings"
         ],
         "signature": [
-          "SearchResponseTimeoutWarning",
-          " | ",
-          "SearchResponseShardFailureWarning"
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-public.SearchResponseIncompleteWarning",
+            "text": "SearchResponseIncompleteWarning"
+          }
         ],
         "path": "src/plugins/data/public/search/types.ts",
         "deprecated": false,
@@ -7144,7 +7217,7 @@
                 "section": "def-common.RequestAdapter",
                 "text": "RequestAdapter"
               },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableShardFailureWarning?: boolean | undefined) => Promise<",
+              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableWarningToasts?: boolean | undefined) => Promise<",
               "SearchResponse",
               "<any, Record<string, ",
               "AggregationsAggregate",
@@ -7512,7 +7585,7 @@
                 "id": "def-common.AggType.postFlightRequest.$8",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "disableShardFailureWarning",
+                "label": "disableWarningToasts",
                 "description": [],
                 "signature": [
                   "boolean | undefined"
@@ -15445,7 +15518,7 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, title, description, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableWarningToasts, getNow, executionContext, title, description, }: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -15474,7 +15547,7 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableWarningToasts,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
             "description": [],
             "signature": [
               {
@@ -29385,10 +29458,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.RequestHandlerParams.disableShardWarnings",
+            "id": "def-common.RequestHandlerParams.disableWarningToasts",
             "type": "CompoundType",
             "tags": [],
-            "label": "disableShardWarnings",
+            "label": "disableWarningToasts",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -30742,12 +30815,12 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSourceSearchOptions.disableShardFailureWarning",
+            "id": "def-common.SearchSourceSearchOptions.disableWarningToasts",
             "type": "CompoundType",
             "tags": [],
-            "label": "disableShardFailureWarning",
+            "label": "disableWarningToasts",
             "description": [
-              "\nDisable default warnings of shard failures"
+              "\nSet to true to disable warning toasts and customize warning display"
             ],
             "signature": [
               "boolean | undefined"
@@ -32459,6 +32532,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ESQL_SEARCH_STRATEGY",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_SEARCH_STRATEGY",
+        "description": [],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.EsQuerySearchAfter",
         "type": "Type",
         "tags": [
@@ -32609,7 +32697,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; disableShardWarnings?: boolean | undefined; }"
+          " | undefined; disableWarningToasts?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -40861,7 +40949,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableShardWarnings?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -41204,7 +41292,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableShardWarnings?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

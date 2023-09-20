@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiResizableContainer,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
@@ -61,7 +56,7 @@ export const PanelsResizable = ({
     []
   );
   const resizeWithPortalsHackButtonCss = css`
-    z-index: 3 !important; // !important can be removed once EuiResizableButton is converted to Emotion
+    z-index: 3;
   `;
   const resizeWithPortalsHackOverlayCss = css`
     position: absolute;
@@ -162,16 +157,6 @@ export const PanelsResizable = ({
     disableResizeWithPortalsHack();
   }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
 
-  const { euiTheme } = useEuiTheme();
-  const buttonCss = css`
-    // The selectors here are intended to override EuiResizableButtons's Sass styles
-    // it can be removed once EuiResizableButton has been converted to Emotion
-    &.euiResizableButton.euiResizableButton--vertical {
-      margin-top: -${euiTheme.size.base};
-      margin-bottom: 0;
-    }
-  `;
-
   return (
     <EuiResizableContainer
       className={className}
@@ -193,7 +178,7 @@ export const PanelsResizable = ({
             {topPanel}
           </EuiResizablePanel>
           <EuiResizableButton
-            css={[resizeWithPortalsHackButtonCss, buttonCss]}
+            css={resizeWithPortalsHackButtonCss}
             data-test-subj="unifiedHistogramResizableButton"
           />
           <EuiResizablePanel

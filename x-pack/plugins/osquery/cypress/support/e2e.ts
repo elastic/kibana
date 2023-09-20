@@ -31,7 +31,7 @@ import 'cypress-react-selector';
 import registerCypressGrep from '@cypress/grep';
 
 import type { ServerlessRoleName } from './roles';
-import { login } from '../tasks/login';
+import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 registerCypressGrep();
 

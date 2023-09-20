@@ -70,6 +70,7 @@ export interface RanTask {
   task: ConcreteTaskInstance;
   persistence: TaskPersistence;
   result: TaskRunResult;
+  isExpired: boolean;
 }
 export type ErroredTask = RanTask & {
   error: Error;

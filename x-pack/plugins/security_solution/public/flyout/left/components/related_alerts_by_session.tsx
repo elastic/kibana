@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CORRELATIONS_SESSION_ALERTS } from '../../shared/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID } from './test_ids';
@@ -20,6 +20,10 @@ export interface RelatedAlertsBySessionProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
 }
 
 /**
@@ -28,12 +32,12 @@ export interface RelatedAlertsBySessionProps {
 export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
   entityId,
   scopeId,
+  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
     scopeId,
   });
-  const title = `${dataCount} ${CORRELATIONS_SESSION_ALERTS(dataCount)}`;
 
   if (error) {
     return null;
@@ -41,9 +45,23 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
 
   return (
     <CorrelationsDetailsAlertsTable
-      title={title}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.sessionAlertsTitle"
+          defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by session"
+          values={{ count: dataCount }}
+        />
+      }
       loading={loading}
       alertIds={data}
+      scopeId={scopeId}
+      eventId={eventId}
+      noItemsMessage={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.sessionAlertsNoDataDescription"
+          defaultMessage="No alerts related by session."
+        />
+      }
       data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
     />
   );

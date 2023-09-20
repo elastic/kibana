@@ -91,6 +91,7 @@ const timestamp = '2022-07-25T08:20:18.966Z';
 const defaultProps = {
   hostName: 'test host',
   timestamp,
+  scopeId: 'scopeId',
 };
 
 const mockHostDetailsResponse = [
@@ -253,7 +254,7 @@ describe('<HostDetails />', () => {
         </TestProviders>
       );
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
-        'No items found'
+        'No users identified'
       );
     });
   });

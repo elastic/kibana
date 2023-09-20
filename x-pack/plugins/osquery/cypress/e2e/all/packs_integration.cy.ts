@@ -7,7 +7,6 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
@@ -34,12 +33,12 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
-    { tags: [tag.ESS] },
+    { tags: ['@ess'] },
     () => {
       beforeEach(() => {
         cy.login('elastic');
@@ -56,6 +55,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
@@ -93,7 +93,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     }
   );
 
-  describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery/packs');
@@ -174,7 +174,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('Global packs', { tags: [tag.ESS] }, () => {
+  describe('Global packs', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       cy.login('elastic');
       navigateTo('/app/osquery/packs');
@@ -222,6 +222,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();

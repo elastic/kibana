@@ -40,7 +40,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
   }> {
-    const { core, plugins, kibanaVersion } = resources;
+    const { core, plugins } = resources;
     const coreStart = await core.start();
 
     const kibanaUrl =
@@ -53,7 +53,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     return {
       apiEndpoint,
       scriptDownloadUrl,
-      elasticAgentVersion: kibanaVersion,
+      elasticAgentVersion: '8.9.1',
     };
   },
 });

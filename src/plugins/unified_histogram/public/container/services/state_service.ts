@@ -190,7 +190,6 @@ export const createStateService = (
     setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
-
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },

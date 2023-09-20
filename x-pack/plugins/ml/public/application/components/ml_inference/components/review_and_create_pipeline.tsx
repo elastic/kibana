@@ -58,7 +58,12 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
 
   const configCodeBlock = useMemo(
     () => (
-      <EuiCodeBlock language="json" isCopyable overflowHeight="400px">
+      <EuiCodeBlock
+        language="json"
+        isCopyable
+        overflowHeight="400px"
+        data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepConfigBlock"
+      >
         {JSON.stringify(inferencePipeline ?? {}, null, 2)}
       </EuiCodeBlock>
     ),
@@ -67,7 +72,11 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        data-test-subj="mlTrainedModelsInferenceReviewAndCreateStep"
+      >
         <EuiFlexItem grow={3}>
           {pipelineCreated === false ? (
             <EuiTitle size="s">
@@ -86,6 +95,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
             <EuiSpacer size="s" />
             {pipelineCreated === true && pipelineError === undefined ? (
               <EuiCallOut
+                data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout"
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage',
                   {

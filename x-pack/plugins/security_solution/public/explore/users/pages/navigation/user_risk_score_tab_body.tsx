@@ -75,7 +75,6 @@ export const UserRiskScoreQueryTabBody = ({
     loading,
     refetch,
     totalCount,
-    isAuthorized,
   } = useRiskScore({
     filterQuery,
     pagination,
@@ -95,10 +94,6 @@ export const UserRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
-
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
-  }
 
   if (riskScoreEngineStatus?.isUpdateAvailable) {
     return <RiskScoreUpdatePanel />;

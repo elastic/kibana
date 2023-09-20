@@ -42,6 +42,7 @@ export async function validateResourceManagement({
     },
     resources: {
       created: statusResponse.resources.created,
+      pre_8_9_1_data: statusResponse.resources.pre_8_9_1_data,
     },
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import type {
@@ -22,12 +22,12 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AppFeatureSecurityKey } from '../../common/types/app_features';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
 } from '../../common/endpoint/models/policy_config_helpers';
-import type { AppFeatures } from '../lib/app_features';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -44,6 +44,8 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -81,7 +83,7 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
-  appFeatures: AppFeatures
+  appFeatures: AppFeaturesService
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -101,6 +103,9 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    if (newPackagePolicy?.inputs) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs);
+    }
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 
@@ -186,7 +191,7 @@ export const getPackagePolicyUpdateCallback = (
   endpointMetadataService: EndpointMetadataService,
   cloud: CloudSetup,
   esClient: ElasticsearchClient,
-  appFeatures: AppFeatures
+  appFeatures: AppFeaturesService
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
@@ -203,6 +208,8 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
     notifyProtectionFeatureUsage(
       endpointIntegrationData,
@@ -280,7 +287,8 @@ export const getPackagePolicyPostCreateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: SavedObjectsClientContract | undefined
 ): PostPackagePolicyPostDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
@@ -290,8 +298,12 @@ export const getPackagePolicyDeleteCallback = (
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
         policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
+        if (savedObjectsClient) {
+          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
+        }
       }
     }
+
     await Promise.all(policiesToRemove);
   };
 };

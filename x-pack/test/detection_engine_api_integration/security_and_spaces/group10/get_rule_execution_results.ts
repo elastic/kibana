@@ -63,6 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl('1'))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(404);
@@ -85,6 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -111,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -158,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -229,6 +233,8 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '1')
         .query({ start, end, status_filters: 'failed,succeeded' });
 
       // Verify the most recent execution was one of the failedRanAfterDisabled executions, which have a duration of 3ms and are made up of 2 docs per execution,

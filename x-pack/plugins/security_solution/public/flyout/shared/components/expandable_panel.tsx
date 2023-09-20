@@ -19,6 +19,7 @@ import {
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
@@ -26,7 +27,7 @@ export interface ExpandablePanelPanelProps {
     /**
      * String value of the title to be displayed in the header of panel
      */
-    title: string;
+    title: string | React.ReactNode;
     /**
      * Callback function to be called when the title is clicked
      */
@@ -34,9 +35,9 @@ export interface ExpandablePanelPanelProps {
     /**
      * Icon string for displaying the specified icon in the header
      */
-    iconType: string;
+    iconType: IconType;
     /**
-     * Optional content and actions to be displayed on the right side of header
+     * Optional content and actions to be displayed next to header or on the right side of header
      */
     headerContent?: React.ReactNode;
   };
@@ -106,7 +107,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
 
   const headerLeftSection = useMemo(
     () => (
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"

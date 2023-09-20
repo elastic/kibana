@@ -60,7 +60,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await appsMenu.clickLink('Dashboard');
+        await appsMenu.clickLink('Dashboard', {
+          category: 'kibana',
+          closeCollapsibleNav: true,
+        });
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
@@ -70,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   async function createNewDashboard() {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.preserveCrossAppState();
     await PageObjects.dashboard.clickNewDashboard();
   }

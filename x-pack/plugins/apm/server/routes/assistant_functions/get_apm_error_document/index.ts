@@ -54,14 +54,14 @@ export async function getApmErrorDocument({
     },
   });
 
-  const error = response.hits.hits[0]?._source as APMError;
+  const errorDoc = response.hits.hits[0]?._source as APMError;
 
-  if (!error) {
+  if (!errorDoc) {
     return undefined;
   }
 
-  return pick(
-    error,
+  const formattedResponse = pick(
+    errorDoc,
     'message',
     'error',
     '@timestamp',
@@ -71,4 +71,11 @@ export async function getApmErrorDocument({
     'span.type',
     'span.subtype'
   );
+
+  const { error, ...rest } = formattedResponse;
+
+  return {
+    ...rest,
+    errorDoc: formattedResponse.error,
+  };
 }

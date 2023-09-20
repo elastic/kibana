@@ -21,6 +21,11 @@ import { AgentListPage } from '.';
 jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
   useConfirmForceInstall: () => <>confirmForceInstall</>,
 }));
+
+jest.mock('./hooks/use_missing_encryption_key_callout', () => ({
+  useMissingEncryptionKeyCallout: jest.fn().mockReturnValue([true, jest.fn()]),
+}));
+
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   UIExtensionsContext: {
@@ -54,6 +59,7 @@ jest.mock('../../../hooks', () => ({
     },
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
+    docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
@@ -286,6 +292,7 @@ describe('agent_list_page', () => {
       // todo: this can be removed when agentTamperProtectionEnabled feature flag is enabled/deleted
       ExperimentalFeaturesService.init({
         ...allowedExperimentalValues,
+        // @ts-expect-error ts upgrade v4.7.4
         agentTamperProtectionEnabled: true,
       });
 

@@ -9,10 +9,12 @@ import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { AggregateQuery } from '@kbn/es-query';
 
 export enum SearchType {
   esQuery = 'esQuery',
   searchSource = 'searchSource',
+  esqlQuery = 'esqlQuery',
 }
 
 export interface CommonRuleParams {
@@ -38,6 +40,8 @@ export interface EsQueryRuleMetaData {
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
   ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
+  : T extends SearchType.esqlQuery
+  ? CommonEsQueryRuleParams & OnlyEsqlQueryRuleParams
   : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
 
 export interface OnlyEsQueryRuleParams {
@@ -51,6 +55,12 @@ export interface OnlySearchSourceRuleParams {
   searchType?: 'searchSource';
   searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;
+}
+
+export interface OnlyEsqlQueryRuleParams {
+  searchType?: 'esqlQuery';
+  esqlQuery: AggregateQuery;
+  timeField: string;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;

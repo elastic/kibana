@@ -7,7 +7,6 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -98,7 +97,7 @@ describe('Packs - Create and Edit', () => {
     cleanupSavedQuery(multipleMappingsSavedQueryId);
   });
 
-  describe('Check if result type is correct', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('Check if result type is correct', { tags: ['@ess', '@serverless'] }, () => {
     let resultTypePackId: string;
 
     before(() => {
@@ -222,7 +221,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('Check if pack is created', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('Check if pack is created', { tags: ['@ess', '@serverless'] }, () => {
     const packName = 'Pack-name' + generateRandomStringName(1)[0];
     let packId: string;
 
@@ -262,7 +261,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('to click the edit button and edit pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('to click the edit button and edit pack', { tags: ['@ess', '@serverless'] }, () => {
     const newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
 
     let packId: string;
@@ -317,7 +316,7 @@ describe('Packs - Create and Edit', () => {
 
   describe(
     'should trigger validation when saved query is being chosen',
-    { tags: [tag.ESS, tag.SERVERLESS] },
+    { tags: ['@ess', '@serverless'] },
     () => {
       let packId: string;
       let packName: string;
@@ -365,7 +364,7 @@ describe('Packs - Create and Edit', () => {
     }
   );
 
-  describe('should open lens in new tab', { tags: [tag.ESS] }, () => {
+  describe('should open lens in new tab', { tags: ['@ess'] }, () => {
     let packId: string;
     let packName: string;
 
@@ -474,7 +473,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('deactivate and activate pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('deactivate and activate pack', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
@@ -510,7 +509,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('should verify that packs are triggered', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
@@ -577,7 +576,7 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('delete all queries in the pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('delete all queries in the pack', { tags: ['@ess', '@serverless'] }, () => {
     let packId: string;
     let packName: string;
 
@@ -625,7 +624,7 @@ describe('Packs - Create and Edit', () => {
 
   describe(
     'enable changing saved queries and ecs_mappings',
-    { tags: [tag.ESS, tag.SERVERLESS] },
+    { tags: ['@ess', '@serverless'] },
     () => {
       let packId: string;
       let packName: string;
@@ -698,7 +697,7 @@ describe('Packs - Create and Edit', () => {
     }
   );
 
-  describe('to click delete button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('to click delete button', { tags: ['@ess', '@serverless'] }, () => {
     let packName: string;
 
     before(() => {
@@ -721,7 +720,7 @@ describe('Packs - Create and Edit', () => {
         });
     });
 
-    it('', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+    it('', { tags: ['@ess', '@serverless'] }, () => {
       preparePack(packName);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');

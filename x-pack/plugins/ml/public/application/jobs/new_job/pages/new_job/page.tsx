@@ -6,10 +6,7 @@
  */
 
 import React, { FC, useEffect, Fragment, useMemo } from 'react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-} from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
@@ -234,15 +231,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       </MlPageHeader>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <FormattedMessage
-              id="xpack.ml.newJob.page.createJob.dataViewName"
-              defaultMessage="Using data view {dataViewName}"
-              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
-            />
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+        <EuiText size={'s'}>
+          <FormattedMessage
+            id="xpack.ml.newJob.page.createJob.dataViewName"
+            defaultMessage="Using data view {dataViewName}"
+            values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+          />
+        </EuiText>
 
         <Wizard
           jobCreator={jobCreator}

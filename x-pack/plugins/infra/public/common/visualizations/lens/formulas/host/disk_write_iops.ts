@@ -16,4 +16,5 @@ export const diskIOWrite: FormulaValueConfig = {
       decimals: 0,
     },
   },
+  timeScale: 's',
 };

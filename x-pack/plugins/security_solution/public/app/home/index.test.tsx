@@ -271,6 +271,7 @@ describe('HomePage', () => {
     const state = 'test-query-id';
     const savedQueryData: SavedQuery = {
       id: 'testSavedquery',
+      namespaces: ['default'],
       attributes: {
         title: 'testtitle',
         description: 'testDescription',

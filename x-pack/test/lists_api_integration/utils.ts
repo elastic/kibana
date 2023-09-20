@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
 
 import type {
   Type,
@@ -21,10 +22,16 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
-import { setPolicy, setTemplate, createBootstrapIndex } from '@kbn/securitysolution-es-utils';
+import {
+  setPolicy,
+  setTemplate,
+  setIndexTemplate,
+  createBootstrapIndex,
+} from '@kbn/securitysolution-es-utils';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
@@ -98,8 +105,8 @@ export const removeListServerGeneratedProperties = (
   list: Partial<ListSchema>
 ): Partial<ListSchema> => {
   /* eslint-disable-next-line @typescript-eslint/naming-convention */
-  const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
-  return removedProperties;
+  const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
+  return props;
 };
 
 /**
@@ -110,8 +117,8 @@ export const removeListItemServerGeneratedProperties = (
   list: Partial<ListItemSchema>
 ): Partial<ListItemSchema> => {
   /* eslint-disable-next-line @typescript-eslint/naming-convention */
-  const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
-  return removedProperties;
+  const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
+  return props;
 };
 
 /**
@@ -418,87 +425,118 @@ export const waitForTextListItems = async (
   await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, log, item, fileName)));
 };
 
+const testPolicy = {
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+    },
+  },
+};
+
+const listsMappings = {
+  dynamic: 'strict',
+  properties: {
+    name: {
+      type: 'keyword',
+    },
+    deserializer: {
+      type: 'keyword',
+    },
+    serializer: {
+      type: 'keyword',
+    },
+    description: {
+      type: 'keyword',
+    },
+    type: {
+      type: 'keyword',
+    },
+    tie_breaker_id: {
+      type: 'keyword',
+    },
+    meta: {
+      enabled: 'false',
+      type: 'object',
+    },
+    created_at: {
+      type: 'date',
+    },
+    updated_at: {
+      type: 'date',
+    },
+    created_by: {
+      type: 'keyword',
+    },
+    updated_by: {
+      type: 'keyword',
+    },
+    version: {
+      type: 'keyword',
+    },
+    immutable: {
+      type: 'boolean',
+    },
+  },
+};
+
+const itemsMappings = {
+  dynamic: 'strict',
+  properties: {
+    tie_breaker_id: {
+      type: 'keyword',
+    },
+    list_id: {
+      type: 'keyword',
+    },
+    deserializer: {
+      type: 'keyword',
+    },
+    serializer: {
+      type: 'keyword',
+    },
+    meta: {
+      enabled: 'false',
+      type: 'object',
+    },
+    created_at: {
+      type: 'date',
+    },
+    updated_at: {
+      type: 'date',
+    },
+    created_by: {
+      type: 'keyword',
+    },
+    updated_by: {
+      type: 'keyword',
+    },
+    ip: {
+      type: 'ip',
+    },
+    keyword: {
+      type: 'keyword',
+    },
+  },
+};
+
 /**
  * Convenience function for creating legacy index templates to
  * test out logic updating to new index templates
  * @param es es client
  */
 export const createLegacyListsIndices = async (es: Client) => {
-  await setPolicy(es, '.lists-default', {
-    policy: {
-      phases: {
-        hot: {
-          min_age: '0ms',
-          actions: {
-            rollover: {
-              max_size: '50gb',
-            },
-          },
-        },
-      },
-    },
-  });
-  await setPolicy(es, '.items-default', {
-    policy: {
-      phases: {
-        hot: {
-          min_age: '0ms',
-          actions: {
-            rollover: {
-              max_size: '50gb',
-            },
-          },
-        },
-      },
-    },
-  });
+  await setPolicy(es, '.lists-default', testPolicy);
+  await setPolicy(es, '.items-default', testPolicy);
   await setTemplate(es, '.lists-default', {
     index_patterns: [`.lists-default-*`],
-    mappings: {
-      dynamic: 'strict',
-      properties: {
-        name: {
-          type: 'keyword',
-        },
-        deserializer: {
-          type: 'keyword',
-        },
-        serializer: {
-          type: 'keyword',
-        },
-        description: {
-          type: 'keyword',
-        },
-        type: {
-          type: 'keyword',
-        },
-        tie_breaker_id: {
-          type: 'keyword',
-        },
-        meta: {
-          enabled: 'false',
-          type: 'object',
-        },
-        created_at: {
-          type: 'date',
-        },
-        updated_at: {
-          type: 'date',
-        },
-        created_by: {
-          type: 'keyword',
-        },
-        updated_by: {
-          type: 'keyword',
-        },
-        version: {
-          type: 'keyword',
-        },
-        immutable: {
-          type: 'boolean',
-        },
-      },
-    },
+    mappings: listsMappings,
     settings: {
       index: {
         lifecycle: {
@@ -510,42 +548,7 @@ export const createLegacyListsIndices = async (es: Client) => {
   });
   await setTemplate(es, '.items-default', {
     index_patterns: [`.items-default-*`],
-    mappings: {
-      dynamic: 'strict',
-      properties: {
-        tie_breaker_id: {
-          type: 'keyword',
-        },
-        list_id: {
-          type: 'keyword',
-        },
-        deserializer: {
-          type: 'keyword',
-        },
-        serializer: {
-          type: 'keyword',
-        },
-        meta: {
-          enabled: 'false',
-          type: 'object',
-        },
-        created_at: {
-          type: 'date',
-        },
-        updated_at: {
-          type: 'date',
-        },
-        created_by: {
-          type: 'keyword',
-        },
-        updated_by: {
-          type: 'keyword',
-        },
-        ip: {
-          type: 'ip',
-        },
-      },
-    },
+    mappings: itemsMappings,
     settings: {
       index: {
         lifecycle: {
@@ -557,4 +560,127 @@ export const createLegacyListsIndices = async (es: Client) => {
   });
   await createBootstrapIndex(es, '.lists-default');
   await createBootstrapIndex(es, '.items-default');
+};
+
+/**
+ * Utility to create list indices, before they were migrated to data streams
+ * @param es ES client
+ */
+export const createListsIndices = async (es: Client) => {
+  await setPolicy(es, '.lists-default', testPolicy);
+  await setPolicy(es, '.items-default', testPolicy);
+  await setIndexTemplate(es, '.lists-default', {
+    index_patterns: [`.lists-default-*`],
+    template: {
+      mappings: listsMappings,
+      settings: {
+        index: {
+          lifecycle: {
+            name: '.lists-default',
+            rollover_alias: '.lists-default',
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+    },
+  });
+  await setIndexTemplate(es, '.items-default', {
+    index_patterns: [`.items-default-*`],
+    template: {
+      mappings: itemsMappings,
+      settings: {
+        index: {
+          lifecycle: {
+            name: '.items-default',
+            rollover_alias: '.items-default',
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+    },
+  });
+  await createBootstrapIndex(es, '.lists-default');
+  await createBootstrapIndex(es, '.items-default');
+};
+
+/**
+ * utility to create list directly by using ES, bypassing all checks
+ * useful, to create list in legacy indices
+ */
+export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
+  const createdAt = new Date().toISOString();
+  const body = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    description: 'mock-description',
+    name: 'mock-name',
+    tie_breaker_id: uuidv4(),
+    type: 'keyword',
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    immutable: false,
+    version: 1,
+  };
+
+  const response = await es.create({
+    body,
+    id,
+    index: '.lists-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...body,
+  };
+};
+
+/**
+ * utility to create list item directly by using ES, bypassing all checks
+ * useful, to create list item in legacy indices
+ * supports keyword only
+ */
+export const createListItemBypassingChecks = async ({
+  es,
+  listId,
+  id,
+  value,
+}: {
+  es: Client;
+  listId: string;
+  id: string;
+  value: string;
+}) => {
+  const createdAt = new Date().toISOString();
+  const body = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    tie_breaker_id: uuidv4(),
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    list_id: listId,
+    keyword: value,
+  };
+
+  const response = await es.create({
+    body,
+    id,
+    index: '.items-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...body,
+  };
 };

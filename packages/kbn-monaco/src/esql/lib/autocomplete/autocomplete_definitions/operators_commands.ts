@@ -11,10 +11,40 @@ import type { AutocompleteCommandDefinition } from '../types';
 
 export const byOperatorDefinition: AutocompleteCommandDefinition = {
   label: 'by',
-  insertText: 'by ',
+  insertText: 'by',
   kind: 21,
   detail: i18n.translate('monaco.esql.autocomplete.byDoc', {
     defaultMessage: 'By',
+  }),
+  sortText: 'D',
+};
+
+export const onOperatorDefinition: AutocompleteCommandDefinition = {
+  label: 'on',
+  insertText: 'on',
+  kind: 21,
+  detail: i18n.translate('monaco.esql.autocomplete.onDoc', {
+    defaultMessage: 'On',
+  }),
+  sortText: 'D',
+};
+
+export const withOperatorDefinition: AutocompleteCommandDefinition = {
+  label: 'with',
+  insertText: 'with',
+  kind: 21,
+  detail: i18n.translate('monaco.esql.autocomplete.withDoc', {
+    defaultMessage: 'With',
+  }),
+  sortText: 'D',
+};
+
+export const asOperatorDefinition: AutocompleteCommandDefinition = {
+  label: 'as',
+  insertText: 'as',
+  kind: 11,
+  detail: i18n.translate('monaco.esql.autocomplete.asDoc', {
+    defaultMessage: 'As',
   }),
   sortText: 'D',
 };

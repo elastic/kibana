@@ -91,7 +91,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       locations: queriedLocations,
     } = request.query as MonitorsQuery;
 
-    const filtersStr = await getMonitorFilters({
+    const { filtersStr } = await getMonitorFilters({
       ...request.query,
       context: routeContext,
     });

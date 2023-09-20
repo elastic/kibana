@@ -7,8 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../../common/types/connectors';
 
 const CUSTOM_SCHEDULING = 'custom_scheduling';
 
@@ -23,4 +24,15 @@ export const fetchCrawlerCustomSchedulingByIndexName = async (
   });
   const result = crawlerResult.hits.hits[0]?._source;
   return result;
+};
+
+export const fetchCrawlerCustomSchedulingKeysByIndexName = async (
+  client: IScopedClusterClient,
+  indexName: string
+): Promise<string[]> => {
+  const crawlerCustomSchedules = await fetchCrawlerCustomSchedulingByIndexName(client, indexName);
+
+  return crawlerCustomSchedules?.custom_scheduling
+    ? Object.keys(crawlerCustomSchedules.custom_scheduling)
+    : [];
 };

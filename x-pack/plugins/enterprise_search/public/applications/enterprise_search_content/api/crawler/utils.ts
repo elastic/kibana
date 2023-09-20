@@ -248,34 +248,39 @@ export const domainConfigServerToClient = (
 export const crawlerCustomSchedulingServerToClient = (
   customSchedulingFromServer: CrawlerCustomSchedulesServer
 ): CrawlerCustomSchedule[] =>
-  Object.entries(customSchedulingFromServer.custom_scheduling).map((scheduleMapping) => {
-    const {
-      name,
-      interval,
-      configuration_overrides: configurationOverrides,
-      enabled,
-    } = scheduleMapping[1];
-    const {
-      max_crawl_depth: maxCrawlDepth = 2,
-      sitemap_discovery_disabled: notIncludeSitemapsInRobotsTxt = false,
-      domain_allowlist: selectedDomainUrls = [],
-      sitemap_urls: customSitemapUrls = [],
-      seed_urls: customEntryPointUrls = [],
-    } = configurationOverrides;
+  Object.entries(customSchedulingFromServer.custom_scheduling).map(
+    ([scheduleKey, scheduleMapping]) => {
+      const {
+        name,
+        interval,
+        configuration_overrides: configurationOverrides,
+        enabled,
+      } = scheduleMapping;
+      const {
+        max_crawl_depth: maxCrawlDepth = 2,
+        sitemap_discovery_disabled: notIncludeSitemapsInRobotsTxt = false,
+        domain_allowlist: selectedDomainUrls = [],
+        sitemap_urls: customSitemapUrls = [],
+        seed_urls: customEntryPointUrls = [],
+      } = configurationOverrides;
 
-    return {
-      name,
-      interval,
-      enabled,
-      maxCrawlDepth,
-      includeSitemapsInRobotsTxt: !notIncludeSitemapsInRobotsTxt,
-      selectedDomainUrls,
-      selectedEntryPointUrls: [],
-      selectedSitemapUrls: [],
-      customEntryPointUrls,
-      customSitemapUrls,
-    };
-  });
+      return {
+        scheduleKey,
+        name,
+        interval,
+        enabled,
+        maxCrawlDepth,
+        includeSitemapsInRobotsTxt: !notIncludeSitemapsInRobotsTxt,
+        selectedDomainUrls,
+        selectedEntryPointUrls: [],
+        selectedSitemapUrls: [],
+        customEntryPointUrls,
+        customSitemapUrls,
+        entryPointUrls: [],
+        sitemapUrls: [],
+      };
+    }
+  );
 
 export const crawlerCustomSchedulingClientToServer = (
   crawlerCustomSchedules: CrawlerCustomSchedule[]
@@ -304,8 +309,7 @@ export const crawlerCustomSchedulingClientToServer = (
 
   const customSchedules: CrawlerCustomScheduleMappingClient = crawlerCustomSchedules.reduce(
     (map, schedule) => {
-      const scheduleNameFormatted = schedule.name.replace(/\s+/g, '_').toLowerCase();
-      map.set(scheduleNameFormatted, mapToServerFormat(schedule));
+      map.set(schedule.scheduleKey, mapToServerFormat(schedule));
       return map;
     },
     new Map()

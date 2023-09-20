@@ -1657,7 +1657,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -3599,7 +3599,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,

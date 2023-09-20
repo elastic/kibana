@@ -52,6 +52,7 @@ export const createListItem = async ({
   const createdAt = dateNow ?? new Date().toISOString();
   const tieBreakerId = tieBreaker ?? uuidv4();
   const baseBody = {
+    '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
     deserializer,
@@ -68,9 +69,9 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const response = await esClient.index({
+    const response = await esClient.create({
       body,
-      id,
+      id: id ?? uuidv4(),
       index: listItemIndex,
       refresh: 'wait_for',
     });

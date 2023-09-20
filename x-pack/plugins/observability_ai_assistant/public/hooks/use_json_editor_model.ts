@@ -55,6 +55,8 @@ export const useJsonEditorModel = ({
 
     if (model === null) {
       model = editor.createModel(initialJsonString, 'json', modelUri);
+    } else {
+      model.setValue(initialJsonString);
     }
 
     return { model, initialJsonString };

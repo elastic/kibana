@@ -10,4 +10,7 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Security Serverless Cypress Tests"
 
-yarn --cwd x-pack/test/security_solution_cypress cypress:run:serverless
+cd x-pack/test/security_solution_cypress
+
+set +e
+yarn cypress:run:serverless; status=$?; yarn junit:merge || :; exit $status

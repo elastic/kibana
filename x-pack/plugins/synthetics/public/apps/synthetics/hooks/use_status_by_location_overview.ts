@@ -9,22 +9,22 @@ import { useSelector } from 'react-redux';
 import { OverviewStatusState } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 
-export function useStatusByLocationOverview(configId: string, locationName?: string) {
+export function useStatusByLocationOverview(configId: string, locationId: string) {
   const { status } = useSelector(selectOverviewStatus);
 
-  return getConfigStatusByLocation(status, configId, locationName);
+  return getConfigStatusByLocation(status, configId, locationId);
 }
 
 export const getConfigStatusByLocation = (
   status: OverviewStatusState | null,
   configId: string,
-  locationName?: string
+  locationId: string
 ) => {
-  if (!locationName || !status) {
+  if (!status) {
     return { status: 'unknown' };
   }
   const allConfigs = status.allConfigs;
-  const configIdByLocation = `${configId}-${locationName}`;
+  const configIdByLocation = `${configId}-${locationId}`;
   const config = allConfigs[configIdByLocation];
 
   return {

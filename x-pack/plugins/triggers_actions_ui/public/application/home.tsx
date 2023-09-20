@@ -23,7 +23,9 @@ import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
-const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
+const LogsList = lazy(
+  () => import('./sections/rule_details/components/global_rule_event_log_list')
+);
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {

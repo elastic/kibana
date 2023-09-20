@@ -22,42 +22,47 @@ export const createTagRoute = (
   logger: Logger,
   security: SetupPlugins['security']
 ) => {
-  router.put(
-    {
+  router.versioned
+    .put({
       path: INTERNAL_TAGS_URL,
-      validate: { body: buildRouteValidationWithExcess(createTagRequest) },
+      access: 'internal',
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const frameworkRequest = await buildFrameworkRequest(context, security, request);
-      const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
-      const { name: tagName, description, color } = request.body;
-      try {
-        const tag = await createTag({
-          savedObjectsClient,
-          tagName,
-          description,
-          color,
-        });
-        return response.ok({ body: tag });
-      } catch (err) {
-        const error = transformError(err);
-        logger.error(`Failed to create ${tagName} tag - ${JSON.stringify(error.message)}`);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: buildRouteValidationWithExcess(createTagRequest) } },
+      },
+      async (context, request, response) => {
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
+        const { name: tagName, description, color } = request.body;
+        try {
+          const tag = await createTag({
+            savedObjectsClient,
+            tagName,
+            description,
+            color,
+          });
+          return response.ok({ body: tag });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to create ${tagName} tag - ${JSON.stringify(error.message)}`);
 
-        const siemResponse = buildSiemResponse(response);
-        return siemResponse.error({
-          statusCode: error.statusCode ?? 500,
-          body: i18n.translate(
-            'xpack.securitySolution.dashboards.createSecuritySolutionTagErrorTitle',
-            {
-              values: { tagName, message: error.message },
-              defaultMessage: `Failed to create {tagName} tag - {message}`,
-            }
-          ),
-        });
+          const siemResponse = buildSiemResponse(response);
+          return siemResponse.error({
+            statusCode: error.statusCode ?? 500,
+            body: i18n.translate(
+              'xpack.securitySolution.dashboards.createSecuritySolutionTagErrorTitle',
+              {
+                values: { tagName, message: error.message },
+                defaultMessage: `Failed to create {tagName} tag - {message}`,
+              }
+            ),
+          });
+        }
       }
-    }
-  );
+    );
 };

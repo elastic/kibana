@@ -52,9 +52,6 @@ describe('CardItemComponent', () => {
     const step = getByText('1 step left');
     expect(step).toBeInTheDocument();
 
-    const time = getByText('• About 30 mins');
-    expect(time).toBeInTheDocument();
-
     const step1 = queryByText('Step 1');
     expect(step1).not.toBeInTheDocument();
   });

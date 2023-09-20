@@ -44,8 +44,8 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiHorizontalRule margin="xxl" />
-      <EuiTitle size="s">
+      <EuiHorizontalRule margin="xl" />
+      <EuiTitle size="xs">
         <h2>
           <FormattedMessage
             id="xpack.csp.awsIntegration.setupInfoContentTitle"
@@ -235,7 +235,9 @@ export const AwsCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={onSetupFormatChange}
+        onChange={(idSelected: SetupFormat) =>
+          idSelected !== setupFormat && onSetupFormatChange(idSelected)
+        }
       />
       <EuiSpacer size="l" />
       {setupFormat === 'cloud_formation' && (

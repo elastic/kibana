@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -213,7 +214,7 @@ export const calculateRiskScores = async ({
     const now = new Date().toISOString();
 
     const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
-    if (userFilter) {
+    if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];

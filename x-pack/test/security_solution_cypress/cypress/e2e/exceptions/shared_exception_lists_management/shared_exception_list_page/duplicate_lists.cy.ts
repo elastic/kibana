@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
@@ -41,7 +40,9 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Duplicate List', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+// Flaky in serverless tests
+describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();
@@ -65,9 +66,7 @@ describe('Duplicate List', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
