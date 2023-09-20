@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { TestWrapper, createFormServicesMock, wrap } from './context';
-export { settingsMock } from './settings';
-export { uiSettingsClientMock } from './settings_client';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+
+/**
+ * Mock of the portion of the {@link IUiSettingsClient} used as a parameter in the {@link getFieldDefinitions} function.
+ */
+export const uiSettingsClientMock: Pick<IUiSettingsClient, 'isCustom' | 'isOverridden'> = {
+  isCustom: () => false,
+  isOverridden: () => false,
+};

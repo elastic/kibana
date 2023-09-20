@@ -66,7 +66,7 @@ export const settingsMock: Settings = {
     name: 'json:test:setting',
     description: 'Description for Json test setting',
     type: 'json',
-    userValue: '{"foo": "bar"}',
+    userValue: null,
     value: '{"foo": "bar"}',
     ...defaults,
   },

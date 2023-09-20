@@ -10,21 +10,17 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 
 import { Form } from './form';
-import { wrap, settingsMock, createFormServicesMock } from './mocks';
+import { wrap, settingsMock, createFormServicesMock, uiSettingsClientMock } from './mocks';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
 import { FormServices } from './types';
 
-const fields: Array<FieldDefinition<SettingType>> = Object.entries(settingsMock).map(
-  ([id, setting]) =>
-    getFieldDefinition({
-      id,
-      setting,
-      params: { isCustom: false, isOverridden: setting.isOverridden },
-    })
+const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+  settingsMock,
+  uiSettingsClientMock
 );
 
 describe('Form', () => {
@@ -121,7 +117,7 @@ describe('Form', () => {
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     fireEvent.click(saveButton);
 
-    expect(services.showError).toHaveBeenCalled();
+    expect(testServices.showError).toHaveBeenCalled();
   });
 
   // TODO: fix

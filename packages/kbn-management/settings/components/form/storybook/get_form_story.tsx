@@ -9,9 +9,9 @@
 import React from 'react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { Form, FormProps } from '../form';
-import { settingsMock } from '../mocks';
+import { settingsMock, uiSettingsClientMock } from '../mocks';
 
 export type StoryProps = Pick<FormProps, 'isSavingEnabled'>;
 
@@ -21,12 +21,9 @@ export type StoryProps = Pick<FormProps, 'isSavingEnabled'>;
  */
 export const getFormStory = () => {
   const Story = ({ isSavingEnabled }: StoryProps) => {
-    const fields: Array<FieldDefinition<SettingType>> = Object.entries(settingsMock).map(
-      ([id, setting]) =>
-        getFieldDefinition({
-          id,
-          setting,
-        })
+    const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+      settingsMock,
+      uiSettingsClientMock
     );
 
     return <Form {...{ fields, isSavingEnabled }} />;
