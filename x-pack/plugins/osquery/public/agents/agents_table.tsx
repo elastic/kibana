@@ -14,11 +14,13 @@ import {
   EuiHighlight,
   EuiSpacer,
   EuiCallOut,
-  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { AgentGrouper } from './agent_grouper';
@@ -36,7 +38,6 @@ import {
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
   NO_AGENT_AVAILABLE_TITLE,
-  NO_AGENT_AVAILABLE_DESCRIPTION,
 } from './translations';
 
 import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
@@ -52,6 +53,7 @@ const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
+  const { docLinks } = useKibana().services;
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
@@ -201,18 +203,42 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   }, []);
   const isFetched = groupsFetched && agentsFetched && agentGroupsData;
 
+  const renderNoAgentAvailableWarning = () => {
+    if (isFetched && !options.length) {
+      return (
+        <>
+          <EuiCallOut color="warning" size="s" title={NO_AGENT_AVAILABLE_TITLE}>
+            <FormattedMessage
+              id={'xpack.osquery.agents.noAgentAvailableDescription'}
+              defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
+              values={{
+                docsLink: (
+                  <EuiLink
+                    href={`${docLinks.links.fleet.agentPolicy}#apply-a-policy`}
+                    target={'_blank'}
+                  >
+                    <FormattedMessage
+                      id={'xpack.osquery.agents.noAgentAvailableDescription.docsLink'}
+                      defaultMessage="Apply a policy"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div>
       <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
         <>
-          {isFetched && !options.length ? (
-            <>
-              <EuiCallOut color="warning" size="s" title={NO_AGENT_AVAILABLE_TITLE}>
-                <EuiText size="s">{NO_AGENT_AVAILABLE_DESCRIPTION}</EuiText>
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          ) : null}
+          {renderNoAgentAvailableWarning()}
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}
