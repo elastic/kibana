@@ -12,21 +12,30 @@ import userEvent from '@testing-library/user-event';
 import { ArrayInput } from './array_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
+import { InputProps } from '../types';
 
 const name = 'Some array field';
 const id = 'some:array:field';
 
 describe('ArrayInput', () => {
-  const defaultProps = {
-    id,
-    name,
-    ariaLabel: 'Test',
-    onChange: jest.fn(),
-    value: ['foo', 'bar'],
+  const onChange = jest.fn();
+  const defaultProps: InputProps<'array'> = {
+    onChange,
+    field: {
+      name,
+      type: 'array',
+      ariaAttributes: {
+        ariaLabel: name,
+      },
+      id,
+      isOverridden: false,
+      defaultValue: ['foo', 'bar'],
+    },
+    isSavingEnabled: true,
   };
 
   beforeEach(() => {
-    defaultProps.onChange.mockClear();
+    onChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -37,6 +46,18 @@ describe('ArrayInput', () => {
   it('renders an array of strings', () => {
     render(wrap(<ArrayInput {...defaultProps} />));
     expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toHaveValue('foo, bar');
+  });
+
+  it('renders saved value when present', () => {
+    render(
+      wrap(
+        <ArrayInput
+          {...defaultProps}
+          field={{ ...defaultProps.field, savedValue: ['foo', 'bar', 'baz'] }}
+        />
+      )
+    );
+    expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toHaveValue('foo, bar, baz');
   });
 
   it('formats array when blurred', () => {
@@ -63,11 +84,14 @@ describe('ArrayInput', () => {
       input.blur();
     });
 
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ value: ['foo', 'bar', 'baz'] });
+    expect(defaultProps.onChange).toHaveBeenCalledWith({
+      type: 'array',
+      unsavedValue: ['foo', 'bar', 'baz'],
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {
-    const { getByTestId } = render(wrap(<ArrayInput {...defaultProps} isDisabled />));
+    const { getByTestId } = render(wrap(<ArrayInput {...defaultProps} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toBeDisabled();
   });
