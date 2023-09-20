@@ -60,6 +60,8 @@ export {
   TextField,
   SelectField,
   ToggleField,
+  TextField,
+  NumericField,
   JsonEditorField,
   ComboBoxField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
