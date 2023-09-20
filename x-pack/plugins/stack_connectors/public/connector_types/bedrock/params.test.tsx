@@ -9,8 +9,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/bedrock/constants';
-import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
+import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
@@ -31,7 +30,7 @@ const messageVariables = [
   },
 ];
 
-describe('Gen AI Params Fields renders', () => {
+describe('Bedrock Params Fields renders', () => {
   test('all params fields are rendered', () => {
     const { getByTestId } = render(
       <BedrockParamsFields
@@ -49,50 +48,41 @@ describe('Gen AI Params Fields renders', () => {
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
-  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi])(
-    'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
-    (apiProvider) => {
-      const actionParams = {
-        subAction: undefined,
-        subActionParams: undefined,
-      };
-      const editAction = jest.fn();
-      const errors = {};
-      const actionConnector = {
-        secrets: {
-          apiKey: 'apiKey',
-        },
-        id: 'test',
-        actionTypeId: '.bedrock',
-        isPreconfigured: false,
-        isSystemAction: false as const,
-        isDeprecated: false,
-        name: 'My GenAI Connector',
-        config: {
-          apiProvider,
-          apiUrl: DEFAULT_URL,
-        },
-      };
-      render(
-        <BedrockParamsFields
-          actionParams={actionParams}
-          actionConnector={actionConnector}
-          editAction={editAction}
-          index={0}
-          messageVariables={messageVariables}
-          errors={errors}
-        />
-      );
-      expect(editAction).toHaveBeenCalledTimes(2);
-      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
-      if (apiProvider === OpenAiProviderType.OpenAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
-      }
-      if (apiProvider === OpenAiProviderType.AzureAi) {
-        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
-      }
-    }
-  );
+  test('useEffect handles the case when subAction and subActionParams are undefined', (apiProvider) => {
+    const actionParams = {
+      subAction: undefined,
+      subActionParams: undefined,
+    };
+    const editAction = jest.fn();
+    const errors = {};
+    const actionConnector = {
+      secrets: {
+        apiKey: 'apiKey',
+      },
+      id: 'test',
+      actionTypeId: '.bedrock',
+      isPreconfigured: false,
+      isSystemAction: false as const,
+      isDeprecated: false,
+      name: 'My GenAI Connector',
+      config: {
+        apiProvider,
+        apiUrl: DEFAULT_BEDROCK_URL,
+      },
+    };
+    render(
+      <BedrockParamsFields
+        actionParams={actionParams}
+        actionConnector={actionConnector}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />
+    );
+    expect(editAction).toHaveBeenCalledTimes(2);
+    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
+  });
 
   it('handles the case when subAction only is undefined', () => {
     const actionParams = {

@@ -76,16 +76,3 @@ export const INVALID_ACTION = i18n.translate(
     defaultMessage: 'Invalid action name.',
   }
 );
-
-export const USAGE_DASHBOARD_LINK = (connectorName: string) =>
-  i18n.translate('xpack.stackConnectors.components.bedrock.dashboardLink', {
-    values: { connectorName },
-    defaultMessage: 'View AWS Bedrock Usage Dashboard for "{ connectorName }" Connector',
-  });
-
-export const GET_DASHBOARD_API_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.bedrock.error.dashboardApiError',
-  {
-    defaultMessage: 'Error finding Generative AI Token Usage Dashboard.',
-  }
-);

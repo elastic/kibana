@@ -7,18 +7,10 @@
 
 import { BedrockConnector } from './bedrock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import {
-  DEFAULT_OPENAI_MODEL,
-  GEN_AI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '../../../common/bedrock/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  BedrockRunActionResponseSchema,
-  BedrockStreamingResponseSchema,
-} from '../../../common/bedrock/schema';
-import { initBedrockDashboard } from './create_dashboard';
+import { BedrockRunActionResponseSchema } from '../../../common/bedrock/schema';
+import { BEDROCK_CONNECTOR_ID, DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 jest.mock('./create_dashboard');
 
 describe('BedrockConnector', () => {
@@ -35,13 +27,12 @@ describe('BedrockConnector', () => {
   describe('OpenAI', () => {
     const connector = new BedrockConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: GEN_AI_CONNECTOR_ID },
+      connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_BEDROCK_MODEL,
       },
-      secrets: { apiKey: '123' },
+      secrets: { accessKey: '123', secret: 'secret' },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
@@ -69,7 +60,11 @@ describe('BedrockConnector', () => {
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+            stream: false,
+            model: DEFAULT_BEDROCK_MODEL,
+          }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
@@ -102,7 +97,11 @@ describe('BedrockConnector', () => {
           url: 'https://api.openai.com/v1/chat/completions',
           method: 'post',
           responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          data: JSON.stringify({
+            ...sampleOpenAiBody,
+            stream: false,
+            model: DEFAULT_BEDROCK_MODEL,
+          }),
           headers: {
             Authorization: 'Bearer 123',
             'content-type': 'application/json',
@@ -152,343 +151,6 @@ describe('BedrockConnector', () => {
           'API Error'
         );
       });
-    });
-
-    describe('streamApi', () => {
-      it('the OpenAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.streamApi({
-          body: JSON.stringify(sampleOpenAiBody),
-          stream: false,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.streamApi({
-          body: JSON.stringify(sampleOpenAiBody),
-          stream: true,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          responseType: 'stream',
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockStreamingResponseSchema,
-          data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({
-          headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
-        });
-      });
-
-      it('overrides stream parameter if set in the body with explicit stream parameter', async () => {
-        const body = {
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-          ],
-        };
-        const response = await connector.streamApi({
-          body: JSON.stringify({
-            ...body,
-            stream: false,
-          }),
-          stream: true,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          responseType: 'stream',
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'post',
-          responseSchema: BedrockStreamingResponseSchema,
-          data: JSON.stringify({
-            ...body,
-            stream: true,
-          }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({
-          headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
-        });
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        connector.request = mockError;
-
-        await expect(
-          connector.streamApi({ body: JSON.stringify(sampleOpenAiBody), stream: true })
-        ).rejects.toThrow('API Error');
-      });
-    });
-  });
-
-  describe('AzureAI', () => {
-    const connector = new BedrockConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: GEN_AI_CONNECTOR_ID },
-      config: {
-        apiUrl:
-          'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        apiProvider: OpenAiProviderType.AzureAi,
-      },
-      secrets: { apiKey: '123' },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
-
-    const sampleAzureAiBody = {
-      messages: [
-        {
-          role: 'user',
-          content: 'Hello world',
-        },
-      ],
-    };
-
-    beforeEach(() => {
-      // @ts-ignore
-      connector.request = mockRequest;
-      jest.clearAllMocks();
-    });
-
-    describe('runApi', () => {
-      it('test the AzureAI API call is successful with correct parameters', async () => {
-        const response = await connector.runApi({ body: JSON.stringify(sampleAzureAiBody) });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('overrides stream parameter if set in the body', async () => {
-        const body = {
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-          ],
-        };
-        const response = await connector.runApi({
-          body: JSON.stringify({ ...body, stream: true }),
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        connector.request = mockError;
-
-        await expect(connector.runApi({ body: JSON.stringify(sampleAzureAiBody) })).rejects.toThrow(
-          'API Error'
-        );
-      });
-    });
-
-    describe('streamApi', () => {
-      it('the AzureAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.streamApi({
-          body: JSON.stringify(sampleAzureAiBody),
-          stream: false,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: false }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({ result: 'success' });
-      });
-
-      it('the AzureAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.streamApi({
-          body: JSON.stringify(sampleAzureAiBody),
-          stream: true,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          responseType: 'stream',
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          method: 'post',
-          responseSchema: BedrockStreamingResponseSchema,
-          data: JSON.stringify({ ...sampleAzureAiBody, stream: true }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({
-          headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
-        });
-      });
-
-      it('overrides stream parameter if set in the body with explicit stream parameter', async () => {
-        const body = {
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-          ],
-        };
-        const response = await connector.streamApi({
-          body: JSON.stringify({ ...body, stream: false }),
-          stream: true,
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          responseType: 'stream',
-          url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-          method: 'post',
-          responseSchema: BedrockStreamingResponseSchema,
-          data: JSON.stringify({
-            ...body,
-            stream: true,
-          }),
-          headers: {
-            'api-key': '123',
-            'content-type': 'application/json',
-          },
-        });
-        expect(response).toEqual({
-          headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
-        });
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        connector.request = mockError;
-
-        await expect(
-          connector.streamApi({ body: JSON.stringify(sampleAzureAiBody), stream: true })
-        ).rejects.toThrow('API Error');
-      });
-    });
-  });
-
-  describe('Token dashboard', () => {
-    const connector = new BedrockConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: GEN_AI_CONNECTOR_ID },
-      config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
-      secrets: { apiKey: '123' },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
-    const mockBedrock = initBedrockDashboard as jest.Mock;
-    beforeEach(() => {
-      // @ts-ignore
-      connector.esClient.transport.request = mockRequest;
-      mockRequest.mockResolvedValue({ has_all_requested: true });
-      mockBedrock.mockResolvedValue({ success: true });
-      jest.clearAllMocks();
-    });
-    it('the create dashboard API call returns available: true when user has correct permissions', async () => {
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: true });
-    });
-    it('the create dashboard API call returns available: false when user has correct permissions', async () => {
-      mockRequest.mockResolvedValue({ has_all_requested: false });
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: false });
-    });
-
-    it('the create dashboard API call returns available: false when init dashboard fails', async () => {
-      mockBedrock.mockResolvedValue({ success: false });
-      const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
-        body: {
-          index: [
-            {
-              names: ['.kibana-event-log-*'],
-              allow_restricted_indices: true,
-              privileges: ['read'],
-            },
-          ],
-        },
-      });
-      expect(response).toEqual({ available: false });
     });
   });
 });

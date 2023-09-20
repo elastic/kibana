@@ -115,5 +115,3 @@ export const bedrockSecrets: SecretsFieldSchema[] = [
     ),
   },
 ];
-
-export const getDashboardId = (spaceId: string): string => `aws-bedrock-token-usage-${spaceId}`;

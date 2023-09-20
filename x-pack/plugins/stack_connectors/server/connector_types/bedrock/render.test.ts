@@ -17,7 +17,7 @@ const params = {
 
 const variables = { domain: 'm0zepcuuu2' };
 
-describe('GenAI - renderParameterTemplates', () => {
+describe('Bedrock - renderParameterTemplates', () => {
   it('should not render body on test action', () => {
     const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
     const result = renderParameterTemplates(testParams, variables);

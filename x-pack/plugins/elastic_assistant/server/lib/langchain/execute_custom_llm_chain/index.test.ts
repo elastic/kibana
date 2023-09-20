@@ -8,7 +8,7 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-import { ResponseBody } from '../helpers';
+import { ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { mockActionResultData } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';

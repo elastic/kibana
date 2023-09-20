@@ -8,40 +8,26 @@
 import React from 'react';
 import BedrockConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/bedrock/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useGetDashboard } from './use_get_dashboard';
+import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('./use_get_dashboard');
-
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockDashboard = useGetDashboard as jest.Mock;
-const openAiConnector = {
+const bedrockConnector = {
   actionTypeId: '.bedrock',
   name: 'bedrock',
   id: '123',
   config: {
-    apiUrl: 'https://openaiurl.com',
-    apiProvider: OpenAiProviderType.OpenAi,
-    defaultModel: DEFAULT_OPENAI_MODEL,
+    apiUrl: 'https://bedrockurl.com',
+    defaultModel: DEFAULT_BEDROCK_MODEL,
   },
   secrets: {
-    apiKey: 'thats-a-nice-looking-key',
+    accessKey: 'thats-a-nice-looking-key',
+    secret: 'thats-a-nice-looking-secret',
   },
   isDeprecated: false,
-};
-const azureConnector = {
-  ...openAiConnector,
-  config: {
-    apiUrl: 'https://azureaiurl.com',
-    apiProvider: OpenAiProviderType.AzureAi,
-  },
-  secrets: {
-    apiKey: 'thats-a-nice-looking-key',
-  },
 };
 
 const navigateToUrl = jest.fn();
@@ -50,13 +36,10 @@ describe('BedrockConnectorFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
-    mockDashboard.mockImplementation(({ connectorId }) => ({
-      dashboardUrl: `https://dashboardurl.com/${connectorId}`,
-    }));
   });
   test('open ai connector fields are rendered', async () => {
     const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={openAiConnector}>
+      <ConnectorFormTestProvider connector={bedrockConnector}>
         <BedrockConnectorFields
           readOnly={false}
           isEdit={false}
@@ -65,89 +48,11 @@ describe('BedrockConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(openAiConnector.config.apiUrl);
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      openAiConnector.config.apiProvider
-    );
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(bedrockConnector.config.apiUrl);
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
-  test('azure ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={azureConnector}>
-        <BedrockConnectorFields
-          readOnly={false}
-          isEdit={false}
-          registerPreSubmitValidator={() => {}}
-        />
-      </ConnectorFormTestProvider>
-    );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(azureConnector.config.apiUrl);
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      azureConnector.config.apiProvider
-    );
-    expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
-  });
-
-  describe('Dashboard link', () => {
-    it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
-      const { queryByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <BedrockConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-      expect(queryByTestId('link-bedrock-token-dashboard')).not.toBeInTheDocument();
-    });
-    it('Does not render if isEdit is true and dashboardUrl is null', async () => {
-      mockDashboard.mockImplementation((id: string) => ({
-        dashboardUrl: null,
-      }));
-      const { queryByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <BedrockConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-      expect(queryByTestId('link-bedrock-token-dashboard')).not.toBeInTheDocument();
-    });
-    it('Renders if isEdit is true and dashboardUrl is defined', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <BedrockConnectorFields
-            readOnly={false}
-            isEdit={true}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-      expect(getByTestId('link-bedrock-token-dashboard')).toBeInTheDocument();
-    });
-    it('On click triggers redirect with correct saved object id', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <BedrockConnectorFields
-            readOnly={false}
-            isEdit={true}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-      fireEvent.click(getByTestId('link-bedrock-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
-    });
-  });
   describe('Validation', () => {
     const onSubmit = jest.fn();
 
@@ -157,7 +62,7 @@ describe('BedrockConnectorFields renders', () => {
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={bedrockConnector} onSubmit={onSubmit}>
           <BedrockConnectorFields
             readOnly={false}
             isEdit={false}
@@ -175,16 +80,16 @@ describe('BedrockConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: openAiConnector,
+        data: bedrockConnector,
         isValid: true,
       });
     });
 
     it('validates correctly if the apiUrl is empty', async () => {
       const connector = {
-        ...openAiConnector,
+        ...bedrockConnector,
         config: {
-          ...openAiConnector.config,
+          ...bedrockConnector.config,
           apiUrl: '',
         },
       };
@@ -211,13 +116,13 @@ describe('BedrockConnectorFields renders', () => {
 
     const tests: Array<[string, string]> = [
       ['config.apiUrl-input', 'not-valid'],
-      ['secrets.apiKey-input', ''],
+      ['secrets.accessKey-input', ''],
     ];
     it.each(tests)('validates correctly %p', async (field, value) => {
       const connector = {
-        ...openAiConnector,
+        ...bedrockConnector,
         config: {
-          ...openAiConnector.config,
+          ...bedrockConnector.config,
           headers: [],
         },
       };

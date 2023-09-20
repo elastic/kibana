@@ -8,11 +8,9 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { aws4Interceptor } from 'aws4-axios';
-import { initBedrockDashboard } from './create_dashboard';
 import {
   BedrockRunActionParamsSchema,
   BedrockRunActionResponseSchema,
-  BedrockDashboardActionParamsSchema,
   InvokeAIActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import type {
@@ -22,12 +20,7 @@ import type {
   BedrockRunActionResponse,
 } from '../../../common/bedrock/types';
 import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/constants';
-import {
-  BedrockDashboardActionParams,
-  BedrockDashboardActionResponse,
-  InvokeAIActionParams,
-  InvokeAIActionResponse,
-} from '../../../common/bedrock/types';
+import { InvokeAIActionParams, InvokeAIActionResponse } from '../../../common/bedrock/types';
 
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
   private url;
@@ -71,12 +64,6 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.DASHBOARD,
-      method: 'getDashboard',
-      schema: BedrockDashboardActionParamsSchema,
     });
   }
 
@@ -124,37 +111,5 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
 
     const res = await this.runApi({ body: JSON.stringify(req) });
     return res.completion.trim();
-  }
-
-  public async getDashboard({
-    dashboardId,
-  }: BedrockDashboardActionParams): Promise<BedrockDashboardActionResponse> {
-    // TODO: implement dashboard
-    return { available: false };
-    const privilege = (await this.esClient.transport.request({
-      path: '/_security/user/_has_privileges',
-      method: 'POST',
-      body: {
-        index: [
-          {
-            names: ['.kibana-event-log-*'],
-            allow_restricted_indices: true,
-            privileges: ['read'],
-          },
-        ],
-      },
-    })) as { has_all_requested: boolean };
-
-    if (!privilege?.has_all_requested) {
-      return { available: false };
-    }
-
-    const response = await initBedrockDashboard({
-      logger: this.logger,
-      savedObjectsClient: this.savedObjectsClient,
-      dashboardId,
-    });
-
-    return { available: response.success };
   }
 }
