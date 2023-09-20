@@ -47,6 +47,7 @@ export function FlyoutContainer({
   panelContainerRef,
   children,
   customFooter,
+  isInlineEditing,
 }: {
   isOpen: boolean;
   handleClose: () => boolean;
@@ -56,6 +57,7 @@ export function FlyoutContainer({
   panelRef?: (el: HTMLDivElement) => void;
   panelContainerRef?: (el: HTMLDivElement) => void;
   customFooter?: React.ReactElement;
+  isInlineEditing?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
@@ -109,6 +111,20 @@ export function FlyoutContainer({
         >
           <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              {isInlineEditing && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-dimensionContainerBack"
+                    className="lnsDimensionContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="sortLeft"
+                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                      defaultMessage: 'Close configuration',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={true}>
                 <EuiTitle size="xs">
                   <h2
@@ -125,18 +141,20 @@ export function FlyoutContainer({
                 </EuiTitle>
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  data-test-subj="lns-indexPattern-dimensionContainerBack"
-                  className="lnsDimensionContainer__backIcon"
-                  onClick={closeFlyout}
-                  iconType="cross"
-                  aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
-                    defaultMessage: 'Close configuration',
-                  })}
-                />
-              </EuiFlexItem>
+              {!isInlineEditing && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-dimensionContainerBack"
+                    className="lnsDimensionContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="cross"
+                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                      defaultMessage: 'Close configuration',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
@@ -147,13 +165,17 @@ export function FlyoutContainer({
               <EuiButtonEmpty
                 flush="left"
                 size="s"
-                iconType="cross"
+                iconType={isInlineEditing ? 'sortLeft' : 'cross'}
                 onClick={closeFlyout}
                 data-test-subj="lns-indexPattern-dimensionContainerClose"
               >
-                {i18n.translate('xpack.lens.dimensionContainer.close', {
-                  defaultMessage: 'Close',
-                })}
+                {isInlineEditing
+                  ? i18n.translate('xpack.lens.dimensionContainer.back', {
+                      defaultMessage: 'Back',
+                    })
+                  : i18n.translate('xpack.lens.dimensionContainer.close', {
+                      defaultMessage: 'Close',
+                    })}
               </EuiButtonEmpty>
             </EuiFlyoutFooter>
           )}
