@@ -29,6 +29,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
     "@kbn/ebt-tools",
+    "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": ["target/**/*"]
 }

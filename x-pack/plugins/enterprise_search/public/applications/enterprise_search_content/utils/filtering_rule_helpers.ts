@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringPolicy, FilteringRuleRule } from '../../../../common/types/connectors';
+import { FilteringPolicy, FilteringRuleRule } from '@kbn/search-connectors';
 
 const filteringRuleStringMap: Record<FilteringRuleRule, string> = {
   [FilteringRuleRule.CONTAINS]: i18n.translate(

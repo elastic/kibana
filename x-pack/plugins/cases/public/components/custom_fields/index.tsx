@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { ListOption } from './draggable';
-import { Draggable } from './draggable';
+import { CustomFieldsList } from './custom_fields_list';
+
 export interface Props {
   customFields: CustomFieldsConfiguration;
   disabled: boolean;
@@ -29,19 +29,14 @@ const CustomFieldsComponent: React.FC<Props> = ({
   const { permissions } = useCasesContext();
   const canAddCustomFields = permissions.create && permissions.update;
 
-  const currentListValues: ListOption[] = useMemo(() => {
-    if (!customFields) {
-      return [];
-    }
-
-    return customFields.map((field) => {
-      return {
-        id: field.key,
-        content: field.label,
-        type: field.type,
-      };
-    });
-  }, [customFields]);
+  const renderBody = customFields?.length ? (
+    <CustomFieldsList customFields={customFields} />
+  ) : (
+    <>
+      <EuiSpacer size="m" />
+      {i18n.NO_CUSTOM_FIELDS}
+    </>
+  );
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
@@ -67,16 +62,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
             max-width: none;
           }
         `}
-        body={
-          customFields?.length ? (
-            <Draggable listValues={currentListValues} />
-          ) : (
-            <>
-              <EuiSpacer size="m" />
-              {i18n.NO_CUSTOM_FIELDS}
-            </>
-          )
-        }
+        body={renderBody}
         actions={
           <EuiButtonEmpty
             isLoading={isLoading}

@@ -214,16 +214,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('collapse expand', function () {
       it('should initially be expanded', async function () {
         await testSubjects.existOrFail('discover-sidebar');
+        await testSubjects.existOrFail('fieldList');
       });
 
       it('should collapse when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
-        await testSubjects.missingOrFail('discover-sidebar');
+        await testSubjects.existOrFail('discover-sidebar');
+        await testSubjects.missingOrFail('fieldList');
       });
 
       it('should expand when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
         await testSubjects.existOrFail('discover-sidebar');
+        await testSubjects.existOrFail('fieldList');
       });
     });
 

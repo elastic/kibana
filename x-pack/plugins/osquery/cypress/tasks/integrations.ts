@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -125,7 +126,7 @@ export const deleteIntegrations = async (integrationName: string) => {
     .then(() => {
       cy.request({
         url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
         method: 'POST',
       });
@@ -135,7 +136,7 @@ export const deleteIntegrations = async (integrationName: string) => {
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
     url: `/api/fleet/epm/packages/${integration}-${version}`,
-    headers: { 'kbn-xsrf': 'cypress' },
+    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
     body: '{ "force": true }',
     method: 'POST',
   });

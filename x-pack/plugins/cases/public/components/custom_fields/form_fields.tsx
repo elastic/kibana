@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { CustomFieldType } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -58,7 +58,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     <>
       <UseField
         path="label"
-        component={Field}
+        component={TextField}
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'custom-field-label-input',

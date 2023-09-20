@@ -237,6 +237,8 @@ describe('Task Runner', () => {
     logger.get.mockImplementation(() => logger);
 
     ruleType.executor.mockResolvedValue({ state: {} });
+
+    actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
   test('successfully executes the task', async () => {
@@ -299,7 +301,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -381,7 +383,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -469,7 +471,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -723,7 +725,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1168,7 +1170,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -1295,7 +1297,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}`
+        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`
       );
 
       testAlertingEventLogCalls({
@@ -1490,7 +1492,7 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
     }
   );
@@ -1562,7 +1564,7 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
       expect(result.state.summaryActions).toEqual({
         '111-111': { date: new Date(DATE_1970).toISOString() },
@@ -2440,7 +2442,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -2962,7 +2964,7 @@ describe('Task Runner', () => {
       status: 'warning',
       errorReason: `maxExecutableActions`,
       logAlert: 4,
-      logAction: 5,
+      logAction: 3,
     });
   });
 
@@ -3146,6 +3148,7 @@ describe('Task Runner', () => {
     logAlert = 0,
     logAction = 0,
     hasReachedAlertLimit = false,
+    hasReachedQueuedActionsLimit = false,
   }: {
     status: string;
     ruleContext?: RuleContextOpts;
@@ -3162,6 +3165,7 @@ describe('Task Runner', () => {
     errorReason?: string;
     errorMessage?: string;
     hasReachedAlertLimit?: boolean;
+    hasReachedQueuedActionsLimit?: boolean;
   }) {
     expect(alertingEventLogger.initialize).toHaveBeenCalledWith(ruleContext);
     if (status !== 'skip') {
@@ -3215,6 +3219,7 @@ describe('Task Runner', () => {
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'partial',
+          hasReachedQueuedActionsLimit,
         },
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
@@ -3250,6 +3255,7 @@ describe('Task Runner', () => {
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'complete',
+          hasReachedQueuedActionsLimit,
         },
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),

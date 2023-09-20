@@ -389,6 +389,7 @@ export interface DocLinks {
     searchPreference: string;
     securityApis: string;
     simulatePipeline: string;
+    tasks: string;
     timeUnits: string;
     unfreezeIndex: string;
     updateTransform: string;
@@ -489,6 +490,7 @@ export interface DocLinks {
     guide: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
+    esSettings: string;
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;

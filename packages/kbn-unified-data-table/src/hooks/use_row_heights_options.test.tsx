@@ -11,8 +11,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { useRowHeightsOptions } from './use_row_heights_options';
 
-const CONFIG_ROW_HEIGHT = 3;
-
 describe('useRowHeightsOptions', () => {
   test('should apply rowHeight from savedSearch', () => {
     const { result } = renderHook(() => {
@@ -32,7 +30,7 @@ describe('useRowHeightsOptions', () => {
         storage: new LocalStorageMock({
           ['discover:dataGridRowHeight']: {
             previousRowHeight: 5,
-            previousConfigRowHeight: 3,
+            previousConfigRowHeight: -1,
           },
         }) as unknown as Storage,
         consumer: 'discover',
@@ -52,7 +50,7 @@ describe('useRowHeightsOptions', () => {
     });
 
     expect(result.current.defaultHeight).toEqual({
-      lineCount: CONFIG_ROW_HEIGHT,
+      lineCount: 3,
     });
   });
 
@@ -61,8 +59,8 @@ describe('useRowHeightsOptions', () => {
       return useRowHeightsOptions({
         storage: new LocalStorageMock({
           ['discover:dataGridRowHeight']: {
-            previousRowHeight: 4,
-            // different from uiSettings (config), now user changed it to 3, but prev was 4
+            previousRowHeight: 5,
+            // different from uiSettings (config), now user changed it to -1, but prev was 4
             previousConfigRowHeight: 4,
           },
         }) as unknown as Storage,
@@ -70,8 +68,6 @@ describe('useRowHeightsOptions', () => {
       });
     });
 
-    expect(result.current.defaultHeight).toEqual({
-      lineCount: CONFIG_ROW_HEIGHT,
-    });
+    expect(result.current.defaultHeight).toEqual('auto');
   });
 });

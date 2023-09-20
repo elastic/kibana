@@ -28,8 +28,9 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 // Flaky in serverless tests
-describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -42,6 +43,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInSer
     cy.task('esArchiverResetKibana');
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161540
   describe.skip('Last response filter', () => {
     // Flaky in serverless tests
     // @brokenInServerless tag is not working so a skip was needed

@@ -36,7 +36,7 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
 
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-describe('Artifact pages', () => {
+describe('Artifact pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -61,6 +61,7 @@ describe('Artifact pages', () => {
 
     // wait for ManifestManager to pick up artifact changes that happened either here
     // or in a previous test suite `after`
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(6000); //  packagerTaskInterval + 1s
 
     yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {

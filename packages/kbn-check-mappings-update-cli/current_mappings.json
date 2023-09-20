@@ -42,6 +42,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -3019,6 +3023,14 @@
             "type": "keyword"
           }
         }
+      }
+    }
+  },
+  "policy-settings-protection-updates-note": {
+    "properties": {
+      "note": {
+        "type": "text",
+        "index": false
       }
     }
   },

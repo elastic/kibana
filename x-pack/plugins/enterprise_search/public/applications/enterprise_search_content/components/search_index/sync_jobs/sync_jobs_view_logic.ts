@@ -9,9 +9,10 @@ import { kea, MakeLogicType } from 'kea';
 
 import moment from 'moment';
 
+import { ConnectorSyncJob } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
 import { Page, Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {

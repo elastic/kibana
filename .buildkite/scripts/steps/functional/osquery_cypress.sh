@@ -14,5 +14,4 @@ echo "--- Osquery Cypress tests"
 
 cd x-pack/plugins/osquery
 
-set +e
-yarn cypress:run; status=$?; yarn junit:merge && exit $status
+yarn --cwd x-pack/plugins/osquery cypress:run

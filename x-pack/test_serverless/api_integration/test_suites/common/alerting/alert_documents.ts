@@ -46,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
       objectRemover.add('default', ruleId, 'rule', 'alerting');
 
       // get the first alert document written
@@ -174,7 +173,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
       objectRemover.add('default', ruleId, 'rule', 'alerting');
 
       // get the first alert document written

@@ -13,7 +13,7 @@ const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const { dashboard, discover, common, timePicker } = getPageObjects([
+  const { dashboard, discover, timePicker } = getPageObjects([
     'dashboard',
     'discover',
     'common',
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
 
     before('start on Dashboard landing page', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
     });
 
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('clean-up custom time range on panel', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('carries over panel time range', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
 
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 

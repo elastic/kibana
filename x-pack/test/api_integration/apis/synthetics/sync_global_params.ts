@@ -24,7 +24,7 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 export default function ({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/162594
   // Failing: See https://github.com/elastic/kibana/issues/162594
-  describe.skip('SyncGlobalParams', function () {
+  describe('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const kServer = getService('kibanaServer');
@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
+      await kServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
 
       _browserMonitorJson = getFixtureJson('browser_monitor');

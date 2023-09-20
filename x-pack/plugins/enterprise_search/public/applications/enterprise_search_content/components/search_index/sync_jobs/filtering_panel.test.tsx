@@ -9,11 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import {
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-} from '../../../../../../common/types/connectors';
+import { FilteringPolicy, FilteringRule, FilteringRuleRule } from '@kbn/search-connectors';
 
 import { FilteringPanel } from './filtering_panel';
 

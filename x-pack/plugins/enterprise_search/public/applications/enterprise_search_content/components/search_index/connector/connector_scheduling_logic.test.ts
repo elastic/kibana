@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { SyncJobType } from '../../../../../../common/types/connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 

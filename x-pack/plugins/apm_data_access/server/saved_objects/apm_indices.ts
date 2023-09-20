@@ -23,6 +23,7 @@ export interface APMIndicesSavedObjectBody {
     span?: string;
     transaction?: string;
     metric?: string;
+    sourcemap?: string;
   };
   isSpaceAware?: boolean;
 }
