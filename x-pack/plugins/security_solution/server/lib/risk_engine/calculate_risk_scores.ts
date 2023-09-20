@@ -158,7 +158,7 @@ const buildIdentifierTypeAggregation = ({
     aggs: {
       inputs: {
         top_hits: {
-          size: 10,
+          size: 5,
           sort: { [ALERT_RISK_SCORE]: 'desc' },
           _source: false,
           docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
