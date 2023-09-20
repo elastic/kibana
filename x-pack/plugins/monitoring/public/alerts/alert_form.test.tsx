@@ -27,6 +27,7 @@ import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/secti
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface AlertAction {
   group: string;
@@ -50,6 +51,15 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 const initLegacyShims = () => {
   const triggersActionsUi = {
@@ -233,28 +243,31 @@ describe('alert_form', () => {
 
         const actionWrapper = mount(
           <I18nProvider>
-            <KibanaReactContext.Provider>
-              <ActionForm
-                actions={initialAlert.actions}
-                defaultActionGroupId={'default'}
-                setActionIdByIndex={(id: string, index: number) => {
-                  initialAlert.actions[index].id = id;
-                }}
-                setActions={(_updatedActions: AlertAction[]) => {}}
-                setActionParamsProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                actionTypeRegistry={actionTypeRegistry}
-                featureId="alerting"
-                producerId="alerting"
-              />
-            </KibanaReactContext.Provider>
+            <QueryClientProvider client={queryClient}>
+              <KibanaReactContext.Provider>
+                <ActionForm
+                  ruleTypeId="test"
+                  actions={initialAlert.actions}
+                  defaultActionGroupId={'default'}
+                  setActionIdByIndex={(id: string, index: number) => {
+                    initialAlert.actions[index].id = id;
+                  }}
+                  setActions={(_updatedActions: AlertAction[]) => {}}
+                  setActionParamsProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  actionTypeRegistry={actionTypeRegistry}
+                  featureId="alerting"
+                  producerId="alerting"
+                />
+              </KibanaReactContext.Provider>
+            </QueryClientProvider>
           </I18nProvider>
         );
 
