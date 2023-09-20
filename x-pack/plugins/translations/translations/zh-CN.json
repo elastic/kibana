@@ -18554,7 +18554,7 @@
     "xpack.infra.logSourceConfiguration.missingDataViewsLabel": "缺少数据视图 {indexPatternId}",
     "xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage": "数据视图必须包含 {messageField} 字段。",
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "无法找到该{savedObjectType}：{savedObjectId}",
-    "xpack.infra.metadataEmbeddable.errorMessage": "加载数据时出错。尝试{reload}并再次打开主机详情。",
+    "xpack.infra.metadataEmbeddable.errorMessage": "加载数据时出错。尝试{refetch}并再次打开主机详情。",
     "xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle": "过去 {lookback} {timeLabel}",
     "xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError": "此规则可能针对低于预期的 {matchedGroups} 告警，因为筛选查询包含{groupCount, plural, other {这些字段}}的匹配项。有关更多信息，请参阅 {filteringAndGroupingLink}。",
     "xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel": "聚合 {name}",
