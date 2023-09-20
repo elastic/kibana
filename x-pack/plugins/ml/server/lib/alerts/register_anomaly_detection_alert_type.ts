@@ -97,7 +97,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
         array: false,
         required: true,
       },
-      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.INTEGER, array: false, required: false },
+      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.DOUBLE, array: false, required: false },
       [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },
       [ALERT_ANOMALY_TIMESTAMP]: { type: ES_FIELD_TYPES.DATE, array: false, required: false },
       [ALERT_TOP_RECORDS]: {
