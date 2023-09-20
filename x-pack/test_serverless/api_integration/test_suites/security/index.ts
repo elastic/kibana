@@ -13,6 +13,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./telemetry/telemetry_config'));
     loadTestFile(require.resolve('./fleet/fleet'));
     loadTestFile(require.resolve('./cases'));
-    loadTestFile(require.resolve('./detection_engine'));
   });
 }

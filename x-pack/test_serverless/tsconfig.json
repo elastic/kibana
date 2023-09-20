@@ -58,8 +58,5 @@
     "@kbn/serverless-observability-settings",
     "@kbn/serverless-search-settings",
     "@kbn/serverless-security-settings",
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/lists-plugin",
-    "@kbn/securitysolution-list-constants",
   ]
 }
