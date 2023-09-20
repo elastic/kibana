@@ -1,0 +1,2653 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution hosts metric" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "416b6fad-1923-4f6a-a2df-b223bb287e30": Object {
+                "columnOrder": Array [
+                  "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+                ],
+                "columns": Object {
+                  "b00c65ea-32be-4163-bfc8-f795b1ef9d06": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": " Hosts",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "host.name",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+          "layerId": "416b6fad-1923-4f6a-a2df-b223bb287e30",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 7,
+    "i": "7cd92d82-5db5-4f16-8e23-7412949c3255",
+    "w": 12,
+    "x": 0,
+    "y": 0,
+  },
+  "panelIndex": "7cd92d82-5db5-4f16-8e23-7412949c3255",
+  "title": "Security Solution hosts metric",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample alerts data" 1`] = `
+Object {
+  "attributes": Object {
+    "description": "",
+    "references": Array [
+      Object {
+        "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+        "name": "indexpattern-datasource-layer-a578b0a4-d2d8-4e74-9ff2-c371933b26e8",
+        "type": "index-pattern",
+      },
+    ],
+    "state": Object {
+      "adHocDataViews": Object {},
+      "datasourceStates": Object {
+        "formBased": Object {
+          "layers": Object {
+            "a578b0a4-d2d8-4e74-9ff2-c371933b26e8": Object {
+              "columnOrder": Array [
+                "34919782-4546-43a5-b668-06ac934d3acd",
+                "aac9d7d0-13a3-480a-892b-08207a787926",
+                "e09e0380-0740-4105-becc-0a4ca12e3944",
+              ],
+              "columns": Object {
+                "34919782-4546-43a5-b668-06ac934d3acd": Object {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Top values of kibana.alert.rule.name",
+                  "operationType": "terms",
+                  "params": Object {
+                    "missingBucket": false,
+                    "orderBy": Object {
+                      "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                      "type": "column",
+                    },
+                    "orderDirection": "desc",
+                    "otherBucket": true,
+                    "parentFormat": Object {
+                      "id": "terms",
+                    },
+                    "secondaryFields": Array [],
+                    "size": 1000,
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "kibana.alert.rule.name",
+                },
+                "aac9d7d0-13a3-480a-892b-08207a787926": Object {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": Object {
+                    "interval": "auto",
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp",
+                },
+                "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                },
+              },
+              "incompleteColumns": Object {},
+            },
+          },
+        },
+      },
+      "filters": Array [
+        Object {
+          "$state": Object {
+            "store": "appState",
+          },
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "key": "kibana.alert.building_block_type",
+            "negate": true,
+            "type": "exists",
+          },
+          "query": Object {
+            "exists": Object {
+              "field": "kibana.alert.building_block_type",
+            },
+          },
+        },
+        Object {
+          "$state": Object {
+            "store": "appState",
+          },
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "key": "_index",
+            "negate": false,
+            "params": Array [
+              ".alerts-security.alerts-test",
+            ],
+            "type": "phrases",
+          },
+          "query": Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match_phrase": Object {
+                    "_index": ".alerts-security.alerts-test",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+      "internalReferences": Array [],
+      "query": Object {
+        "language": "kuery",
+        "query": "",
+      },
+      "visualization": Object {
+        "axisTitlesVisibilitySettings": Object {
+          "x": false,
+          "yLeft": false,
+          "yRight": true,
+        },
+        "layers": Array [
+          Object {
+            "accessors": Array [
+              "e09e0380-0740-4105-becc-0a4ca12e3944",
+            ],
+            "layerId": "a578b0a4-d2d8-4e74-9ff2-c371933b26e8",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+            "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+          },
+        ],
+        "legend": Object {
+          "isVisible": true,
+          "legendSize": "xlarge",
+          "position": "right",
+        },
+        "preferredSeriesType": "bar_stacked",
+        "title": "Empty XY chart",
+        "valueLabels": "hide",
+        "valuesInLegend": true,
+        "yLeftExtent": Object {
+          "mode": "full",
+        },
+        "yRightExtent": Object {
+          "mode": "full",
+        },
+      },
+    },
+    "title": "Security Solution sample alerts data",
+    "type": "lens",
+    "visualizationType": "lnsXY",
+  },
+  "enhancements": Object {},
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data DNS queries" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "13394812-83b1-4e55-81c0-a3e5f99014f2",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "cea37c70-8f91-43bf-b9fe-72d8c049f6a3": Object {
+                "columnOrder": Array [
+                  "0374e520-eae0-4ac1-bcfe-37565e7fc9e3",
+                ],
+                "columns": Object {
+                  "0374e520-eae0-4ac1-bcfe-37565e7fc9e3": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "DNS queries",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "index": "13394812-83b1-4e55-81c0-a3e5f99014f2",
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+              "value": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"dns.question.name\\"}},{\\"term\\":{\\"suricata.eve.dns.type\\":{\\"value\\":\\"query\\"}}},{\\"exists\\":{\\"field\\":\\"zeek.dns.query\\"}}],\\"minimum_should_match\\":1}}",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "dns.question.name",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "suricata.eve.dns.type": Object {
+                        "value": "query",
+                      },
+                    },
+                  },
+                  Object {
+                    "exists": Object {
+                      "field": "zeek.dns.query",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "0374e520-eae0-4ac1-bcfe-37565e7fc9e3",
+          "autoScaleMetricAlignment": "left",
+          "colorMode": "None",
+          "layerId": "cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 7,
+    "i": "b6885441-daca-4e78-8afc-0c2ab0e6ebe6",
+    "w": 12,
+    "x": 24,
+    "y": 0,
+  },
+  "panelIndex": "b6885441-daca-4e78-8afc-0c2ab0e6ebe6",
+  "title": "Security Solution sample data DNS queries",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data host area chart" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "416b6fad-1923-4f6a-a2df-b223bb287e30": Object {
+                "columnOrder": Array [
+                  "5eea817b-67b7-4268-8ecb-7688d1094721",
+                  "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+                ],
+                "columns": Object {
+                  "5eea817b-67b7-4268-8ecb-7688d1094721": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                  "b00c65ea-32be-4163-bfc8-f795b1ef9d06": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Unique count of host.name",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "host.name",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": false,
+          },
+          "fittingFunction": "None",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "b00c65ea-32be-4163-bfc8-f795b1ef9d06",
+              ],
+              "layerId": "416b6fad-1923-4f6a-a2df-b223bb287e30",
+              "layerType": "data",
+              "seriesType": "area",
+              "xAccessor": "5eea817b-67b7-4268-8ecb-7688d1094721",
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "legendSize": "xlarge",
+            "position": "right",
+            "showSingleSeries": true,
+          },
+          "preferredSeriesType": "area",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "683374cb-6216-4bed-9e83-f30f0fe207a8",
+    "w": 24,
+    "x": 24,
+    "y": 60,
+  },
+  "panelIndex": "683374cb-6216-4bed-9e83-f30f0fe207a8",
+  "title": "Security Solution sample data host area chart",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data network events" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-eaadfec7-deaa-4aeb-a403-3b4e516416d2",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "eaadfec7-deaa-4aeb-a403-3b4e516416d2": Object {
+                "columnOrder": Array [
+                  "370ebd07-5ce0-4f46-a847-0e363c50d037",
+                ],
+                "columns": Object {
+                  "370ebd07-5ce0-4f46-a847-0e363c50d037": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": " Network events",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "index": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+              "key": "source.ip",
+              "negate": false,
+              "type": "exists",
+            },
+            "query": Object {
+              "exists": Object {
+                "field": "source.ip",
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "index": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+              "key": "destination.ip",
+              "negate": false,
+              "type": "exists",
+            },
+            "query": Object {
+              "exists": Object {
+                "field": "destination.ip",
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "370ebd07-5ce0-4f46-a847-0e363c50d037",
+          "autoScaleMetricAlignment": "left",
+          "layerId": "eaadfec7-deaa-4aeb-a403-3b4e516416d2",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 7,
+    "i": "4b4950a6-76db-43a7-8a93-d87428d4ee73",
+    "w": 12,
+    "x": 12,
+    "y": 0,
+  },
+  "panelIndex": "4b4950a6-76db-43a7-8a93-d87428d4ee73",
+  "title": "Security Solution sample data network events",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data unique IPs area chart" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-ca05ecdb-0fa4-49a8-9305-b23d91012a46",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
+                "columnOrder": Array [
+                  "a0cb6400-f708-46c3-ad96-24788f12dae4",
+                  "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+                ],
+                "columns": Object {
+                  "a0cb6400-f708-46c3-ad96-24788f12dae4": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                  "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Src.",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "source.ip",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+              "ca05ecdb-0fa4-49a8-9305-b23d91012a46": Object {
+                "columnOrder": Array [
+                  "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+                  "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+                ],
+                "columns": Object {
+                  "e7052671-fb9e-481f-8df3-7724c98cfc6f": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Dest.",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "destination.ip",
+                  },
+                  "f95e74e6-99dd-4b11-8faf-439b4d959df9": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "fittingFunction": "None",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+              ],
+              "layerId": "8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+              "layerType": "data",
+              "seriesType": "area",
+              "xAccessor": "a0cb6400-f708-46c3-ad96-24788f12dae4",
+              "yConfig": Array [
+                Object {
+                  "color": "#d36186",
+                  "forAccessor": "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+                },
+              ],
+            },
+            Object {
+              "accessors": Array [
+                "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+              ],
+              "layerId": "ca05ecdb-0fa4-49a8-9305-b23d91012a46",
+              "layerType": "data",
+              "seriesType": "area",
+              "xAccessor": "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+              "yConfig": Array [
+                Object {
+                  "color": "#9170b8",
+                  "forAccessor": "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+                },
+              ],
+            },
+          ],
+          "legend": Object {
+            "isVisible": false,
+            "position": "right",
+            "showSingleSeries": false,
+          },
+          "preferredSeriesType": "area",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "de1c52cf-033b-4e4d-a361-1e4786ec026f",
+    "w": 24,
+    "x": 24,
+    "y": 75,
+  },
+  "panelIndex": "de1c52cf-033b-4e4d-a361-1e4786ec026f",
+  "title": "Security Solution sample data unique IPs area chart",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data unique IPs" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
+                "columnOrder": Array [
+                  "f8bfa719-5c1c-4bf2-896e-c318d77fc08e",
+                  "32f66676-f4e1-48fd-b7f8-d4de38318601",
+                ],
+                "columns": Object {
+                  "32f66676-f4e1-48fd-b7f8-d4de38318601": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Unique count of source.ip",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "source.ip",
+                  },
+                  "f8bfa719-5c1c-4bf2-896e-c318d77fc08e": Object {
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Filters",
+                    "operationType": "filters",
+                    "params": Object {
+                      "filters": Array [
+                        Object {
+                          "input": Object {
+                            "language": "kuery",
+                            "query": "source.ip: *",
+                          },
+                          "label": "Src.",
+                        },
+                      ],
+                    },
+                    "scale": "ordinal",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+              "ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e": Object {
+                "columnOrder": Array [
+                  "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff",
+                  "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+                ],
+                "columns": Object {
+                  "b7e59b08-96e6-40d1-84fd-e97b977d1c47": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Unique count of destination.ip",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "destination.ip",
+                  },
+                  "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff": Object {
+                    "customLabel": true,
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Dest.",
+                    "operationType": "filters",
+                    "params": Object {
+                      "filters": Array [
+                        Object {
+                          "input": Object {
+                            "language": "kuery",
+                            "query": "destination.ip: *",
+                          },
+                          "label": "Dest.",
+                        },
+                      ],
+                    },
+                    "scale": "ordinal",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "fittingFunction": "None",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "32f66676-f4e1-48fd-b7f8-d4de38318601",
+              ],
+              "layerId": "8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+              "layerType": "data",
+              "seriesType": "bar_horizontal_stacked",
+              "xAccessor": "f8bfa719-5c1c-4bf2-896e-c318d77fc08e",
+              "yConfig": Array [
+                Object {
+                  "color": "#d36186",
+                  "forAccessor": "32f66676-f4e1-48fd-b7f8-d4de38318601",
+                },
+              ],
+            },
+            Object {
+              "accessors": Array [
+                "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+              ],
+              "layerId": "ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e",
+              "layerType": "data",
+              "seriesType": "bar_horizontal_stacked",
+              "xAccessor": "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff",
+              "yConfig": Array [
+                Object {
+                  "color": "#9170b8",
+                  "forAccessor": "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+                },
+              ],
+            },
+          ],
+          "legend": Object {
+            "isVisible": false,
+            "position": "right",
+            "showSingleSeries": false,
+          },
+          "preferredSeriesType": "bar_horizontal_stacked",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "cee0f71d-407e-4660-ac64-ae70d8216623",
+    "w": 24,
+    "x": 0,
+    "y": 60,
+  },
+  "panelIndex": "cee0f71d-407e-4660-ac64-ae70d8216623",
+  "title": "Security Solution sample data unique IPs",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data unique destination ip" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
+                "columnOrder": Array [
+                  "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+                ],
+                "columns": Object {
+                  "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "destination ",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "destination.ip",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+          "layerId": "8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 8,
+    "i": "243bcb45-f0d0-4327-84e4-cf57868d4dcb",
+    "w": 12,
+    "x": 12,
+    "y": 7,
+  },
+  "panelIndex": "243bcb45-f0d0-4327-84e4-cf57868d4dcb",
+  "title": "Security Solution sample data unique destination ip",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data user authentications area chart" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "31213ae3-905b-4e88-b987-0cccb1f3209f": Object {
+                "columnOrder": Array [
+                  "33a6163d-0c0a-451d-aa38-8ca6010dd5bf",
+                  "2b27c80e-a20d-46f1-8fb2-79626ef4563c",
+                ],
+                "columns": Object {
+                  "2b27c80e-a20d-46f1-8fb2-79626ef4563c": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "filter": Object {
+                      "language": "kuery",
+                      "query": "event.outcome: \\"failure\\" ",
+                    },
+                    "isBucketed": false,
+                    "label": "Fail",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                  "33a6163d-0c0a-451d-aa38-8ca6010dd5bf": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+              "4590dafb-4ac7-45aa-8641-47a3ff0b817c": Object {
+                "columnOrder": Array [
+                  "49a42fe6-ebe8-4adb-8eed-1966a5297b7e",
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7",
+                ],
+                "columns": Object {
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "filter": Object {
+                      "language": "kuery",
+                      "query": "event.outcome : \\"success\\" ",
+                    },
+                    "isBucketed": false,
+                    "label": "Succ.",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                  "49a42fe6-ebe8-4adb-8eed-1966a5297b7e": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "indexRefName": "filter-index-pattern-0",
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.category": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "fittingFunction": "None",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "0eb97c09-a351-4280-97da-944e4bd30dd7",
+              ],
+              "layerId": "4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+              "layerType": "data",
+              "seriesType": "area",
+              "xAccessor": "49a42fe6-ebe8-4adb-8eed-1966a5297b7e",
+              "yConfig": Array [
+                Object {
+                  "color": "#54b399",
+                  "forAccessor": "0eb97c09-a351-4280-97da-944e4bd30dd7",
+                },
+              ],
+            },
+            Object {
+              "accessors": Array [
+                "2b27c80e-a20d-46f1-8fb2-79626ef4563c",
+              ],
+              "layerId": "31213ae3-905b-4e88-b987-0cccb1f3209f",
+              "layerType": "data",
+              "seriesType": "area",
+              "xAccessor": "33a6163d-0c0a-451d-aa38-8ca6010dd5bf",
+              "yConfig": Array [
+                Object {
+                  "color": "#e7664c",
+                  "forAccessor": "2b27c80e-a20d-46f1-8fb2-79626ef4563c",
+                },
+              ],
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "position": "right",
+            "showSingleSeries": true,
+          },
+          "preferredSeriesType": "area",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "e3109518-0bfb-4692-8dce-c1b04b20938b",
+    "w": 24,
+    "x": 0,
+    "y": 75,
+  },
+  "panelIndex": "e3109518-0bfb-4692-8dce-c1b04b20938b",
+  "title": "Security Solution sample data user authentications area chart",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data user authentications failure" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "4590dafb-4ac7-45aa-8641-47a3ff0b817c": Object {
+                "columnOrder": Array [
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7",
+                ],
+                "columns": Object {
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "filter": Object {
+                      "language": "kuery",
+                      "query": "event.outcome : \\"failure\\" ",
+                    },
+                    "isBucketed": false,
+                    "label": " User authentication failures",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "indexRefName": "filter-index-pattern-0",
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.category": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "0eb97c09-a351-4280-97da-944e4bd30dd7",
+          "layerId": "4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 8,
+    "i": "5fdf5c11-57f0-440c-8d3e-c31068ed92c6",
+    "w": 12,
+    "x": 36,
+    "y": 7,
+  },
+  "panelIndex": "5fdf5c11-57f0-440c-8d3e-c31068ed92c6",
+  "title": "Security Solution sample data user authentication failure",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data user authentications success" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "4590dafb-4ac7-45aa-8641-47a3ff0b817c": Object {
+                "columnOrder": Array [
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7",
+                ],
+                "columns": Object {
+                  "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "filter": Object {
+                      "language": "kuery",
+                      "query": "event.outcome : \\"success\\" ",
+                    },
+                    "isBucketed": false,
+                    "label": " User authentications success",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "indexRefName": "filter-index-pattern-0",
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.category": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "0eb97c09-a351-4280-97da-944e4bd30dd7",
+          "layerId": "4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 8,
+    "i": "ccdb082f-0c2e-45ea-92ce-ee5d7689d89b",
+    "w": 12,
+    "x": 24,
+    "y": 7,
+  },
+  "panelIndex": "ccdb082f-0c2e-45ea-92ce-ee5d7689d89b",
+  "title": "Security Solution sample data user authentications success",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data user authentications" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-b9acd453-f476-4467-ad38-203e37b73e55",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "31213ae3-905b-4e88-b987-0cccb1f3209f": Object {
+                "columnOrder": Array [
+                  "430e690c-9992-414f-9bce-00812d99a5e7",
+                  "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+                ],
+                "columns": Object {
+                  "430e690c-9992-414f-9bce-00812d99a5e7": Object {
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Filters",
+                    "operationType": "filters",
+                    "params": Object {
+                      "filters": Array [
+                        Object {
+                          "input": Object {
+                            "language": "kuery",
+                            "query": "event.outcome : \\"success\\" ",
+                          },
+                          "label": "Succ.",
+                        },
+                      ],
+                    },
+                    "scale": "ordinal",
+                  },
+                  "938b445a-a291-4bbc-84fe-4f47b69c20e4": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Succ.",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+              "b9acd453-f476-4467-ad38-203e37b73e55": Object {
+                "columnOrder": Array [
+                  "e959c351-a3a2-4525-b244-9623f215a8fd",
+                  "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+                ],
+                "columns": Object {
+                  "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Fail",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                  "e959c351-a3a2-4525-b244-9623f215a8fd": Object {
+                    "customLabel": true,
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Fail",
+                    "operationType": "filters",
+                    "params": Object {
+                      "filters": Array [
+                        Object {
+                          "input": Object {
+                            "language": "kuery",
+                            "query": "event.outcome:\\"failure\\" ",
+                          },
+                          "label": "Fail",
+                        },
+                      ],
+                    },
+                    "scale": "ordinal",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "indexRefName": "filter-index-pattern-0",
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "term": Object {
+                      "event.category": "authentication",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "fittingFunction": "None",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+              ],
+              "layerId": "31213ae3-905b-4e88-b987-0cccb1f3209f",
+              "layerType": "data",
+              "seriesType": "bar_horizontal_stacked",
+              "xAccessor": "430e690c-9992-414f-9bce-00812d99a5e7",
+              "yConfig": Array [],
+            },
+            Object {
+              "accessors": Array [
+                "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+              ],
+              "layerId": "b9acd453-f476-4467-ad38-203e37b73e55",
+              "layerType": "data",
+              "seriesType": "bar_horizontal_stacked",
+              "xAccessor": "e959c351-a3a2-4525-b244-9623f215a8fd",
+              "yConfig": Array [
+                Object {
+                  "color": "#e7664c",
+                  "forAccessor": "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+                },
+              ],
+            },
+          ],
+          "legend": Object {
+            "isVisible": false,
+            "position": "right",
+            "showSingleSeries": false,
+          },
+          "preferredSeriesType": "bar_horizontal_stacked",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "2408f3c1-e896-4796-804b-7f9fe8d8e805",
+    "w": 24,
+    "x": 24,
+    "y": 45,
+  },
+  "panelIndex": "2408f3c1-e896-4796-804b-7f9fe8d8e805",
+  "title": "Security Solution sample data user authentications",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data users" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "416b6fad-1923-4f6a-a2df-b223bb287e30": Object {
+                "columnOrder": Array [
+                  "3e51b035-872c-4b44-824b-fe069c222e91",
+                ],
+                "columns": Object {
+                  "3e51b035-872c-4b44-824b-fe069c222e91": Object {
+                    "customLabel": true,
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": " Users",
+                    "operationType": "unique_count",
+                    "scale": "ratio",
+                    "sourceField": "user.name",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "accessor": "3e51b035-872c-4b44-824b-fe069c222e91",
+          "layerId": "416b6fad-1923-4f6a-a2df-b223bb287e30",
+          "layerType": "data",
+        },
+      },
+      "visualizationType": "lnsLegacyMetric",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 7,
+    "i": "b5686950-a649-45e6-a9d5-b09c2d029b5d",
+    "w": 12,
+    "x": 36,
+    "y": 0,
+  },
+  "panelIndex": "b5686950-a649-45e6-a9d5-b09c2d029b5d",
+  "title": "Security Solution sample data users",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample data" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "columns": Array [
+        "agent.type",
+        "ecs.version",
+        "event.kind",
+        "host.hostname",
+      ],
+      "grid": Object {},
+      "hideChart": false,
+      "isTextBasedQuery": false,
+      "kibanaSavedObjectMeta": Object {
+        "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"},\\"filter\\":[],\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+      },
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+        },
+      ],
+      "sort": Array [
+        Array [
+          "@timestamp",
+          "desc",
+        ],
+      ],
+      "timeRestore": false,
+      "usesAdHocDataView": false,
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "b900f09a-e19d-497b-b5cb-6ed2a6bd1a4a",
+    "w": 24,
+    "x": 0,
+    "y": 45,
+  },
+  "panelIndex": "b900f09a-e19d-497b-b5cb-6ed2a6bd1a4a",
+  "title": "Security Solution sample data",
+  "type": "search",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample events by actions" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-29bada9b-1e08-4752-9825-20e413fa2cd4",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "29bada9b-1e08-4752-9825-20e413fa2cd4": Object {
+                "columnOrder": Array [
+                  "34919782-4546-43a5-b668-06ac934d3acd",
+                  "aac9d7d0-13a3-480a-892b-08207a787926",
+                  "e09e0380-0740-4105-becc-0a4ca12e3944",
+                ],
+                "columns": Object {
+                  "34919782-4546-43a5-b668-06ac934d3acd": Object {
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Top values of event.action",
+                    "operationType": "terms",
+                    "params": Object {
+                      "missingBucket": false,
+                      "orderBy": Object {
+                        "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                        "type": "column",
+                      },
+                      "orderDirection": "desc",
+                      "otherBucket": true,
+                      "parentFormat": Object {
+                        "id": "terms",
+                      },
+                      "size": 10,
+                    },
+                    "scale": "ordinal",
+                    "sourceField": "event.action",
+                  },
+                  "aac9d7d0-13a3-480a-892b-08207a787926": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                  "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Count of records",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "host.name",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "must": Array [],
+                "must_not": Array [],
+                "should": Array [],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "host.name",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "kibana_sample_data_securitysolution_*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "kibana_sample_data_securitysolution_*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "e09e0380-0740-4105-becc-0a4ca12e3944",
+              ],
+              "layerId": "29bada9b-1e08-4752-9825-20e413fa2cd4",
+              "layerType": "data",
+              "position": "top",
+              "seriesType": "bar_stacked",
+              "showGridlines": false,
+              "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+              "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "legendSize": "xlarge",
+            "position": "right",
+          },
+          "preferredSeriesType": "bar_stacked",
+          "title": "Empty XY chart",
+          "valueLabels": "hide",
+          "valuesInLegend": true,
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "5bb44d4f-1e6b-4edb-b82a-18094fabe525",
+    "w": 24,
+    "x": 24,
+    "y": 30,
+  },
+  "panelIndex": "5bb44d4f-1e6b-4edb-b82a-18094fabe525",
+  "title": "Security Solution sample data events by actions",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard contains "Security Solution sample events by dataset" 1`] = `
+Object {
+  "embeddableConfig": Object {
+    "attributes": Object {
+      "description": "",
+      "references": Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "indexpattern-datasource-layer-29bada9b-1e08-4752-9825-20e413fa2cd4",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {},
+        "datasourceStates": Object {
+          "formBased": Object {
+            "layers": Object {
+              "29bada9b-1e08-4752-9825-20e413fa2cd4": Object {
+                "columnOrder": Array [
+                  "34919782-4546-43a5-b668-06ac934d3acd",
+                  "aac9d7d0-13a3-480a-892b-08207a787926",
+                  "e09e0380-0740-4105-becc-0a4ca12e3944",
+                ],
+                "columns": Object {
+                  "34919782-4546-43a5-b668-06ac934d3acd": Object {
+                    "dataType": "string",
+                    "isBucketed": true,
+                    "label": "Top values of event.dataset",
+                    "operationType": "terms",
+                    "params": Object {
+                      "missingBucket": false,
+                      "orderBy": Object {
+                        "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                        "type": "column",
+                      },
+                      "orderDirection": "desc",
+                      "otherBucket": true,
+                      "parentFormat": Object {
+                        "id": "terms",
+                      },
+                      "size": 10,
+                    },
+                    "scale": "ordinal",
+                    "sourceField": "event.dataset",
+                  },
+                  "aac9d7d0-13a3-480a-892b-08207a787926": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
+                  },
+                  "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                    "dataType": "number",
+                    "isBucketed": false,
+                    "label": "Count of records",
+                    "operationType": "count",
+                    "scale": "ratio",
+                    "sourceField": "___records___",
+                  },
+                },
+                "incompleteColumns": Object {},
+              },
+            },
+          },
+        },
+        "filters": Array [
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "query",
+              "negate": false,
+              "type": "custom",
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [],
+                "must": Array [],
+                "must_not": Array [],
+                "should": Array [],
+              },
+            },
+          },
+          Object {
+            "$state": Object {
+              "store": "appState",
+            },
+            "meta": Object {
+              "alias": null,
+              "disabled": false,
+              "key": "_index",
+              "negate": false,
+              "params": Array [
+                "auditbeat-*",
+                "logs-*",
+              ],
+              "type": "phrases",
+            },
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "auditbeat-*",
+                    },
+                  },
+                  Object {
+                    "match_phrase": Object {
+                      "_index": "logs-*",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": false,
+            "yLeft": false,
+            "yRight": true,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "e09e0380-0740-4105-becc-0a4ca12e3944",
+              ],
+              "layerId": "29bada9b-1e08-4752-9825-20e413fa2cd4",
+              "layerType": "data",
+              "position": "top",
+              "seriesType": "bar_stacked",
+              "showGridlines": false,
+              "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+              "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "legendSize": "xlarge",
+            "position": "right",
+          },
+          "preferredSeriesType": "bar_stacked",
+          "title": "Empty XY chart",
+          "valueLabels": "hide",
+          "valuesInLegend": true,
+          "yLeftExtent": Object {
+            "mode": "full",
+          },
+          "yRightExtent": Object {
+            "mode": "full",
+          },
+        },
+      },
+      "title": "Security Solution sample events by dataset",
+      "type": "lens",
+      "visualizationType": "lnsXY",
+    },
+    "enhancements": Object {},
+    "hidePanelTitles": false,
+  },
+  "gridData": Object {
+    "h": 15,
+    "i": "2f02b581-0abe-45dc-bb60-28980ecb6ff5",
+    "w": 24,
+    "x": 24,
+    "y": 15,
+  },
+  "panelIndex": "2f02b581-0abe-45dc-bb60-28980ecb6ff5",
+  "title": "Security Solution sample events by dataset",
+  "type": "lens",
+}
+`;
+
+exports[`getSavedObjects returns a dashboard saved objects 1`] = `
+Array [
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "7cd92d82-5db5-4f16-8e23-7412949c3255:indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "4b4950a6-76db-43a7-8a93-d87428d4ee73:indexpattern-datasource-layer-eaadfec7-deaa-4aeb-a403-3b4e516416d2",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "b6885441-daca-4e78-8afc-0c2ab0e6ebe6:indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "b6885441-daca-4e78-8afc-0c2ab0e6ebe6:13394812-83b1-4e55-81c0-a3e5f99014f2",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "b5686950-a649-45e6-a9d5-b09c2d029b5d:indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "6fd0e620-0f8f-4f38-b739-bc8e9ccee478:indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "243bcb45-f0d0-4327-84e4-cf57868d4dcb:indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "ccdb082f-0c2e-45ea-92ce-ee5d7689d89b:indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "5fdf5c11-57f0-440c-8d3e-c31068ed92c6:indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "60fa5218-4ab5-4cae-8655-f0cb4bd213e0:indexpattern-datasource-layer-a578b0a4-d2d8-4e74-9ff2-c371933b26e8",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "2f02b581-0abe-45dc-bb60-28980ecb6ff5:indexpattern-datasource-layer-29bada9b-1e08-4752-9825-20e413fa2cd4",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "5bb44d4f-1e6b-4edb-b82a-18094fabe525:indexpattern-datasource-layer-29bada9b-1e08-4752-9825-20e413fa2cd4",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "cee0f71d-407e-4660-ac64-ae70d8216623:indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "cee0f71d-407e-4660-ac64-ae70d8216623:indexpattern-datasource-layer-ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "e3109518-0bfb-4692-8dce-c1b04b20938b:indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "e3109518-0bfb-4692-8dce-c1b04b20938b:indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "2408f3c1-e896-4796-804b-7f9fe8d8e805:indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "2408f3c1-e896-4796-804b-7f9fe8d8e805:indexpattern-datasource-layer-b9acd453-f476-4467-ad38-203e37b73e55",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "683374cb-6216-4bed-9e83-f30f0fe207a8:indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "de1c52cf-033b-4e4d-a361-1e4786ec026f:indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "de1c52cf-033b-4e4d-a361-1e4786ec026f:indexpattern-datasource-layer-ca05ecdb-0fa4-49a8-9305-b23d91012a46",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "b900f09a-e19d-497b-b5cb-6ed2a6bd1a4a:kibanaSavedObjectMeta.searchSourceJSON.index",
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "tag-ref-c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "type": "tag",
+  },
+]
+`;
+
+exports[`getSavedObjects returns a data view saved objects: 
+      Object {
+        "fieldAttrs": "{}",
+        "fieldFormatMap": "{}",
+        "fields": "[]",
+        "name": "[Security Solution] Kibana Sample Data Security Solution",
+        "runtimeFieldMap": "{}",
+        "sourceFilters": "[]",
+        "timeFieldName": "@timestamp",
+        "title": "kibana_sample_data_securitysolution_*",
+        "typeMeta": "{}",
+      }
+     1`] = `
+Object {
+  "fieldAttrs": "{}",
+  "fieldFormatMap": "{}",
+  "fields": "[]",
+  "name": "[Security Solution] Kibana Sample Data Security Solution",
+  "runtimeFieldMap": "{}",
+  "sourceFilters": "[]",
+  "timeFieldName": "@timestamp",
+  "title": "kibana_sample_data_securitysolution_*",
+  "typeMeta": "{}",
+}
+`;
+
+exports[`getSavedObjects returns a search saved objects: 
+      Array [
+        Object {
+          "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+        },
+      ]
+     1`] = `
+Array [
+  Object {
+    "id": "c89b196d-d0cd-4cfb-8d95-787e4ce51551",
+    "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+    "type": "index-pattern",
+  },
+]
+`;
+
+exports[`getSavedObjects returns a search saved objects: 
+      Object {
+        "columns": Array [
+          "agent.type",
+          "ecs.version",
+          "event.kind",
+          "host.hostname",
+        ],
+        "description": "",
+        "grid": Object {},
+        "hideChart": false,
+        "isTextBasedQuery": false,
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "{\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"},\\"filter\\":[],\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+        },
+        "sort": Array [
+          Array [
+            "@timestamp",
+            "desc",
+          ],
+        ],
+        "timeRestore": false,
+        "title": "[Security Solution] Security Solution Sample data",
+        "usesAdHocDataView": false,
+      }
+     1`] = `
+Object {
+  "columns": Array [
+    "agent.type",
+    "ecs.version",
+    "event.kind",
+    "host.hostname",
+  ],
+  "description": "",
+  "grid": Object {},
+  "hideChart": false,
+  "isTextBasedQuery": false,
+  "kibanaSavedObjectMeta": Object {
+    "searchSourceJSON": "{\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"},\\"filter\\":[],\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+  },
+  "sort": Array [
+    Array [
+      "@timestamp",
+      "desc",
+    ],
+  ],
+  "timeRestore": false,
+  "title": "[Security Solution] Security Solution Sample data",
+  "usesAdHocDataView": false,
+}
+`;
