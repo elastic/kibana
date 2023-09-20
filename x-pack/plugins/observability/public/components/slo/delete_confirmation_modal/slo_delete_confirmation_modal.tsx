@@ -50,7 +50,7 @@ export function SloDeleteConfirmationModal({
             'xpack.observability.slo.deleteConfirmationModal.partitionByDisclaimerText',
             {
               defaultMessage:
-                'This SLO has been generated with a partition key on "{partitionKey}". Proceeding with the deletion will result in all instances being deleted.',
+                'This SLO has been generated with a partition key on "{partitionKey}". Deleting this SLO definition will result in all instances being deleted.',
               values: { partitionKey: groupBy },
             }
           )
