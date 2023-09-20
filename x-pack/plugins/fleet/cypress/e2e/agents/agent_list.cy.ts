@@ -14,6 +14,8 @@ import type { CreateAgentPolicyRequest } from '../../../common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
 import { API_VERSIONS } from '../../../common/constants';
+import { request } from '../../tasks/common';
+import { login } from '../../tasks/login';
 
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
@@ -65,7 +67,7 @@ const POLICIES: Array<CreateAgentPolicyRequest['body']> = [
 ];
 
 function createAgentPolicy(body: CreateAgentPolicyRequest['body']) {
-  cy.request({
+  request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
     headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
@@ -101,11 +103,13 @@ describe('View agents list', () => {
     }
   });
   after(() => {
-    deleteFleetServerDocs();
-    deleteAgentDocs();
+    deleteFleetServerDocs(true);
+    deleteAgentDocs(true);
     cleanupAgentPolicies();
   });
   beforeEach(() => {
+    login();
+
     cy.intercept('/api/fleet/agents/setup', {
       isReady: true,
       missing_optional_features: [],
@@ -369,7 +373,6 @@ describe('View agents list', () => {
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
       cy.wait('@getAgents');
       assertTableIsEmpty();
-      cy.pause();
       // Select new policy is filters
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
       cy.get('button').contains('Agent policy 4').click();
