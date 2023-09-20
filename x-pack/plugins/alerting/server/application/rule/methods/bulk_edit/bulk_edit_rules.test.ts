@@ -239,6 +239,7 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -736,6 +737,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -2350,6 +2352,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
       });
 
@@ -2394,6 +2397,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
       });
 

@@ -87,6 +87,7 @@ describe('find()', () => {
       isExportable: true,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
@@ -146,6 +147,7 @@ describe('find()', () => {
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
           isExportable: true,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -462,6 +464,7 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
@@ -480,6 +483,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
@@ -496,6 +500,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -670,6 +675,7 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
@@ -688,6 +694,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
@@ -704,6 +711,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

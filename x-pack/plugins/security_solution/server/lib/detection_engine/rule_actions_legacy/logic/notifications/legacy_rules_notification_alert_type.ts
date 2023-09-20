@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
   SERVER_APP_ID,
+  APP_ID,
 } from '../../../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
@@ -40,7 +40,7 @@ export const legacyRulesNotificationAlertType = ({
   name: 'Security Solution notification (Legacy)',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
-  category: DEFAULT_APP_CATEGORIES.security.id,
+  category: APP_ID,
   producer: SERVER_APP_ID,
   validate: {
     params: legacyRulesNotificationParams,

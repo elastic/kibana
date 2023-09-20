@@ -22,6 +22,7 @@ describe('createAlertEventLogRecordObject', () => {
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: schema.any(),

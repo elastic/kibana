@@ -54,6 +54,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -113,6 +114,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -175,6 +177,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },

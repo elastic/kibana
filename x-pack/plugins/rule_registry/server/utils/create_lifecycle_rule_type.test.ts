@@ -59,6 +59,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
     isExportable: true,
     minimumLicenseRequired: 'basic',
     name: 'ruleTypeName',
+    category: 'test',
     producer: 'producer',
     validate: {
       params: schema.object(

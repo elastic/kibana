@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { SERVER_APP_ID } from '../../../../../common/constants';
+import { SERVER_APP_ID, APP_ID } from '../../../../../common/constants';
 
 import type { ThresholdRuleParams } from '../../rule_schema';
 import { thresholdRuleParams } from '../../rule_schema';
@@ -61,7 +60,7 @@ export const createThresholdAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    category: DEFAULT_APP_CATEGORIES.security.id,
+    category: APP_ID,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {

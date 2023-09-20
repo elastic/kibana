@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
-import { SERVER_APP_ID } from '../../../../../common/constants';
+import { SERVER_APP_ID, APP_ID } from '../../../../../common/constants';
 import type { EqlRuleParams } from '../../rule_schema';
 import { eqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
@@ -60,7 +59,7 @@ export const createEqlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    category: DEFAULT_APP_CATEGORIES.security.id,
+    category: APP_ID,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {

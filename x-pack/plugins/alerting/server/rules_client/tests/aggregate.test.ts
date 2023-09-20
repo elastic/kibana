@@ -79,6 +79,7 @@ describe('aggregate()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
@@ -160,6 +161,7 @@ describe('aggregate()', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },

@@ -427,8 +427,6 @@ export class TaskRunner<
       })
       .map(({ id }) => id);
 
-    console.log('ids!', maintenanceWindowIds);
-
     if (maintenanceWindowIds.length) {
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
