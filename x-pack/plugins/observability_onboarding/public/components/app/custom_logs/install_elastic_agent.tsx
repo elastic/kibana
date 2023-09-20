@@ -62,14 +62,13 @@ export function InstallElasticAgent() {
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  const datasetEnforcedName = `${
-    integration === dataset ? dataset : `${integration}.${dataset}`
-  }`;
+  const enforcedDatasetName =
+    integration === dataset ? dataset : `${integration}.${dataset}`;
 
   async function onContinue() {
     await singleDatasetLocator!.navigate({
       integration,
-      dataset: datasetEnforcedName,
+      dataset: enforcedDatasetName,
     });
   }
 
