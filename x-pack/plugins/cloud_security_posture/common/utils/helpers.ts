@@ -47,7 +47,7 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const getBenchmarkTypeFilter = (type: BenchmarkId, section?: RuleSection): string =>
+export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
     section
       ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`

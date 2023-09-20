@@ -13,10 +13,7 @@ import semverValid from 'semver/functions/valid';
 import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
 import { CspRuleTemplate } from '../../../common/schemas';
 import { findCspRuleTemplateRequest } from '../../../common/schemas/csp_rule_template_api/get_csp_rule_template';
-import {
-  getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
-} from '../../../common/utils/helpers';
+import { getBenchmarkFromPackagePolicy, getBenchmarkFilter } from '../../../common/utils/helpers';
 
 import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -27,15 +24,16 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
 
 export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRuleTemplate[]) => {
   return cspRulesTemplates.slice().sort((a, b) => {
-    const versionA = semverValid(a?.metadata?.benchmark?.rule_number);
-    const versionB = semverValid(b?.metadata?.benchmark?.rule_number);
+    const ruleNumberA = a?.metadata?.benchmark?.rule_number;
+    const ruleNumberB = b?.metadata?.benchmark?.rule_number;
+
+    const versionA = semverValid(ruleNumberA);
+    const versionB = semverValid(ruleNumberB);
 
     if (versionA !== null && versionB !== null) {
       return semverCompare(versionA, versionB);
     } else {
-      return String(a?.metadata?.benchmark?.rule_number).localeCompare(
-        String(b?.metadata?.benchmark?.rule_number)
-      );
+      return String(ruleNumberA).localeCompare(String(ruleNumberB));
     }
   });
 };
@@ -74,7 +72,7 @@ const findCspRuleTemplateHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkTypeFilter(benchmarkId, options.section),
+    filter: getBenchmarkFilter(benchmarkId, options.section),
   });
 
   const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
