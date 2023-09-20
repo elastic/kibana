@@ -14,7 +14,7 @@ import React, { FC, useContext } from 'react';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import type { FormServices, FormKibanaDependencies, Services } from './types';
-import { ReloadPageToast } from './reload_page_toast';
+import { reloadPageToast } from './reload_page_toast';
 
 const FormContext = React.createContext<Services | null>(null);
 
@@ -48,7 +48,7 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
           return Promise.all(arr);
         },
         showError: (message: string) => toasts.addDanger(message),
-        showReloadPagePrompt: () => toasts.add(ReloadPageToast(theme, i18nStart)),
+        showReloadPagePrompt: () => toasts.add(reloadPageToast(theme, i18nStart)),
       }}
     >
       <FieldRowKibanaProvider {...{ docLinks, toasts }}>{children}</FieldRowKibanaProvider>

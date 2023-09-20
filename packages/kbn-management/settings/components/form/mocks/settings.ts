@@ -18,6 +18,9 @@ type Settings = {
   [key in SettingType]: KnownTypeToMetadata<key>;
 };
 
+/**
+ * A representative set of UiSettings.
+ */
 export const settingsMock: Settings = {
   array: {
     description: 'Description for Array test setting',

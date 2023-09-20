@@ -15,6 +15,10 @@ import { settingsMock } from '../mocks';
 
 export type StoryProps = Pick<FormProps, 'isSavingEnabled'>;
 
+/**
+ * Utility function for returning a {@link Form} Storybook story.
+ * @returns A Storybook Story.
+ */
 export const getFormStory = () => {
   const Story = ({ isSavingEnabled }: StoryProps) => {
     const fields: Array<FieldDefinition<SettingType>> = Object.entries(settingsMock).map(

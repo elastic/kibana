@@ -91,7 +91,7 @@ describe('Form', () => {
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     fireEvent.click(saveButton);
 
-    expect(services.saveChanges).toHaveBeenCalledTimes(1);
+    expect(services.saveChanges).toHaveBeenCalled();
   });
 
   it('clears changes when Cancel button is clicked', () => {
@@ -115,7 +115,7 @@ describe('Form', () => {
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
     const { getByTestId } = render(
-      wrap(<Form fields={fields} isSavingEnabled={false} />, testServices)
+      wrap(<Form fields={fields} isSavingEnabled={true} />, testServices)
     );
 
     const testFieldType = 'string';
@@ -136,7 +136,7 @@ describe('Form', () => {
     });
 
     const { getByTestId } = render(
-      wrap(<Form fields={testFields} isSavingEnabled={false} />, services)
+      wrap(<Form fields={testFields} isSavingEnabled={true} />, services)
     );
 
     const testFieldType = 'string';

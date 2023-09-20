@@ -12,10 +12,16 @@ import { EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormStyles } from '../form.styles';
 
+/**
+ * Props for a {@link UnsavedCount} component.
+ */
 interface UnsavedCountProps {
   unsavedCount: number;
 }
 
+/**
+ * Component for displaying the count of unsaved changes in a {@link BottomBar}.
+ */
 export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
   const { cssFormUnsavedCountMessage } = useFormStyles();
   return (

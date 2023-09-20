@@ -16,11 +16,20 @@ import { i18n } from '@kbn/i18n';
 import { BottomBar } from './bottom_bar';
 import { useServices } from './services';
 
+/**
+ * Props for a {@link Form} component.
+ */
 export interface FormProps {
+  /** A list of {@link FieldDefinition} corresponding to settings to be displayed in the form. */
   fields: Array<FieldDefinition<SettingType>>;
+  /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
 }
 
+/**
+ * Component for displaying a set of {@link FieldRow} in a form.
+ * @param props The {@link FormProps} for the {@link Form} component.
+ */
 export const Form = (props: FormProps) => {
   const { fields, isSavingEnabled } = props;
   const { saveChanges, showError, showReloadPagePrompt } = useServices();

@@ -23,6 +23,9 @@ import { useFormStyles } from '../form.styles';
 export const DATA_TEST_SUBJ_SAVE_BUTTON = 'settings-save-button';
 export const DATA_TEST_SUBJ_CANCEL_BUTTON = 'settings-cancel-button';
 
+/**
+ * Props for a {@link BottomBar} component.
+ */
 export interface BottomBarProps {
   saveAll: () => void;
   clearAllUnsaved: () => void;
@@ -31,6 +34,9 @@ export interface BottomBarProps {
   unsavedChangesCount: number;
 }
 
+/**
+ * Component for displaying the bottom bar of a {@link Form}.
+ */
 export const BottomBar = ({
   saveAll,
   clearAllUnsaved,
