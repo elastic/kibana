@@ -20,13 +20,13 @@ import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
-export const useDebouncedWidthObserver = (wait = 250) => {
+export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
   const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
   const { ref } = useResizeObserver<HTMLDivElement>({
     onResize: (dimensions) => {
       if (dimensions.width) {
-        if (width === 0) setWidth(dimensions.width);
+        if (width === 0 || skipDebounce) setWidth(dimensions.width);
         if (dimensions.width !== width) onWidthChange(dimensions.width);
       }
     },
@@ -58,10 +58,11 @@ export const DashboardViewportComponent = () => {
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const description = dashboard.select((state) => state.explicitInput.description);
+  const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
-  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver();
+  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(hasOverlays);
 
   const classes = classNames({
     dshDashboardViewport: true,
