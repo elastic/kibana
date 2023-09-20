@@ -141,8 +141,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
           overlayRef.close();
         },
         maxWidth: true,
-        type: 'push',
-        ownFocus: false,
       }
     );
     overlayTracker?.openOverlay(handle);
