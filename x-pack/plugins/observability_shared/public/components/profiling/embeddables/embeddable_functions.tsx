@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import React from 'react';
 import { ProfilingEmbeddable, ProfilingEmbeddableProps } from './profiling_embeddable';
-import { EMBEDDABLE_FLAMEGRAPH } from '.';
+import { EMBEDDABLE_FUNCTIONS } from '.';
 
-type Props = Omit<ProfilingEmbeddableProps<BaseFlameGraph>, 'embeddableFactoryId'>;
+type Props = Omit<ProfilingEmbeddableProps<TopNFunctions>, 'embeddableFactoryId'> & {
+  rangeFrom: number;
+  rangeTo: number;
+};
 
-export function EmbeddableFlamegraph(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FLAMEGRAPH} />;
+export function EmbeddableFunctions(props: Props) {
+  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FUNCTIONS} />;
 }
