@@ -6,17 +6,8 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { set } from '@kbn/safer-lodash-set';
 import { Counter } from './counter';
-
-interface GenericObject {
-  [key: string]: unknown;
-}
-export const unflattenObject = <T extends object = GenericObject>(object: object): T =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    set(acc, key, value);
-    return acc;
-  }, {} as T);
+import { unflattenObject } from './unflatten_object';
 
 export class MetricCounterService<T extends JsonObject> {
   private readonly counters = new Map<string, Counter>();
