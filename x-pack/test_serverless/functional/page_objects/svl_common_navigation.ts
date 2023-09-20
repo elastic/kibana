@@ -151,6 +151,25 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           });
         }
       },
+      async expectBreadcrumbMissing(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          await retry.try(async () => {
+            expect(await getByVisibleText('~breadcrumb', by.text)).be(null);
+          });
+        }
+      },
+      async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+        await retry.try(async () => {
+          const breadcrumbsContainer = await testSubjects.find('breadcrumbs');
+          const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
+          breadcrumbs.shift(); // remove home
+          expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
+          const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
+          expect(expectedBreadcrumbTexts).to.eql(texts);
+        });
+      },
     },
     search: new SvlNavigationSearchPageObject(ctx),
     recent: {

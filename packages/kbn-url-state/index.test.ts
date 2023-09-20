@@ -87,6 +87,9 @@ describe('useSyncToUrl', () => {
   it('should clear the value from the query string on unmount', () => {
     const key = 'testKey';
 
+    // Location should have a key to clear
+    window.location.search = `?${key}=${encode({ test: 'value' })}`;
+
     const { unmount } = renderHook(() => useSyncToUrl(key, jest.fn()));
 
     act(() => {
@@ -103,6 +106,9 @@ describe('useSyncToUrl', () => {
   it('should clear the value from the query string when history back or forward is pressed', () => {
     const key = 'testKey';
     const restore = jest.fn();
+
+    // Location should have a key to clear
+    window.location.search = `?${key}=${encode({ test: 'value' })}`;
 
     renderHook(() => useSyncToUrl(key, restore, true));
 

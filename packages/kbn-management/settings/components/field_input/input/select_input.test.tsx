@@ -16,27 +16,35 @@ const name = 'Some select field';
 const id = 'some:select:field';
 
 describe('SelectInput', () => {
-  const defaultProps = {
-    id,
-    name,
-    ariaLabel: 'Test',
-    onChange: jest.fn(),
+  const onChange = jest.fn();
+  const defaultProps: SelectInputProps = {
+    onChange,
+    field: {
+      name,
+      type: 'select',
+      ariaAttributes: {
+        ariaLabel: name,
+      },
+      id,
+      isOverridden: false,
+      defaultValue: 'option2',
+    },
     optionLabels: {
       option1: 'Option 1',
       option2: 'Option 2',
       option3: 'Option 3',
     },
     optionValues: ['option1', 'option2', 'option3'],
-    value: 'option2',
+    isSavingEnabled: true,
   };
 
-  it('renders without errors', () => {
-    const { container } = render(wrap(<SelectInput {...defaultProps} />));
-    expect(container).toBeInTheDocument();
+  beforeEach(() => {
+    onChange.mockClear();
   });
 
-  it('renders the value prop', () => {
-    const { getByTestId } = render(wrap(<SelectInput {...defaultProps} />));
+  it('renders without errors', () => {
+    const { container, getByTestId } = render(wrap(<SelectInput {...defaultProps} />));
+    expect(container).toBeInTheDocument();
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toHaveValue('option2');
   });
@@ -45,11 +53,11 @@ describe('SelectInput', () => {
     const { getByTestId } = render(wrap(<SelectInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'option3' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ value: 'option3' });
+    expect(defaultProps.onChange).toHaveBeenCalledWith({ type: 'select', unsavedValue: 'option3' });
   });
 
   it('disables the input when isDisabled prop is true', () => {
-    const { getByTestId } = render(wrap(<SelectInput {...defaultProps} isDisabled />));
+    const { getByTestId } = render(wrap(<SelectInput {...defaultProps} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toBeDisabled();
   });

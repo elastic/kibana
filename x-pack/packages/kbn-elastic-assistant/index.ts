@@ -133,3 +133,10 @@ export type { PromptContextTemplate } from './impl/assistant/prompt_context/type
  * can be displayed when corresponding PromptContext's are registered.
  */
 export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
+
+/**
+ * Knowledge Base API Responses
+ */
+export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
+export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
+export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
