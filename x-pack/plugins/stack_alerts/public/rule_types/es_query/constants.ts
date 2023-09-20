@@ -22,6 +22,7 @@ export const DEFAULT_VALUES = {
   TERM_SIZE: 5,
   GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: true,
+  CAN_SELECT_MULTI_TERMS: true,
 };
 
 export const COMMON_EXPRESSION_ERRORS = {
