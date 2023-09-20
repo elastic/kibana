@@ -93,7 +93,7 @@ export const DeletePolicyModal = ({
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.deleteModal.bodyCopy"
-          defaultMessage="You are about to delete the enrich policy {policy}. This action is irreverisble."
+          defaultMessage="You are about to delete the enrich policy {policy}. This action is irreversible."
           values={{
             policy: <strong>{policyToDelete}</strong>,
           }}
