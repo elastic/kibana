@@ -171,7 +171,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
             )}
             <SectionLinks>
               <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink
+                data-test-subj="viewAssetDetailsContextMenuItem"
+                {...nodeDetailMenuItem}
+              />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} color={'primary'} />
             </SectionLinks>
