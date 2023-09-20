@@ -47,6 +47,7 @@ export function FlyoutContainer({
   panelContainerRef,
   children,
   customFooter,
+  hideFooter,
 }: {
   isOpen: boolean;
   handleClose: () => boolean;
@@ -56,6 +57,7 @@ export function FlyoutContainer({
   panelRef?: (el: HTMLDivElement) => void;
   panelContainerRef?: (el: HTMLDivElement) => void;
   customFooter?: React.ReactElement;
+  hideFooter?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
@@ -142,21 +144,23 @@ export function FlyoutContainer({
 
           <div className="lnsDimensionContainer__content">{children}</div>
 
-          {customFooter || (
-            <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-              <EuiButtonEmpty
-                flush="left"
-                size="s"
-                iconType="cross"
-                onClick={closeFlyout}
-                data-test-subj="lns-indexPattern-dimensionContainerClose"
-              >
-                {i18n.translate('xpack.lens.dimensionContainer.close', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlyoutFooter>
-          )}
+          {!Boolean(hideFooter)
+            ? customFooter || (
+                <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+                  <EuiButtonEmpty
+                    flush="left"
+                    size="s"
+                    iconType="cross"
+                    onClick={closeFlyout}
+                    data-test-subj="lns-indexPattern-dimensionContainerClose"
+                  >
+                    {i18n.translate('xpack.lens.dimensionContainer.close', {
+                      defaultMessage: 'Close',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlyoutFooter>
+              )
+            : null}
         </div>
       </EuiFocusTrap>
     </div>

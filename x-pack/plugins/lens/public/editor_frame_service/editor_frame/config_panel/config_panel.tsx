@@ -279,6 +279,7 @@ export function LayerPanels(
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
               displayLayerSettings={!props.hideLayerHeader}
+              hideDimensionsFlyoutFooter={props.hideDimensionsFlyoutFooter}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =

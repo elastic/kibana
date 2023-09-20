@@ -129,24 +129,20 @@ export function LensEditConfigurationFlyout({
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
-    const prevDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-      ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-          previousAttrs.state.datasourceStates[datasourceId],
-          previousAttrs.references
-        )
-      : previousAttrs.state.datasourceStates[datasourceId];
 
-    const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-      ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-          datasourceStates[datasourceId].state,
-          attributes.references
-        )
-      : datasourceStates[datasourceId].state;
+    const datasourceStatesAreSame =
+      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
+        ? datasourceMap[datasourceId].isEqual(
+            previousAttrs.state.datasourceStates[datasourceId],
+            previousAttrs.references,
+            datasourceStates[datasourceId].state,
+            attributes.references
+          )
+        : false;
 
     const visualizationState = visualization.state;
     return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) ||
-      !isEqual(prevDatasourceState, currentDatasourceState)
+      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
     );
   }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
 
@@ -161,9 +157,9 @@ export function LensEditConfigurationFlyout({
           )
         : previousAttrs.state.datasourceStates[datasourceId];
       updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
-    }
-    if (savedObjectId) {
-      updateByRefInput?.(savedObjectId);
+      if (savedObjectId) {
+        updateByRefInput?.(savedObjectId);
+      }
     }
     closeFlyout?.();
   }, [
@@ -258,6 +254,10 @@ export function LensEditConfigurationFlyout({
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
     indexPatternService,
+    // we need to hide the footer from the dimensions flyout
+    // it is not displayed even without hiding this
+    // but having both in the Dom creates a weird bug with the click events
+    hideDimensionsFlyoutFooter: true,
   };
   return (
     <>
