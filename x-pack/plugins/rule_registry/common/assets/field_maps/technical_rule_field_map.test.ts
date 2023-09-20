@@ -286,6 +286,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.workflow_assignees": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.workflow_reason": Object {
         "array": false,
         "required": false,
