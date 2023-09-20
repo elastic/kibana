@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
 
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
@@ -17,10 +17,11 @@ export interface SloDeleteConfirmationModalProps {
 }
 
 export function SloDeleteConfirmationModal({
-  slo: { name },
+  slo,
   onCancel,
   onConfirm,
 }: SloDeleteConfirmationModalProps) {
+  const { name, groupBy } = slo;
   return (
     <EuiConfirmModal
       buttonColor="danger"
@@ -44,10 +45,19 @@ export function SloDeleteConfirmationModal({
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
-      {i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.descriptionText', {
-        defaultMessage: "You can't recover {name} after deleting.",
-        values: { name },
-      })}
+      {groupBy !== ALL_VALUE
+        ? i18n.translate(
+            'xpack.observability.slo.deleteConfirmationModal.partitionByDisclaimerText',
+            {
+              defaultMessage:
+                'This SLO has been generated with a partition key on "{partitionKey}". Proceeding with the deletion will result in all instances being deleted.',
+              values: { partitionKey: groupBy },
+            }
+          )
+        : i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.descriptionText', {
+            defaultMessage: "You can't recover {name} after deleting.",
+            values: { name },
+          })}
     </EuiConfirmModal>
   );
 }
