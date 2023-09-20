@@ -82,6 +82,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     beforeEach(() => {
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery/saved_queries');
       cy.getBySel('tablePaginationPopoverButton').click();
       cy.getBySel('tablePagination-50-rows').click();
