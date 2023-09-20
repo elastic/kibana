@@ -237,6 +237,7 @@ const SecurityAlertOptional = rt.partial({
       workflow_reason: schemaString,
       workflow_status: schemaString,
       workflow_tags: schemaStringArray,
+      workflow_assignees: schemaStringArray,
       workflow_user: schemaString,
     }),
     version: schemaString,
