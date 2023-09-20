@@ -460,7 +460,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const isEditable = !item.managed && (itemIsEditable?.(item) ?? true);
+      // If the So is `managed` it is never editable.
+      const isEditable = item.managed ? false : itemIsEditable?.(item) ?? true;
 
       const close = openContentEditor({
         item: {
