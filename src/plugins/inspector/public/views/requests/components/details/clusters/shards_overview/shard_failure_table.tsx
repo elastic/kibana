@@ -63,11 +63,12 @@ export function ShardFailureTable({ failures }: Props) {
       name: i18n.translate('inspector.requests.clusters.shards.table.indexLabel', {
         defaultMessage: 'Index',
       }),
-      render: (index?: string) => (
-        index ? <EuiText size="xs" color="subdued">
-          {index}
-        </EuiText> : null
-      ),
+      render: (index?: string) =>
+        index ? (
+          <EuiText size="xs" color="subdued">
+            {index}
+          </EuiText>
+        ) : null,
     },
     {
       field: 'failureType',
