@@ -12,6 +12,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
