@@ -3892,6 +3892,10 @@
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
@@ -6340,6 +6344,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -8994,6 +9002,10 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14456,6 +14468,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",

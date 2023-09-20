@@ -946,7 +946,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   if (!showFetchError && hasNoItems) {
     return (
-      <PageTemplate panelled isEmptyState={true}>
+      <PageTemplate isEmptyState={true}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
