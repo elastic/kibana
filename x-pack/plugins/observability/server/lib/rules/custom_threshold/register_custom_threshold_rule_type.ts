@@ -147,7 +147,7 @@ export function thresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'groups', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupByKeysActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,

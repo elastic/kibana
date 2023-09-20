@@ -12,7 +12,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
-  ALERT_GROUPS,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
@@ -159,7 +159,7 @@ export const createMetricThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
-          [ALERT_GROUPS]: groups,
+          [ALERT_GROUP]: groups,
           ...flattenAdditionalContext(additionalContext),
         },
       });
