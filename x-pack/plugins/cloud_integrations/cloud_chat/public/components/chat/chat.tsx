@@ -9,6 +9,7 @@ import React from 'react';
 // import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { WhenIdle } from './when_idle';
 // import { EuiButtonEmpty } from '@elastic/eui';
 // import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -39,31 +40,30 @@ export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: 
     return null;
   }
 
-  const { isReady } = config;
-
   return (
-    <iframe
-      loading="lazy"
-      data-test-subj="cloud-chat-frame"
-      title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
-        defaultMessage: 'Chat',
-      })}
-      src={config.src}
-      ref={config.ref}
-      style={
-        isReady
-          ? {
-              ...config.style,
-              // reset
-              bottom: 'auto',
-              inset: 'initial',
-              // position
-              top: 32,
-              right: 0,
-            }
-          : { position: 'absolute' }
-      }
-    />
+    <WhenIdle>
+      <iframe
+        data-test-subj="cloud-chat-frame"
+        title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
+          defaultMessage: 'Chat',
+        })}
+        src={config.src}
+        ref={config.ref}
+        style={
+          config.isReady
+            ? {
+                ...config.style,
+                // reset
+                bottom: 'auto',
+                inset: 'initial',
+                // position
+                top: 32,
+                right: 0,
+              }
+            : { position: 'absolute' }
+        }
+      />
+    </WhenIdle>
   );
 
   // const buttonCSS = css`

@@ -126,7 +126,13 @@ export const useChatConfig = ({
         // its interface.
         case MESSAGE_RESIZE: {
           const styles = message.data.styles || ({} as CSSProperties);
-          setStyle({ ...style, ...styles });
+          // camelize to avoid style warnings from react
+          const camelize = (s: string) => s.replace(/-./g, (x) => x[1].toUpperCase());
+          const camelStyles = Object.keys(styles).reduce((acc, key) => {
+            acc[camelize(key)] = styles[key];
+            return acc;
+          }, {} as Record<string, string>) as CSSProperties;
+          setStyle({ ...style, ...camelStyles });
 
           if (!isResized) {
             setIsResized(true);

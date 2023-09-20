@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 export function whenIdle(doWork: () => void) {
   const requestIdleCallback = window.requestIdleCallback || window.setTimeout;
   if (document.readyState === 'complete') {
@@ -15,3 +17,18 @@ export function whenIdle(doWork: () => void) {
     });
   }
 }
+
+/**
+ * Postpone rendering of children until the page is loaded and browser is idle.
+ */
+export const WhenIdle: React.FC = ({ children }) => {
+  const [idleFired, setIdleFired] = React.useState(false);
+
+  React.useEffect(() => {
+    whenIdle(() => {
+      setIdleFired(true);
+    });
+  }, []);
+
+  return idleFired ? <>{children}</> : null;
+};
