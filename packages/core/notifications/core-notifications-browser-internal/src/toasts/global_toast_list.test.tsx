@@ -11,6 +11,7 @@ import React, { type ComponentProps } from 'react';
 import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
 import { screen, render, fireEvent, act } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { EuiToast } from '@elastic/eui';
 import { EventReporter } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';
@@ -26,6 +27,17 @@ const sharedProps = {
 function RenderToastList(props: Partial<ComponentProps<typeof GlobalToastList>> = {}) {
   return <GlobalToastList {...sharedProps} {...props} />;
 }
+
+const dummyToastText = `You've got mail!`;
+const dummyToastTitle = `AOL Notifications`;
+
+const createMockToast = (id: any, type?: ComponentProps<typeof EuiToast>['color']): Toast => ({
+  id: id.toString(),
+  text: dummyToastText,
+  title: dummyToastTitle,
+  toastLifeTimeMs: 5000,
+  color: type,
+});
 
 it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
   const unsubscribeSpy = jest.fn();
@@ -60,19 +72,16 @@ it('uses the latest value from toasts$ passed to <EuiGlobalToastList /> to rende
 });
 
 describe('global_toast_list with duplicate elements', () => {
-  const dummyText = `You've got mail!`;
-  const dummyTitle = `AOL Notifications`;
-  const createMockToast = (id: any): Toast => ({
-    id: id.toString(),
-    text: dummyText,
-    title: dummyTitle,
-    toastLifeTimeMs: 5000,
-  });
+  const TOAST_DUPLICATE_COUNT = 4;
 
   function ToastListWithDuplicates() {
     return (
       <RenderToastList
-        toasts$={from([Array.from(new Array(4)).map((_, idx) => createMockToast(idx))]) as any}
+        toasts$={
+          from([
+            Array.from(new Array(TOAST_DUPLICATE_COUNT)).map((_, idx) => createMockToast(idx)),
+          ]) as any
+        }
       />
     );
   }
@@ -85,19 +94,50 @@ describe('global_toast_list with duplicate elements', () => {
     jest.useRealTimers();
   });
 
-  it('renders the toast list with a single element', () => {
+  it('renders the toast list with a single toast when toasts matching deduplication heuristics are passed', () => {
     render(<ToastListWithDuplicates />);
 
-    expect(screen.getAllByLabelText('Notification')).toHaveLength(1);
+    const { 0: firstToast, length: toastCount } = screen.getAllByLabelText('Notification');
+
+    expect(toastCount).toEqual(1);
+
+    expect(screen.getAllByText(dummyToastText)).toHaveLength(1);
+
+    expect(firstToast.querySelector('.euiNotificationBadge')?.innerHTML).toEqual('4');
   });
 
-  it('renders a single toast in the toast list with the common text', () => {
-    render(<ToastListWithDuplicates />);
+  it('renders a single toast also when toast titles are mount points are used that match the deduplication heuristics', () => {
+    const createMockToastWithMountPoints = (id: any): Toast => ({
+      id: id.toString(),
+      text: dummyToastText,
+      title: (element) => {
+        const a = document.createElement('a');
+        a.innerText = 'Click me!';
+        a.href = 'https://elastic.co';
+        element.appendChild(a);
+        return () => element.removeChild(a);
+      },
+      toastLifeTimeMs: 5000,
+    });
 
-    expect(screen.getAllByText(dummyText)).toHaveLength(1);
+    render(
+      <RenderToastList
+        toasts$={
+          from([
+            Array.from(new Array(TOAST_DUPLICATE_COUNT)).map((_, idx) =>
+              createMockToastWithMountPoints(idx)
+            ),
+          ]) as any
+        }
+      />
+    );
+
+    const renderedToasts = screen.getAllByText(dummyToastText);
+
+    expect(renderedToasts).toHaveLength(TOAST_DUPLICATE_COUNT);
   });
 
-  it(`when a represented toast is closed,the provided dismiss action is called for all its internal toasts`, () => {
+  it(`when a represented toast is closed, the provided dismiss action is called for all its internal toasts`, () => {
     render(<ToastListWithDuplicates />);
 
     const { 0: toastDismissButton, length: toastDismissButtonLength } =
@@ -108,12 +148,12 @@ describe('global_toast_list with duplicate elements', () => {
     fireEvent.click(toastDismissButton);
 
     act(() => {
-      // This is so that the toast fade out animation has succesfully ran,
+      // This is so that the toast fade out animation succesfully runs,
       // only after this is the dismiss method invoked
-      jest.runAllTimers();
+      jest.runOnlyPendingTimers();
     });
 
-    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(4);
+    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(TOAST_DUPLICATE_COUNT);
     expect(sharedProps.dismissToast).toHaveBeenCalledWith('0');
     expect(sharedProps.dismissToast).toHaveBeenCalledWith('1');
     expect(sharedProps.dismissToast).toHaveBeenCalledWith('2');
@@ -121,34 +161,124 @@ describe('global_toast_list with duplicate elements', () => {
   });
 });
 
-describe('global_toast_list with duplicate elements, using MountPoints', () => {
-  const dummyText = `You've got mail!`;
-  const createMockToastWithMountPoints = (id: any): Toast => ({
-    id: id.toString(),
-    text: dummyText,
-    title: (element) => {
-      const a = document.createElement('a');
-      a.innerText = 'Click me!';
-      a.href = 'https://elastic.co';
-      element.appendChild(a);
-      return () => element.removeChild(a);
-    },
-    toastLifeTimeMs: 5000,
+describe('global_toast_list toast dismissal telemetry', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
   });
 
-  it('renders the all separate elements element', () => {
-    render(
-      <RenderToastList
-        toasts$={
-          from([
-            Array.from(new Array(4)).map((_, idx) => createMockToastWithMountPoints(idx)),
-          ]) as any
-        }
-      />
+  afterEach(() => {
+    jest.useRealTimers();
+    sharedProps.dismissToast.mockReset();
+  });
+
+  it('does not invoke the reportEvent method when there is no recurring toast', async () => {
+    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+
+    const toastObservable$ = new BehaviorSubject([createMockToast(1)]);
+
+    sharedProps.dismissToast.mockImplementation((toastId: string) =>
+      act(() => {
+        const toastList = toastObservable$.getValue();
+        toastObservable$.next(toastList.filter((t) => t.id !== toastId));
+      })
     );
 
-    const renderedToasts = screen.getAllByText(dummyText);
+    render(<RenderToastList toasts$={toastObservable$.asObservable() as any} />);
 
-    expect(renderedToasts).toHaveLength(4);
+    const { 0: toastDismissButton, length: toastDismissButtonLength } =
+      screen.getAllByLabelText('Dismiss toast');
+
+    expect(toastDismissButtonLength).toEqual(1);
+
+    fireEvent.click(toastDismissButton);
+
+    act(() => {
+      // This is so that the toast fade out animation succesfully runs,
+      // only after this is the dismiss method invoked
+      jest.runOnlyPendingTimers();
+    });
+
+    expect(sharedProps.dismissToast).toHaveBeenCalled();
+    expect(onDimissReporterSpy).not.toBeCalled();
+
+    expect(screen.queryByLabelText('Notification')).toBeNull();
+  });
+
+  it('does not invoke the reportEvent method for a recurring toast of the success type', () => {
+    const REPEATED_TOAST_COUNT = 2;
+
+    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+
+    const toastObservable$ = new BehaviorSubject(
+      Array.from(new Array(2)).map((_, idx) => createMockToast(idx, 'success'))
+    );
+
+    sharedProps.dismissToast.mockImplementation((toastId: string) =>
+      act(() => {
+        const toastList = toastObservable$.getValue();
+        toastObservable$.next(toastList.filter((t) => t.id !== toastId));
+      })
+    );
+
+    render(<RenderToastList toasts$={toastObservable$.asObservable() as any} />);
+
+    const { 0: toastDismissButton, length: toastDismissButtonLength } =
+      screen.getAllByLabelText('Dismiss toast');
+
+    expect(toastDismissButtonLength).toEqual(1);
+
+    fireEvent.click(toastDismissButton);
+
+    act(() => {
+      // This is so that the toast fade out animation succesfully runs,
+      // only after this is the dismiss method invoked
+      jest.runOnlyPendingTimers();
+    });
+
+    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(REPEATED_TOAST_COUNT);
+    expect(onDimissReporterSpy).not.toBeCalled();
+
+    expect(screen.queryByLabelText('Notification')).toBeNull();
+  });
+
+  it('invokes the reportEvent method for a recurring toast of allowed type that is not success', () => {
+    const REPEATED_TOAST_COUNT = 4;
+
+    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+
+    const toastObservable$ = new BehaviorSubject(
+      Array.from(new Array(REPEATED_TOAST_COUNT)).map((_, idx) => createMockToast(idx, 'warning'))
+    );
+
+    sharedProps.dismissToast.mockImplementation((toastId: string) =>
+      act(() => {
+        const toastList = toastObservable$.getValue();
+        toastObservable$.next(toastList.filter((t) => t.id !== toastId));
+      })
+    );
+
+    render(<RenderToastList toasts$={toastObservable$.asObservable() as any} />);
+
+    const { 0: toastDismissButton, length: toastDismissButtonLength } =
+      screen.getAllByLabelText('Dismiss toast');
+
+    expect(toastDismissButtonLength).toEqual(1);
+
+    fireEvent.click(toastDismissButton);
+
+    act(() => {
+      // This is so that the toast fade out animation succesfully runs,
+      // only after this is the dismiss method invoked
+      jest.runOnlyPendingTimers();
+    });
+
+    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(REPEATED_TOAST_COUNT);
+    expect(onDimissReporterSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recurrenceCount: REPEATED_TOAST_COUNT,
+      })
+    );
+
+    expect(screen.queryByLabelText('Notification')).toBeNull();
   });
 });

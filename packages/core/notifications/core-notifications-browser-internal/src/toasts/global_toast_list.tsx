@@ -7,7 +7,8 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
+import React, { useEffect, useState, type FunctionComponent, useCallback, useRef } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -40,40 +41,69 @@ export const GlobalToastList: FunctionComponent<Props> = ({
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
+  const userRequestedToastDimissIndex = useRef<string | null>(null);
+
+  const reportToastDismissal = useCallback(
+    (representedToasts: State['idToToasts'][number]) => {
+      // Select the first duplicate toast within the represented toast group
+      // given it's identical to all other recurring ones within it's group
+      const {
+        0: { title: toastTitle, color: toastType },
+        length: toastRecurrenceCount,
+      } = representedToasts;
+
+      if (toastRecurrenceCount > 1 && toastType !== 'success' && toastTitle) {
+        reportEvent.onDismissToast({
+          toastMessage:
+            toastTitle instanceof Function
+              ? renderToStaticMarkup(<MountWrapper mount={toastTitle} />)
+              : toastTitle,
+          recurrenceCount: toastRecurrenceCount,
+          toastMessageType: toastType,
+        });
+      }
+    },
+    [reportEvent]
+  );
 
   useEffect(() => {
     const subscription = toasts$.subscribe((redundantToastList) => {
       const { toasts: reducedToasts, idToToasts: reducedIdToasts } =
         deduplicateToasts(redundantToastList);
 
-      setIdToToasts(reducedIdToasts);
+      setIdToToasts((prevState) => {
+        // select toast group that just got dismissed
+        // using the stored requested toast delete index
+        const toastsDimissedFromLastInteraction = userRequestedToastDimissIndex.current
+          ? prevState[userRequestedToastDimissIndex.current]
+          : [];
+
+        if (toastsDimissedFromLastInteraction.length) {
+          reportToastDismissal(toastsDimissedFromLastInteraction);
+
+          userRequestedToastDimissIndex.current = null;
+        }
+
+        return reducedIdToasts;
+      });
+
       setToasts(reducedToasts);
     });
 
     return () => subscription.unsubscribe();
-  }, [toasts$]);
+  }, [reportEvent, reportToastDismissal, toasts$]);
 
   const closeToastsRepresentedById = useCallback(
     ({ id }: EuiToast) => {
       const representedToasts = idToToasts[id];
 
       if (representedToasts) {
+        userRequestedToastDimissIndex.current = id;
+
         representedToasts.forEach((toast) => dismissToast(toast.id));
-
-        // Select the first duplicate toast within the represented toast
-        // given it's identical to all other recurring ones within it's group
-        const { 0: firstDuplicateToast, length: toastRecurrenceCount } = representedToasts;
-
-        if (toastRecurrenceCount > 1) {
-          reportEvent.onDismissToast({
-            toastMessage: firstDuplicateToast.title!,
-            recurrenceCount: toastRecurrenceCount,
-            toastMessageType: firstDuplicateToast.color,
-          });
-        }
       }
     },
-    [dismissToast, idToToasts, reportEvent]
+    [dismissToast, idToToasts]
   );
 
   return (

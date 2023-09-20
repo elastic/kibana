@@ -11,7 +11,7 @@ import { EuiToast } from '@elastic/eui';
 import { type AnalyticsServiceStart } from '@kbn/core/public';
 import { EventMetric, FieldType } from './event_types';
 
-type ToastMessageType = ComponentProps<typeof EuiToast>['color'];
+type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'success'>;
 
 interface EventPayload {
   [FieldType.RECURRENCE_COUNT]: number;
@@ -31,8 +31,8 @@ export class EventReporter {
     toastMessage,
     toastMessageType,
   }: {
-    recurrenceCount: number;
     toastMessage: string;
+    recurrenceCount: number;
     toastMessageType: ToastMessageType;
   }) {
     this.reportEvent<EventPayload>(EventMetric.TOAST_DISMISSED, {
@@ -40,10 +40,5 @@ export class EventReporter {
       [FieldType.TOAST_MESSAGE]: toastMessage,
       [FieldType.TOAST_MESSAGE_TYPE]: toastMessageType,
     });
-  }
-
-  onClearAllToasts() {
-    // TODO: add in fields for all toasts dismissal
-    this.reportEvent(EventMetric.ALL_TOASTS_DISMISSED, {});
   }
 }
