@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { navigateToEndpointPolicyResponse } from '../../screens';
 import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { navigateToEndpointPolicyResponse } from '../../screens/endpoints';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
 import type { IndexedEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import { login } from '../../tasks/login';
-import { navigateToFleetAgentDetails } from '../../screens/fleet';
+import { navigateToFleetAgentDetails } from '../../screens/fleet/agent_details';
 import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 
