@@ -134,7 +134,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       setIsOpen?.(false);
       setIsConnectorModalVisible(false);
       setSelectedActionType(null);
-    }, []);
+    }, [setIsOpen]);
 
     const [modalForceOpen, setModalForceOpen] = useState(isOpen);
 

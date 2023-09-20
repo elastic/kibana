@@ -99,7 +99,7 @@ export const bedrockSecrets: SecretsFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="The AWS secret for HTTP Basic authentication. For more details about generating AWS security credentials, refer to the {bedrockAPIKeyDocs}."
-        id="xpack.stackConnectors.components.bedrock.bedrockApiKeyDocumentation"
+        id="xpack.stackConnectors.components.bedrock.bedrockSecretDocumentation"
         values={{
           bedrockAPIKeyDocs: (
             <EuiLink
