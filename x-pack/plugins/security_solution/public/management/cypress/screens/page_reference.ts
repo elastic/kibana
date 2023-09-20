@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import {
   APP_BLOCKLIST_PATH,
   APP_ENDPOINTS_PATH,
@@ -13,8 +14,7 @@ import {
   APP_POLICIES_PATH,
   APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_TRUSTED_APPS_PATH,
-} from '@kbn/security-solution-plugin/common/constants';
-import { keyBy } from 'lodash';
+} from '../../../../common/constants';
 
 export interface EndpointManagementPageMap {
   endpointList: EndpointManagementPage;

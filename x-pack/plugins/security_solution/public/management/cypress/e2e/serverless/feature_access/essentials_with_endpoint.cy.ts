@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
-import { login } from '../../../tasks/login';
-import { getAgentListTable, visitFleetAgentList } from '../../../screens';
-import { getEndpointManagementPageMap } from '../../../screens/endpoint_management';
-import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
+import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import {
+  getEndpointManagementPageMap,
+  getFleetAgentListTable,
+  visitFleetAgentList,
+} from '../../../screens';
 
 describe(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',
@@ -37,7 +40,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      login('endpoint_operations_analyst').then((response) => {
+      loginServerless(ServerlessUser.ENDPOINT_OPERATIONS_ANALYST).then((response) => {
         username = response.username;
         password = response.password;
       });
@@ -71,7 +74,7 @@ describe(
 
     it(`should have access to Fleet`, () => {
       visitFleetAgentList();
-      getAgentListTable().should('exist');
+      getFleetAgentListTable().should('exist');
     });
   }
 );

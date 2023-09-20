@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { DeepReadonly } from 'utility-types';
-import { EndpointManagementPageMap, getEndpointManagementPageMap } from './page_reference';
-import { UserAuthzAccessLevel } from './types';
+import type { DeepReadonly } from 'utility-types';
+import type { EndpointManagementPageMap } from './page_reference';
+import { getEndpointManagementPageMap } from './page_reference';
+import type { UserAuthzAccessLevel } from './types';
 import { getNoPrivilegesPage } from './common';
+import { loadPage } from '../tasks/common';
+import { APP_PATH } from '../../../../common';
+import { getEndpointDetailsPath } from '../../common/routing';
 
 interface ListRowOptions {
   endpointId?: string;
@@ -16,6 +20,11 @@ interface ListRowOptions {
   /** Zero-based row index */
   rowIndex?: number;
 }
+
+export const TABLE_ROW_ACTIONS_MENU = 'tableRowActionsMenuPanel';
+export const AGENT_HOSTNAME_CELL = 'hostnameCellLink';
+export const AGENT_POLICY_CELL = 'policyNameCellLink';
+export const TABLE_ROW_ACTIONS = 'endpointTableRowActions';
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
 
@@ -80,4 +89,11 @@ export const getUnIsolateActionMenuItem = (): Cypress.Chainable => {
 
 export const getConsoleActionMenuItem = (): Cypress.Chainable => {
   return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('console');
+};
+
+export const navigateToEndpointPolicyResponse = (endpointAgentId: string): void => {
+  loadPage(
+    APP_PATH +
+      getEndpointDetailsPath({ name: 'endpointPolicyResponse', selected_endpoint: endpointAgentId })
+  );
 };
