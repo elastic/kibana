@@ -21,12 +21,16 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 
 let availableVersions: string[] | undefined;
 
-export const getLatestAvailableVersion = async (): Promise<string> => {
-  const versions = await getAvailableVersions();
+export const getLatestAvailableVersion = async (includeCurrentVersion = true): Promise<string> => {
+  const versions = await getAvailableVersions({ includeCurrentVersion });
+
   return versions[0];
 };
 
-export const getAvailableVersions = async (cached = true): Promise<string[]> => {
+export const getAvailableVersions = async ({
+  cached = true,
+  includeCurrentVersion = true,
+}): Promise<string[]> => {
   // Use cached value to avoid reading from disk each time
   if (cached && availableVersions) {
     return availableVersions;
@@ -51,7 +55,7 @@ export const getAvailableVersions = async (cached = true): Promise<string[]> => 
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
     versionsToDisplay = uniq(versions) as string[];
 
-    if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
+    if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions && includeCurrentVersion) {
       // Add current version if not already present
       const hasCurrentVersion = versionsToDisplay.some((v) => v === kibanaVersion);
 
