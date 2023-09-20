@@ -16,8 +16,8 @@ import { goToUserRiskScoreTab } from '../../../tasks/user_risk';
 describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_entities');
-    cy.task('esArchiverLoad', 'query_alert');
+    cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
+    cy.task('esArchiverLoad', { archiveName: 'query_alert' });
   });
 
   beforeEach(() => {

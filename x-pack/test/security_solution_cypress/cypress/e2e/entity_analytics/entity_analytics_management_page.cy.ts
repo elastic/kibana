@@ -46,7 +46,7 @@ describe(
     env: {
       ftrConfig: { enableExperimental: ['riskScoringPersistence'] },
     },
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@ess', '@brokenInServerless'],
   },
   () => {
     before(() => {
