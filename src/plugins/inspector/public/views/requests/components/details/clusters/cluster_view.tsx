@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { ShardsOverview } from './shards_overview';
+import { ShardsView } from './shards_view';
 
 interface Props {
   clusterDetails: ClusterDetails;
@@ -30,7 +30,7 @@ export function ClusterView({ clusterDetails }: Props) {
         />
       ) : null}
 
-      <ShardsOverview
+      <ShardsView
         failures={clusterDetails.failures ?? []}
         shardsDetails={clusterDetails._shards}
       />

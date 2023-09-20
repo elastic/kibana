@@ -16,7 +16,7 @@ interface Props {
   shardsDetails?: ShardStatistics;
 }
 
-export function ShardsOverview({ failures, shardsDetails }: Props) {
+export function ShardsView({ failures, shardsDetails }: Props) {
   const [showFailures, setShowFailures] = useState(false);
 
   return !shardsDetails || failures.length === 0 ? null : (
