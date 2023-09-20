@@ -6,6 +6,12 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_HOSTNAME_CELL,
+  AGENT_POLICY_CELL,
+  TABLE_ROW_ACTIONS,
+  TABLE_ROW_ACTIONS_MENU,
+} from '../../screens';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import {
@@ -18,21 +24,15 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import {
-  AGENT_HOSTNAME_CELL,
-  TABLE_ROW_ACTIONS,
-  TABLE_ROW_ACTIONS_MENU,
-  AGENT_POLICY_CELL,
-} from '../../screens/endpoints';
-import {
   FLEET_REASSIGN_POLICY_MODAL,
   FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
-} from '../../screens/fleet';
+} from '../../screens/fleet/agent_details';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe('Endpoints page', () => {
+describe('Endpoints page', { tags: '@ess' }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -109,24 +109,26 @@ describe('Endpoints page', () => {
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
       loadPage(APP_ENDPOINTS_PATH);
-      const hostname = cy
-        .getByTestSubj(AGENT_HOSTNAME_CELL)
-        .filter(`:contains("${createdHost.hostname}")`);
-      const tableRow = hostname.parents('tr');
-      tableRow.findByTestSubj(TABLE_ROW_ACTIONS).click();
-      cy.getByTestSubj(TABLE_ROW_ACTIONS_MENU).contains('Reassign agent policy').click();
-      cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
-        .find('select')
-        .select(response.agentPolicies[0].name);
-      cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
       cy.getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${createdHost.hostname}")`)
-        .should('exist');
-      cy.getByTestSubj(AGENT_HOSTNAME_CELL)
-        .filter(`:contains("${createdHost.hostname}")`)
-        .parents('tr')
-        .findByTestSubj(AGENT_POLICY_CELL)
-        .should('have.text', response.agentPolicies[0].name);
+        .then((hostname) => {
+          const tableRow = hostname.parents('tr');
+
+          tableRow.find(`[data-test-subj=${TABLE_ROW_ACTIONS}`).trigger('click');
+          cy.getByTestSubj(TABLE_ROW_ACTIONS_MENU).contains('Reassign agent policy').click();
+          cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
+            .find('select')
+            .select(response.agentPolicies[0].name);
+          cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
+          cy.getByTestSubj(AGENT_HOSTNAME_CELL)
+            .filter(`:contains("${createdHost.hostname}")`)
+            .should('exist');
+          cy.getByTestSubj(AGENT_HOSTNAME_CELL)
+            .filter(`:contains("${createdHost.hostname}")`)
+            .parents('tr')
+            .findByTestSubj(AGENT_POLICY_CELL)
+            .should('have.text', response.agentPolicies[0].name);
+        });
     });
   });
 
