@@ -8,6 +8,7 @@
 import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { INSTALLED_VERSION } from '../services/private_location_test_service';
 
 interface PolicyProps {
   name?: string;
@@ -29,7 +30,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
+    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     inputs: [
@@ -471,30 +472,14 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
     streams: [
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser'),
         vars: browserVars,
         id: 'synthetics/browser-browser-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: compiledBrowser,
       },
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser.network',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser.network'),
         id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: {
           processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
@@ -502,15 +487,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
       },
       {
         enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'browser.screenshot',
-          elasticsearch: {
-            privileges: {
-              indices: ['auto_configure', 'create_doc', 'read'],
-            },
-          },
-        },
+        data_stream: getDataStream('browser.screenshot'),
         id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         compiled_stream: {
           processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
@@ -519,6 +496,16 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
     ],
   };
 };
+
+export const getDataStream = (dataset: string) => ({
+  dataset,
+  type: 'synthetics',
+  elasticsearch: {
+    privileges: {
+      indices: ['auto_configure', 'create_doc', 'read'],
+    },
+  },
+});
 
 export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
