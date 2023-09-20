@@ -29,7 +29,6 @@ export interface ConfigPanelWrapperProps {
   uiActions: UiActionsStart;
   getUserMessages?: UserMessagesGetter;
   hideLayerHeader?: boolean;
-  hideDimensionsFlyoutFooter?: boolean;
 }
 
 export interface LayerPanelProps {

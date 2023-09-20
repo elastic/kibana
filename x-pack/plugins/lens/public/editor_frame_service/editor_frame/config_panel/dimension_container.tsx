@@ -20,7 +20,6 @@ export function DimensionContainer({
   groupLabel: string;
   isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
-  hideFooter?: boolean;
 }) {
   return <FlyoutContainer {...props}>{panel}</FlyoutContainer>;
 }

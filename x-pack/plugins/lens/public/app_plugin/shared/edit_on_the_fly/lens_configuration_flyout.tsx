@@ -254,10 +254,6 @@ export function LensEditConfigurationFlyout({
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
     indexPatternService,
-    // we need to hide the footer from the dimensions flyout
-    // it is not displayed even without hiding this
-    // but having both in the Dom creates a weird bug with the click events
-    hideDimensionsFlyoutFooter: true,
   };
   return (
     <>
@@ -265,7 +261,7 @@ export function LensEditConfigurationFlyout({
         className="lnsEditFlyoutBody"
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
-          overflow-y: auto;
+          overflow-y: scroll;
           padding-left: ${euiThemeVars.euiFormMaxWidth};
           margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none !important;
