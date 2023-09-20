@@ -17,6 +17,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import { ShardFailuresTable } from './shard_failures_table';
 
 interface Props {
   failures: ShardFailure[];
@@ -39,7 +40,9 @@ export function ShardFailuresFlyout({ failures, onClose }: Props) {
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody />
+      <EuiFlyoutBody>
+        <ShardFailuresTable failures={failures} />
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="sortLeft" onClick={onClose} flush="left">
