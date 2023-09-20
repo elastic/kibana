@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useEffect, useState } from 'react';
 import {
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
   EuiCollapsibleNavSubItemGroupTitle,
 } from '@elastic/eui';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
+import React, { FC, useEffect, useState } from 'react';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { ChromeProjectNavigationNodeEnhanced } from '../types';
 import { GroupAsLink } from './group_as_link';
 
 const navigationNodeToEuiItem = (
-  item: ChromeProjectNavigationNodeEnhanced,
+  item: ChromeProjectNavigationNode,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
 ): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
@@ -54,8 +54,8 @@ const navigationNodeToEuiItem = (
 };
 
 interface Props {
-  navNode: ChromeProjectNavigationNodeEnhanced;
-  items?: ChromeProjectNavigationNodeEnhanced[];
+  navNode: ChromeProjectNavigationNode;
+  items?: ChromeProjectNavigationNode[];
 }
 
 export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
@@ -67,7 +67,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
   // If the item has no link and no cildren, we don't want to render it
-  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNodeEnhanced) => {
+  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNode) => {
     const isGroupTitle = Boolean(item.isGroupTitle);
     const hasLink = Boolean(item.deepLink) || Boolean(item.href);
     if (isGroupTitle) {

@@ -291,7 +291,6 @@ describe('<DefaultNavigation />', () => {
                       "group1",
                       "item1",
                     ],
-                    "renderItem": undefined,
                     "title": "Title from deeplink",
                   },
                   Object {
@@ -311,7 +310,6 @@ describe('<DefaultNavigation />', () => {
                       "group1",
                       "item2",
                     ],
-                    "renderItem": undefined,
                     "title": "Overwrite deeplink title",
                   },
                 ],
@@ -394,7 +392,6 @@ describe('<DefaultNavigation />', () => {
                       "group1",
                       "item1",
                     ],
-                    "renderItem": undefined,
                     "title": "Absolute link",
                   },
                 ],
@@ -556,11 +553,11 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
-      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+        /nav-item-isActive/
       );
     });
 
@@ -619,8 +616,8 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
-        'euiSideNavItemButton-isSelected'
+      expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+        /nav-item-isActive/
       );
     });
   });
@@ -703,17 +700,13 @@ describe('<DefaultNavigation />', () => {
         );
 
         expect(
-          (
-            await findByTestId(
-              /nav-item-project_settings_project_nav.settings.cloudLinkUserAndRoles/
-            )
-          ).textContent
-        ).toBe('Mock Users & RolesExternal link');
+          (await findByTestId(/nav-item-project_settings_project_nav.cloudLinkUserAndRoles/))
+            .textContent
+        ).toBe('Mock Users & Roles');
 
         expect(
-          (await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/))
-            .textContent
-        ).toBe('Mock Billing & SubscriptionsExternal link');
+          (await findByTestId(/nav-item-project_settings_project_nav.cloudLinkBilling/)).textContent
+        ).toBe('Mock Billing & Subscriptions');
       });
     });
   });
