@@ -16,7 +16,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,11 +40,11 @@ export const showSuccessToast = (
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
-    'data-test-subj': 'completeReportSuccess',
+    'data-test-subj': 'csp:toast-success',
     text: toMountPoint(
       <div>
         <EuiText size="m">
-          <strong>{ruleResponse.name}</strong>
+          <strong data-test-subj="csp:toast-success-title">{ruleResponse.name}</strong>
           {` `}
           <FormattedMessage
             id="xpack.csp.flyout.ruleCreatedToastTitle"
@@ -59,7 +59,11 @@ export const showSuccessToast = (
         </EuiText>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}>
+            <EuiButton
+              data-test-subj="csp:toast-success-link"
+              size="s"
+              href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}
+            >
               <FormattedMessage
                 id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
                 defaultMessage="View rule"
@@ -67,8 +71,7 @@ export const showSuccessToast = (
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>,
-      {}
+      </div>
     ),
   });
 };
