@@ -14,6 +14,7 @@ import { getEndpointManagementPageList } from '../../../screens';
 describe(
   'App Features for Security Essential PLI',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],

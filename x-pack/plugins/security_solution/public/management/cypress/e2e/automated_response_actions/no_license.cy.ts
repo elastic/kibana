@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
-import { APP_ALERTS_PATH } from '../../../../../../common/constants';
-import { closeAllToasts } from '../../../tasks/toasts';
-import { fillUpNewRule } from '../../../tasks/response_actions';
-import { login, loginWithRole, ROLE } from '../../../tasks/login';
-import { generateRandomStringName } from '../../../tasks/utils';
-import type { ReturnTypeFromChainable } from '../../../types';
-import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
+import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
+import { APP_ALERTS_PATH } from '../../../../../common/constants';
+import { closeAllToasts } from '../../tasks/toasts';
+import { fillUpNewRule } from '../../tasks/response_actions';
+import { login, loginWithRole, ROLE } from '../../tasks/login';
+import { generateRandomStringName } from '../../tasks/utils';
+import type { ReturnTypeFromChainable } from '../../types';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } }, () => {
   describe('User cannot use endpoint action in form', () => {
