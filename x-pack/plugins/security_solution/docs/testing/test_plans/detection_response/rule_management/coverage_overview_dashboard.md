@@ -63,6 +63,8 @@ And rules enabled
 When user navigates to Coverage Overview page
 Then page should render all rule data in grid
 And color tiles according to filters and dashboard legend
+
+CASE: Test case should work with non-security rules both present and not present in system
 ```
 
 #### **Scenario: User clicks on tile**
@@ -96,8 +98,10 @@ Then the dashboard is rendered according to the rule data
 
 ```Gherkin
 Given coverage overview page is loaded with rule data
-When <type> filter(s) is/are enabled
-Then all <type> rule data is fetched and dashboard containing the rule data is rendered
+When filter(s) is/are enabled
+Then all filtered rule data is fetched and dashboard containing the rule data is rendered
+
+CASE: Filtering should work for all permutations of activity and source filters
 
 Examples:
   | type                   |
@@ -157,29 +161,6 @@ When user clicks on a technique tile with disabled rules
 Then "enable all disabled" button should be disabled
 ```
 
-### API specific cases
-
-#### **Scenario: Non-security rules are present**
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given non-security rules are present in system
-When coverage overview data is fetched
-Then only security rule data is returned
-And no error is thrown
-```
-
-#### **Scenario: Invalid API body**
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given coverage overview data is fetched
-And query has an invalid body
-Then `400` error is returned
-```
-
 ### Error handling
 
 #### **Scenario: Error is handled when API error is returned**
@@ -190,4 +171,6 @@ Then `400` error is returned
 Given a user navigates to coverage overview page
 And any error is returned from coverage overview API
 Then error is handled and displayed via a toast
+
+CASE: Should work for valid and invalid API body
 ```
