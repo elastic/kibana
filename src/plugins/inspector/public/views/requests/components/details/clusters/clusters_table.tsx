@@ -7,18 +7,24 @@
  */
 
 import React, { useState, ReactNode } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { ClusterDetails } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from './cluster_health';
 import { LOCAL_CLUSTER_KEY } from './constants';
 
-function getInitialExpandedRow(clusters) {
+function getInitialExpandedRow(clusters: Record<string, ClusterDetails>) {
   const clusterNames = Object.keys(clusters);
   return clusterNames.length === 1
     ? { [clusterNames[0]]: <ClusterView clusterDetails={clusters[clusterNames[0]]} /> }
     : {};
+}
+
+interface ClusterColumn {
+  name: string;
+  status: string;
+  responseTime?: number;
 }
 
 interface Props {
@@ -40,7 +46,7 @@ export function ClustersTable({ clusters }: Props) {
     setExpandedRows(nextExpandedRows);
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<ClusterColumn>> = [
     {
       field: 'name',
       name: i18n.translate('inspector.requests.clustersTable.nameLabel', {
@@ -79,12 +85,12 @@ export function ClustersTable({ clusters }: Props) {
       name: i18n.translate('inspector.requests.clustersTable.statusLabel', {
         defaultMessage: 'Status',
       }),
-      render: (status: estypes.ClusterSearchStatus) => {
+      render: (status: string) => {
         return <ClusterHealth status={status} />;
       },
     },
     {
-      align: 'right',
+      align: 'right' as 'right',
       field: 'responseTime',
       name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
         defaultMessage: 'Response time',

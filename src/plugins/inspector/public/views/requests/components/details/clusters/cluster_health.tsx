@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { HEALTH_HEX_CODES } from './utils';
 
 interface Props {
   count?: number;
-  status: ClusterSearchStatus;
+  status: string;
 }
 
 export function ClusterHealth({ count, status }: Props) {

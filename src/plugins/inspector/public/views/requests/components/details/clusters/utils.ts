@@ -7,6 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { ClusterDetails } from '@kbn/es-types';
 
 export const HEALTH_HEX_CODES = {
   successful: '#54B399',
@@ -15,8 +16,8 @@ export const HEALTH_HEX_CODES = {
   failed: '#E7664C',
 };
 
-function getLocalClusterStatus(rawResponse: estypes.SearchResponse): estypes.ClusterSearchStatus {
-  if (rawResponse.error) {
+function getLocalClusterStatus(rawResponse: estypes.SearchResponse): ClusterDetails['status'] {
+  if (rawResponse._shards?.successful === 0) {
     return 'failed';
   }
 

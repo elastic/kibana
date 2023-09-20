@@ -7,13 +7,14 @@
  */
 
 import React, { useState } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ShardFailureFlyout } from './shard_failure_flyout';
 
 interface Props {
-  failures: ShardFailure[];
-  shardsDetails?: ShardStatistics;
+  failures: estypes.ShardFailure[];
+  shardsDetails?: estypes.ShardStatistics;
 }
 
 export function ShardsView({ failures, shardsDetails }: Props) {

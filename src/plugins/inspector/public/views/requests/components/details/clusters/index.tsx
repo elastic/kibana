@@ -7,7 +7,10 @@
  */
 
 import React, { Component } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiSpacer } from '@elastic/eui';
+import type { ClusterDetails } from '@kbn/es-types';
+import { Request } from '../../../../../../common/adapters/request/types';
 import type { RequestDetailsProps } from '../../types';
 import { getLocalClusterDetails } from './utils';
 import { ClustersHealth } from './clusters_health';
@@ -17,11 +20,11 @@ import { LOCAL_CLUSTER_KEY } from './constants';
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
     Boolean(
-      request.response?.json?.rawResponse?._shards || request.response?.json?.rawResponse?._clusters
+      (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards || (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
     );
 
   render() {
-    const rawResponse = this.props.request.response?.json?.rawResponse;
+    const rawResponse = (this.props.request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse;
     if (!rawResponse) {
       return null;
     }

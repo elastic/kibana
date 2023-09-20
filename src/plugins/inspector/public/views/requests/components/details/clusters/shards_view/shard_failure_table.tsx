@@ -9,8 +9,14 @@
 import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ShardFailureDetails } from './shard_failure_details';
+
+interface ShardColumn {
+  shard: number;
+  index?: string;
+  failureType: string;
+}
 
 interface Props {
   failures: estypes.ShardFailure[];
@@ -30,13 +36,13 @@ export function ShardFailureTable({ failures }: Props) {
     setExpandedRows(nextExpandedRows);
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<ShardColumn>> = [
     {
       field: 'shard',
       name: i18n.translate('inspector.requests.clusters.shards.table.shardLabel', {
         defaultMessage: 'Shard',
       }),
-      render: (shard: string) => {
+      render: (shard: number) => {
         return (
           <>
             <EuiButtonIcon

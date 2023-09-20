@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -20,13 +21,13 @@ import {
 import { ShardFailureTable } from './shard_failure_table';
 
 interface Props {
-  failures: ShardFailure[];
+  failures: estypes.ShardFailure[];
   onClose: () => void;
 }
 
 export function ShardFailureFlyout({ failures, onClose }: Props) {
   return (
-    <EuiFlyout ownFocus={false}>
+    <EuiFlyout onClose={onClose} ownFocus={false} hideCloseButton={true}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h1>

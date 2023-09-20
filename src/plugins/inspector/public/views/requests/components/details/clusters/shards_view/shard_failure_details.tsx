@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 
 /**
@@ -26,7 +27,7 @@ export function formatKey(key: string): string {
  * @param value
  * @param key
  */
-export function formatValueByKey(value: unknown, key: string): ReactNode {
+export function formatValueByKey(value: unknown, key: string): JSX.Element {
   if (key === 'script' || key === 'script_stack') {
     const valueScript = Array.isArray(value) ? value.join('\n') : String(value);
     return (
@@ -40,7 +41,7 @@ export function formatValueByKey(value: unknown, key: string): ReactNode {
 }
 
 interface Props {
-  failure: ShardFailure;
+  failure: estypes.ShardFailure;
 }
 
 export function ShardFailureDetails({ failure }: Props) {

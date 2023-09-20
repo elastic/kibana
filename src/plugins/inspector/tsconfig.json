@@ -15,6 +15,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/std",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",
