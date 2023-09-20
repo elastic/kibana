@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getHeathBarLinearGradient } from './utils';
+import { getHeathBarLinearGradient } from './gradient';
 
 describe('getHeathBarLinearGradient', () => {
   test('should return linear-gradient with percentages for each status', () => {

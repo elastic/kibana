@@ -11,8 +11,8 @@ import type { ClusterDetails } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
-import { ClusterHealth } from './cluster_health';
-import { LOCAL_CLUSTER_KEY } from './constants';
+import { ClusterHealth } from '../clusters_health';
+import { LOCAL_CLUSTER_KEY } from '../constants';
 
 function getInitialExpandedRow(clusters: Record<string, ClusterDetails>) {
   const clusterNames = Object.keys(clusters);

@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import { HEALTH_HEX_CODES } from './utils';
+import { HEALTH_HEX_CODES } from './gradient';
 
 interface Props {
   count?: number;
