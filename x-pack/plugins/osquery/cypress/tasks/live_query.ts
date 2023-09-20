@@ -16,7 +16,7 @@ export const selectAllAgents = () => {
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').click();
   });
-  cy.contains('All agents', { timeout: 10000 }).should('exist');
+  cy.contains('All agents').should('exist');
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').type('{downArrow}{enter}{esc}');
   });
@@ -102,6 +102,12 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 
 export const loadRuleAlerts = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
+  // additional trigger - in serverless alerts do not appear instantly in tests
+  const isServerless = Cypress.env().IS_SERVERLESS;
+  if (isServerless) {
+    toggleRuleOffAndOn(ruleName);
+  }
+
   cy.visit('/app/security/rules');
   clickRuleName(ruleName);
   cy.getBySel('alertsTable').within(() => {
