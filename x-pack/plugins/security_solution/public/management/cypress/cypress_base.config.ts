@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { dataLoaders } from './support/data_loaders';
+import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
 
 export const getCypressBaseConfig = (
