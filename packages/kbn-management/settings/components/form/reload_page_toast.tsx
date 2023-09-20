@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n/target/types';
+import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ToastInput } from '@kbn/core-notifications-browser/target/types';
+import { ToastInput } from '@kbn/core-notifications-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 

@@ -31,7 +31,7 @@ export interface FieldInputServices {
  */
 export interface FieldInputKibanaDependencies {
   /** The portion of the {@link ToastsStart} contract used by this component. */
-  toasts: Pick<ToastsStart, 'addDanger' | 'add'>;
+  toasts: Pick<ToastsStart, 'addDanger'>;
 }
 
 /**

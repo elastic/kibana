@@ -7,3 +7,4 @@
  */
 
 export { TestWrapper, createFormServicesMock, wrap } from './context';
+export { settingsMock } from './settings';
