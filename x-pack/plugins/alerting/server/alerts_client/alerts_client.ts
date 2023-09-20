@@ -203,7 +203,7 @@ export class AlertsClient<
     return { hits, total };
   }
 
-  public async untrackRuleIdsByIndices(indices: string[], ruleIds: string[]) {
+  public async setAlertStatusToUntracked(indices: string[], ruleIds: string[]) {
     const esClient = await this.options.elasticsearchClientPromise;
     const terms: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
       term: {

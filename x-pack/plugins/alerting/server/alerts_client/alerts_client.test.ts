@@ -2796,7 +2796,7 @@ describe('Alerts Client', () => {
         });
       });
 
-      describe('untrackRuleIdsByIndices()', () => {
+      describe('setAlertStatusToUntracked()', () => {
         test('should call updateByQuery on provided ruleIds', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -2811,7 +2811,7 @@ describe('Alerts Client', () => {
           };
           await alertsClient.initializeExecution(opts);
 
-          await alertsClient.untrackRuleIdsByIndices(['test-index'], ['test-rule']);
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
 
           expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
         });
@@ -2834,7 +2834,7 @@ describe('Alerts Client', () => {
           };
           await alertsClient.initializeExecution(opts);
 
-          await alertsClient.untrackRuleIdsByIndices(['test-index'], ['test-rule']);
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
 
           expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
           expect(logger.warn).toHaveBeenCalledWith(

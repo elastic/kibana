@@ -233,7 +233,7 @@ export class LegacyAlertsClient<
 
   public async persistAlerts() {}
 
-  public async untrackRuleIdsByIndices() {
+  public async setAlertStatusToUntracked() {
     return;
   }
 }

@@ -95,7 +95,7 @@ export const untrackRuleAlerts = async (
         });
         if (!alertsClient) throw new Error('Could not create alertsClient');
         const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-        await alertsClient.untrackRuleIdsByIndices(indices, [id]);
+        await alertsClient.setAlertStatusToUntracked(indices, [id]);
       }
     } catch (error) {
       // this should not block the rest of the disable process
