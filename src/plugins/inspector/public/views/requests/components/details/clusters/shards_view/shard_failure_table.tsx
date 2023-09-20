@@ -30,8 +30,10 @@ export function ShardFailureTable({ failures }: Props) {
     if (shard in nextExpandedRows) {
       delete nextExpandedRows[shard];
     } else {
-      const shardFailure = failures.find(failure => shard === failure.shard);
-      nextExpandedRows[shard] = shardFailure ? <ShardFailureDetails failure={shardFailure} /> : null;
+      const shardFailure = failures.find((failure) => shard === failure.shard);
+      nextExpandedRows[shard] = shardFailure ? (
+        <ShardFailureDetails failure={shardFailure} />
+      ) : null;
     }
     setExpandedRows(nextExpandedRows);
   };

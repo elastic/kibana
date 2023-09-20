@@ -20,11 +20,14 @@ import { LOCAL_CLUSTER_KEY } from './constants';
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
     Boolean(
-      (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards || (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
+      (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
+        (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
     );
 
   render() {
-    const rawResponse = (this.props.request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse;
+    const rawResponse = (
+      this.props.request.response?.json as { rawResponse?: estypes.SearchResponse }
+    )?.rawResponse;
     if (!rawResponse) {
       return null;
     }

@@ -31,10 +31,7 @@ export function ClusterView({ clusterDetails }: Props) {
         />
       ) : null}
 
-      <ShardsView
-        failures={clusterDetails.failures ?? []}
-        shardsDetails={clusterDetails._shards}
-      />
+      <ShardsView failures={clusterDetails.failures ?? []} shardsDetails={clusterDetails._shards} />
     </EuiText>
   );
 }
