@@ -55,7 +55,7 @@ Then an empty grid of all Mitre tactics and techniques is displayed
 
 #### **Scenario: Rules installed**
 
-**Automation**: 1 e2e test + 1 integration test
+**Automation**: 1 e2e test + 2 integration test
 
 ```Gherkin
 Given prebuilt rules installed and/or custom rules created
@@ -165,7 +165,7 @@ Then "enable all disabled" button should be disabled
 
 #### **Scenario: Error is handled when API error is returned**
 
-**Automation**: 1 e2e test.
+**Automation**: 2 e2e test.
 
 ```Gherkin
 Given a user navigates to coverage overview page
