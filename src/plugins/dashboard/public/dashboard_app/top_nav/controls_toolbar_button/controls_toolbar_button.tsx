@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -17,7 +17,12 @@ import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
-export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
+interface Props {
+  controlGroup: ControlGroupContainer;
+  isDisabled?: boolean;
+}
+
+export const ControlsToolbarButton: FC<Props> = ({ controlGroup, isDisabled }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -30,6 +35,7 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       size="s"
       iconType="controlsHorizontal"
       data-test-subj="dashboard-controls-menu-button"
+      isDisabled={isDisabled}
     >
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
@@ -54,4 +60,4 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       )}
     </ToolbarPopover>
   );
-}
+};

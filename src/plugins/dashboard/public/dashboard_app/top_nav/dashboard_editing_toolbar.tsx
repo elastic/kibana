@@ -7,7 +7,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -23,7 +23,11 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar() {
+interface Props {
+  isDisabled?: boolean;
+}
+
+export const DashboardEditingToolbar: FC<Props> = ({ isDisabled }) => {
   const {
     usageCollection,
     data: { search },
@@ -32,6 +36,8 @@ export function DashboardEditingToolbar() {
     visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
+
+  console.log({ isDisabled });
 
   const dashboard = useDashboardAPI();
 
@@ -106,15 +112,22 @@ export function DashboardEditingToolbar() {
   );
 
   const extraButtons = [
-    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
+    <EditorMenu
+      createNewVisType={createNewVisType}
+      createNewEmbeddable={createNewEmbeddable}
+      isDisabled={isDisabled}
+    />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
+      isDisabled={isDisabled}
     />,
   ];
   if (dashboard.controlGroup) {
-    extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
+    extraButtons.push(
+      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
+    );
   }
 
   return (
@@ -128,6 +141,7 @@ export function DashboardEditingToolbar() {
           primaryButton: (
             <ToolbarButton
               type="primary"
+              isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
               onClick={createNewVisType(lensAlias)}
@@ -140,4 +154,4 @@ export function DashboardEditingToolbar() {
       </Toolbar>
     </div>
   );
-}
+};
