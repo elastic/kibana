@@ -13,7 +13,6 @@ import type {
 } from '../components/agent_enrollment_flyout/types';
 
 import { useAgentVersion } from './use_agent_version';
-import { useGetSettings } from './use_request';
 
 const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
@@ -26,21 +25,19 @@ export const useCreateCloudFormationUrl = ({
   cloudFormationProps?: CloudFormationProps;
   fleetServerHost?: string;
 }) => {
-  const { isLoading } = useGetSettings();
-
   const agentVersion = useAgentVersion();
 
   let isError = false;
   let error: string | undefined;
 
-  if (!fleetServerHost && !isLoading) {
+  if (!fleetServerHost) {
     isError = true;
     error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noFleetServerHost', {
       defaultMessage: 'No Fleet Server host found',
     });
   }
 
-  if (!enrollmentAPIKey && !isLoading) {
+  if (!enrollmentAPIKey) {
     isError = true;
     error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noApiKey', {
       defaultMessage: 'No enrollment token found',
@@ -59,7 +56,6 @@ export const useCreateCloudFormationUrl = ({
       : undefined;
 
   return {
-    isLoading,
     cloudFormationUrl,
     isError,
     error,

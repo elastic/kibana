@@ -20,11 +20,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
+import { useAgentPolicyWithPackagePolicies } from '../../../../../../../components/agent_enrollment_flyout/hooks';
+
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import {
   sendGetEnrollmentAPIKeys,
   useCreateCloudFormationUrl,
-  useGetFleetServerHosts,
+  useFleetServerHostsForPolicy,
 } from '../../../../../hooks';
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
 import { CloudFormationGuide } from '../../../../../components';
@@ -35,7 +37,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
-  const { data: apyKeysData } = useQuery(['cloudFormationApiKeys'], () =>
+  const { data: apiKeysData, isLoading } = useQuery(['cloudFormationApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
@@ -43,21 +45,16 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
     })
   );
 
+  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy.id);
+  const { fleetServerHosts } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
+  const fleetServerHost = fleetServerHosts[0];
+
   const cloudFormationProps = getCloudFormationPropsFromPackagePolicy(packagePolicy);
 
-  const fleetServerHostId = agentPolicy?.fleet_server_host_id;
-  const { data } = useGetFleetServerHosts();
-
-  const fleetServerHosts = data ? data.items ?? [] : [];
-
-  const selectedHost = fleetServerHosts.find((host) => host.id === fleetServerHostId);
-
-  const fleetServerUrl = selectedHost?.host_urls?.[0];
-
-  const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
-    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
+  const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
+    enrollmentAPIKey: apiKeysData?.data?.items[0]?.api_key,
     cloudFormationProps,
-    fleetServerHost: fleetServerUrl,
+    fleetServerHost,
   });
 
   return (
