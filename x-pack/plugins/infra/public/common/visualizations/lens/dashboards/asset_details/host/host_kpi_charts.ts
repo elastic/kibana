@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { hostLensFormulas } from '../../../formulas';
 import { METRICS_TOOLTIP } from '../../translations';
-import { KPIChartProps } from '../../types';
+import type { KPIChartProps } from '../../types';
 
 export const hostKPICharts: KPIChartProps[] = [
   {
