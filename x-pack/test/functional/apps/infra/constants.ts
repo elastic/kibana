@@ -26,6 +26,8 @@ export const DATES = {
       max: '2018-10-17T19:58:03.952Z',
       processesDataStartDate: '2023-03-28T18:20:00.000Z',
       processesDataEndDate: '2023-03-28T18:21:00.000Z',
+      kubernetesSectionStartDate: '2023-09-19T07:20:00.000Z',
+      kubernetesSectionEndDate: '2023-09-19T07:21:00.000Z',
     },
     stream: {
       startWithData: '2018-10-17T19:42:22.000Z',
