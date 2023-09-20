@@ -92,7 +92,7 @@ export interface TableListViewTableProps<
   editItem?(item: T): void;
 
   /**
-   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable.
+   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable.
    */
   itemIsEditable?(item: T): boolean;
 
@@ -454,14 +454,20 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     items,
   });
 
+  const isEditable = useCallback(
+    (item: T) => {
+      // If the So is `managed` it is never editable.
+      if (item.managed) return false;
+      return itemIsEditable?.(item) ?? true;
+    },
+    [itemIsEditable]
+  );
+
   const inspectItem = useCallback(
     (item: T) => {
       const tags = getTagIdsFromReferences(item.references).map((_id) => {
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
-
-      // If the So is `managed` it is never editable.
-      const isEditable = item.managed ? false : itemIsEditable?.(item) ?? true;
 
       const close = openContentEditor({
         item: {
@@ -472,7 +478,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
-        isReadonly: contentEditor.isReadonly || !isEditable,
+        isReadonly: contentEditor.isReadonly || !isEditable(item),
         onSave:
           contentEditor.onSave &&
           (async (args) => {
@@ -483,14 +489,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [
-      getTagIdsFromReferences,
-      itemIsEditable,
-      contentEditor,
-      openContentEditor,
-      entityName,
-      fetchItems,
-    ]
+    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, isEditable, fetchItems]
   );
 
   const tableColumns = useMemo(() => {
@@ -564,7 +563,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (v) => !v.managed && (itemIsEditable?.(v) ?? true),
+          available: (item) => isEditable(item),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -612,16 +611,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
+    contentEditor.enabled,
     listingId,
     getDetailViewLink,
     onClickTitle,
     searchQuery.text,
-    addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
     DateFormatterComp,
-    contentEditor,
+    isEditable,
     inspectItem,
-    itemIsEditable,
   ]);
 
   const itemsById = useMemo(() => {
