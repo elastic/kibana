@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+
 import { getSAMLResponse } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { kbnTestConfig } from '@kbn/test';
 
