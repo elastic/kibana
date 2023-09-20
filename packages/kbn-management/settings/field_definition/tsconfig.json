@@ -15,5 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/management-settings-types",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-utilities",
   ]
 }

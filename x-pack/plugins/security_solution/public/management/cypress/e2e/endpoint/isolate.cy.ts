@@ -31,7 +31,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe.skip('Isolate command', () => {
+describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let isolateComment: string;
   let releaseComment: string;
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -84,7 +84,7 @@ describe.skip('Isolate command', () => {
 
       filterOutIsolatedHosts();
       cy.contains('No items found');
-      cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
+      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       cy.getByTestSubj('endpointTableRowActions').click();
       cy.getByTestSubj('isolateLink').click();
@@ -105,7 +105,7 @@ describe.skip('Isolate command', () => {
       releaseHostWithComment(releaseComment, createdHost.hostname);
       cy.contains('Confirm').click();
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
+      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       checkEndpointListForOnlyUnIsolatedHosts();
     });
