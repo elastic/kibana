@@ -37,8 +37,6 @@ export const DashboardEditingToolbar: FC<Props> = ({ isDisabled }) => {
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
-  console.log({ isDisabled });
-
   const dashboard = useDashboardAPI();
 
   const stateTransferService = getStateTransfer();
