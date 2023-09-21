@@ -6,35 +6,31 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiContextMenuItem, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ReloadDatasets } from '../../../hooks/use_datasets';
-import {
-  errorLabel,
-  noDatasetsDescriptionLabel,
-  noDatasetsLabel,
-  noDataRetryLabel,
-} from '../constants';
-import { Dataset } from '../../../../common/datasets';
+import { errorLabel, noDataRetryLabel } from '../constants';
+import type { Dataset, Integration } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';
-import { DatasetSelectionHandler } from '../types';
 
-interface DatasetListProps {
-  datasets: Dataset[] | null;
+export interface ListStatusProps {
+  data: Dataset[] | Integration[] | null;
+  description: string;
   error: Error | null;
   isLoading: boolean;
   onRetry: ReloadDatasets;
-  onDatasetClick: DatasetSelectionHandler;
+  title: string;
 }
 
-export const DatasetsList = ({
-  datasets,
+export const ListStatus = ({
+  data,
+  description,
   error,
   isLoading,
   onRetry,
-  onDatasetClick,
-}: DatasetListProps) => {
-  const isEmpty = datasets == null || datasets.length <= 0;
+  title,
+}: ListStatusProps) => {
+  const isEmpty = data == null || data.length <= 0;
   const hasError = error !== null;
 
   if (isLoading) {
@@ -44,16 +40,16 @@ export const DatasetsList = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="datasetErrorPrompt"
+        data-test-subj="datasetSelectorListStatusErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"
-        title={<h2>{noDatasetsLabel}</h2>}
+        title={<h2>{title}</h2>}
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.logExplorer.datasetSelector.noDatasetsError"
-            defaultMessage="An {error} occurred while getting your data streams. Please retry."
+            id="xpack.logExplorer.datasetSelector.noDataError"
+            defaultMessage="An {error} occurred while getting your data. Please retry."
             values={{
               error: (
                 <EuiToolTip content={error.message}>
@@ -71,22 +67,18 @@ export const DatasetsList = ({
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="emptyDatasetPrompt"
+        data-test-subj="datasetSelectorListStatusEmptyPrompt"
         iconType="search"
         paddingSize="m"
-        title={<h2>{noDatasetsLabel}</h2>}
+        title={<h2>{title}</h2>}
         titleSize="s"
-        body={<p>{noDatasetsDescriptionLabel}</p>}
+        body={<p>{description}</p>}
       />
     );
   }
 
-  return datasets.map((dataset) => (
-    <EuiContextMenuItem key={dataset.id} onClick={() => onDatasetClick(dataset)}>
-      {dataset.title}
-    </EuiContextMenuItem>
-  ));
+  return null;
 };
 
 // eslint-disable-next-line import/no-default-export
-export default DatasetsList;
+export default ListStatus;
