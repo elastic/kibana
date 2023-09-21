@@ -9,26 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
-  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165746
-  describe.skip('Index Templates', function () {
+  describe('Index Templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
+      // Navigate to the index management page
+      await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the index templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('renders the index templates tab', async () => {
-      await retry.waitFor('index templates list to be visible', async () => {
-        return await testSubjects.exists('templateList');
-      });
-
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/templates`);
     });

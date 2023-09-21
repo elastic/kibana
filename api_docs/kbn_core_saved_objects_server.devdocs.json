@@ -10657,6 +10657,10 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
               },
               {
