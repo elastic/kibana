@@ -79,9 +79,13 @@ a| <<torq-action-type,Torq>>
 
 | Trigger a Torq workflow.
 
-a| <<gen-ai-action-type,Generative AI>>
+a| <<gen-ai-action-type,OpenAI>>
 
 | Send a request to OpenAI.
+
+a| <<bedrock-action-type,AWS Bedrock>>
+
+| Send a request to AWS Bedrock.
 
 a| <<d3security-action-type,D3 Security>>
 
