@@ -61,6 +61,7 @@ import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from '.
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
+import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -416,7 +417,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             />
           )}
         {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
-          <PostInstallCloudFormationModal
+          <PostInstallAzureArmTemplateModal
             agentPolicy={agentPolicy}
             packagePolicy={savedPackagePolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
