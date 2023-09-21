@@ -636,6 +636,7 @@ describe('Create Lifecycle', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "validLegacyConsumers": Array [],
           "validate": Object {
             "params": Object {
               "validate": [Function],
@@ -734,6 +735,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "validLegacyConsumers": Array [],
           },
         }
       `);

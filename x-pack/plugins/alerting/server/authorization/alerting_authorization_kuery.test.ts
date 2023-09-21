@@ -35,6 +35,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -73,6 +74,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -114,6 +116,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -134,6 +137,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -154,6 +158,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -195,6 +200,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -215,6 +221,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -257,6 +264,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -277,6 +285,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -313,6 +322,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]),
       {
@@ -350,6 +360,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -415,6 +426,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -488,6 +500,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -508,6 +521,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -528,6 +542,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             enabledInLicense: true,
             hasAlertsMappings: false,
             hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -694,6 +709,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]),
       {

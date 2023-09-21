@@ -374,6 +374,7 @@ beforeEach(() => {
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -392,6 +393,7 @@ beforeEach(() => {
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   });
 
   rulesClient = new RulesClient(rulesClientParams);

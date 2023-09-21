@@ -27,6 +27,7 @@ describe('createAlertEventLogRecordObject', () => {
     validate: {
       params: schema.any(),
     },
+    validLegacyConsumers: [],
   };
 
   test('created alert event "execute-start"', async () => {

@@ -153,6 +153,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     context: 'test',
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
+  validLegacyConsumers: [],
 };
 
 export const mockRunNowResponse = {
