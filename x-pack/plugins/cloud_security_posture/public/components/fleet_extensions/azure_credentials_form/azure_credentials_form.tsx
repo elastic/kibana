@@ -11,16 +11,15 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_MANUAL_AZURE_CREDENTIALS_TYPE } from './get_aws_credentials_form_options';
 import { RadioGroup } from '../csp_boxed_radio_group';
 import { NewPackagePolicyPostureInput } from '../utils';
-import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { SetupFormat, useAzureCredentialsForm } from './hooks';
 
-interface AWSSetupInfoContentProps {
+interface AzureSetupInfoContentProps {
   integrationLink: string;
 }
 
-const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
+const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -63,10 +62,10 @@ const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    disabled: true,
+    disabled: false,
     tooltip: i18n.translate(
       'xpack.csp.azureIntegration.setupFormatOptions.manual.disabledTooltip',
-      { defaultMessage: 'Coming soon' }
+      { defaultMessage: 'Coming Soon' }
     ),
   },
 ];
@@ -85,13 +84,13 @@ const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
 const ArmTemplateSetup = ({
-  hasCloudFormationTemplate,
+  hasArmTemplateUrl,
   input,
 }: {
-  hasCloudFormationTemplate: boolean;
+  hasArmTemplateUrl: boolean;
   input: NewPackagePolicyInput;
 }) => {
-  if (!hasCloudFormationTemplate) {
+  if (!hasArmTemplateUrl) {
     return (
       <EuiCallOut color="warning">
         <FormattedMessage
@@ -163,8 +162,8 @@ export const AzureCredentialsForm = ({
   onChange,
   setIsValid,
 }: Props) => {
-  const { setupFormat, integrationLink, hasCloudFormationTemplate, onSetupFormatChange } =
-    useAwsCredentialsForm({
+  const { setupFormat, onSetupFormatChange, integrationLink, hasArmTemplateUrl } =
+    useAzureCredentialsForm({
       newPolicy,
       input,
       packageInfo,
@@ -175,19 +174,19 @@ export const AzureCredentialsForm = ({
 
   return (
     <>
-      <AWSSetupInfoContent integrationLink={integrationLink} />
+      <AzureSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
         size="m"
         options={getSetupFormatOptions()}
-        idSelected={DEFAULT_MANUAL_AZURE_CREDENTIALS_TYPE}
+        idSelected={setupFormat}
         onChange={(idSelected: SetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
       />
       <EuiSpacer size="l" />
       {setupFormat === 'arm_template' && (
-        <ArmTemplateSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
+        <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
       <EuiSpacer />
     </>

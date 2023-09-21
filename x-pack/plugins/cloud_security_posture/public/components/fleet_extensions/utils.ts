@@ -182,6 +182,27 @@ export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): str
   return cloudFormationTemplate;
 };
 
+export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
+  if (!policyTemplateInputs) return '';
+
+  console.log(policyTemplateInputs);
+
+  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return armTemplateUrl;
+};
+
 /**
  * Input vars that are hidden from the user
  */

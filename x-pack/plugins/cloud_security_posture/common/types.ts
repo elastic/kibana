@@ -30,6 +30,8 @@ export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
 };
 
+export type AzureCredentialsType = 'arm_template' | 'manual';
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';

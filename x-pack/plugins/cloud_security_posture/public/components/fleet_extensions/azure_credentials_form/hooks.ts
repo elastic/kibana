@@ -9,24 +9,27 @@ import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
+  getArmTemplateUrlFromCspmPackage,
   getCspmCloudFormationDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
 } from '../utils';
-// import {
-//   DEFAULT_MANUAL_AZURE_CREDENTIALS_TYPE,
-//   getAwsCredentialsFormOptions,
-//   getInputVarsFields,
-// } from './get_aws_credentials_form_options';
-import { CLOUDBEAT_AWS } from '../../../../common/constants';
+import {
+  DEFAULT_AZURE_CREDENTIALS_TYPE,
+  getAzureCredentialsFormOptions,
+  getInputVarsFields,
+} from './get_aws_credentials_form_options';
+import { CLOUDBEAT_AZURE } from '../../../../common/constants';
 import { AzureCredentialsType } from '../../../../common/types';
+
+export type SetupFormat = 'arm_template' | 'manual';
 
 const getAzureCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
 ): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type']?.value;
 
-const getAwsCloudFormationTemplate = (newPolicy: NewPackagePolicy) => {
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_AWS)
+const getAzureCloudFormationTemplate = (newPolicy: NewPackagePolicy) => {
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_AZURE)
     ?.config?.cloud_formation_template_url?.value;
 
   return template || undefined;
@@ -40,7 +43,7 @@ const updateCloudFormationPolicyTemplate = (
   updatePolicy?.({
     ...newPolicy,
     inputs: newPolicy.inputs.map((input) => {
-      if (input.type === CLOUDBEAT_AWS) {
+      if (input.type === CLOUDBEAT_AZURE) {
         return {
           ...input,
           config: { cloud_formation_template_url: { value: templateUrl } },
@@ -63,7 +66,7 @@ const useCloudFormationTemplate = ({
   setupFormat: SetupFormat;
 }) => {
   useEffect(() => {
-    const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy);
+    const policyInputCloudFormationTemplate = getAzureCloudFormationTemplate(newPolicy);
 
     if (setupFormat === 'manual') {
       if (!!policyInputCloudFormationTemplate) {
@@ -82,7 +85,7 @@ const useCloudFormationTemplate = ({
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo, setupFormat]);
 };
 
-export const useAwsCredentialsForm = ({
+export const useAzureCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
@@ -98,13 +101,11 @@ export const useAwsCredentialsForm = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
-    getAzureCredentialsType(input) || DEFAULT_MANUAL_AZURE_CREDENTIALS_TYPE;
+    getAzureCredentialsType(input) || DEFAULT_AZURE_CREDENTIALS_TYPE;
 
-  console.log(azureCredentialsType);
+  const options = getAzureCredentialsFormOptions();
 
-  const options = getAwsCredentialsFormOptions();
-
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
 
   const setupFormat = getAzureCredentialsType(input);
 
@@ -113,17 +114,17 @@ export const useAwsCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
-  // useEffect(() => {
-  //   const isInvalid = setupFormat === 'cloud_formation' && !hasCloudFormationTemplate;
-  //
-  //   setIsValid(!isInvalid);
-  //
-  //   onChange({
-  //     isValid: !isInvalid,
-  //     updatedPolicy: newPolicy,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [setupFormat, input.type]);
+  useEffect(() => {
+    const isInvalid = setupFormat === 'arm_template' && !hasArmTemplateUrl;
+
+    setIsValid(!isInvalid);
+
+    onChange({
+      isValid: !isInvalid,
+      updatedPolicy: newPolicy,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setupFormat, input.type]);
 
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
 
@@ -155,7 +156,7 @@ export const useAwsCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.credentials.type': {
-            value: lastManualCredentialsType.current || DEFAULT_MANUAL_AZURE_CREDENTIALS_TYPE,
+            value: lastManualCredentialsType.current || DEFAULT_AZURE_CREDENTIALS_TYPE,
             type: 'text',
           },
           ...fieldsSnapshot.current,
@@ -170,7 +171,7 @@ export const useAwsCredentialsForm = ({
     group,
     fields,
     integrationLink,
-    hasCloudFormationTemplate,
+    hasArmTemplateUrl,
     onSetupFormatChange,
   };
 };
