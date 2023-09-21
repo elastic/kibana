@@ -12,10 +12,6 @@ import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { opendirSync } from 'fs';
-// import { pipe } from 'fp-ts/function';
-// import * as TE from 'fp-ts/TaskEither';
-// import fs from 'fs/promises';
-// import { toError } from 'fp-ts/Either';
 import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
@@ -33,37 +29,6 @@ const isCompressed = (x: string): boolean => {
   const isIt: boolean = isGzip(dirent?.name);
   opened.closeSync();
   return isIt;
-
-  // TODO-TRE: LATER!
-  // pipe(
-  //   TE.tryCatch(
-  //     () => opendirSync(x),
-  //     (reason: any) => toError(reason)
-  //   ),
-  //   TE.map((opened) => {
-  //     return {
-  //       dirent: opened.readSync(),
-  //       opened,
-  //     };
-  //   }),
-  //   TE.map({ opened, dirent }) => {
-  //     return {
-  //       name: dirent?.name,
-  //       opened,
-  //     };
-  //   }),
-  //   TE.fold(
-  //     (e) => {
-  //       console.log(`\nλjs error?: \n\t${e}`);
-  //       opened.closeSync();
-  //
-  //     },
-  //     ({ opened, name }) => {
-  //       const isIt: boolean =
-  //         opened.closeSync();
-  //     }
-  //   )
-  // );
 };
 export function createIndexDocRecordsStream(
   client: Client,
@@ -75,9 +40,6 @@ export function createIndexDocRecordsStream(
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
   const highWaterMark: number = isCompressed(inputDir) ? 5000 : 300;
-  console.log(`\nλjs inputDir: \n\t${inputDir}`);
-
-  console.log(`\nλjs highWaterMark: \n\t${highWaterMark}`);
   return new Writable({
     highWaterMark,
     objectMode: true,
@@ -93,8 +55,6 @@ export function createIndexDocRecordsStream(
       }
     },
 
-    // I didnt know what writev was and now I kinda do:
-    // https://medium.com/@mark.birbeck/using-writev-to-create-a-fast-writable-stream-for-elasticsearch-ac69bd010802
     async writev(chunks, callback): Promise<void> {
       try {
         await doIndexDocs(chunks.map(({ chunk: record }) => record.value));
@@ -108,8 +68,6 @@ export function createIndexDocRecordsStream(
 }
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
-    // const length = jsonStanzasWithinArchive.length;
-    // console.log(`\nλjs length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
