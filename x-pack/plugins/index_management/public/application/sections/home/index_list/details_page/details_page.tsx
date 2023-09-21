@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { Section, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { Index } from '../../../../../../common';
 import { INDEX_OPEN } from '../../../../../../common/constants';
@@ -25,7 +26,6 @@ import { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
 import { DetailsPageStats } from './details_page_stats';
@@ -33,12 +33,6 @@ import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageOverview } from './details_page_overview';
 import { DetailsPageSettings } from './details_page_settings';
 
-export enum IndexDetailsSection {
-  Overview = 'overview',
-  Mappings = 'mappings',
-  Settings = 'settings',
-  Stats = 'stats',
-}
 const defaultTabs = [
   {
     id: IndexDetailsSection.Overview,

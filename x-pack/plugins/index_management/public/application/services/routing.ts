@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { IndexDetailsSection } from '../sections/home/index_list/details_page';
-import { Section } from '../sections/home/home';
+import { Section, IndexDetailsSection } from '../../../common/constants';
 
 export const getTemplateListLink = () => `/templates`;
 
