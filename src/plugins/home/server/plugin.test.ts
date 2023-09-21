@@ -53,7 +53,7 @@ describe('HomeServerPlugin', () => {
         homeServerPluginSetupDependenciesMock
       );
       expect(setup).toHaveProperty('sampleData');
-      expect(setup.sampleData).toHaveProperty('registerSampleDataset');
+      expect(setup.sampleData).toHaveProperty('registerSampleDataSet');
       expect(setup.sampleData).toHaveProperty('getSampleDatasets');
       expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
       expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
