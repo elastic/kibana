@@ -103,6 +103,7 @@
     "@kbn/analytics-client",
     "@kbn/monaco",
     "@kbn/shared-svg"
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }

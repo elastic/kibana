@@ -8,8 +8,9 @@
 import React, { useMemo } from 'react';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
+import { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
