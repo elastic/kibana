@@ -69,7 +69,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       // the fixed header and banner heights.
       offset={0}
       minHeight={header ? 'calc(100vh - var(--euiFixedHeadersOffset, 0))' : 0}
-      grow={rest.grow ?? (header ? false : undefined)}
+      grow={header ? false : undefined}
       {...rest}
     >
       {sideBar}
