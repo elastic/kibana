@@ -22,10 +22,14 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const esServerConfig = config.get('servers.elasticsearch');
+
+  // For stateful tests, use system indices user so tests can write to system indices
+  // For serverless tests, we don't have a system indices user, so we're using the default superuser
   const elasticSearchServerUrl = formatUrl({
     ...esServerConfig,
-    // Use system indices user so tests can write to system indices
-    auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`,
+    ...(config.get('serverless')
+      ? []
+      : { auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}` }),
   });
 
   let agentOptions = {};

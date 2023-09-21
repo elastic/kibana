@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -26,6 +26,7 @@ import {
 } from '@kbn/search-api-panels';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
 
 interface Props {
@@ -43,6 +44,10 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     aliases,
   } = indexDetails;
   const { config, core, plugins } = useAppContext();
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
+  }, []);
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
 

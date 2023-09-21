@@ -35,7 +35,7 @@ import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import type { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
-import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { EditTimelineButton } from '../../timeline/header/edit_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
@@ -421,14 +421,14 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
           <RowFlexItem>
             <TimelineName timelineId={timelineId} />
-            <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
+            <EditTimelineButton timelineId={timelineId} initialFocus="title" />
             <TimelineStatusInfoContainer>
               <TimelineStatusInfo timelineId={timelineId} />
             </TimelineStatusInfoContainer>
           </RowFlexItem>
           <RowFlexItem>
             <TimelineDescription timelineId={timelineId} />
-            <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
+            <EditTimelineButton timelineId={timelineId} initialFocus="description" />
           </RowFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
