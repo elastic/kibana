@@ -121,6 +121,10 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
       : cloudFormationTemplateFromAgentPolicy;
 
+    const azureArmTemplateUrl = packageInfoData?.item
+      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
+      : cloudFormationTemplateFromAgentPolicy;
+
     const AWS_ACCOUNT_TYPE = 'aws.account_type';
 
     const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
