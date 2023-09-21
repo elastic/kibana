@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render should display callout when request timed out 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    size="s"
+    title="Request timed out before completion. Results may be incomplete or empty."
+  />
+  <ShardsView
+    failures={Array []}
+    shardStats={
+      Object {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 3,
+        "total": 3,
+      }
+    }
+  />
+</EuiText>
+`;
+
+exports[`render should show failures 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <ShardsView
+    failures={
+      Array [
+        Object {
+          "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
+          "node": "NVzFRd6SS4qT9o0k2vIzlg",
+          "reason": Object {
+            "caused_by": Object {
+              "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+              "type": "runtime_exception",
+            },
+            "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
+            "index_uuid": "z1sPO8E4TdWcijNgsL_BxQ",
+            "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
+            "type": "query_shard_exception",
+          },
+          "shard": 0,
+        },
+      ]
+    }
+    shardStats={
+      Object {
+        "failed": 1,
+        "skipped": 0,
+        "successful": 1,
+        "total": 2,
+      }
+    }
+  />
+</EuiText>
+`;

@@ -14,13 +14,13 @@ import { ShardFailureFlyout } from './shard_failure_flyout';
 
 interface Props {
   failures: estypes.ShardFailure[];
-  shardsDetails?: estypes.ShardStatistics;
+  shardStats?: estypes.ShardStatistics;
 }
 
-export function ShardsView({ failures, shardsDetails }: Props) {
+export function ShardsView({ failures, shardStats }: Props) {
   const [showFailures, setShowFailures] = useState(false);
 
-  return !shardsDetails && failures.length === 0 ? null : (
+  return !shardStats && failures.length === 0 ? null : (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -52,20 +52,20 @@ export function ShardsView({ failures, shardsDetails }: Props) {
         ) : null}
       </EuiFlexGroup>
 
-      {shardsDetails ? (
+      {shardStats ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             {i18n.translate('inspector.requests.clusters.shards.totalShardsLabel', {
               defaultMessage: '{total} total shards',
-              values: { total: shardsDetails.total },
+              values: { total: shardStats.total },
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('inspector.requests.clusters.shards.successfulShardsLabel', {
               defaultMessage: '{successful} of {total} successful',
               values: {
-                successful: shardsDetails.successful,
-                total: shardsDetails.total,
+                successful: shardStats.successful,
+                total: shardStats.total,
               },
             })}
           </EuiFlexItem>

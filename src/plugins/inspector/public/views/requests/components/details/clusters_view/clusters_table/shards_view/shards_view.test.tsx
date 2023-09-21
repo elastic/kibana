@@ -13,18 +13,18 @@ import { ShardsView } from './shards_view';
 
 describe('render', () => {
   test('should render with no failures', () => {
-    const shardsDetails = {
+    const shardStats = {
       total: 2,
       successful: 2,
       skipped: 0,
       failed: 0,
     };
-    const wrapper = shallow(<ShardsView failures={[]} shardsDetails={shardsDetails} />);
+    const wrapper = shallow(<ShardsView failures={[]} shardStats={shardStats} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('should render with failures', () => {
-    const shardsDetails = {
+    const shardStats = {
       total: 2,
       successful: 1,
       skipped: 0,
@@ -33,7 +33,7 @@ describe('render', () => {
     const wrapper = shallow(
       <ShardsView
         failures={[{} as unknown as estypes.ShardFailure]}
-        shardsDetails={shardsDetails}
+        shardStats={shardStats}
       />
     );
     expect(wrapper).toMatchSnapshot();
