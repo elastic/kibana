@@ -197,7 +197,7 @@ export function createSearchBar({
 
     const showSaveQuery = isOfAggregateQueryType(query)
       ? false // Saved Queries are not supported for text-based languages (only Saved Searches)
-      : // users can disable it via the global privilege but enable it per app
+      : // users can enable it globally or configure individually per app
         Boolean(core.application.capabilities.savedQueryManagement?.saveQuery) ||
         props.showSaveQuery;
 
