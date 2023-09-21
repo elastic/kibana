@@ -25,12 +25,7 @@ import type { CasesConfigurationUICustomField } from '../../../../common/ui';
 
 import type { CustomFieldType } from '../types';
 import { View } from './view';
-import {
-  CANCEL,
-  EDIT_CUSTOM_FIELDS_ARIA_LABEL,
-  NO_CUSTOM_FIELD_SET,
-  SAVE,
-} from '../translations';
+import { CANCEL, EDIT_CUSTOM_FIELDS_ARIA_LABEL, NO_CUSTOM_FIELD_SET, SAVE } from '../translations';
 import { getTextFieldConfig } from './config';
 
 interface FormState {

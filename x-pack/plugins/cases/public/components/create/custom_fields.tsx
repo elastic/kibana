@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
@@ -18,10 +19,6 @@ interface Props {
 
 const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfiguration }) => {
   const { permissions } = useCasesContext();
-
-  if (!customFieldsConfiguration.length) {
-    return null;
-  }
 
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(customFieldsConfiguration),
@@ -40,20 +37,20 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfigu
       }
 
       return (
-        <React.Fragment
-          data-test-subj={`create-case-custom-field-wrapper-${customField.key}`}
-          key={customField.key}
-        >
         <CreateComponent
           isLoading={isLoading}
           customFieldConfiguration={customField}
+          key={customField.key}
         />
-        </React.Fragment>
       );
     }
   );
 
-  return <>{customFieldsComponents}</>;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem data-test-subj="create-case-custom-fields">{customFieldsComponents}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 CustomFieldsComponent.displayName = 'CustomFields';

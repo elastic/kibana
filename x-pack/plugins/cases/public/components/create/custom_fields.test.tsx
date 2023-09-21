@@ -7,45 +7,17 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { FormProps } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-import type { CasesConfigurationUI } from '../../../common/ui';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { createAppMockRenderer, readCasesPermissions } from '../../common/mock';
+import { FormTestComponent } from '../../common/test_utils';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
-import { EuiButton } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
-  const customFieldsConfigurationMock: CasesConfigurationUI['customFields'] = [
-    {
-      key: 'random_custom_key',
-      label: 'Summary',
-      type: CustomFieldTypes.TEXT,
-      required: true,
-    },
-    {
-      key: 'random_custom_key_2',
-      label: 'Maintenance',
-      type: CustomFieldTypes.TOGGLE,
-      required: false,
-    },
-  ];
-
-  const FormComponent: React.FC = ({ children }) => {
-    const { form } = useForm<FormProps>({ onSubmit });
-
-    return (
-      <Form form={form}>
-        {children}
-        <EuiButton onClick={() => form.submit()}>{'Submit'}</EuiButton>
-      </Form>
-    );
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,82 +26,73 @@ describe('CustomFields', () => {
 
   it('renders correctly', () => {
     appMockRender.render(
-      <FormComponent>
-        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock}  />
-      </FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
+      </FormTestComponent>
     );
 
-    for(const item of customFieldsConfigurationMock) {
-      expect(screen.getByTestId(`${item.label}-${item.type}-create-custom-field`)).toBeInTheDocument();
-    } 
+    expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+    for (const item of customFieldsConfigurationMock) {
+      expect(
+        screen.getByTestId(`${item.label}-${item.type}-create-custom-field`)
+      ).toBeInTheDocument();
+    }
   });
 
-  // it('renders alphabetically', () => {
-  //   appMockRender.render(
-  //     <FormComponent>
-  //       <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock}  />
-  //     </FormComponent>
-  //   );
+  it('should not show the custom fields if the configuration is empty', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields isLoading={false} customFieldsConfiguration={[]} />
+      </FormTestComponent>
+    );
 
-  //   const customFields = screen.getAllByTestId('create-case-custom-field-wrapper', { exact: false });
+    expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
+  });
 
-  //   expect(customFields.length).toBe(2);
+  it('should not show the custom fields when no permissions to create', async () => {
+    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
 
-  //   expect(within(customFields[0]).getByRole('heading')).toHaveTextContent('My test label 1');
-  //   expect(within(customFields[1]).getByRole('heading')).toHaveTextContent('My test label 2');
-  // });
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
+      </FormTestComponent>
+    );
 
-  // it('shows the optional label correctly', () => {
-  //   appMockRender.render(
-  //     <FormComponent>
-  //       <Category isLoading={false} />
-  //     </FormComponent>
-  //   );
+    expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
+  });
 
-  //   expect(screen.getByText('Optional')).toBeInTheDocument();
-  // });
+  it('should update the custom fields', async () => {
+    appMockRender = createAppMockRenderer();
 
-  // it('disables the combobox when it is loading', () => {
-  //   appMockRender.render(
-  //     <FormComponent>
-  //       <Category isLoading={true} />
-  //     </FormComponent>
-  //   );
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
+      </FormTestComponent>
+    );
 
-  //   expect(screen.getByRole('combobox')).toBeDisabled();
-  // });
+    const textField = customFieldsConfigurationMock[0];
+    const toggleField = customFieldsConfigurationMock[1];
 
-  // it('disables the combobox when is loading categories', async () => {
-  //   useGetCategoriesMock.mockReturnValue({ isLoading: true, data: categories });
+    userEvent.type(
+      screen.getByTestId(`${textField.label}-${textField.type}-create-custom-field`),
+      'hello'
+    );
+    userEvent.click(
+      screen.getByTestId(`${toggleField.label}-${toggleField.type}-create-custom-field`)
+    );
 
-  //   appMockRender.render(
-  //     <FormComponent>
-  //       <Category isLoading={false} />
-  //     </FormComponent>
-  //   );
+    userEvent.click(screen.getByText('Submit'));
 
-  //   await waitFor(() => {
-  //     expect(screen.getByRole('combobox')).toBeDisabled();
-  //   });
-  // });
-
-  // it('can set the categories returned from the useGetCategories correctly ', async () => {
-  //   const category = 'test';
-
-  //   useGetCategoriesMock.mockReturnValue(() => ({ isLoading: true, data: [category] }));
-
-  //   appMockRender.render(
-  //     <FormComponent>
-  //       <Category isLoading={false} />
-  //     </FormComponent>
-  //   );
-
-  //   userEvent.type(screen.getByRole('combobox'), `${category}{enter}`);
-  //   userEvent.click(screen.getByText('Submit'));
-
-  //   await waitFor(() => {
-  //     // data, isValid
-  //     expect(onSubmit).toBeCalledWith({ category }, true);
-  //   });
-  // });
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toHaveBeenCalledWith(
+        {
+          [textField.key]: 'hello',
+          [toggleField.key]: true,
+        },
+        true
+      );
+    });
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CustomFieldType } from '../types';
@@ -13,20 +13,27 @@ import { getToggleFieldConfig } from './config';
 
 const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, isLoading }) => {
   const { key, label, type, required } = customFieldConfiguration;
-  const config = getToggleFieldConfig({ required, label });
+  const config = { ...getToggleFieldConfig({ required, label }) };
+  const [toggleValue, setToggleValue] = useState<boolean>(false);
+
+  const handleChange = (value: string) => {
+    setToggleValue(Boolean(value));
+  };
 
   return (
     <UseField
       path={key}
-      config={{...config, defaultValue: false}}
+      config={config}
       component={ToggleField}
       type={type}
       key={key}
+      onChange={handleChange}
       componentProps={{
         label,
         euiFieldProps: {
           'data-test-subj': `${label}-toggle-create-custom-field`,
           disabled: isLoading,
+          checked: toggleValue,
         },
       }}
     />

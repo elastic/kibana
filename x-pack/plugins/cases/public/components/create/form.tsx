@@ -146,6 +146,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         canShowCaseSolutionSelection,
         availableOwners,
         draftStorageKey,
+        customFieldsConfiguration,
       ]
     );
 

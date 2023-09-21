@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -93,19 +93,23 @@ export const FormContext: React.FC<Props> = ({
     return formData;
   };
 
-  const mapCustomFieldsData = (userFormData: CaseUI & Record<string, string | boolean>) => {
-    if (!customFieldsConfiguration.length) {
-      return [];
-    }
-    return customFieldsConfiguration.map((field) => {
-      return ({
-      key: field.key,
-      type: field.type,
-      field: {
-        value: [userFormData[field.key]],
-      },
-    })});
-  };
+  const mapCustomFieldsData = useCallback(
+    (userFormData: CaseUI & Record<string, string | boolean>) => {
+      if (!customFieldsConfiguration.length) {
+        return [];
+      }
+      return customFieldsConfiguration.map((field) => {
+        return {
+          key: field.key,
+          type: field.type,
+          field: {
+            value: [userFormData[field.key]],
+          },
+        };
+      });
+    },
+    [customFieldsConfiguration]
+  );
 
   const submitCase = useCallback(
     async (
@@ -170,6 +174,7 @@ export const FormContext: React.FC<Props> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       isSyncAlertsEnabled,
       connectors,

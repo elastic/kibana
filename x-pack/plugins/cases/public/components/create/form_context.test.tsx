@@ -46,7 +46,7 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
-import { categories } from '../../containers/mock';
+import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
 import { CaseSeverity, AttachmentType, ConnectorTypes } from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
@@ -427,6 +427,51 @@ describe('Create case', () => {
       expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
+    });
+
+    it('should submit form with custom fields', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+        },
+      }));
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const textField = customFieldsConfigurationMock[0];
+      const toggleField = customFieldsConfigurationMock[1];
+
+      expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+      userEvent.paste(
+        screen.getByTestId(`${textField.label}-${textField.type}-create-custom-field`),
+        'My text test value 1'
+      );
+
+      userEvent.click(
+        screen.getByTestId(`${toggleField.label}-${toggleField.type}-create-custom-field`)
+      );
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        request: {
+          ...sampleDataWithoutTags,
+          customFields: customFieldsMock,
+        },
+      });
     });
 
     it('should select the default connector set in the configuration', async () => {
