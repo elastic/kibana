@@ -78,7 +78,7 @@ const ObservabilityLogsAlertOptional = rt.partial({
         value: schemaStringOrNumber,
         values: schemaStringOrNumberArray,
       }),
-      groups: rt.array(
+      group: rt.array(
         rt.partial({
           field: schemaString,
           value: schemaString,

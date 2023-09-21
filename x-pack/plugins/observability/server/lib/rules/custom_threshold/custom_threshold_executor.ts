@@ -61,7 +61,7 @@ export type MetricThresholdAlertState = AlertState; // no specific instance stat
 
 export interface MetricThresholdAlertContext extends Record<string, unknown> {
   alertDetailsUrl: string;
-  groups?: object;
+  group?: object;
   reason?: string;
   timestamp: string; // ISO string
   value?: Array<number | null> | null;
@@ -85,7 +85,7 @@ type MetricThresholdAlert = Alert<
   MetricThresholdAllowedActionGroups
 >;
 
-export type Groups = Array<{
+export type Group = Array<{
   field: string;
   value: string;
 }>;
@@ -96,7 +96,7 @@ type MetricThresholdAlertFactory = (
   actionGroup: MetricThresholdActionGroup,
   additionalContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>,
-  groups?: Groups
+  group?: Group
 ) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = ({
@@ -151,7 +151,7 @@ export const createMetricThresholdExecutor = ({
       actionGroup,
       additionalContext,
       evaluationValues,
-      groups
+      group
     ) =>
       alertWithLifecycle({
         id,
@@ -159,7 +159,7 @@ export const createMetricThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
-          [ALERT_GROUP]: groups,
+          [ALERT_GROUP]: group,
           ...flattenAdditionalContext(additionalContext),
         },
       });
@@ -320,7 +320,7 @@ export const createMetricThresholdExecutor = ({
             alertsLocator,
             basePath.publicBaseUrl
           ),
-          groups: groupByKeysObjectMapping[group],
+          group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
           value: alertResults.map((result, index) => {
@@ -361,7 +361,7 @@ export const createMetricThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        groups: groupByKeysObjectForRecovered[recoveredAlertId],
+        group: groupByKeysObjectForRecovered[recoveredAlertId],
         timestamp: startedAt.toISOString(),
         ...additionalContext,
       });
