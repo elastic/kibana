@@ -8,6 +8,10 @@
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../../test/fixtures';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, getRandomString } from '../helpers';
 
@@ -26,8 +30,22 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
 describe('Index Templates tab', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IndexTemplatesTabTestBed;
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('when there are no index templates of either kind', () => {
+    test('updates the breadcrumbs to component templates', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      const { component } = testBed;
+      component.update();
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.templates
+      );
+    });
+
     test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
