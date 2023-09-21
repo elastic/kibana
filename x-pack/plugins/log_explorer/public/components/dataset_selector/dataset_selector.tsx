@@ -168,7 +168,7 @@ export function DatasetSelector({
     }
 
     return dataViews.map((dataView) => ({
-      'data-test-subj': `logExplorerDataView_${dataView.name}`,
+      'data-test-subj': 'logExplorerDataViewMenuEntry',
       name: dataView.name,
       onClick: () => selectDataView(dataView),
     }));
