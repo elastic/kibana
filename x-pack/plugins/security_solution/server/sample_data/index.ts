@@ -47,7 +47,7 @@ export const securitySolutionSpecProvider = function (spaceId = 'default'): Samp
     id: 'securitysolution',
     name: securitysolutionName,
     description: securitysolutionDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/security_solution/siem.png',
+    previewImagePath: '/plugins/securitySolution/assets/images/siem.png',
     overviewDashboard: OVERVIEW_DASHBOARD_ID,
     defaultIndex: SAMPLE_DATA_VIEW_ID,
     savedObjects: getSavedObjects(spaceId),
