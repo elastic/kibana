@@ -10,7 +10,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import type { EndpointSecurityRoleNames } from '../../../scripts/endpoint/common/roles_users';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
@@ -18,7 +17,11 @@ import type {
   HostPolicyResponse,
   LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions, HostActionResponse } from './types';
+import type {
+  HostActionResponse,
+  IndexEndpointHostsCyTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+} from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -34,10 +37,6 @@ import type {
   IndexedEndpointRuleAlerts,
 } from '../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { LoadedRoleAndUser } from '../../../scripts/endpoint/common/role_and_user_loader';
-
-export interface LoadUserAndRoleCyTaskOptions {
-  name: EndpointSecurityRoleNames;
-}
 
 declare global {
   namespace Cypress {

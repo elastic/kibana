@@ -15,7 +15,6 @@ import type {
   EndpointSecurityRoleDefinitions,
   EndpointSecurityRoleNames,
 } from '../../../../scripts/endpoint/common/roles_users';
-import type { LoadUserAndRoleCyTaskOptions } from '../cypress';
 import type {
   LoadedRoleAndUser,
   RoleAndUserLoader,
@@ -40,7 +39,7 @@ import {
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions } from '../types';
+import type { IndexEndpointHostsCyTaskOptions, LoadUserAndRoleCyTaskOptions } from '../types';
 import type {
   IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
@@ -69,6 +68,12 @@ import {
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 
+const KIBANA_KNOWN_DEFAULT_ACCOUNTS = [
+  'elastic',
+  'elastic_serverless',
+  'system_indices_superuser',
+] as const;
+
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
  */
@@ -82,6 +87,14 @@ class TestRoleAndUserLoader extends EndpointSecurityTestRolesLoader {
   }
 
   async load(name: EndpointSecurityRoleNames): Promise<LoadedRoleAndUser> {
+    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS.includes(name)) {
+      return {
+        role: name,
+        username: name,
+        password: 'changeme',
+      };
+    }
+
     if (this.isServerless) {
       // If the username is not one that we support in serverless, then throw an error.
       if (!SECURITY_SERVERLESS_ROLE_NAMES[name as keyof typeof SECURITY_SERVERLESS_ROLE_NAMES]) {

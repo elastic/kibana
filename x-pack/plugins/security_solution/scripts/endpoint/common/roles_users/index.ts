@@ -67,9 +67,9 @@ const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   // --------------------------------------
   // Other roles used for testing
   hunter: 'hunter',
-  endpoint_response_actions_access: 'endpointResponseActionsAccess',
-  endpoint_response_actions_no_access: 'endpointResponseActionsNoAccess',
-  endpoint_security_policy_management_read: 'endpointSecurityPolicyManagementRead',
+  endpoint_response_actions_access: 'endpoint_response_actions_access',
+  endpoint_response_actions_no_access: 'endpoint_response_actions_no_access',
+  endpoint_security_policy_management_read: 'endpoint_security_policy_management_read',
 });
 
 export type EndpointSecurityRoleNames = keyof typeof ENDPOINT_SECURITY_ROLE_NAMES;

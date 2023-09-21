@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { EndpointSecurityRoleNames } from '../../../scripts/endpoint/common/roles_users';
 import type { ActionDetails } from '../../../common/endpoint/types';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
 
@@ -55,4 +56,8 @@ export interface HostActionResponse {
     action: ActionDetails;
     state: { state?: 'success' | 'failure' };
   };
+}
+
+export interface LoadUserAndRoleCyTaskOptions {
+  name: EndpointSecurityRoleNames;
 }
