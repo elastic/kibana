@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction } from 'react';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
+import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { orderedFlyoutTabs } from './flyout_tabs';
 
 interface Props {
@@ -19,6 +20,11 @@ interface Props {
 
 export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVisible }: Props) => {
   const { source } = useSourceContext();
+  const { currentTimeRange } = useWaffleTimeContext();
+  const currentDateRange = {
+    from: new Date(currentTimeRange.from).toISOString(),
+    to: new Date(currentTimeRange.to).toISOString(),
+  };
 
   return source ? (
     <AssetDetails
@@ -42,6 +48,7 @@ export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVis
         closeFlyout,
       }}
       metricAlias={source.configuration.metricAlias}
+      dateRange={currentDateRange}
     />
   ) : null;
 };

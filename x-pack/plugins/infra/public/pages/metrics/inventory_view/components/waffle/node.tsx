@@ -41,7 +41,6 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
-  detailsItemId: string | null;
   setShowAssetDetailsFlyout: ({ detailsItemId }: { detailsItemId: string | null }) => void;
 }
 
@@ -143,9 +142,9 @@ export class Node extends React.PureComponent<Props, State> {
   }
 
   private togglePopover = () => {
-    const { nodeType, node, setShowAssetDetailsFlyout, detailsItemId } = this.props;
+    const { nodeType, node, setShowAssetDetailsFlyout } = this.props;
     if (nodeType === 'host') {
-      setShowAssetDetailsFlyout({ detailsItemId: node.name === detailsItemId ? null : node.name });
+      setShowAssetDetailsFlyout({ detailsItemId: node.name });
     } else {
       this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
     }

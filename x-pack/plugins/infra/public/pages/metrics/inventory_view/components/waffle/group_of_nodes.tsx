@@ -45,7 +45,7 @@ const isEqualGroupOfNodes = (prevProps: Props, nextProps: Props) => {
 export const GroupOfNodes = React.memo<Props>(
   ({ group, options, formatter, onDrilldown, isChild = false, bounds, nodeType, currentTime }) => {
     const width = group.width > 200 ? group.width : 200;
-    const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
+    const [_, setProperties] = useAssetDetailsFlyoutState();
 
     return (
       <GroupOfNodesContainer style={{ width }}>
@@ -62,7 +62,6 @@ export const GroupOfNodes = React.memo<Props>(
                 bounds={bounds}
                 nodeType={nodeType}
                 currentTime={currentTime}
-                detailsItemId={detailsItemId}
                 setShowAssetDetailsFlyout={setProperties}
               />
             ))

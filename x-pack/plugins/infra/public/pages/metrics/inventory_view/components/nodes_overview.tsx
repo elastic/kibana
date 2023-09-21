@@ -62,6 +62,7 @@ export const NodesOverview = ({
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
+
   const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
 
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
