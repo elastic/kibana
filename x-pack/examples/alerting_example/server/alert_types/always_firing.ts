@@ -78,7 +78,7 @@ export const alertType: RuleType<
       },
     };
   },
-  category: 'example',
+  category: 'kibana',
   producer: ALERTING_EXAMPLE_APP_ID,
   validate: {
     params: schema.object({

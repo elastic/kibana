@@ -51,7 +51,7 @@ function getPatternRuleType(): RuleType {
     id: 'example.pattern',
     name: 'Example: Creates alerts on a pattern, for testing',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    category: 'example',
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
