@@ -13,12 +13,8 @@ exports[`render should display callout when cluster is skipped 1`] = `
     color="warning"
     iconType="warning"
     size="s"
-    title="Cluster skipped"
-  >
-    <p>
-      Search failed, no such remote cluster: [remote1]
-    </p>
-  </EuiCallOut>
+    title="Search failed, no such remote cluster: [remote1]"
+  />
   <ShardsView
     failures={Array []}
   />

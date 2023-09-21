@@ -57,24 +57,17 @@ export function ClusterView({ clusterDetails }: Props) {
         <EuiCallOut
           size="s"
           color="warning"
-          title={i18n.translate('inspector.requests.clusters.skippedClusterTitle', {
+          title={i18n.translate('inspector.requests.clusters.skippedClusterMessage', {
             defaultMessage:
-              'Cluster skipped',
+              'Search failed{reason}',
+              values: {
+                reason: clusterFailures[0]?.reason?.reason
+                  ? `, ${clusterFailures[0].reason.reason}`
+                  : '.'
+              }
           })}
           iconType="warning"
-        >
-          <p>
-            {i18n.translate('inspector.requests.clusters.skippedClusterMessage', {
-              defaultMessage:
-                'Search failed{reason}',
-                values: {
-                  reason: clusterFailures[0]?.reason?.reason
-                    ? `, ${clusterFailures[0].reason.reason}`
-                    : '.'
-                }
-            })}
-          </p>
-        </EuiCallOut>
+        />
       ) : null}
 
       <ShardsView failures={shardFailures} shardStats={clusterDetails._shards} />
