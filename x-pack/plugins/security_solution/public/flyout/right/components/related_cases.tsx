@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID } from './test_ids';
+import { CORRELATIONS_RELATED_CASES_TEST_ID } from './test_ids';
 
 const ICON = 'warning';
 
@@ -40,7 +40,7 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
       icon={ICON}
       value={dataCount}
       text={text}
-      data-test-subj={INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID}
+      data-test-subj={CORRELATIONS_RELATED_CASES_TEST_ID}
       key={`correlation-row-${text}`}
     />
   );
