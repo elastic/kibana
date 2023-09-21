@@ -49,8 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('create_rule_exception_route', () => {
+  describe('create_rule_exception_route @serverless', () => {
     before(async () => {
       await createSignalsIndex(supertest, log);
     });
