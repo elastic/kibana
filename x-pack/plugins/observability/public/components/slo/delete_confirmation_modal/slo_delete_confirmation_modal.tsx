@@ -26,21 +26,17 @@ export function SloDeleteConfirmationModal({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="sloDeleteConfirmationModal"
-      title={i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.title', {
-        defaultMessage: 'Are you sure?',
+      title={i18n.translate('xpack.observability.slo.deleteConfirmationModal.title', {
+        defaultMessage: 'Delete {name}?',
+        values: { name },
       })}
       cancelButtonText={i18n.translate(
-        'xpack.observability.slo.slo.deleteConfirmationModal.cancelButtonLabel',
-        {
-          defaultMessage: 'Cancel',
-        }
+        'xpack.observability.slo.deleteConfirmationModal.cancelButtonLabel',
+        { defaultMessage: 'Cancel' }
       )}
       confirmButtonText={i18n.translate(
-        'xpack.observability.slo.slo.deleteConfirmationModal.deleteButtonLabel',
-        {
-          defaultMessage: 'Delete {name}',
-          values: { name },
-        }
+        'xpack.observability.slo.deleteConfirmationModal.deleteButtonLabel',
+        { defaultMessage: 'Delete' }
       )}
       onCancel={onCancel}
       onConfirm={onConfirm}
@@ -54,9 +50,8 @@ export function SloDeleteConfirmationModal({
               values: { partitionKey: groupBy },
             }
           )
-        : i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.descriptionText', {
-            defaultMessage: "You can't recover {name} after deleting.",
-            values: { name },
+        : i18n.translate('xpack.observability.slo.deleteConfirmationModal.descriptionText', {
+            defaultMessage: "You can't recover this SLO after deleting it.",
           })}
     </EuiConfirmModal>
   );
