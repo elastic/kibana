@@ -479,22 +479,22 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      // expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
-      // expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      //   ruleId: enabledRuleForBulkDelete1.id,
-      //   skipActionsValidation: true,
-      //   attributes: enabledRuleForBulkDelete1.attributes,
-      // });
-      // expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      //   ruleId: enabledRuleForBulkDelete2.id,
-      //   skipActionsValidation: true,
-      //   attributes: enabledRuleForBulkDelete2.attributes,
-      // });
-      // expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      //   ruleId: siemRuleForBulkDelete1.id,
-      //   skipActionsValidation: true,
-      //   attributes: siemRuleForBulkDelete1.attributes,
-      // });
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRuleForBulkDelete1.id,
+        skipActionsValidation: true,
+        attributes: enabledRuleForBulkDelete1.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRuleForBulkDelete2.id,
+        skipActionsValidation: true,
+        attributes: enabledRuleForBulkDelete2.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRuleForBulkDelete1.id,
+        skipActionsValidation: true,
+        attributes: siemRuleForBulkDelete1.attributes,
+      });
     });
   });
 
