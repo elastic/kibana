@@ -18,9 +18,10 @@ import type {
   BedrockSecrets,
   BedrockRunActionParams,
   BedrockRunActionResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
-import { InvokeAIActionParams, InvokeAIActionResponse } from '../../../common/bedrock/types';
 
 interface SignedRequest {
   method: string;
@@ -93,7 +94,6 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
         },
         body,
         path,
-        url: `${this.url}${path}`,
       },
       {
         secretAccessKey: this.secrets.secret,

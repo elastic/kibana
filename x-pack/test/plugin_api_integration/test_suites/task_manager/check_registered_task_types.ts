@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.d3security',
         'actions:.email',
         'actions:.gen-ai',
+        'actions:.bedrock',
         'actions:.index',
         'actions:.jira',
         'actions:.opsgenie',
