@@ -21,6 +21,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import { pick } from 'lodash';
 import type {
   CMCrudTypes,
@@ -136,6 +137,9 @@ export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
   enableMSearch?: boolean;
   mSearchAdditionalSearchFields?: string[];
+
+  logger: Logger;
+  throwOnResultValidationError?: boolean;
 }
 
 export abstract class SOContentStorage<Types extends CMCrudTypes>
@@ -155,7 +159,11 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     enableMSearch,
     allowedSavedObjectAttributes,
     mSearchAdditionalSearchFields,
+    logger,
+    throwOnResultValidationError,
   }: SOContentStorageConstrutorParams<Types>) {
+    this.logger = logger;
+    this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.savedObjectType = savedObjectType;
     this.cmServicesDefinition = cmServicesDefinition;
     this.createArgsToSoCreateOptions =
@@ -194,6 +202,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
   }
 
+  private throwOnResultValidationError: boolean;
+  private logger: Logger;
   private savedObjectType: SOContentStorageConstrutorParams<Types>['savedObjectType'];
   private cmServicesDefinition: SOContentStorageConstrutorParams<Types>['cmServicesDefinition'];
   private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
@@ -280,13 +290,28 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       createOptions
     );
 
+    const result = {
+      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+    };
+
+    const validationError = transforms.create.out.result.validate(result);
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
       Types['CreateOut'],
       Types['CreateOut']
-    >({
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
-    });
+    >(
+      result,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
