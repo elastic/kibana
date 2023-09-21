@@ -15,9 +15,9 @@ import {
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
+  PREVALENCE_DETAILS_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
 } from './test_ids';
@@ -113,8 +113,8 @@ describe('PrevalenceDetails', () => {
     expect(
       getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
     ).toBeGreaterThan(1);
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render formatted numbers for the alert and document count columns', () => {
@@ -198,7 +198,7 @@ describe('PrevalenceDetails', () => {
     expect(
       getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
     ).toBeGreaterThan(1);
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {
@@ -211,8 +211,8 @@ describe('PrevalenceDetails', () => {
     const { getByTestId, queryByTestId } = renderPrevalenceDetails();
 
     expect(getByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message if call errors out', () => {
@@ -224,8 +224,8 @@ describe('PrevalenceDetails', () => {
 
     const { getByTestId, queryByTestId } = renderPrevalenceDetails();
 
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
       'No prevalence data available.'
     );
     expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
@@ -240,8 +240,8 @@ describe('PrevalenceDetails', () => {
 
     const { getByTestId, queryByTestId } = renderPrevalenceDetails();
 
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
       'No prevalence data available.'
     );
     expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();

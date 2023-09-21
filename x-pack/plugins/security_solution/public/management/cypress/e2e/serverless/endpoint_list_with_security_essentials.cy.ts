@@ -18,6 +18,7 @@ import {
 describe(
   'When on the Endpoint List in Security Essentials PLI',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
