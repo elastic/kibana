@@ -677,9 +677,7 @@ async function deleteTransforms(
             transform_id: transformId,
           });
           const transformConfig = body.transforms[0];
-          destinationIndex = Array.isArray(transformConfig.dest.index)
-            ? transformConfig.dest.index[0]
-            : transformConfig.dest.index;
+          destinationIndex = transformConfig.dest.index;
         } catch (getTransformConfigError) {
           transformDeleted.error = getTransformConfigError.meta.body.error;
           results[transformId] = {
