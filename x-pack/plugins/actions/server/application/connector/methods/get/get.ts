@@ -48,6 +48,8 @@ export async function get({
     throw Boom.notFound(`Connector ${id} not found`);
   }
 
+  let connector: Connector;
+
   if (foundInMemoryConnector !== undefined) {
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -56,7 +58,7 @@ export async function get({
       })
     );
 
-    return {
+    connector = {
       id,
       actionTypeId: foundInMemoryConnector.actionTypeId,
       name: foundInMemoryConnector.name,
@@ -64,27 +66,27 @@ export async function get({
       isSystemAction: foundInMemoryConnector.isSystemAction,
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
     };
+  } else {
+    const result = await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET,
+        savedObject: { type: 'action', id },
+      })
+    );
+
+    connector = {
+      id,
+      actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
+      name: result.attributes.name,
+      config: result.attributes.config,
+      isPreconfigured: false,
+      isSystemAction: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
+    };
   }
-
-  const result = await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-
-  context.auditLogger?.log(
-    connectorAuditEvent({
-      action: ConnectorAuditAction.GET,
-      savedObject: { type: 'action', id },
-    })
-  );
-
-  const connector = {
-    id,
-    actionTypeId: result.attributes.actionTypeId,
-    isMissingSecrets: result.attributes.isMissingSecrets,
-    name: result.attributes.name,
-    config: result.attributes.config,
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: isConnectorDeprecated(result.attributes),
-  };
 
   // Try to validate the connector, but don't throw.
   try {
