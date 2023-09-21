@@ -8,7 +8,7 @@
 
 import { ComponentProps } from 'react';
 import { EuiToast } from '@elastic/eui';
-import { type AnalyticsServiceStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { EventMetric, FieldType } from './event_types';
 
 type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'success'>;
