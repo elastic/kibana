@@ -58,14 +58,14 @@ export const getGcpIntegrationDetailsFromAgentPolicy = (selectedPolicy?: AgentPo
     }
     return acc;
   }, '');
-  
+
   gcpProjectId = gcpProjectId !== '' ? gcpProjectId : undefined;
   gcpOrganizationId = gcpOrganizationId !== '' ? gcpOrganizationId : undefined;
   gcpAccountType = gcpAccountType !== '' ? gcpAccountType : undefined;
 
   return {
-    gcpProjectId: gcpProjectId,
-    gcpOrganizationId: gcpOrganizationId,
-    gcpAccountType: gcpAccountType,
-  }
+    gcpProjectId,
+    gcpOrganizationId,
+    gcpAccountType,
+  };
 };

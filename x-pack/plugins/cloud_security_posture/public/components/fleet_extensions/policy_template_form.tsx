@@ -112,7 +112,7 @@ const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
     id: GCP_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
       defaultMessage: 'GCP Organization',
-    })
+    }),
   },
   {
     id: GCP_SINGLE_ACCOUNT,
@@ -246,10 +246,7 @@ const GcpAccountTypeSelect = ({
     ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
     : true;
 
-  const gcpAccountTypeOptions = useMemo(
-    () => getGcpAccountTypeOptions(),
-    [isGcpOrgDisabled]
-  );
+  const gcpAccountTypeOptions = useMemo(() => getGcpAccountTypeOptions(), [isGcpOrgDisabled]);
 
   useEffect(() => {
     if (!getGcpAccountType(input)) {

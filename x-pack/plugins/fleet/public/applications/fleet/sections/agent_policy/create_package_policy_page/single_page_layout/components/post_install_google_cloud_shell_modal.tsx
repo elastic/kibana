@@ -47,7 +47,8 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   );
   const { fleetServerHosts, fleetProxy } = useFleetServerHostsForPolicy(agentPolicy);
   const agentVersion = useAgentVersion();
-  const { gcpProjectId, gcpOrganizationId, gcpAccountType } = getGcpIntegrationDetailsFromPackagePolicy(packagePolicy)
+  const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
+    getGcpIntegrationDetailsFromPackagePolicy(packagePolicy);
 
   const { cloudShellUrl, error, isError, isLoading } = useCreateCloudShellUrl({
     enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,

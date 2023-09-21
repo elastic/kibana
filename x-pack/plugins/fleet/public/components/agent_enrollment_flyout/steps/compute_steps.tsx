@@ -14,7 +14,11 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import { fullAgentPolicyToYaml, agentPolicyRouteService, getGcpIntegrationDetailsFromAgentPolicy } from '../../../services';
+import {
+  fullAgentPolicyToYaml,
+  agentPolicyRouteService,
+  getGcpIntegrationDetailsFromAgentPolicy,
+} from '../../../services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -220,7 +224,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const agentVersion = useAgentVersion();
 
-  const { gcpProjectId, gcpOrganizationId, gcpAccountType } = getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy)
+  const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
+    getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,

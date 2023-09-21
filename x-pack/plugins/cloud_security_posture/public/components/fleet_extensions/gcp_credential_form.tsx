@@ -107,19 +107,19 @@ const GoogleCloudShellSetup = ({
             />
           </li>
           {accountType === GCP_ORGANIZATION_ACCOUNT ? (
-          <li>
-          <FormattedMessage
-            id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
-            defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
-          />
-        </li>
+            <li>
+              <FormattedMessage
+                id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
+                defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
+              />
+            </li>
           ) : (
             <li>
-            <FormattedMessage
-              id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
-              defaultMessage="Note down the GCP project ID of the project you wish to monitor"
-            />
-          </li>
+              <FormattedMessage
+                id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
+                defaultMessage="Note down the GCP project ID of the project you wish to monitor"
+              />
+            </li>
           )}
 
           <li>
@@ -132,7 +132,7 @@ const GoogleCloudShellSetup = ({
       </EuiText>
       <EuiSpacer size="l" />
       <EuiForm component="form">
-      {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
+        {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -143,7 +143,7 @@ const GoogleCloudShellSetup = ({
             />
           </EuiFormRow>
         )}
-      {projectIdFields && (
+        {projectIdFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -487,8 +487,7 @@ export const GcpCredentialsForm = ({
   };
   // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
-    const isProjectIdEmpty =
-       !getFieldById('gcp.project_id')?.value;
+    const isProjectIdEmpty = !getFieldById('gcp.project_id')?.value;
     const isInvalidPolicy = isInvalid || isProjectIdEmpty;
 
     setIsValid(!isInvalidPolicy);
@@ -498,7 +497,10 @@ export const GcpCredentialsForm = ({
       updatedPolicy: newPolicy,
     });
 
-    if(input.streams[0].vars?.['gcp.account_type'].value === undefined || input.streams[0].vars?.setup_access?.value === undefined){
+    if (
+      input.streams[0].vars?.['gcp.account_type'].value === undefined ||
+      input.streams[0].vars?.setup_access?.value === undefined
+    ) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
@@ -547,11 +549,11 @@ export const GcpCredentialsForm = ({
           }
         />
       ) : (
-        <GoogleCloudShellSetup          
+        <GoogleCloudShellSetup
           fields={fields}
           onChange={(key, value) =>
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
-        }
+          }
           input={input}
         />
       )}
@@ -591,7 +593,7 @@ const GcpInputVarFields = ({
   return (
     <div>
       <EuiForm component="form">
-        {organizationIdFields && (accountType?.value === GCP_ORGANIZATION_ACCOUNT) && (
+        {organizationIdFields && accountType?.value === GCP_ORGANIZATION_ACCOUNT && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
