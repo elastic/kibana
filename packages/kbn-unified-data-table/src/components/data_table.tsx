@@ -335,6 +335,7 @@ export const UnifiedDataTable = ({
   externalCustomRenderers,
   consumer = 'discover',
   componentsTourSteps,
+  gridStyle = GRID_STYLE,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -789,7 +790,7 @@ export const UnifiedDataTable = ({
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
             inMemory={inMemory}
-            gridStyle={GRID_STYLE}
+            gridStyle={gridStyle}
             renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
           />

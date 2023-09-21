@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
@@ -96,7 +97,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         throw new Error('expected buckets to be an array');
 
       return {
-        page: hits.hits.map((hit) => hit._source!),
+        page: hits.hits.map((hit) => buildDataTableRecord(hit as estypes.EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
         count: getAggregationCount(aggregations.count.buckets),
       };

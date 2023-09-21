@@ -56,6 +56,11 @@ export const useStyles = () => {
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
       text-align: left;
     }
+    & .euiDataGrid__rightControls {
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+    }
   `;
 
   const highlightStyle = css`
@@ -67,6 +72,8 @@ export const useStyles = () => {
 
   const groupBySelector = css`
     width: 188px;
+    display: inline-block;
+    margin-left: 8px;
   `;
 
   return {

@@ -163,6 +163,11 @@ const VulnerabilitiesDataGrid = ({
     });
   }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState(
+    columns.map(({ id }) => id) // initialize to the full set of columns
+  );
+
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
   const selectedVulnerabilityIndex = flyoutVulnerabilityIndex
@@ -298,20 +303,17 @@ const VulnerabilitiesDataGrid = ({
         className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
         aria-label={VULNERABILITIES}
         columns={columns}
-        columnVisibility={{
-          visibleColumns: columns.map(({ id }) => id),
-          setVisibleColumns: () => {},
-        }}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
         schemaDetectors={[severitySchemaConfig]}
         rowCount={limitedTotalItemCount}
         toolbarVisibility={{
-          showColumnSelector: false,
-          showDisplaySelector: false,
-          showKeyboardShortcuts: false,
-          showFullScreenSelector: false,
+          showColumnSelector: true,
+          showDisplaySelector: true,
+          showKeyboardShortcuts: true,
+          showFullScreenSelector: true,
           additionalControls: {
             left: {
-              prepend: (
+              append: (
                 <>
                   <EuiButtonEmpty size="xs" color="text">
                     {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {

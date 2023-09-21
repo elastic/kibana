@@ -200,6 +200,15 @@ const baseColumns = [
   },
 ] as const;
 
+export const getDataGridColumn = (field: string) => {
+  const baseColumn = baseColumns.find((column) => column.field === field);
+  return {
+    ...baseColumn,
+    displayName: baseColumn.name,
+    id: baseColumn.field,
+  };
+};
+
 export const baseFindingsColumns = Object.fromEntries(
   baseColumns.map((column) => [column.field, column])
 ) as Record<typeof baseColumns[number]['field'], typeof baseColumns[number]>;
