@@ -143,7 +143,7 @@ describe('buildAlert', () => {
 
   describe('recursive intersection between objects', () => {
     describe('objectPairIntersection', () => {
-      test('should work with arrays with exact matches', () => {
+      test('returns the intersection of fields with identically-valued arrays', () => {
         const a = {
           field1: [1],
         };
