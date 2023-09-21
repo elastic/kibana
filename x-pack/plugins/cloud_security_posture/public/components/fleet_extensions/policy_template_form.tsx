@@ -138,17 +138,19 @@ const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
+    disabled: false,
+    tooltip: i18n.translate(
+      'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+      {
+        defaultMessage: 'Coming Soon',
+      }
+    ),
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
-    disabled: true,
-    tooltip: i18n.translate(
-      'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
-      { defaultMessage: 'Coming soon' }
-    ),
   },
 ];
 
@@ -311,21 +313,19 @@ const AzureAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
-  packageInfo,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
-  packageInfo: PackageInfo;
 }) => {
-  const azureAccountTypeOptions = useMemo(() => getAzureAccountTypeOptions(), []);
+  const azureAccountTypeOptions = getAzureAccountTypeOptions();
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
-            value: AZURE_ORGANIZATION_ACCOUNT,
+            value: AZURE_SINGLE_ACCOUNT,
             type: 'text',
           },
         })
@@ -411,7 +411,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
-        console.log(updatedPolicy);
         onChange({ isValid, updatedPolicy });
       },
       [onChange, isValid]
@@ -564,12 +563,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         )}
 
         {input.type === 'cloudbeat/cis_azure' && (
-          <AzureAccountTypeSelect
-            input={input}
-            newPolicy={newPolicy}
-            updatePolicy={updatePolicy}
-            packageInfo={packageInfo}
-          />
+          <AzureAccountTypeSelect input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
         )}
 
         {/* Defines the name/description */}

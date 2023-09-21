@@ -21,6 +21,8 @@ const AWS_ACCOUNT_TYPE = 'aws.account_type';
 export const getCloudFormationPropsFromPackagePolicy = (
   packagePolicy?: PackagePolicy
 ): CloudFormationProps => {
+  console.log(packagePolicy);
+
   const templateUrl = packagePolicy?.inputs?.reduce((accInput, input) => {
     if (accInput !== '') {
       return accInput;
