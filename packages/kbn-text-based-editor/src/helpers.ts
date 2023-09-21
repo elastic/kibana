@@ -82,7 +82,11 @@ export const parseWarning = (warning: string): MonacoError[] => {
 
 export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
   return errors.map((error) => {
-    if (error.message.includes('line')) {
+    if (
+      // Found while testing random commands (as inlinestats)
+      !error.message.includes('esql_illegal_argument_exception') &&
+      error.message.includes('line')
+    ) {
       const text = error.message.split('line')[1];
       const [lineNumber, startPosition, errorMessage] = text.split(':');
       // initialize the length to 10 in case no error word found

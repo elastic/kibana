@@ -27,7 +27,6 @@ sourceCommand
 
 processingCommand
     : evalCommand
-    | inlinestatsCommand
     | limitCommand
     | keepCommand
     | sortCommand
@@ -106,10 +105,6 @@ evalCommand
 
 statsCommand
     : STATS fields? (BY grouping)?
-    ;
-
-inlinestatsCommand
-    : INLINESTATS fields (BY grouping)?
     ;
 
 grouping

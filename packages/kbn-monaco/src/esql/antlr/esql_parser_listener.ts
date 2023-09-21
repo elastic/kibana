@@ -50,7 +50,6 @@ import { FromCommandContext } from "./esql_parser";
 import { MetadataContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
-import { InlinestatsCommandContext } from "./esql_parser";
 import { GroupingContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
 import { QualifiedNameContext } from "./esql_parser";
@@ -647,17 +646,6 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStatsCommand?: (ctx: StatsCommandContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.grouping`.
