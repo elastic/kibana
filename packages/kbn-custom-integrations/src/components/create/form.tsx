@@ -187,7 +187,7 @@ export const CreateCustomIntegrationForm = ({
                 <EuiIconTip
                   content={i18n.translate('customIntegrationsPackage.create.dataset.name.tooltip', {
                     defaultMessage:
-                      'The name of the dataset associated with this integration.  ',
+                      'The name of the dataset associated with this integration. ',
                   })}
                   position="right"
                 />
