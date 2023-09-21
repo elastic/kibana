@@ -14,5 +14,5 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Security API Integration Tests',
   },
-  suiteTags: { exclude: ['skipSvlSec'] },
+  suiteTags: { include: ['@serverless'] },
 });
