@@ -13,15 +13,9 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
-import type {
-  EndpointSecurityRoleDefinitions,
-  EndpointSecurityRoleNames,
-} from '../../../../scripts/endpoint/common/roles_users';
+import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
 import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
-import type {
-  LoadedRoleAndUser,
-  RoleAndUserLoader,
-} from '../../../../scripts/endpoint/common/role_and_user_loader';
+import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
 import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
 import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
 import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
@@ -49,7 +43,11 @@ import {
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions, LoadUserAndRoleCyTaskOptions } from '../types';
+import type {
+  IndexEndpointHostsCyTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+  CreateUserAndRoleCyTaskOptions,
+} from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
   IndexedEndpointRuleAlerts,
@@ -141,10 +139,11 @@ export const dataLoaders = (
     asSuperuser: true,
   });
 
-  const roleAndUserLoaderPromise: Promise<RoleAndUserLoader<EndpointSecurityRoleDefinitions>> =
-    stackServicesPromise.then(({ kbnClient, log }) => {
+  const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
+    ({ kbnClient, log }) => {
       return new TestRoleAndUserLoader(kbnClient, log, isServerless);
-    });
+    }
+  );
 
   on('task', {
     indexFleetEndpointPolicy: async ({
@@ -273,6 +272,15 @@ export const dataLoaders = (
      */
     loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
       return (await roleAndUserLoaderPromise).load(name);
+    },
+
+    /**
+     * Creates a new Role/User
+     */
+    createUserAndRole: async ({
+      role,
+    }: CreateUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
+      return (await roleAndUserLoaderPromise).create(role);
     },
   });
 };

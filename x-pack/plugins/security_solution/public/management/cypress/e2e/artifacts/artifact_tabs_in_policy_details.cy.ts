@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
 import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
@@ -16,12 +17,7 @@ import {
   yieldFirstPolicyID,
 } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
-import {
-  getRoleWithArtifactReadPrivilege,
-  login,
-  loginWithCustomRole,
-  ROLE,
-} from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
@@ -30,12 +26,12 @@ const loginWithPrivilegeAll = () => {
 
 const loginWithPrivilegeRead = (privilegePrefix: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
+  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
 };
 
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
+  login.withCustomRole({ name: 'roleWithoutArtifactPrivilege', ...roleWithoutArtifactPrivilege });
 };
 
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {

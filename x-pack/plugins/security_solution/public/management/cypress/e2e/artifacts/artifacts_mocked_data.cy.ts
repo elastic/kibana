@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  getRoleWithArtifactReadPrivilege,
-  login,
-  loginWithCustomRole,
-  ROLE,
-} from '../../tasks/login';
+import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
+import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
@@ -25,7 +21,7 @@ const loginWithWriteAccess = (url: string) => {
 
 const loginWithReadAccess = (privilegePrefix: string, url: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
+  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
   loadPage(url);
 };
 

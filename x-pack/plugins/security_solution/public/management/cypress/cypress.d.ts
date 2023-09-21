@@ -21,6 +21,7 @@ import type {
   HostActionResponse,
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
+  CreateUserAndRoleCyTaskOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -194,6 +195,12 @@ declare global {
       task(
         name: 'loadUserAndRole',
         arg: LoadUserAndRoleCyTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LoadedRoleAndUser>;
+
+      task(
+        name: 'createUserAndRole',
+        arg: CreateUserAndRoleCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<LoadedRoleAndUser>;
     }

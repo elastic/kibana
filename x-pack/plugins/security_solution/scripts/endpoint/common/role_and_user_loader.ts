@@ -32,7 +32,19 @@ export interface LoadedRoleAndUser {
 }
 
 export interface RoleAndUserLoaderInterface<R extends Record<string, Role> = Record<string, Role>> {
+  /**
+   * Loads the requested Role into kibana and then creates a user by the same role name that is
+   * assigned to the given role
+   * @param name
+   */
   load(name: keyof R): Promise<LoadedRoleAndUser>;
+
+  /**
+   * Creates a new Role in kibana along with a user (by the same name as the Role name)
+   * that is assigned to the given role
+   * @param role
+   */
+  create(role: Role): Promise<LoadedRoleAndUser>;
 }
 
 /**
@@ -54,11 +66,6 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  /**
-   * Loads the requested role into Kibana and creates (or updates, if it already exists) a user by
-   * the same name that is assigned the role just created.
-   * @param name
-   */
   async load(name: keyof R): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
@@ -70,6 +77,10 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       );
     }
 
+    return this.create(role);
+  }
+
+  public async create(role: Role): Promise<LoadedRoleAndUser> {
     const roleName = role.name;
 
     await this.createRole(role);
