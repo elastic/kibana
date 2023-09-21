@@ -9,12 +9,12 @@
 import { mount } from 'enzyme';
 import type { ReactElement, RefObject } from 'react';
 import React from 'react';
-import { Panels } from './panels';
+import ResizableLayout from './resizable_layout';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsFixed } from './panels_fixed';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
-describe('Panels component', () => {
+describe('ResizableLayout component', () => {
   const mountComponent = ({
     mode = ResizableLayoutMode.Resizable,
     resizeRef = { current: null },
@@ -33,7 +33,7 @@ describe('Panels component', () => {
     fixedPanel?: ReactElement;
   }) => {
     return mount(
-      <Panels
+      <ResizableLayout
         mode={mode}
         direction={ResizableLayoutDirection.Vertical}
         resizeRef={resizeRef}
@@ -57,10 +57,10 @@ describe('Panels component', () => {
     expect(component.contains(flexPanel)).toBe(true);
   });
 
-  it('should show PanelsFixed when mode is ResizableLayoutMode.Fixed', () => {
+  it('should show PanelsFixed when mode is ResizableLayoutMode.Static', () => {
     const fixedPanel = <div data-test-subj="fixedPanel" />;
     const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Fixed, fixedPanel, flexPanel });
+    const component = mountComponent({ mode: ResizableLayoutMode.Static, fixedPanel, flexPanel });
     expect(component.find(PanelsFixed).exists()).toBe(true);
     expect(component.find(PanelsResizable).exists()).toBe(false);
     expect(component.contains(fixedPanel)).toBe(true);
@@ -90,10 +90,10 @@ describe('Panels component', () => {
     expect(component.contains(flexPanel)).toBe(true);
   });
 
-  it('should pass false for hideFixedPanel when mode is ResizableLayoutMode.Fixed', () => {
+  it('should pass false for hideFixedPanel when mode is ResizableLayoutMode.Static', () => {
     const fixedPanel = <div data-test-subj="fixedPanel" />;
     const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ mode: ResizableLayoutMode.Fixed, fixedPanel, flexPanel });
+    const component = mountComponent({ mode: ResizableLayoutMode.Static, fixedPanel, flexPanel });
     expect(component.find(PanelsFixed).prop('hideFixedPanel')).toBe(false);
     expect(component.contains(fixedPanel)).toBe(true);
     expect(component.contains(flexPanel)).toBe(true);

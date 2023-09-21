@@ -13,7 +13,8 @@ import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { act } from 'react-dom/test-utils';
 
-const containerSize = 1000;
+const containerHeight = 1000;
+const containerWidth = 500;
 const fixedPanelId = 'fixedPanel';
 
 jest.mock('@elastic/eui', () => ({
@@ -29,6 +30,7 @@ import { ResizableLayoutDirection } from '../types';
 describe('Panels resizable', () => {
   const mountComponent = ({
     className = '',
+    direction = ResizableLayoutDirection.Vertical,
     resizeRef = { current: null },
     initialFixedPanelSize = 0,
     minFixedPanelSize = 0,
@@ -39,6 +41,7 @@ describe('Panels resizable', () => {
     onFixedPanelSizeChange = jest.fn(),
   }: {
     className?: string;
+    direction?: ResizableLayoutDirection;
     resizeRef?: RefObject<HTMLDivElement>;
     initialFixedPanelSize?: number;
     minFixedPanelSize?: number;
@@ -51,7 +54,7 @@ describe('Panels resizable', () => {
     return mount(
       <PanelsResizable
         className={className}
-        direction={ResizableLayoutDirection.Vertical}
+        direction={direction}
         resizeRef={resizeRef}
         fixedPanelSize={initialFixedPanelSize}
         minFixedPanelSize={minFixedPanelSize}
@@ -83,7 +86,9 @@ describe('Panels resizable', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerSize, width: 0 });
+    jest
+      .spyOn(eui, 'useResizeObserver')
+      .mockReturnValue({ height: containerHeight, width: containerWidth });
   });
 
   it('should render both panels', () => {
@@ -97,7 +102,7 @@ describe('Panels resizable', () => {
   it('should set the initial sizes of both panels', () => {
     const initialFixedPanelSize = 200;
     const component = mountComponent({ initialFixedPanelSize });
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
   });
 
   it('should set the correct sizes of both panels when the panels are resized', () => {
@@ -106,7 +111,7 @@ describe('Panels resizable', () => {
       component.setProps({ fixedPanelSize }).update();
     });
     const component = mountComponent({ initialFixedPanelSize, onFixedPanelSizeChange });
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newFixedPanelSizePct = 30;
     const onPanelSizeChange = component
       .find('[data-test-subj="unifiedHistogramResizableContainer"]')
@@ -116,15 +121,15 @@ describe('Panels resizable', () => {
       onPanelSizeChange({ [fixedPanelId]: newFixedPanelSizePct });
     });
     forceRender(component);
-    const newFixedPanelSize = (newFixedPanelSizePct / 100) * containerSize;
+    const newFixedPanelSize = (newFixedPanelSizePct / 100) * containerHeight;
     expect(onFixedPanelSizeChange).toHaveBeenCalledWith(newFixedPanelSize);
-    expectCorrectPanelSizes(component, containerSize, newFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, newFixedPanelSize);
   });
 
   it('should maintain the size of the fixed panel and resize the flex panel when the container size changes', () => {
     const initialFixedPanelSize = 200;
     const component = mountComponent({ initialFixedPanelSize });
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 2000;
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
     forceRender(component);
@@ -140,14 +145,14 @@ describe('Panels resizable', () => {
       minFixedPanelSize,
       minFlexPanelSize,
     });
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 400;
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
     forceRender(component);
     expectCorrectPanelSizes(component, newContainerSize, newContainerSize - minFlexPanelSize);
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerSize, width: 0 });
+    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
     forceRender(component);
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
   });
 
   it('should maintain the minimum sizes of both panels when the container is too small to fit them', () => {
@@ -159,7 +164,7 @@ describe('Panels resizable', () => {
       minFixedPanelSize,
       minFlexPanelSize,
     });
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 200;
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
     forceRender(component);
@@ -169,9 +174,9 @@ describe('Panels resizable', () => {
     expect(
       component.find('[data-test-subj="unifiedHistogramResizablePanelMain"]').at(0).prop('size')
     ).toBe((minFlexPanelSize / newContainerSize) * 100);
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerSize, width: 0 });
+    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
     forceRender(component);
-    expectCorrectPanelSizes(component, containerSize, initialFixedPanelSize);
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
   });
 
   it('should blur the resize button after a resize', async () => {
@@ -195,5 +200,43 @@ describe('Panels resizable', () => {
     await waitFor(() => {
       expect(resizeButton.getDOMNode()).not.toHaveFocus();
     });
+  });
+
+  it('should pass direction "vertical" to EuiResizableContainer when direction is ResizableLayoutDirection.Vertical', () => {
+    const component = mountComponent({ direction: ResizableLayoutDirection.Vertical });
+    expect(
+      component
+        .find('[data-test-subj="unifiedHistogramResizableContainer"]')
+        .at(0)
+        .prop('direction')
+    ).toBe('vertical');
+  });
+
+  it('should pass direction "horizontal" to EuiResizableContainer when direction is ResizableLayoutDirection.Horizontal', () => {
+    const component = mountComponent({ direction: ResizableLayoutDirection.Horizontal });
+    expect(
+      component
+        .find('[data-test-subj="unifiedHistogramResizableContainer"]')
+        .at(0)
+        .prop('direction')
+    ).toBe('horizontal');
+  });
+
+  it('should use containerHeight when direction is ResizableLayoutDirection.Vertical', () => {
+    const initialFixedPanelSize = 200;
+    const component = mountComponent({
+      direction: ResizableLayoutDirection.Vertical,
+      initialFixedPanelSize,
+    });
+    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+  });
+
+  it('should use containerWidth when direction is ResizableLayoutDirection.Horizontal', () => {
+    const initialFixedPanelSize = 200;
+    const component = mountComponent({
+      direction: ResizableLayoutDirection.Horizontal,
+      initialFixedPanelSize,
+    });
+    expectCorrectPanelSizes(component, containerWidth, initialFixedPanelSize);
   });
 });

@@ -37,7 +37,7 @@ export const PanelsFixed = ({
   return (
     <EuiFlexGroup
       className={className}
-      direction={direction === 'vertical' ? 'column' : 'row'}
+      direction={direction === ResizableLayoutDirection.Vertical ? 'column' : 'row'}
       alignItems="stretch"
       gutterSize="none"
       responsive={false}

@@ -8,7 +8,7 @@
 
 export enum ResizableLayoutMode {
   Single = 'single',
-  Fixed = 'fixed',
+  Static = 'static',
   Resizable = 'resizable',
 }
 

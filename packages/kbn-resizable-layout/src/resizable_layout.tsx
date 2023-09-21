@@ -12,7 +12,7 @@ import { PanelsResizable } from './panels_resizable';
 import { PanelsFixed } from './panels_fixed';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
-export interface PanelsProps {
+export interface ResizableLayoutProps {
   className?: string;
   mode: ResizableLayoutMode;
   direction: ResizableLayoutDirection;
@@ -26,9 +26,9 @@ export interface PanelsProps {
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }
 
-const fixedModes = [ResizableLayoutMode.Single, ResizableLayoutMode.Fixed];
+const staticModes = [ResizableLayoutMode.Single, ResizableLayoutMode.Static];
 
-export const Panels = ({
+const ResizableLayout = ({
   className,
   mode,
   direction,
@@ -40,10 +40,10 @@ export const Panels = ({
   flexPanel,
   resizeButtonClassName,
   onFixedPanelSizeChange,
-}: PanelsProps) => {
+}: ResizableLayoutProps) => {
   const panelsProps = { className, fixedPanel, flexPanel };
 
-  return fixedModes.includes(mode) ? (
+  return staticModes.includes(mode) ? (
     <PanelsFixed
       direction={direction}
       hideFixedPanel={mode === ResizableLayoutMode.Single}
@@ -62,3 +62,6 @@ export const Panels = ({
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default ResizableLayout;

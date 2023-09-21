@@ -8,8 +8,7 @@
 
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { lazy } from 'react';
-import type { PanelsProps } from './panels';
 
 export { ResizableLayoutMode, ResizableLayoutDirection } from './types';
-export type ResizableLayoutProps = PanelsProps;
-export const ResizableLayout = withSuspense<ResizableLayoutProps>(lazy(() => import('./panels')));
+export type { ResizableLayoutProps } from './src/resizable_layout';
+export const ResizableLayout = withSuspense(lazy(() => import('./src/resizable_layout')));

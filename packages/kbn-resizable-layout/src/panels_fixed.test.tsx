@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -14,17 +15,19 @@ import { PanelsFixed } from './panels_fixed';
 
 describe('Panels fixed', () => {
   const mountComponent = ({
+    direction = ResizableLayoutDirection.Vertical,
     hideFixedPanel = false,
     fixedPanel = <></>,
     flexPanel = <></>,
   }: {
+    direction?: ResizableLayoutDirection;
     hideFixedPanel?: boolean;
     fixedPanel: ReactElement;
     flexPanel: ReactElement;
   }) => {
     return mount(
       <PanelsFixed
-        direction={ResizableLayoutDirection.Vertical}
+        direction={direction}
         hideFixedPanel={hideFixedPanel}
         fixedPanel={fixedPanel}
         flexPanel={flexPanel}
@@ -46,5 +49,23 @@ describe('Panels fixed', () => {
     const component = mountComponent({ hideFixedPanel: true, fixedPanel, flexPanel });
     expect(component.contains(fixedPanel)).toBe(false);
     expect(component.contains(flexPanel)).toBe(true);
+  });
+
+  it('should pass direction "column" to EuiFlexGroup when direction is ResizableLayoutDirection.Vertical', () => {
+    const component = mountComponent({
+      direction: ResizableLayoutDirection.Vertical,
+      fixedPanel: <></>,
+      flexPanel: <></>,
+    });
+    expect(component.find(EuiFlexGroup).prop('direction')).toBe('column');
+  });
+
+  it('should pass direction "row" to EuiFlexGroup when direction is ResizableLayoutDirection.Horizontal', () => {
+    const component = mountComponent({
+      direction: ResizableLayoutDirection.Horizontal,
+      fixedPanel: <></>,
+      flexPanel: <></>,
+    });
+    expect(component.find(EuiFlexGroup).prop('direction')).toBe('row');
   });
 });
