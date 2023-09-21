@@ -26,6 +26,7 @@ This section for Service Accounts was originally from the [ES Serverless reposit
 The "service_tokens" file contains this line:
 ```
 elastic/kibana/kibana-dev:$2a$10$mY2RuGROhk56vLNh.Mgwue98BnkdQPlTR.yGh38ao5jhPJobvuBCq
+elastic/fleet-server/fleet-server-dev:$2a$10$tgMX7U09G/EVTP8F/O4zHewhA3DXdv7iM5F2vny9TC6zw77RrutyG
 ```
 
 That line defines a single service token
