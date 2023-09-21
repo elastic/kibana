@@ -19,9 +19,16 @@ import { reloadPageToast } from './reload_page_toast';
 const FormContext = React.createContext<Services | null>(null);
 
 /**
+ * Props for {@link FormProvider}.
+ */
+export interface FormProviderProps extends FormServices {
+  children: React.ReactNode;
+}
+
+/**
  * React Provider that provides services to a {@link Form} component and its dependents.
  */
-export const FormProvider: FC<FormServices> = ({ children, ...services }) => {
+export const FormProvider = ({ children, ...services }: FormProviderProps) => {
   const { saveChanges, showError, showReloadPagePrompt, ...rest } = services;
 
   return (
@@ -29,7 +36,6 @@ export const FormProvider: FC<FormServices> = ({ children, ...services }) => {
       <FieldRowProvider {...rest}>{children}</FieldRowProvider>
     </FormContext.Provider>
   );
-  return <FieldRowProvider {...services}>{children}</FieldRowProvider>;
 };
 
 /**
@@ -58,8 +64,6 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
 
 /**
  * React hook for accessing pre-wired services.
- *
- * @see {@link FormServices}
  */
 export const useServices = () => {
   const context = useContext(FormContext);
