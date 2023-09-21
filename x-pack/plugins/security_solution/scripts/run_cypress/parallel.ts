@@ -93,7 +93,7 @@ ${JSON.stringify(argv, null, 2)}
 ----------------------------------------------
 `);
 
-      const isOpen = argv._[0] === 'open';
+      const isOpen = argv._.includes('open');
 
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
