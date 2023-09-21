@@ -14,12 +14,12 @@ import type {
   HostAggEsItem,
   HostsStrategyResponse,
   HostsQueries,
-  HostsRequestOptions,
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
+  RiskQueries,
   RiskScoreEntity,
   getHostRiskIndex,
   buildHostNamesFilter,
@@ -34,14 +34,14 @@ import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
-  buildDsl: (options: HostsRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildHostsQuery(options);
   },
   parse: async (
-    options: HostsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -134,6 +134,7 @@ export async function getHostRiskData(
         defaultIndex: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)],
         filterQuery: buildHostNamesFilter(hostNames),
         riskScoreEntity: RiskScoreEntity.host,
+        factoryQueryType: RiskQueries.hostsRiskScore,
       })
     );
     return hostRiskResponse;

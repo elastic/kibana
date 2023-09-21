@@ -17,6 +17,7 @@ import {
 describe(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [
