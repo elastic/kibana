@@ -20,13 +20,12 @@ import {
   getRoleWithArtifactReadPrivilege,
   login,
   loginWithCustomRole,
-  loginWithRole,
   ROLE,
 } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
-  loginWithRole(ROLE.endpoint_security_policy_manager);
+  login(ROLE.endpoint_policy_manager);
 };
 
 const loginWithPrivilegeRead = (privilegePrefix: string) => {
