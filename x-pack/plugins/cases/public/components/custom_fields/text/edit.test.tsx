@@ -110,10 +110,42 @@ describe('Edit ', () => {
     expect(screen.getByText('No "My test label 1" added')).toBeInTheDocument();
   });
 
+  it('shows the no value text if the the value is null', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={{ ...customField, field: { value: null } }}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(screen.getByText('No "My test label 1" added')).toBeInTheDocument();
+  });
+
   it('does not show the value when the custom field is undefined', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(screen.queryByTestId('text-custom-field-view-test_key_1')).not.toBeInTheDocument();
+  });
+
+  it('does not show the value when the value is null', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={{ ...customField, field: { value: null } }}
           customFieldConfiguration={customFieldConfiguration}
           onSubmit={onSubmit}
           isLoading={false}
@@ -177,6 +209,38 @@ describe('Edit ', () => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
         field: { value: ['My text test value 1!!!'] },
+      });
+    });
+  });
+
+  it('sets the value to null if the text field is empty', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    userEvent.clear(screen.getByTestId('case-toggle-custom-field-form-field-test_key_1'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('case-text-custom-field-submit-button-test_key_1')
+      ).not.toBeDisabled();
+    });
+
+    userEvent.click(screen.getByTestId('case-text-custom-field-submit-button-test_key_1'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        ...customField,
+        field: { value: null },
       });
     });
   });

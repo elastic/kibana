@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
@@ -116,11 +117,13 @@ const EditComponent: CustomFieldType['Edit'] = ({
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
+      const value = isEmpty(data.value) ? null : [data.value];
+
       onSubmit({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TEXT,
-        field: { value: [data.value] },
+        field: { value },
       });
     }
 
@@ -130,6 +133,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
   const initialValue = (customField?.field.value?.[0] as string) ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
+  const isCustomFieldValueDefined = !isEmpty(customField?.field.value);
 
   return (
     <>
@@ -166,10 +170,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
         data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
-        {!customField && !isEdit && (
+        {!isCustomFieldValueDefined && !isEdit && (
           <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
         )}
-        {!isEdit && customField && (
+        {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
