@@ -130,7 +130,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
-  private _sampleDataRegistered?: boolean = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
