@@ -57,8 +57,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
   basePath: string;
-  /** If this process exits, teardown the ES cluster as well */
-  teardown?: boolean;
+  /** If this process exits, leave the ES cluster running in the background */
+  skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
@@ -596,6 +596,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     `);
   }
 
+  if (!options.skipTeardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
 
@@ -625,24 +630,16 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     await waitUntilClusterReady({ client, expectedStatus: 'green', log });
   }
 
-  if (options.teardown) {
-    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
-    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
-  }
-
   if (!options.background) {
     // The ESS cluster has to be started detached, so we attach a logger afterwards for output
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
-    }).catch((error) => {
+    }).catch(() => {
       /**
-       * 255 is a generic exit code which is triggered from docker logs command
-       * if we teardown the cluster since the entrypoint doesn't exit normally
+       * docker logs will throw errors when the nodes are killed through SIGINT
+       * and the entrypoint doesn't exit normally, so we silence the errors.
        */
-      if (error.exitCode !== 255) {
-        log.error(error.message);
-      }
     });
   }
 
