@@ -111,6 +111,7 @@ export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
+export type CaseUICustomField = CaseUI['customFields'][number];
 
 export interface ResolvedCase {
   case: CaseUI;
@@ -123,6 +124,8 @@ export type CasesConfigurationUI = Pick<
   SnakeToCamelCase<Configuration>,
   'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
 >;
+
+export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
 
 export type SortOrder = 'asc' | 'desc';
 
