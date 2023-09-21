@@ -31,6 +31,11 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import {
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+} from '@kbn/controls-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 
@@ -49,13 +54,13 @@ import {
   DashboardReduxState,
   DashboardRenderPerformanceStats,
 } from '../types';
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { placePanel } from '../component/panel_placement';
 import { pluginServices } from '../../services/plugin_services';
 import { initializeDashboard } from './create/create_dashboard';
 import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
+import { DashboardAppLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
@@ -107,6 +112,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
+  public locator?: LocatorPublic<DashboardAppLocatorParams>;
+
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
@@ -159,6 +166,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       dashboardCapabilities: { showWriteControls: this.showWriteControls },
     } = pluginServices.getServices());
 
+    this.locator = creationOptions?.locator;
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.dashboardCreationStartTime = dashboardCreationStartTime;

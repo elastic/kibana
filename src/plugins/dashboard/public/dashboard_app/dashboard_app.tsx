@@ -31,6 +31,7 @@ import {
 } from './url/search_sessions_integration';
 import { DashboardAPI, DashboardRenderer } from '..';
 import { type DashboardEmbedSettings } from './types';
+import { DASHBOARD_APP_LOCATOR } from './locator/locator';
 import { pluginServices } from '../services/plugin_services';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 import { DashboardRedirect } from '../dashboard_container/types';
@@ -64,6 +65,12 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
+  const {
+    share: {
+      url: { locators },
+    },
+  } = pluginServices.getServices();
+
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
   useMount(() => {
@@ -139,6 +146,7 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
+      locator: locators.get(DASHBOARD_APP_LOCATOR),
       getIncomingEmbeddable: () =>
         getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
@@ -167,6 +175,7 @@ export function DashboardApp({
     });
   }, [
     history,
+    locators,
     embedSettings,
     validateOutcome,
     getScopedHistory,

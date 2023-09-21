@@ -18,6 +18,8 @@ import {
   EmbeddablePackageState,
   EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
@@ -61,6 +63,7 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
+  locator?: LocatorPublic<SerializableRecord>; // TODO: Should this be a string and the `get` happens in the link embeddable?
 }
 
 export class DashboardContainerFactoryDefinition
