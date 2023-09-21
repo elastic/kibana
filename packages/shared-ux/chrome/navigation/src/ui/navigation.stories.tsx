@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
 import React, { FC, PropsWithChildren } from 'react';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import {
   EuiButton,
@@ -32,7 +32,12 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
+import type {
+  GroupDefinition,
+  NavigationTreeDefinition,
+  NonEmptyArray,
+  ProjectNavigationDefinition,
+} from './types';
 
 const storybookMock = new NavigationStorybookMock();
 
@@ -153,6 +158,83 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
     </NavigationWrapper>
   );
 };
+
+export const UpdatingState = (args: NavigationServices) => {
+  const groupDef: GroupDefinition = {
+    type: 'navGroup',
+    id: 'observability_project_nav',
+    title: 'Observability',
+    icon: 'logoObservability',
+    accordionProps: { arrowProps: { css: { display: 'none' } } },
+    children: [
+      {
+        id: 'aiops',
+        title: 'AIOps',
+        icon: 'branch',
+        children: [
+          {
+            title: 'Anomaly detection',
+            link: 'ml:anomalyDetection',
+          },
+          { title: 'Log Rate Analysis', link: 'ml:logRateAnalysis' },
+          {
+            title: 'Change Point Detections',
+            link: 'ml:changePointDetections',
+          },
+          {
+            title: 'Job Notifications',
+            link: 'ml:notifications',
+          },
+        ],
+      },
+      {
+        id: 'project_settings_project_nav',
+        title: 'Project settings',
+        icon: 'gear',
+        children: [{ link: 'management' }, { link: 'integrations' }, { link: 'fleet' }],
+      },
+    ],
+  };
+
+  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
+    [
+      {
+        ...groupDef,
+        path: ['observability_project_nav'],
+      } as unknown as ChromeProjectNavigationNode,
+      {
+        ...groupDef.children?.[0],
+        path: ['observability_project_nav', 'aiops'],
+      } as unknown as ChromeProjectNavigationNode,
+      {
+        ...groupDef.children?.[0].children?.[0],
+        path: ['observability_project_nav', 'aiops', 'ml:logRateAnalysis'],
+      } as unknown as ChromeProjectNavigationNode,
+    ],
+  ]);
+
+  const services = storybookMock.getServices({
+    ...args,
+    activeNodes$,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+  });
+
+  const myNavigationTree: NavigationTreeDefinition = {
+    body: [groupDef],
+  };
+
+  return (
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation navigationTree={myNavigationTree} />
+      </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+UpdatingState.argTypes = storybookMock.getArgumentTypes();
 
 const navigationDefinition: ProjectNavigationDefinition = {
   navigationTree: {
