@@ -38,7 +38,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
-    --esServerlessImage  If 'esFrom' is set to "serverless", 'esServerlessImage' is interpreted as the ES Serverless image path OR tag.
+    --esServerlessImage  When 'esFrom' is "serverless", this argument will be interpreted either as a tag within the ES Serverless repo, OR a full docker image path.
     --include-tag        Tags that suites must include to be run, can be included multiple times
     --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
     --include            Files that must included to be run, can be included multiple times

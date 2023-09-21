@@ -43,7 +43,7 @@ export const serverless: Command = {
 
     Examples:
 
-      es serverless --tag git-fec36430fba2-x86_64
+      es serverless --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
       es serverless --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
     `;
   },
