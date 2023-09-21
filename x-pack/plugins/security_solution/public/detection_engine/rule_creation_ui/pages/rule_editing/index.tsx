@@ -66,7 +66,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { useEsqlIndex } from '../../hooks';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
@@ -147,19 +147,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  // if about step not active, passing query as undefined to prevent unnecessary re-renders
-  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
-  // when it is active, query would not change
-  const esqlQueryForAboutStep = useMemo(() => {
-    if (activeStep !== RuleStep.aboutRule) {
-      return undefined;
-    }
-    return typeof defineStepData.queryBar.query.query === 'string' &&
-      isEsqlRule(defineStepData.ruleType)
-      ? defineStepData.queryBar.query.query
-      : undefined;
-  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
-
+  const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),

@@ -39,11 +39,16 @@ const EsqlInfoIconComponent = () => {
               defaultMessage: `
 ### Aggregating rule
 Is a rule that uses {statsByLink} grouping commands. So, its result can not be matched with a particular document in ES.
-Please use suppress configuration to deduplicate alerts. For the best results, select fields that are used to be aggregating by.
+\`\`\`
+FROM logs*
+| STATS count = COUNT(host.name) BY host.name
+| SORT host.name
+\`\`\`
+
     
 ### Non-aggregating rule
-Is a rule that does not {statsByLink} grouping commands. Hence, each row in result is a single document in ES. For this type of rule,
-please use operator \`[metadata _id, _index, _version]\` after defining index source
+Is a rule that does not use {statsByLink} grouping commands. Hence, each row in result can be tracked to a source document in ES. For this type of rule,
+please use operator \`[metadata _id, _index, _version]\` after defining index source. This would allow deduplicate alerts and link them with the source document.
 
 Example
 
@@ -54,9 +59,12 @@ FROM logs* [metadata _id, _index, _version]
 \`\`\`
 
 Please, ensure, metadata properties \`id\`, \`_index\`, \`_version\` are carried over through pipe operators.
+
+More information can be found on {startUsingEsqlLink}
             `,
               values: {
                 statsByLink: `[STATS..BY](${docLinks.links.esql.statsBy})`,
+                startUsingEsqlLink: `[WIP: Get started using ES|QL rules](${docLinks.links.esql.statsBy})`,
               },
             }
           )}

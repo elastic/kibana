@@ -30,19 +30,13 @@ export const performEsqlRequest = async ({
 }): Promise<EsqlTable> => {
   const search = async () => {
     try {
-      //  const { terminateAfter, ...requestParams } = request.params ?? {};
-      const rawResponse = await esClient.transport.request<EsqlTable>(
-        {
-          method: 'POST',
-          path: '/_esql',
-          body: {
-            ...requestParams,
-          },
-        }
-        // {
-        //   signal: abortSignal,
-        // }
-      );
+      const rawResponse = await esClient.transport.request<EsqlTable>({
+        method: 'POST',
+        path: '/_esql',
+        body: {
+          ...requestParams,
+        },
+      });
       return {
         rawResponse,
         isPartial: false,

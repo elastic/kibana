@@ -336,8 +336,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 path="ruleNameOverride"
                 component={EsqlAutocomplete}
                 componentProps={{
+                  dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType',
+                  idAria: 'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType',
                   esqlQuery,
                   fieldType: 'string',
+                  isDisabled: isLoading,
                 }}
               />
             ) : (

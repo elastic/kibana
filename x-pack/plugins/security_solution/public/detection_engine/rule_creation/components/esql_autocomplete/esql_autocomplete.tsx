@@ -47,10 +47,11 @@ export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
   );
   const { options, isLoading } = useEsqlFieldOptions(esqlQuery, fieldType);
 
-  const value = field?.value as string;
-  const selectedOptions = field.value ? [{ label: value }] : [];
+  const value = field?.value;
+  const selectedOptions = typeof value === 'string' && value ? [{ label: value }] : [];
 
-  const isInvalid = field.value ? !new Set(options.map((_) => _.label)).has(value) : false;
+  const isInvalid =
+    typeof value === 'string' && value ? !new Set(options.map((_) => _.label)).has(value) : false;
 
   return (
     <EuiFormRow

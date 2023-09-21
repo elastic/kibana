@@ -67,7 +67,7 @@ import {
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { formatRule } from './helpers';
-import { useEsqlIndex } from '../../hooks';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -217,18 +217,7 @@ const CreateRulePageComponent: React.FC = () => {
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
-  // if about step not active, passing query as undefined to prevent unnecessary re-renders
-  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
-  // when it is active, query would not change
-  const esqlQueryForAboutStep = useMemo(() => {
-    if (activeStep !== RuleStep.aboutRule) {
-      return undefined;
-    }
-    return typeof defineStepData.queryBar.query.query === 'string' &&
-      isEsqlRule(defineStepData.ruleType)
-      ? defineStepData.queryBar.query.query
-      : undefined;
-  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
+  const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
   const memoizedIndex = useMemo(
     () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),

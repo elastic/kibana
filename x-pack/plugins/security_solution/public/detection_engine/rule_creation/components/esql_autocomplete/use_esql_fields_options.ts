@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const useFetchEsqlOptions = () => {};
-
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 
