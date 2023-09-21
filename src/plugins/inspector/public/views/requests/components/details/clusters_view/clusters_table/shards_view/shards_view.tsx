@@ -20,7 +20,7 @@ interface Props {
 export function ShardsView({ failures, shardsDetails }: Props) {
   const [showFailures, setShowFailures] = useState(false);
 
-  return !shardsDetails || failures.length === 0 ? null : (
+  return !shardsDetails && failures.length === 0 ? null : (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
