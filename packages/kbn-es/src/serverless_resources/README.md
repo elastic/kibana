@@ -1,5 +1,5 @@
 # Elasticsearch Serverless Resources
-The resources in this directory are used for seeding Elasticsearch Serverless (ESS) images with users, roles and tokens for SSL and authentication. ESS requires file realm authentication, so we will bind mount them into the containers at `/usr/share/elasticsearch/config/`.
+The resources in this directory are used for seeding Elasticsearch Serverless images with users, roles and tokens for SSL and authentication. Serverless requires file realm authentication, so we will bind mount them into the containers at `/usr/share/elasticsearch/config/`.
 
 ## Users
 
@@ -21,7 +21,7 @@ password: changeme
 
 ## Service Account and Tokens
 
-This section for Service Accounts was originally from the [ESS repository](https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/resources/README.service_tokens.md).
+This section for Service Accounts was originally from the [ES Serverless repository](https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/resources/README.service_tokens.md).
 
 The "service_tokens" file contains this line:
 ```
@@ -46,4 +46,4 @@ If a node is configured to use this `service_tokens` file, then you can authenti
 curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA" http://localhost:9200/_security/_authenticate
 ```
 
-The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed an ESS cluster with this token.
+The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
