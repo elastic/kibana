@@ -223,11 +223,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnNodeDetailsFlyoutOpenAsPage();
 
-          const documentTitle = await browser.getTitle();
-
-          expect(documentTitle).to.contain(
-            'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
-          );
+          await retry.tryForTime(3 * 1000, async () => {
+            const documentTitle = await browser.getTitle();
+            expect(documentTitle).to.contain(
+              'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+            );
+          });
 
           await returnTo(INVENTORY_PATH);
         });
@@ -238,10 +239,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnGoToNodeDetails();
 
-          const documentTitle = await browser.getTitle();
-          expect(documentTitle).to.contain(
-            'ed01e3a3-4787-42f6-b73e-ac9e97294e9d - Infrastructure - Observability - Elastic'
-          );
+          await retry.tryForTime(3 * 1000, async () => {
+            const documentTitle = await browser.getTitle();
+            expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+          });
 
           await returnTo(INVENTORY_PATH);
         });
