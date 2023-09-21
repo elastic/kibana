@@ -82,5 +82,4 @@ export interface RouteInitialization {
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
   getEnabledFeatures: () => MlFeatures;
-  isServerless: boolean;
 }
