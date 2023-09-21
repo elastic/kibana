@@ -40,20 +40,13 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
         }
       }
 
-      return http
-        .get(`/internal/osquery/fleet_wrapper/agents`, {
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-          query: {
-            kuery,
-            perPage,
-          },
-        })
-        .catch((err) => {
-          console.log({ err });
-          throw new Error(err);
-        });
+      return http.get(`/internal/osquery/fleet_wrapper/agents`, {
+        version: API_VERSIONS.internal.v1,
+        query: {
+          kuery,
+          perPage,
+        },
+      });
     },
     {
       select: (data) => data?.agents || [],
