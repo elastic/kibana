@@ -1269,6 +1269,7 @@
     "@types/adm-zip": "^0.5.0",
     "@types/archiver": "^5.3.1",
     "@types/async": "^3.2.3",
+    "@types/aws4": "^1.5.0",
     "@types/babel__core": "^7.20.0",
     "@types/babel__generator": "^7.6.4",
     "@types/babel__helper-plugin-utils": "^7.10.0",
