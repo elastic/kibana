@@ -207,7 +207,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     if (isFetched && !options.length) {
       return (
         <>
-          <EuiCallOut color="warning" size="s" title={NO_AGENT_AVAILABLE_TITLE}>
+          <EuiCallOut color="danger" size="s" iconType="warning" title={NO_AGENT_AVAILABLE_TITLE}>
             <FormattedMessage
               id="xpack.osquery.agents.noAgentAvailableDescription"
               defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
