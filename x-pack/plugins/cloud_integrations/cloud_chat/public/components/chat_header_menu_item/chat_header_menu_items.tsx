@@ -35,7 +35,7 @@ export function ChatHeaderMenuItem() {
     const chatButton = ref.current;
     if (!chatButton) return;
     const chatButtonClientRect = chatButton.getBoundingClientRect();
-    setChatTopOffset(chatButtonClientRect.top + chatButtonClientRect.height);
+    setChatTopOffset(chatButtonClientRect.top + chatButtonClientRect.height - 8);
   }, [showChatButton]);
 
   const isLargeScreen = useIsWithinMinBreakpoint('m');

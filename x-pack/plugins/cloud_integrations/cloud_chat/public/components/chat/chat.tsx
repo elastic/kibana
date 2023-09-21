@@ -61,6 +61,8 @@ export const Chat = ({
                 // force position to the top and of the page
                 top: topOffset,
                 right: 0,
+                // TODO: if the page height is smaller than widget height + topOffset,
+                // the widget will be cut off from the bottom.
               }
             : { display: 'none' }
         }

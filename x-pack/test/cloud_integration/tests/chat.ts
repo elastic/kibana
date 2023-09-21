@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  // TODO: the whole suite don't run on ci https://github.com/elastic/kibana/issues/159401
+  // TODO: the whole suite doesn't run on ci https://github.com/elastic/kibana/issues/159401
   describe('Cloud Chat integration', function () {
     it('chat widget is present in header', async () => {
       await PageObjects.common.navigateToUrl('home');
