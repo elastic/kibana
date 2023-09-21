@@ -10,15 +10,11 @@ import React from 'react';
 
 import { EuiText, EuiPanel, EuiSpacer, EuiButton, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 
-import { NavEmbeddableStrings } from '../links_strings';
+import { LinksStrings } from '../links_strings';
 
-export const NavigationEmbeddablePanelEditorEmptyPrompt = ({
-  addLink,
-}: {
-  addLink: () => Promise<void>;
-}) => {
+export const LinksPanelEditorEmptyPrompt = ({ addLink }: { addLink: () => Promise<void> }) => {
   return (
-    <EuiFormRow data-test-subj="navEmbeddable--panelEditor--emptyPrompt">
+    <EuiFormRow data-test-subj="links--panelEditor--emptyPrompt">
       <EuiPanel paddingSize="m" hasBorder={true}>
         <EuiEmptyPrompt
           color="plain"
@@ -26,12 +22,10 @@ export const NavigationEmbeddablePanelEditorEmptyPrompt = ({
           paddingSize="none"
           body={
             <>
-              <EuiText size="s">
-                {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
-              </EuiText>
+              <EuiText size="s">{LinksStrings.editor.panelEditor.getEmptyLinksMessage()}</EuiText>
               <EuiSpacer size="m" />
               <EuiButton size="s" onClick={addLink} iconType="plusInCircle">
-                {NavEmbeddableStrings.editor.getAddButtonLabel()}
+                {LinksStrings.editor.getAddButtonLabel()}
               </EuiButton>
             </>
           }

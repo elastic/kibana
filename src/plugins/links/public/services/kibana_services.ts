@@ -13,7 +13,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddableStartDependencies } from '../plugin';
+import { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
@@ -34,10 +34,7 @@ export const untilPluginStartServicesReady = () => {
   });
 };
 
-export const setKibanaServices = (
-  kibanaCore: CoreStart,
-  deps: NavigationEmbeddableStartDependencies
-) => {
+export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDependencies) => {
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;

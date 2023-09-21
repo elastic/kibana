@@ -16,16 +16,16 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
-import { NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT } from './constants';
+import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from './constants';
 
-const baseNavigationEmbeddableLinkSchema = {
+const baseLinksLinkSchema = {
   id: schema.string(),
   label: schema.maybe(schema.string()),
   order: schema.number(),
 };
 
 const dashboardLinkSchema = schema.object({
-  ...baseNavigationEmbeddableLinkSchema,
+  ...baseLinksLinkSchema,
   destinationRefName: schema.string(),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
@@ -41,7 +41,7 @@ const dashboardLinkSchema = schema.object({
 });
 
 const externalLinkSchema = schema.object({
-  ...baseNavigationEmbeddableLinkSchema,
+  ...baseLinksLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string(),
   options: schema.maybe(
@@ -55,21 +55,19 @@ const externalLinkSchema = schema.object({
   ),
 });
 
-const navigationEmbeddableAttributesSchema = schema.object(
+const linksAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
     links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
     layout: schema.maybe(
-      schema.oneOf([schema.literal(NAV_HORIZONTAL_LAYOUT), schema.literal(NAV_VERTICAL_LAYOUT)])
+      schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)])
     ),
   },
   { unknowns: 'forbid' }
 );
 
-const navigationEmbeddableSavedObjectSchema = savedObjectSchema(
-  navigationEmbeddableAttributesSchema
-);
+const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
 
 const searchOptionsSchema = schema.maybe(
   schema.object(
@@ -80,12 +78,12 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const navigationEmbeddableCreateOptionsSchema = schema.object({
+const linksCreateOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
 });
 
-const navigationEmbeddableUpdateOptionsSchema = schema.object({
+const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
 
@@ -95,32 +93,32 @@ export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(navigationEmbeddableSavedObjectSchema),
+        schema: objectTypeToGetResultSchema(linksSavedObjectSchema),
       },
     },
   },
   create: {
     in: {
       options: {
-        schema: navigationEmbeddableCreateOptionsSchema,
+        schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: navigationEmbeddableAttributesSchema,
+        schema: linksAttributesSchema,
       },
     },
     out: {
       result: {
-        schema: createResultSchema(navigationEmbeddableSavedObjectSchema),
+        schema: createResultSchema(linksSavedObjectSchema),
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: navigationEmbeddableUpdateOptionsSchema, // same schema as "create"
+        schema: linksUpdateOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: navigationEmbeddableAttributesSchema,
+        schema: linksAttributesSchema,
       },
     },
   },
@@ -134,7 +132,7 @@ export const serviceDefinition: ServicesDefinition = {
   mSearch: {
     out: {
       result: {
-        schema: navigationEmbeddableSavedObjectSchema,
+        schema: linksSavedObjectSchema,
       },
     },
   },

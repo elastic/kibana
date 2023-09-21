@@ -13,42 +13,30 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddableFactoryDefinition } from './embeddable';
+import { LinksFactoryDefinition } from './embeddable';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { APP_NAME } from '../common';
 import { setKibanaServices } from './services/kibana_services';
 
-export interface NavigationEmbeddableSetupDependencies {
+export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
-export interface NavigationEmbeddableStartDependencies {
+export interface LinksStartDependencies {
   embeddable: EmbeddableStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
 }
 
-export class NavigationEmbeddablePlugin
-  implements
-    Plugin<
-      void,
-      void,
-      NavigationEmbeddableSetupDependencies,
-      NavigationEmbeddableStartDependencies
-    >
+export class LinksPlugin
+  implements Plugin<void, void, LinksSetupDependencies, LinksStartDependencies>
 {
   constructor() {}
 
-  public setup(
-    core: CoreSetup<NavigationEmbeddableStartDependencies>,
-    plugins: NavigationEmbeddableSetupDependencies
-  ) {
+  public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
     core.getStartServices().then(([_, deps]) => {
-      plugins.embeddable.registerEmbeddableFactory(
-        CONTENT_ID,
-        new NavigationEmbeddableFactoryDefinition(deps.embeddable)
-      );
+      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, new LinksFactoryDefinition());
 
       plugins.contentManagement.registry.register({
         id: CONTENT_ID,
@@ -60,7 +48,7 @@ export class NavigationEmbeddablePlugin
     });
   }
 
-  public start(core: CoreStart, plugins: NavigationEmbeddableStartDependencies) {
+  public start(core: CoreStart, plugins: LinksStartDependencies) {
     setKibanaServices(core, plugins);
     return {};
   }

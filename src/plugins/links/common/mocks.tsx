@@ -8,31 +8,25 @@
 
 import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
 import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
-import { NavigationEmbeddableByValueInput } from '../public/embeddable/types';
-import { NavigationEmbeddableFactoryDefinition } from '../public';
-import { NavigationEmbeddableAttributes } from './content_management';
+import { LinksByValueInput } from '../public/embeddable/types';
+import { LinksFactoryDefinition } from '../public';
+import { LinksAttributes } from './content_management';
 
 jest.mock('../public/services/attribute_service', () => {
   return {
-    getNavigationEmbeddableAttributeService: jest.fn(() => {
+    getLinksAttributeService: jest.fn(() => {
       return {
         saveMethod: jest.fn(),
         unwrapMethod: jest.fn(),
         checkForDuplicateTitle: jest.fn(),
-        unwrapAttributes: jest.fn((attributes: NavigationEmbeddableByValueInput) =>
-          Promise.resolve(attributes)
-        ),
-        wrapAttributes: jest.fn((attributes: NavigationEmbeddableAttributes) =>
-          Promise.resolve(attributes)
-        ),
+        unwrapAttributes: jest.fn((attributes: LinksByValueInput) => Promise.resolve(attributes)),
+        wrapAttributes: jest.fn((attributes: LinksAttributes) => Promise.resolve(attributes)),
       };
     }),
   };
 });
 
-export const mockNavigationEmbeddableInput = (
-  partial?: Partial<NavigationEmbeddableByValueInput>
-): NavigationEmbeddableByValueInput => ({
+export const mockLinksInput = (partial?: Partial<LinksByValueInput>): LinksByValueInput => ({
   id: 'mocked_links_panel',
   attributes: {
     title: 'mocked_links',
@@ -40,23 +34,20 @@ export const mockNavigationEmbeddableInput = (
   ...(partial ?? {}),
 });
 
-export const mockNavigationEmbeddable = async ({
+export const mockLinks = async ({
   explicitInput,
   dashboardExplicitInput,
 }: {
-  explicitInput?: Partial<NavigationEmbeddableByValueInput>;
+  explicitInput?: Partial<LinksByValueInput>;
   dashboardExplicitInput?: Partial<DashboardContainerInput>;
 }) => {
   const dashboardContainer = buildMockDashboard({
     overrides: dashboardExplicitInput,
     savedObjectId: '123',
   });
-  const navigationEmbeddableFactoryStub = new NavigationEmbeddableFactoryDefinition();
+  const linksFactoryStub = new LinksFactoryDefinition();
 
-  const navigationEmbeddable = await navigationEmbeddableFactoryStub.create(
-    mockNavigationEmbeddableInput(explicitInput),
-    dashboardContainer
-  );
+  const links = await linksFactoryStub.create(mockLinksInput(explicitInput), dashboardContainer);
 
-  return navigationEmbeddable;
+  return links;
 };

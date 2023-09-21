@@ -17,17 +17,17 @@ import { EuiListGroupItem } from '@elastic/eui';
 import { validateUrl } from './external_link_tools';
 import { coreServices } from '../../services/kibana_services';
 import {
-  NavigationEmbeddableLink,
-  NavigationLayoutType,
-  NAV_VERTICAL_LAYOUT,
+  LinksLink,
+  LinksLayoutType,
+  LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
 }: {
-  link: NavigationEmbeddableLink;
-  layout: NavigationLayoutType;
+  link: LinksLink;
+  layout: LinksLayoutType;
 }) => {
   const [error, setError] = useState<string | undefined>();
 
@@ -56,11 +56,11 @@ export const ExternalLinkComponent = ({
       size="s"
       color="text"
       isDisabled={!link.destination || !isValidUrl}
-      className={'navigationLink'}
+      className={'linkLink'}
       showToolTip={!isValidUrl}
       toolTipProps={{
         content: error,
-        position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
+        position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
         'data-test-subj': `externalLink--${link.id}--tooltip`,

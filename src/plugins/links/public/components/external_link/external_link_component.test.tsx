@@ -10,12 +10,9 @@ import React from 'react';
 
 import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
-import {
-  NavigationEmbeddable,
-  NavigationEmbeddableContext,
-} from '../../embeddable/links_embeddable';
-import { mockNavigationEmbeddable } from '../../../common/mocks';
-import { NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
+import { mockLinks } from '../../../common/mocks';
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -28,10 +25,10 @@ describe('external link component', () => {
     type: 'externalLink' as const,
   };
 
-  let navEmbeddable: NavigationEmbeddable;
+  let links: LinksEmbeddable;
   beforeEach(async () => {
     window.open = jest.fn();
-    navEmbeddable = await mockNavigationEmbeddable({});
+    links = await mockLinks({});
   });
 
   afterEach(() => {
@@ -40,9 +37,9 @@ describe('external link component', () => {
 
   test('by default opens in new tab', async () => {
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <ExternalLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
 
     const link = await screen.findByTestId('externalLink--foo');
@@ -57,9 +54,9 @@ describe('external link component', () => {
       options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <ExternalLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toHaveTextContent('https://example.com');
@@ -75,9 +72,9 @@ describe('external link component', () => {
       options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <ExternalLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     const link = await screen.findByTestId('externalLink--foo');
     await userEvent.click(link);
@@ -91,9 +88,9 @@ describe('external link component', () => {
       destination: 'file://buzz',
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <ExternalLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     const link = await screen.findByTestId('externalLink--foo--error');
     expect(link).toBeDisabled();

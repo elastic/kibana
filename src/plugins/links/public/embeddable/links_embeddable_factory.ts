@@ -22,43 +22,32 @@ import {
 } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
-import {
-  NavigationEmbeddableInput,
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableEditorFlyoutReturn,
-} from './types';
+import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from './types';
 import { extract, inject } from '../../common/embeddable';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
-import type { NavigationEmbeddable } from './links_embeddable';
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
-import { NavEmbeddableStrings } from '../components/links_strings';
-import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
+import type { LinksEmbeddable } from './links_embeddable';
+import { LinksAttributes } from '../../common/content_management';
+import { LinksStrings } from '../components/links_strings';
+import { getLinksAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
-export type NavigationEmbeddableFactory = EmbeddableFactory;
+export type LinksFactory = EmbeddableFactory;
 
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant once the dashboardEnhanced plugin is removed
 // and it is no longer locked behind `x-pack`
-const getDefaultNavigationEmbeddableInput = (): Partial<NavigationEmbeddableInput> => ({
+const getDefaultLinksInput = (): Partial<LinksInput> => ({
   disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
-const isNavigationEmbeddableAttributes = (
-  attributes?: unknown
-): attributes is NavigationEmbeddableAttributes => {
+const isLinksAttributes = (attributes?: unknown): attributes is LinksAttributes => {
   return (
     attributes !== undefined &&
-    Boolean(
-      (attributes as NavigationEmbeddableAttributes).layout ||
-        (attributes as NavigationEmbeddableAttributes).links
-    )
+    Boolean((attributes as LinksAttributes).layout || (attributes as LinksAttributes).links)
   );
 };
 
-export class NavigationEmbeddableFactoryDefinition
-  implements
-    EmbeddableFactoryDefinition<NavigationEmbeddableInput>,
-    IProvidesPanelPlacementSettings<NavigationEmbeddableInput>
+export class LinksFactoryDefinition
+  implements EmbeddableFactoryDefinition<LinksInput>, IProvidesPanelPlacementSettings<LinksInput>
 {
   latestVersion?: string | undefined;
   telemetry?:
@@ -77,11 +66,11 @@ export class NavigationEmbeddableFactoryDefinition
   };
 
   public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
-    NavigationEmbeddableInput,
-    NavigationEmbeddableAttributes | unknown
+    LinksInput,
+    LinksAttributes | unknown
   >['getPanelPlacementSettings'] = (input, attributes) => {
-    if (!isNavigationEmbeddableAttributes(attributes) || !attributes.layout) {
-      // if we have no information about the layout of this nav embeddable defer to default panel size and placement.
+    if (!isLinksAttributes(attributes) || !attributes.layout) {
+      // if we have no information about the layout of this links panel defer to default panel size and placement.
       return {};
     }
 
@@ -100,48 +89,48 @@ export class NavigationEmbeddableFactoryDefinition
     return true;
   }
 
-  public getDefaultInput(): Partial<NavigationEmbeddableInput> {
-    return getDefaultNavigationEmbeddableInput();
+  public getDefaultInput(): Partial<LinksInput> {
+    return getDefaultLinksInput();
   }
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: NavigationEmbeddableInput,
+    input: LinksInput,
     parent: DashboardContainer
-  ): Promise<NavigationEmbeddable | ErrorEmbeddable> {
-    if (!(input as NavigationEmbeddableByReferenceInput).savedObjectId) {
-      (input as NavigationEmbeddableByReferenceInput).savedObjectId = savedObjectId;
+  ): Promise<LinksEmbeddable | ErrorEmbeddable> {
+    if (!(input as LinksByReferenceInput).savedObjectId) {
+      (input as LinksByReferenceInput).savedObjectId = savedObjectId;
     }
     return this.create(input, parent);
   }
 
-  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
+  public async create(initialInput: LinksInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
 
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
-    const { NavigationEmbeddable } = await import('./links_embeddable');
+    const { LinksEmbeddable } = await import('./links_embeddable');
     const editable = await this.isEditable();
 
-    return new NavigationEmbeddable(
+    return new LinksEmbeddable(
       reduxEmbeddablePackage,
       { editable },
-      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
-      getNavigationEmbeddableAttributeService(),
+      { ...getDefaultLinksInput(), ...initialInput },
+      getLinksAttributeService(),
       parent
     );
   }
 
   public async getExplicitInput(
-    initialInput: NavigationEmbeddableInput,
+    initialInput: LinksInput,
     parent?: DashboardContainer
-  ): Promise<NavigationEmbeddableEditorFlyoutReturn> {
+  ): Promise<LinksEditorFlyoutReturn> {
     if (!parent) return { newInput: {} };
 
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
     const { newInput, attributes } = await openEditorFlyout(
       {
-        ...getDefaultNavigationEmbeddableInput(),
+        ...getDefaultLinksInput(),
         ...initialInput,
       },
       parent
@@ -159,7 +148,7 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public getDescription() {
-    return NavEmbeddableStrings.getDescription();
+    return LinksStrings.getDescription();
   }
 
   inject = inject;

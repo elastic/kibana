@@ -7,12 +7,12 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
-import type { NavigationEmbeddableAttributes } from '../content_management';
+import type { LinksAttributes } from '../content_management';
 import { extractReferences } from '../persistable_state';
-import { NavigationEmbeddablePersistableState } from './types';
+import { LinksPersistableState } from './types';
 
 export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
-  const typedState = state as NavigationEmbeddablePersistableState;
+  const typedState = state as LinksPersistableState;
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
@@ -22,7 +22,7 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
 
   // by-value embeddable
   const { attributes, references } = extractReferences({
-    attributes: typedState.attributes as unknown as NavigationEmbeddableAttributes,
+    attributes: typedState.attributes as unknown as LinksAttributes,
   });
 
   return {

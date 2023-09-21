@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { NavigationEmbeddableCrudTypes } from './types';
+import { LinksCrudTypes } from './types';
 export type {
-  NavigationEmbeddableCrudTypes,
-  NavigationEmbeddableAttributes,
-  NavigationEmbeddableLink,
-  NavigationLinkOptions,
-  NavigationLayoutType,
-  NavigationLinkType,
+  LinksCrudTypes,
+  LinksAttributes,
+  LinksLink,
+  LinksLinkOptions,
+  LinksLayoutType,
+  LinksLinkType,
 } from './types';
-export type NavigationEmbeddableItem = NavigationEmbeddableCrudTypes['Item'];
+export type LinksItem = LinksCrudTypes['Item'];
 export {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NAV_VERTICAL_LAYOUT,
-  NAV_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+  LINKS_HORIZONTAL_LAYOUT,
 } from './constants';

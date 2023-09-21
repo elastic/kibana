@@ -10,25 +10,22 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { NavigationEmbeddableReduxState } from './types';
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { LinksReduxState } from './types';
+import { LinksAttributes } from '../../common/content_management';
 
-export const navigationEmbeddableReducers = {
+export const linksReducers = {
   /**
    * TODO: Right now, we aren't using any reducers - but, I'm keeping this here as a draft
    * just in case we need them later on. As a final cleanup, we could remove this if we never
    * end up using reducers
    */
-  setLoading: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<boolean>
-  ) => {
+  setLoading: (state: WritableDraft<LinksReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },
 
   setAttributes: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<NavigationEmbeddableAttributes>
+    state: WritableDraft<LinksReduxState>,
+    action: PayloadAction<LinksAttributes>
   ) => {
     state.componentState = { ...action.payload };
   },

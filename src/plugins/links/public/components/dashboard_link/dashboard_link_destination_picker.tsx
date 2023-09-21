@@ -50,7 +50,7 @@ export const DashboardLinkDestinationPicker = ({
       key: dashboard.id,
       value: dashboard,
       label: dashboard.attributes.title,
-      className: 'navEmbeddableDashboardItem',
+      className: 'linksDashboardItem',
     };
   }, []);
 
@@ -106,7 +106,7 @@ export const DashboardLinkDestinationPicker = ({
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className={'navEmbeddableLinkText'}>
+          <EuiFlexItem className={'linksLinkText'}>
             <EuiHighlight search={searchValue} className={'wrapText'}>
               {label}
             </EuiHighlight>
@@ -123,7 +123,7 @@ export const DashboardLinkDestinationPicker = ({
       {...other}
       async
       fullWidth
-      className={'navEmbeddableDashboardPicker'}
+      className={'linksDashboardPicker'}
       isLoading={loadingDashboardList}
       aria-label={DashboardLinkStrings.getDashboardPickerAriaLabel()}
       placeholder={DashboardLinkStrings.getDashboardPickerPlaceholder()}

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NavigationEmbeddableStorage } from './navigation_embeddable_storage';
+export { LinksStorage } from './links_storage';

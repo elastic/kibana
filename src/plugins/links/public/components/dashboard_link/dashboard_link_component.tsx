@@ -19,26 +19,26 @@ import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  NAV_VERTICAL_LAYOUT,
-  NavigationLayoutType,
-  NavigationEmbeddableLink,
+  LINKS_VERTICAL_LAYOUT,
+  LinksLayoutType,
+  LinksLink,
 } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { useNavigationEmbeddable } from '../../embeddable/links_embeddable';
+import { useLinks } from '../../embeddable/links_embeddable';
 import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
 
 export const DashboardLinkComponent = ({
   link,
   layout,
 }: {
-  link: NavigationEmbeddableLink;
-  layout: NavigationLayoutType;
+  link: LinksLink;
+  layout: LinksLayoutType;
 }) => {
-  const navEmbeddable = useNavigationEmbeddable();
+  const linksEmbeddable = useLinks();
   const [error, setError] = useState<Error | undefined>();
 
-  const dashboardContainer = navEmbeddable.parent as DashboardContainer;
+  const dashboardContainer = linksEmbeddable.parent as DashboardContainer;
   const parentDashboardInput = useObservable(dashboardContainer.getInput$());
   const parentDashboardId = dashboardContainer.select((state) => state.componentState.lastSavedId);
 
@@ -105,7 +105,7 @@ export const DashboardLinkComponent = ({
 
     const locator = await getDashboardLocator({
       link: { ...link, options: linkOptions },
-      navEmbeddable,
+      linksEmbeddable,
     });
     if (!locator) return;
 
@@ -157,7 +157,7 @@ export const DashboardLinkComponent = ({
       toolTipProps={{
         title: tooltipTitle,
         content: tooltipMessage,
-        position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
+        position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
         'data-test-subj': `dashboardLink--${link.id}--tooltip`,
@@ -165,8 +165,8 @@ export const DashboardLinkComponent = ({
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
       isDisabled={Boolean(error) || loadingOnClickProps}
-      className={classNames('navigationLink', {
-        navigationLinkCurrent: link.destination === parentDashboardId,
+      className={classNames('linkLink', {
+        linkLinkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}

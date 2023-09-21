@@ -15,26 +15,26 @@ import {
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import {
-  NavigationLinkType,
+  LinksLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NAV_VERTICAL_LAYOUT,
-  NavigationLayoutType,
-  NAV_HORIZONTAL_LAYOUT,
-  NavigationEmbeddableAttributes,
+  LINKS_VERTICAL_LAYOUT,
+  LinksLayoutType,
+  LINKS_HORIZONTAL_LAYOUT,
+  LinksAttributes,
 } from '../../common/content_management';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { ExternalLinkStrings } from '../components/external_link/external_link_strings';
-import { NavEmbeddableStrings } from '../components/links_strings';
+import { LinksStrings } from '../components/links_strings';
 
-export const NavigationLayoutInfo: {
-  [id in NavigationLayoutType]: { displayName: string };
+export const LinksLayoutInfo: {
+  [id in LinksLayoutType]: { displayName: string };
 } = {
-  [NAV_HORIZONTAL_LAYOUT]: {
-    displayName: NavEmbeddableStrings.editor.panelEditor.getHorizontalLayoutLabel(),
+  [LINKS_HORIZONTAL_LAYOUT]: {
+    displayName: LinksStrings.editor.panelEditor.getHorizontalLayoutLabel(),
   },
-  [NAV_VERTICAL_LAYOUT]: {
-    displayName: NavEmbeddableStrings.editor.panelEditor.getVerticalLayoutLabel(),
+  [LINKS_VERTICAL_LAYOUT]: {
+    displayName: LinksStrings.editor.panelEditor.getVerticalLayoutLabel(),
   },
 };
 
@@ -43,8 +43,8 @@ export interface DashboardItem {
   attributes: DashboardAttributes;
 }
 
-export const NavigationLinkInfo: {
-  [id in NavigationLinkType]: {
+export const LinksLinkInfo: {
+  [id in LinksLinkType]: {
     icon: string;
     type: string;
     displayName: string;
@@ -65,32 +65,26 @@ export const NavigationLinkInfo: {
   },
 };
 
-export interface NavigationEmbeddableEditorFlyoutReturn {
+export interface LinksEditorFlyoutReturn {
   attributes?: unknown;
-  newInput: Partial<NavigationEmbeddableInput>;
+  newInput: Partial<LinksInput>;
 }
 
-export type NavigationEmbeddableByValueInput = {
-  attributes: NavigationEmbeddableAttributes;
+export type LinksByValueInput = {
+  attributes: LinksAttributes;
 } & EmbeddableInput;
 
-export type NavigationEmbeddableByReferenceInput = SavedObjectEmbeddableInput;
+export type LinksByReferenceInput = SavedObjectEmbeddableInput;
 
-export type NavigationEmbeddableInput =
-  | NavigationEmbeddableByValueInput
-  | NavigationEmbeddableByReferenceInput;
+export type LinksInput = LinksByValueInput | LinksByReferenceInput;
 
-export type NavigationEmbeddableOutput = EmbeddableOutput & {
-  attributes?: NavigationEmbeddableAttributes;
+export type LinksOutput = EmbeddableOutput & {
+  attributes?: LinksAttributes;
 };
 
 /**
- *  Navigation embeddable redux state
+ *  Links embeddable redux state
  */
-export type NavigationEmbeddableComponentState = NavigationEmbeddableAttributes;
+export type LinksComponentState = LinksAttributes;
 
-export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
-  NavigationEmbeddableInput,
-  NavigationEmbeddableOutput,
-  NavigationEmbeddableComponentState
->;
+export type LinksReduxState = ReduxEmbeddableState<LinksInput, LinksOutput, LinksComponentState>;

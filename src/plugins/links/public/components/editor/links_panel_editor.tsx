@@ -29,36 +29,36 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationLayoutInfo } from '../../embeddable/types';
+import { LinksLayoutInfo } from '../../embeddable/types';
 import {
-  NavigationEmbeddableLink,
-  NavigationLayoutType,
-  NAV_HORIZONTAL_LAYOUT,
-  NAV_VERTICAL_LAYOUT,
+  LinksLink,
+  LinksLayoutType,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
-import { NavEmbeddableStrings } from '../links_strings';
+import { LinksStrings } from '../links_strings';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
-import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
-import { NavigationEmbeddablePanelEditorEmptyPrompt } from './navigation_embeddable_panel_editor_empty_prompt';
+import { LinksPanelEditorLink } from './links_panel_editor_link';
+import { LinksPanelEditorEmptyPrompt } from './links_panel_editor_empty_prompt';
 
 import { TooltipWrapper } from '../tooltip_wrapper';
 
-import './navigation_embeddable_editor.scss';
+import './links_editor.scss';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
-    id: NAV_VERTICAL_LAYOUT,
-    label: NavigationLayoutInfo[NAV_VERTICAL_LAYOUT].displayName,
+    id: LINKS_VERTICAL_LAYOUT,
+    label: LinksLayoutInfo[LINKS_VERTICAL_LAYOUT].displayName,
   },
   {
-    id: NAV_HORIZONTAL_LAYOUT,
-    label: NavigationLayoutInfo[NAV_HORIZONTAL_LAYOUT].displayName,
+    id: LINKS_HORIZONTAL_LAYOUT,
+    label: LinksLayoutInfo[LINKS_HORIZONTAL_LAYOUT].displayName,
   },
 ];
 
-const NavigationEmbeddablePanelEditor = ({
+const LinksPanelEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
   onClose,
@@ -67,25 +67,22 @@ const NavigationEmbeddablePanelEditor = ({
   parentDashboard,
   isByReference,
 }: {
-  onSaveToLibrary: (
-    newLinks: NavigationEmbeddableLink[],
-    newLayout: NavigationLayoutType
-  ) => Promise<void>;
-  onAddToDashboard: (newLinks: NavigationEmbeddableLink[], newLayout: NavigationLayoutType) => void;
+  onSaveToLibrary: (newLinks: LinksLink[], newLayout: LinksLayoutType) => Promise<void>;
+  onAddToDashboard: (newLinks: LinksLink[], newLayout: LinksLayoutType) => void;
   onClose: () => void;
-  initialLinks?: NavigationEmbeddableLink[];
-  initialLayout?: NavigationLayoutType;
+  initialLinks?: LinksLink[];
+  initialLayout?: LinksLayoutType;
   parentDashboard?: DashboardContainer;
   isByReference: boolean;
 }) => {
   const toasts = coreServices.notifications.toasts;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
-  const [currentLayout, setCurrentLayout] = useState<NavigationLayoutType>(
-    initialLayout ?? NAV_VERTICAL_LAYOUT
+  const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
+    initialLayout ?? LINKS_VERTICAL_LAYOUT
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
+  const [orderedLinks, setOrderedLinks] = useState<LinksLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
@@ -113,7 +110,7 @@ const NavigationEmbeddablePanelEditor = ({
   );
 
   const addOrEditLink = useCallback(
-    async (linkToEdit?: NavigationEmbeddableLink) => {
+    async (linkToEdit?: LinksLink) => {
       const newLink = await openLinkEditorFlyout({
         parentDashboard,
         link: linkToEdit,
@@ -124,7 +121,7 @@ const NavigationEmbeddablePanelEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order } as NavigationEmbeddableLink;
+                return { ...newLink, order: linkToEdit.order } as LinksLink;
               }
               return link;
             })
@@ -132,7 +129,7 @@ const NavigationEmbeddablePanelEditor = ({
         } else {
           setOrderedLinks([
             ...orderedLinks,
-            { ...newLink, order: orderedLinks.length } as NavigationEmbeddableLink,
+            { ...newLink, order: orderedLinks.length } as LinksLink,
           ]);
         }
       }
@@ -159,39 +156,39 @@ const NavigationEmbeddablePanelEditor = ({
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="navEmbeddable--panelEditor--title">
+        <EuiTitle size="m" data-test-subj="links--panelEditor--title">
           <h2>
             {isEditingExisting
-              ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
-              : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
+              ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
+              : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
-          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
+          <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
               options={layoutOptions}
               buttonSize="compressed"
               idSelected={currentLayout}
               onChange={(id) => {
-                setCurrentLayout(id as NavigationLayoutType);
+                setCurrentLayout(id as LinksLayoutType);
               }}
-              legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
+              legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
             />
           </EuiFormRow>
-          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
+          <EuiFormRow label={LinksStrings.editor.panelEditor.getLinksTitle()}>
             {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
                 to the focus of the inner elements */}
             <div>
               {hasZeroLinks ? (
-                <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
+                <LinksPanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
               ) : (
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
-                      className="navEmbeddableDroppableLinksArea"
-                      droppableId="navEmbeddableDroppableLinksArea"
+                      className="linksDroppableLinksArea"
+                      droppableId="linksDroppableLinksArea"
                     >
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
@@ -201,10 +198,10 @@ const NavigationEmbeddablePanelEditor = ({
                           draggableId={link.id}
                           customDragHandle={true}
                           hasInteractiveChildren={true}
-                          data-test-subj={`navEmbeddable--panelEditor--draggableLink`}
+                          data-test-subj={`links--panelEditor--draggableLink`}
                         >
                           {(provided) => (
-                            <NavigationEmbeddablePanelEditorLink
+                            <LinksPanelEditorLink
                               link={link}
                               parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
@@ -222,7 +219,7 @@ const NavigationEmbeddablePanelEditor = ({
                     iconType="plusInCircle"
                     onClick={() => addOrEditLink()}
                   >
-                    {NavEmbeddableStrings.editor.getAddButtonLabel()}
+                    {LinksStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
               )}
@@ -237,9 +234,9 @@ const NavigationEmbeddablePanelEditor = ({
               onClick={onClose}
               iconType="cross"
               flush="left"
-              data-test-subj="navEmbeddable--panelEditor--closeBtn"
+              data-test-subj="links--panelEditor--closeBtn"
             >
-              {NavEmbeddableStrings.editor.getCancelButtonLabel()}
+              {LinksStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -248,15 +245,15 @@ const NavigationEmbeddablePanelEditor = ({
                 <EuiFlexItem grow={false}>
                   <TooltipWrapper
                     condition={!hasZeroLinks}
-                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
-                    data-test-subj="navEmbeddable--panelEditor--saveByReferenceTooltip"
+                    tooltipContent={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
+                    data-test-subj="links--panelEditor--saveByReferenceTooltip"
                   >
                     <EuiSwitch
-                      label={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
+                      label={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
                       checked={saveByReference}
                       disabled={hasZeroLinks}
                       onChange={() => setSaveByReference(!saveByReference)}
-                      data-test-subj="navEmbeddable--panelEditor--saveByReferenceSwitch"
+                      data-test-subj="links--panelEditor--saveByReferenceSwitch"
                     />
                   </TooltipWrapper>
                 </EuiFlexItem>
@@ -264,22 +261,21 @@ const NavigationEmbeddablePanelEditor = ({
               <EuiFlexItem grow={false}>
                 <TooltipWrapper
                   condition={hasZeroLinks}
-                  tooltipContent={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}
-                  data-test-id={'navEmbeddable--panelEditor--saveBtnTooltip'}
+                  tooltipContent={LinksStrings.editor.panelEditor.getEmptyLinksTooltip()}
+                  data-test-id={'links--panelEditor--saveBtnTooltip'}
                 >
                   <EuiButton
                     fill
                     isLoading={isSaving}
                     disabled={hasZeroLinks}
-                    data-test-subj={'navEmbeddable--panelEditor--saveBtn'}
+                    data-test-subj={'links--panelEditor--saveBtn'}
                     onClick={async () => {
                       if (saveByReference) {
                         setIsSaving(true);
                         onSaveToLibrary(orderedLinks, currentLayout)
                           .catch((e) => {
                             toasts.addError(e, {
-                              title:
-                                NavEmbeddableStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
+                              title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
                             });
                           })
                           .finally(() => {
@@ -290,7 +286,7 @@ const NavigationEmbeddablePanelEditor = ({
                       }
                     }}
                   >
-                    {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
+                    {LinksStrings.editor.panelEditor.getSaveButtonLabel()}
                   </EuiButton>
                 </TooltipWrapper>
               </EuiFlexItem>
@@ -304,4 +300,4 @@ const NavigationEmbeddablePanelEditor = ({
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default NavigationEmbeddablePanelEditor;
+export default LinksPanelEditor;

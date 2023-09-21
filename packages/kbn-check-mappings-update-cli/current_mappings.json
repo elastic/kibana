@@ -1062,7 +1062,7 @@
       }
     }
   },
-  "navigation_embeddable": {
+  "links": {
     "dynamic": false,
     "properties": {
       "id": {

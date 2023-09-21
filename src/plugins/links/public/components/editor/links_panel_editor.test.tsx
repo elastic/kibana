@@ -9,9 +9,9 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
-import NavigationEmbeddablePanelEditor from './links_panel_editor';
-import { NavEmbeddableStrings } from '../links_strings';
-import { NavigationEmbeddableLink, NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
+import LinksPanelEditor from './links_panel_editor';
+import { LinksStrings } from '../links_strings';
+import { LinksLink, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 
 jest.mock('../dashboard_link/dashboard_link_tools', () => {
@@ -33,7 +33,7 @@ jest.mock('../dashboard_link/dashboard_link_tools', () => {
   };
 });
 
-describe('NavigationEmbeddablePanelEditor', () => {
+describe('LinksPanelEditor', () => {
   const defaultProps = {
     onSaveToLibrary: jest.fn().mockImplementation(() => Promise.resolve()),
     onAddToDashboard: jest.fn(),
@@ -41,7 +41,7 @@ describe('NavigationEmbeddablePanelEditor', () => {
     isByReference: false,
   };
 
-  const someLinks: NavigationEmbeddableLink[] = [
+  const someLinks: LinksLink[] = [
     {
       id: 'foo',
       type: 'dashboardLink' as const,
@@ -73,25 +73,25 @@ describe('NavigationEmbeddablePanelEditor', () => {
   });
 
   test('shows empty state with no links', async () => {
-    render(<NavigationEmbeddablePanelEditor {...defaultProps} />);
-    expect(screen.getByTestId('navEmbeddable--panelEditor--title')).toHaveTextContent(
-      NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()
+    render(<LinksPanelEditor {...defaultProps} />);
+    expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
+      LinksStrings.editor.panelEditor.getCreateFlyoutTitle()
     );
-    expect(screen.getByTestId('navEmbeddable--panelEditor--emptyPrompt')).toBeInTheDocument();
-    expect(screen.getByTestId('navEmbeddable--panelEditor--saveBtn')).toBeDisabled();
+    expect(screen.getByTestId('links--panelEditor--emptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('links--panelEditor--saveBtn')).toBeDisabled();
 
-    await userEvent.click(screen.getByTestId('navEmbeddable--panelEditor--closeBtn'));
+    await userEvent.click(screen.getByTestId('links--panelEditor--closeBtn'));
     expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 
   test('shows links in order', async () => {
     const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
-    render(<NavigationEmbeddablePanelEditor {...defaultProps} initialLinks={someLinks} />);
+    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
-    expect(screen.getByTestId('navEmbeddable--panelEditor--title')).toHaveTextContent(
-      NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
+    expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
+      LinksStrings.editor.panelEditor.getEditFlyoutTitle()
     );
-    const draggableLinks = screen.getAllByTestId('navEmbeddable--panelEditor--draggableLink');
+    const draggableLinks = screen.getAllByTestId('links--panelEditor--draggableLink');
     expect(draggableLinks.length).toEqual(4);
 
     draggableLinks.forEach((link, idx) => {
@@ -101,29 +101,21 @@ describe('NavigationEmbeddablePanelEditor', () => {
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(
-      <NavigationEmbeddablePanelEditor {...defaultProps} initialLinks={someLinks} isByReference />
-    );
+    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
-    const saveButton = screen.getByTestId('navEmbeddable--panelEditor--saveBtn');
+    const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, NAV_VERTICAL_LAYOUT);
+    expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(
-      <NavigationEmbeddablePanelEditor
-        {...defaultProps}
-        initialLinks={someLinks}
-        isByReference={false}
-      />
-    );
+    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
-    const saveButton = screen.getByTestId('navEmbeddable--panelEditor--saveBtn');
+    const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, NAV_VERTICAL_LAYOUT);
+    expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
 });

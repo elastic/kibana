@@ -9,6 +9,6 @@
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
-export type NavigationEmbeddablePersistableState = EmbeddableStateWithType & {
+export type LinksPersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;
 };

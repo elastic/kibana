@@ -7,13 +7,13 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { DASHBOARD_LINK_TYPE, NavigationEmbeddableAttributes } from '../content_management';
+import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../content_management';
 
 export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: NavigationEmbeddableAttributes;
+  attributes: LinksAttributes;
   references?: Reference[];
 }) {
   if (!attributes.links) {
@@ -56,7 +56,7 @@ export function injectReferences({
   attributes,
   references,
 }: {
-  attributes: NavigationEmbeddableAttributes;
+  attributes: LinksAttributes;
   references: Reference[];
 }) {
   if (!attributes.links) {

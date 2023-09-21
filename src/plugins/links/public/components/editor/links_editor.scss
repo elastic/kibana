@@ -1,9 +1,9 @@
 @import '../../mixins';
 
-.navEmbeddablePanelEditor {
+.linksPanelEditor {
   max-inline-size: $euiSizeXXL * 18; // 40px * 18 = 720px
 
-  .navEmbeddableLinkEditor {
+  .linksLinkEditor {
     @include euiFlyout;
     max-inline-size: $euiSizeXXL * 18;
 
@@ -21,7 +21,7 @@
   }
 }
 
-.navEmbeddableDashboardItem {
+.linksDashboardItem {
   .euiBadge {
     cursor: pointer !important;
   }
@@ -32,18 +32,18 @@
     text-decoration: none;
   }
 
-  .navEmbeddableLinkText {
+  .linksLinkText {
     &:hover {
       text-decoration: underline !important;
     }
   }
 }
 
-.navEmbeddableLinkPanel {
+.linksLinkPanel {
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
 
-  .navEmbeddableLinkText {
+  .linksLinkText {
     flex: 1;
     min-width: 0;
   }
@@ -51,29 +51,29 @@
   &.linkError {
     border: 1px solid transparentize($euiColorWarningText, .7);
 
-    .navEmbeddableLinkText {
+    .linksLinkText {
       color: $euiColorWarningText;
     }
 
-    .navEmbeddableLinkText--noLabel {
+    .linksLinkText--noLabel {
       font-style: italic;
     }
   }
 
-  .navEmbeddable_hoverActions {
+  .links_hoverActions {
     opacity: 0;
     visibility: hidden;
     transition: visibility $euiAnimSpeedNormal, opacity $euiAnimSpeedNormal;
   }
 
   &:hover, &:focus-within {
-    .navEmbeddable_hoverActions {
+    .links_hoverActions {
       opacity: 1;
       visibility: visible;
     }
   }
 }
 
-.navEmbeddableDroppableLinksArea {
+.linksDroppableLinksArea {
   margin: 0 (-$euiSizeXS);
 }

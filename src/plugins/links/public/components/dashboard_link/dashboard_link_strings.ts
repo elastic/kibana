@@ -10,35 +10,35 @@ import { i18n } from '@kbn/i18n';
 
 export const DashboardLinkStrings = {
   getType: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.type', {
+    i18n.translate('links.dashboardLink.type', {
       defaultMessage: 'Dashboard link',
     }),
   getDisplayName: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.displayName', {
+    i18n.translate('links.dashboardLink.displayName', {
       defaultMessage: 'Dashboard',
     }),
   getDescription: () =>
-    i18n.translate('navigationEmbeddable.dsahboardLink.description', {
+    i18n.translate('links.dsahboardLink.description', {
       defaultMessage: 'Go to dashboard',
     }),
   getDashboardPickerPlaceholder: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardComboBoxPlaceholder', {
+    i18n.translate('links.dashboardLink.editor.dashboardComboBoxPlaceholder', {
       defaultMessage: 'Search for a dashboard',
     }),
   getDashboardPickerAriaLabel: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardPickerAriaLabel', {
+    i18n.translate('links.dashboardLink.editor.dashboardPickerAriaLabel', {
       defaultMessage: 'Pick a destination dashboard',
     }),
   getCurrentDashboardLabel: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.currentDashboardLabel', {
+    i18n.translate('links.dashboardLink.editor.currentDashboardLabel', {
       defaultMessage: 'Current',
     }),
   getLoadingDashboardLabel: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.loadingDashboardLabel', {
+    i18n.translate('links.dashboardLink.editor.loadingDashboardLabel', {
       defaultMessage: 'Loading...',
     }),
   getDashboardErrorLabel: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardErrorLabel', {
+    i18n.translate('links.dashboardLink.editor.dashboardErrorLabel', {
       defaultMessage: 'Error fetching dashboard',
     }),
 };

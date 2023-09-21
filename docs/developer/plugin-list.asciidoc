@@ -249,8 +249,8 @@ management section itself.
 It also provides a stateful version of it on the start contract.
 
 
-|{kib-repo}blob/{branch}/src/plugins/navigation_embeddable/README.md[navigationEmbeddable]
-|This plugin adds the Navigation Embeddable which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
+|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
 |{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]

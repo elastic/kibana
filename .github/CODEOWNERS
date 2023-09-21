@@ -523,7 +523,7 @@ x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
 x-pack/plugins/monitoring @elastic/infra-monitoring-ui
-src/plugins/navigation_embeddable @elastic/kibana-presentation
+src/plugins/links @elastic/kibana-presentation
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core

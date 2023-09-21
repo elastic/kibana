@@ -23,14 +23,14 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationLinkInfo } from '../../embeddable/types';
+import { LinksLinkInfo } from '../../embeddable/types';
 import { validateUrl } from '../external_link/external_link_tools';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
-import { NavEmbeddableStrings } from '../links_strings';
+import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
-import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, LinksLink } from '../../../common/content_management';
 
-export const NavigationEmbeddablePanelEditorLink = ({
+export const LinksPanelEditorLink = ({
   link,
   editLink,
   deleteLink,
@@ -39,7 +39,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
 }: {
   editLink: () => void;
   deleteLink: () => void;
-  link: NavigationEmbeddableLink;
+  link: LinksLink;
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
@@ -82,19 +82,19 @@ export const NavigationEmbeddablePanelEditorLink = ({
       <EuiFlexGroup tabIndex={0} gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={destinationError ? 'warning' : NavigationLinkInfo[link.type].icon}
+            type={destinationError ? 'warning' : LinksLinkInfo[link.type].icon}
             color={destinationError ? 'warning' : 'text'}
             aria-label={
               destinationError
-                ? NavEmbeddableStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
-                : NavigationLinkInfo[link.type].type
+                ? LinksStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
+                : LinksLinkInfo[link.type].type
             }
           />
         </EuiFlexItem>
 
         <EuiFlexItem
-          className={classNames('navEmbeddableLinkText', {
-            'navEmbeddableLinkText--noLabel': !link.label,
+          className={classNames('linksLinkText', {
+            'linksLinkText--noLabel': !link.label,
           })}
         >
           <EuiSkeletonTitle
@@ -133,7 +133,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
       hasBorder
       hasShadow={false}
       color={destinationError ? 'warning' : 'plain'}
-      className={`navEmbeddableLinkPanel ${destinationError ? 'linkError' : ''}`}
+      className={`linksLinkPanel ${destinationError ? 'linkError' : ''}`}
       data-test-subj={`panelEditorLink${linkLabelLoading ? '--loading' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
@@ -142,33 +142,33 @@ export const NavigationEmbeddablePanelEditorLink = ({
             color="transparent"
             paddingSize="none"
             {...dragHandleProps}
-            aria-label={NavEmbeddableStrings.editor.panelEditor.getDragHandleAriaLabel()}
+            aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
           >
             <EuiIcon type="grab" />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem className="navEmbeddableLinkText">
+        <EuiFlexItem className="linksLinkText">
           <LinkLabel />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" responsive={false} className="navEmbeddable_hoverActions">
+          <EuiFlexGroup gutterSize="none" responsive={false} className="links_hoverActions">
             <EuiFlexItem>
-              <EuiToolTip content={NavEmbeddableStrings.editor.getEditLinkTitle()}>
+              <EuiToolTip content={LinksStrings.editor.getEditLinkTitle()}>
                 <EuiButtonIcon
                   size="xs"
                   iconType="pencil"
                   onClick={editLink}
-                  aria-label={NavEmbeddableStrings.editor.getEditLinkTitle()}
+                  aria-label={LinksStrings.editor.getEditLinkTitle()}
                 />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiToolTip content={NavEmbeddableStrings.editor.getDeleteLinkTitle()}>
+              <EuiToolTip content={LinksStrings.editor.getDeleteLinkTitle()}>
                 <EuiButtonIcon
                   size="xs"
                   iconType="trash"
-                  aria-label={NavEmbeddableStrings.editor.getDeleteLinkTitle()}
+                  aria-label={LinksStrings.editor.getDeleteLinkTitle()}
                   color="danger"
                   onClick={deleteLink}
                 />

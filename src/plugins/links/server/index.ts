@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { NavigationEmbeddableServerPlugin } from './plugin';
+import { LinksServerPlugin } from './plugin';
 
-export const plugin = () => new NavigationEmbeddableServerPlugin();
+export const plugin = () => new LinksServerPlugin();

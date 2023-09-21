@@ -14,17 +14,17 @@ import type {
 import { type UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
 import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
-import { NavigationEmbeddableContentType } from '../../types';
+import { LinksContentType } from '../../types';
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
-  NAV_HORIZONTAL_LAYOUT,
-  NAV_VERTICAL_LAYOUT,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
 } from './constants';
 
-export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
-  NavigationEmbeddableContentType,
-  NavigationEmbeddableAttributes,
+export type LinksCrudTypes = ContentManagementCrudTypes<
+  LinksContentType,
+  LinksAttributes,
   Pick<SavedObjectCreateOptions, 'references'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
@@ -34,37 +34,37 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
 >;
 
 /**
- * Navigation embeddable explicit input
+ * Links embeddable explicit input
  */
-export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
+export type LinksLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
-export type NavigationLinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
-interface BaseNavigationEmbeddableLink {
+export type LinksLinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
+interface BaseLinksLink {
   id: string;
   label?: string;
   order: number;
-  options?: NavigationLinkOptions;
+  options?: LinksLinkOptions;
   destination?: string;
 }
 
-interface DashboardLink extends BaseNavigationEmbeddableLink {
+interface DashboardLink extends BaseLinksLink {
   type: typeof DASHBOARD_LINK_TYPE;
   destinationRefName?: string;
 }
 
-interface ExternalLink extends BaseNavigationEmbeddableLink {
+interface ExternalLink extends BaseLinksLink {
   type: typeof EXTERNAL_LINK_TYPE;
   destination: string;
 }
 
-export type NavigationEmbeddableLink = DashboardLink | ExternalLink;
+export type LinksLink = DashboardLink | ExternalLink;
 
-export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
+export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type NavigationEmbeddableAttributes = {
+export type LinksAttributes = {
   title: string;
   description?: string;
-  links?: NavigationEmbeddableLink[];
-  layout?: NavigationLayoutType;
+  links?: LinksLink[];
+  layout?: LinksLayoutType;
 };

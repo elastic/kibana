@@ -10,7 +10,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, CONTENT_ID } from '../../common';
 
-export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
+export const linksSavedObjectType: SavedObjectsType = {
   name: CONTENT_ID,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,

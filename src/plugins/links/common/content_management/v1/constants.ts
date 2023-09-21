@@ -15,5 +15,5 @@ export const EXTERNAL_LINK_TYPE = 'externalLink';
 /**
  * Layout options
  */
-export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
-export const NAV_VERTICAL_LAYOUT = 'vertical';
+export const LINKS_HORIZONTAL_LAYOUT = 'horizontal';
+export const LINKS_VERTICAL_LAYOUT = 'vertical';

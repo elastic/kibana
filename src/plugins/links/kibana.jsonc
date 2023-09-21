@@ -1,10 +1,10 @@
 {
   "type": "plugin",
-  "id": "@kbn/navigation-embeddable-plugin",
+  "id": "@kbn/links-plugin",
   "owner": "@elastic/kibana-presentation",
-  "description": "An embeddable for quickly navigating between dashboards.",
+  "description": "An dashboard panel for creating links to dashboards or external links.",
   "plugin": {
-    "id": "navigationEmbeddable",
+    "id": "links",
     "server": true,
     "browser": true,
     "requiredPlugins": [

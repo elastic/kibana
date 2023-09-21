@@ -9,19 +9,19 @@
 import { extract } from './extract';
 
 test('Should return original state and empty references with by-reference embeddable state', () => {
-  const navigationEmbeddableByReferenceInput = {
+  const linksByReferenceInput = {
     id: '2192e502-0ec7-4316-82fb-c9bbf78525c4',
-    type: 'navigation_embeddable',
+    type: 'links',
   };
 
-  expect(extract!(navigationEmbeddableByReferenceInput)).toEqual({
-    state: navigationEmbeddableByReferenceInput,
+  expect(extract!(linksByReferenceInput)).toEqual({
+    state: linksByReferenceInput,
     references: [],
   });
 });
 
 test('Should update state with refNames with by-value embeddable state', () => {
-  const navigationEmbeddableByValueInput = {
+  const linksByValueInput = {
     id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
     attributes: {
       links: [
@@ -34,10 +34,10 @@ test('Should update state with refNames with by-value embeddable state', () => {
       ],
       layout: 'horizontal',
     },
-    type: 'navigation_embeddable',
+    type: 'links',
   };
 
-  expect(extract!(navigationEmbeddableByValueInput)).toEqual({
+  expect(extract!(linksByValueInput)).toEqual({
     references: [
       {
         name: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
@@ -58,7 +58,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
         ],
         layout: 'horizontal',
       },
-      type: 'navigation_embeddable',
+      type: 'links',
     },
   });
 });

@@ -8,22 +8,22 @@
 
 import React, { useMemo } from 'react';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import { useNavigationEmbeddable } from '../embeddable/links_embeddable';
+import { useLinks } from '../embeddable/links_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
 import {
   DASHBOARD_LINK_TYPE,
-  NAV_HORIZONTAL_LAYOUT,
-  NAV_VERTICAL_LAYOUT,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 
-import './navigation_embeddable_component.scss';
+import './links_component.scss';
 
-export const NavigationEmbeddableComponent = () => {
-  const navEmbeddable = useNavigationEmbeddable();
-  const links = navEmbeddable.select((state) => state.componentState.links);
-  const layout = navEmbeddable.select((state) => state.componentState.layout);
+export const LinksComponent = () => {
+  const linksEmbeddable = useLinks();
+  const links = linksEmbeddable.select((state) => state.componentState.links);
+  const layout = linksEmbeddable.select((state) => state.componentState.layout);
 
   const orderedLinks = useMemo(() => {
     if (!links) return [];
@@ -41,13 +41,13 @@ export const NavigationEmbeddableComponent = () => {
               <DashboardLinkComponent
                 key={currentLink.id}
                 link={currentLink}
-                layout={layout ?? NAV_VERTICAL_LAYOUT}
+                layout={layout ?? LINKS_VERTICAL_LAYOUT}
               />
             ) : (
               <ExternalLinkComponent
                 key={currentLink.id}
                 link={currentLink}
-                layout={layout ?? NAV_VERTICAL_LAYOUT}
+                layout={layout ?? LINKS_VERTICAL_LAYOUT}
               />
             ),
         },
@@ -57,8 +57,8 @@ export const NavigationEmbeddableComponent = () => {
 
   return (
     <EuiPanel
-      className={`navEmbeddableComponent ${
-        layout === NAV_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
+      className={`linksComponent ${
+        layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
       }`}
       paddingSize="xs"
     >

@@ -8,10 +8,10 @@
 
 import { SOContentStorage } from '@kbn/content-management-utils';
 import { CONTENT_ID } from '../../common';
-import type { NavigationEmbeddableCrudTypes } from '../../common/content_management';
+import type { LinksCrudTypes } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
-export class NavigationEmbeddableStorage extends SOContentStorage<NavigationEmbeddableCrudTypes> {
+export class LinksStorage extends SOContentStorage<LinksCrudTypes> {
   constructor() {
     super({
       savedObjectType: CONTENT_ID,

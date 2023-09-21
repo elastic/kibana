@@ -21,22 +21,22 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import {
-  NavigationLinkType,
+  LinksLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NavigationLinkOptions,
+  LinksLinkOptions,
 } from '../../../common/content_management';
-import { NavEmbeddableStrings } from '../links_strings';
-import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { LinksStrings } from '../links_strings';
+import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
 
-export const NavigationEmbeddableLinkOptions = ({
+export const LinksLinkOptionsComponent = ({
   link,
   setLinkOptions,
   selectedLinkType,
 }: {
-  selectedLinkType: NavigationLinkType;
-  link?: NavigationEmbeddableUnorderedLink;
-  setLinkOptions: (options: NavigationLinkOptions) => void;
+  selectedLinkType: LinksLinkType;
+  link?: LinksUnorderedLink;
+  setLinkOptions: (options: LinksLinkOptions) => void;
 }) => {
   const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardDrilldownOptions>({
     ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
@@ -48,7 +48,7 @@ export const NavigationEmbeddableLinkOptions = ({
   });
 
   return (
-    <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkOptionsLabel()}>
+    <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkOptionsLabel()}>
       {selectedLinkType === DASHBOARD_LINK_TYPE ? (
         <DashboardDrilldownOptionsComponent
           options={dashboardLinkOptions}

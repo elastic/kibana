@@ -12,12 +12,9 @@ import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import {
-  NavigationEmbeddable,
-  NavigationEmbeddableContext,
-} from '../../embeddable/links_embeddable';
-import { mockNavigationEmbeddable } from '../../../common/mocks';
-import { NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
+import { mockLinks } from '../../../common/mocks';
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
 import { coreServices } from '../../services/kibana_services';
@@ -57,7 +54,7 @@ describe('Dashboard link component', () => {
     type: 'dashboardLink' as const,
   };
 
-  let navEmbeddable: NavigationEmbeddable;
+  let links: LinksEmbeddable;
   beforeEach(async () => {
     window.open = jest.fn();
     (fetchDashboard as jest.Mock).mockResolvedValue(mockDashboards[0]);
@@ -67,7 +64,7 @@ describe('Dashboard link component', () => {
       state: {},
     });
     (getDashboardHref as jest.Mock).mockReturnValue('https://my-kibana.com/dashboard/123');
-    navEmbeddable = await mockNavigationEmbeddable({
+    links = await mockLinks({
       dashboardExplicitInput: mockDashboards[1].attributes,
     });
   });
@@ -78,9 +75,9 @@ describe('Dashboard link component', () => {
 
   test('by default uses navigateToApp to open in same tab', async () => {
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
 
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
@@ -91,7 +88,7 @@ describe('Dashboard link component', () => {
         ...defaultLinkInfo,
         options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
       },
-      navEmbeddable,
+      links,
     });
 
     const link = await screen.findByTestId('dashboardLink--foo');
@@ -106,9 +103,9 @@ describe('Dashboard link component', () => {
 
   test('modified click does not trigger event.preventDefault', async () => {
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
@@ -124,13 +121,13 @@ describe('Dashboard link component', () => {
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     expect(fetchDashboard).toHaveBeenCalledWith(linkInfo.destination);
-    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
+    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, links });
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
     await userEvent.click(link);
@@ -149,12 +146,12 @@ describe('Dashboard link component', () => {
       },
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
+    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, links });
   });
 
   test('shows an error when fetchDashboard fails', async () => {
@@ -164,9 +161,9 @@ describe('Dashboard link component', () => {
       id: 'notfound',
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--notfound--error');
@@ -180,9 +177,9 @@ describe('Dashboard link component', () => {
       id: 'bar',
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--bar');
@@ -194,9 +191,9 @@ describe('Dashboard link component', () => {
 
   test('shows dashboard title and description in tooltip', async () => {
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
@@ -213,9 +210,9 @@ describe('Dashboard link component', () => {
       label,
     };
     render(
-      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
-        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={links}>
+        <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+      </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');

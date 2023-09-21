@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { navigationEmbeddableClient } from './links_content_management_client.ts.js';
+import { linksClient } from './links_content_management_client';
 
-const rejectErrorMessage = i18n.translate('navigationEmbeddable.saveDuplicateRejectedDescription', {
+const rejectErrorMessage = i18n.translate('links.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',
 });
 
@@ -38,7 +38,7 @@ export const checkForDuplicateTitle = async ({
     return true;
   }
 
-  const { hits } = await navigationEmbeddableClient.search(
+  const { hits } = await linksClient.search(
     {
       text: `"${title}"`,
       limit: 10,

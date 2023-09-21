@@ -10,30 +10,30 @@ import { i18n } from '@kbn/i18n';
 
 export const ExternalLinkStrings = {
   getType: () =>
-    i18n.translate('navigationEmbeddable.externalLink.type', {
+    i18n.translate('links.externalLink.type', {
       defaultMessage: 'External URL',
     }),
   getDisplayName: () =>
-    i18n.translate('navigationEmbeddable.externalLink.displayName', {
+    i18n.translate('links.externalLink.displayName', {
       defaultMessage: 'URL',
     }),
   getDescription: () =>
-    i18n.translate('navigationEmbeddable.externalLink.description', {
+    i18n.translate('links.externalLink.description', {
       defaultMessage: 'Go to URL',
     }),
   getPlaceholder: () =>
-    i18n.translate('navigationEmbeddable.externalLink.editor.placeholder', {
+    i18n.translate('links.externalLink.editor.placeholder', {
       defaultMessage: 'Enter external URL',
     }),
   getUrlFormatError: () =>
-    i18n.translate('navigationEmbeddable.externalLink.editor.urlFormatError', {
+    i18n.translate('links.externalLink.editor.urlFormatError', {
       defaultMessage: 'Invalid format. Example: {exampleUrl}',
       values: {
         exampleUrl: 'https://elastic.co/',
       },
     }),
   getDisallowedUrlError: () =>
-    i18n.translate('navigationEmbeddable.externalLink.editor.disallowedUrlError', {
+    i18n.translate('links.externalLink.editor.disallowedUrlError', {
       defaultMessage:
         'This URL is not allowed by your administrator. Refer to "externalUrl.policy" configuration.',
     }),

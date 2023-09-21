@@ -29,19 +29,19 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  NavigationLinkType,
+  LinksLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NavigationLinkOptions,
-  NavigationEmbeddableLink,
+  LinksLinkOptions,
+  LinksLink,
 } from '../../../common/content_management';
-import { NavigationLinkInfo } from '../../embeddable/types';
-import { NavEmbeddableStrings } from '../links_strings';
-import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
-import { NavigationEmbeddableLinkOptions } from './navigation_embeddable_link_options';
-import { NavigationEmbeddableLinkDestination } from './navigation_embeddable_link_destination';
+import { LinksLinkInfo } from '../../embeddable/types';
+import { LinksStrings } from '../links_strings';
+import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { LinksLinkOptionsComponent } from './links_link_options';
+import { LinksLinkDestination } from './links_link_destination';
 
-export const NavigationEmbeddableLinkEditor = ({
+export const LinksLinkEditor = ({
   link,
   onSave,
   onClose,
@@ -49,31 +49,31 @@ export const NavigationEmbeddableLinkEditor = ({
 }: {
   onClose: () => void;
   parentDashboard?: DashboardContainer;
-  link?: NavigationEmbeddableUnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
-  onSave: (newLink: Omit<NavigationEmbeddableLink, 'order'>) => void;
+  link?: LinksUnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
+  onSave: (newLink: Omit<LinksLink, 'order'>) => void;
 }) => {
-  const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
+  const [selectedLinkType, setSelectedLinkType] = useState<LinksLinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
-  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>();
+  const [linkOptions, setLinkOptions] = useState<LinksLinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
-    return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
+    return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as LinksLinkType[]).map((type) => {
       return {
         id: type,
         label: (
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
-            aria-label={NavigationLinkInfo[type].description}
+            aria-label={LinksLinkInfo[type].description}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type={NavigationLinkInfo[type].icon} color="text" />
+              <EuiIcon type={LinksLinkInfo[type].icon} color="text" />
             </EuiFlexItem>
-            <EuiFlexItem>{NavigationLinkInfo[type].displayName}</EuiFlexItem>
+            <EuiFlexItem>{LinksLinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>
         ),
       };
@@ -93,7 +93,7 @@ export const NavigationEmbeddableLinkEditor = ({
   );
 
   return (
-    <EuiFocusTrap className={'navEmbeddableLinkEditor in'}>
+    <EuiFocusTrap className={'linksLinkEditor in'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -102,21 +102,18 @@ export const NavigationEmbeddableLinkEditor = ({
           iconType={'arrowLeft'}
           onClick={() => onClose()}
         >
-          <EuiTitle
-            size="m"
-            aria-label={NavEmbeddableStrings.editor.linkEditor.getGoBackAriaLabel()}
-          >
+          <EuiTitle size="m" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
             <h2>
               {link
-                ? NavEmbeddableStrings.editor.getEditLinkTitle()
-                : NavEmbeddableStrings.editor.getAddButtonLabel()}
+                ? LinksStrings.editor.getEditLinkTitle()
+                : LinksStrings.editor.getAddButtonLabel()}
             </h2>
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" fullWidth>
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTypePickerLabel()}>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
               options={linkTypes}
               idSelected={selectedLinkType}
@@ -124,27 +121,27 @@ export const NavigationEmbeddableLinkEditor = ({
                 if (currentLinkLabel === defaultLinkLabel) {
                   setCurrentLinkLabel(link?.type === id ? link.label ?? '' : '');
                 }
-                setSelectedLinkType(id as NavigationLinkType);
+                setSelectedLinkType(id as LinksLinkType);
               }}
             />
           </EuiFormRow>
-          <NavigationEmbeddableLinkDestination
+          <LinksLinkDestination
             link={link}
             parentDashboard={parentDashboard}
             selectedLinkType={selectedLinkType}
             setDestination={handleDestinationPicked}
           />
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
               placeholder={
                 (linkDestination ? defaultLinkLabel : '') ||
-                NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
+                LinksStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
               value={currentLinkLabel}
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
-          <NavigationEmbeddableLinkOptions
+          <LinksLinkOptionsComponent
             link={link}
             setLinkOptions={setLinkOptions}
             selectedLinkType={selectedLinkType}
@@ -155,7 +152,7 @@ export const NavigationEmbeddableLinkEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={() => onClose()} iconType="cross">
-              {NavEmbeddableStrings.editor.getCancelButtonLabel()}
+              {LinksStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -177,8 +174,8 @@ export const NavigationEmbeddableLinkEditor = ({
               }}
             >
               {link
-                ? NavEmbeddableStrings.editor.getUpdateButtonLabel()
-                : NavEmbeddableStrings.editor.getAddButtonLabel()}
+                ? LinksStrings.editor.getUpdateButtonLabel()
+                : LinksStrings.editor.getAddButtonLabel()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

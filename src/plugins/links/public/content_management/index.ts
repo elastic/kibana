@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { navigationEmbeddableClient } from './links_content_management_client.ts.js';
+export { linksClient } from './links_content_management_client';
 export { checkForDuplicateTitle } from './duplicate_title_check';

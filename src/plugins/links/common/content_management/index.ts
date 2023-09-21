@@ -8,23 +8,23 @@
 
 export { LATEST_VERSION, CONTENT_ID } from '../constants';
 
-export type { NavigationEmbeddableContentType } from '../types';
+export type { LinksContentType } from '../types';
 
 export type {
-  NavigationLinkType,
-  NavigationLayoutType,
-  NavigationLinkOptions,
-  NavigationEmbeddableLink,
-  NavigationEmbeddableItem,
-  NavigationEmbeddableCrudTypes,
-  NavigationEmbeddableAttributes,
+  LinksLinkType,
+  LinksLayoutType,
+  LinksLinkOptions,
+  LinksLink,
+  LinksItem,
+  LinksCrudTypes,
+  LinksAttributes,
 } from './latest';
 
 export {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NAV_VERTICAL_LAYOUT,
-  NAV_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+  LINKS_HORIZONTAL_LAYOUT,
 } from './latest';
 
-export * as NavigationEmbeddableV1 from './v1';
+export * as LinksV1 from './v1';

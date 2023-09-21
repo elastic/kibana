@@ -12,24 +12,24 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { EuiFormRow } from '@elastic/eui';
 import {
-  NavigationLinkType,
+  LinksLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
 } from '../../../common/content_management';
-import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
-import { NavEmbeddableStrings } from '../links_strings';
+import { LinksStrings } from '../links_strings';
 
-export const NavigationEmbeddableLinkDestination = ({
+export const LinksLinkDestination = ({
   link,
   setDestination,
   parentDashboard,
   selectedLinkType,
 }: {
-  selectedLinkType: NavigationLinkType;
+  selectedLinkType: LinksLinkType;
   parentDashboard?: DashboardContainer;
-  link?: NavigationEmbeddableUnorderedLink;
+  link?: LinksUnorderedLink;
   setDestination: (destination?: string, defaultLabel?: string) => void;
 }) => {
   const [destinationError, setDestinationError] = useState<string | undefined>();
@@ -49,7 +49,7 @@ export const NavigationEmbeddableLinkDestination = ({
     <EuiFormRow
       error={destinationError}
       isInvalid={Boolean(destinationError)}
-      label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}
+      label={LinksStrings.editor.linkEditor.getLinkDestinationLabel()}
     >
       {selectedLinkType === DASHBOARD_LINK_TYPE ? (
         <DashboardLinkDestinationPicker

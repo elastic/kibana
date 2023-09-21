@@ -1,6 +1,6 @@
-.navEmbeddableComponent {
+.linksComponent {
 
-  .navigationLink {
+  .linkLink {
     max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
 
     &.dashboardLinkError {
@@ -13,7 +13,7 @@
       }
     }
 
-    &.navigationLinkCurrent {
+    &.linkLinkCurrent {
       border-radius: 0;
       .euiListGroupItem__text {
         cursor: default;
@@ -24,8 +24,8 @@
 
   .verticalLayoutWrapper {
     gap: $euiSizeXS;
-    .navigationLink {
-      &.navigationLinkCurrent {
+    .linkLink {
+      &.linkLinkCurrent {
         &::before {
           content: '';
           position: absolute;
@@ -44,8 +44,8 @@
     align-items: center;
     flex-direction: row;
 
-    .navigationLink {
-      &.navigationLinkCurrent {
+    .linkLink {
+      &.linkLinkCurrent {
         padding: 0 $euiSizeS;
 
         .euiListGroupItem__text {

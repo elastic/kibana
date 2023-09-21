@@ -10,42 +10,39 @@ import { Reference } from '@kbn/content-management-utils';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SharingSavedObjectProps } from '../../common/types';
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { LinksAttributes } from '../../common/content_management';
 import { extractReferences, injectReferences } from '../../common/persistable_state';
-import {
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableByValueInput,
-} from '../embeddable/types';
+import { LinksByReferenceInput, LinksByValueInput } from '../embeddable/types';
 import { embeddableService } from './kibana_services';
-import { checkForDuplicateTitle, navigationEmbeddableClient } from '../content_management';
+import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { CONTENT_ID } from '../../common';
 
-export type NavigationEmbeddableDocument = NavigationEmbeddableAttributes & {
+export type LinksDocument = LinksAttributes & {
   references?: Reference[];
 };
 
-export interface NavigationEmbeddableUnwrapMetaInfo {
+export interface LinksUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
 }
 
-export type NavigationEmbeddableAttributeService = AttributeService<
-  NavigationEmbeddableDocument,
-  NavigationEmbeddableByValueInput,
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableUnwrapMetaInfo
+export type LinksAttributeService = AttributeService<
+  LinksDocument,
+  LinksByValueInput,
+  LinksByReferenceInput,
+  LinksUnwrapMetaInfo
 >;
 
-let navigationEmbeddableAttributeService: NavigationEmbeddableAttributeService | null = null;
-export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableAttributeService {
-  if (navigationEmbeddableAttributeService) return navigationEmbeddableAttributeService;
+let linksAttributeService: LinksAttributeService | null = null;
+export function getLinksAttributeService(): LinksAttributeService {
+  if (linksAttributeService) return linksAttributeService;
 
-  navigationEmbeddableAttributeService = embeddableService.getAttributeService<
-    NavigationEmbeddableDocument,
-    NavigationEmbeddableByValueInput,
-    NavigationEmbeddableByReferenceInput,
-    NavigationEmbeddableUnwrapMetaInfo
+  linksAttributeService = embeddableService.getAttributeService<
+    LinksDocument,
+    LinksByValueInput,
+    LinksByReferenceInput,
+    LinksUnwrapMetaInfo
   >(CONTENT_ID, {
-    saveMethod: async (attributes: NavigationEmbeddableDocument, savedObjectId?: string) => {
+    saveMethod: async (attributes: LinksDocument, savedObjectId?: string) => {
       const { attributes: updatedAttributes, references } = extractReferences({
         attributes,
         references: attributes.references,
@@ -53,24 +50,24 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
       const {
         item: { id },
       } = await (savedObjectId
-        ? navigationEmbeddableClient.update({
+        ? linksClient.update({
             id: savedObjectId,
             data: updatedAttributes,
             options: { references },
           })
-        : navigationEmbeddableClient.create({ data: updatedAttributes, options: { references } }));
+        : linksClient.create({ data: updatedAttributes, options: { references } }));
       return { id };
     },
     unwrapMethod: async (
       savedObjectId: string
     ): Promise<{
-      attributes: NavigationEmbeddableDocument;
-      metaInfo: NavigationEmbeddableUnwrapMetaInfo;
+      attributes: LinksDocument;
+      metaInfo: LinksUnwrapMetaInfo;
     }> => {
       const {
         item: savedObject,
         meta: { outcome, aliasPurpose, aliasTargetId },
-      } = await navigationEmbeddableClient.get(savedObjectId);
+      } = await linksClient.get(savedObjectId);
       if (savedObject.error) throw savedObject.error;
 
       const { attributes } = injectReferences(savedObject);
@@ -96,5 +93,5 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
       });
     },
   });
-  return navigationEmbeddableAttributeService;
+  return linksAttributeService;
 }

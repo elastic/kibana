@@ -9,11 +9,11 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
-import { NavigationEmbeddableAttributes } from '../common/content_management';
-import { NavigationEmbeddableStorage } from './content_management';
-import { navigationEmbeddableSavedObjectType } from './saved_objects';
+import { LinksAttributes } from '../common/content_management';
+import { LinksStorage } from './content_management';
+import { linksSavedObjectType } from './saved_objects';
 
-export class NavigationEmbeddableServerPlugin implements Plugin<object, object> {
+export class LinksServerPlugin implements Plugin<object, object> {
   public setup(
     core: CoreSetup,
     plugins: {
@@ -22,15 +22,13 @@ export class NavigationEmbeddableServerPlugin implements Plugin<object, object> 
   ) {
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new NavigationEmbeddableStorage(),
+      storage: new LinksStorage(),
       version: {
         latest: LATEST_VERSION,
       },
     });
 
-    core.savedObjects.registerType<NavigationEmbeddableAttributes>(
-      navigationEmbeddableSavedObjectType
-    );
+    core.savedObjects.registerType<LinksAttributes>(linksSavedObjectType);
 
     return {};
   }

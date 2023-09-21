@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { NavigationEmbeddable } from './links_embeddable';
-export type { NavigationEmbeddableFactory } from './links_embeddable_factory';
-export { NavigationEmbeddableFactoryDefinition } from './links_embeddable_factory';
+export { LinksEmbeddable } from './links_embeddable';
+export type { LinksFactory } from './links_embeddable_factory';
+export { LinksFactoryDefinition } from './links_embeddable_factory';

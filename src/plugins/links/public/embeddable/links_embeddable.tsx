@@ -19,42 +19,31 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
-import {
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableByValueInput,
-  NavigationEmbeddableReduxState,
-} from './types';
-import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-import { NavigationEmbeddableInput, NavigationEmbeddableOutput } from './types';
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { linksReducers } from './links_reducers';
+import { LinksByReferenceInput, LinksByValueInput, LinksReduxState } from './types';
+import { LinksComponent } from '../components/links_component';
+import { LinksInput, LinksOutput } from './types';
+import { LinksAttributes } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
 
-export const NavigationEmbeddableContext = createContext<NavigationEmbeddable | null>(null);
-export const useNavigationEmbeddable = (): NavigationEmbeddable => {
-  const navigation = useContext<NavigationEmbeddable | null>(NavigationEmbeddableContext);
-  if (navigation == null) {
-    throw new Error('useNavigation must be used inside NavigationEmbeddableContext.');
+export const LinksContext = createContext<LinksEmbeddable | null>(null);
+export const useLinks = (): LinksEmbeddable => {
+  const linksEmbeddable = useContext<LinksEmbeddable | null>(LinksContext);
+  if (linksEmbeddable == null) {
+    throw new Error('useLinks must be used inside LinksContext.');
   }
-  return navigation!;
+  return linksEmbeddable!;
 };
 
-type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
-  NavigationEmbeddableReduxState,
-  typeof navigationEmbeddableReducers
->;
+type LinksReduxEmbeddableTools = ReduxEmbeddableTools<LinksReduxState, typeof linksReducers>;
 
-export interface NavigationEmbeddableConfig {
+export interface LinksConfig {
   editable: boolean;
 }
 
-export class NavigationEmbeddable
-  extends Embeddable<NavigationEmbeddableInput, NavigationEmbeddableOutput>
-  implements
-    ReferenceOrValueEmbeddable<
-      NavigationEmbeddableByValueInput,
-      NavigationEmbeddableByReferenceInput
-    >
+export class LinksEmbeddable
+  extends Embeddable<LinksInput, LinksOutput>
+  implements ReferenceOrValueEmbeddable<LinksByValueInput, LinksByReferenceInput>
 {
   public readonly type = CONTENT_ID;
   deferEmbeddableLoad = true;
@@ -63,18 +52,18 @@ export class NavigationEmbeddable
   private subscriptions: Subscription = new Subscription();
 
   // state management
-  public select: NavigationReduxEmbeddableTools['select'];
-  public getState: NavigationReduxEmbeddableTools['getState'];
-  public dispatch: NavigationReduxEmbeddableTools['dispatch'];
-  public onStateChange: NavigationReduxEmbeddableTools['onStateChange'];
+  public select: LinksReduxEmbeddableTools['select'];
+  public getState: LinksReduxEmbeddableTools['getState'];
+  public dispatch: LinksReduxEmbeddableTools['dispatch'];
+  public onStateChange: LinksReduxEmbeddableTools['onStateChange'];
 
   private cleanupStateTools: () => void;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
-    config: NavigationEmbeddableConfig,
-    initialInput: NavigationEmbeddableInput,
-    private attributeService: AttributeService<NavigationEmbeddableAttributes>,
+    config: LinksConfig,
+    initialInput: LinksInput,
+    private attributeService: AttributeService<LinksAttributes>,
     parent?: DashboardContainer
   ) {
     super(
@@ -88,11 +77,11 @@ export class NavigationEmbeddable
 
     /** Build redux embeddable tools */
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
-      NavigationEmbeddableReduxState,
-      typeof navigationEmbeddableReducers
+      LinksReduxState,
+      typeof linksReducers
     >({
       embeddable: this,
-      reducers: navigationEmbeddableReducers,
+      reducers: linksReducers,
       initialComponentState: {
         title: '',
       },
@@ -139,8 +128,8 @@ export class NavigationEmbeddable
   }
 
   public inputIsRefType(
-    input: NavigationEmbeddableByValueInput | NavigationEmbeddableByReferenceInput
-  ): input is NavigationEmbeddableByReferenceInput {
+    input: LinksByValueInput | LinksByReferenceInput
+  ): input is LinksByReferenceInput {
     return this.attributeService.inputIsRefType(input);
   }
 
@@ -151,7 +140,7 @@ export class NavigationEmbeddable
     });
   }
 
-  public async getInputAsValueType(): Promise<NavigationEmbeddableByValueInput> {
+  public async getInputAsValueType(): Promise<LinksByValueInput> {
     return this.attributeService.getInputAsValueType(this.getExplicitInput());
   }
 
@@ -172,9 +161,9 @@ export class NavigationEmbeddable
   public render() {
     if (this.isDestroyed) return;
     return (
-      <NavigationEmbeddableContext.Provider value={this}>
-        <NavigationEmbeddableComponent />
-      </NavigationEmbeddableContext.Provider>
+      <LinksContext.Provider value={this}>
+        <LinksComponent />
+      </LinksContext.Provider>
     );
   }
 }

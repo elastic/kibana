@@ -9,26 +9,24 @@
 import { inject } from './inject';
 
 test('Should return original state with by-reference embeddable state', () => {
-  const navigationEmbeddableByReferenceInput = {
+  const linksByReferenceInput = {
     id: 'ea40fd4e-216c-49a7-917f-f733c8a2c817',
-    type: 'navigation_embeddable',
+    type: 'links',
   };
 
   const references = [
     {
       name: 'panel_ea40fd4e-216c-49a7-917f-f733c8a2c817',
-      type: 'navigation_embeddable',
+      type: 'links',
       id: '7f92d7d0-8e5f-11ec-9477-312c8a6de896',
     },
   ];
 
-  expect(inject!(navigationEmbeddableByReferenceInput, references)).toEqual(
-    navigationEmbeddableByReferenceInput
-  );
+  expect(inject!(linksByReferenceInput, references)).toEqual(linksByReferenceInput);
 });
 
 test('Should inject refNames with by-value embeddable state', () => {
-  const navigationEmbeddableByValueInput = {
+  const linksByValueInput = {
     id: 'c3937cf9-29be-43df-a4af-a4df742d7d35',
     attributes: {
       links: [
@@ -41,7 +39,7 @@ test('Should inject refNames with by-value embeddable state', () => {
       ],
       layout: 'horizontal',
     },
-    type: 'navigation_embeddable',
+    type: 'links',
   };
   const references = [
     {
@@ -51,7 +49,7 @@ test('Should inject refNames with by-value embeddable state', () => {
     },
   ];
 
-  expect(inject!(navigationEmbeddableByValueInput, references)).toEqual({
+  expect(inject!(linksByValueInput, references)).toEqual({
     id: 'c3937cf9-29be-43df-a4af-a4df742d7d35',
     attributes: {
       links: [
@@ -64,6 +62,6 @@ test('Should inject refNames with by-value embeddable state', () => {
       ],
       layout: 'horizontal',
     },
-    type: 'navigation_embeddable',
+    type: 'links',
   });
 });

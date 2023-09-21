@@ -15,22 +15,16 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  NavigationEmbeddableInput,
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableEditorFlyoutReturn,
-} from '../embeddable/types';
+import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
 import { runSaveToLibrary } from '../content_management/save_to_library';
-import { NavigationEmbeddableLink, NavigationLayoutType } from '../../common/content_management';
-import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
+import { LinksLink, LinksLayoutType } from '../../common/content_management';
+import { getLinksAttributeService } from '../services/attribute_service';
 
-const LazyNavigationEmbeddablePanelEditor = React.lazy(
-  () => import('../components/editor/links_panel_editor')
-);
+const LazyLinksPanelEditor = React.lazy(() => import('../components/editor/links_panel_editor'));
 
-const NavigationEmbeddablePanelEditor = withSuspense(
-  LazyNavigationEmbeddablePanelEditor,
+const LinksPanelEditor = withSuspense(
+  LazyLinksPanelEditor,
   <EuiPanel className="eui-textCenter">
     <EuiLoadingSpinner size="l" />
   </EuiPanel>
@@ -40,26 +34,23 @@ const NavigationEmbeddablePanelEditor = withSuspense(
  * @throws in case user cancels
  */
 export async function openEditorFlyout(
-  initialInput: NavigationEmbeddableInput,
+  initialInput: LinksInput,
   parentDashboard?: DashboardContainer
-): Promise<NavigationEmbeddableEditorFlyoutReturn> {
-  const attributeService = getNavigationEmbeddableAttributeService();
+): Promise<LinksEditorFlyoutReturn> {
+  const attributeService = getLinksAttributeService();
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
 
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSaveToLibrary = async (
-      newLinks: NavigationEmbeddableLink[],
-      newLayout: NavigationLayoutType
-    ) => {
+    const onSaveToLibrary = async (newLinks: LinksLink[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
         links: newLinks,
         layout: newLayout,
       };
-      const updatedInput = (initialInput as NavigationEmbeddableByReferenceInput).savedObjectId
+      const updatedInput = (initialInput as LinksByReferenceInput).savedObjectId
         ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
         : await runSaveToLibrary(newAttributes, initialInput);
       if (!updatedInput) {
@@ -75,16 +66,13 @@ export async function openEditorFlyout(
       editorFlyout.close();
     };
 
-    const onAddToDashboard = (
-      newLinks: NavigationEmbeddableLink[],
-      newLayout: NavigationLayoutType
-    ) => {
+    const onAddToDashboard = (newLinks: LinksLink[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
         links: newLinks,
         layout: newLayout,
       };
-      const newInput: NavigationEmbeddableInput = {
+      const newInput: LinksInput = {
         ...initialInput,
         attributes: newAttributes,
       };
@@ -114,7 +102,7 @@ export async function openEditorFlyout(
 
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
-        <NavigationEmbeddablePanelEditor
+        <LinksPanelEditor
           initialLinks={attributes?.links}
           initialLayout={attributes?.layout}
           onClose={onCancel}
@@ -129,7 +117,7 @@ export async function openEditorFlyout(
         ownFocus: true,
         outsideClickCloses: false,
         onClose: onCancel,
-        className: 'navEmbeddablePanelEditor',
+        className: 'linksPanelEditor',
       }
     );
 

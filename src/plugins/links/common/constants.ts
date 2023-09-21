@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 
 export const LATEST_VERSION = 1;
 
-export const CONTENT_ID = 'navigation_embeddable';
+export const CONTENT_ID = 'links';
 
 export const APP_ICON = 'link';
 
-export const APP_NAME = i18n.translate('navigationEmbeddable.visTypeAlias.title', {
+export const APP_NAME = i18n.translate('links.visTypeAlias.title', {
   defaultMessage: 'Links',
 });
