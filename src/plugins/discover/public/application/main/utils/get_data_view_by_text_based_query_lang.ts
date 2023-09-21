@@ -34,6 +34,7 @@ export async function getDataViewByTextBasedQueryLang(
   ) {
     const dataViewObj = await services.dataViews.create({
       title: indexPatternFromQuery,
+      name: generateTextBasedDataViewName(),
     });
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
@@ -43,3 +44,11 @@ export async function getDataViewByTextBasedQueryLang(
   }
   return currentDataView;
 }
+
+const textBasedDataViewPrefix = '__TEXT_BASED_DATA_VIEW__';
+let textBasedDataViewCount = 0;
+
+export const generateTextBasedDataViewName = () => {
+  textBasedDataViewCount++;
+  return `${textBasedDataViewPrefix}${textBasedDataViewCount}`;
+};

@@ -111,7 +111,9 @@ export function ChangeDataView({
         : await data.dataViews.getIdsWithTitle();
       // not propagate the adHoc dataviews on the list for text based languages
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        (!isTextBasedLangSelected && adHocDataViews?.map(mapAdHocDataView)) || [];
+        adHocDataViews
+          ?.filter((dataView) => !dataView.name.startsWith('__TEXT_BASED_DATA_VIEW__'))
+          ?.map(mapAdHocDataView) || [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };

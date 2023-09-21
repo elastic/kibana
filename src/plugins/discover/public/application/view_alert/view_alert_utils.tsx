@@ -19,6 +19,7 @@ import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/locator';
+import { generateTextBasedDataViewName } from '../main/utils/get_data_view_by_text_based_query_lang';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
@@ -137,6 +138,7 @@ export const getAlertUtils = (
       dataView = await dataViews.create({
         title: indexPattern,
         timeFieldName: alert.params.timeField,
+        name: generateTextBasedDataViewName(),
       });
     }
 
