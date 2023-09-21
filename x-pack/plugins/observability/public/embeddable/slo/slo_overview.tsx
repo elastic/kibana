@@ -11,6 +11,7 @@ import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { i18n } from '@kbn/i18n';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -51,7 +52,11 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
         <LoadingContentPanel>
           <EuiLoadingSpinner size="m" />
           <EuiText>
-            <p>reloading</p>
+            <p>
+              {i18n.translate('xpack.observability.sloEmbeddable.widget.reloading', {
+                defaultMessage: 'Reloading',
+              })}
+            </p>
           </EuiText>
         </LoadingContentPanel>
       </LoadingPanel>

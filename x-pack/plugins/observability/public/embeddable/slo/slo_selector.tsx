@@ -18,7 +18,7 @@ interface Props {
   hasError?: boolean;
 }
 
-const SLO_REQUIRED = i18n.translate('xpack.observability.slo.rules.burnRate.errors.sloRequired', {
+const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
 
@@ -69,12 +69,18 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   return (
     <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>
       <EuiComboBox
-        aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {
-          defaultMessage: 'SLO',
-        })}
-        placeholder={i18n.translate('xpack.observability.slo.rules.sloSelector.placeholder', {
-          defaultMessage: 'Select a SLO',
-        })}
+        aria-label={i18n.translate(
+          'xpack.observability.sloEmbeddable.config.sloSelector.ariaLabel',
+          {
+            defaultMessage: 'SLO',
+          }
+        )}
+        placeholder={i18n.translate(
+          'xpack.observability.sloEmbeddable.config.sloSelector.placeholder',
+          {
+            defaultMessage: 'Select a SLO',
+          }
+        )}
         data-test-subj="sloSelector"
         singleSelection={{ asPlainText: true }}
         options={options}

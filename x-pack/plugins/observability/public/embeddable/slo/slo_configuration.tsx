@@ -18,7 +18,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { SloSelector } from './slo_selector';
+
 import type { SloConfigurationProps, EmbeddableSloProps } from './types';
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
@@ -34,7 +36,11 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>SLO configuration</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
+            defaultMessage: 'SLO configuration',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup>
@@ -56,7 +62,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+            id="xpack.observability.sloEmbeddable.config.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -68,7 +74,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
           fill
         >
           <FormattedMessage
-            id="xpack.observability.embeddableSlo.setupModal.confirmButtonLabel"
+            id="xpack.observability.embeddableSlo.config.confirmButtonLabel"
             defaultMessage="Confirm configurations"
           />
         </EuiButton>
