@@ -16,7 +16,7 @@ import RuleAdd from './rule_add';
 import { createRule } from '../../lib/rule_api/create';
 import { alertingFrameworkHealth } from '../../lib/rule_api/health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   Rule,
   RuleAddProps,
@@ -340,7 +340,7 @@ describe('rule_add', () => {
     });
   });
 
-  it('should set consumer when the consumer selection renders and rule is created', async () => {
+  it('should NOT allow to save the rule if the consumer is not set', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
@@ -349,7 +349,7 @@ describe('rule_add', () => {
       initialValues: {
         name: 'Simple rule',
         consumer: 'alerts',
-        ruleTypeId: 'observability.rules.threshold',
+        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         tags: ['uptime', 'logs'],
         schedule: {
           interval: '1h',
@@ -358,7 +358,7 @@ describe('rule_add', () => {
       onClose,
       ruleTypesOverwrite: [
         {
-          id: 'observability.rules.threshold',
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           name: 'Threshold Rule',
           actionGroups: [
             {
@@ -393,7 +393,7 @@ describe('rule_add', () => {
         },
       ],
       ruleTypeModelOverwrite: {
-        id: 'observability.rules.threshold',
+        id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         iconClass: 'test',
         description: 'test',
         documentationUrl: null,
@@ -403,13 +403,7 @@ describe('rule_add', () => {
         ruleParamsExpression: TestExpression,
         requiresAppContext: false,
       },
-      validConsumers: [
-        AlertConsumers.APM,
-        AlertConsumers.INFRASTRUCTURE,
-        AlertConsumers.LOGS,
-        AlertConsumers.UPTIME,
-        AlertConsumers.SLO,
-      ],
+      validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
     });
 
     await act(async () => {
@@ -424,13 +418,7 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    expect(createRule).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        rule: expect.objectContaining({
-          consumer: 'apm',
-        }),
-      })
-    );
+    expect(createRule).toBeCalledTimes(0);
   });
 
   it('should set consumer automatically if only 1 authorized consumer exists', async () => {
@@ -442,7 +430,7 @@ describe('rule_add', () => {
       initialValues: {
         name: 'Simple rule',
         consumer: 'alerts',
-        ruleTypeId: 'observability.rules.threshold',
+        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         tags: ['uptime', 'logs'],
         schedule: {
           interval: '1h',
@@ -451,7 +439,7 @@ describe('rule_add', () => {
       onClose,
       ruleTypesOverwrite: [
         {
-          id: 'observability.rules.threshold',
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           name: 'Threshold Rule',
           actionGroups: [
             {
@@ -475,7 +463,7 @@ describe('rule_add', () => {
         },
       ],
       ruleTypeModelOverwrite: {
-        id: 'observability.rules.threshold',
+        id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         iconClass: 'test',
         description: 'test',
         documentationUrl: null,
@@ -485,13 +473,7 @@ describe('rule_add', () => {
         ruleParamsExpression: TestExpression,
         requiresAppContext: false,
       },
-      validConsumers: [
-        AlertConsumers.APM,
-        AlertConsumers.INFRASTRUCTURE,
-        AlertConsumers.LOGS,
-        AlertConsumers.UPTIME,
-        AlertConsumers.SLO,
-      ],
+      validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
     });
 
     await act(async () => {
