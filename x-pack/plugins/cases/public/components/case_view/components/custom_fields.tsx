@@ -26,37 +26,27 @@ const CustomFieldsComponent: React.FC<Props> = ({
   onSubmit,
 }) => {
   const { permissions } = useCasesContext();
-  const sortedCustomFields = useMemo(() => sortCustomFieldsByLabel(customFields), [customFields]);
+  const sortedCustomFieldsConfiguration = useMemo(
+    () => sortCustomFieldsByLabel(customFieldsConfiguration),
+    [customFieldsConfiguration]
+  );
 
-  const customFieldsComponents = sortedCustomFields.map((customField) => {
-    const customFieldFactory = customFieldsBuilderMap[customField.type];
+  const customFieldsComponents = sortedCustomFieldsConfiguration.map((customFieldConf) => {
+    const customFieldFactory = customFieldsBuilderMap[customFieldConf.type];
     const customFieldType = customFieldFactory().build();
 
-    const customFieldConfiguration = customFieldsConfiguration.find(
-      (configuration) => configuration.key === customField.key
-    );
+    const customField = customFields.find((field) => field.key === customFieldConf.key);
 
     const EditComponent = customFieldType.Edit;
-
-    /**
-     * If the configuration does not exists
-     * we should not show the custom field.
-     * This can happen if a user deletes the
-     * custom field definition from the configuration
-     * page.
-     */
-    if (!customFieldConfiguration) {
-      return null;
-    }
 
     return (
       <EditComponent
         isLoading={isLoading}
         canUpdate={permissions.update}
-        customFieldConfiguration={customFieldConfiguration}
+        customFieldConfiguration={customFieldConf}
         customField={customField}
         onSubmit={onSubmit}
-        key={customField.key}
+        key={customFieldConf.key}
       />
     );
   });
@@ -68,11 +58,8 @@ CustomFieldsComponent.displayName = 'CustomFields';
 
 export const CustomFields = React.memo(CustomFieldsComponent);
 
-const sortCustomFieldsByLabel = (customFields: Props['customFields']) => {
-  return sortBy(customFields, (customField) => {
-    const customFieldFactory = customFieldsBuilderMap[customField.type];
-    const customFieldType = customFieldFactory();
-
-    return customFieldType.label;
+const sortCustomFieldsByLabel = (customFieldsConfiguration: Props['customFieldsConfiguration']) => {
+  return sortBy(customFieldsConfiguration, (customFieldConf) => {
+    return customFieldConf.label;
   });
 };

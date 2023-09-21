@@ -13,7 +13,7 @@ import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -247,10 +247,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setAddFieldFlyoutVisibility]);
 
   const onCustomFieldCreated = useCallback(
-    (customFieldData: CustomFieldsConfiguration) => {
+    (customFieldData: CustomFieldConfiguration) => {
       persistCaseConfigure({
         connector,
-        customFields: customFieldData,
+        customFields: [...customFields, customFieldData],
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -258,7 +258,14 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
       setAddFieldFlyoutVisibility(false);
     },
-    [closureType, configurationId, configurationVersion, connector, persistCaseConfigure]
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      persistCaseConfigure,
+    ]
   );
 
   const CustomFieldAddFlyout = addFieldFlyoutVisible ? (

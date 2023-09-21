@@ -6,9 +6,12 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  TextField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { CustomFieldType } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -56,6 +59,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
 
   return (
     <>
+      <UseField path="key" component={HiddenField} />
       <UseField
         path="label"
         component={TextField}

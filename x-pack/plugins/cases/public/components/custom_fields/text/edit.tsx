@@ -120,7 +120,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
     setIsEdit(false);
   };
 
-  const initialValue = customField.field.value?.[0] as string;
+  const initialValue = (customField?.field.value?.[0] as string) ?? '';
   const title = customFieldConfiguration?.label ?? UNKNOWN;
   const isTextFieldValid = formState.isValid;
 
@@ -138,12 +138,14 @@ const EditComponent: CustomFieldType['Edit'] = ({
           </EuiText>
         </EuiFlexItem>
         {isLoading && (
-          <EuiLoadingSpinner data-test-subj={`case-text-custom-field-loading-${customField.key}`} />
+          <EuiLoadingSpinner
+            data-test-subj={`case-text-custom-field-loading-${customFieldConfiguration.key}`}
+          />
         )}
         {!isLoading && canUpdate && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              data-test-subj={`case-text-custom-field-edit-button-${customField.key}`}
+              data-test-subj={`case-text-custom-field-edit-button-${customFieldConfiguration.key}`}
               aria-label={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)}
               iconType={'pencil'}
               onClick={onEdit}
@@ -154,7 +156,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup
         gutterSize="m"
-        data-test-subj={`case-text-custom-field-${customField.key}`}
+        data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
         {!isEdit && (
@@ -177,7 +179,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
-                    data-test-subj={`case-text-custom-field-submit-button-${customField.key}`}
+                    data-test-subj={`case-text-custom-field-submit-button-${customFieldConfiguration.key}`}
                     fill
                     iconType="save"
                     onClick={onSubmitCustomField}
@@ -189,7 +191,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj={`case-text-custom-field-cancel-button-${customField.key}`}
+                    data-test-subj={`case-text-custom-field-cancel-button-${customFieldConfiguration.key}`}
                     iconType="cross"
                     onClick={onCancel}
                     size="s"

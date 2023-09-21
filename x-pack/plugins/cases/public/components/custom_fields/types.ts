@@ -12,10 +12,10 @@ import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 export interface CustomFieldType {
   Configure: React.FC;
   View: React.FC<{
-    customField: CaseUI['customFields'][number];
+    customField?: CaseUI['customFields'][number];
   }>;
   Edit: React.FC<{
-    customField: CaseUI['customFields'][number];
+    customField?: CaseUI['customFields'][number];
     customFieldConfiguration: CasesConfigurationUI['customFields'][number];
     onSubmit: (customField: CaseUI['customFields'][number]) => void;
     isLoading: boolean;
