@@ -181,8 +181,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '1', 'Delete'],
-        ['', 'dataStream2', 'green', '1', 'Delete'],
+        ['', 'dataStream1', 'green', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -220,8 +220,8 @@ describe('Data Streams tab', () => {
       // The table renders with the stats columns though.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -240,8 +240,8 @@ describe('Data Streams tab', () => {
       // the human-readable string values.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -346,6 +346,12 @@ describe('Data Streams tab', () => {
         expect(find('summaryTab').exists()).toBeTruthy();
         expect(find('title').text().trim()).toBe('indexTemplate');
       });
+
+      test('shows data retention detail when configured', async () => {
+        const { actions, findDetailPanelDataRetentionDetail } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanelDataRetentionDetail().exists()).toBeTruthy();
+      });
     });
   });
 
@@ -434,10 +440,10 @@ describe('Data Streams tab', () => {
       });
       testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyName().contains('None')).toBeTruthy();
+      expect(findDetailPanelIlmPolicyDetail().exists()).toBeFalsy();
     });
 
     test('without an ILM url locator and with an ILM policy', async () => {
@@ -464,10 +470,10 @@ describe('Data Streams tab', () => {
       });
       testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyName().contains('my_ilm_policy')).toBeTruthy();
+      expect(findDetailPanelIlmPolicyDetail().contains('my_ilm_policy')).toBeTruthy();
     });
   });
 
@@ -500,8 +506,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', '7d', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -510,14 +516,16 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', '7d', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
       ]);
 
       actions.toggleViewFilterAt(0);
 
       ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
-      expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
+      expect(tableCellsValues).toEqual([
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
+      ]);
     });
   });
 
@@ -548,7 +556,7 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', 'Delete'],
+        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', '7d', 'Delete'],
       ]);
     });
   });
@@ -581,8 +589,8 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
-          ['', 'dataStreamNoDelete', 'green', '1', ''],
-          ['', 'dataStreamWithDelete', 'green', '1', 'Delete'],
+          ['', 'dataStreamNoDelete', 'green', '1', '7d', ''],
+          ['', 'dataStreamWithDelete', 'green', '1', '7d', 'Delete'],
         ]);
       });
 

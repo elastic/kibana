@@ -42,7 +42,13 @@ export enum IndexManagementBreadcrumb {
   componentTemplateCreate = 'componentTemplateCreate',
   componentTemplateEdit = 'componentTemplateEdit',
   componentTemplateClone = 'componentTemplateClone',
+  /**
+   * Enrich policies tab
+   */
+  enrichPolicies = 'enrichPolicies',
+  enrichPoliciesCreate = 'enrichPoliciesCreate',
 }
+
 class BreadcrumbService {
   private breadcrumbs: {
     [key in IndexManagementBreadcrumb]?: EuiBreadcrumb[];
@@ -206,6 +212,26 @@ class BreadcrumbService {
             defaultMessage: 'Clone component template',
           }
         ),
+      },
+    ];
+
+    this.breadcrumbs.enrichPolicies = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyLabel', {
+          defaultMessage: 'Enrich policies',
+        }),
+        href: `/enrich_policies`,
+      },
+    ];
+
+    this.breadcrumbs.enrichPoliciesCreate = [
+      ...this.breadcrumbs.enrichPolicies,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyCreateLabel', {
+          defaultMessage: 'Create enrich policy',
+        }),
+        href: `/enrich_policies/create`,
       },
     ];
   }
