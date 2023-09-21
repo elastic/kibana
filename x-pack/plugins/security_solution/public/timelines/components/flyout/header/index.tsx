@@ -57,6 +57,7 @@ import { TimelineKPIs } from './kpis';
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { TimelineSavePrompt } from '../../timeline/header/timeline_save_prompt';
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -422,6 +423,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
           <RowFlexItem>
             <TimelineName timelineId={timelineId} />
+            <TimelineSavePrompt timelineId={timelineId} />
             <EditTimelineButton timelineId={timelineId} initialFocus="title" />
             <TimelineStatusInfoContainer>
               <TimelineStatusInfo timelineId={timelineId} />

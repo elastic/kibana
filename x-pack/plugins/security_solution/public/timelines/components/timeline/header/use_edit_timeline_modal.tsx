@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useState } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-import { TimelineId } from '../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions } from '../../../store/timeline';
-import { getTimelineSaveModalByIdSelector } from './selectors';
 import { EditTimelineModal } from './edit_timeline_modal';
 
 interface UseEditTimelineModalArguments {
@@ -24,26 +19,15 @@ export function useEditTimelineModal({
   initialFocus = 'title',
   timelineId,
 }: UseEditTimelineModalArguments) {
-  const dispatch = useDispatch();
-  const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
-  const forceShow = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
   const closeEditTimeline = useCallback(() => {
     setShowEditTimelineOverlay(false);
-    if (forceShow) {
-      dispatch(
-        timelineActions.toggleModalSaveTimeline({
-          id: TimelineId.active,
-          showModalSaveTimeline: false,
-        })
-      );
-    }
-  }, [dispatch, setShowEditTimelineOverlay, forceShow]);
+  }, []);
 
   const openEditTimeline = useCallback(() => {
     setShowEditTimelineOverlay(true);
-  }, [setShowEditTimelineOverlay]);
+  }, []);
 
   // Case: 1
   // check if user has crud privileges so that user can be allowed to edit the timeline
@@ -56,16 +40,16 @@ export function useEditTimelineModal({
 
   return {
     EditModal:
-      showEditTimelineOverlay || forceShow ? (
+      showEditTimelineOverlay && hasKibanaCrud ? (
         <EditTimelineModal
           closeEditTimeline={closeEditTimeline}
           initialFocus={initialFocus}
           timelineId={timelineId}
-          showWarning={initialFocus === 'title' && forceShow}
+          showWarning={false}
         />
       ) : null,
     canEditTimeline: hasKibanaCrud,
     openEditTimeline,
-    forceShow,
+    closeEditTimeline,
   };
 }
