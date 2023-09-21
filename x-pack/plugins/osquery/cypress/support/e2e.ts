@@ -30,8 +30,8 @@ export {};
 import 'cypress-react-selector';
 import registerCypressGrep from '@cypress/grep';
 
-import type { ServerlessRoleName } from './roles';
 import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import type { ServerlessRoleName } from './roles';
 
 registerCypressGrep();
 
