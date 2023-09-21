@@ -32,7 +32,7 @@ export const esArchiver = (
     authOverride: !isServerless ? serverlessUser : undefined,
   });
 
-  const kibanaUrl = config.env.KIBANA_URL ? config.env.KIBANA_URL : config.env.BASE_URL;
+  const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
 
   const kbnClient = new KbnClient({
     log,
