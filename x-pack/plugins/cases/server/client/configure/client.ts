@@ -339,7 +339,7 @@ export async function update(
   }
 }
 
-async function create(
+export async function create(
   configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal

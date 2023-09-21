@@ -7,10 +7,18 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+
 import type { CasesClientArgs } from '../types';
-import { getConnectors, get, update } from './client';
+
+import { getConnectors, get, update, create } from './client';
 import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
-import { MAX_SUPPORTED_CONNECTORS_RETURNED } from '../../../common/constants';
+import {
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+} from '../../../common/constants';
+import { ConnectorTypes } from '../../../common';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import type { ConfigurationRequest } from '../../../common/types/api';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -250,6 +258,52 @@ describe('client', () => {
         // @ts-expect-error: excess attribute
         update('test-id', { version: 'test-version', foo: 'bar' }, clientArgs, casesClientInternal)
       ).rejects.toThrow('invalid keys "foo"');
+    });
+
+    it(`throws when trying to update more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+              key: 'foobar',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            }),
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        `Failed to get patch configure in route: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+  });
+
+  describe('create', () => {
+    it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
+      const request = {
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+        closure_type: 'close-by-user',
+        owner: 'securitySolutionFixture',
+        customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+          key: 'foobar',
+          label: 'text',
+          type: CustomFieldTypes.TEXT,
+          required: false,
+        }),
+      } as ConfigurationRequest;
+
+      await expect(create(request, clientArgs, casesClientInternal)).rejects.toThrow(
+        `Failed to create case configuration: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
     });
   });
 });

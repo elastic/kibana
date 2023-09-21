@@ -276,7 +276,7 @@ describe('CasePostRequestRt', () => {
     });
   });
 
-  it('limits customFields to 5', () => {
+  it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
       type: 'text',
@@ -290,7 +290,9 @@ describe('CasePostRequestRt', () => {
           customFields,
         })
       )
-    ).toContain('The length of the field customFields is too long. Array must be of length <= 5.');
+    ).toContain(
+      `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+    );
   });
 
   it('does not throw an error with undefined customFields', async () => {
@@ -660,7 +662,7 @@ describe('CasePatchRequestRt', () => {
     ).toContain('The length of the category is too long. The maximum length is 50.');
   });
 
-  it('limits customFields to 5', () => {
+  it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
       type: 'text',
@@ -674,7 +676,9 @@ describe('CasePatchRequestRt', () => {
           customFields,
         })
       )
-    ).toContain('The length of the field customFields is too long. Array must be of length <= 5.');
+    ).toContain(
+      `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+    );
   });
 });
 
