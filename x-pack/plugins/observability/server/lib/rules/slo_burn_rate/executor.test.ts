@@ -148,6 +148,7 @@ describe('BurnRateRuleExecutor', () => {
       getAlertByAlertUuid: jest.fn(),
       share: {} as SharePluginStart,
       dataViews: dataViewPluginMocks.createStartContract(),
+      clearAlertUuid: jest.fn(),
     };
   });
 
