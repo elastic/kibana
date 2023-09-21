@@ -17,9 +17,6 @@ const fnLookups = builtinFunctions.concat(mathCommandFullDefinitions).reduce((me
   return memo;
 }, new Map<string, FunctionDefinition>());
 
-type SignatureType = FunctionDefinition['signatures'][number];
-type SignatureArgType = SignatureType['params'][number];
-
 interface ValidationErrors {
   wrongArgumentType: {
     message: string;
