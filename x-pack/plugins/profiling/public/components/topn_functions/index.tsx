@@ -26,6 +26,7 @@ import { FrameInformationTooltip } from '../frame_information_window/frame_infor
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
 import { getFunctionsRows, IFunctionRow } from './utils';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   topNFunctions?: TopNFunctions;
@@ -68,6 +69,7 @@ export const TopNFunctionsGrid = forwardRef(
   ) => {
     const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
     const trackProfilingEvent = useUiTracker({ app: 'profiling' });
+    const calculateImpactEstimates = useCalculateImpactEstimate();
 
     function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
       const lastItem = last(newSortingColumns);
@@ -91,9 +93,11 @@ export const TopNFunctionsGrid = forwardRef(
         comparisonTopNFunctions,
         topNFunctions,
         totalSeconds,
+        calculateImpactEstimates,
       });
     }, [
       baselineScaleFactor,
+      calculateImpactEstimates,
       comparisonScaleFactor,
       comparisonTopNFunctions,
       topNFunctions,

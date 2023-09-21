@@ -13,6 +13,9 @@ describe('calculateImpactEstimates', () => {
       countInclusive: 1000,
       totalSamples: 10000,
       totalSeconds: 15 * 60, // 15m
+      perCoreWatts: 7,
+      datacenterPUE: 1.7,
+      co2PerTonKWH: 0.000379069,
     });
 
     expect(totalCPU).toEqual({
@@ -52,6 +55,9 @@ describe('calculateImpactEstimates', () => {
       countInclusive: 1000,
       totalSamples: 10000,
       totalSeconds: 15 * 60, // 15m
+      perCoreWatts: 7,
+      datacenterPUE: 1.7,
+      co2PerTonKWH: 0.000379069,
     });
 
     expect(totalCPU).toEqual({

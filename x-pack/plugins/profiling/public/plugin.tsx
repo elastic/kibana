@@ -23,6 +23,7 @@ import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locato
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
+import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
 export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;
 export type ProfilingPluginStart = void;
@@ -85,6 +86,8 @@ export class ProfilingPlugin implements Plugin {
 
     pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
+    const profilingFetchServices = getServices();
+
     coreSetup.application.register({
       id: 'profiling',
       title: 'Universal Profiling',
@@ -99,7 +102,6 @@ export class ProfilingPlugin implements Plugin {
           unknown
         ];
 
-        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
@@ -132,9 +134,25 @@ export class ProfilingPlugin implements Plugin {
       },
     });
 
+    const getProfilingEmbeddableDependencies =
+      async (): Promise<ProfilingEmbeddablesDependencies> => {
+        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
+          CoreStart,
+          ProfilingPluginPublicStartDeps,
+          unknown
+        ];
+        return {
+          coreStart,
+          coreSetup,
+          pluginsStart,
+          pluginsSetup,
+          profilingFetchServices,
+        };
+      };
+
     pluginsSetup.embeddable.registerEmbeddableFactory(
       EMBEDDABLE_FLAMEGRAPH,
-      new EmbeddableFlamegraphFactory()
+      new EmbeddableFlamegraphFactory(getProfilingEmbeddableDependencies)
     );
 
     return {

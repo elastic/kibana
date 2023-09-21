@@ -194,7 +194,6 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          showAIAssistant={!isEmbedded}
           showSymbolsStatus={!isEmbedded}
         />
       )}
