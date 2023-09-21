@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type {
   Logger,
   SavedObject,
@@ -13,7 +15,10 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type {
+  ConfigurationAttributes,
+  CustomFieldsConfiguration,
+} from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
@@ -39,6 +44,32 @@ import {
   ConfigurationPartialAttributesRt,
   ConfigurationTransformedAttributesRt,
 } from '../../common/types/configure';
+
+/**
+ * Throws an error if the requests has custom fields with duplicated keys.
+ */
+function throwIfDuplicatedCustomFieldKeysInRequest({
+  customFieldsInRequest = [],
+}: {
+  customFieldsInRequest?: CustomFieldsConfiguration;
+}) {
+  const uniqueKeys = new Set();
+  const duplicatedKeys = new Set();
+
+  customFieldsInRequest.forEach((item) => {
+    if (uniqueKeys.has(item.key)) {
+      duplicatedKeys.add(item.key);
+    } else {
+      uniqueKeys.add(item.key);
+    }
+  });
+
+  if (duplicatedKeys.size) {
+    throw Boom.badRequest(
+      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
+    );
+  }
+}
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -119,6 +150,11 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to POST a new case configuration`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
+
+      throwIfDuplicatedCustomFieldKeysInRequest({
+        customFieldsInRequest: decodedAttributes.customFields,
+      });
+
       const esConfigInfo = transformAttributesToESModel(decodedAttributes);
 
       const createdConfig =
@@ -148,6 +184,11 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(updatedAttributes);
+
+      throwIfDuplicatedCustomFieldKeysInRequest({
+        customFieldsInRequest: updatedAttributes.customFields,
+      });
+
       const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
       const updatedConfiguration =
