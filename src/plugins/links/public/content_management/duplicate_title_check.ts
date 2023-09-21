@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { navigationEmbeddableClient } from './navigation_embeddable_content_management_client.ts';
+import { navigationEmbeddableClient } from './links_content_management_client.ts.js';
 
 const rejectErrorMessage = i18n.translate('navigationEmbeddable.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',

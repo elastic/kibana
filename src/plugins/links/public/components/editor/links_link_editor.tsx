@@ -36,7 +36,7 @@ import {
   NavigationEmbeddableLink,
 } from '../../../common/content_management';
 import { NavigationLinkInfo } from '../../embeddable/types';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { NavigationEmbeddableLinkOptions } from './navigation_embeddable_link_options';
 import { NavigationEmbeddableLinkDestination } from './navigation_embeddable_link_destination';

@@ -13,7 +13,7 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import {
   NavigationEmbeddable,
   NavigationEmbeddableContext,
-} from '../../embeddable/navigation_embeddable';
+} from '../../embeddable/links_embeddable';
 import { mockNavigationEmbeddable } from '../../../common/mocks';
 import { NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';

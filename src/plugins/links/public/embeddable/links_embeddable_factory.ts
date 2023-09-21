@@ -29,9 +29,9 @@ import {
 } from './types';
 import { extract, inject } from '../../common/embeddable';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
-import type { NavigationEmbeddable } from './navigation_embeddable';
+import type { NavigationEmbeddable } from './links_embeddable';
 import { NavigationEmbeddableAttributes } from '../../common/content_management';
-import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../components/links_strings';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
@@ -119,7 +119,7 @@ export class NavigationEmbeddableFactoryDefinition
     await untilPluginStartServicesReady();
 
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
-    const { NavigationEmbeddable } = await import('./navigation_embeddable');
+    const { NavigationEmbeddable } = await import('./links_embeddable');
     const editable = await this.isEditable();
 
     return new NavigationEmbeddable(

@@ -15,7 +15,7 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 import {
   NavigationEmbeddable,
   NavigationEmbeddableContext,
-} from '../../embeddable/navigation_embeddable';
+} from '../../embeddable/links_embeddable';
 import { mockNavigationEmbeddable } from '../../../common/mocks';
 import { NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';

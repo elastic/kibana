@@ -19,7 +19,7 @@ import {
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 
 export const NavigationEmbeddableLinkDestination = ({
   link,

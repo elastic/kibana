@@ -25,7 +25,7 @@ import {
 } from '../../common/content_management';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { ExternalLinkStrings } from '../components/external_link/external_link_strings';
-import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../components/links_strings';
 
 export const NavigationLayoutInfo: {
   [id in NavigationLayoutType]: { displayName: string };

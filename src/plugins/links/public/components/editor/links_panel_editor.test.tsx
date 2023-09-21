@@ -9,8 +9,8 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
-import NavigationEmbeddablePanelEditor from './navigation_embeddable_panel_editor';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import NavigationEmbeddablePanelEditor from './links_panel_editor';
+import { NavEmbeddableStrings } from '../links_strings';
 import { NavigationEmbeddableLink, NAV_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 

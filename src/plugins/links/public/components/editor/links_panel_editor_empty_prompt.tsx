@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiText, EuiPanel, EuiSpacer, EuiButton, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 
 export const NavigationEmbeddablePanelEditorEmptyPrompt = ({
   addLink,

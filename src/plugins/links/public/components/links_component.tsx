@@ -8,10 +8,10 @@
 
 import React, { useMemo } from 'react';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { useNavigationEmbeddable } from '../embeddable/links_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
-import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
+import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
 import {
   DASHBOARD_LINK_TYPE,
   NAV_HORIZONTAL_LAYOUT,

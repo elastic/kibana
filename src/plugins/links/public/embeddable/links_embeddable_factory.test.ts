@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NavigationEmbeddableFactoryDefinition } from './navigation_embeddable_factory';
+import { NavigationEmbeddableFactoryDefinition } from './links_embeddable_factory';
 import { NavigationEmbeddableInput } from './types';
 
 describe('navigationEmbeddableFactory', () => {

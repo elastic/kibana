@@ -26,7 +26,7 @@ import { NavigationEmbeddableLink, NavigationLayoutType } from '../../common/con
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
-  () => import('../components/editor/navigation_embeddable_panel_editor')
+  () => import('../components/editor/links_panel_editor')
 );
 
 const NavigationEmbeddablePanelEditor = withSuspense(

@@ -26,7 +26,7 @@ import {
   DASHBOARD_LINK_TYPE,
   NavigationLinkOptions,
 } from '../../../common/content_management';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 
 export const NavigationEmbeddableLinkOptions = ({

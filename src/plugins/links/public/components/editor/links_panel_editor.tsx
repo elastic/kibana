@@ -37,9 +37,9 @@ import {
   NAV_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { memoizedGetOrderedLinkList } from '../../editor/navigation_embeddable_editor_tools';
+import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 import { NavigationEmbeddablePanelEditorEmptyPrompt } from './navigation_embeddable_panel_editor_empty_prompt';
 

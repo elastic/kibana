@@ -25,7 +25,7 @@ import {
 } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
+import { useNavigationEmbeddable } from '../../embeddable/links_embeddable';
 import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
 
 export const DashboardLinkComponent = ({

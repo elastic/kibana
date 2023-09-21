@@ -26,7 +26,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { NavigationLinkInfo } from '../../embeddable/types';
 import { validateUrl } from '../external_link/external_link_tools';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
-import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavEmbeddableStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../../common/content_management';
 
