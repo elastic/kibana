@@ -56,6 +56,7 @@ import { TimelineKPIs } from './kpis';
 
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
+import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -425,6 +426,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
             <TimelineStatusInfoContainer>
               <TimelineStatusInfo timelineId={timelineId} />
             </TimelineStatusInfoContainer>
+            <SaveTimelineButton timelineId={timelineId} />
           </RowFlexItem>
           <RowFlexItem>
             <TimelineDescription timelineId={timelineId} />
