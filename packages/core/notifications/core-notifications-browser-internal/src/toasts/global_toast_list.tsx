@@ -7,7 +7,7 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent, useCallback, useRef } from 'react';
+import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -41,7 +41,6 @@ export const GlobalToastList: FunctionComponent<Props> = ({
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
-  const userRequestedToastDimissIndex = useRef<string | null>(null);
 
   const reportToastDismissal = useCallback(
     (representedToasts: State['idToToasts'][number]) => {
@@ -71,39 +70,24 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       const { toasts: reducedToasts, idToToasts: reducedIdToasts } =
         deduplicateToasts(redundantToastList);
 
-      setIdToToasts((prevState) => {
-        // select toast group that just got dismissed
-        // using the stored requested toast delete index
-        const toastsDimissedFromLastInteraction = userRequestedToastDimissIndex.current
-          ? prevState[userRequestedToastDimissIndex.current]
-          : [];
-
-        if (toastsDimissedFromLastInteraction.length) {
-          reportToastDismissal(toastsDimissedFromLastInteraction);
-
-          userRequestedToastDimissIndex.current = null;
-        }
-
-        return reducedIdToasts;
-      });
-
+      setIdToToasts(reducedIdToasts);
       setToasts(reducedToasts);
     });
 
     return () => subscription.unsubscribe();
-  }, [reportEvent, reportToastDismissal, toasts$]);
+  }, [reportEvent, toasts$]);
 
   const closeToastsRepresentedById = useCallback(
     ({ id }: EuiToast) => {
       const representedToasts = idToToasts[id];
 
       if (representedToasts) {
-        userRequestedToastDimissIndex.current = id;
-
         representedToasts.forEach((toast) => dismissToast(toast.id));
+
+        reportToastDismissal(representedToasts);
       }
     },
-    [dismissToast, idToToasts]
+    [dismissToast, idToToasts, reportToastDismissal]
   );
 
   return (

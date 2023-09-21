@@ -168,7 +168,7 @@ describe('global_toast_list toast dismissal telemetry', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    sharedProps.dismissToast.mockReset();
+    jest.resetAllMocks();
   });
 
   it('does not invoke the reportEvent method when there is no recurring toast', async () => {
@@ -278,6 +278,58 @@ describe('global_toast_list toast dismissal telemetry', () => {
         recurrenceCount: REPEATED_TOAST_COUNT,
       })
     );
+
+    expect(screen.queryByLabelText('Notification')).toBeNull();
+  });
+
+  it('invokes the reportEvent method when the clear all button is clicked', () => {
+    const UNIQUE_TOASTS_COUNT = 4;
+    const REPEATED_COUNT_PER_UNIQUE_TOAST = 2;
+
+    const onDimissReporterSpy = jest.spyOn(sharedProps.reportEvent, 'onDismissToast');
+
+    const toastObservable$ = new BehaviorSubject<Toast[]>(
+      Array.from(new Array(UNIQUE_TOASTS_COUNT)).reduce((acc, _, idx) => {
+        return acc.concat(
+          Array.from(new Array(REPEATED_COUNT_PER_UNIQUE_TOAST)).map(() => ({
+            ...createMockToast(idx, 'warning'),
+            title: `${dummyToastTitle}_${idx}`,
+          }))
+        );
+      }, [])
+    );
+
+    sharedProps.dismissToast.mockImplementation((toastId: string) =>
+      act(() => {
+        const toastList = toastObservable$.getValue();
+        toastObservable$.next(toastList.filter((t) => t.id !== toastId));
+      })
+    );
+
+    render(<RenderToastList toasts$={toastObservable$.asObservable() as any} />);
+
+    fireEvent.click(screen.getByLabelText('Clear all toast notifications'));
+
+    act(() => {
+      // This is so that the toast fade out animation succesfully runs,
+      // only after this is the dismiss method invoked
+      jest.runOnlyPendingTimers();
+    });
+
+    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(
+      UNIQUE_TOASTS_COUNT * REPEATED_COUNT_PER_UNIQUE_TOAST
+    );
+
+    expect(onDimissReporterSpy).toHaveBeenCalledTimes(UNIQUE_TOASTS_COUNT);
+
+    new Array(UNIQUE_TOASTS_COUNT).forEach((_, idx) => {
+      expect(onDimissReporterSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toastMessage: `${dummyToastTitle}_${idx}`,
+          recurrenceCount: REPEATED_COUNT_PER_UNIQUE_TOAST,
+        })
+      );
+    });
 
     expect(screen.queryByLabelText('Notification')).toBeNull();
   });
