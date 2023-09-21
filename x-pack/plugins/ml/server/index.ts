@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
@@ -26,5 +26,10 @@ export {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
 } from './shared';
+import { configSchema, type ConfigSchema } from './config_schema';
 
-export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+};
+
+export const plugin = (ctx: PluginInitializerContext<ConfigSchema>) => new MlServerPlugin(ctx);

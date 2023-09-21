@@ -16,7 +16,7 @@ import {
   createResultSchema,
 } from '@kbn/content-management-utils';
 
-const sortSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
+const sortSchema = schema.arrayOf(schema.string(), { maxSize: 2 });
 
 const savedSearchAttributesSchema = schema.object(
   {

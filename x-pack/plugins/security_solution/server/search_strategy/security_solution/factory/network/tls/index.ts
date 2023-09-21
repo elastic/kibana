@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   NetworkTlsStrategyResponse,
   NetworkQueries,
-  NetworkTlsRequestOptions,
   NetworkTlsEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
@@ -24,14 +23,14 @@ import { getNetworkTlsEdges } from './helpers';
 import { buildNetworkTlsQuery } from './query.tls_network.dsl';
 
 export const networkTls: SecuritySolutionFactory<NetworkQueries.tls> = {
-  buildDsl: (options: NetworkTlsRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildNetworkTlsQuery(options);
   },
   parse: async (
-    options: NetworkTlsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTlsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
