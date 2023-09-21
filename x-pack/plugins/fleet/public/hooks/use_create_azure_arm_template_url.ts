@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { AzureArmTemplateProps } from '../components/agent_enrollment_flyout/types';
 
-import { useAgentVersion } from './use_agent_version';
 import { useGetSettings } from './use_request';
-
-const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
 export const useCreateAzureArmTemplateUrl = ({
   enrollmentAPIKey,
@@ -22,8 +19,6 @@ export const useCreateAzureArmTemplateUrl = ({
   azureArmTemplateProps: AzureArmTemplateProps | undefined;
 }) => {
   const { data, isLoading } = useGetSettings();
-
-  const agentVersion = useAgentVersion();
 
   let isError = false;
   let error: string | undefined;

@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
+import { AzureArmTemplateInstructions } from '../azure_arm_template_instructions';
 
-import { CloudFormationInstructions } from '../cloud_formation_instructions';
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import type { CloudSecurityIntegration } from '../types';
 
@@ -40,7 +40,7 @@ export const InstallAzureArmTemplateManagedAgentStep = ({
     }),
     children:
       selectedApiKeyId && apiKeyData && cloudSecurityIntegration ? (
-        <CloudFormationInstructions
+        <AzureArmTemplateInstructions
           cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
         />

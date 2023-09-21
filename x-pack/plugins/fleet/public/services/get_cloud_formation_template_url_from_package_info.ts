@@ -14,7 +14,8 @@ import type { PackageInfo } from '../types';
  */
 export const getCloudFormationTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
-  integrationType: string
+  integrationType: string,
+  templateUrlFieldName: string
 ): string | undefined => {
   if (!packageInfo?.policy_templates) return undefined;
 
@@ -24,7 +25,7 @@ export const getCloudFormationTemplateUrlFromPackageInfo = (
   if ('inputs' in policyTemplate) {
     const cloudFormationTemplate = policyTemplate.inputs?.reduce((acc, input): string => {
       if (!input.vars) return acc;
-      const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+      const template = input.vars.find((v) => v.name === templateUrlFieldName)?.default;
       return template ? String(template) : acc;
     }, '');
     return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;

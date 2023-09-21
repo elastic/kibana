@@ -31,7 +31,7 @@ export interface CloudFormationProps {
 
 export interface AzureArmTemplateProps {
   templateUrl: string | undefined;
-  awsAccountType: CloudSecurityIntegrationAzureAccountType | undefined;
+  azureAccountType: CloudSecurityIntegrationAzureAccountType | undefined;
 }
 
 export interface CloudSecurityIntegration {

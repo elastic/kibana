@@ -14,18 +14,19 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getCloudShellUrlFromAgentPolicy } from '../../services';
-
 import {
   getCloudFormationTemplateUrlFromPackageInfo,
-  getCloudFormationTemplateUrlFromAgentPolicy,
+  getCloudShellUrlFromAgentPolicy,
 } from '../../services';
+
+import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
 
 import type {
   K8sMode,
   CloudSecurityIntegrationType,
   CloudSecurityIntegrationAwsAccountType,
   CloudSecurityIntegration,
+  CloudSecurityIntegrationAzureAccountType,
 } from './types';
 
 // Packages that requires custom elastic-agent manifest
@@ -99,6 +100,9 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     { enabled: Boolean(cloudSecurityPackagePolicy) }
   );
 
+  const AWS_ACCOUNT_TYPE = 'aws.account_type';
+  const AZURE_ACCOUNT_TYPE = 'azure.account_type';
+
   const cloudSecurityIntegration: CloudSecurityIntegration | undefined = useMemo(() => {
     if (!agentPolicy || !cloudSecurityPackagePolicy) {
       return undefined;
@@ -109,8 +113,15 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
 
     if (!integrationType) return undefined;
 
-    const cloudFormationTemplateFromAgentPolicy =
-      getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+    const cloudFormationTemplateFromAgentPolicy = getCloudFormationTemplateUrlFromAgentPolicy(
+      agentPolicy,
+      'cloud_formation_template_url'
+    );
+
+    const azureArmTemplateFromAgentPolicy = getCloudFormationTemplateUrlFromAgentPolicy(
+      agentPolicy,
+      'arm_template_url'
+    );
 
     // Use the latest CloudFormation template for the current version
     // So it guarantee that the template version matches the integration version
@@ -118,19 +129,33 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     // In case it can't find the template for the current version,
     // it will fallback to the one from the agent policy.
     const cloudFormationTemplateUrl = packageInfoData?.item
-      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
+      ? getCloudFormationTemplateUrlFromPackageInfo(
+          packageInfoData.item,
+          integrationType,
+          'cloud_formation_template_url'
+        )
       : cloudFormationTemplateFromAgentPolicy;
-
-    const azureArmTemplateUrl = packageInfoData?.item
-      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
-      : cloudFormationTemplateFromAgentPolicy;
-
-    const AWS_ACCOUNT_TYPE = 'aws.account_type';
 
     const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
       cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
         AWS_ACCOUNT_TYPE
       ]?.value;
+
+    const azureArmTemplateUrl = packageInfoData?.item
+      ? getCloudFormationTemplateUrlFromPackageInfo(
+          packageInfoData.item,
+          integrationType,
+          'arm_template_url'
+        )
+      : azureArmTemplateFromAgentPolicy;
+
+    const azureArmTemplateAccountType: CloudSecurityIntegrationAzureAccountType | undefined =
+      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+        AZURE_ACCOUNT_TYPE
+      ]?.value;
+
+    console.log(Boolean(cloudFormationTemplateFromAgentPolicy));
+    console.log(cloudFormationTemplateUrl);
 
     const cloudShellUrl = getCloudShellUrlFromAgentPolicy(agentPolicy);
     return {
@@ -140,6 +165,11 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       cloudFormationProps: {
         awsAccountType: cloudFormationAwsAccountType,
         templateUrl: cloudFormationTemplateUrl,
+      },
+      isAzureArmTemplate: Boolean(azureArmTemplateFromAgentPolicy),
+      azureArmTemplateProps: {
+        awsAccountType: azureArmTemplateAccountType,
+        templateUrl: azureArmTemplateUrl,
       },
       cloudShellUrl,
     };
