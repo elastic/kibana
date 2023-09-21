@@ -369,7 +369,7 @@ export class AlertsClient<
               })
         );
       } else {
-        this.options.logger.warn(
+        this.options.logger.debug(
           `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
             id
           ].getUuid()}`
