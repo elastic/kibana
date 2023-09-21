@@ -289,6 +289,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
                 runElasticsearch({
                   config,
                   log,
+                  esPort,
                   name: `ftr-${esPort}`,
                   esFrom: config.get('esTestCluster')?.from || 'snapshot',
                   onEarlyExit,
