@@ -257,7 +257,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('executor', () => {
+    describe('executor', () => {
       describe('validation', () => {
         const simulator = new BedrockSimulator({
           proxy: {
