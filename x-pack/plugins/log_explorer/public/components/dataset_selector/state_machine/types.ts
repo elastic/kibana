@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DatasetSelection, DatasetSelectionChange } from '../../../utils/dataset_selection';
+import { DatasetSelection, DatasetSelectionChange } from '../../../../common/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {

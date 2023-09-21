@@ -9,20 +9,32 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import { TextInput } from './text_input';
+import { TextInput, TextInputProps } from './text_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 const name = 'Some text field';
 const id = 'some:text:field';
 
 describe('TextInput', () => {
-  const defaultProps = {
-    id,
-    name,
-    ariaLabel: 'Test',
-    onChange: jest.fn(),
-    value: 'initial value',
+  const onChange = jest.fn();
+  const defaultProps: TextInputProps = {
+    onChange,
+    field: {
+      name,
+      type: 'string',
+      ariaAttributes: {
+        ariaLabel: name,
+      },
+      id,
+      isOverridden: false,
+      defaultValue: 'initial value',
+    },
+    isSavingEnabled: true,
   };
+
+  beforeEach(() => {
+    onChange.mockClear();
+  });
 
   it('renders without errors', () => {
     const { container } = render(<TextInput {...defaultProps} />);
@@ -39,11 +51,14 @@ describe('TextInput', () => {
     const { getByTestId } = render(<TextInput {...defaultProps} />);
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ value: 'new value' });
+    expect(defaultProps.onChange).toHaveBeenCalledWith({
+      type: 'string',
+      unsavedValue: 'new value',
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {
-    const { getByTestId } = render(<TextInput {...defaultProps} isDisabled />);
+    const { getByTestId } = render(<TextInput {...defaultProps} isSavingEnabled={false} />);
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toBeDisabled();
   });

@@ -39,7 +39,7 @@ describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless']
 
   it('should substitute parameters in investigation guide', () => {
     cy.getBySel('expand-event').first().click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+    cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
     cy.contains('Get processes').click();
     cy.getBySel('flyout-body-osquery').within(() => {
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
