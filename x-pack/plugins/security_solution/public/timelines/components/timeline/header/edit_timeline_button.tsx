@@ -14,24 +14,24 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../store/timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
-import { TimelineTitleAndDescription } from './title_and_description';
+import { EditTimelineModal } from './edit_timeline_modal';
 import * as timelineTranslations from './translations';
 
-export interface SaveTimelineComponentProps {
+export interface EditTimelineComponentProps {
   initialFocus: 'title' | 'description';
   timelineId: string;
   toolTip?: string;
 }
 
-export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
+export const EditTimelineButton = React.memo<EditTimelineComponentProps>(
   ({ initialFocus, timelineId, toolTip }) => {
     const dispatch = useDispatch();
     const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
     const show = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
-    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
+    const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
-    const closeSaveTimeline = useCallback(() => {
-      setShowSaveTimelineOverlay(false);
+    const closeEditTimeline = useCallback(() => {
+      setShowEditTimelineOverlay(false);
       if (show) {
         dispatch(
           timelineActions.toggleModalSaveTimeline({
@@ -40,11 +40,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
           })
         );
       }
-    }, [dispatch, setShowSaveTimelineOverlay, show]);
+    }, [dispatch, setShowEditTimelineOverlay, show]);
 
-    const openSaveTimeline = useCallback(() => {
-      setShowSaveTimelineOverlay(true);
-    }, [setShowSaveTimelineOverlay]);
+    const openEditTimeline = useCallback(() => {
+      setShowEditTimelineOverlay(true);
+    }, [setShowEditTimelineOverlay]);
 
     // Case: 1
     // check if user has crud privileges so that user can be allowed to edit the timeline
@@ -60,35 +60,35 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
       [toolTip, hasKibanaCrud]
     );
 
-    const saveTimelineButtonIcon = useMemo(
+    const editTimelineButtonIcon = useMemo(
       () => (
         <EuiButtonIcon
           aria-label={timelineTranslations.EDIT}
           isDisabled={!hasKibanaCrud}
-          onClick={openSaveTimeline}
+          onClick={openEditTimeline}
           iconType="pencil"
-          data-test-subj="save-timeline-button-icon"
+          data-test-subj="edit-timeline-button-icon"
         />
       ),
-      [openSaveTimeline, hasKibanaCrud]
+      [openEditTimeline, hasKibanaCrud]
     );
 
-    return (initialFocus === 'title' && show) || showSaveTimelineOverlay ? (
+    return (initialFocus === 'title' && show) || showEditTimelineOverlay ? (
       <>
-        {saveTimelineButtonIcon}
-        <TimelineTitleAndDescription
-          closeSaveTimeline={closeSaveTimeline}
+        {editTimelineButtonIcon}
+        <EditTimelineModal
+          closeEditTimeline={closeEditTimeline}
           initialFocus={initialFocus}
           timelineId={timelineId}
           showWarning={initialFocus === 'title' && show}
         />
       </>
     ) : (
-      <EuiToolTip content={finalTooltipMsg ?? ''} data-test-subj="save-timeline-btn-tooltip">
-        {saveTimelineButtonIcon}
+      <EuiToolTip content={finalTooltipMsg ?? ''} data-test-subj="edit-timeline-btn-tooltip">
+        {editTimelineButtonIcon}
       </EuiToolTip>
     );
   }
 );
 
-SaveTimelineButton.displayName = 'SaveTimelineButton';
+EditTimelineButton.displayName = 'EditTimelineButton';
