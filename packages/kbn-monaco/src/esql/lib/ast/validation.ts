@@ -17,8 +17,76 @@ const fnLookups = builtinFunctions.concat(mathCommandFullDefinitions).reduce((me
   return memo;
 }, new Map<string, FunctionDefinition>());
 
-function createError(message: string, location?: ESQLLocation) {
-  return createMessage('error', message, location);
+type SignatureType = FunctionDefinition['signatures'][number];
+type SignatureArgType = SignatureType['params'][number];
+
+interface ValidationErrors {
+  wrongArgumentType: {
+    message: string;
+    type: {
+      name: string;
+      argType: string;
+      value: string | number | Date;
+      givenType: string;
+    };
+  };
+  wrongArgumentNumber: {
+    message: string;
+    type: { fn: string; numArgs: number; passedArgs: number };
+  };
+  unknownColumn: {
+    message: string;
+    type: { value: string | number };
+  };
+  unknownFunction: {
+    message: string;
+    type: { name: string };
+  };
+}
+
+type ErrorTypes = keyof ValidationErrors;
+type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
+
+function getMessageFromId<K extends ErrorTypes>({
+  messageId,
+  values,
+  locations,
+}: {
+  messageId: K;
+  values: ErrorValues<K>;
+  locations?: ESQLLocation;
+}): ESQLMessage {
+  let message: string = '';
+  // Use a less strict type instead of doing a typecast on each message type
+  //   const out = values as unknown as Record<string, string>;
+  switch (messageId) {
+    case 'wrongArgumentType':
+      message = i18n.translate('monaco.esql.validation.wrongArgumentType', {
+        defaultMessage:
+          'argument of [{name}] must be [{expectedType}], found value [{argValue}] type [{actualType}]',
+        values,
+      });
+      break;
+    case 'unknownColumn':
+      message = i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
+        defaultMessage: 'unknown column [{arg}]',
+        values,
+      });
+      break;
+    case 'unknownFunction':
+      message = i18n.translate('monaco.esql.validation.missingFunction', {
+        defaultMessage: 'Unknown function [{name}]',
+        values,
+      });
+      break;
+    case 'wrongArgumentNumber':
+      message = i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
+        defaultMessage:
+          'error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+        values,
+      });
+  }
+  return createMessage('error', message, locations);
 }
 
 function createWarning(message: string, location?: ESQLLocation) {
@@ -33,41 +101,18 @@ function createMessage(type: 'error' | 'warning', message: string, location?: ES
   };
 }
 
-type SignatureType = FunctionDefinition['signatures'][number];
-type SignatureArgType = SignatureType['params'][number];
-
-function createWrongTypeMessage(
-  fn: string,
-  argDef: SignatureArgType,
-  value: string | number | Date,
-  givenType: string
-) {
-  return i18n.translate('monaco.esql.validation.wrongArgumentLiteralType', {
-    defaultMessage:
-      'argument of [{fn}] must be [{expectedType}], found value [{argValue}] type [{actualType}]',
-    values: {
-      fn,
-      expectedType: Array.isArray(argDef.type) ? argDef.type.join(', ') : argDef.type,
-      argValue: value,
-      actualType: givenType,
-    },
-  });
-}
-
 function validateFunction(astFunction: ESQLFunction) {
   const errors: ESQLMessage[] = [];
   const warnings: ESQLMessage[] = [];
   if (!fnLookups.has(astFunction.name)) {
     errors.push(
-      createError(
-        i18n.translate('monaco.esql.validation.missingFunction', {
-          defaultMessage: 'Unknown function [{fn}]',
-          values: {
-            fn: astFunction.name,
-          },
-        }),
-        astFunction.location
-      )
+      getMessageFromId({
+        messageId: 'unknownFunction',
+        values: {
+          name: astFunction.name,
+        },
+        locations: astFunction.location,
+      })
     );
     return { errors, warnings };
   }
@@ -81,18 +126,15 @@ function validateFunction(astFunction: ESQLFunction) {
   if (!matchingSignatures.length) {
     const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
     errors.push(
-      createError(
-        i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
-          defaultMessage:
-            'error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
-          values: {
-            fn: astFunction.name,
-            numArgs,
-            passedArgs: astFunction.args.length,
-          },
-        }),
-        astFunction.location
-      )
+      getMessageFromId({
+        messageId: 'wrongArgumentNumber',
+        values: {
+          fn: astFunction.name,
+          numArgs,
+          passedArgs: astFunction.args.length,
+        },
+        locations: astFunction.location,
+      })
     );
   }
   // now perform the same check on all functions args
@@ -136,49 +178,50 @@ function validateFunction(astFunction: ESQLFunction) {
     const failingSignature: ESQLMessage[] = [];
     signature.params.forEach((argDef, index) => {
       const actualArg = astFunction.args[index]!;
+      const argDefTypes = Array.isArray(argDef.type) ? argDef.type : [argDef.type];
       if (!Array.isArray(actualArg)) {
         if (actualArg.type === 'literal') {
-          if (actualArg.literalType !== argDef.type) {
+          if (!argDefTypes.includes(actualArg.literalType) && argDefTypes[0] !== 'any') {
             if (actualArg.literalType === 'string') {
               failingSignature.push(
-                createError(
-                  i18n.translate('monaco.esql.validation.wrongArgumentColumnType', {
-                    defaultMessage: 'unknown column [{arg}]',
-                    values: {
-                      arg: actualArg.value,
-                    },
-                  }),
-                  actualArg.location
-                )
+                getMessageFromId({
+                  messageId: 'unknownColumn',
+                  values: {
+                    value: actualArg.value,
+                  },
+                  locations: actualArg.location,
+                })
               );
             } else {
               failingSignature.push(
-                createError(
-                  createWrongTypeMessage(
-                    astFunction.name,
-                    argDef,
-                    actualArg.value,
-                    actualArg.literalType
-                  ),
-                  actualArg.location
-                )
+                getMessageFromId({
+                  messageId: 'wrongArgumentType',
+                  values: {
+                    name: astFunction.name,
+                    argType: argDefTypes.join(', '),
+                    value: actualArg.value,
+                    givenType: actualArg.literalType,
+                  },
+                  locations: actualArg.location,
+                })
               );
             }
           }
         }
         if (actualArg.type === 'function' && fnLookups.has(actualArg.name)) {
           const argFn = fnLookups.get(actualArg.name)!;
-          if (argFn.signatures.every(({ returnType }) => returnType !== argDef.type)) {
+          if (argFn.signatures.every(({ returnType }) => !argDefTypes.includes(returnType))) {
             failingSignature.push(
-              createError(
-                createWrongTypeMessage(
-                  astFunction.name,
-                  argDef,
-                  actualArg.name,
-                  argFn.signatures[0].returnType
-                ),
-                actualArg.location
-              )
+              getMessageFromId({
+                messageId: 'wrongArgumentType',
+                values: {
+                  name: astFunction.name,
+                  argType: argDefTypes.join(', '),
+                  value: actualArg.name,
+                  givenType: argFn.signatures[0].returnType,
+                },
+                locations: actualArg.location,
+              })
             );
           }
         }
