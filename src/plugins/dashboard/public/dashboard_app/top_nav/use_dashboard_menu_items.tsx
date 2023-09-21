@@ -58,6 +58,7 @@ export const useDashboardMenuItems = ({
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -268,7 +269,7 @@ export const useDashboardMenuItems = ({
     const fullScreenMenuItem = showFullScreenButton ? [menuItems.fullScreen] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
-    const editMenuItem = showWriteControls ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     return [
       ...labsMenuItem,
       ...fullScreenMenuItem,
@@ -287,6 +288,7 @@ export const useDashboardMenuItems = ({
     showFullScreenButton,
     share,
     showWriteControls,
+    managed,
     resetChangesMenuItem,
   ]);
 

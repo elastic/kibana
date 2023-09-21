@@ -26,6 +26,7 @@ import {
   leaveConfirmStrings,
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
+  dashboardManagedBadge,
 } from '../dashboard_app/_dashboard_app_strings';
 import { UI_SETTINGS } from '../../common';
 import { useDashboardAPI } from '../dashboard_app/dashboard_app';
@@ -73,7 +74,7 @@ export function InternalDashboardTopNav({
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: showSaveQuery },
+    dashboardCapabilities: { saveQuery: showSaveQuery, showWriteControls },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -88,6 +89,7 @@ export function InternalDashboardTopNav({
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -271,9 +273,8 @@ export function InternalDashboardTopNav({
   });
 
   const badges = useMemo(() => {
-    if (viewMode !== ViewMode.EDIT) return;
     const allBadges: TopNavMenuProps['badges'] = [];
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChanges && viewMode === ViewMode.EDIT) {
       allBadges.push({
         'data-test-subj': 'dashboardUnsavedChangesBadge',
         badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
@@ -285,7 +286,7 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
-    if (hasRunMigrations) {
+    if (hasRunMigrations && viewMode === ViewMode.EDIT) {
       allBadges.push({
         'data-test-subj': 'dashboardSaveRecommendedBadge',
         badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
@@ -298,8 +299,21 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
+    if (showWriteControls && managed) {
+      allBadges.push({
+        'data-test-subj': 'dashboardSaveRecommendedBadge',
+        badgeText: dashboardManagedBadge.getText(),
+        title: '',
+        color: 'primary',
+        iconType: 'glasses',
+        toolTipProps: {
+          content: dashboardManagedBadge.getTooltip(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
     return allBadges;
-  }, [hasRunMigrations, hasUnsavedChanges, viewMode]);
+  }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
 
   return (
     <div
