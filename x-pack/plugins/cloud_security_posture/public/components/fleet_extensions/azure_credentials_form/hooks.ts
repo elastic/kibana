@@ -10,12 +10,11 @@ import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getArmTemplateUrlFromCspmPackage,
-  getCspmCloudFormationDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
 } from '../utils';
 import {
-  DEFAULT_AZURE_CREDENTIALS_TYPE,
+  DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE,
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
@@ -28,14 +27,14 @@ const getAzureCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
 ): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type']?.value;
 
-const getAzureCloudFormationTemplate = (newPolicy: NewPackagePolicy) => {
+const getAzureArmTemplateUrl = (newPolicy: NewPackagePolicy) => {
   const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_AZURE)
-    ?.config?.cloud_formation_template_url?.value;
+    ?.config?.arm_template_url?.value;
 
   return template || undefined;
 };
 
-const updateCloudFormationPolicyTemplate = (
+const updateAzureArmTemplateUrlInPolicy = (
   newPolicy: NewPackagePolicy,
   updatePolicy: (policy: NewPackagePolicy) => void,
   templateUrl: string | undefined
@@ -46,7 +45,7 @@ const updateCloudFormationPolicyTemplate = (
       if (input.type === CLOUDBEAT_AZURE) {
         return {
           ...input,
-          config: { cloud_formation_template_url: { value: templateUrl } },
+          config: { arm_template_url: { value: templateUrl } },
         };
       }
       return input;
@@ -66,21 +65,21 @@ const useCloudFormationTemplate = ({
   setupFormat: SetupFormat;
 }) => {
   useEffect(() => {
-    const policyInputCloudFormationTemplate = getAzureCloudFormationTemplate(newPolicy);
+    const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
 
     if (setupFormat === 'manual') {
-      if (!!policyInputCloudFormationTemplate) {
-        updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined);
+      if (!!azureArmTemplateUrl) {
+        updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
       }
       return;
     }
-    const templateUrl = getCspmCloudFormationDefaultValue(packageInfo);
+    const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo);
 
     if (templateUrl === '') return;
 
-    if (policyInputCloudFormationTemplate === templateUrl) return;
+    if (azureArmTemplateUrl === templateUrl) return;
 
-    updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl);
+    updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo, setupFormat]);
 };
@@ -101,7 +100,7 @@ export const useAzureCredentialsForm = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
-    getAzureCredentialsType(input) || DEFAULT_AZURE_CREDENTIALS_TYPE;
+    getAzureCredentialsType(input) || DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE;
 
   const options = getAzureCredentialsFormOptions();
 
@@ -156,7 +155,7 @@ export const useAzureCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.credentials.type': {
-            value: lastManualCredentialsType.current || DEFAULT_AZURE_CREDENTIALS_TYPE,
+            value: lastManualCredentialsType.current || DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE,
             type: 'text',
           },
           ...fieldsSnapshot.current,

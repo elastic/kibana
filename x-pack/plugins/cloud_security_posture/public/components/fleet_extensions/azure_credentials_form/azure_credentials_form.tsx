@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -171,6 +171,12 @@ export const AzureCredentialsForm = ({
       setIsValid,
       updatePolicy,
     });
+
+  useEffect(() => {
+    if (!setupFormat) {
+      onSetupFormatChange('arm_template');
+    }
+  }, [setupFormat, onSetupFormatChange]);
 
   return (
     <>

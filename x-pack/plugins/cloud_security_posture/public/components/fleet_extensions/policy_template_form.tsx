@@ -158,10 +158,6 @@ const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
-const getAzureAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
-): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
-
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
 
 const AwsAccountTypeSelect = ({
@@ -308,6 +304,9 @@ const GcpAccountTypeSelect = ({
 };
 
 // const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0-preview1';
+const getAzureAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
+): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
 const AzureAccountTypeSelect = ({
   input,

@@ -32,7 +32,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
       } as const;
     });
 
-export const DEFAULT_AZURE_CREDENTIALS_TYPE = 'arm_template';
+export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'manual';
 
 export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   arm_template: {
@@ -41,7 +41,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {},
   },
   manual: {
-    label: 'ARM Template',
+    label: 'Manual',
     info: [],
     fields: {},
   },
