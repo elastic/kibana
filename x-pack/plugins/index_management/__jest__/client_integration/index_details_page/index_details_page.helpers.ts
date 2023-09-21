@@ -13,10 +13,9 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import {
-  IndexDetailsPage,
-  IndexDetailsSection,
-} from '../../../public/application/sections/home/index_list/details_page';
+
+import { IndexDetailsSection } from '../../../common/constants';
+import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
 
