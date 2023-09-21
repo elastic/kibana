@@ -7,7 +7,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
