@@ -11,13 +11,9 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
 
-
-const CreateComponent: CustomFieldType['Create'] = ({
-  customFieldConfiguration,
-  isLoading,
-}) => {
-  const {key, label, required} = customFieldConfiguration;
-  const config = getTextFieldConfig({required, label});
+const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, isLoading }) => {
+  const { key, label, required } = customFieldConfiguration;
+  const config = getTextFieldConfig({ required, label });
 
   return (
     <UseField
@@ -31,10 +27,10 @@ const CreateComponent: CustomFieldType['Create'] = ({
           fullWidth: true,
           disabled: isLoading,
           isLoading,
-        }
+        },
       }}
     />
-)
+  );
 };
 
 CreateComponent.displayName = 'Create';

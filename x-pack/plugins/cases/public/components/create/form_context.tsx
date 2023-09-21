@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -93,20 +93,19 @@ export const FormContext: React.FC<Props> = ({
     return formData;
   };
 
-  const mapCustomFieldsData = (userFormData): CaseUI['customFields'] => {
-    if(!customFieldsConfiguration.length) {
+  const mapCustomFieldsData = (userFormData: CaseUI & Record<string, string | boolean>) => {
+    if (!customFieldsConfiguration.length) {
       return [];
     }
-    return customFieldsConfiguration.map(field => (
-      { 
-        key: field.key,
-        type: field.type,
-        field: {
-          value: [userFormData[field.key]]
-        }
-      }
-    ));
-  }
+    return customFieldsConfiguration.map((field) => {
+      return ({
+      key: field.key,
+      type: field.type,
+      field: {
+        value: [userFormData[field.key]],
+      },
+    })});
+  };
 
   const submitCase = useCallback(
     async (
@@ -131,12 +130,10 @@ export const FormContext: React.FC<Props> = ({
 
         const customFieldsMapped = mapCustomFieldsData(userFormData);
 
-        // remove custom fields keys from the form data
-        customFieldsConfiguration.forEach(item => delete userFormData[item.key])
+        // remove custom fields keys from userFormData
+        customFieldsConfiguration.forEach((item) => delete userFormData[item.key]);
 
         const trimmedData = trimUserFormData(userFormData);
-
-        console.log('create case', {trimmedData, customFieldsMapped});
 
         const theCase = await postCase({
           request: {
@@ -144,7 +141,7 @@ export const FormContext: React.FC<Props> = ({
             connector: connectorToUpdate,
             settings: { syncAlerts },
             owner: selectedOwner ?? defaultOwner,
-            customFields: customFieldsMapped,
+            customFields: customFieldsMapped as CaseUI['customFields'],
           },
         });
 
@@ -190,7 +187,7 @@ export const FormContext: React.FC<Props> = ({
     ]
   );
 
-  const { form } = useForm<FormProps>({
+  const { form } = useForm({
     defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
@@ -203,7 +200,11 @@ export const FormContext: React.FC<Props> = ({
     () =>
       children != null
         ? React.Children.map(children, (child: React.ReactElement) =>
-            React.cloneElement(child, { connectors, isLoadingConnectors, customFieldsConfiguration })
+            React.cloneElement(child, {
+              connectors,
+              isLoadingConnectors,
+              customFieldsConfiguration,
+            })
           )
         : null,
     [children, connectors, isLoadingConnectors, customFieldsConfiguration]

@@ -11,7 +11,7 @@ import * as i18n from '../translations';
 import { Edit } from './edit';
 import { View } from './view';
 import { Configure } from './configure';
-import  { Create } from './create';
+import { Create } from './create';
 
 export const configureTextCustomFieldFactory: CustomFieldFactory = () => ({
   id: CustomFieldTypes.TEXT,

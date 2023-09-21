@@ -6,10 +6,8 @@
  */
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  REQUIRED_FIELD,
-} from '../translations';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { REQUIRED_FIELD } from '../translations';
 
 const { emptyField } = fieldValidators;
 
@@ -29,8 +27,6 @@ export const getToggleFieldConfig = ({
   }
 
   return {
-    validations: [
-      ...validators,
-    ],
+    validations: [...validators],
   };
 };

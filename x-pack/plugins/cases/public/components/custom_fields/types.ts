@@ -22,8 +22,7 @@ export interface CustomFieldType {
     canUpdate: boolean;
   }>;
   Create: React.FC<{
-    // customField: CaseUI['customFields'][number];
-    customFieldConfiguration: CasesConfigurationUI['customFields'][number];
+    customFieldConfiguration: CasesConfigurationUICustomField;
     isLoading: boolean;
   }>;
 }

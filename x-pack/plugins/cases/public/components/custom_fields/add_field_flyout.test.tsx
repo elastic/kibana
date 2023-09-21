@@ -46,14 +46,12 @@ describe('AddFieldFlyout ', () => {
     userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
 
     await waitFor(() => {
-      expect(props.onSaveField).toBeCalledWith([
-        {
-          key: expect.anything(),
-          label: 'Summary',
-          required: true,
-          type: 'text',
-        },
-      ]);
+      expect(props.onSaveField).toBeCalledWith({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
     });
   });
 
@@ -65,14 +63,12 @@ describe('AddFieldFlyout ', () => {
     userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
 
     await waitFor(() => {
-      expect(props.onSaveField).toBeCalledWith([
-        {
-          key: expect.anything(),
-          label: 'Summary',
-          required: false,
-          type: 'text',
-        },
-      ]);
+      expect(props.onSaveField).toBeCalledWith({
+        key: expect.anything(),
+        label: 'Summary',
+        required: false,
+        type: 'text',
+      });
     });
   });
 
