@@ -6,7 +6,12 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { DatasetSelection, DatasetSelectionChange } from '../../../common/dataset_selection';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type {
+  DatasetSelection,
+  DatasetSelectionChange,
+  DataViewSelection,
+} from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
@@ -21,6 +26,7 @@ import {
   INTEGRATIONS_TAB_ID,
   UNCATEGORIZED_TAB_ID,
 } from './constants';
+import { LoadDataViews, ReloadDataViews, SearchDataViews } from '../../hooks/use_data_views';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */
@@ -29,19 +35,32 @@ export interface DatasetSelectorProps {
   datasetsError: Error | null;
   /* The current selection instance */
   datasetSelection: DatasetSelection;
+  /* The available data views list */
+  dataViews: DataViewListItem[] | null;
+  /* Any error occurred to show when the user preview the data views */
+  dataViewsError: Error | null;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
   integrationsError: Error | null;
-  /* Flags for loading/searching integrations or data streams*/
+  /* Flags for loading/searching integrations, data streams or data views*/
+  isLoadingDataViews: boolean;
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;
   isSearchingIntegrations: boolean;
+  /* Triggered when retrying to load the data views */
+  onDataViewsReload: ReloadDataViews;
+  /* Triggered when selecting a data view */
+  onDataViewSelection: DataViewSelection;
+  /* Triggered when the data views tab is selected */
+  onDataViewsTabClick: LoadDataViews;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when the user reload the list after an error */
   onIntegrationsReload: ReloadIntegrations;
   /* Triggered when a search or sorting is performed */
+  onDataViewsSearch: SearchDataViews;
+  onDataViewsSort: SearchDataViews;
   onIntegrationsSearch: SearchIntegrations;
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
@@ -50,8 +69,8 @@ export interface DatasetSelectorProps {
   onUncategorizedSort: SearchDatasets;
   /* Triggered when retrying to load the data streams */
   onUncategorizedReload: ReloadDatasets;
-  /* Triggered when the uncategorized streams entry is selected */
-  onStreamsEntryClick: LoadDatasets;
+  /* Triggered when the uncategorized tab is selected */
+  onUncategorizedTabClick: LoadDatasets;
   /* Triggered when the selection is updated */
   onSelectionChange: DatasetSelectionChange;
 }
@@ -76,3 +95,5 @@ export type DatasetsSelectorSearchHandler = (params: DatasetsSelectorSearchParam
 export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
+
+export type DataViewSelectionHandler = (dataView: DataViewListItem) => void;

@@ -96,7 +96,7 @@ Basic.args = {
   isLoadingIntegrations: false,
   isLoadingStreams: false,
   onIntegrationsReload: () => alert('Reload integrations...'),
-  onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
+  onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
   onUncategorizedReload: () => alert('Reloading streams...'),
 };
 

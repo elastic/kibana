@@ -25,7 +25,7 @@ export interface CreateLogExplorerProfileCustomizationsDeps {
 export const createLogExplorerProfileCustomizations =
   ({ core, plugins, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { data, dataViews } = plugins;
+    const { data, dataViews, discover } = plugins;
     // Lazy load dependencies
     const datasetServiceModuleLoadable = import('../services/datasets');
     const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
@@ -73,6 +73,7 @@ export const createLogExplorerProfileCustomizations =
         <LazyCustomDatasetSelector
           datasetsClient={datasetsClient}
           dataViews={dataViews}
+          discover={discover}
           logExplorerProfileStateService={logExplorerProfileStateService}
         />
       ),

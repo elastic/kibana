@@ -7,7 +7,15 @@
 
 import React, { useMemo } from 'react';
 import styled from '@emotion/styled';
-import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
   dataViewsLabel,
@@ -17,6 +25,7 @@ import {
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
+  openDiscoverLabel,
   uncategorizedLabel,
   UNCATEGORIZED_PANEL_ID,
   UNCATEGORIZED_TAB_ID,
@@ -28,19 +37,28 @@ import { SelectorActions } from './sub_components/selector_actions';
 import { DatasetSelectorProps } from './types';
 import {
   buildIntegrationsTree,
+  createDataViewsStatusItem,
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
 
 export function DatasetSelector({
   datasets,
-  datasetsError,
   datasetSelection,
+  datasetsError,
+  dataViews,
+  dataViewsError,
   integrations,
   integrationsError,
+  isLoadingDataViews,
   isLoadingIntegrations,
   isLoadingStreams,
   isSearchingIntegrations,
+  onDataViewSelection,
+  onDataViewsReload,
+  onDataViewsSearch,
+  onDataViewsSort,
+  onDataViewsTabClick,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -48,10 +66,10 @@ export function DatasetSelector({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onStreamsEntryClick,
   onUncategorizedReload,
   onUncategorizedSearch,
   onUncategorizedSort,
+  onUncategorizedTabClick,
 }: DatasetSelectorProps) {
   const {
     panelId,
@@ -65,6 +83,7 @@ export function DatasetSelector({
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
@@ -72,6 +91,9 @@ export function DatasetSelector({
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
+    onDataViewSelection,
+    onDataViewsSearch,
+    onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
     onIntegrationsSearch,
@@ -133,6 +155,25 @@ export function DatasetSelector({
     }));
   }, [datasets, datasetsError, isLoadingStreams, selectDataset, onUncategorizedReload]);
 
+  const dataViewsItems = useMemo(() => {
+    if (!dataViews || dataViews.length === 0) {
+      return [
+        createDataViewsStatusItem({
+          data: dataViews,
+          error: dataViewsError,
+          isLoading: isLoadingDataViews,
+          onRetry: onDataViewsReload,
+        }),
+      ];
+    }
+
+    return dataViews.map((dataView) => ({
+      'data-test-subj': `logExplorerDataView_${dataView.name}`,
+      name: dataView.name,
+      onClick: () => selectDataView(dataView),
+    }));
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
+
   const tabs = [
     {
       id: INTEGRATIONS_TAB_ID,
@@ -144,7 +185,7 @@ export function DatasetSelector({
       id: UNCATEGORIZED_TAB_ID,
       name: uncategorizedLabel,
       onClick: () => {
-        onStreamsEntryClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
+        onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
         switchToUncategorizedTab();
       },
       'data-test-subj': 'datasetSelectorUncategorizedTab',
@@ -153,6 +194,7 @@ export function DatasetSelector({
       id: DATA_VIEWS_TAB_ID,
       name: dataViewsLabel,
       onClick: () => {
+        onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
         switchToDataViewsTab();
       },
       'data-test-subj': 'datasetSelectorDataViewsTab',
@@ -234,9 +276,9 @@ export function DatasetSelector({
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: dataViewsLabel,
+            title: <DataViewsPanelTitle />,
             width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-            items: uncategorizedItems,
+            items: dataViewsItems,
           },
         ]}
         className="eui-yScroll"
@@ -246,6 +288,17 @@ export function DatasetSelector({
     </DatasetsPopover>
   );
 }
+
+const DataViewsPanelTitle = () => {
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem>{dataViewsLabel}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge iconType="discoverApp">{openDiscoverLabel}</EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const Tabs = styled(EuiTabs)`
   padding: 0 8px;

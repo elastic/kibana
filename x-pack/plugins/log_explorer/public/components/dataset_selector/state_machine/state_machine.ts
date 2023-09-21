@@ -132,7 +132,10 @@ export const createPureDatasetsSelectorStateMachine = (
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortDataViews'],
                     },
-                    SELECT_DATASET: '#closed',
+                    SELECT_DATA_VIEW: {
+                      target: '#closed',
+                      actions: ['selectDataView'],
+                    },
                   },
                 },
               },
@@ -175,7 +178,7 @@ export const createPureDatasetsSelectorStateMachine = (
         ),
         storeSearch: assign((context, event) => {
           if ('search' in event) {
-            const id = context.tabId === UNCATEGORIZED_TAB_ID ? context.tabId : context.panelId;
+            const id = context.tabId === INTEGRATIONS_TAB_ID ? context.panelId : context.tabId;
             context.searchCache.set(id, event.search);
 
             return {
@@ -230,6 +233,9 @@ export const createPureDatasetsSelectorStateMachine = (
 
 export const createDatasetsSelectorStateMachine = ({
   initialContext,
+  onDataViewSelection,
+  onDataViewsSearch,
+  onDataViewsSort,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -249,6 +255,11 @@ export const createDatasetsSelectorStateMachine = ({
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
       reloadUncategorized: onUncategorizedReload,
+      selectDataView: (_context, event) => {
+        if (event.type === 'SELECT_DATA_VIEW' && 'dataView' in event) {
+          return onDataViewSelection(event.dataView);
+        }
+      },
       // Search actions
       searchIntegrations: (_context, event) => {
         if ('search' in event) {
@@ -258,6 +269,16 @@ export const createDatasetsSelectorStateMachine = ({
       sortIntegrations: (_context, event) => {
         if ('search' in event) {
           onIntegrationsSort(event.search);
+        }
+      },
+      searchDataViews: (context, event) => {
+        if ('search' in event) {
+          onDataViewsSearch(event.search);
+        }
+      },
+      sortDataViews: (context, event) => {
+        if ('search' in event) {
+          onDataViewsSort(event.search);
         }
       },
       searchIntegrationsStreams: (context, event) => {

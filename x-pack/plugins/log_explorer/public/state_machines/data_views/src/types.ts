@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { FindDatasetValue, SortOrder } from '../../../../common/latest';
+import { SortOrder } from '../../../../common/latest';
 
 export interface DataViewsSearchParams {
-  datasetQuery?: string;
+  name?: string;
   sortOrder?: SortOrder;
 }
 
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchParams, FindDatasetValue>;
+  cache: IHashedCache<DataViewsSearchParams, DataViewListItem[]>;
 }
 
 export interface WithSearch {
@@ -23,10 +23,12 @@ export interface WithSearch {
 }
 
 export interface WithDataViews {
-  dataViews: DataView[];
+  dataViewsSource: DataViewListItem[];
+  dataViews: DataViewListItem[];
 }
 
 export interface WithNullishDataViews {
+  dataViewsSource: null;
   dataViews: null;
 }
 
@@ -63,12 +65,16 @@ export type DataViewsTypestate =
       context: LoadedDataViewsContext;
     }
   | {
-      value: 'loadingFailed';
-      context: LoadingFailedDataViewsContext;
+      value: 'loaded.idle';
+      context: LoadedDataViewsContext;
     }
   | {
-      value: 'debounceSearchingDataViews';
+      value: 'loaded.debounceSearchingDataViews';
       context: LoadedDataViewsContext;
+    }
+  | {
+      value: 'loadingFailed';
+      context: LoadingFailedDataViewsContext;
     };
 
 export type DataViewsContext = DataViewsTypestate['context'];
@@ -81,6 +87,10 @@ export type DataViewsEvent =
       type: 'RELOAD_DATA_VIEWS';
     }
   | {
+      type: 'SELECT_DATA_VIEW';
+      dataView: DataViewListItem;
+    }
+  | {
       type: 'SEARCH_DATA_VIEWS';
       search: DataViewsSearchParams;
     }
@@ -88,4 +98,4 @@ export type DataViewsEvent =
       type: 'SORT_DATA_VIEWS';
       search: DataViewsSearchParams;
     }
-  | DoneInvokeEvent<FindDatasetValue | Error>;
+  | DoneInvokeEvent<DataViewListItem[] | Error>;

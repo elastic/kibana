@@ -6,14 +6,15 @@
  */
 
 import { HashedCache } from '../../../../common/hashed_cache';
-import { DefaultDatasetsContext } from './types';
+import { DefaultDataViewsContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultDatasetsContext = {
+export const DEFAULT_CONTEXT: DefaultDataViewsContext = {
   cache: new HashedCache(),
+  dataViewsSource: null,
   dataViews: null,
   error: null,
   search: {
-    dataViewQuery: '',
+    name: '',
     sortOrder: 'asc',
   },
 };

@@ -11,6 +11,7 @@ import {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DatasetsSelectorSearchHandler,
+  DataViewSelectionHandler,
   PanelId,
 } from '../types';
 import { createDatasetsSelectorStateMachine } from './state_machine';
@@ -18,6 +19,9 @@ import { DatasetsSelectorStateMachineDependencies } from './types';
 
 export const useDatasetSelector = ({
   initialContext,
+  onDataViewSelection,
+  onDataViewsSearch,
+  onDataViewsSort,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -32,6 +36,9 @@ export const useDatasetSelector = ({
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
       initialContext,
+      onDataViewSelection,
+      onDataViewsSearch,
+      onDataViewsSort,
       onIntegrationsLoadMore,
       onIntegrationsReload,
       onIntegrationsSearch,
@@ -98,6 +105,11 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
+  const selectDataView = useCallback<DataViewSelectionHandler>(
+    (dataView) => datasetsSelectorStateService.send({ type: 'SELECT_DATA_VIEW', dataView }),
+    [datasetsSelectorStateService]
+  );
+
   const sortByOrder = useCallback<DatasetsSelectorSearchHandler>(
     (params) => datasetsSelectorStateService.send({ type: 'SORT_BY_ORDER', search: params }),
     [datasetsSelectorStateService]
@@ -129,6 +141,7 @@ export const useDatasetSelector = ({
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,

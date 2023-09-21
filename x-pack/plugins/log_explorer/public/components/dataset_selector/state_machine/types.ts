@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DatasetSelection, DatasetSelectionChange } from '../../../../common/dataset_selection';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { SearchDataViews } from '../../../hooks/use_data_views';
+import {
+  DatasetSelection,
+  DatasetSelectionChange,
+  DataViewSelection,
+} from '../../../../common/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
@@ -100,6 +106,10 @@ export type DatasetsSelectorEvent =
       dataset: Dataset;
     }
   | {
+      type: 'SELECT_DATA_VIEW';
+      dataView: DataViewListItem;
+    }
+  | {
       type: 'SELECT_ALL_LOGS_DATASET';
     }
   | {
@@ -116,6 +126,9 @@ export type DatasetsSelectorEvent =
 
 export interface DatasetsSelectorStateMachineDependencies {
   initialContext?: Partial<DefaultDatasetsSelectorContext>;
+  onDataViewSelection: DataViewSelection;
+  onDataViewsSearch: SearchDataViews;
+  onDataViewsSort: SearchDataViews;
   onIntegrationsLoadMore: LoadMoreIntegrations;
   onIntegrationsReload: ReloadIntegrations;
   onIntegrationsSearch: SearchIntegrations;

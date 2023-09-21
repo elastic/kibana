@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { useDatasetSelection } from '../hooks/use_dataset_selection';
-import { DataViewsProvider } from '../hooks/use_data_views';
+import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views';
 
 interface CustomDatasetSelectorProps {
   logExplorerProfileStateService: LogExplorerProfileStateService;
@@ -47,20 +48,35 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
     sortDatasets,
   } = useDatasetsContext();
 
-  // const { dataViews, loadDataViews } = useDataViewsContext();
-
-  // console.log(dataViews);
+  const {
+    dataViews,
+    error: dataViewsError,
+    isLoading: isLoadingDataViews,
+    loadDataViews,
+    reloadDataViews,
+    selectDataView,
+    searchDataViews,
+    sortDataViews,
+  } = useDataViewsContext();
 
   return (
     <DatasetSelector
       datasets={datasets}
       datasetSelection={datasetSelection}
       datasetsError={datasetsError}
+      dataViews={dataViews}
+      dataViewsError={dataViewsError}
       integrations={integrations}
       integrationsError={integrationsError}
+      isLoadingDataViews={isLoadingDataViews}
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingStreams={isLoadingStreams}
       isSearchingIntegrations={isSearchingIntegrations}
+      onDataViewsReload={reloadDataViews}
+      onDataViewsSearch={searchDataViews}
+      onDataViewSelection={selectDataView}
+      onDataViewsSort={sortDataViews}
+      onDataViewsTabClick={loadDataViews}
       onIntegrationsLoadMore={loadMore}
       onIntegrationsReload={reloadIntegrations}
       onIntegrationsSearch={searchIntegrations}
@@ -68,10 +84,10 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
       onSelectionChange={handleDatasetSelectionChange}
-      onStreamsEntryClick={loadDatasets}
       onUncategorizedReload={reloadDatasets}
       onUncategorizedSearch={searchDatasets}
       onUncategorizedSort={sortDatasets}
+      onUncategorizedTabClick={loadDatasets}
     />
   );
 });
@@ -82,18 +98,20 @@ export default CustomDatasetSelector;
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
     datasetsClient,
     dataViews,
+    discover,
     logExplorerProfileStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
-          <DataViewsProvider dataViews={dataViews}>
+          <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
             <Component logExplorerProfileStateService={logExplorerProfileStateService} />
           </DataViewsProvider>
         </DatasetsProvider>

@@ -34,6 +34,10 @@ export const dataViewsLabel = i18n.translate('xpack.logExplorer.datasetSelector.
   defaultMessage: 'Data Views',
 });
 
+export const openDiscoverLabel = i18n.translate('xpack.logExplorer.datasetSelector.openDiscover', {
+  defaultMessage: 'Opens in Discover',
+});
+
 export const sortOrdersLabel = i18n.translate('xpack.logExplorer.datasetSelector.sortOrders', {
   defaultMessage: 'Sort directions',
 });
@@ -46,6 +50,17 @@ export const noDatasetsDescriptionLabel = i18n.translate(
   'xpack.logExplorer.datasetSelector.noDatasetsDescription',
   {
     defaultMessage: 'No datasets or search results found.',
+  }
+);
+
+export const noDataViewsLabel = i18n.translate('xpack.logExplorer.datasetSelector.noDataViews', {
+  defaultMessage: 'No data views found',
+});
+
+export const noDataViewsDescriptionLabel = i18n.translate(
+  'xpack.logExplorer.datasetSelector.noDataViewsDescription',
+  {
+    defaultMessage: 'No data views or search results found.',
   }
 );
 
