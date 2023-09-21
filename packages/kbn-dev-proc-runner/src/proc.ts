@@ -87,17 +87,24 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent<[number]>(childProcess, 'exit').pipe(
+    Rx.fromEvent<[number, string]>(childProcess, 'exit').pipe(
       take(1),
-      map(([code]) => {
+      map(([code, signal]) => {
         if (stopCalled) {
           return null;
         }
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+
+        // JVM exits with 143 on SIGTERM and 130 on SIGINT, don't treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
           throw createFailError(`[${name}] exited with code ${code}`, {
             exitCode: code,
           });
+        }
+
+        // A stop signal of SIGABRT indicates a self-inflicted app crash,
+        // then we can't rely on an exit code, because it's not passed
+        if (signal === 'SIGABRT') {
+          throw createFailError(`[${name}] aborted ${code ? `with code: ${code}` : ''}`);
         }
 
         return code;
@@ -132,7 +139,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     share()
   );
 
-  const outcomePromise = Rx.merge(lines$.pipe(ignoreElements()), outcome$).toPromise();
+  const outcomePromise = Rx.firstValueFrom(Rx.merge(lines$.pipe(ignoreElements()), outcome$));
 
   async function stop(signal: NodeJS.Signals) {
     if (stopCalled) {
