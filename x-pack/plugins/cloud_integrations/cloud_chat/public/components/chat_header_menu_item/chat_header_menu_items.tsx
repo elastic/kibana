@@ -76,7 +76,7 @@ export function ChatHeaderMenuItem() {
             css={{ color: euiTheme.colors.ghost, marginRight: euiTheme.size.m }}
             size="s"
             iconType={chatIconLight}
-            data-test-subj="cloudChat"
+            data-test-subj="cloud-chat"
             onClick={() => {
               if (showTour) setShowTour(false);
               chatApi?.toggle();
