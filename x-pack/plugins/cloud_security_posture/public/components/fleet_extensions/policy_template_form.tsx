@@ -84,6 +84,7 @@ export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
 export const GCP_SINGLE_ACCOUNT = 'single-account-gcp';
 export const GCP_ORGANIZATION_ACCOUNT = 'organization-account-gcp';
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
+type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -111,14 +112,7 @@ const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
     id: GCP_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
       defaultMessage: 'GCP Organization',
-    }),
-    disabled: true,
-    tooltip: i18n.translate(
-      'xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip',
-      {
-        defaultMessage: 'Coming Soon',
-      }
-    ),
+    })
   },
   {
     id: GCP_SINGLE_ACCOUNT,
@@ -231,6 +225,10 @@ const AwsAccountTypeSelect = ({
   );
 };
 
+const getGcpAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
+): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
+
 const GcpAccountTypeSelect = ({
   input,
   newPolicy,
@@ -242,6 +240,31 @@ const GcpAccountTypeSelect = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
 }) => {
+  // This will disable the gcp org option for any version below 1.5.9 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
+  const isValidSemantic = semverValid(packageInfo.version);
+  const isGcpOrgDisabled = isValidSemantic
+    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
+    : true;
+
+  const gcpAccountTypeOptions = useMemo(
+    () => getGcpAccountTypeOptions(),
+    [isGcpOrgDisabled]
+  );
+
+  useEffect(() => {
+    if (!getGcpAccountType(input)) {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'gcp.account_type': {
+            value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
+            type: 'text',
+          },
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input]);
+
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -251,13 +274,24 @@ const GcpAccountTypeSelect = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
+      {isGcpOrgDisabled && (
+        <>
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationNotSupportedMessage"
+              defaultMessage="GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
       <RadioGroup
-        idSelected={GCP_SINGLE_ACCOUNT}
-        options={getGcpAccountTypeOptions()}
+        idSelected={getGcpAccountType(input) || ''}
+        options={gcpAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy(
             getPosturePolicy(newPolicy, input.type, {
-              gcp_account_type: {
+              'gcp.account_type': {
                 value: accountType,
                 type: 'text',
               },
@@ -266,13 +300,28 @@ const GcpAccountTypeSelect = ({
         }}
         size="m"
       />
-      <EuiSpacer size="l" />
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.gcpAccountType.singleAccountDescription"
-          defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
-        />
-      </EuiText>
+      {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDescription"
+              defaultMessage="Connect Elastic to every GCP Project (current and future) in your environment by providing Elastic with read-only (configuration) access to your GCP organization"
+            />
+          </EuiText>
+        </>
+      )}
+      {getGcpAccountType(input) === GCP_SINGLE_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+            />
+          </EuiText>
+        </>
+      )}
     </>
   );
 };
