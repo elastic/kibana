@@ -68,7 +68,7 @@ import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
-import { registerSampleDataSetLinks } from './lib/register_sameple_data_set_links';
+import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
