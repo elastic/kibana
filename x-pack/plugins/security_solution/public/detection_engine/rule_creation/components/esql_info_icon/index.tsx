@@ -16,7 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 const POPOVER_WIDTH = 640;
 
 /**
- * Icon and popover that gives hint to users how suppression for missing fields work
+ * Icon and popover that gives hint to users how to get started with ES|QL rules
  */
 const EsqlInfoIconComponent = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
