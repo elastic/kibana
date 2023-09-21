@@ -52,6 +52,13 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
   `,
+  examples: `
+Run the latest verified, kibana-compatible ES Serverless image:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+
+Run with a specific ES Serverless tag from the docker.elastic.co/elasticsearch-ci/elasticsearch-serverless repo:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage git-fec36430fba2
+  `,
 };
 
 export function parseFlags(flags: FlagsReader) {
