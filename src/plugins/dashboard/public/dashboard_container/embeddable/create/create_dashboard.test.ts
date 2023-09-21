@@ -262,7 +262,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     .fn()
     .mockReturnValue(mockContactCardFactory);
 
-  await createDashboard({
+  const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
     getInitialInput: () => ({
       panels: {
@@ -286,6 +286,75 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     }),
     expect.any(Object)
   );
+  expect(dashboard!.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_match',
+      firstName: 'wow look at this new panel wow',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.i_do_not_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_do_not_match',
+      firstName: 'phew... I will not be replaced',
+    })
+  );
+
+  // expect panel to be created with the default size.
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.w).toBe(24);
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.h).toBe(15);
+});
+
+test('creates new embeddable with specified size if size is provided', async () => {
+  const incomingEmbeddable: EmbeddablePackageState = {
+    type: CONTACT_CARD_EMBEDDABLE,
+    input: {
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    } as ContactCardEmbeddableInput,
+    size: { width: 1, height: 1 },
+    embeddableId: 'new_panel',
+  };
+  const mockContactCardFactory = {
+    create: jest.fn().mockReturnValue({ destroy: jest.fn() }),
+    getDefaultInput: jest.fn().mockResolvedValue({}),
+  };
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockContactCardFactory);
+
+  const dashboard = await createDashboard({
+    getIncomingEmbeddable: () => incomingEmbeddable,
+    getInitialInput: () => ({
+      panels: {
+        i_do_not_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: {
+            id: 'i_do_not_match',
+            firstName: 'phew... I will not be replaced',
+          },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    }),
+  });
+
+  // flush promises
+  await new Promise((r) => setTimeout(r, 1));
+
+  expect(mockContactCardFactory.create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    }),
+    expect.any(Object)
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.w).toBe(1);
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
 });
 
 test('creates a control group from the control group factory and waits for it to be initialized', async () => {
