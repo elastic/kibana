@@ -56,6 +56,7 @@ import {
   getDocumentationSections,
   MonacoError,
   getWrappedInPipesCode,
+  isSystemIndex,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -376,7 +377,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         pattern: '*',
         isRollupIndex: () => false,
       });
-      return indices.map((i) => i.name);
+      return indices.filter((index) => !isSystemIndex(index.name)).map((i) => i.name);
     }, [dataViews]);
 
   const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = useCallback(
