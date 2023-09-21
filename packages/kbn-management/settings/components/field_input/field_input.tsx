@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useImperativeHandle, useRef } from 'react';
 
 import type {
   FieldDefinition,
+  OnChangeFn,
+  ResetInputRef,
   SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
@@ -40,8 +42,6 @@ import {
   isUndefinedFieldUnsavedChange,
 } from '@kbn/management-settings-field-definition/is';
 
-import { getInputValue } from '@kbn/management-settings-utilities';
-
 import {
   BooleanInput,
   CodeEditorInput,
@@ -51,23 +51,20 @@ import {
   SelectInput,
   TextInput,
   ArrayInput,
-  TextInputProps,
 } from './input';
-
-import { OnChangeFn } from './types';
 
 /**
  * The props that are passed to the {@link FieldInput} component.
  */
 export interface FieldInputProps<T extends SettingType> {
   /** The {@link FieldDefinition} for the component. */
-  field: FieldDefinition<T>;
+  field: Pick<FieldDefinition<T>, 'type' | 'id' | 'name' | 'ariaAttributes'>;
   /** An {@link UnsavedFieldChange} for the component, if any. */
   unsavedChange?: UnsavedFieldChange<T>;
   /** The `onChange` handler for the input. */
   onChange: OnChangeFn<T>;
-  /** True if the input is disabled, false otherwise. */
-  isDisabled?: boolean;
+  /** True if the input can be saved, false otherwise. */
+  isSavingEnabled: boolean;
   /** True if the value within the input is invalid, false otherwise. */
   isInvalid?: boolean;
 }
@@ -84,167 +81,140 @@ const getMismatchError = (type: SettingType, unsavedType?: SettingType) =>
  *
  * @param props The props for the {@link FieldInput} component.
  */
-export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => {
-  const {
-    field,
-    unsavedChange,
-    isDisabled = false,
-    isInvalid = false,
-    onChange: onChangeProp,
-  } = props;
-  const { id, name, ariaAttributes } = field;
+export const FieldInput = React.forwardRef<ResetInputRef, FieldInputProps<SettingType>>(
+  (props, ref) => {
+    const { field, unsavedChange, onChange, isSavingEnabled } = props;
 
-  const inputProps = {
-    ...ariaAttributes,
-    id,
-    isDisabled,
-    isInvalid,
-    name,
-  };
+    // Create a ref for those input fields that require an imperative handle.
+    const inputRef = useRef<ResetInputRef>(null);
 
-  // These checks might seem excessive or redundant, but they are necessary to ensure that
-  // the types are honored correctly using type guards.  These checks get compiled down to
-  // checks against the `type` property-- which we were doing in the previous code, albeit
-  // in an unenforceable way.
-  //
-  // Based on the success of a check, we can render the `FieldInput` in a indempotent and
-  // type-safe way.
-  //
-  if (isArrayFieldDefinition(field)) {
-    // If the composing component mistakenly provides an incompatible `UnsavedFieldChange`,
-    // we can throw an `Error`.  We might consider switching to a `console.error` and not
-    // rendering the input, but that might be less helpful.
-    if (!isArrayFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+    // Create an imperative handle that passes the invocation to any internal input that
+    // may require it.
+    useImperativeHandle(ref, () => ({
+      reset: () => {
+        if (inputRef.current) {
+          inputRef.current.reset();
+        }
+      },
+    }));
+
+    const inputProps = { isSavingEnabled, onChange };
+
+    // These checks might seem excessive or redundant, but they are necessary to ensure that
+    // the types are honored correctly using type guards.  These checks get compiled down to
+    // checks against the `type` property-- which we were doing in the previous code, albeit
+    // in an unenforceable way.
+    //
+    // Based on the success of a check, we can render the `FieldInput` in a indempotent and
+    // type-safe way.
+    //
+    if (isArrayFieldDefinition(field)) {
+      // If the composing component mistakenly provides an incompatible `UnsavedFieldChange`,
+      // we can throw an `Error`.  We might consider switching to a `console.error` and not
+      // rendering the input, but that might be less helpful.
+      if (!isArrayFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
+
+      return <ArrayInput {...{ field, unsavedChange, ...inputProps }} />;
     }
 
-    const [value] = getInputValue(field, unsavedChange);
+    if (isBooleanFieldDefinition(field)) {
+      if (!isBooleanFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    // This is a safe cast because we've already checked that the type is correct in both
-    // the `FieldDefinition` and the `UnsavedFieldChange`... no need for a further
-    // type guard.
-    const onChange = onChangeProp as OnChangeFn<'array'>;
-
-    return <ArrayInput {...{ ...inputProps, onChange, value }} />;
-  }
-
-  if (isBooleanFieldDefinition(field)) {
-    if (!isBooleanFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return <BooleanInput {...{ field, unsavedChange, ...inputProps }} />;
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'boolean'>;
+    if (isColorFieldDefinition(field)) {
+      if (!isColorFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return <BooleanInput {...{ ...inputProps, onChange, value }} />;
-  }
-
-  if (isColorFieldDefinition(field)) {
-    if (!isColorFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return <ColorPickerInput {...{ field, unsavedChange, ...inputProps }} />;
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'color'>;
+    if (isImageFieldDefinition(field)) {
+      if (!isImageFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return <ColorPickerInput {...{ ...inputProps, onChange, value }} />;
-  }
-
-  if (isImageFieldDefinition(field)) {
-    if (!isImageFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return <ImageInput {...{ field, unsavedChange, ...inputProps }} ref={inputRef} />;
     }
 
-    const [value, unsaved] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'image'>;
+    if (isJsonFieldDefinition(field)) {
+      if (!isJsonFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return (
-      <ImageInput
-        {...{ ...inputProps, onChange, value }}
-        isDefaultValue={field.isDefaultValue}
-        hasChanged={unsaved}
-      />
-    );
-  }
-
-  if (isJsonFieldDefinition(field)) {
-    if (!isJsonFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return (
+        <CodeEditorInput
+          {...{ field, unsavedChange, ...inputProps }}
+          type="json"
+          defaultValue={field.savedValue || ''}
+        />
+      );
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'json'>;
+    if (isMarkdownFieldDefinition(field)) {
+      if (!isMarkdownFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return (
-      <CodeEditorInput
-        {...{ ...inputProps, onChange, value }}
-        type="json"
-        defaultValue={field.savedValue || ''}
-      />
-    );
-  }
-
-  if (isMarkdownFieldDefinition(field)) {
-    if (!isMarkdownFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return (
+        <CodeEditorInput
+          {...{ field, unsavedChange, ...inputProps }}
+          type="markdown"
+          defaultValue={field.savedValue || ''}
+        />
+      );
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'markdown'>;
+    if (isNumberFieldDefinition(field)) {
+      if (!isNumberFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return (
-      <CodeEditorInput
-        {...{ ...inputProps, onChange, value }}
-        type="markdown"
-        defaultValue={field.savedValue || ''}
-      />
-    );
-  }
-
-  if (isNumberFieldDefinition(field)) {
-    if (!isNumberFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return <NumberInput {...{ field, unsavedChange, ...inputProps }} />;
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'number'>;
+    if (isSelectFieldDefinition(field)) {
+      if (!isSelectFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return <NumberInput {...{ ...inputProps, onChange, value }} />;
-  }
+      const {
+        options: { values: optionValues, labels: optionLabels },
+      } = field;
 
-  if (isSelectFieldDefinition(field)) {
-    if (!isSelectFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return (
+        <SelectInput {...{ field, unsavedChange, optionLabels, optionValues, ...inputProps }} />
+      );
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'select'>;
-    const {
-      options: { values: optionValues, labels: optionLabels },
-    } = field;
+    if (isStringFieldDefinition(field)) {
+      if (!isStringFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return <SelectInput {...{ ...inputProps, onChange, optionLabels, optionValues, value }} />;
-  }
-
-  if (isStringFieldDefinition(field)) {
-    if (!isStringFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return <TextInput {...{ field, unsavedChange, ...inputProps }} />;
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    const onChange = onChangeProp as OnChangeFn<'string'>;
+    if (isUndefinedFieldDefinition(field)) {
+      if (!isUndefinedFieldUnsavedChange(unsavedChange)) {
+        throw getMismatchError(field.type, unsavedChange?.type);
+      }
 
-    return <TextInput {...{ ...inputProps, onChange, value }} />;
-  }
-
-  if (isUndefinedFieldDefinition(field)) {
-    if (!isUndefinedFieldUnsavedChange(unsavedChange)) {
-      throw getMismatchError(field.type, unsavedChange?.type);
+      return (
+        <TextInput
+          field={field as unknown as FieldDefinition<'string'>}
+          unsavedChange={unsavedChange as unknown as UnsavedFieldChange<'string'>}
+          {...inputProps}
+        />
+      );
     }
 
-    const [value] = getInputValue(field, unsavedChange);
-    return <TextInput {...{ ...(inputProps as unknown as TextInputProps), value }} />;
+    throw new Error(`Unknown or incompatible field type: ${field.type}`);
   }
-
-  throw new Error(`Unknown or incompatible field type: ${field.type}`);
-};
+);

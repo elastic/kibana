@@ -722,6 +722,8 @@
       "@kbn/event-annotation-common/*": ["packages/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["packages/kbn-event-annotation-components"],
       "@kbn/event-annotation-components/*": ["packages/kbn-event-annotation-components/*"],
+      "@kbn/event-annotation-listing-plugin": ["src/plugins/event_annotation_listing"],
+      "@kbn/event-annotation-listing-plugin/*": ["src/plugins/event_annotation_listing/*"],
       "@kbn/event-annotation-plugin": ["src/plugins/event_annotation"],
       "@kbn/event-annotation-plugin/*": ["src/plugins/event_annotation/*"],
       "@kbn/event-log-fixture-plugin": ["x-pack/test/plugin_api_integration/plugins/event_log"],

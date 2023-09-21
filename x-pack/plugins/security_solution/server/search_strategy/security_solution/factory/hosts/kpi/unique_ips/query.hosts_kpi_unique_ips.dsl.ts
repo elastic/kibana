@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HostsKpiUniqueIpsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { KpiUniqueIpsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiUniqueIpsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: HostsKpiUniqueIpsRequestOptions) => {
+}: KpiUniqueIpsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
