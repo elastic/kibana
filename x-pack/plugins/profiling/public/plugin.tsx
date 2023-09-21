@@ -16,10 +16,9 @@ import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
-import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
+import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
 
 export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
@@ -129,10 +128,8 @@ export class ProfilingPlugin implements Plugin {
       },
     });
 
-    pluginsSetup.embeddable.registerEmbeddableFactory(
-      EMBEDDABLE_FLAMEGRAPH,
-      new EmbeddableFlamegraphFactory()
-    );
+    registerEmbeddables(pluginsSetup.embeddable);
+
     return {};
   }
 

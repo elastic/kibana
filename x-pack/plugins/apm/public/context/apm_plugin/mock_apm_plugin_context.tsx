@@ -158,6 +158,7 @@ export const mockApmPluginContextValue = {
     locators: infraLocatorsMock,
   },
   deps: {},
+  share: sharePluginMock.createSetupContract(),
   unifiedSearch: mockUnifiedSearch,
   uiActions: {
     getTriggerCompatibleActions: () => Promise.resolve([]),

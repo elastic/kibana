@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { PreviewPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_preview_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 import { AlertReasonPreview } from './alert_reason_preview';
 import { ThemeProvider } from 'styled-components';
@@ -24,7 +24,7 @@ const panelContextValue = {
 describe('<AlertReasonPreview />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
-      <IntlProvider locale="en>">
+      <IntlProvider locale="en">
         <PreviewPanelContext.Provider value={panelContextValue}>
           <ThemeProvider theme={mockTheme}>
             <AlertReasonPreview />

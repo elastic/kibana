@@ -12,6 +12,7 @@ import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
 import { createGetSetupState } from './get_setup_state';
 import { ProfilingESClient } from '../../common/profiling_es_client';
+import { createFetchFunctions } from './functions';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
@@ -30,5 +31,6 @@ export function registerServices(params: RegisterServicesParams) {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
     getSetupState: createGetSetupState(params),
+    fetchFunction: createFetchFunctions(params),
   };
 }

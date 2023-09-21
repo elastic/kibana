@@ -69,9 +69,11 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 
 const expectInfraLocatorsToBeCalled = () => {
   expect(
-    apmContextMock.infra.locators.nodeLogsLocator.getRedirectUrl
+    apmContextMock.infra?.locators.nodeLogsLocator.getRedirectUrl
   ).toBeCalled();
-  expect(apmContextMock.infra.locators.logsLocator.getRedirectUrl).toBeCalled();
+  expect(
+    apmContextMock.infra?.locators.logsLocator.getRedirectUrl
+  ).toBeCalled();
 };
 
 describe('TransactionActionMenu component', () => {
