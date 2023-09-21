@@ -30,11 +30,11 @@ const CHECKBOX_OPTIONS = [
 ];
 
 const checkboxGroupLegend = {
-  children: <span>{i18n.CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE}</span>
-}
+  children: <span>{i18n.CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE}</span>,
+};
 
 export interface MaintenanceWindowSolutionSelectionFormProps {
-  selectedCategories: string[]
+  selectedCategories: string[];
   onChange: (category: string) => void;
 }
 
@@ -51,12 +51,10 @@ export const MaintenanceWindowSolutionSelectionForm = (
   }, [selectedCategories]);
 
   return (
-    <EuiFlexGroup >
+    <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText size="s">
-          <h4>
-            {i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}
-          </h4>
+          <h4>{i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}</h4>
           <p>
             <EuiTextColor color="subdued">
               {i18n.CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION}

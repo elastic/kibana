@@ -81,6 +81,7 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
+          categoryIds: [],
         }}
       />
     );

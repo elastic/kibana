@@ -168,7 +168,7 @@ export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
 export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
   {
-    defaultMessage: 
+    defaultMessage:
       'Select which solutions should be affected by the maintenance window. Only rules created in that solution will reference the maintenance window',
   }
 );

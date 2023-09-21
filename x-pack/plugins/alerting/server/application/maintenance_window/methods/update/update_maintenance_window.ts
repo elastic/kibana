@@ -87,7 +87,7 @@ async function updateWithOCC(
         ...maintenanceWindow,
         ...(title ? { title } : {}),
         ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
-        ...(categoryIds ? { categoryIds } : {}),
+        ...(categoryIds !== undefined ? { categoryIds } : {}),
         ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,

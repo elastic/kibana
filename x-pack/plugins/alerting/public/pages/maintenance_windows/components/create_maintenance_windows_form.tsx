@@ -125,15 +125,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const { setFieldValue } = form;
 
-    console.info(categoryIds);
-
-    const onCategoryChange = useCallback((id: string) => {
-      if (categoryIds.includes(id)) {
-        setFieldValue('categoryIds', categoryIds.filter(category => category !== id));
-        return;
-      }
-      setFieldValue('categoryIds', [...categoryIds, id]);
-    }, [categoryIds, setFieldValue]);
+    const onCategoryIdsChange = useCallback(
+      (id: string) => {
+        if (categoryIds.includes(id)) {
+          setFieldValue(
+            'categoryIds',
+            categoryIds.filter((category) => category !== id)
+          );
+          return;
+        }
+        setFieldValue('categoryIds', [...categoryIds, id]);
+      },
+      [categoryIds, setFieldValue]
+    );
 
     const modal = useMemo(() => {
       let m;
@@ -175,12 +179,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               }}
             />
           </EuiFlexItem>
-          <EuiSpacer size='xs'/>
+          <EuiSpacer size="xs" />
           <EuiFlexItem>
             <EuiText size="s">
-              <h4>
-                {i18n.CREATE_FORM_TIMEFRAME_TITLE}
-              </h4>
+              <h4>{i18n.CREATE_FORM_TIMEFRAME_TITLE}</h4>
               <p>
                 <EuiTextColor color="subdued">
                   {i18n.CREATE_FORM_TIMEFRAME_DESCRIPTION}
@@ -259,18 +261,18 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               }}
             />
           </EuiFlexItem>
-          {isRecurring &&
+          {isRecurring && (
             <EuiFlexItem>
               <RecurringSchedule data-test-subj="recurring-form" />
             </EuiFlexItem>
-          }
+          )}
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <UseField path="categoryIds">
               {() => (
-                <MaintenanceWindowSolutionSelectionForm 
+                <MaintenanceWindowSolutionSelectionForm
                   selectedCategories={categoryIds}
-                  onChange={onCategoryChange}
+                  onChange={onCategoryIdsChange}
                 />
               )}
             </UseField>

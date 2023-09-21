@@ -10,20 +10,20 @@ import { AsApiContract, RewriteRequestCase, RewriteResponseCase } from '@kbn/act
 import { MaintenanceWindow } from '../../pages/maintenance_windows/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 
-const rewriteBodyRequest: RewriteResponseCase<MaintenanceWindow> = ({ 
-  rRule, 
+const rewriteBodyRequest: RewriteResponseCase<MaintenanceWindow> = ({
+  rRule,
   categoryIds,
-  ...res 
+  ...res
 }) => ({
   ...res,
   r_rule: rRule,
   category_ids: categoryIds,
 });
 
-const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({ 
-  r_rule: rRule, 
+const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({
+  r_rule: rRule,
   category_ids: categoryIds,
-  ...rest 
+  ...rest
 }) => ({
   ...rest,
   rRule,

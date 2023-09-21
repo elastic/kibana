@@ -76,5 +76,31 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should create maintenance window with category ids', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          category_ids: ['observability', 'securitySolution'],
+        })
+        .expect(200);
+
+      objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+      expect(response.body.category_ids).eql(['observability', 'securitySolution']);
+    });
+
+    it('should throw if creating maintenance window with invalid categories', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          category_ids: ['something-else'],
+        })
+        .expect(400);
+    });
   });
 }
