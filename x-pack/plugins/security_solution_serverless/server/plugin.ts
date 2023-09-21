@@ -65,8 +65,6 @@ export class SecuritySolutionServerlessPlugin
       pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
-
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
