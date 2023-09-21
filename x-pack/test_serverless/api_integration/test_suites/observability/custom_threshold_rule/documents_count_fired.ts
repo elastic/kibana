@@ -23,9 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  // Issue: https://github.com/elastic/kibana/issues/165138
-  describe.skip('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
+  describe('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
@@ -35,9 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await dataViewApi.create({
-        name: 'metrics-fake_hosts',
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: 'metrics-fake_hosts',
+        title: DATE_VIEW,
       });
     });
 
