@@ -41,6 +41,7 @@ import {
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
+import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 
 export function DatasetSelector({
   datasets,
@@ -168,7 +169,7 @@ export function DatasetSelector({
     }
 
     return dataViews.map((dataView) => ({
-      'data-test-subj': 'logExplorerDataViewMenuEntry',
+      'data-test-subj': getDataViewTestSubj(dataView.title),
       name: dataView.name,
       onClick: () => selectDataView(dataView),
     }));
