@@ -4758,6 +4758,14 @@
             "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
+          },
+          {
             "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
           },

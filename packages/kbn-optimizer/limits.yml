@@ -39,7 +39,8 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
   esUiShared: 326654
-  eventAnnotation: 48565
+  eventAnnotation: 30000
+  eventAnnotationListing: 25841
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000

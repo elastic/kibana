@@ -39,7 +39,7 @@ import { IngestionSelector } from './ingestion_selector';
 import './product_selector.scss';
 
 export const ProductSelector: React.FC = () => {
-  const { config, userProfile } = useValues(KibanaLogic);
+  const { config, user } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
@@ -52,7 +52,7 @@ export const ProductSelector: React.FC = () => {
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <EuiText color="ghost">
-            <WelcomeBanner userProfile={userProfile} image={headerImage} showDescription={false} />
+            <WelcomeBanner user={user || undefined} image={headerImage} showDescription={false} />
           </EuiText>
         </EuiPageTemplate.Section>
 
