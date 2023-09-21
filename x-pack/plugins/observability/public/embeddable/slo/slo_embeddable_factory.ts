@@ -28,11 +28,6 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
     >['getStartServices']
   ) {}
 
-  /**
-   * In our simple example, we let everyone have permissions to edit this. Most
-   * embeddables should check the UI Capabilities service to be sure of
-   * the right permissions.
-   */
   public async isEditable() {
     return true;
   }
@@ -70,5 +65,9 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
     return i18n.translate('xpack.observability.sloEmbeddable.displayName', {
       defaultMessage: 'SLO Overview',
     });
+  }
+
+  public getIconType() {
+    return 'visGauge';
   }
 }

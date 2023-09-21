@@ -52,8 +52,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
 
   public render(node: HTMLElement) {
     this.node = node;
-    const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
-    const endTimestamp = datemathToEpochMillis(this.input.timeRange.to, 'up');
+    const startTimestamp = datemathToEpochMillis(this.input.timeRange!.from);
+    const endTimestamp = datemathToEpochMillis(this.input.timeRange!.to, 'up');
     const { sloId, sloInstanceId } = this.getInput();
     const queryClient = new QueryClient();
 

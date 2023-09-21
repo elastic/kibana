@@ -6,6 +6,7 @@
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;
@@ -19,7 +20,10 @@ export interface SloConfigurationProps {
   onCancel: () => void;
 }
 
-export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
+export type SloEmbeddableInput = EmbeddableInput &
+  EmbeddableSloProps & {
+    timeRange: TimeRange;
+  };
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
