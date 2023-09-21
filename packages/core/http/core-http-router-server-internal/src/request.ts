@@ -59,14 +59,16 @@ export class CoreKibanaRequest<
    */
   public static from<P, Q, B>(
     req: RawRequest,
-    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
+    routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>,
     withoutSecretHeaders: boolean = true
   ) {
-    const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-    let requestParts: { params: P; query: Q; body: B };
-    if (isFakeRawRequest(req)) {
-      requestParts = { query: {} as Q, params: {} as P, body: {} as B };
-    } else {
+    let requestParts: { params: P; query: Q; body: B } = {
+      query: {} as Q,
+      params: {} as P,
+      body: {} as B,
+    };
+    if (routeSchemas && !isFakeRawRequest(req)) {
+      const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
       const rawParts = CoreKibanaRequest.sanitizeRequest(req);
       requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
     }
