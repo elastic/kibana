@@ -54,15 +54,7 @@ export function SloList({ autoRefresh }: Props) {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={
-            isInitialLoading ||
-            isLoading ||
-            isRefetching ||
-            isCreatingSlo ||
-            isCloningSlo ||
-            isUpdatingSlo ||
-            isDeletingSlo
-          }
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
         />
