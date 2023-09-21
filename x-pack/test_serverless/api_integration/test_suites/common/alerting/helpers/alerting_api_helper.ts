@@ -122,7 +122,55 @@ export async function createEsQueryRule({
 import { v4 as uuidv4 } from 'uuid';
 export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
-export async function createRule({
+export async function createAnomalyRule({
+  supertest,
+  name = generateUniqueKey(),
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer = 'alerts',
+  notifyWhen,
+  enabled = true,
+  ruleTypeId = 'apm.anomaly',
+  params,
+}: {
+  supertest: SuperTest<Test>;
+  name?: string;
+  consumer?: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: params || {
+        anomalySeverityType: 'critical',
+        environment: 'ENVIRONMENT_ALL',
+        windowSize: 30,
+        windowUnit: 'm',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
+      },
+      tags,
+      name,
+      rule_type_id: ruleTypeId,
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    });
+  return body;
+}
+
+export async function createInventoryRule({
   supertest,
   name = generateUniqueKey(),
   actions = [],
