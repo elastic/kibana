@@ -55,6 +55,24 @@ describe('useAgentVersion', () => {
     expect(result.current).toEqual('8.9.2');
   });
 
+  it('should return the agent version that is <= Kibana version if an agent version that matches Kibana version is not released', async () => {
+    const mockKibanaVersion = '8.8.3';
+    const mockAvailableVersions = ['8.8.0', '8.8.1', '8.8.2', '8.7.0', '8.9.2', '7.16.0'];
+
+    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+      data: { items: mockAvailableVersions },
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+
+    expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+
+    await waitForNextUpdate();
+
+    expect(result.current).toEqual('8.8.2');
+  });
+
   it('should return the latest availeble agent version if a snapshot version', async () => {
     const mockKibanaVersion = '8.10.0-SNAPSHOT';
     const mockAvailableVersions = ['8.8.0', '8.7.0', '8.9.2', '7.16.0'];
@@ -71,6 +89,24 @@ describe('useAgentVersion', () => {
     await waitForNextUpdate();
 
     expect(result.current).toEqual('8.9.2');
+  });
+
+  it('should return kibana version if no agent versions available', async () => {
+    const mockKibanaVersion = '8.11.0';
+    const mockAvailableVersions: string[] = [];
+
+    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+      data: { items: mockAvailableVersions },
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+
+    expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+
+    await waitForNextUpdate();
+
+    expect(result.current).toEqual('8.11.0');
   });
 
   it('should return kibana version if the list of available agent versions is not available', async () => {
