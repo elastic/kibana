@@ -16,6 +16,8 @@ import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
+const cpuCount = () => os.cpus().length;
+
 enum BulkOperation {
   Create = 'create',
   Index = 'index',
@@ -67,6 +69,8 @@ const mapper = (operation) => (ops) => (doc) => {
   });
   return body;
 };
+
+const concurrencyMaxMinus1 = () => cpuCount() - 1;
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
@@ -76,15 +80,16 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency: os.cpus().length - 1,
+        concurrency: concurrencyMaxMinus1(),
         datasource: jsonStanzasWithinArchive.map(mapper(operation)(ops)),
         onDocument(doc) {
           return ops.get(doc);
         },
         onDrop(dropped): void {
-          const dj = JSON.stringify(dropped.document);
-          const ej = JSON.stringify(dropped.error);
-          errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+          errors.push(`
+Bulk doc failure [operation=${operation}]:\n  doc: ${JSON.stringify(
+            dropped.document
+          )}\n  error: ${JSON.stringify(dropped.error)}`);
         },
       },
       {
