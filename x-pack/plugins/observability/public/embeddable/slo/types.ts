@@ -9,8 +9,8 @@ import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/p
 import type { TimeRange } from '@kbn/es-query';
 
 export interface EmbeddableSloProps {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
+  sloId?: string | undefined;
+  sloInstanceId?: string | undefined;
   startTime?: number | null;
   endTime?: number | null;
 }

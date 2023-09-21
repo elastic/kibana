@@ -26,7 +26,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
   const updatedProps = useMemo(() => {
     return {
       ...selectedSlo,
-      title: 'SLO overview',
+      title: 'SLO overview', // TODO use i18n
     };
   }, [selectedSlo]);
   const [hasError, setHasError] = useState(false);
