@@ -58,6 +58,32 @@ export interface CspmResourcesStats {
   passed_findings_count: number;
   failed_findings_count: number;
 }
+
+export interface CloudAccountsStats {
+  account_id: string;
+  product: string;
+  cloud_provider: string;
+  package_policy_id: string;
+  cloud_posture_stats?: CloudPostureAccountsStats;
+  kspm_stats?: KSPMAccountsStats;
+  latest_doc_count: number;
+  latest_doc_updated_timestamp: string;
+}
+export interface CloudPostureAccountsStats {
+  posture_score: number;
+  benchmark_name: string;
+  benchmark_version: string;
+  passed_findings_count: number;
+  failed_findings_count: number;
+}
+
+export interface KSPMAccountsStats {
+  kubernetes_version: string | null;
+  agents_count: number;
+  nodes_count: number;
+  pods_count: number;
+}
+
 export interface CspmAccountsStats {
   account_id: string;
   posture_score: number;
@@ -65,9 +91,9 @@ export interface CspmAccountsStats {
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;
-  kubernetes_version: string | null;
   passed_findings_count: number;
   failed_findings_count: number;
+  kubernetes_version: string | null;
   agents_count: number;
   nodes_count: number;
   pods_count: number;
