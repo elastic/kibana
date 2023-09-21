@@ -108,8 +108,9 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 === Examples
 
 * <<preconfigured-d3security-configuration>>
-* <<preconfigured-resilient-configuration>>
 * <<preconfigured-email-configuration>>
+* <<preconfigured-gen-ai-configuration>>
+* <<preconfigured-resilient-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
@@ -275,6 +276,30 @@ secrets:
     user: <email.address>
     password: <password>
 --------------------------------------------------
+
+[float]
+[[preconfigured-gen-ai-configuration]]
+==== Generative AI connectors
+
+The following example creates a <<gen-ai-action-type,generative AI connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-gen-ai:
+    name: preconfigured-gen-ai-connector-type
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://api.openai.com/v1/chat/completions <1>
+      apiProvider: 'OpenAI' <2>
+      defaultModel: gpt-4 <3>
+    secrets:
+      apiKey: superlongapikey <4>
+--
+<1> The OpenAI request URL
+<2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+<3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
+<4> The OpenAI or Azure OpenAI API key for authentication.
 
 [float]
 [[preconfigured-resilient-configuration]]
