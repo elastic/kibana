@@ -18,8 +18,8 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
 import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_right_panel_context';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockContextValue } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
@@ -66,19 +66,24 @@ jest.mock('../../../explore/containers/risk_score');
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../common/containers/use_first_last_seen');
 
+const renderHostEntityContent = () =>
+  render(
+    <TestProviders>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProviders>
+  );
+
 describe('<HostEntityContent />', () => {
   describe('license is valid', () => {
     it('should render os family and host risk classification', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HostEntityOverview hostName={hostName} />
-          </RightPanelContext.Provider>
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostEntityContent();
 
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
@@ -88,13 +93,8 @@ describe('<HostEntityContent />', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HostEntityOverview hostName={hostName} />
-          </RightPanelContext.Provider>
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostEntityContent();
+
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent('—');
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('—');
     });
@@ -106,13 +106,7 @@ describe('<HostEntityContent />', () => {
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
       mockUseFirstLastSeen.mockReturnValue([false, { lastSeen }]);
 
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HostEntityOverview hostName={hostName} />
-          </RightPanelContext.Provider>
-        </TestProviders>
-      );
+      const { getByTestId, queryByTestId } = renderHostEntityContent();
 
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
@@ -124,13 +118,7 @@ describe('<HostEntityContent />', () => {
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
       mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HostEntityOverview hostName={hostName} />
-          </RightPanelContext.Provider>
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostEntityContent();
 
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent('—');
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
@@ -140,15 +128,7 @@ describe('<HostEntityContent />', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-            <RightPanelContext.Provider value={panelContextValue}>
-              <HostEntityOverview hostName={hostName} />
-            </RightPanelContext.Provider>
-          </ExpandableFlyoutContext.Provider>
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostEntityContent();
 
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
       expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
