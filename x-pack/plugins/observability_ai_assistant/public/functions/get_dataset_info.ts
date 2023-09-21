@@ -23,8 +23,8 @@ export function registerGetDatasetInfoFunction({
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
       providing empty string as index name will retrieve all indices
-      if index is provided and it doesnt match any indices in elasticsearch list of all indices will be provoded as well
-      else list of all fields for the given index will be given.
+      if index is provided and it doesnt match any indices in elasticsearch list of all indices will be provided as well
+      else list of all fields for the given index will be given. if no fields are returned this means no indices were matched by provided index pattern.
       wildcards can be part of index name.
 
       DO NOT include the user's request. It will be added internally.`,
@@ -37,7 +37,7 @@ export function registerGetDatasetInfoFunction({
           index: {
             type: 'string',
             description:
-              'index name the user is interested in or empty string to get information about all available indices',
+              'index pattern the user is interested in or empty string to get information about all available indices',
           },
         },
         required: ['index'],
