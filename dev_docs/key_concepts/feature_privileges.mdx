@@ -1,13 +1,11 @@
 ---
 id: kibDevFeaturePrivileges
 slug: /kibana-dev-docs/key-concepts/designing-feature-privileges
-title: Creating Feature Privlieges
+title: Creating Feature Privileges
 description: Learn to control access to features of your plugin
 date: 2023-09-18
 tags: ['kibana', 'dev', 'architecture', 'contributor']
 ---
-
-# Creating Feature Privileges
 
 If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you're after.
 
@@ -202,61 +200,61 @@ This tells the Kibana RBAC system that users with the role that has `all` access
 
 We've successfully added access control to your plugin using the Kibana feature privileges.
 
-### Options and Configuration
+## Options and Configuration
 
 A deep dive into every option for the Kibana Feature configuration and what they mean.
 
-##### KibanaFeatureConfig Interface
+### KibanaFeatureConfig Interface
 
-###### id
+#### id
 
 - **Description**: Unique identifier for this feature. This identifier is also used when generating UI Capabilities.
 - **Type**: string
 - **Example**: `"myFeature"`
 
-###### name
+#### name
 
 - **Description**: Display name for this feature. This will be displayed to end-users, so a translatable string is advised for i18n.
 - **Type**: string
 - **Example**: `"My Feature"`
 
-###### description (optional)
+#### description (optional)
 
 - **Description**: An optional description that will appear as subtext underneath the feature name.
 - **Type**: string
 - **Example**: `"This is a feature that allows users to perform advanced actions."`
 
-###### category
+#### category
 
 - **Description**: The category for this feature. This will be used to organize the list of features for display within the Spaces and Roles management screens.
 - **Type**: AppCategory (enum)
 - **Example**: `AppCategory.Security`
 
-###### order (optional)
+#### order (optional)
 
 - **Description**: An ordinal used to sort features relative to one another for display.
 - **Type**: number
 - **Example**: `10`
 
-###### excludeFromBasePrivileges (optional)
+#### excludeFromBasePrivileges (optional)
 
 - **Description**: Whether or not this feature should be excluded from the base privileges. This is primarily helpful when migrating applications with a "legacy" privileges model to use Kibana privileges.
 - **Type**: boolean
 - **Example**: `false`
 
-###### minimumLicense (optional)
+#### minimumLicense (optional)
 
 - **Description**: Optional minimum supported license. If omitted, all licenses are allowed. This does not restrict access to your feature based on license. Its only purpose is to inform the space and roles UIs on which features to display.
 - **Type**: LicenseType (enum)
 - **Example**: `LicenseType.Gold`
 
-###### app
+#### app
 
 - **Description**: An array of app IDs that are enabled when this feature is enabled. Apps specified here will automatically cascade to the privileges defined below, unless specified differently there.
 - **Type**: string[]
 - **Example**: `["app1", "app2"]`
 
-###### management (optional)
+#### management (optional)
 
 - **Description**: If this feature includes management sections, you can specify them here to control visibility of those pages based on the current space.
 - **Type**: Object
@@ -268,25 +266,25 @@ A deep dive into every option for the Kibana Feature configuration and what they
   }
   ```
 
-###### catalogue (optional)
+#### catalogue (optional)
 
 - **Description**: If this feature includes a catalogue entry, you can specify them here to control visibility based on the current space.
 - **Type**: string[]
 - **Example**: `["cat1", "cat2"]`
 
-###### alerting (optional)
+#### alerting (optional)
 
 - **Description**: If your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.
 - **Type**: string[]
 - **Example**: `["alertType1", "alertType2"]`
 
-###### cases (optional)
+#### cases (optional)
 
 - **Description**: If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.
 - **Type**: string[]
 - **Example**: `["caseType1", "caseType2"]`
 
-###### privileges
+#### privileges
 
 - **Description**: Feature privilege definition. These are used to control what access the read/all roles will have when enabled for your application.
 - **Type**: Object
@@ -298,7 +296,7 @@ A deep dive into every option for the Kibana Feature configuration and what they
   }
   ```
 
-###### subFeatures (optional)
+#### subFeatures (optional)
 
 - **Description**: Optional sub-feature privilege definitions. This can only be specified if `privileges` are also defined.
 - **Type**: SubFeatureConfig[]
@@ -313,13 +311,13 @@ A deep dive into every option for the Kibana Feature configuration and what they
   ];
   ```
 
-###### privilegesTooltip (optional)
+#### privilegesTooltip (optional)
 
 - **Description**: Optional message to display on the Role Management screen when configuring permissions for this feature.
 - **Type**: string
 - **Example**: `"Configure privileges for this feature."`
 
-###### reserved (private)
+#### reserved (private)
 
 - **Description**: Private information about reserved privileges for this feature.
 - **Type**: Object
@@ -333,29 +331,28 @@ A deep dive into every option for the Kibana Feature configuration and what they
   }
   ```
 
-Feature privilege definitions
 
-## FeatureKibanaPrivileges Interface
+### FeatureKibanaPrivileges Interface
 
-###### excludeFromBasePrivileges (optional)
+#### excludeFromBasePrivileges (optional)
 
 - **Description**: Whether or not this specific privilege should be excluded from the base privileges.
 - **Type**: boolean
 - **Example**: `true`
 
-###### requireAllSpaces (optional)
+#### requireAllSpaces (optional)
 
 - **Description**: Whether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not support Spaces. Defaults to `false`.
 - **Type**: boolean
 - **Example**: `false`
 
-###### disabled (optional)
+#### disabled (optional)
 
 - **Description**: Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
 - **Type**: boolean
 - **Example**: `true`
 
-###### management (optional)
+#### management (optional)
 
 - **Description**: If this feature includes management sections, you can specify them here to control visibility of those pages based on user privileges.
 - **Type**: Object
@@ -367,25 +364,25 @@ Feature privilege definitions
   }
   ```
 
-###### catalogue (optional)
+#### catalogue (optional)
 
 - **Description**: If this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions.
 - **Type**: string[]
 - **Example**: `["cat1", "cat2"]`
 
-###### api (optional)
+#### api (optional)
 
 - **Description**: If your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.
 - **Type**: string[]
 - **Example**: `["my_feature-admin", "my_feature-user"]`
 
-###### app (optional)
+#### app (optional)
 
 - **Description**: If your feature exposes a client-side application, you can control access to them here.
 - **Type**: string[]
 - **Example**: `["my-app", "kibana"]`
 
-###### alerting (optional)
+#### alerting (optional)
 
 - **Description**: If your feature requires access to specific Alert Types, then specify your access needs here.
 - **Type**: Object
@@ -403,7 +400,7 @@ Feature privilege definitions
   }
   ```
 
-###### cases (optional)
+#### cases (optional)
 
 - **Description**: If your feature requires access to specific owners of cases, specify your access needs here.
 - **Type**: Object
@@ -419,7 +416,7 @@ Feature privilege definitions
   }
   ```
 
-###### savedObject
+#### savedObject
 
 - **Description**: If your feature requires access to specific saved objects, then specify your access needs here.
 - **Type**: Object
@@ -431,7 +428,7 @@ Feature privilege definitions
   }
   ```
 
-###### ui
+#### ui
 
 - **Description**: A list of UI Capabilities that should be granted to users with this privilege. These capabilities will automatically be namespaces within your feature id.
 - **Type**: string[]
