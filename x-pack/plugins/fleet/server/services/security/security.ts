@@ -64,12 +64,14 @@ const computeUiApiPrivileges = (
   security: SecurityPluginStart,
   privileges: Record<string, PrivilegeMapObject>
 ): string[] => {
-  return Object.entries(privileges).map(([_, { appId, privilegeType, privilegeName }]) => {
-    if (privilegeType === 'ui') {
-      return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+  return Object.entries(privileges).map(
+    ([_, { appId, privilegeType, privilegeSplit, privilegeName }]) => {
+      if (privilegeType === 'ui') {
+        return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+      }
+      return security.authz.actions[privilegeType].get(`${appId}${privilegeSplit}${privilegeName}`);
     }
-    return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
-  });
+  );
 };
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {

@@ -80,13 +80,13 @@ describe('fleet authz', () => {
   describe('#calculateEndpointExceptionsPrivilegesFromCapabilities', () => {
     it('calculates endpoint exceptions privileges correctly', () => {
       const endpointExceptionsCapabilities = {
-        showEndpointExceptions: true,
+        showEndpointExceptions: false,
         crudEndpointExceptions: true,
       };
 
       const expected = {
         actions: {
-          showEndpointExceptions: true,
+          showEndpointExceptions: false,
           crudEndpointExceptions: true,
         },
       };
