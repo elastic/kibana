@@ -542,9 +542,7 @@ async function getIndexTemplate(
     name: dataStreamName,
     expand_wildcards: ['open', 'hidden'],
   });
-  const indexTemplateName = dataStream.data_streams[0].template;
-
-  return indexTemplateName;
+  return dataStream.data_streams[0].template;
 }
 
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
