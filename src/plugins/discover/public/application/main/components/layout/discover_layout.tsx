@@ -37,6 +37,11 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
+import {
+  ResizableLayout,
+  ResizableLayoutMode,
+  ResizableLayoutDirection,
+} from '@kbn/resizable-layout';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -58,7 +63,6 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
-import { Panels, PANELS_DIRECTION, PANELS_MODE } from './panels';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -343,12 +347,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             </EuiFlexGroup>
           </InPortal>
           <InPortal node={mainPanelNode}>
-            <div
-              className="dscPageContent__wrapper"
-              // css={css({
-              //   marginLeft: isSidebarClosed ? undefined : euiTheme.size.s,
-              // })}
-            >
+            <div className="dscPageContent__wrapper">
               {resultState === 'none' ? (
                 dataState.error ? (
                   <ErrorCallout
@@ -386,10 +385,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               )}
             </div>
           </InPortal>
-          <Panels
+          <ResizableLayout
             className="dscPageBody__contents"
-            mode={isMobile || isSidebarCollapsed ? PANELS_MODE.FIXED : PANELS_MODE.RESIZABLE}
-            direction={isMobile ? PANELS_DIRECTION.VERTICAL : PANELS_DIRECTION.HORIZONTAL}
+            mode={
+              isMobile || isSidebarCollapsed
+                ? ResizableLayoutMode.Static
+                : ResizableLayoutMode.Resizable
+            }
+            direction={
+              isMobile ? ResizableLayoutDirection.Vertical : ResizableLayoutDirection.Horizontal
+            }
             resizeRef={mainResizeRef}
             fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
             minFixedPanelSize={minSidebarWidth}
