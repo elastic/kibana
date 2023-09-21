@@ -172,11 +172,3 @@ export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string 
   });
   return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
-
-export const isSystemIndex = (index: string): boolean => {
-  if (index.startsWith('.')) {
-    return true;
-  }
-
-  return false;
-};
