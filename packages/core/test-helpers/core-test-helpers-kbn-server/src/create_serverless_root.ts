@@ -81,7 +81,6 @@ function createServerlessES() {
       await es.runServerless({
         basePath: ES_BASE_PATH_DIR,
         port: esPort,
-        teardown: true,
         background: true,
         clean: true,
         kill: true,
