@@ -6,16 +6,12 @@
  */
 
 import React from 'react';
+import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { DESCRIPTION_TITLE_TEST_ID, RULE_SUMMARY_BUTTON_TEST_ID } from './test_ids';
-import {
-  DOCUMENT_DESCRIPTION_TITLE,
-  PREVIEW_RULE_DETAILS,
-  RULE_DESCRIPTION_TITLE,
-} from './translations';
 import { Description } from './description';
 import { RightPanelContext } from '../context';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { PreviewPanelKey } from '../../preview';
@@ -48,7 +44,7 @@ const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
 } as unknown as ExpandableFlyoutContext;
 
-const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null) =>
+const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]) =>
   ({
     eventId: 'event id',
     indexName: 'indexName',
@@ -59,11 +55,13 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
 
 const renderDescription = (panelContext: RightPanelContext) =>
   render(
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContext}>
-        <Description />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContext}>
+          <Description />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
   );
 
 describe('<Description />', () => {
@@ -73,7 +71,7 @@ describe('<Description />', () => {
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
+    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
@@ -83,7 +81,7 @@ describe('<Description />', () => {
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
+    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
     expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -91,18 +89,7 @@ describe('<Description />', () => {
     const { getByTestId } = renderDescription(panelContextValue([ruleDescription]));
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(DOCUMENT_DESCRIPTION_TITLE);
-  });
-
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
-    const panelContext = {
-      ...panelContextValue([ruleUuid, ruleDescription, ruleName]),
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = renderDescription(panelContext);
-
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Document description');
   });
 
   it('should open preview panel when clicking on button', () => {
@@ -120,7 +107,12 @@ describe('<Description />', () => {
         indexName: panelContext.indexName,
         scopeId: panelContext.scopeId,
         banner: {
-          title: PREVIEW_RULE_DETAILS,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
+              defaultMessage="Preview rule details"
+            />
+          ),
           backgroundColor: 'warning',
           textColor: 'warning',
         },

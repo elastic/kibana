@@ -3505,10 +3505,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/find.ts"
               },
               {
@@ -3534,10 +3530,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/get_rule.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.ts"
               },
               {
                 "plugin": "alerting",
@@ -3702,14 +3694,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "profiling",
@@ -3906,6 +3890,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -4322,6 +4310,14 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -4757,22 +4753,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/find_rules.test.ts"
               },
               {
@@ -5090,26 +5070,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6063,7 +6023,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6270,14 +6230,6 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/profiling/server/routes/setup.ts"
               },
@@ -6366,6 +6318,18 @@
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
               {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.ts"
               },
@@ -6392,6 +6356,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -6744,6 +6712,14 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -7559,6 +7535,22 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
               },
               {
@@ -7972,12 +7964,12 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/create_script_route.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_create_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -7990,6 +7982,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8182,6 +8178,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8634,10 +8634,6 @@
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/pinned_events/persist_pinned_event.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
               },
@@ -8648,6 +8644,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -8996,10 +8996,6 @@
                 "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
@@ -9016,12 +9012,20 @@
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
               {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_delete_route.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.ts"
               },
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -9150,6 +9154,10 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -13454,14 +13462,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
               },
@@ -13522,8 +13522,16 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/detection_engine/get_detection_engine_alerts_count_by_rule_tags.ts"
               },
               {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "kubernetesSecurity",
@@ -13930,14 +13938,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.ts"
               },
@@ -13952,6 +13952,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "transform",
@@ -14495,6 +14503,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/system.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/alerting.ts"
               },
               {
@@ -14678,14 +14690,6 @@
                 "path": "x-pack/plugins/aiops/server/routes/log_categorization.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.ts"
               },
@@ -14702,8 +14706,8 @@
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/plugins/file_upload/server/routes.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -14716,6 +14720,14 @@
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "maps",
@@ -15106,20 +15118,20 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.ts"
               },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/delete.ts"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "maps",

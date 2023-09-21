@@ -29,9 +29,10 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
+// TODO: https://github.com/elastic/kibana/issues/161539 Does it need to run in Serverless?
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
-  { tags: '@ess' },
+  { tags: ['@ess', '@skipInServerless'] },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.

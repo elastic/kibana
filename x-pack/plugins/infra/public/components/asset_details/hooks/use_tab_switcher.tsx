@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { useLazyRef } from '../../../hooks/use_lazy_ref';
 import type { TabIds } from '../types';
-import { AssetDetailsState, useAssetDetailsUrlState } from './use_asset_details_url_state';
+import { AssetDetailsUrlState, useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 interface TabSwitcherParams {
   defaultActiveTabId?: TabIds;
@@ -26,7 +26,7 @@ export function useTabSwitcher({ defaultActiveTabId }: TabSwitcherParams) {
     // On a tab click, mark the tab content as allowed to be rendered
     renderedTabsSet.current.add(tabId);
 
-    setUrlState({ tabId: tabId as AssetDetailsState['tabId'] });
+    setUrlState({ tabId: tabId as AssetDetailsUrlState['tabId'] });
   };
 
   return {

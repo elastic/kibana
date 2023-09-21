@@ -4727,6 +4727,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
           },
           {
@@ -4748,6 +4756,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",

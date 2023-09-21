@@ -27,7 +27,11 @@ export default async () => {
       protocol: 'https',
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
-    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
+    elasticsearch: {
+      ...esTestConfig.getUrlParts(),
+      protocol: 'https',
+      certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
+    },
   };
 
   // "Fake" SAML provider
@@ -52,31 +56,30 @@ export default async () => {
       files: [idpPath, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
-
-        'xpack.security.authc.realms.jwt.jwt1.order=-98',
-        `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
-        'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
-        `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
-        `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
-        'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
-        `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
-        `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
-        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
-
         `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
-        'xpack.security.authc.token.enabled=true',
+
+        'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
+        `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
+        `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
+        'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
+        'xpack.security.authc.realms.jwt.jwt1.order=-98',
+        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
+        `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${getDockerFileMountPath(
           idpPath
         )}`,
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
       ],
-      ssl: true, // not needed as for serverless ssl is always on but added it anyway
+      ssl: true, // SSL is required for SAML realm
     },
 
     kbnTestServer: {
@@ -120,13 +123,17 @@ export default async () => {
         ])}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
-        // basic: { 'basic': { order: 0 } },
         `--plugin-path=${samlIdPPlugin}`,
         '--xpack.cloud.id=ftr_fake_cloud_id',
+        // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
+        // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
+        // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
+        // order, we indicate that basic authentication can still be used, but only if explicitly requested when the
+        // user navigates to `/login` page directly and enters username and password in the login form.
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { basic: { order: 0 } },
-          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
+          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
+          basic: { 'cloud-basic': { order: 1 } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
