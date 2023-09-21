@@ -19,12 +19,16 @@ interface Props {
   errors?: string[];
 }
 
+const SLO_REQUIRED = i18n.translate('xpack.observability.slo.rules.burnRate.errors.sloRequired', {
+  defaultMessage: 'SLO is required.',
+});
+
 export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, sloList } = useFetchSloList({ search: searchValue });
-  const hasError = errors !== undefined && errors.length > 0;
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     setSelectedOptions(
@@ -58,7 +62,13 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
       opts.length === 1
         ? sloList!.results?.find((slo) => opts[0].value === `${slo.id}-${slo.instanceId}`)
         : undefined;
+
     onSelected(selectedSlo);
+    if (selectedSlo === undefined) {
+      setHasError(true);
+    } else {
+      setHasError(false);
+    }
   };
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
@@ -70,7 +80,7 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
       label={rowLabel}
       fullWidth
       isInvalid={hasError}
-      error={hasError ? errors[0] : undefined}
+      error={hasError ? SLO_REQUIRED : undefined}
     >
       <EuiComboBox
         aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {

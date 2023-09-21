@@ -29,6 +29,8 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       title: 'SLO overview',
     };
   }, [selectedSlo]);
+  const [hasError, setHasError] = useState(false);
+
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>
@@ -38,7 +40,13 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
+              hasError={hasError}
               onSelected={(slo) => {
+                if (slo === undefined) {
+                  setHasError(true);
+                } else {
+                  setHasError(false);
+                }
                 setSelectedSlo({ sloId: slo?.id, sloInstanceId: slo?.instanceId });
               }}
             />
@@ -55,6 +63,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
 
         <EuiButton
           data-test-subj="sloConfirmButton"
+          isDisabled={!selectedSlo || hasError}
           onClick={onCreate.bind(null, updatedProps)}
           fill
         >
