@@ -68,7 +68,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
-  // Show when user has privileges to save or when savedQueryManagement.edit privilege is true
+  // Show when user has privileges to save or when savedQueryManagement.saveQuery privilege is true (unless text-based search)
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;

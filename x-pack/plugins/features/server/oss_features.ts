@@ -20,31 +20,6 @@ export const buildOSSFeatures = ({
 }: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
     {
-      id: 'savedQueryManagement',
-      name: i18n.translate('xpack.features.savedQueryManagementFeatureName', {
-        defaultMessage: 'Saved Query Management',
-      }),
-      order: 1700,
-      category: DEFAULT_APP_CATEGORIES.management,
-      app: ['kibana'],
-      catalogue: [],
-      privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
-        defaultMessage:
-          'If "All" is set saved queries can be edited or changed across Kibana. This will overwrite any other privileges related to saved queries.',
-      }),
-      privileges: {
-        all: {
-          app: ['kibana'],
-          catalogue: [],
-          savedObject: {
-            all: ['query'],
-            read: ['query'],
-          },
-          ui: ['edit'],
-        },
-      },
-    },
-    {
       id: 'discover',
       name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
@@ -558,6 +533,31 @@ export const buildOSSFeatures = ({
           },
           ui: ['read'],
         },
+      },
+    },
+    {
+      id: 'savedQueryManagement',
+      name: i18n.translate('xpack.features.savedQueryManagementFeatureName', {
+        defaultMessage: 'Saved Query Management',
+      }),
+      order: 1750,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
+        defaultMessage:
+          'Set to "All" to enable saving queries across Kibana. Otherwise, set to "None" and configure individually via other feature privileges.',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          catalogue: [],
+          savedObject: {
+            all: ['query'],
+            read: [],
+          },
+          ui: ['saveQuery'],
+        }, // No read-only mode supported
       },
     },
   ] as KibanaFeatureConfig[];

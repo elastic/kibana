@@ -194,9 +194,18 @@ export function createSearchBar({
         true
       );
     }, [query, timeRange, useDefaultBehaviors]);
-    const showSaveQuery =
-      !isOfAggregateQueryType(query) &&
-      (Boolean(core.application.capabilities.savedQueryManagement?.edit) || props.showSaveQuery);
+
+    const showSaveQuery = isOfAggregateQueryType(query)
+      ? false // Saved Queries are not supported for text-based languages (only Saved Searches)
+      : // users can disable it via the global privilege but enable it per app
+        Boolean(core.application.capabilities.savedQueryManagement?.saveQuery) ||
+        props.showSaveQuery;
+
+    // console.log(
+    //   'savedQueryManagement',
+    //   core.application.capabilities.savedQueryManagement?.saveQuery
+    // );
+    // console.log('local', props.showSaveQuery);
 
     return (
       <KibanaContextProvider
