@@ -78,6 +78,10 @@ export interface UsageSourceMetadata {
 
 export type Tier = ProductTier | 'none';
 
+export interface SecurityUsageReportingTaskSetupContractOptions {
+  lookBackLimitMinutes?: number;
+}
+
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -88,6 +92,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  options?: SecurityUsageReportingTaskSetupContractOptions;
 }
 
 export interface SecurityUsageReportingTaskStartContract {
