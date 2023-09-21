@@ -122,7 +122,11 @@ export function ServiceDashboards() {
         />
       ) : status === FETCH_STATUS.SUCCESS && serviceDashboards.length > 0 ? (
         <>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            gutterSize="xs"
+            alignItems="center"
+          >
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
                 <h3>{currentDashboard?.dashboardTitle}</h3>

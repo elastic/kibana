@@ -17,7 +17,8 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
-  EuiMarkdownFormat,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
@@ -166,16 +167,29 @@ export function SaveDashboardModal({
           />
 
           <EuiSwitch
+            css={{ alignItems: 'center' }}
             compressed
             label={
-              <EuiMarkdownFormat textSize="s">
+              <p>
                 {i18n.translate(
                   'xpack.apm.dashboard.addDashboard.useContextFilterLabel',
                   {
-                    defaultMessage: 'Filter by `service` and `environment`',
+                    defaultMessage: 'Filter by service and environment',
                   }
-                )}
-              </EuiMarkdownFormat>
+                )}{' '}
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip',
+                    {
+                      defaultMessage:
+                        'Enabling this option will apply filters to the dashboard based on your chosen service and environment.',
+                    }
+                  )}
+                >
+                  <EuiIcon type="questionInCircle" title="Icon with tooltip" />
+                </EuiToolTip>
+              </p>
             }
             onChange={() => setUseContextFilter(!useContextFilter)}
             checked={useContextFilter}
