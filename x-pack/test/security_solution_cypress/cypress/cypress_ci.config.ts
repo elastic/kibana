@@ -38,7 +38,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      oldHeadless(on);
+      // oldHeadless(on);
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
