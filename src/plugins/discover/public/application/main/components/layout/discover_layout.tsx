@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +14,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiResizableContainer,
   useEuiBackgroundColor,
   useEuiTheme,
   useIsWithinBreakpoints,
@@ -33,6 +32,8 @@ import {
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -54,8 +55,7 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
-import useMount from 'react-use/lib/useMount';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { Panels, PANELS_DIRECTION, PANELS_MODE } from './panels';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -186,7 +186,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isPlainRecord]);
 
-  const resizeRef = useRef<HTMLDivElement>(null);
+  const mainResizeRef = useRef<HTMLDivElement>(null);
+  const histogramLayoutResizeRef = useRef<HTMLDivElement>(null);
 
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
@@ -215,7 +216,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
-          resizeRef={resizeRef}
+          resizeRef={histogramLayoutResizeRef}
           onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
@@ -234,39 +235,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const topPanelNode = useMemo(
+  const sidebarPanelMode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
   );
-
   const mainPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
   );
-  // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
-  // will cancel the resize. To work around this we keep track of when resizes start and
-  // end to toggle the rendering of a transparent overlay which prevents the cancellation.
-  // EUI issue: https://github.com/elastic/eui/issues/6199
-  const [resizeWithPortalsHackIsResizing, setResizeWithPortalsHackIsResizing] = useState(false);
-  const enableResizeWithPortalsHack = useCallback(
-    () => setResizeWithPortalsHackIsResizing(true),
-    []
+  const minSidebarWidth = euiTheme.base * 13;
+  const defaultSidebarWidth = euiTheme.base * 19;
+  const minMainPanelWidth = euiTheme.base * 30;
+  const [sidebarWidth, setSidebarWidth] = useLocalStorage(
+    'discover:sidebarWidth',
+    defaultSidebarWidth
   );
-  const disableResizeWithPortalsHack = useCallback(
-    () => setResizeWithPortalsHackIsResizing(false),
-    []
-  );
-  const resizeWithPortalsHackButtonCss = css`
-    z-index: 3;
-  `;
-  const resizeWithPortalsHackOverlayCss = css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-  `;
 
   return (
     <EuiPage
@@ -304,123 +287,107 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
-        <SavedSearchURLConflictCallout
-          savedSearch={savedSearch}
-          spaces={spaces}
-          history={history}
-        />
-        <InPortal node={topPanelNode}>
-          <EuiFlexGroup
-            gutterSize="none"
-            css={css`
-              height: 100%;
-            `}
-          >
-            <EuiFlexItem>
-              <SidebarMemoized
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
-                columns={currentColumns}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-                onRemoveField={onRemoveColumn}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                selectedDataView={dataView}
-                trackUiMetric={trackUiMetric}
-                onFieldEdited={onFieldEdited}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                availableFields$={stateContainer.dataState.data$.availableFields$}
-              />
-            </EuiFlexItem>
-            <EuiHideFor sizes={['xs', 's']}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  border-right: ${euiTheme.border.thin};
-                `}
-              />
-            </EuiHideFor>
-          </EuiFlexGroup>
-        </InPortal>
-        <InPortal node={mainPanelNode}>
-          <div
-            className="dscPageContent__wrapper"
-            // css={css({
-            //   marginLeft: isSidebarClosed ? undefined : euiTheme.size.s,
-            // })}
-          >
-            {resultState === 'none' ? (
-              dataState.error ? (
-                <ErrorCallout
-                  title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-                    defaultMessage: 'Unable to retrieve search results',
-                  })}
-                  error={dataState.error}
-                  data-test-subj="discoverNoResultsError"
-                />
-              ) : (
-                <DiscoverNoResults
-                  stateContainer={stateContainer}
-                  isTimeBased={isTimeBased}
-                  query={globalQueryState.query}
-                  filters={globalQueryState.filters}
-                  dataView={dataView}
-                  onDisableFilters={onDisableFilters}
-                />
-              )
-            ) : (
-              <EuiPanel
-                role="main"
-                panelRef={resizeRef}
-                paddingSize="none"
-                borderRadius="none"
-                hasShadow={false}
-                hasBorder={false}
-                color="transparent"
-                className={classNames('dscPageContent', {
-                  'dscPageContent--centered': contentCentered,
-                })}
-              >
-                {mainDisplay}
-              </EuiPanel>
-            )}
-          </div>
-        </InPortal>
-        <EuiResizableContainer
-          direction={isMobile ? 'vertical' : 'horizontal'}
-          className="dscPageBody__contents"
+        <div
+          ref={mainResizeRef}
           css={css`
-            .euiResizableToggleButton {
-              animation: none !important;
-              transition-property: background, box-shadow;
-              background: ${euiTheme.colors.emptyShade};
-              transform: translate(50%, -50%) !important;
-              &-isCollapsed {
-                background: transparent;
-              }
-            }
+            width: 100%;
+            height: 100%;
           `}
-          onResizeStart={enableResizeWithPortalsHack}
-          onResizeEnd={disableResizeWithPortalsHack}
         >
-          {(EuiResizablePanel, EuiResizableButton) => {
-            return (
-              <>
-                <EuiResizablePanel initialSize={30} paddingSize="none">
-                  <OutPortal node={topPanelNode} />
-                </EuiResizablePanel>
-                {isMobile ? <></> : <EuiResizableButton css={resizeWithPortalsHackButtonCss} />}
-                <EuiResizablePanel initialSize={70} paddingSize="none">
-                  <OutPortal node={mainPanelNode} />
-                </EuiResizablePanel>
-                {resizeWithPortalsHackIsResizing ? (
-                  <div css={resizeWithPortalsHackOverlayCss} />
+          <SavedSearchURLConflictCallout
+            savedSearch={savedSearch}
+            spaces={spaces}
+            history={history}
+          />
+          <InPortal node={sidebarPanelMode}>
+            <EuiFlexGroup
+              gutterSize="none"
+              css={css`
+                height: 100%;
+              `}
+            >
+              <EuiFlexItem>
+                <SidebarMemoized
+                  documents$={stateContainer.dataState.data$.documents$}
+                  onAddField={onAddColumn}
+                  columns={currentColumns}
+                  onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                  onRemoveField={onRemoveColumn}
+                  onChangeDataView={stateContainer.actions.onChangeDataView}
+                  selectedDataView={dataView}
+                  trackUiMetric={trackUiMetric}
+                  onFieldEdited={onFieldEdited}
+                  onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                  availableFields$={stateContainer.dataState.data$.availableFields$}
+                />
+              </EuiFlexItem>
+              <EuiHideFor sizes={['xs', 's']}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    border-right: ${euiTheme.border.thin};
+                  `}
+                />
+              </EuiHideFor>
+            </EuiFlexGroup>
+          </InPortal>
+          <InPortal node={mainPanelNode}>
+            <div
+              className="dscPageContent__wrapper"
+              // css={css({
+              //   marginLeft: isSidebarClosed ? undefined : euiTheme.size.s,
+              // })}
+            >
+              {resultState === 'none' ? (
+                dataState.error ? (
+                  <ErrorCallout
+                    title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                      defaultMessage: 'Unable to retrieve search results',
+                    })}
+                    error={dataState.error}
+                    data-test-subj="discoverNoResultsError"
+                  />
                 ) : (
-                  <></>
-                )}
-              </>
-            );
-          }}
-        </EuiResizableContainer>
+                  <DiscoverNoResults
+                    stateContainer={stateContainer}
+                    isTimeBased={isTimeBased}
+                    query={globalQueryState.query}
+                    filters={globalQueryState.filters}
+                    dataView={dataView}
+                    onDisableFilters={onDisableFilters}
+                  />
+                )
+              ) : (
+                <EuiPanel
+                  role="main"
+                  panelRef={histogramLayoutResizeRef}
+                  paddingSize="none"
+                  borderRadius="none"
+                  hasShadow={false}
+                  hasBorder={false}
+                  color="transparent"
+                  className={classNames('dscPageContent', {
+                    'dscPageContent--centered': contentCentered,
+                  })}
+                >
+                  {mainDisplay}
+                </EuiPanel>
+              )}
+            </div>
+          </InPortal>
+          <Panels
+            className="dscPageBody__contents"
+            mode={isMobile ? PANELS_MODE.FIXED : PANELS_MODE.RESIZABLE}
+            direction={isMobile ? PANELS_DIRECTION.VERTICAL : PANELS_DIRECTION.HORIZONTAL}
+            resizeRef={mainResizeRef}
+            fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
+            minFixedPanelSize={minSidebarWidth}
+            minFlexPanelSize={minMainPanelWidth}
+            fixedPanel={<OutPortal node={sidebarPanelMode} />}
+            flexPanel={<OutPortal node={mainPanelNode} />}
+            onFixedPanelSizeChange={setSidebarWidth}
+          />
+        </div>
       </EuiPageBody>
     </EuiPage>
   );
