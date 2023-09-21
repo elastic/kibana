@@ -7,3 +7,10 @@
 
 /** Profiling flamegraph embeddable key */
 export const EMBEDDABLE_FLAMEGRAPH = 'EMBEDDABLE_FLAMEGRAPH';
+/** Profiling flamegraph embeddable */
+export { EmbeddableFlamegraph } from './embeddable_flamegraph';
+
+/** Profiling functions embeddable key */
+export const EMBEDDABLE_FUNCTIONS = 'EMBEDDABLE_FUNCTIONS';
+/** Profiling functions embeddable */
+export { EmbeddableFunctions } from './embeddable_functions';
