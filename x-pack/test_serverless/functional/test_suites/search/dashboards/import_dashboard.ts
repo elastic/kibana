@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
 
-  describe('Importing an existing dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/166573
+  describe.skip('Importing an existing dashboard', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
