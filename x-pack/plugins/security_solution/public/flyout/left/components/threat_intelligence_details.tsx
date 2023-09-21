@@ -11,7 +11,7 @@ import isEmpty from 'lodash/isEmpty';
 import { EnrichmentRangePicker } from '../../../common/components/event_details/cti_details/enrichment_range_picker';
 import { ThreatDetailsView } from '../../../common/components/event_details/cti_details/threat_details_view';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
-import { THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID } from './test_ids';
+import { THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID } from './test_ids';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';
 
@@ -33,7 +33,7 @@ export const ThreatIntelligenceDetails: React.FC = () => {
     return (
       <EuiFlexGroup
         justifyContent="spaceAround"
-        data-test-subj={THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID}
+        data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID}
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
