@@ -7,6 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RiskEngineMetrics } from './types';
 
 interface GetRiskEngineMetricsOptions {
   esClient: ElasticsearchClient;
@@ -122,55 +123,70 @@ export const getRiskEngineMetrics = async ({
   esClient,
   logger,
   riskEngineIndexPatterns,
-}: GetRiskEngineMetricsOptions) => {
+}: GetRiskEngineMetricsOptions): Promise<RiskEngineMetrics> => {
   logger.info('Fetch risk engine metrics');
 
-  const results = await Promise.all([
-    getEntitiesAggregationData({
-      esClient,
-      index: riskEngineIndexPatterns.latest,
-      logger,
-      lastDay: false,
-      hostMetricField: 'unique_user_risk_score_total',
-      userMetricField: 'unique_host_risk_score_total',
-    }),
-    getEntitiesAggregationData({
-      esClient,
-      index: riskEngineIndexPatterns.latest,
-      logger,
-      lastDay: true,
-      hostMetricField: 'unique_host_risk_score_day',
-      userMetricField: 'unique_user_risk_score_day',
-    }),
-    getEntitiesAggregationData({
-      esClient,
-      index: riskEngineIndexPatterns.all,
-      logger,
-      lastDay: false,
-      hostMetricField: 'all_host_risk_scores_total',
-      userMetricField: 'all_user_risk_scores_total',
-    }),
-    getEntitiesAggregationData({
-      esClient,
-      index: riskEngineIndexPatterns.all,
-      logger,
-      lastDay: true,
-      hostMetricField: 'all_host_risk_scores_total_day',
-      userMetricField: 'all_user_risk_scores_total_day',
-    }),
-    getIndexSize({
-      esClient,
-      logger,
-      index: riskEngineIndexPatterns.all,
-      metricField: 'all_risk_scores_index_size',
-    }),
-    getIndexSize({
-      esClient,
-      logger,
-      index: riskEngineIndexPatterns.latest,
-      metricField: 'unique_risk_scores_index_size',
-    }),
-  ]);
+  try {
+    const riskEngineIndexes = await esClient.indices.get({
+      index: `${riskEngineIndexPatterns.all}`,
+    });
 
-  return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    const isRiskEngineExists = Object.keys(riskEngineIndexes).length > 0;
+
+    if (!isRiskEngineExists) {
+      return {};
+    }
+
+    const results = await Promise.all([
+      getEntitiesAggregationData({
+        esClient,
+        index: riskEngineIndexPatterns.latest,
+        logger,
+        lastDay: false,
+        hostMetricField: 'unique_user_risk_score_total',
+        userMetricField: 'unique_host_risk_score_total',
+      }),
+      getEntitiesAggregationData({
+        esClient,
+        index: riskEngineIndexPatterns.latest,
+        logger,
+        lastDay: true,
+        hostMetricField: 'unique_host_risk_score_day',
+        userMetricField: 'unique_user_risk_score_day',
+      }),
+      getEntitiesAggregationData({
+        esClient,
+        index: riskEngineIndexPatterns.all,
+        logger,
+        lastDay: false,
+        hostMetricField: 'all_host_risk_scores_total',
+        userMetricField: 'all_user_risk_scores_total',
+      }),
+      getEntitiesAggregationData({
+        esClient,
+        index: riskEngineIndexPatterns.all,
+        logger,
+        lastDay: true,
+        hostMetricField: 'all_host_risk_scores_total_day',
+        userMetricField: 'all_user_risk_scores_total_day',
+      }),
+      getIndexSize({
+        esClient,
+        logger,
+        index: riskEngineIndexPatterns.all,
+        metricField: 'all_risk_scores_index_size',
+      }),
+      getIndexSize({
+        esClient,
+        logger,
+        index: riskEngineIndexPatterns.latest,
+        metricField: 'unique_risk_scores_index_size',
+      }),
+    ]);
+
+    return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  } catch (e) {
+    logger.error(`Error while fetching risk engine metrics: ${e.message}`);
+    return {};
+  }
 };

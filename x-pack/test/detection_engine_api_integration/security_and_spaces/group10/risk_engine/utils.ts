@@ -101,6 +101,19 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
+export const deleteRiskScoreIndecies = async (log: ToolingLog, es: Client) => {
+  try {
+    Promise.allSettled([
+      es.indices.delete({
+        index: 'risk-score.risk-score-latest-default',
+      }),
+      es.indices.deleteDataStream({ name: 'risk-score.risk-score-default' }),
+    ]);
+  } catch (e) {
+    log.error(`Error deleting risk score indices: ${e.message}`);
+  }
+};
+
 /**
  * Deletes all risk scores from a given index or indices, defaults to `risk-score.risk-score-*`
  * For use inside of afterEach blocks of tests
