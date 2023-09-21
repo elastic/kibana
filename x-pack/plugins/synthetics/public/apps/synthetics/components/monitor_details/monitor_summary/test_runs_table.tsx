@@ -244,19 +244,16 @@ export const TestRunsTable = ({
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
+        const classList = [
+          ...targetElem.classList,
+          ...(targetElem.parentElement?.classList ?? []),
+        ].join(' ');
         const isTableRow =
-          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
-          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
-          targetElem?.classList.contains('euiTableCellContent') ||
-          targetElem?.classList.contains('euiBadge__text');
+          classList.includes('euiTableCellContent') ||
+          classList.includes('euiTableCellContent__text') ||
+          classList.includes('euiBadge__text');
         // we dont want to capture image click event
-        if (
-          isTableRow &&
-          targetElem.tagName !== 'IMG' &&
-          targetElem.tagName !== 'path' &&
-          targetElem.tagName !== 'BUTTON' &&
-          !targetElem.parentElement?.classList.contains('euiLink')
-        ) {
+        if (isTableRow && !classList.includes('kbnDocViewer')) {
           if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
             toggleDetails(item, expandedRows, setExpandedRows);
           } else {
