@@ -396,6 +396,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             minFlexPanelSize={minMainPanelWidth}
             fixedPanel={<OutPortal node={sidebarPanelMode} />}
             flexPanel={<OutPortal node={mainPanelNode} />}
+            resizeButtonClassName="dscSidebarResizeButton"
             onFixedPanelSizeChange={setSidebarWidth}
           />
         </div>

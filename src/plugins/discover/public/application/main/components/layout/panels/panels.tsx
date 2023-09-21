@@ -32,6 +32,7 @@ export interface PanelsProps {
   minFlexPanelSize: number;
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
+  resizeButtonClassName?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }
 
@@ -47,6 +48,7 @@ export const Panels = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
+  resizeButtonClassName,
   onFixedPanelSizeChange,
 }: PanelsProps) => {
   const panelsProps = { className, fixedPanel, flexPanel };
@@ -64,6 +66,7 @@ export const Panels = ({
       fixedPanelSize={fixedPanelSize}
       minFixedPanelSize={minFixedPanelSize}
       minFlexPanelSize={minFlexPanelSize}
+      resizeButtonClassName={resizeButtonClassName}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
       {...panelsProps}
     />

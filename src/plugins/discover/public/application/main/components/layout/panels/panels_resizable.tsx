@@ -28,6 +28,7 @@ export const PanelsResizable = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
+  resizeButtonClassName,
   onFixedPanelSizeChange,
 }: {
   className?: string;
@@ -38,6 +39,7 @@ export const PanelsResizable = ({
   minFlexPanelSize: number;
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
+  resizeButtonClassName?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }) => {
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
@@ -181,6 +183,7 @@ export const PanelsResizable = ({
             {fixedPanel}
           </EuiResizablePanel>
           <EuiResizableButton
+            className={resizeButtonClassName}
             css={resizeWithPortalsHackButtonCss}
             data-test-subj="unifiedHistogramResizableButton"
           />
