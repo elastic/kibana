@@ -9,7 +9,7 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { ExpandableSection } from './expandable_section';
 
-const title = 'title';
+const title = <p>{'title'}</p>;
 const children = <div>{'content'}</div>;
 
 export default {

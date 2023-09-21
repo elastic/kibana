@@ -9,14 +9,13 @@ import { getBuildingBlockRule } from '../../../objects/rule';
 import { OVERVIEW_ALERTS_HISTOGRAM_EMPTY } from '../../../screens/overview';
 import { HIGHLIGHTED_ROWS_IN_TABLE } from '../../../screens/rule_details';
 import { OVERVIEW } from '../../../screens/security_header';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 
 const EXPECTED_NUMBER_OF_ALERTS = 5;
 
@@ -26,19 +25,21 @@ describe(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
-      cleanKibana();
-      login();
     });
-    beforeEach(() => {
-      createRule(getBuildingBlockRule());
-    });
+
     after(() => {
       cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
+    beforeEach(() => {
+      cleanKibana();
+      login();
+      createRule(getBuildingBlockRule()).then((rule) =>
+        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+      );
+    });
+
     it('Alerts should be visible on the Rule Detail page and not visible on the Overview page', () => {
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
       waitForTheRuleToBeExecuted();
 
       // Check that generated events are visible on the Details page

@@ -113,7 +113,7 @@ describe('ruleType', () => {
             "name": "index",
           },
           Object {
-            "description": "ESQL query field used to fetch data from Elasticsearch.",
+            "description": "ES|QL query field used to fetch data from Elasticsearch.",
             "name": "esqlQuery",
           },
         ],

@@ -9,7 +9,7 @@ import rison from '@kbn/rison';
 import querystring from 'querystring';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const defaultLogColumns = ['@timestamp', 'message'];
+const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo({
           search: querystring.stringify({
             _a: rison.encode({
-              columns: ['message', 'data_stream.namespace'],
+              columns: ['service.name', 'host.name', 'message', 'data_stream.namespace'],
             }),
           }),
         });

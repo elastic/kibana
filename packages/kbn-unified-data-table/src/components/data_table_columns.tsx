@@ -30,7 +30,7 @@ import { buildEditFieldButton } from './build_edit_field_button';
 
 const openDetails = {
   id: 'openDetails',
-  width: 24,
+  width: 26,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>

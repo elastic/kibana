@@ -17,7 +17,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   Provider as UrlStateContextProvider,
@@ -263,9 +263,12 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   );
 };
 
-export const IndexDataVisualizer: FC<{
+interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
-}> = ({ getAdditionalLinks }) => {
+  isServerless?: boolean;
+}
+
+export const IndexDataVisualizer: FC<Props> = ({ getAdditionalLinks, isServerless = false }) => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -296,9 +299,10 @@ export const IndexDataVisualizer: FC<{
     unifiedSearch,
     ...coreStart,
   };
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    isServerless,
   };
 
   return (

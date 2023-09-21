@@ -7,12 +7,11 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -42,7 +41,8 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', { tags: '@ess' }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
@@ -75,10 +75,9 @@ describe('Detections > Callouts', { tags: '@ess' }, () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule());
-        loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
-        waitForPageTitleToBeShown();
-        goToRuleDetails();
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
+        );
       });
 
       afterEach(() => {
@@ -126,10 +125,9 @@ describe('Detections > Callouts', { tags: '@ess' }, () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule());
-        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
-        waitForPageTitleToBeShown();
-        goToRuleDetails();
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
+        );
       });
 
       afterEach(() => {
