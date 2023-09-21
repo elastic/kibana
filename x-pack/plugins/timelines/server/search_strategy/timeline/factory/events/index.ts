@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  TimelineFactoryQueryTypes,
-  TimelineEventsQueries,
-} from '../../../../../common/search_strategy/timeline';
+import { TimelineEventsQueries } from '../../../../../common/api/search_strategy';
 
 import { TimelineFactory } from '../types';
 import { timelineEventsAll } from './all';
@@ -16,10 +13,9 @@ import { timelineEventsDetails } from './details';
 import { timelineKpi } from './kpi';
 import { timelineEventsLastEventTime } from './last_event_time';
 
-export const timelineEventsFactory: Record<
-  TimelineEventsQueries,
-  TimelineFactory<TimelineFactoryQueryTypes>
-> = {
+export const timelineEventsFactory: {
+  [K in TimelineEventsQueries]: TimelineFactory<K>;
+} = {
   [TimelineEventsQueries.all]: timelineEventsAll,
   [TimelineEventsQueries.details]: timelineEventsDetails,
   [TimelineEventsQueries.kpi]: timelineKpi,
