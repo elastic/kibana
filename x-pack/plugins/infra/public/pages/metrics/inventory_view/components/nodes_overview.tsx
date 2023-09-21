@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
@@ -19,6 +20,9 @@ import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
+import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
+import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
+import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -57,6 +61,10 @@ export const NodesOverview = ({
   showLoading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
+  const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
+  const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
+
+  const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
 
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -132,6 +140,24 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
+      {nodeType === 'host' && detailsItemId && (
+        <>
+          {isAlertFlyoutVisible && (
+            <AlertFlyout
+              filter={`${findInventoryFields(nodeType).id}: "${detailsItemId}"`}
+              options={options}
+              nodeType={nodeType}
+              setVisible={(isOpen) => setIsAlertFlyoutVisible(isOpen)}
+              visible={isAlertFlyoutVisible}
+            />
+          )}
+          <AssetDetailsFlyout
+            setIsAlertFlyoutVisible={setIsAlertFlyoutVisible}
+            closeFlyout={closeFlyout}
+            assetName={detailsItemId}
+          />
+        </>
+      )}
       <Legend
         formatter={formatter}
         bounds={bounds}

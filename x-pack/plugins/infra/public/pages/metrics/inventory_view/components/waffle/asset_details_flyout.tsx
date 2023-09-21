@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { Dispatch, SetStateAction } from 'react';
+import AssetDetails from '../../../../../components/asset_details/asset_details';
+import { useSourceContext } from '../../../../../containers/metrics_source';
+import { orderedFlyoutTabs } from './flyout_tabs';
+
+interface Props {
+  assetName: string;
+  closeFlyout: () => void;
+  setIsAlertFlyoutVisible: Dispatch<SetStateAction<boolean>>;
+}
+
+export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVisible }: Props) => {
+  const { source } = useSourceContext();
+
+  return source ? (
+    <AssetDetails
+      asset={{ id: assetName, name: assetName }}
+      assetType="host"
+      overrides={{
+        metadata: {
+          showActionsColumn: false,
+        },
+        alertRule: {
+          onCreateRuleClick: () => setIsAlertFlyoutVisible(true),
+        },
+      }}
+      tabs={orderedFlyoutTabs}
+      links={['alertRule', 'nodeDetails']}
+      renderMode={{
+        mode: 'flyout',
+        closeFlyout,
+      }}
+      metricAlias={source.configuration.metricAlias}
+    />
+  ) : null;
+};

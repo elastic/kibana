@@ -21,13 +21,8 @@ import {
 import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { NodeContextPopover } from '../node_details/overlay';
 
 import { NodeContextMenu } from './node_context_menu';
-import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { findInventoryFields } from '../../../../../../common/inventory_models';
-import AssetDetails from '../../../../../components/asset_details/asset_details';
-import { orderedFlyoutTabs } from './flyout_tabs';
 
 const initialState = {
   isPopoverOpen: false,
@@ -46,15 +41,15 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
-  metricAlias?: string;
+  detailsItemId: string | null;
+  setShowAssetDetailsFlyout: ({ detailsItemId }: { detailsItemId: string | null }) => void;
 }
 
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter, currentTime, metricAlias } =
-      this.props;
-    const { isPopoverOpen, isAlertFlyoutVisible, isToolTipOpen } = this.state;
+    const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
+    const { isPopoverOpen, isToolTipOpen } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -143,78 +138,17 @@ export class Node extends React.PureComponent<Props, State> {
         ) : (
           nodeSquare
         )}
-        {/* TODO */}
-        {metricAlias && this.state.isOverlayOpen && this.props.nodeType === 'host' ? (
-          <AssetDetails
-            asset={{ id: node.name, name: node.name }}
-            assetType="host"
-            overrides={{
-              metadata: {
-                showActionsColumn: false,
-              },
-              alertRule: {
-                onCreateRuleClick: this.openAlertFlyout,
-              },
-            }}
-            tabs={orderedFlyoutTabs}
-            links={['alertRule', 'nodeDetails']}
-            renderMode={{
-              mode: 'flyout',
-              closeFlyout: this.togglePopover,
-            }}
-            metricAlias={metricAlias}
-          />
-        ) : (
-          <NodeContextPopover
-            openAlertFlyout={this.openAlertFlyout}
-            node={node}
-            nodeType={nodeType}
-            isOpen={this.state.isOverlayOpen}
-            options={options}
-            currentTime={currentTime}
-            onClose={this.toggleNewOverlay}
-          />
-        )}
-        {isAlertFlyoutVisible && (
-          <AlertFlyout
-            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
-            options={options}
-            nodeType={nodeType}
-            setVisible={this.setAlertFlyoutVisible}
-            visible={isAlertFlyoutVisible}
-          />
-        )}
       </>
     );
   }
 
-  private openAlertFlyout = () => {
-    this.setState({
-      isOverlayOpen: false,
-      isAlertFlyoutVisible: true,
-    });
-  };
-
-  private setAlertFlyoutVisible = (isOpen: boolean) => {
-    this.setState({
-      isAlertFlyoutVisible: isOpen,
-    });
-  };
-
   private togglePopover = () => {
-    const { nodeType } = this.props;
+    const { nodeType, node, setShowAssetDetailsFlyout, detailsItemId } = this.props;
     if (nodeType === 'host') {
-      this.toggleNewOverlay();
+      setShowAssetDetailsFlyout({ detailsItemId: node.name === detailsItemId ? null : node.name });
     } else {
       this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
     }
-  };
-
-  private toggleNewOverlay = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isOverlayOpen === true ? false : prevState.isPopoverOpen,
-      isOverlayOpen: !prevState.isOverlayOpen,
-    }));
   };
 
   private closePopover = () => {
