@@ -637,7 +637,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       stdio: ['ignore', 'inherit', 'inherit'],
     }).catch(() => {
       /**
-       * docker logs will through errors when the nodes are killed through SIGINT
+       * docker logs will throw errors when the nodes are killed through SIGINT
        * and the entrypoint doesn't exit normally, so we silence the errors.
        */
     });
