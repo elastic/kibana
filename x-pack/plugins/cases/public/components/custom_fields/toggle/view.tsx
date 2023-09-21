@@ -11,7 +11,7 @@ import { EuiIcon } from '@elastic/eui';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType['View'] = ({ customField }) => {
-  const value = Boolean(customField.field.value?.[0]);
+  const value = Boolean(customField?.field.value?.[0]);
   const iconType = value ? 'check' : 'empty';
 
   return <EuiIcon type={iconType}>{value}</EuiIcon>;

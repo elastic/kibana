@@ -21,7 +21,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = customField.field.value?.[0] as string;
+  const initialValue = customField?.field.value?.[0] as boolean;
   const title = customFieldConfiguration.label ?? UNKNOWN;
 
   const { form } = useForm({
@@ -56,7 +56,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup
         gutterSize="m"
-        data-test-subj={`case-toggle-custom-field-${customField.key}`}
+        data-test-subj={`case-toggle-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
         <Form form={form}>
@@ -67,7 +67,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
             componentProps={{
               euiFieldProps: {
                 disabled: isLoading || !canUpdate,
-                'data-test-subj': `case-toggle-custom-field-form-field-${customField.key}`,
+                'data-test-subj': `case-toggle-custom-field-form-field-${customFieldConfiguration.key}`,
               },
             }}
           />
