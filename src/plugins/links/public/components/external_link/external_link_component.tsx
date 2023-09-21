@@ -16,17 +16,13 @@ import { EuiListGroupItem } from '@elastic/eui';
 
 import { validateUrl } from './external_link_tools';
 import { coreServices } from '../../services/kibana_services';
-import {
-  LinksLink,
-  LinksLayoutType,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../../common/content_management';
+import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
 }: {
-  link: LinksLink;
+  link: Link;
   layout: LinksLayoutType;
 }) => {
   const [error, setError] = useState<string | undefined>();

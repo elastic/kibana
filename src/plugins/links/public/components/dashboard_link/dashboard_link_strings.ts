@@ -18,7 +18,7 @@ export const DashboardLinkStrings = {
       defaultMessage: 'Dashboard',
     }),
   getDescription: () =>
-    i18n.translate('links.dsahboardLink.description', {
+    i18n.translate('links.dashboardLink.description', {
       defaultMessage: 'Go to dashboard',
     }),
   getDashboardPickerPlaceholder: () =>

@@ -13,11 +13,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import { LinksLink } from '../../common/content_management';
-import { LinksLinkEditor } from '../components/editor/links_link_editor';
+import { Link } from '../../common/content_management';
+import { LinksEditorLink } from '../components/editor/links_editor_link';
 
-export interface LinkEditorProps {
-  link?: LinksLink;
+export interface LinksEditorProps {
+  link?: Link;
   parentDashboard?: DashboardContainer;
   ref: React.RefObject<HTMLDivElement>;
 }
@@ -26,7 +26,7 @@ export interface LinkEditorProps {
  * This editor has no context about other links, so it cannot determine order; order will be determined
  * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
  */
-export type LinksUnorderedLink = Omit<LinksLink, 'order'>;
+export type UnorderedLinks = Omit<Link, 'order'>;
 
 /**
  * @throws in case user cancels
@@ -35,10 +35,10 @@ export async function openLinkEditorFlyout({
   ref,
   link,
   parentDashboard,
-}: LinkEditorProps): Promise<LinksUnorderedLink | undefined> {
+}: LinksEditorProps): Promise<UnorderedLinks | undefined> {
   const unmountFlyout = async () => {
     if (ref.current) {
-      ref.current.children[1].className = 'linksLinkEditor out';
+      ref.current.children[1].className = 'linkEditor out';
     }
     await new Promise(() => {
       // wait for close animation before unmounting
@@ -48,8 +48,8 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<LinksUnorderedLink | undefined>((resolve, reject) => {
-    const onSave = async (newLink: LinksUnorderedLink) => {
+  return new Promise<UnorderedLinks | undefined>((resolve, reject) => {
+    const onSave = async (newLink: UnorderedLinks) => {
       resolve(newLink);
       await unmountFlyout();
     };
@@ -61,7 +61,7 @@ export async function openLinkEditorFlyout({
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-        <LinksLinkEditor
+        <LinksEditorLink
           link={link}
           onSave={onSave}
           onClose={onCancel}

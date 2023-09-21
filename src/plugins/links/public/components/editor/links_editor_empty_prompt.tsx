@@ -12,7 +12,7 @@ import { EuiText, EuiPanel, EuiSpacer, EuiButton, EuiEmptyPrompt, EuiFormRow } f
 
 import { LinksStrings } from '../links_strings';
 
-export const LinksPanelEditorEmptyPrompt = ({ addLink }: { addLink: () => Promise<void> }) => {
+export const LinksEditorEmptyPrompt = ({ addLink }: { addLink: () => Promise<void> }) => {
   return (
     <EuiFormRow data-test-subj="links--panelEditor--emptyPrompt">
       <EuiPanel paddingSize="m" hasBorder={true}>

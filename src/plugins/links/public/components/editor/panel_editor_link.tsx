@@ -23,14 +23,14 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { LinksLinkInfo } from '../../embeddable/types';
+import { LinkInfo } from '../../embeddable/types';
 import { validateUrl } from '../external_link/external_link_tools';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
-import { DASHBOARD_LINK_TYPE, LinksLink } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, Link } from '../../../common/content_management';
 
-export const LinksPanelEditorLink = ({
+export const PanelEditorLink = ({
   link,
   editLink,
   deleteLink,
@@ -39,7 +39,7 @@ export const LinksPanelEditorLink = ({
 }: {
   editLink: () => void;
   deleteLink: () => void;
-  link: LinksLink;
+  link: Link;
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
@@ -82,12 +82,12 @@ export const LinksPanelEditorLink = ({
       <EuiFlexGroup tabIndex={0} gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={destinationError ? 'warning' : LinksLinkInfo[link.type].icon}
+            type={destinationError ? 'warning' : LinkInfo[link.type].icon}
             color={destinationError ? 'warning' : 'text'}
             aria-label={
               destinationError
                 ? LinksStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
-                : LinksLinkInfo[link.type].type
+                : LinkInfo[link.type].type
             }
           />
         </EuiFlexItem>

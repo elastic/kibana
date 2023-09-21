@@ -31,7 +31,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { LinksLayoutInfo } from '../../embeddable/types';
 import {
-  LinksLink,
+  Link,
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
@@ -40,8 +40,8 @@ import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
-import { LinksPanelEditorLink } from './links_panel_editor_link';
-import { LinksPanelEditorEmptyPrompt } from './links_panel_editor_empty_prompt';
+import { PanelEditorLink } from './panel_editor_link';
+import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 
 import { TooltipWrapper } from '../tooltip_wrapper';
 
@@ -67,10 +67,10 @@ const LinksPanelEditor = ({
   parentDashboard,
   isByReference,
 }: {
-  onSaveToLibrary: (newLinks: LinksLink[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: LinksLink[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (newLinks: Link[], newLayout: LinksLayoutType) => Promise<void>;
+  onAddToDashboard: (newLinks: Link[], newLayout: LinksLayoutType) => void;
   onClose: () => void;
-  initialLinks?: LinksLink[];
+  initialLinks?: Link[];
   initialLayout?: LinksLayoutType;
   parentDashboard?: DashboardContainer;
   isByReference: boolean;
@@ -82,7 +82,7 @@ const LinksPanelEditor = ({
     initialLayout ?? LINKS_VERTICAL_LAYOUT
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [orderedLinks, setOrderedLinks] = useState<LinksLink[]>([]);
+  const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
   const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
@@ -110,7 +110,7 @@ const LinksPanelEditor = ({
   );
 
   const addOrEditLink = useCallback(
-    async (linkToEdit?: LinksLink) => {
+    async (linkToEdit?: Link) => {
       const newLink = await openLinkEditorFlyout({
         parentDashboard,
         link: linkToEdit,
@@ -121,16 +121,13 @@ const LinksPanelEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order } as LinksLink;
+                return { ...newLink, order: linkToEdit.order } as Link;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([
-            ...orderedLinks,
-            { ...newLink, order: orderedLinks.length } as LinksLink,
-          ]);
+          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length } as Link]);
         }
       }
     },
@@ -182,7 +179,7 @@ const LinksPanelEditor = ({
                 to the focus of the inner elements */}
             <div>
               {hasZeroLinks ? (
-                <LinksPanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
+                <LinksEditorEmptyPrompt addLink={() => addOrEditLink()} />
               ) : (
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
@@ -201,7 +198,7 @@ const LinksPanelEditor = ({
                           data-test-subj={`links--panelEditor--draggableLink`}
                         >
                           {(provided) => (
-                            <LinksPanelEditorLink
+                            <PanelEditorLink
                               link={link}
                               parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}

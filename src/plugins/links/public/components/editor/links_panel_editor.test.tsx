@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import LinksPanelEditor from './links_panel_editor';
 import { LinksStrings } from '../links_strings';
-import { LinksLink, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { Link, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 
 jest.mock('../dashboard_link/dashboard_link_tools', () => {
@@ -41,7 +41,7 @@ describe('LinksPanelEditor', () => {
     isByReference: false,
   };
 
-  const someLinks: LinksLink[] = [
+  const someLinks: Link[] = [
     {
       id: 'foo',
       type: 'dashboardLink' as const,

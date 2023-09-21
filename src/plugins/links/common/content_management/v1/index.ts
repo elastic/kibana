@@ -10,10 +10,10 @@ import { LinksCrudTypes } from './types';
 export type {
   LinksCrudTypes,
   LinksAttributes,
-  LinksLink,
-  LinksLinkOptions,
+  Link,
+  LinkOptions,
   LinksLayoutType,
-  LinksLinkType,
+  LinkType,
 } from './types';
 export type LinksItem = LinksCrudTypes['Item'];
 export {

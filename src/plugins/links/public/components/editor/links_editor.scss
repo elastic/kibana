@@ -3,7 +3,7 @@
 .linksPanelEditor {
   max-inline-size: $euiSizeXXL * 18; // 40px * 18 = 720px
 
-  .linksLinkEditor {
+  .linkEditor {
     @include euiFlyout;
     max-inline-size: $euiSizeXXL * 18;
 

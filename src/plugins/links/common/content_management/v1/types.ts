@@ -33,31 +33,28 @@ export type LinksCrudTypes = ContentManagementCrudTypes<
   }
 >;
 
-/**
- * Links embeddable explicit input
- */
-export type LinksLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
+export type LinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
-export type LinksLinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
-interface BaseLinksLink {
+export type LinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
+interface BaseLink {
   id: string;
   label?: string;
   order: number;
-  options?: LinksLinkOptions;
+  options?: LinkOptions;
   destination?: string;
 }
 
-interface DashboardLink extends BaseLinksLink {
+interface DashboardLink extends BaseLink {
   type: typeof DASHBOARD_LINK_TYPE;
   destinationRefName?: string;
 }
 
-interface ExternalLink extends BaseLinksLink {
+interface ExternalLink extends BaseLink {
   type: typeof EXTERNAL_LINK_TYPE;
   destination: string;
 }
 
-export type LinksLink = DashboardLink | ExternalLink;
+export type Link = DashboardLink | ExternalLink;
 
 export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;
 
@@ -65,6 +62,6 @@ export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERT
 export type LinksAttributes = {
   title: string;
   description?: string;
-  links?: LinksLink[];
+  links?: Link[];
   layout?: LinksLayoutType;
 };

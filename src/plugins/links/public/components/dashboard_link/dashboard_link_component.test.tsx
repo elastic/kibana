@@ -54,7 +54,7 @@ describe('Dashboard link component', () => {
     type: 'dashboardLink' as const,
   };
 
-  let links: LinksEmbeddable;
+  let linksEmbeddable: LinksEmbeddable;
   beforeEach(async () => {
     window.open = jest.fn();
     (fetchDashboard as jest.Mock).mockResolvedValue(mockDashboards[0]);
@@ -64,7 +64,7 @@ describe('Dashboard link component', () => {
       state: {},
     });
     (getDashboardHref as jest.Mock).mockReturnValue('https://my-kibana.com/dashboard/123');
-    links = await mockLinks({
+    linksEmbeddable = await mockLinks({
       dashboardExplicitInput: mockDashboards[1].attributes,
     });
   });
@@ -75,7 +75,7 @@ describe('Dashboard link component', () => {
 
   test('by default uses navigateToApp to open in same tab', async () => {
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
@@ -88,7 +88,7 @@ describe('Dashboard link component', () => {
         ...defaultLinkInfo,
         options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
       },
-      links,
+      linksEmbeddable,
     });
 
     const link = await screen.findByTestId('dashboardLink--foo');
@@ -103,7 +103,7 @@ describe('Dashboard link component', () => {
 
   test('modified click does not trigger event.preventDefault', async () => {
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
@@ -121,13 +121,13 @@ describe('Dashboard link component', () => {
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
     };
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     expect(fetchDashboard).toHaveBeenCalledWith(linkInfo.destination);
-    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, links });
+    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, linksEmbeddable });
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
     await userEvent.click(link);
@@ -146,12 +146,12 @@ describe('Dashboard link component', () => {
       },
     };
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, links });
+    expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, linksEmbeddable });
   });
 
   test('shows an error when fetchDashboard fails', async () => {
@@ -161,7 +161,7 @@ describe('Dashboard link component', () => {
       id: 'notfound',
     };
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
@@ -177,7 +177,7 @@ describe('Dashboard link component', () => {
       id: 'bar',
     };
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
@@ -191,7 +191,7 @@ describe('Dashboard link component', () => {
 
   test('shows dashboard title and description in tooltip', async () => {
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );
@@ -210,7 +210,7 @@ describe('Dashboard link component', () => {
       label,
     };
     render(
-      <LinksContext.Provider value={links}>
+      <LinksContext.Provider value={linksEmbeddable}>
         <DashboardLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
       </LinksContext.Provider>
     );

@@ -15,7 +15,7 @@ import {
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import {
-  LinksLinkType,
+  LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   LINKS_VERTICAL_LAYOUT,
@@ -43,8 +43,8 @@ export interface DashboardItem {
   attributes: DashboardAttributes;
 }
 
-export const LinksLinkInfo: {
-  [id in LinksLinkType]: {
+export const LinkInfo: {
+  [id in LinkType]: {
     icon: string;
     type: string;
     displayName: string;

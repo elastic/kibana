@@ -18,14 +18,14 @@ import {
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
 import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from './constants';
 
-const baseLinksLinkSchema = {
+const baseLinkSchema = {
   id: schema.string(),
   label: schema.maybe(schema.string()),
   order: schema.number(),
 };
 
 const dashboardLinkSchema = schema.object({
-  ...baseLinksLinkSchema,
+  ...baseLinkSchema,
   destinationRefName: schema.string(),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
@@ -41,7 +41,7 @@ const dashboardLinkSchema = schema.object({
 });
 
 const externalLinkSchema = schema.object({
-  ...baseLinksLinkSchema,
+  ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string(),
   options: schema.maybe(

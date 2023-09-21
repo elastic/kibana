@@ -20,7 +20,7 @@ import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public'
 
 import { DashboardItem } from '../../embeddable/types';
 import type { LinksEmbeddable } from '../../embeddable';
-import { LinksLink } from '../../../common/content_management';
+import { Link } from '../../../common/content_management';
 import { coreServices, dashboardServices } from '../../services/kibana_services';
 
 /**
@@ -104,7 +104,7 @@ export const fetchDashboards = async ({
  */
 
 interface GetDashboardLocatorProps {
-  link: LinksLink & { options: DashboardDrilldownOptions };
+  link: Link & { options: DashboardDrilldownOptions };
   linksEmbeddable: LinksEmbeddable;
 }
 

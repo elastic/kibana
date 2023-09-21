@@ -18,11 +18,7 @@ import {
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  LINKS_VERTICAL_LAYOUT,
-  LinksLayoutType,
-  LinksLink,
-} from '../../../common/content_management';
+import { LINKS_VERTICAL_LAYOUT, LinksLayoutType, Link } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { useLinks } from '../../embeddable/links_embeddable';
@@ -32,7 +28,7 @@ export const DashboardLinkComponent = ({
   link,
   layout,
 }: {
-  link: LinksLink;
+  link: Link;
   layout: LinksLayoutType;
 }) => {
   const linksEmbeddable = useLinks();

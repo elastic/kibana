@@ -21,22 +21,22 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import {
-  LinksLinkType,
+  LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinksLinkOptions,
+  LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { UnorderedLinks } from '../../editor/open_link_editor_flyout';
 
-export const LinksLinkOptionsComponent = ({
+export const LinkOptionsComponent = ({
   link,
   setLinkOptions,
   selectedLinkType,
 }: {
-  selectedLinkType: LinksLinkType;
-  link?: LinksUnorderedLink;
-  setLinkOptions: (options: LinksLinkOptions) => void;
+  selectedLinkType: LinkType;
+  link?: UnorderedLinks;
+  setLinkOptions: (options: LinkOptions) => void;
 }) => {
   const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardDrilldownOptions>({
     ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,

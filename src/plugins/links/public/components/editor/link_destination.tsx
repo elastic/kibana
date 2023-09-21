@@ -12,24 +12,24 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { EuiFormRow } from '@elastic/eui';
 import {
-  LinksLinkType,
+  LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
 } from '../../../common/content_management';
-import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { UnorderedLinks } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { LinksStrings } from '../links_strings';
 
-export const LinksLinkDestination = ({
+export const LinkDestination = ({
   link,
   setDestination,
   parentDashboard,
   selectedLinkType,
 }: {
-  selectedLinkType: LinksLinkType;
+  selectedLinkType: LinkType;
   parentDashboard?: DashboardContainer;
-  link?: LinksUnorderedLink;
+  link?: UnorderedLinks;
   setDestination: (destination?: string, defaultLabel?: string) => void;
 }) => {
   const [destinationError, setDestinationError] = useState<string | undefined>();

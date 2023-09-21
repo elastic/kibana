@@ -11,10 +11,10 @@ export { LATEST_VERSION, CONTENT_ID } from '../constants';
 export type { LinksContentType } from '../types';
 
 export type {
-  LinksLinkType,
+  LinkType,
   LinksLayoutType,
-  LinksLinkOptions,
-  LinksLink,
+  LinkOptions,
+  Link,
   LinksItem,
   LinksCrudTypes,
   LinksAttributes,

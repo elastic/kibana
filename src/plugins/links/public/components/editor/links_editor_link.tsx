@@ -29,19 +29,19 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  LinksLinkType,
+  LinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinksLinkOptions,
-  LinksLink,
+  LinkOptions,
+  Link,
 } from '../../../common/content_management';
-import { LinksLinkInfo } from '../../embeddable/types';
+import { LinkInfo } from '../../embeddable/types';
 import { LinksStrings } from '../links_strings';
-import { LinksUnorderedLink } from '../../editor/open_link_editor_flyout';
-import { LinksLinkOptionsComponent } from './links_link_options';
-import { LinksLinkDestination } from './links_link_destination';
+import { UnorderedLinks } from '../../editor/open_link_editor_flyout';
+import { LinkOptionsComponent } from './link_options';
+import { LinkDestination } from './link_destination';
 
-export const LinksLinkEditor = ({
+export const LinksEditorLink = ({
   link,
   onSave,
   onClose,
@@ -49,31 +49,27 @@ export const LinksLinkEditor = ({
 }: {
   onClose: () => void;
   parentDashboard?: DashboardContainer;
-  link?: LinksUnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
-  onSave: (newLink: Omit<LinksLink, 'order'>) => void;
+  link?: UnorderedLinks; // will only be defined if **editing** a link; otherwise, creating a new link
+  onSave: (newLink: Omit<Link, 'order'>) => void;
 }) => {
-  const [selectedLinkType, setSelectedLinkType] = useState<LinksLinkType>(
+  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
-  const [linkOptions, setLinkOptions] = useState<LinksLinkOptions | undefined>();
+  const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
-    return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as LinksLinkType[]).map((type) => {
+    return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as LinkType[]).map((type) => {
       return {
         id: type,
         label: (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            aria-label={LinksLinkInfo[type].description}
-          >
+          <EuiFlexGroup gutterSize="s" alignItems="center" aria-label={LinkInfo[type].description}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={LinksLinkInfo[type].icon} color="text" />
+              <EuiIcon type={LinkInfo[type].icon} color="text" />
             </EuiFlexItem>
-            <EuiFlexItem>{LinksLinkInfo[type].displayName}</EuiFlexItem>
+            <EuiFlexItem>{LinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>
         ),
       };
@@ -93,7 +89,7 @@ export const LinksLinkEditor = ({
   );
 
   return (
-    <EuiFocusTrap className={'linksLinkEditor in'}>
+    <EuiFocusTrap className={'linkEditor in'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -121,11 +117,11 @@ export const LinksLinkEditor = ({
                 if (currentLinkLabel === defaultLinkLabel) {
                   setCurrentLinkLabel(link?.type === id ? link.label ?? '' : '');
                 }
-                setSelectedLinkType(id as LinksLinkType);
+                setSelectedLinkType(id as LinkType);
               }}
             />
           </EuiFormRow>
-          <LinksLinkDestination
+          <LinkDestination
             link={link}
             parentDashboard={parentDashboard}
             selectedLinkType={selectedLinkType}
@@ -141,7 +137,7 @@ export const LinksLinkEditor = ({
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
-          <LinksLinkOptionsComponent
+          <LinkOptionsComponent
             link={link}
             setLinkOptions={setLinkOptions}
             selectedLinkType={selectedLinkType}

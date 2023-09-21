@@ -18,13 +18,13 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
 import { runSaveToLibrary } from '../content_management/save_to_library';
-import { LinksLink, LinksLayoutType } from '../../common/content_management';
+import { Link, LinksLayoutType } from '../../common/content_management';
 import { getLinksAttributeService } from '../services/attribute_service';
 
-const LazyLinksPanelEditor = React.lazy(() => import('../components/editor/links_panel_editor'));
+const LazyLinksEditor = React.lazy(() => import('../components/editor/links_panel_editor'));
 
 const LinksPanelEditor = withSuspense(
-  LazyLinksPanelEditor,
+  LazyLinksEditor,
   <EuiPanel className="eui-textCenter">
     <EuiLoadingSpinner size="l" />
   </EuiPanel>
@@ -44,7 +44,7 @@ export async function openEditorFlyout(
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSaveToLibrary = async (newLinks: LinksLink[], newLayout: LinksLayoutType) => {
+    const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
         links: newLinks,
@@ -66,7 +66,7 @@ export async function openEditorFlyout(
       editorFlyout.close();
     };
 
-    const onAddToDashboard = (newLinks: LinksLink[], newLayout: LinksLayoutType) => {
+    const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
         links: newLinks,

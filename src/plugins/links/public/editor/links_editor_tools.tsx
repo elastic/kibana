@@ -7,9 +7,9 @@
  */
 
 import { memoize } from 'lodash';
-import { LinksLink } from '../../common/content_management';
+import { Link } from '../../common/content_management';
 
-const getOrderedLinkList = (links: LinksLink[]): LinksLink[] => {
+const getOrderedLinkList = (links: Link[]): Link[] => {
   return [...links].sort((linkA, linkB) => {
     return linkA.order - linkB.order;
   });
@@ -21,10 +21,10 @@ const getOrderedLinkList = (links: LinksLink[]): LinksLink[] => {
  * calculated this so, we can get away with using the cached version in the editor
  */
 export const memoizedGetOrderedLinkList = memoize(
-  (links: LinksLink[]) => {
+  (links: Link[]) => {
     return getOrderedLinkList(links);
   },
-  (links: LinksLink[]) => {
+  (links: Link[]) => {
     return links;
   }
 );
