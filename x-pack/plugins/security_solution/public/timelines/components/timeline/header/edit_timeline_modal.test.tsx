@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { TimelineTitleAndDescription } from './title_and_description';
+import { EditTimelineModal } from './edit_timeline_modal';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
@@ -30,15 +30,12 @@ jest.mock('react-redux', () => {
   };
 });
 
-describe('TimelineTitleAndDescription', () => {
+describe('EditTimelineModal', () => {
   describe('save timeline', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeSaveTimeline: jest.fn(),
+      closeEditTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
     };
 
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
@@ -59,14 +56,14 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('show process bar while saving', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
-    test('Show correct header for save timeline modal', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+    test('Show correct header for edit timeline modal', () => {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -74,7 +71,7 @@ describe('TimelineTitleAndDescription', () => {
       );
     });
 
-    test('Show correct header for save timeline template modal', () => {
+    test('Show correct header for edit timeline template modal', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
@@ -82,7 +79,7 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -91,28 +88,28 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show name field', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="edit-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="edit-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show close button', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
@@ -122,13 +119,8 @@ describe('TimelineTitleAndDescription', () => {
   describe('update timeline', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeSaveTimeline: jest.fn(),
-      openSaveTimeline: jest.fn(),
+      closeEditTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      toggleSaveTimeline: jest.fn(),
-      onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
     };
 
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
@@ -149,14 +141,14 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('show process bar while saving', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
     test('Show correct header for save timeline modal', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -164,7 +156,7 @@ describe('TimelineTitleAndDescription', () => {
       );
     });
 
-    test('Show correct header for save timeline template modal', () => {
+    test('Show correct header for edit timeline template modal', () => {
       (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
@@ -172,7 +164,7 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
@@ -181,21 +173,21 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show name field', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="edit-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="edit-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
@@ -205,13 +197,8 @@ describe('TimelineTitleAndDescription', () => {
   describe('showWarning', () => {
     const props = {
       initialFocus: 'title' as const,
-      closeSaveTimeline: jest.fn(),
-      openSaveTimeline: jest.fn(),
+      closeEditTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      toggleSaveTimeline: jest.fn(),
-      onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
       showWarning: true,
     };
 
@@ -234,14 +221,14 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show EuiCallOut', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-callout"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="edit-timeline-callout"]').exists()).toEqual(true);
     });
 
     test('Show discardTimelineButton', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
@@ -257,7 +244,7 @@ describe('TimelineTitleAndDescription', () => {
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = mount(<TimelineTitleAndDescription {...props} />, {
+      const component = mount(<EditTimelineModal {...props} />, {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
@@ -266,7 +253,7 @@ describe('TimelineTitleAndDescription', () => {
     });
 
     test('Show saveButton', () => {
-      const component = mount(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<EditTimelineModal {...props} />);
       expect(component.find('[data-test-subj="save-button"]').at(1).exists()).toEqual(true);
     });
   });
