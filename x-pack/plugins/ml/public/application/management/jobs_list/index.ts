@@ -53,10 +53,14 @@ const renderApp = (
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
   params: ManagementAppMountParams,
-  deps: { usageCollection?: UsageCollectionSetup },
-  isServerless: boolean,
-  mlFeatures: MlFeatures
+  deps: { usageCollection?: UsageCollectionSetup }
 ) {
+  const isServerless = false;
+  const mlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
   const [coreStart, pluginsStart] = await core.getStartServices();
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());

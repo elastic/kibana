@@ -176,15 +176,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(
-        pluginsSetup.management,
-        core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
-        this.isServerless,
-        this.enabledFeatures
-      ).enable();
+      registerManagementSection(pluginsSetup.management, core, {
+        usageCollection: pluginsSetup.usageCollection,
+      }).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
