@@ -53,7 +53,7 @@ const updateAzureArmTemplateUrlInPolicy = (
   });
 };
 
-const useCloudFormationTemplate = ({
+const useUpdateAzureArmTemplate = ({
   packageInfo,
   newPolicy,
   updatePolicy,
@@ -127,7 +127,7 @@ export const useAzureCredentialsForm = ({
 
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
 
-  useCloudFormationTemplate({
+  useUpdateAzureArmTemplate({
     packageInfo,
     newPolicy,
     updatePolicy,
