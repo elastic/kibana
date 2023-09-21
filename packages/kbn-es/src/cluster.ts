@@ -538,8 +538,6 @@ export class Cluster {
       throw new Error('ES serverless docker cluster has already been started');
     }
 
-    this.serverlessNodes = await runServerlessCluster(this.log, options);
-
     if (!options.skipTeardown) {
       /**
        * Ideally would be async and an event like beforeExit or SIGINT,
@@ -547,6 +545,8 @@ export class Cluster {
        */
       process.on('exit', () => teardownServerlessClusterSync(this.log, options));
     }
+
+    this.serverlessNodes = await runServerlessCluster(this.log, options);
 
     return this.serverlessNodes;
   }

@@ -82,7 +82,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const essResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
   acc.push(`${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
 
   return acc;
@@ -93,7 +93,7 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
-      ...essResources,
+      ...serverlessResources,
       `${baseEsPath}:/objectstore:z`,
       `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
       `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
