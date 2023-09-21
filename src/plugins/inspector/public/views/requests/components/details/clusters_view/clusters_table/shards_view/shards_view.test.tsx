@@ -17,8 +17,8 @@ describe('render', () => {
       total: 2,
       successful: 2,
       skipped: 0,
-      failed: 0
-    }
+      failed: 0,
+    };
     const wrapper = shallow(<ShardsView failures={[]} shardsDetails={shardsDetails} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -28,9 +28,14 @@ describe('render', () => {
       total: 2,
       successful: 1,
       skipped: 0,
-      failed: 1
-    }
-    const wrapper = shallow(<ShardsView failures={[{} as unknown as estypes.ShardFailure]} shardsDetails={shardsDetails} />);
+      failed: 1,
+    };
+    const wrapper = shallow(
+      <ShardsView
+        failures={[{} as unknown as estypes.ShardFailure]}
+        shardsDetails={shardsDetails}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 
