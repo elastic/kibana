@@ -19,13 +19,11 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  const es = config.get('servers.elasticsearch');
-  es.hostname = 'host.docker.internal';
-  const elasticUrl = Url.format(es);
+  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
   const fleetServerUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
-    hostname: 'host.docker.internal',
+    hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.fleetserver.port'),
   });
   const username = config.get('servers.elasticsearch.username');
@@ -40,8 +38,6 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     password,
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
-
-  console.log('FS PORT', config.get('servers.fleetserver.port'));
 
   await new FleetManager(log).setup();
 
