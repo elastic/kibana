@@ -27,8 +27,9 @@ import {
   mapCaseFieldsToExternalSystemFields,
   formatComments,
   addKibanaInformationToDescription,
+  throwIfDuplicatedCustomFieldKeysInRequest,
 } from './utils';
-import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes, UserActionActions } from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -1339,6 +1340,63 @@ describe('utils', () => {
           userProfilesMapNoFullNames
         )
       ).toEqual(userProfiles[0].user.username);
+    });
+  });
+
+  describe('throwIfDuplicatedCustomFieldKeysInRequest', () => {
+    it('throws if customFields in request have duplicated keys', () => {
+      expect(() =>
+        throwIfDuplicatedCustomFieldKeysInRequest({
+          customFieldsInRequest: [
+            {
+              key: 'triplicated_key',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+            {
+              key: 'triplicated_key',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+            {
+              key: 'triplicated_key',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+            {
+              key: 'duplicated_key',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+            {
+              key: 'duplicated_key',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated custom field keys in request: triplicated_key,duplicated_key"`
+      );
+    });
+
+    it('does not throw if customFields in request has no duplicated keys', () => {
+      expect(() =>
+        throwIfDuplicatedCustomFieldKeysInRequest({
+          customFieldsInRequest: [
+            {
+              key: '1',
+              type: CustomFieldTypes.TEXT,
+              field: { value: ['this is a text field value', 'this is second'] },
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.TOGGLE,
+              field: { value: [true] },
+            },
+          ],
+        })
+      ).not.toThrowError();
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { uniqBy, isEmpty } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
@@ -23,7 +24,10 @@ import type {
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import type {
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -452,4 +456,30 @@ export const getUserProfiles = async (
     acc.set(profile.uid, profile);
     return acc;
   }, new Map());
+};
+
+/**
+ * Throws an error if the request has custom fields with duplicated keys.
+ */
+export const throwIfDuplicatedCustomFieldKeysInRequest = ({
+  customFieldsInRequest = [],
+}: {
+  customFieldsInRequest?: CaseRequestCustomFields;
+}) => {
+  const uniqueKeys = new Set();
+  const duplicatedKeys = new Set();
+
+  customFieldsInRequest.forEach((item) => {
+    if (uniqueKeys.has(item.key)) {
+      duplicatedKeys.add(item.key);
+    } else {
+      uniqueKeys.add(item.key);
+    }
+  });
+
+  if (duplicatedKeys.size) {
+    throw Boom.badRequest(
+      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
+    );
+  }
 };

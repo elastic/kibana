@@ -42,6 +42,13 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
+const CustomFieldsRt = limitedArraySchema({
+  codec: CustomFieldRt,
+  fieldName: 'customFields',
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+});
+
 /**
  * Create case
  */
@@ -108,12 +115,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The list of custom field values of the case.
        */
-      customFields: limitedArraySchema({
-        codec: CustomFieldRt,
-        fieldName: 'customFields',
-        min: 0,
-        max: MAX_CUSTOM_FIELDS_PER_CASE,
-      }),
+      customFields: CustomFieldsRt,
     })
   ),
 ]);
@@ -371,12 +373,7 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * Custom fields of the case
        */
-      customFields: limitedArraySchema({
-        codec: CustomFieldRt,
-        fieldName: 'customFields',
-        min: 0,
-        max: MAX_CUSTOM_FIELDS_PER_CASE,
-      }),
+      customFields: CustomFieldsRt,
     })
   ),
   /**
@@ -467,3 +464,4 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
