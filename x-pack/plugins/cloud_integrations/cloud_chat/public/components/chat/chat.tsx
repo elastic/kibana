@@ -20,13 +20,21 @@ export interface Props {
   onResize?: () => void;
   /** Handler invoked when the playbook is fired. */
   onPlaybookFired?: () => void;
+  /** The offset from the top of the page to the chat widget. */
+  topOffset?: number;
 }
 
 /**
  * A component that will display a trigger that will allow the user to chat with a human operator,
  * when the service is enabled; otherwise, it renders nothing.
  */
-export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: Props) => {
+export const Chat = ({
+  onHide = () => {},
+  onReady,
+  onResize,
+  onPlaybookFired,
+  topOffset = 0,
+}: Props) => {
   const config = useChatConfig({ onReady, onResize, onPlaybookFired });
 
   if (!config.enabled) {
@@ -45,12 +53,13 @@ export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: 
         style={
           config.isReady
             ? {
+                position: 'fixed',
                 ...config.style,
-                // reset
+                // reset default button positioning
                 bottom: 'auto',
                 inset: 'initial',
-                // position
-                top: 32,
+                // force position to the top and of the page
+                top: topOffset,
                 right: 0,
               }
             : { display: 'none' }

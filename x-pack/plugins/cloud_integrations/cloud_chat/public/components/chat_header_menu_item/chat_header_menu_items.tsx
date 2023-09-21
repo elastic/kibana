@@ -26,6 +26,17 @@ export function ChatHeaderMenuItem() {
   const [chatApi, setChatApi] = React.useState<ChatApi | null>(null);
   const [showTour, setShowTour] = useLocalStorage('cloudChatTour', true);
   const { euiTheme } = useEuiTheme();
+  const ref = React.useRef<HTMLButtonElement>(null);
+
+  // chat top offset is used to properly position the chat widget
+  // it can't be static because of an edge case with banners
+  const [chatTopOffset, setChatTopOffset] = React.useState(0);
+  React.useEffect(() => {
+    const chatButton = ref.current;
+    if (!chatButton) return;
+    const chatButtonClientRect = chatButton.getBoundingClientRect();
+    setChatTopOffset(chatButtonClientRect.top + chatButtonClientRect.height);
+  }, [showChatButton]);
 
   const isLargeScreen = useIsWithinMinBreakpoint('m');
   if (!isLargeScreen) return null;
@@ -61,6 +72,7 @@ export function ChatHeaderMenuItem() {
           anchorPosition="downRight"
         >
           <EuiButtonEmpty
+            buttonRef={ref}
             css={{ color: euiTheme.colors.ghost, marginRight: euiTheme.size.m }}
             size="s"
             iconType={chatIconLight}
@@ -84,6 +96,7 @@ export function ChatHeaderMenuItem() {
           onPlaybookFired={() => {
             setChatButtonShow(true);
           }}
+          topOffset={chatTopOffset}
         />,
         document.body
       )}
