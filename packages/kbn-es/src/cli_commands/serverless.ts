@@ -37,7 +37,7 @@ export const serverless: Command = {
       --kill              Kill running ESS nodes if detected on startup
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on Elasticsearch
-      --teardown          If this process exits, teardown the ES cluster as well
+      --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       
       -E                  Additional key=value settings to pass to Elasticsearch
@@ -66,10 +66,20 @@ export const serverless: Command = {
       },
 
       string: ['tag', 'image', 'basePath'],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'teardown', 'waitForReady'],
+      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
       default: defaults,
     }) as unknown as ServerlessOptions;
+
+    /*
+     * The nodes will be killed immediately if background = true and skipTeardown = false
+     * because the CLI process exits after starting the nodes. We handle this here instead of
+     * in runServerless because in FTR we run the nodes in the background but the parent
+     * process continues for testing and we want to be able to SIGINT for teardown.
+     */
+    if (options.background && !options.skipTeardown) {
+      options.skipTeardown = true;
+    }
 
     const cluster = new Cluster();
     await cluster.runServerless({

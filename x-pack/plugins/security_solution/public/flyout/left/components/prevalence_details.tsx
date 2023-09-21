@@ -35,10 +35,10 @@ import {
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
+  PREVALENCE_DETAILS_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
 import {
@@ -334,7 +334,7 @@ export const PrevalenceDetails: React.FC = () => {
 
   const upsell = (
     <>
-      <EuiCallOut data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID}>
+      <EuiCallOut data-test-subj={PREVALENCE_DETAILS_UPSELL_TEST_ID}>
         <FormattedMessage
           id="xpack.securitySolution.flyout.left.insights.prevalence.tableAlertUpsellDescription"
           defaultMessage="Preview of a {subscription} feature showing host and user prevalence."
@@ -372,7 +372,7 @@ export const PrevalenceDetails: React.FC = () => {
             data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
           />
         ) : (
-          <p data-test-subj={PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}>
+          <p data-test-subj={PREVALENCE_DETAILS_NO_DATA_TEST_ID}>
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."
