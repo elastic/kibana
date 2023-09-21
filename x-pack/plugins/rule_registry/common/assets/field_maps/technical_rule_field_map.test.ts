@@ -286,7 +286,7 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
-      "kibana.alert.workflow_assignees": Object {
+      "kibana.alert.workflow_assignee_ids": Object {
         "array": true,
         "required": false,
         "type": "keyword",
