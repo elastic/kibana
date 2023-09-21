@@ -101,7 +101,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
       },
       {
         title: 'transform_version',
-        description: item.config.version,
+        description: item.config.version ?? '',
       },
       {
         title: 'description',
