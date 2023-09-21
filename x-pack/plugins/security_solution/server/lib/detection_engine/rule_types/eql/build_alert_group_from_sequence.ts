@@ -202,22 +202,23 @@ export const objectArrayIntersection = (objects: object[]) => {
 };
 
 /**
+ * Finds the intersection of two objects by recursively
+ * finding the "intersection" of each of of their common keys'
+ * values. If an intersection cannot be found between a key's
+ * values, the value will be undefined in the returned object.
  *
- * @param accumulated
- * @param child
- * @returns
+ * @param a object
+ * @param b object
+ * @returns intersection of the two objects
  */
-export const objectPairIntersection = (
-  accumulated: object | undefined,
-  child: object | undefined
-) => {
-  if (accumulated === undefined || child === undefined) {
+export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
+  if (a === undefined || b === undefined) {
     return undefined;
   }
   const intersection: Record<string, unknown> = {};
-  Object.entries(accumulated).forEach(([key, aVal]) => {
-    if (key in child) {
-      const bVal = (child as Record<string, unknown>)[key];
+  Object.entries(a).forEach(([key, aVal]) => {
+    if (key in b) {
+      const bVal = (b as Record<string, unknown>)[key];
       if (
         typeof aVal === 'object' &&
         !(aVal instanceof Array) &&
