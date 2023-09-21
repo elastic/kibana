@@ -97,6 +97,19 @@ export const createLogExplorerProfileCustomizations =
       },
     });
 
+    /**
+     * Hide flyout actions to prevent rendering hard-coded actions.
+     */
+    customizations.set({
+      id: 'flyout',
+      actions: {
+        defaultActions: {
+          viewSingleDocument: { disabled: true },
+          viewSurroundingDocument: { disabled: true },
+        },
+      },
+    });
+
     return () => {
       if (stateSubscription) {
         stateSubscription.unsubscribe();
