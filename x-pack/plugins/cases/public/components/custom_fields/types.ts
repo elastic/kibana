@@ -21,6 +21,11 @@ export interface CustomFieldType {
     isLoading: boolean;
     canUpdate: boolean;
   }>;
+  Create: React.FC<{
+    // customField: CaseUI['customFields'][number];
+    customFieldConfiguration: CasesConfigurationUI['customFields'][number];
+    isLoading: boolean;
+  }>;
 }
 
 export type CustomFieldFactory = () => {

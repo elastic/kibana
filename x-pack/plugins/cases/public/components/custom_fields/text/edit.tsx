@@ -16,23 +16,20 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import type { FieldConfig, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, UseField, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { CasesConfigurationUI } from '../../../../common/ui';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import type { CustomFieldType } from '../types';
 import { View } from './view';
 import {
   CANCEL,
   EDIT_CUSTOM_FIELDS_ARIA_LABEL,
-  MAX_LENGTH_ERROR,
-  REQUIRED_FIELD,
   SAVE,
   UNKNOWN,
 } from '../translations';
+import { getTextFieldConfig } from './config';
 
 interface FormState {
   isValid: boolean | undefined;
@@ -45,8 +42,6 @@ interface FormWrapper {
   customFieldConfiguration: CasesConfigurationUI['customFields'][number];
   onChange: (state: FormState) => void;
 }
-
-const { emptyField } = fieldValidators;
 
 const FormWrapperComponent: React.FC<FormWrapper> = ({
   initialValue,
@@ -215,37 +210,3 @@ EditComponent.displayName = 'Edit';
 
 export const Edit = React.memo(EditComponent);
 
-export const getTextFieldConfig = ({
-  required,
-  label,
-}: {
-  required: boolean;
-  label: string;
-}): FieldConfig<string> => {
-  const validators = [];
-
-  if (required) {
-    validators.push({
-      validator: emptyField(REQUIRED_FIELD(label)),
-    });
-  }
-
-  return {
-    validations: [
-      ...validators,
-      {
-        validator: ({ value }) => {
-          if (value == null || !required) {
-            return;
-          }
-
-          if (value.length > MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH) {
-            return {
-              message: MAX_LENGTH_ERROR(label, MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH),
-            };
-          }
-        },
-      },
-    ],
-  };
-};
