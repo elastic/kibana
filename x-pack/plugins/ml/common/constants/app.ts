@@ -33,15 +33,3 @@ export const configSchema = schema.object({
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
-
-export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
-  if (config.ad?.enabled !== undefined) {
-    enabledFeatures.ad = config.ad.enabled;
-  }
-  if (config.dfa?.enabled !== undefined) {
-    enabledFeatures.dfa = config.dfa.enabled;
-  }
-  if (config.nlp?.enabled !== undefined) {
-    enabledFeatures.nlp = config.nlp.enabled;
-  }
-}

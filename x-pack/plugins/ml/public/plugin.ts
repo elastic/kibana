@@ -59,9 +59,9 @@ import {
   ML_APP_ROUTE,
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
-  initEnabledFeatures,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
+import { initEnabledFeatures } from '../common/util/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
