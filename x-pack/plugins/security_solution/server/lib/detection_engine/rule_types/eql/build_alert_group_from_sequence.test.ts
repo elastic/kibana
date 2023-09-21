@@ -185,7 +185,7 @@ describe('buildAlert', () => {
         expect(intersection).toEqual(expected);
       });
 
-      test('should work with arrays with differing lengths and two matching elements', () => {
+      test('should work with arrays with differing lengths and two intersecting elements', () => {
         const a = {
           field1: [3, 4, 5],
         };
