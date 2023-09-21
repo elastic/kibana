@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import {
+  RuleObjectId,
+  RuleSignatureId,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { rootRequest } from '../common';
 
 export const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
 
 interface FetchRuleAlertsParams {
-  ruleId: string;
+  ruleId: RuleObjectId | RuleSignatureId;
   fields: string[];
   size?: number;
 }
@@ -28,6 +32,15 @@ interface AlertsResponse {
   };
 }
 
+/**
+ * Returns rule's generated alerts
+ *
+ * @param ruleId a rule id representing either RuleObjectId (Saved Object id) or RuleSignatureId (rule_id)
+ * @param fields fields to fetch (fetch only fields you need to do assertions on)
+ * @param size a number of alerts to fetch
+ *
+ * @returns rule's generated alerts
+ */
 export function fetchRuleAlerts({
   ruleId,
   fields,
