@@ -53,7 +53,6 @@ import {
   type MetadataContext,
   type EvalCommandContext,
   type StatsCommandContext,
-  type InlinestatsCommandContext,
   type GroupingContext,
   type SourceIdentifierContext,
   type QualifiedNameContext,
@@ -897,24 +896,6 @@ export class AstListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    if (ctx.exception) {
-      this.errors.push(createError(ctx.exception));
-    }
-  }
-
-  /**
-   * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-   * @param ctx the parse tree
-   */
-  enterInlinestatsCommand(ctx: InlinestatsCommandContext) {
-    const command = createCommand('inlinestats', ctx);
-    this.ast.push(command);
-  }
-  /**
-   * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-   * @param ctx the parse tree
-   */
-  exitInlinestatsCommand(ctx: InlinestatsCommandContext) {
     if (ctx.exception) {
       this.errors.push(createError(ctx.exception));
     }
