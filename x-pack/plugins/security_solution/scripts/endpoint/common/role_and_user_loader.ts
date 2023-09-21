@@ -40,6 +40,11 @@ export interface RoleAndUserLoaderInterface<R extends Record<string, Role> = Rec
   load(name: keyof R): Promise<LoadedRoleAndUser>;
 
   /**
+   * Loads all roles/users
+   */
+  loadAll(): Promise<Record<keyof R, LoadedRoleAndUser>>;
+
+  /**
    * Creates a new Role in kibana along with a user (by the same name as the Role name)
    * that is assigned to the given role
    * @param role
@@ -80,6 +85,16 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     return this.create(role);
   }
 
+  async loadAll(): Promise<Record<keyof R, LoadedRoleAndUser>> {
+    const response = {} as Record<keyof R, LoadedRoleAndUser>;
+
+    for (const [name, role] of Object.entries(this.roles)) {
+      response[name as keyof R] = await this.create(role);
+    }
+
+    return response;
+  }
+
   public async create(role: Role): Promise<LoadedRoleAndUser> {
     const roleName = role.name;
 
@@ -108,7 +123,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         body: roleDefinition,
       })
       .then((response) => {
-        this.logger.info(`Role [${roleName}] created/updated`, response?.data);
+        this.logger.debug(`Role [${roleName}] created/updated`, response?.data);
         return response;
       })
       .catch(ignoreHttp409Error)
@@ -141,7 +156,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         body: user,
       })
       .then((response) => {
-        this.logger.info(`User [${username}] created/updated`, response?.data);
+        this.logger.debug(`User [${username}] created/updated`, response?.data);
         return response;
       })
       .catch(ignoreHttp409Error)
