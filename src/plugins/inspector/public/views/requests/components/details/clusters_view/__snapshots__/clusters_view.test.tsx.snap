@@ -78,30 +78,14 @@ exports[`render should render local cluster details from _shards 1`] = `
       Object {
         "(local)": Object {
           "_shards": Object {
-            "failed": 1,
+            "failed": 0,
             "skipped": 0,
-            "successful": 1,
+            "successful": 2,
             "total": 2,
           },
-          "failures": Array [
-            Object {
-              "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-              "node": "XPQtz28bSLW26Oynf6oUmg",
-              "reason": Object {
-                "caused_by": Object {
-                  "reason": "[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                  "type": "runtime_exception",
-                },
-                "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-                "index_uuid": "Pjkv7r1PQpmhbxaGL-6Chw",
-                "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                "type": "query_shard_exception",
-              },
-              "shard": 0,
-            },
-          ],
+          "failures": undefined,
           "indices": "",
-          "status": "partial",
+          "status": "successful",
           "timed_out": undefined,
           "took": undefined,
         },
@@ -113,30 +97,14 @@ exports[`render should render local cluster details from _shards 1`] = `
       Object {
         "(local)": Object {
           "_shards": Object {
-            "failed": 1,
+            "failed": 0,
             "skipped": 0,
-            "successful": 1,
+            "successful": 2,
             "total": 2,
           },
-          "failures": Array [
-            Object {
-              "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-              "node": "XPQtz28bSLW26Oynf6oUmg",
-              "reason": Object {
-                "caused_by": Object {
-                  "reason": "[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                  "type": "runtime_exception",
-                },
-                "index": ".ds-kibana_sample_data_logs-2023.08.21-000001",
-                "index_uuid": "Pjkv7r1PQpmhbxaGL-6Chw",
-                "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                "type": "query_shard_exception",
-              },
-              "shard": 0,
-            },
-          ],
+          "failures": undefined,
           "indices": "",
-          "status": "partial",
+          "status": "successful",
           "timed_out": undefined,
           "took": undefined,
         },

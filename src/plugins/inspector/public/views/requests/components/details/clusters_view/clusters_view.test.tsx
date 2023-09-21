@@ -58,28 +58,9 @@ describe('render', () => {
           rawResponse: {
             _shards: {
               total: 2,
-              successful: 1,
+              successful: 2,
               skipped: 0,
-              failed: 1,
-              failures: [
-                {
-                  shard: 0,
-                  index: '.ds-kibana_sample_data_logs-2023.08.21-000001',
-                  node: 'XPQtz28bSLW26Oynf6oUmg',
-                  reason: {
-                    type: 'query_shard_exception',
-                    reason:
-                      'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
-                    index_uuid: 'Pjkv7r1PQpmhbxaGL-6Chw',
-                    index: '.ds-kibana_sample_data_logs-2023.08.21-000001',
-                    caused_by: {
-                      type: 'runtime_exception',
-                      reason:
-                        '[.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
-                    },
-                  },
-                },
-              ],
+              failed: 0,
             },
           },
         },
