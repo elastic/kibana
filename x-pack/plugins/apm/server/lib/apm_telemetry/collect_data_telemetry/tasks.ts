@@ -559,7 +559,24 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agent_configuration',
-    executor: async ({ indices, telemetryClient }) => {},
+    executor: async ({ indices, telemetryClient }) => {
+      const agentConfigurationCount = await telemetryClient.search({
+        index: APM_AGENT_CONFIGURATION_INDEX,
+        body: {
+          size: 0,
+          timeout,
+          track_total_hits: true,
+        },
+      });
+
+      return {
+        counts: {
+          agent_configuration: {
+            all: agentConfigurationCount.hits.total.value,
+          },
+        },
+      };
+    },
   },
   {
     name: 'services',
