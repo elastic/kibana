@@ -46,7 +46,7 @@ export * from './detections_engineer';
  *
  * @see https://docs.google.com/spreadsheets/d/16aGow187AunLCBFZLlbVyS81iQNuMpNxd96LOerWj4c/edit#gid=1936689222
  */
-const SECURITY_SERVERLESS_ROLE_NAMES = Object.freeze({
+export const SECURITY_SERVERLESS_ROLE_NAMES = Object.freeze({
   t1_analyst: 't1_analyst',
   t2_analyst: 't2_analyst',
   t3_analyst: 't3_analyst',
@@ -72,9 +72,10 @@ const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   endpoint_security_policy_management_read: 'endpointSecurityPolicyManagementRead',
 });
 
-export const getAllEndpointSecurityRoles = (): {
-  [key in keyof typeof ENDPOINT_SECURITY_ROLE_NAMES]: Role;
-} => {
+export type EndpointSecurityRoleNames = keyof typeof ENDPOINT_SECURITY_ROLE_NAMES;
+export type EndpointSecurityRoleDefinitions = Record<EndpointSecurityRoleNames, Role>;
+
+export const getAllEndpointSecurityRoles = (): EndpointSecurityRoleDefinitions => {
   return {
     t1_analyst: {
       ...getT1Analyst(),

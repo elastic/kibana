@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { KbnClient } from '@kbn/test';
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 import type { AxiosError } from 'axios';
+import type { EndpointSecurityRoleDefinitions } from './roles_users';
+import { getAllEndpointSecurityRoles } from './roles_users';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { COMMON_API_HEADERS } from './constants';
 
@@ -27,10 +31,16 @@ export interface LoadedRoleAndUser {
   password: string;
 }
 
+export interface RoleAndUserLoaderInterface<R extends Record<string, Role> = Record<string, Role>> {
+  load(name: keyof R): Promise<LoadedRoleAndUser>;
+}
+
 /**
  * A generic class for loading roles and creating associated user into kibana
  */
-export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, Role>> {
+export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, Role>>
+  implements RoleAndUserLoaderInterface<R>
+{
   protected readonly logPromiseError: (error: Error) => never;
 
   constructor(
@@ -126,5 +136,14 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .catch(ignoreHttp409Error)
       .catch(catchAxiosErrorFormatAndThrow)
       .catch(this.logPromiseError);
+  }
+}
+
+/**
+ * Role and user loader for Endpoint security dev/testing
+ */
+export class EndpointSecurityTestRolesLoader extends RoleAndUserLoader<EndpointSecurityRoleDefinitions> {
+  constructor(protected readonly kbnClient: KbnClient, protected readonly logger: ToolingLog) {
+    super(kbnClient, logger, getAllEndpointSecurityRoles());
   }
 }
