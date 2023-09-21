@@ -25,6 +25,7 @@ interface Props {
   onChange: (state: CustomFieldFormState) => void;
 }
 
+// Form -> API
 const formSerializer = ({
   key,
   label,
@@ -39,6 +40,21 @@ const formSerializer = ({
   };
 };
 
+// API -> Form
+const formDeserializer = ({
+  key,
+  label,
+  type,
+  required,
+}: CustomFieldConfiguration): CustomFieldsConfigurationFormProps => {
+  return {
+    key,
+    label,
+    type,
+    options: { required: Boolean(required) },
+  };
+};
+
 const FormComponent: React.FC<Props> = ({ onChange }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
@@ -47,6 +63,7 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
     options: { stripEmptyFields: false },
     schema,
     serializer: formSerializer,
+    deserializer: formDeserializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

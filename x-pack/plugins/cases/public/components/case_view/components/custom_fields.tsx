@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
+import { EuiFlexItem } from '@elastic/eui';
 import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -40,14 +41,19 @@ const CustomFieldsComponent: React.FC<Props> = ({
     const EditComponent = customFieldType.Edit;
 
     return (
-      <EditComponent
-        isLoading={isLoading}
-        canUpdate={permissions.update}
-        customFieldConfiguration={customFieldConf}
-        customField={customField}
-        onSubmit={onSubmit}
+      <EuiFlexItem
+        grow={false}
+        data-test-subj={`case-custom-field-wrapper-${customFieldConf.key}`}
         key={customFieldConf.key}
-      />
+      >
+        <EditComponent
+          isLoading={isLoading}
+          canUpdate={permissions.update}
+          customFieldConfiguration={customFieldConf}
+          customField={customField}
+          onSubmit={onSubmit}
+        />
+      </EuiFlexItem>
     );
   });
 

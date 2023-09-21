@@ -79,9 +79,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
           euiFieldProps: {
             options,
             'data-test-subj': 'custom-field-type-selector',
+            isLoading: isSubmitting,
           },
-          selectedType,
-          isLoading: isSubmitting,
           onChange: handleTypeChange,
         }}
       />

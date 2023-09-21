@@ -14,7 +14,11 @@ const ViewComponent: CustomFieldType['View'] = ({ customField }) => {
   const value = Boolean(customField?.field.value?.[0]);
   const iconType = value ? 'check' : 'empty';
 
-  return <EuiIcon type={iconType}>{value}</EuiIcon>;
+  return (
+    <EuiIcon data-test-subj={`toggle-custom-field-view-${customField?.key}`} type={iconType}>
+      {value}
+    </EuiIcon>
+  );
 };
 
 ViewComponent.displayName = 'View';
