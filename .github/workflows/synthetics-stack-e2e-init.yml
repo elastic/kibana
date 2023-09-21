@@ -1,18 +1,36 @@
+---
 #
 # This workflow sets the status check `synthetics-stack-e2e` instantly to 'failure'
 # the synthetics-stack-e2e.yml is triggered with a PR comment and is responsible for setting it to success or failure.
 #
-name: synthetics # This name needs to be the same as in synthetic-stack-e2e.yml
+name: synthetics
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - "x-pack/plugins/synthetics/**"
 
 jobs:
-  synthetics-stack-e2e: # This name needs to be the same as in synthetic-stack-e2e.yml
+  init-synthetics-stack-e2e:
+    permissions:
+      statuses: write  # Needed to set the commit status
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo 'Comment "/synthetics-stack-e2e" on the PR to trigger the synthetics stack e2e workflow. That workflow is responsible for setting this status check to success or failure."'
-          exit 1
+      - name: Create commit status
+        uses: actions/github-script@v6
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              context: "synthetics-stack-e2e",
+              sha: process.env.SHA,
+              state: 'failure',
+              description: "Comment \"/synthetics-stack-e2e\" to run the synthetics stack e2e tests",
+            });
+      - name: Help
+        run: |
+          echo "Comment \"/synthetics-stack-e2e\" to run the synthetics stack e2e tests"

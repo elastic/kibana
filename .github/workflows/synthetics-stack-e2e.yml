@@ -4,23 +4,73 @@
 # which was set to failure by the synthetics-stack-e2e-init.yml workflow.
 #
 ---
-name: synthetics # This name needs to be the same as in synthetic-stack-e2e-init.yml
+name: synthetics-check-run
 
 on:
   issue_comment:
     types:
       - created
 
-permissions:
-  issues: write
-
 jobs:
-  synthetics-stack-e2e: # This name needs to be the same as in synthetic-stack-e2e-init.yml
+  run-synthetics-stack-e2e:
     if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/synthetics-stack-e2e') }}
     runs-on: ubuntu-latest
+    env:
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}?pr=${{ github.event.issue.number }}
+    permissions:
+      statuses: write # Needed to set the commit status
+      pull-requests: write # Needed to react to the comment
     steps:
+      - name: Get PR head SHA
+        id: get-pr-head-sha
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo } = context.repo;
+            const pull = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: context.issue.number,
+            });
+            return pull.data.head.sha;
+      - name: Create commit status
+        uses: actions/github-script@v6
+        env:
+          SHA: ${{ steps.get-pr-head-sha.outputs.result }}
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              context: "synthetics-stack-e2e",
+              sha: process.env.SHA,
+              state: 'pending',
+              description: "Running synthetics-stack-e2e",
+              target_url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            });
       - uses: elastic/apm-pipeline-library/.github/actions/run-synthetics-stack-e2e@current
         with:
-          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+          vault-url: ${{ secrets.OBLT_VAULT_ADDR }}
+          vault-role-id: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+      - if: always()
+        name: Create commit status
+        uses: actions/github-script@v6
+        env:
+          SHA: ${{ steps.get-pr-head-sha.outputs.result }}
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              context: "synthetics-stack-e2e",
+              sha: process.env.SHA,
+              state: process.env.JOB_STATUS == 'success' ? 'success' : 'failure',
+              description: process.env.JOB_STATUS == 'success' ? "The synthetics-stack-e2e tests succeeded" : "synthetics-stack-e2e tests failed",
+              target_url: process.env.RUN_URL,
+            });
