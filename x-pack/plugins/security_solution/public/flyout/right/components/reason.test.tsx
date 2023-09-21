@@ -15,8 +15,9 @@ import {
 } from './test_ids';
 import { Reason } from './reason';
 import { RightPanelContext } from '../context';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { PreviewPanelKey } from '../../preview';
 
 const flyoutContextValue = {
@@ -54,8 +55,9 @@ describe('<Reason />', () => {
   });
 
   it('should render the component for document', () => {
-    const dataFormattedForFieldBrowser = [...mockDataFormattedForFieldBrowser];
-    dataFormattedForFieldBrowser.shift();
+    const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser.filter(
+      (d) => d.field !== 'kibana.alert.rule.uuid'
+    );
     const panelContext = {
       ...panelContextValue,
       dataFormattedForFieldBrowser,
