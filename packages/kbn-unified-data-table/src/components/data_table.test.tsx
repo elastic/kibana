@@ -432,4 +432,37 @@ describe('UnifiedDataTable', () => {
       expect(tourStep).toEqual('test-expand');
     });
   });
+
+  describe('gridStyle', () => {
+    it('should render the grid with the default style if no gridStyle is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+    });
+    it('should render the grid with style override if gridStyle is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        gridStyle: {
+          stripes: false,
+          rowHover: 'none',
+          border: 'none',
+        },
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+    });
+  });
 });
