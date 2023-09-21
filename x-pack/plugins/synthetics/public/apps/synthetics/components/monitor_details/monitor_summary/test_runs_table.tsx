@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { css } from '@kbn/kibana-react-plugin/common';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
   ExpandRowColumn,
@@ -189,6 +190,9 @@ export const TestRunsTable = ({
       field: 'error.message',
       name: MESSAGE_LABEL,
       textOnly: true,
+      css: css`
+        max-width: 500px;
+      `,
       render: (errorMessage: string) => (
         <EuiText size="s">{errorMessage?.length > 0 ? errorMessage : '-'}</EuiText>
       ),
@@ -243,28 +247,16 @@ export const TestRunsTable = ({
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
-        const targetElem = evt.target as HTMLElement;
-        const classList = [
-          ...targetElem.classList,
-          ...(targetElem.parentElement?.classList ?? []),
-        ].join(' ');
-        const isTableRow =
-          classList.includes('euiTableCellContent') ||
-          classList.includes('euiTableCellContent__text') ||
-          classList.includes('euiBadge__text');
-        // we dont want to capture image click event
-        if (isTableRow && !classList.includes('kbnDocViewer')) {
-          if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
-            toggleDetails(item, expandedRows, setExpandedRows);
-          } else {
-            history.push(
-              getTestRunDetailRelativeLink({
-                monitorId,
-                checkGroup: item.monitor.check_group,
-                locationId: selectedLocation?.id,
-              })
-            );
-          }
+        if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+          toggleDetails(item, expandedRows, setExpandedRows);
+        } else {
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };

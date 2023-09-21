@@ -62,7 +62,14 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         }}
       />
       {isFlyoutVisible && (
-        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} ownFocus={true}>
+        <EuiFlyout
+          onClose={() => setIsFlyoutVisible(false)}
+          ownFocus={true}
+          onClick={(evt: MouseEvent) => {
+            // needed to prevent propagation to the table row click
+            evt.stopPropagation();
+          }}
+        >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
               <h4>
