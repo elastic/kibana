@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-// import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
 import { WhenIdle } from './when_idle';
-// import { EuiButtonEmpty } from '@elastic/eui';
-// import { euiThemeVars } from '@kbn/ui-theme';
-
 import { useChatConfig, ChatApi } from './use_chat_config';
 export type { ChatApi } from './use_chat_config';
 
@@ -23,7 +18,7 @@ export interface Props {
   onReady?: (chatApi: ChatApi) => void;
   /** Handler invoked when the chat widget signals to be resized. */
   onResize?: () => void;
-
+  /** Handler invoked when the playbook is fired. */
   onPlaybookFired?: () => void;
 }
 
@@ -33,8 +28,6 @@ export interface Props {
  */
 export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: Props) => {
   const config = useChatConfig({ onReady, onResize, onPlaybookFired });
-  // const ref = useRef<HTMLDivElement>(null);
-  // const [isClosed, setIsClosed] = useState(false);
 
   if (!config.enabled) {
     return null;
@@ -60,52 +53,9 @@ export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: 
                 top: 32,
                 right: 0,
               }
-            : { position: 'absolute' }
+            : { display: 'none' }
         }
       />
     </WhenIdle>
   );
-
-  // const buttonCSS = css`
-  //   bottom: ${euiThemeVars.euiSizeXS};
-  //   position: fixed;
-  //   right: calc(${right} + ${euiThemeVars.euiSizeXS});
-  //   visibility: ${isReady && isResized ? 'visible' : 'hidden'};
-  // `;
-
-  // const button = (
-  //   <EuiButtonEmpty
-  //     css={buttonCSS}
-  //     data-test-subj="cloud-chat-hide"
-  //     name="cloudChatHide"
-  //     onClick={() => {
-  //       onHide();
-  //       setIsClosed(true);
-  //     }}
-  //     size="xs"
-  //   >
-  //     {i18n.translate('xpack.cloudChat.hideChatButtonLabel', {
-  //       defaultMessage: 'Hide chat',
-  //     })}
-  //   </EuiButtonEmpty>
-  // );
-
-  // const containerCSS = css`
-  //   top: ${euiThemeVars.euiSizeXL};
-  //   position: fixed;
-  //   right: ${euiThemeVars.euiSizeXL};
-  //   z-index: ${euiThemeVars.euiZLevel9 + 1};
-  //
-  //   &:focus [name='cloudChatHide'],
-  //   &:hover [name='cloudChatHide'] {
-  //     visibility: visible;
-  //   }
-  // `;
-
-  // return (
-  //   // <div css={containerCSS} ref={ref} data-test-subj="cloud-chat">
-  //   //   {/*{button}*/}
-  //   //
-  //   // </div>
-  // );
 };
