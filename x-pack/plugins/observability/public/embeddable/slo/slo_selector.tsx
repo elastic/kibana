@@ -26,15 +26,7 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { isLoading, sloList } = useFetchSloList({ search: searchValue });
-
-  useEffect(() => {
-    setSelectedOptions(
-      initialSlo
-        ? [{ value: `${initialSlo.id}-${initialSlo.instanceId}`, label: initialSlo.name }]
-        : []
-    );
-  }, [initialSlo]);
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList({ search: searchValue });
 
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList!.results !== undefined;
@@ -65,6 +57,10 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   };
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
+
+  if (isInitialLoading) {
+    return null;
+  }
 
   return (
     <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>

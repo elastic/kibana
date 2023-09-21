@@ -28,7 +28,9 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
   const updatedProps = useMemo(() => {
     return {
       ...selectedSlo,
-      title: 'SLO overview', // TODO use i18n
+      title: i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
+        defaultMessage: 'SLO Overview',
+      }),
     };
   }, [selectedSlo]);
   const [hasError, setHasError] = useState(false);
