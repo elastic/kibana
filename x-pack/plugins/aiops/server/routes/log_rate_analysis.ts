@@ -23,8 +23,9 @@ import type {
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { RANDOM_SAMPLER_SEED } from '../../common/constants';
+import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -52,6 +53,7 @@ import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantTermGroups } from './queries/get_significant_term_groups';
+import { trackAIOpsRouteUsage } from '../lib/track_route_usage';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -67,7 +69,8 @@ export const defineLogRateAnalysisRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
   logger: Logger,
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  usageCounter?: UsageCounter
 ) => {
   router.versioned
     .post({
@@ -85,6 +88,9 @@ export const defineLogRateAnalysisRoute = (
         },
       },
       async (context, request, response) => {
+        const { headers } = request;
+        trackAIOpsRouteUsage(LOG_RATE_ANALYSIS, headers.source, usageCounter);
+
         if (!license.isActivePlatinumLicense) {
           return response.forbidden();
         }

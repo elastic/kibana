@@ -31,6 +31,7 @@ import {
 } from '../log_rate_analysis_results';
 import type { GroupTableItem } from '../../log_rate_analysis_results_table/types';
 import { useLogRateAnalysisResultsTableRowContext } from '../../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
+import { AIOPS_DEFAULT_SOURCE } from '../../../../common/constants';
 
 const DEFAULT_SEARCH_QUERY = { match_all: {} };
 
@@ -64,6 +65,8 @@ export interface LogRateAnalysisContentProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional identifyer to indicate the plugin utilizing the component */
+  source?: string;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
@@ -76,6 +79,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  source = AIOPS_DEFAULT_SOURCE,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
@@ -172,6 +176,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           onAnalysisCompleted={onAnalysisCompleted}
+          source={source}
         />
       )}
       {windowParameters === undefined && (

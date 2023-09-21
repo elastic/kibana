@@ -19,3 +19,11 @@ export const RANDOM_SAMPLER_SEED = 3867412;
 export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
 
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
+
+export const LOG_RATE_ANALYSIS = 'AIOpsLogRateAnalysis';
+
+export const LOG_PATTERN_ANALYSIS = 'AIOpsLogPatternAnalysis';
+
+export const CHANGE_POINT_DETECTION = 'AIOpsChangePointDetection';
+
+export const AIOPS_DEFAULT_SOURCE = 'mlAIOpsLabs';

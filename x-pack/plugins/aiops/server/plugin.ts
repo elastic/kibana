@@ -9,8 +9,10 @@ import { Subscription } from 'rxjs';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../common/constants';
+import { PLUGIN_ID } from '../common';
 import { isActiveLicense } from './lib/license';
 import {
   AiopsLicense,
@@ -28,6 +30,7 @@ export class AiopsPlugin
 {
   private readonly logger: Logger;
   private licenseSubscription: Subscription | null = null;
+  private usageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -38,6 +41,7 @@ export class AiopsPlugin
     plugins: AiopsPluginSetupDeps
   ) {
     this.logger.debug('aiops: Setup');
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
     // Subscribe to license changes and store the current license in `currentLicense`.
     // This way we can pass on license changes to the route factory having always
@@ -51,8 +55,8 @@ export class AiopsPlugin
 
     // Register server side APIs
     core.getStartServices().then(([coreStart, depsStart]) => {
-      defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart);
-      defineLogCategorizationRoutes(router, aiopsLicense);
+      defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
+      defineLogCategorizationRoutes(router, aiopsLicense, this.usageCounter);
     });
 
     if (plugins.cases) {

@@ -268,6 +268,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
+            source="observability_alerts"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}

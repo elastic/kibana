@@ -113,6 +113,8 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional identifyer to indicate the plugin utilizing the component */
+  source?: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -129,6 +131,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  source,
 }) => {
   const { http } = useAiopsAppContext();
 
@@ -198,7 +201,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState }
+    { reducer: streamReducer, initialState },
+    { source }
   );
 
   const { significantTerms } = data;
