@@ -76,6 +76,12 @@ export interface IndexDetailsPageTestBed extends TestBed {
       indexStatsTabExists: () => boolean;
       isWarningDisplayed: () => boolean;
     };
+    overview: {
+      indexStatsContentExists: () => boolean;
+      indexDetailsContentExists: () => boolean;
+      addDocCodeBlockExists: () => boolean;
+      extensionSummaryExists: (index: number) => boolean;
+    };
   };
 }
 
@@ -114,6 +120,21 @@ export const setup = async (
 
   const getActiveTabContent = () => {
     return find('indexDetailsContent').text();
+  };
+
+  const overview = {
+    indexStatsContentExists: () => {
+      return exists('overviewTabIndexStats');
+    },
+    indexDetailsContentExists: () => {
+      return exists('overviewTabIndexDetails');
+    },
+    addDocCodeBlockExists: () => {
+      return exists('codeBlockControlsPanel');
+    },
+    extensionSummaryExists: (index: number) => {
+      return exists(`extensionsSummary-${index}`);
+    },
   };
 
   const mappings = {
@@ -258,6 +279,7 @@ export const setup = async (
       getActiveTabContent,
       mappings,
       settings,
+      overview,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,

@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
 import { useDateRangeProviderContext } from './use_date_range';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
 
 export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
+  const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
 
-  const { loading, error, metadata } = useMetadata(
+  const { loading, error, metadata, reload } = useMetadata(
     asset.id,
     assetType,
     inventoryModel.requiredMetrics,
@@ -27,10 +30,21 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     getDateRangeInTimestamp()
   );
 
+  const refresh = useCallback(() => {
+    reload();
+  }, [reload]);
+
+  useEffect(() => {
+    if (metadata?.name) {
+      setUrlState({ name: metadata.name });
+    }
+  }, [metadata?.name, setUrlState]);
+
   return {
     loading,
     error,
     metadata,
+    refresh,
   };
 }
 

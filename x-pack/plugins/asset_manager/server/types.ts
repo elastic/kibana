@@ -7,6 +7,10 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
   esClient: ElasticsearchClient;
@@ -15,9 +19,6 @@ export interface ElasticsearchAccessorOptions {
 export const INDEX_DEFAULTS = {
   metrics: 'metricbeat-*,metrics-*',
   logs: 'filebeat-*,logs-*',
-  traces: 'traces-*',
-  serviceMetrics: 'metrics-apm*',
-  serviceLogs: 'logs-apm*',
 };
 
 export const configSchema = schema.object({
@@ -30,9 +31,6 @@ export const configSchema = schema.object({
     {
       metrics: schema.string({ defaultValue: INDEX_DEFAULTS.metrics }),
       logs: schema.string({ defaultValue: INDEX_DEFAULTS.logs }),
-      traces: schema.string({ defaultValue: INDEX_DEFAULTS.traces }),
-      serviceMetrics: schema.string({ defaultValue: INDEX_DEFAULTS.serviceMetrics }),
-      serviceLogs: schema.string({ defaultValue: INDEX_DEFAULTS.serviceLogs }),
     },
     { defaultValue: INDEX_DEFAULTS }
   ),
@@ -47,3 +45,10 @@ export const configSchema = schema.object({
 });
 
 export type AssetManagerConfig = TypeOf<typeof configSchema>;
+
+export interface AssetManagerPluginSetupDependencies {
+  apmDataAccess: ApmDataAccessPluginSetup;
+}
+export interface AssetManagerPluginStartDependencies {
+  apmDataAccess: ApmDataAccessPluginStart;
+}

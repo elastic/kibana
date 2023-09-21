@@ -17,11 +17,14 @@ import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
-  MlAnomalyDetectionAlertParams,
+  type MlAnomalyDetectionAlertParams,
   mlAnomalyDetectionAlertParams,
 } from '../../routes/schemas/alerting_schema';
-import { RegisterAlertParams } from './register_ml_alerts';
-import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
+import type { RegisterAlertParams } from './register_ml_alerts';
+import {
+  InfluencerAnomalyAlertDoc,
+  type RecordAnomalyAlertDoc,
+} from '../../../common/types/alerts';
 
 /**
  * Base Anomaly detection alerting rule context.

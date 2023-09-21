@@ -239,7 +239,6 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
-    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -251,7 +250,8 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       end,
     });
 
-    if (serviceMetadataDetails?.container?.ids) {
+    if (serviceMetadataDetails?.container?.ids && resources.plugins.infra) {
+      const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceOverviewContainerMetadata({
         infraMetricsClient,
         containerIds: serviceMetadataDetails.container.ids,
@@ -748,7 +748,6 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       (ServiceInstanceContainerMetadataDetails | {})
   > => {
     const apmEventClient = await getApmEventClient(resources);
-    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
@@ -762,7 +761,11 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
         end,
       });
 
-    if (serviceInstanceMetadataDetails?.container?.id) {
+    if (
+      serviceInstanceMetadataDetails?.container?.id &&
+      resources.plugins.infra
+    ) {
+      const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceInstanceContainerMetadata({
         infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,

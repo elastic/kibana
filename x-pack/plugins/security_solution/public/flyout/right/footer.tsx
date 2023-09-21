@@ -44,10 +44,6 @@ export const PanelFooter: FC = () => {
     [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
   );
 
-  if (!dataFormattedForFieldBrowser || !dataAsNestedObject) {
-    return null;
-  }
-
   return (
     <FlyoutFooter
       detailsData={dataFormattedForFieldBrowser}

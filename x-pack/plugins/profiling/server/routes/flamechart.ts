@@ -38,8 +38,8 @@ export function registerFlameChartSearchRoute({
         const esClient = await getClient(context);
         const flamegraph = await profilingDataAccess.services.fetchFlamechartData({
           esClient,
-          rangeFrom: timeFrom,
-          rangeTo: timeTo,
+          rangeFromMs: timeFrom,
+          rangeToMs: timeTo,
           kuery,
         });
 

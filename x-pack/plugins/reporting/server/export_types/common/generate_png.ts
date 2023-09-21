@@ -42,11 +42,11 @@ export function generatePngObservable(
   }).pipe(
     tap(({ metrics }) => {
       if (metrics) {
-        apmTrans?.setLabel('cpu', metrics.cpu, false);
-        apmTrans?.setLabel('memory', metrics.memory, false);
+        apmTrans.setLabel('cpu', metrics.cpu, false);
+        apmTrans.setLabel('memory', metrics.memory, false);
       }
       apmScreenshots?.end();
-      apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
+      apmBuffer = apmTrans.startSpan('get-buffer', 'output') ?? null;
     }),
     map(({ metrics, results }) => ({
       metrics,
@@ -63,11 +63,11 @@ export function generatePngObservable(
     })),
     tap(({ buffer }) => {
       logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
-      apmTrans?.setLabel('byte-length', buffer.byteLength, false);
+      apmTrans.setLabel('byte-length', buffer.byteLength, false);
     }),
     finalize(() => {
       apmBuffer?.end();
-      apmTrans?.end();
+      apmTrans.end();
     })
   );
 }

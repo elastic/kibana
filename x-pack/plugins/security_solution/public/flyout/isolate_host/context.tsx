@@ -6,17 +6,11 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { css } from '@emotion/react';
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { SecurityPageName } from '../../../common/constants';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useEventDetails } from '../shared/hooks/use_event_details';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import type { IsolateHostPanelProps } from '.';
 
 export interface IsolateHostPanelContext {
@@ -35,7 +29,7 @@ export interface IsolateHostPanelContext {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * Isolate action, either 'isolateHost' or 'unisolateHost'
    */
@@ -55,26 +49,11 @@ export type IsolateHostPanelProviderProps = {
 
 export const IsolateHostPanelProvider = memo(
   ({ id, indexName, scopeId, isolateAction, children }: IsolateHostPanelProviderProps) => {
-    const currentSpaceId = useSpaceId();
-    // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
-    //  https://github.com/elastic/kibana/issues/113063
-    const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
-    const [{ pageName }] = useRouteSpy();
-    const sourcererScope =
-      pageName === SecurityPageName.detections
-        ? SourcererScopeName.detections
-        : SourcererScopeName.default;
-    const sourcererDataView = useSourcererDataView(sourcererScope);
-    const [loading, dataFormattedForFieldBrowser] = useTimelineEventsDetails({
-      indexName: eventIndex,
-      eventId: id ?? '',
-      runtimeMappings: sourcererDataView.runtimeMappings,
-      skip: !id,
-    });
+    const { dataFormattedForFieldBrowser, loading } = useEventDetails({ eventId: id, indexName });
 
     const contextValue = useMemo(
       () =>
-        id && indexName && scopeId && isolateAction
+        id && indexName && scopeId && isolateAction && dataFormattedForFieldBrowser
           ? {
               eventId: id,
               indexName,
@@ -87,16 +66,11 @@ export const IsolateHostPanelProvider = memo(
     );
 
     if (loading) {
-      return (
-        <EuiFlexItem
-          css={css`
-            align-items: center;
-            justify-content: center;
-          `}
-        >
-          <EuiLoadingSpinner size="xxl" />
-        </EuiFlexItem>
-      );
+      return <FlyoutLoading />;
+    }
+
+    if (!contextValue) {
+      return <FlyoutError />;
     }
 
     return (

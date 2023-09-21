@@ -10,13 +10,17 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlSecNavigation = getService('svlSecNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
 
-  describe('Configure Case', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/166551
+  describe.skip('Configure Case', function () {
     before(async () => {
+      await svlCommonPage.login();
+
       await svlSecNavigation.navigateToLandingPage();
 
       await testSubjects.click('solutionSideNavItemLink-cases');
@@ -26,6 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {

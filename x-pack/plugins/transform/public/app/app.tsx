@@ -20,6 +20,7 @@ import { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
+import { ServerlessContextProvider } from './serverless_context';
 
 export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
   <Router history={history}>
@@ -37,7 +38,11 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
   </Router>
 );
 
-export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
+export const renderApp = (
+  element: HTMLElement,
+  appDependencies: AppDependencies,
+  isServerless: boolean
+) => {
   const I18nContext = appDependencies.i18n.Context;
 
   const queryClient = new QueryClient({
@@ -55,7 +60,9 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
         <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
           <KibanaContextProvider services={appDependencies}>
             <I18nContext>
-              <App history={appDependencies.history} />
+              <ServerlessContextProvider isServerless={isServerless}>
+                <App history={appDependencies.history} />
+              </ServerlessContextProvider>
             </I18nContext>
           </KibanaContextProvider>
         </KibanaThemeProvider>

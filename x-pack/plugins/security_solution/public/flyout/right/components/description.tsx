@@ -10,6 +10,7 @@ import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -17,12 +18,6 @@ import {
   DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import {
-  DOCUMENT_DESCRIPTION_TITLE,
-  RULE_DESCRIPTION_TITLE,
-  RULE_SUMMARY_TEXT,
-  PREVIEW_RULE_DETAILS,
-} from './translations';
 import { PreviewPanelKey, type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 
 /**
@@ -45,7 +40,12 @@ export const Description: FC = () => {
         indexName,
         scopeId,
         banner: {
-          title: PREVIEW_RULE_DETAILS,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
+              defaultMessage="Preview rule details"
+            />
+          ),
           backgroundColor: 'warning',
           textColor: 'warning',
         },
@@ -66,16 +66,15 @@ export const Description: FC = () => {
             iconSide="right"
             data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
           >
-            {RULE_SUMMARY_TEXT}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
+              defaultMessage="Show rule summary"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       ),
     [ruleName, openRulePreview, ruleId]
   );
-
-  if (!dataFormattedForFieldBrowser) {
-    return null;
-  }
 
   const hasRuleDescription = ruleDescription && ruleDescription.length > 0;
 
@@ -86,12 +85,22 @@ export const Description: FC = () => {
           {isAlert ? (
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
-                <h5>{RULE_DESCRIPTION_TITLE}</h5>
+                <h5>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.about.description.ruleTitle"
+                    defaultMessage="Rule description"
+                  />
+                </h5>
               </EuiFlexItem>
               {viewRule}
             </EuiFlexGroup>
           ) : (
-            <h5>{DOCUMENT_DESCRIPTION_TITLE}</h5>
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.about.description.documentTitle"
+                defaultMessage="Document description"
+              />
+            </h5>
           )}
         </EuiTitle>
       </EuiFlexItem>
