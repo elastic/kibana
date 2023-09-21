@@ -44,19 +44,19 @@ const clusterDetailsWithShardFailure = {
 } as ClusterDetails;
 
 const clusterDetailsWhenClusterIsNotAvailable = {
-  "status": "skipped",
-  "indices": "kibana_sample_data*",
-  "timed_out": false,
-  "failures": [
+  status: 'skipped',
+  indices: 'kibana_sample_data*',
+  timed_out: false,
+  failures: [
     {
-      "shard": -1,
-      "index": null,
-      "reason": {
-        "type": "no_such_remote_cluster_exception",
-        "reason": "no such remote cluster: [remote1]"
-      }
-    }
-  ]
+      shard: -1,
+      index: null,
+      reason: {
+        type: 'no_such_remote_cluster_exception',
+        reason: 'no such remote cluster: [remote1]',
+      },
+    },
+  ],
 } as ClusterDetails;
 
 describe('getFailures', () => {
@@ -76,49 +76,53 @@ describe('getFailures', () => {
 
   test('should get failures from response when all shards fail', () => {
     const clusterDetails = {
-          "status": "skipped",
-          "indices": "kibana_sample_data*",
-          "timed_out": false,
-          "failures": [
-            {
-              "shard": -1,
-              "index": null,
-              "reason": {
-                "type": "search_phase_execution_exception",
-                "reason": "all shards failed",
-                "phase": "query",
-                "grouped": true,
-                "failed_shards": [
-                  {
-                    "shard": 0,
-                    "index": "remote1:.ds-kibana_sample_data_logs-2023.09.21-000001",
-                    "node": "_JVoOnN5QKidGGXFJAlgpA",
-                    "reason": {
-                      "type": "query_shard_exception",
-                      "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123",
-                      "index_uuid": "PAa7v-dKRIyo4kv6b8dxkQ",
-                      "index": "remote1:.ds-kibana_sample_data_logs-2023.09.21-000001",
-                      "caused_by": {
-                        "type": "runtime_exception",
-                        "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123"
-                      }
-                    }
-                  }
-                ],
-                "caused_by": {
-                  "type": "query_shard_exception",
-                  "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123",
-                  "index_uuid": "PAa7v-dKRIyo4kv6b8dxkQ",
-                  "index": "remote1:.ds-kibana_sample_data_logs-2023.09.21-000001",
-                  "caused_by": {
-                    "type": "runtime_exception",
-                    "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123"
-                  }
-                }
-              }
-            }
-          ]
-        };
+      status: 'skipped',
+      indices: 'kibana_sample_data*',
+      timed_out: false,
+      failures: [
+        {
+          shard: -1,
+          index: null,
+          reason: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            phase: 'query',
+            grouped: true,
+            failed_shards: [
+              {
+                shard: 0,
+                index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
+                node: '_JVoOnN5QKidGGXFJAlgpA',
+                reason: {
+                  type: 'query_shard_exception',
+                  reason:
+                    'failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                  index_uuid: 'PAa7v-dKRIyo4kv6b8dxkQ',
+                  index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
+                  caused_by: {
+                    type: 'runtime_exception',
+                    reason:
+                      'runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                  },
+                },
+              },
+            ],
+            caused_by: {
+              type: 'query_shard_exception',
+              reason:
+                'failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+              index_uuid: 'PAa7v-dKRIyo4kv6b8dxkQ',
+              index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
+              caused_by: {
+                type: 'runtime_exception',
+                reason:
+                  'runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+              },
+            },
+          },
+        },
+      ],
+    };
     expect(getFailures(clusterDetails)).toEqual({
       clusterFailures: [clusterDetails.failures[0]],
       shardFailures: clusterDetails.failures[0].reason.failed_shards,
@@ -150,7 +154,9 @@ describe('render', () => {
   });
 
   test('should display callout when cluster is skipped', () => {
-    const wrapper = shallow(<ClusterView clusterDetails={clusterDetailsWhenClusterIsNotAvailable} />);
+    const wrapper = shallow(
+      <ClusterView clusterDetails={clusterDetailsWhenClusterIsNotAvailable} />
+    );
     expect(wrapper).toMatchSnapshot();
-  })
+  });
 });
