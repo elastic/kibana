@@ -81,7 +81,7 @@ const useCloudFormationTemplate = ({
 
     updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo, setupFormat]);
+  }, [newPolicy?.vars?.arm_template_url, newPolicy, packageInfo, setupFormat]);
 };
 
 export const useAzureCredentialsForm = ({
