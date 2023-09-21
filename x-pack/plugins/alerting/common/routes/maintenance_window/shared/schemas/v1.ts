@@ -15,6 +15,7 @@ export const maintenanceWindowCategoryIdsSchema = schema.maybe(
         schema.literal(maintenanceWindowCategoryIdTypesV1.KIBANA),
         schema.literal(maintenanceWindowCategoryIdTypesV1.OBSERVABILITY),
         schema.literal(maintenanceWindowCategoryIdTypesV1.SECURITY_SOLUTION),
+        schema.literal(maintenanceWindowCategoryIdTypesV1.MANAGEMENT),
       ])
     )
   )

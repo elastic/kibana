@@ -24,6 +24,9 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 
@@ -37,6 +40,7 @@ import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenanc
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { MaintenanceWindowSolutionSelectionForm } from './maintenance_window_solution_selection_form';
 
 const UseField = getUseField({ component: Field });
 
@@ -83,6 +87,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               formData.timezone ? formData.timezone[0] : defaultTimezone,
               formData.recurringSchedule
             ),
+            categoryIds: formData.categoryIds,
           };
           if (isEditMode) {
             updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
@@ -108,15 +113,27 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       onSubmit: submitMaintenanceWindow,
     });
 
-    const [{ recurring, timezone }] = useFormData<FormProps>({
+    const [{ recurring, timezone, categoryIds }] = useFormData<FormProps>({
       form,
-      watch: ['recurring', 'timezone'],
+      watch: ['recurring', 'timezone', 'categoryIds'],
     });
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 
     const closeModal = useCallback(() => setIsModalVisible(false), []);
     const showModal = useCallback(() => setIsModalVisible(true), []);
+
+    const { setFieldValue } = form;
+
+    console.info(categoryIds);
+
+    const onCategoryChange = useCallback((id: string) => {
+      if (categoryIds.includes(id)) {
+        setFieldValue('categoryIds', categoryIds.filter(category => category !== id));
+        return;
+      }
+      setFieldValue('categoryIds', [...categoryIds, id]);
+    }, [categoryIds, setFieldValue]);
 
     const modal = useMemo(() => {
       let m;
@@ -157,6 +174,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 },
               }}
             />
+          </EuiFlexItem>
+          <EuiSpacer size='xs'/>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <h4>
+                {i18n.CREATE_FORM_TIMEFRAME_TITLE}
+              </h4>
+              <p>
+                <EuiTextColor color="subdued">
+                  {i18n.CREATE_FORM_TIMEFRAME_DESCRIPTION}
+                </EuiTextColor>
+              </p>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -229,20 +259,36 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               }}
             />
           </EuiFlexItem>
+          {isRecurring &&
+            <EuiFlexItem>
+              <RecurringSchedule data-test-subj="recurring-form" />
+            </EuiFlexItem>
+          }
           <EuiFlexItem>
-            {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="categoryIds">
+              {() => (
+                <MaintenanceWindowSolutionSelectionForm 
+                  selectedCategories={categoryIds}
+                  onChange={onCategoryChange}
+                />
+              )}
+            </UseField>
+            <EuiHorizontalRule margin="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isEditMode ? (
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
-            <p>{i18n.ARCHIVE_SUBTITLE}</p>
-            <EuiButton fill color="danger" onClick={showModal}>
-              {i18n.ARCHIVE}
-            </EuiButton>
-            {modal}
-          </EuiCallOut>
-        ) : null}
-        <EuiHorizontalRule margin="xl" />
+        {isEditMode && (
+          <>
+            <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
+              <p>{i18n.ARCHIVE_SUBTITLE}</p>
+              <EuiButton fill color="danger" onClick={showModal}>
+                {i18n.ARCHIVE}
+              </EuiButton>
+              {modal}
+            </EuiCallOut>
+            <EuiHorizontalRule margin="xl" />
+          </>
+        )}
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexEnd"

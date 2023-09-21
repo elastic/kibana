@@ -144,6 +144,42 @@ export const CREATE_FORM_FREQUENCY_WEEKLY = i18n.translate(
   }
 );
 
+export const CREATE_FORM_TIMEFRAME_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.frequency.title',
+  {
+    defaultMessage: 'Timeframe',
+  }
+);
+
+export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.frequency.description',
+  {
+    defaultMessage: 'Define the start and end time when events should be affected by the window.',
+  }
+);
+
+export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.title',
+  {
+    defaultMessage: 'Solution specific maintenance window',
+  }
+);
+
+export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
+  {
+    defaultMessage: 
+      'Select which solutions should be affected by the maintenance window. Only rules created in that solution will reference the maintenance window',
+  }
+);
+
+export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
+  {
+    defaultMessage: 'Select the solution(s) this should affect',
+  }
+);
+
 export const CREATE_FORM_FREQUENCY_WEEKLY_ON = (dayOfWeek: string) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.weeklyOnWeekday', {
     defaultMessage: 'Weekly on {dayOfWeek}',
