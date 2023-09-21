@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { breadcrumbService } from '../../services/breadcrumbs';
 import { documentationService } from '../../services/documentation';
 import { useAppContext } from '../../app_context';
 import { ComponentTemplateList } from '../../components/component_templates';
@@ -95,10 +94,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
   };
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs('home');
-  }, []);
 
   const indexManagementTabs = (
     <>
