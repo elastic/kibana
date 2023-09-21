@@ -12,6 +12,7 @@ import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { opendirSync } from 'fs';
+import os from 'node:os';
 import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
@@ -39,15 +40,13 @@ export function createIndexDocRecordsStream(
 ): Writable {
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
-  const highWaterMark: number = isCompressed(inputDir) ? 5000 : 300;
   return new Writable({
-    highWaterMark,
+    highWaterMark: isCompressed(inputDir) ? 5000 : 300,
     objectMode: true,
 
     async write(record, enc, callback): Promise<void> {
-      const jsonStanza = [record.value];
       try {
-        await doIndexDocs(jsonStanza);
+        await doIndexDocs([record.value]);
         progress.addToComplete(1);
         callback(null);
       } catch (err) {
@@ -66,6 +65,18 @@ export function createIndexDocRecordsStream(
     },
   });
 }
+const mapper = (operation) => (ops) => (doc) => {
+  const body = doc.source;
+  const op = doc.data_stream ? BulkOperation.Create : operation;
+  const index = doc.data_stream || doc.index;
+  ops.set(body, {
+    [op]: {
+      _index: index,
+      _id: doc.id,
+    },
+  });
+  return body;
+};
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
@@ -75,18 +86,8 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
     await client.helpers.bulk(
       {
         retries: 5,
-        datasource: jsonStanzasWithinArchive.map((doc) => {
-          const body = doc.source;
-          const op = doc.data_stream ? BulkOperation.Create : operation;
-          const index = doc.data_stream || doc.index;
-          ops.set(body, {
-            [op]: {
-              _index: index,
-              _id: doc.id,
-            },
-          });
-          return body;
-        }),
+        concurrency: os.cpus().length - 1,
+        datasource: jsonStanzasWithinArchive.map(mapper(operation)(ops)),
         onDocument(doc) {
           return ops.get(doc);
         },
