@@ -222,5 +222,3 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
-
-export const ALERT_PAGE_TITLE = '[data-test-subj="header-page-title"]';
