@@ -24,8 +24,15 @@ jest.mock('aws4', () => ({
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
+  const mockResponseString = 'Hello! How can I assist you today?';
+  const mockResponse = {
+    headers: {},
+    data: {
+      completion: mockResponseString,
+      stop_reason: 'stop_sequence',
+    },
+  };
   beforeEach(() => {
-    const mockResponse = { headers: {}, data: { result: 'success' } };
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
@@ -62,7 +69,7 @@ describe('BedrockConnector', () => {
           responseSchema: BedrockRunActionResponseSchema,
           data: DEFAULT_BODY,
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -70,6 +77,78 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(connector.runApi({ body: DEFAULT_BODY })).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeAI', () => {
+      const aiAssistantBody = {
+        messages: [
+          {
+            role: 'user',
+            content: 'Hello world',
+          },
+        ],
+      };
+
+      it('the API call is successful with correct parameters', async () => {
+        const response = await connector.invokeAI(aiAssistantBody);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: BedrockRunActionResponseSchema,
+          data: JSON.stringify({
+            prompt: '\n\nHuman:Hello world \n\nAssistant:',
+            max_tokens_to_sample: 300,
+            stop_sequences: ['\n\nHuman:'],
+          }),
+        });
+        expect(response).toEqual(mockResponseString);
+      });
+
+      it('Properly formats messages from user, assistant, and system', async () => {
+        const response = await connector.invokeAI({
+          messages: [
+            {
+              role: 'user',
+              content: 'Hello world',
+            },
+            {
+              role: 'system',
+              content: 'Be a good chatbot',
+            },
+            {
+              role: 'assistant',
+              content: 'Hi, I am a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'What is 2+2?',
+            },
+          ],
+        });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: BedrockRunActionResponseSchema,
+          data: JSON.stringify({
+            prompt:
+              '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+            max_tokens_to_sample: 300,
+            stop_sequences: ['\n\nHuman:'],
+          }),
+        });
+        expect(response).toEqual(mockResponseString);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.invokeAI(aiAssistantBody)).rejects.toThrow('API Error');
       });
     });
   });

@@ -42,6 +42,15 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
     }
   }, [editAction, index, subActionParams]);
 
+  useEffect(() => {
+    return () => {
+      // some bedrock specific formatting gets messed up if we do not reset
+      // subActionParams on dismount (switching tabs between test and config)
+      editAction('subActionParams', undefined, index);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const editSubActionParams = useCallback(
     (params: BedrockActionParams['subActionParams']) => {
       editAction('subActionParams', { ...subActionParams, ...params }, index);

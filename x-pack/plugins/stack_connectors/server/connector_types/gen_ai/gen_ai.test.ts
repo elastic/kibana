@@ -24,8 +24,24 @@ jest.mock('./create_dashboard');
 describe('GenAiConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
+  const mockResponseString = 'Hello! How can I assist you today?';
+  const mockResponse = {
+    headers: {},
+    data: {
+      result: 'success',
+      choices: [
+        {
+          message: {
+            role: 'assistant',
+            content: mockResponseString,
+          },
+          finish_reason: 'stop',
+          index: 0,
+        },
+      ],
+    },
+  };
   beforeEach(() => {
-    const mockResponse = { headers: {}, data: { result: 'success' } };
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
@@ -75,7 +91,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides the default model with the default model specified in the body', async () => {
@@ -92,7 +108,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters', async () => {
@@ -108,7 +124,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides stream parameter if set in the body', async () => {
@@ -141,7 +157,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -171,7 +187,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
@@ -193,7 +209,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -231,7 +247,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -242,6 +258,31 @@ describe('GenAiConnector', () => {
         await expect(
           connector.streamApi({ body: JSON.stringify(sampleOpenAiBody), stream: true })
         ).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeAI', () => {
+      it('the API call is successful with correct parameters', async () => {
+        const response = await connector.invokeAI(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: GenAiRunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual(mockResponseString);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.invokeAI(sampleOpenAiBody)).rejects.toThrow('API Error');
       });
     });
   });
@@ -289,7 +330,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides stream parameter if set in the body', async () => {
@@ -315,7 +356,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -345,7 +386,7 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual(mockResponse.data);
       });
 
       it('the AzureAI API call is successful with correct parameters when stream = true', async () => {
@@ -367,7 +408,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 
@@ -401,7 +442,7 @@ describe('GenAiConnector', () => {
         });
         expect(response).toEqual({
           headers: { 'Content-Type': 'dont-compress-this' },
-          result: 'success',
+          ...mockResponse.data,
         });
       });
 

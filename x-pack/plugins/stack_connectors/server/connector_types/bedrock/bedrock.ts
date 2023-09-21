@@ -19,7 +19,7 @@ import type {
   BedrockRunActionParams,
   BedrockRunActionResponse,
 } from '../../../common/bedrock/types';
-import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/constants';
+import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { InvokeAIActionParams, InvokeAIActionResponse } from '../../../common/bedrock/types';
 
 interface SignedRequest {
@@ -35,12 +35,14 @@ interface SignedRequest {
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
   private url;
   private model;
+  private region;
 
   constructor(params: ServiceParams<BedrockConfig, BedrockSecrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    this.region = this.config.region;
 
     this.registerSubActions();
   }
@@ -83,7 +85,7 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
       {
         method: 'POST',
         service: 'bedrock',
-        region: DEFAULT_BEDROCK_REGION,
+        region: this.region,
         host,
         headers: {
           'Content-Type': 'application/json',
@@ -100,11 +102,16 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     ) as SignedRequest;
   }
 
-  public async runApi({ body }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
-    const signed = this.signRequest(body, `/model/${this.model}/invoke`);
+  public async runApi({
+    body,
+    model: reqModel,
+  }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
+    // set model on per request basis
+    const model = reqModel ? reqModel : this.model;
+    const signed = this.signRequest(body, `/model/${model}/invoke`);
     const response = await this.request({
       ...signed,
-      url: `${this.url}/model/${this.model}/invoke`,
+      url: `${this.url}/model/${model}/invoke`,
       method: 'post',
       responseSchema: BedrockRunActionResponseSchema,
       data: body,
@@ -112,7 +119,10 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     return response.data;
   }
 
-  public async invokeAI({ messages }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+  public async invokeAI({
+    messages,
+    model,
+  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const combinedMessages = messages.reduce((acc: string, message) => {
       const { role, content } = message;
       // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
@@ -128,7 +138,7 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
       stop_sequences: ['\n\nHuman:'],
     };
 
-    const res = await this.runApi({ body: JSON.stringify(req) });
+    const res = await this.runApi({ body: JSON.stringify(req), model });
     return res.completion.trim();
   }
 }

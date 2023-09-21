@@ -9,7 +9,11 @@ import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
+import {
+  DEFAULT_AWS_REGION,
+  DEFAULT_BEDROCK_MODEL,
+  DEFAULT_BEDROCK_URL,
+} from '../../../common/bedrock/constants';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -50,7 +54,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
       <FormattedMessage
-        defaultMessage='Current support is for the Anthropic Claude models. The model can be set on a per request basis by including a "model" parameter in the request body. If no model is provided, the fallback will be the default model -  Claude 2. For more information, refer to the {bedrockAPIModelDocs}.'
+        defaultMessage='Current support is for the Anthropic Claude models. The model can be set on a per request basis by including a "model" parameter alongside the request body. If no model is provided, the fallback will be the default model -  Claude 2. For more information, refer to the {bedrockAPIModelDocs}.'
         id="xpack.stackConnectors.components.bedrock.bedrockDocumentationModel"
         values={{
           bedrockAPIModelDocs: (
@@ -66,6 +70,11 @@ export const bedrockConfig: ConfigFieldSchema[] = [
       />
     ),
     defaultValue: DEFAULT_BEDROCK_MODEL,
+  },
+  {
+    id: 'region',
+    label: i18n.REGION_LABEL,
+    defaultValue: DEFAULT_AWS_REGION,
   },
 ];
 

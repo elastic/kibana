@@ -28,6 +28,13 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
+export const REGION_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel',
+  {
+    defaultMessage: 'AWS Region',
+  }
+);
+
 export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.secret', {
   defaultMessage: 'Secret',
 });

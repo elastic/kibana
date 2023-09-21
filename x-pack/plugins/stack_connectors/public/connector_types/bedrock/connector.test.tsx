@@ -11,7 +11,7 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
+import { DEFAULT_AWS_REGION, DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -22,6 +22,7 @@ const bedrockConnector = {
   config: {
     apiUrl: 'https://bedrockurl.com',
     defaultModel: DEFAULT_BEDROCK_MODEL,
+    region: DEFAULT_AWS_REGION,
   },
   secrets: {
     accessKey: 'thats-a-nice-looking-key',
@@ -54,6 +55,8 @@ describe('BedrockConnectorFields renders', () => {
     expect(getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
       bedrockConnector.config.defaultModel
     );
+    expect(getAllByTestId('config.region-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.region-input')[0]).toHaveValue(bedrockConnector.config.region);
     expect(getAllByTestId('bedrock-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('bedrock-api-model-doc')[0]).toBeInTheDocument();
   });
