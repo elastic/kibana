@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
-  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../common/components/event_details/insights/translations';
@@ -41,7 +41,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
               values={{ count: alertSuppressionCount }}
             />
           }
-          data-test-subj={INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
+          data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />
       </EuiFlexItem>
@@ -57,7 +57,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
             />
           }
           tooltipPosition="bottom"
-          data-test-subj={INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
+          data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
