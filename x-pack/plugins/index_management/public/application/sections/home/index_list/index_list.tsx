@@ -28,6 +28,7 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
   }, []);
+
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
       <IndexTable history={history as ScopedHistory} />
