@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative } from 'path';
+import { resolve, relative, extname } from "path";
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -60,6 +60,7 @@ export async function loadAction({
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  let docIsCompressed = false;
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -67,6 +68,7 @@ export async function loadAction({
   const recordStream = concatStreamProviders(
     files.map((filename) => () => {
       log.info('[%s] Loading %j', name, filename);
+      if (filename === 'data.json.gz') docIsCompressed = true;
 
       return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
         createReadStream(resolve(inputDir, filename)),
@@ -81,7 +83,7 @@ export async function loadAction({
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, inputDir),
+    createIndexDocRecordsStream(client, stats, progress, useCreate, docIsCompressed),
   ]);
 
   progress.deactivate();

@@ -11,9 +11,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
-import { opendirSync } from 'fs';
 import os from 'node:os';
-import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -23,25 +21,17 @@ enum BulkOperation {
   Index = 'index',
 }
 
-const isCompressed = (x: string): boolean => {
-  const opened = opendirSync(x);
-  const dirent = opened.readSync();
-  // @ts-ignore
-  const isIt: boolean = isGzip(dirent?.name);
-  opened.closeSync();
-  return isIt;
-};
 export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false,
-  inputDir: string
+  isCompressed?: boolean
 ): Writable {
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
   return new Writable({
-    highWaterMark: isCompressed(inputDir) ? 5000 : 300,
+    highWaterMark: isCompressed ? 5000 : 300,
     objectMode: true,
 
     async write(record, enc, callback): Promise<void> {
