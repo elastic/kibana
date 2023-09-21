@@ -15,9 +15,9 @@ import { FtrConfigProvider } from '@kbn/test';
 import {
   FtrProviderContext,
   KibanaServer,
-  Es,
   RetryService,
 } from '@kbn/ftr-common-functional-services';
+import { Es } from '../services/es';
 
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';

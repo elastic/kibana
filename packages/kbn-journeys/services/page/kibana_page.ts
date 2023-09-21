@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
@@ -19,10 +20,12 @@ interface WaitForRenderArgs {
 export class KibanaPage {
   readonly page: Page;
   readonly log: ToolingLog;
+  readonly retry: RetryService;
 
-  constructor(page: Page, log: ToolingLog) {
+  constructor(page: Page, log: ToolingLog, retry: RetryService) {
     this.page = page;
     this.log = log;
+    this.retry = retry;
   }
 
   async waitForHeader() {
@@ -36,25 +39,32 @@ export class KibanaPage {
   }
 
   async waitForRender({ expectedItemsCount, itemLocator, checkAttribute }: WaitForRenderArgs) {
-    try {
-      await this.page.waitForFunction(
-        function renderCompleted(args: WaitForRenderArgs) {
-          const renderingItems = Array.from(document.querySelectorAll(args.itemLocator));
-          const allItemsLoaded = renderingItems.length === args.expectedItemsCount;
-          return allItemsLoaded
-            ? renderingItems.every((e) => e.getAttribute(args.checkAttribute) === 'true')
-            : false;
-        },
-        { expectedItemsCount, itemLocator, checkAttribute }
-      );
-    } catch (err) {
-      const loaded = await this.page.$$(itemLocator);
-      const rendered = await this.page.$$(`${itemLocator}[${checkAttribute}="true"]`);
-      this.log.error(
-        `'waitForRendering' failed: loaded - ${loaded.length}, rendered - ${rendered.length}, expected count - ${expectedItemsCount}`
-      );
-      throw err;
-    }
+    // we can't use `page.waitForFunction` because of CSP while testing on Cloud
+    await this.retry.waitFor(
+      `rendering of ${expectedItemsCount} elements with selector ${itemLocator} is completed`,
+      async () => {
+        const renderingItems = await this.page.$$(itemLocator);
+        if (renderingItems.length === expectedItemsCount) {
+          // all components are loaded, checking if all are rendered
+          const renderStatuses = await Promise.all(
+            renderingItems.map(async (item) => {
+              return (await item.getAttribute(checkAttribute)) === 'true';
+            })
+          );
+          const rendered = renderStatuses.filter((isRendered) => isRendered === true);
+          this.log.debug(
+            `waitForRender: ${rendered.length} out of ${expectedItemsCount} are rendered...`
+          );
+          return rendered.length === expectedItemsCount;
+        } else {
+          // not all components are loaded yet
+          this.log.debug(
+            `waitForRender: ${renderingItems.length} out of ${expectedItemsCount} are loaded...`
+          );
+          return false;
+        }
+      }
+    );
   }
 
   async waitForVisualizations(count: number) {

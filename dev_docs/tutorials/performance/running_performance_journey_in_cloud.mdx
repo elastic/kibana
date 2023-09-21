@@ -11,7 +11,7 @@ tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry
 As a way to better understand user experience with Kibana in cloud, we support running performance journeys against
 Cloud deployments.
 The process takes a few steps:
-- Create a cloud deployment
+- Create a cloud deployment (8.11.0+ is supported)
 - Re-configure deployment with APM enabled and reporting metrics to the monitoring cluster
 - Create a user with `superuser` role to run tests with
 - Checkout the branch that matches your cloud deployment version
@@ -35,7 +35,7 @@ Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding
 ```
 "user_settings_override_json": {
   "tracing.apm.enabled": "true",
-  "tracing.apm.environment": "development",
+  "tracing.apm.agent.environment": "development",
   "tracing.apm.agent.service_name": "elasticsearch",
   "tracing.apm.agent.server_url": "<SERVER_URL>",
   "tracing.apm.agent.metrics_interval": "120s",
@@ -50,6 +50,7 @@ Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding
 
 ```
 "user_settings_override_json": {
+  "coreApp.allowDynamicConfigOverrides": true,
   "elastic.apm.active": true,
   "elastic.apm.breakdownMetrics": false,
   "elastic.apm.captureBody": "all",
