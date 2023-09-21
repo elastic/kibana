@@ -12,6 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { BedrockRunActionResponseSchema } from '../../../common/bedrock/schema';
 import {
   BEDROCK_CONNECTOR_ID,
+  DEFAULT_AWS_REGION,
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
 } from '../../../common/bedrock/constants';
@@ -46,6 +47,7 @@ describe('BedrockConnector', () => {
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
         defaultModel: DEFAULT_BEDROCK_MODEL,
+        region: DEFAULT_AWS_REGION,
       },
       secrets: { accessKey: '123', secret: 'secret' },
       logger: loggingSystemMock.createLogger(),

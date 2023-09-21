@@ -30,9 +30,7 @@ const defaultConfig = {
 export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
-  const retry = getService('retry');
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const result = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
