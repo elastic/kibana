@@ -16,7 +16,7 @@ import {
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTION_TYPES } from '../../../../../common/api/detection_engine';
-import { ROLE } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 
 describe('Form', { tags: '@ess' }, () => {
   describe('User with no access can not create an endpoint response action', () => {
