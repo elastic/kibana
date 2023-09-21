@@ -11,12 +11,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/common';
+import type { MatrixHistogramRequestOptionsInput } from '../../../../common/api/search_strategy';
 import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { useKibana } from '../../lib/kibana';
 import type {
-  MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
@@ -76,7 +76,7 @@ export const useMatrixHistogram = ({
   const { startTracking } = useTrackHttpRequest();
 
   const [matrixHistogramRequest, setMatrixHistogramRequest] =
-    useState<MatrixHistogramRequestOptions>({
+    useState<MatrixHistogramRequestOptionsInput>({
       defaultIndex: indexNames,
       factoryQueryType: MatrixHistogramQuery,
       filterQuery: createFilter(filterQuery),
@@ -106,7 +106,7 @@ export const useMatrixHistogram = ({
   });
 
   const search = useCallback(
-    (request: MatrixHistogramRequestOptions) => {
+    (request: MatrixHistogramRequestOptionsInput) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -115,7 +115,7 @@ export const useMatrixHistogram = ({
         });
 
         searchSubscription$.current = data.search
-          .search<MatrixHistogramRequestOptions, MatrixHistogramStrategyResponse>(request, {
+          .search<MatrixHistogramRequestOptionsInput, MatrixHistogramStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
