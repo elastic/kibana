@@ -29,10 +29,14 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
+  height: 100%;
 }
 
 .dscPageContent__wrapper {
   overflow: hidden; // Ensures horizontal scroll of table
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dscPageContent {

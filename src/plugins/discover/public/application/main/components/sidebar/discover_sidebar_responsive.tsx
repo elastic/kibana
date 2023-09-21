@@ -385,6 +385,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       allFields={sidebarState.allFields}
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
+      fullWidth
       onAddFieldToWorkspace={onAddFieldToWorkspace}
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
       onAddFilter={onAddFilter}
