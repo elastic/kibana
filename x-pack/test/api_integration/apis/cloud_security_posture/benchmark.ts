@@ -76,6 +76,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       await createPackagePolicy(
         supertest,
+        agentPolicyId2,
+        'kspm',
+        'cloudbeat/cis_k8s',
+        'vanilla',
+        'kspm',
+        'KSPM-2'
+      );
+
+      await createPackagePolicy(
+        supertest,
         agentPolicyId3,
         'vuln_mgmt',
         'cloudbeat/vuln_mgmt_aws',
@@ -97,8 +107,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(2);
-      expect(res.total).equal(2);
+      expect(res.items.length).equal(3);
+      expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
@@ -109,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(2);
-      expect(res.total).equal(2);
+      expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
@@ -119,8 +129,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(1);
-      expect(res.total).equal(2);
+      expect(res.items.length).equal(2);
+      expect(res.total).equal(3);
     });
 
     it(`Should return empty array when we set page to be above the last page number`, async () => {
@@ -131,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(0);
-      expect(res.total).equal(2);
+      expect(res.total).equal(3);
     });
   });
 }
