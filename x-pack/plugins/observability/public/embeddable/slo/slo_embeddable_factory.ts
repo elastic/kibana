@@ -60,6 +60,12 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
     }
   }
 
+  public getDescription() {
+    return i18n.translate('xpack.observability.sloEmbeddable.description', {
+      defaultMessage: 'Add an SLO overview.',
+    });
+  }
+
   public getDisplayName() {
     return i18n.translate('xpack.observability.sloEmbeddable.displayName', {
       defaultMessage: 'SLO Overview',
