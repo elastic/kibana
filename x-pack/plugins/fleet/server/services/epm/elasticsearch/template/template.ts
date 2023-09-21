@@ -534,9 +534,17 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
 /**
  * Given a data stream name, return the indexTemplate name
  */
-function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
-  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
-  return [type, dataset].join('-');
+async function getIndexTemplate(
+  esClient: ElasticsearchClient,
+  dataStreamName: string
+): Promise<string> {
+  const dataStream = await esClient.indices.getDataStream({
+    name: dataStreamName,
+    expand_wildcards: ['open', 'hidden'],
+  });
+  const indexTemplateName = dataStream.data_streams[0].template;
+
+  return indexTemplateName;
 }
 
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
@@ -757,9 +765,9 @@ const updateExistingDataStream = async ({
   let lifecycle: any;
 
   try {
-    const simulateResult = await retryTransientEsErrors(() =>
+    const simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
-        name: dataStreamNameToIndexTemplateName(dataStreamName),
+        name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 
