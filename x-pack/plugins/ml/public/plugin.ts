@@ -54,14 +54,13 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import {
-  type ConfigSchema,
-  MlFeatures,
+  initEnabledFeatures,
+  type MlFeatures,
   ML_APP_ROUTE,
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
-import { initEnabledFeatures } from '../common/util/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -117,7 +116,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     nlp: true,
   };
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
   }

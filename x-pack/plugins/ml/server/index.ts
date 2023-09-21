@@ -6,7 +6,8 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, type ConfigSchema } from '../common/constants/app';
+import { type ConfigSchema } from '../common/constants/app';
+import { configSchema } from './config_schema';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
