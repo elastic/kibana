@@ -91,7 +91,13 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
 };
 
 export const TextAreaWithMessageVariables = (props: Props) => {
-  const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
+  let isMustacheAutocompleteOn;
+  try {
+    isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
+  } catch (e) {
+    isMustacheAutocompleteOn = false;
+  }
+
   if (isMustacheAutocompleteOn) return TextAreaWithAutocomplete(props);
   return TextAreaWithMessageVariablesLegacy(props);
 };

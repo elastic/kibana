@@ -8,8 +8,8 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "common/**/*",
-    "public/**/*"
-, "../triggers_actions_ui/public/application/hooks/use_rule_aad_fields.ts", "../triggers_actions_ui/public/application/hooks/use_rule_aad_template_fields.ts"  ],
+    "public/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/actions-plugin",

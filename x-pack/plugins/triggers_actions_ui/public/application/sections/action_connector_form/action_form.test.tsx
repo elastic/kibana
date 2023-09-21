@@ -19,8 +19,6 @@ import {
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '../../../common/experimental_features_service';
-import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -388,10 +386,6 @@ describe('action_form', () => {
   }
 
   describe('action_form in alert', () => {
-    beforeAll(() => {
-      TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
-    });
-
     it('renders available action cards', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(

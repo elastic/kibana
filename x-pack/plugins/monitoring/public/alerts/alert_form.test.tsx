@@ -28,8 +28,6 @@ import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '@kbn/triggers-actions-ui-plugin/public/common/experimental_features_service';
-import { allowedExperimentalValues } from '@kbn/triggers-actions-ui-plugin/common/experimental_features';
 
 interface AlertAction {
   group: string;
@@ -84,10 +82,6 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 describe('alert_form', () => {
-  beforeAll(() => {
-    TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
-  });
-
   beforeEach(() => {
     initLegacyShims();
     jest.resetAllMocks();

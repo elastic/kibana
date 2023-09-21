@@ -13,8 +13,6 @@ import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '@kbn/triggers-actions-ui-plugin/public/common/experimental_features_service';
-import { allowedExperimentalValues } from '@kbn/triggers-actions-ui-plugin/common/experimental_features';
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock(kibanaReactPath, () => {
@@ -28,10 +26,6 @@ jest.mock(kibanaReactPath, () => {
 });
 
 describe('OpsgenieParamFields', () => {
-  beforeAll(() => {
-    TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
-  });
-
   const editAction = jest.fn();
   const createAlertActionParams: OpsgenieActionParams = {
     subAction: OpsgenieSubActions.CreateAlert,

@@ -14,8 +14,6 @@ import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
-import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '@kbn/triggers-actions-ui-plugin/public/common/experimental_features_service';
-import { allowedExperimentalValues } from '@kbn/triggers-actions-ui-plugin/common/experimental_features';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -151,8 +149,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
       onChoicesSuccess = args.onSuccess;
       return choicesResponse;
     });
-
-    TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
   });
 
   test('all params fields is rendered', () => {
