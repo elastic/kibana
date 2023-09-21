@@ -26,6 +26,8 @@ export const Page = styled(EuiPage)`
 
 export const ContentWrapper = styled.div`
   height: 100%;
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
+  padding-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 interface Props {

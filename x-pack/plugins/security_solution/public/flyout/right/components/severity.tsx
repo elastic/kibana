@@ -17,7 +17,7 @@ import { SecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { useRightPanelContext } from '../context';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
-import { FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID } from './test_ids';
+import { SEVERITY_TITLE_TEST_ID } from './test_ids';
 
 const isSeverity = (x: unknown): x is Severity =>
   x === 'low' || x === 'medium' || x === 'high' || x === 'critical';
@@ -45,7 +45,7 @@ export const DocumentSeverity: FC = memo(() => {
   return (
     <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID}>
+        <EuiTitle size="xxs" data-test-subj={SEVERITY_TITLE_TEST_ID}>
           <h5>
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.header.severityTitle"
