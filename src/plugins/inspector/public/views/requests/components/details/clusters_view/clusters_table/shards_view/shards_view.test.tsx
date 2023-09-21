@@ -31,10 +31,7 @@ describe('render', () => {
       failed: 1,
     };
     const wrapper = shallow(
-      <ShardsView
-        failures={[{} as unknown as estypes.ShardFailure]}
-        shardStats={shardStats}
-      />
+      <ShardsView failures={[{} as unknown as estypes.ShardFailure]} shardStats={shardStats} />
     );
     expect(wrapper).toMatchSnapshot();
   });
