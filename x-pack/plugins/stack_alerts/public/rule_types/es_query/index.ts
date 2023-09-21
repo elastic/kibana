@@ -59,4 +59,20 @@ function registerNavigation(alerting: AlertingSetup) {
       return;
     }
   );
+  alerting.registerNavigation(
+    'logs',
+    ES_QUERY_ID,
+    (rule: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
+      if (isSearchSourceRule(rule.params)) return `/app/discover#/viewAlert/${rule.id}`;
+      return;
+    }
+  );
+  alerting.registerNavigation(
+    'infrastructure',
+    ES_QUERY_ID,
+    (rule: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
+      if (isSearchSourceRule(rule.params)) return `/app/discover#/viewAlert/${rule.id}`;
+      return;
+    }
+  );
 }
