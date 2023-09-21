@@ -36,3 +36,7 @@ xpack.fleet.internal.registry.spec.max: '3.0'
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
   - esqlRulesDisabled
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: false
