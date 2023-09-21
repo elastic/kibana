@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import React, { FunctionComponent, useEffect } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
