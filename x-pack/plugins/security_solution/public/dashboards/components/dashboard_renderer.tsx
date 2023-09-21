@@ -50,6 +50,7 @@ const DashboardRendererComponent = ({
 
   const securityTags = useSecurityTags();
   const firstSecurityTagId = securityTags?.[0]?.id;
+
   const isCreateDashboard = !savedObjectId;
 
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(
@@ -62,7 +63,6 @@ const DashboardRendererComponent = ({
           viewMode,
           query,
           filters,
-          ...(isCreateDashboard && firstSecurityTagId ? { tags: [firstSecurityTagId] } : {}),
         }),
         getIncomingEmbeddable: () =>
           embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
@@ -71,7 +71,7 @@ const DashboardRendererComponent = ({
             dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`,
         }),
       }),
-    [embeddable, filters, firstSecurityTagId, isCreateDashboard, query, timeRange, viewMode]
+    [embeddable, filters, query, timeRange, viewMode]
   );
   const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
     React.ReactElement | undefined
@@ -101,6 +101,11 @@ const DashboardRendererComponent = ({
   useEffect(() => {
     dashboardContainer?.updateInput({ timeRange, query, filters });
   }, [dashboardContainer, filters, query, timeRange]);
+
+  useEffect(() => {
+    if (isCreateDashboard && firstSecurityTagId)
+      dashboardContainer?.updateInput({ tags: [firstSecurityTagId] });
+  }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
   useEffect(() => {
     if (wrapperRef) {
