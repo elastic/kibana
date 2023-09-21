@@ -32,6 +32,7 @@ import {
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -44,12 +45,12 @@ import {
   addOrUpdateEmbeddable,
 } from './api';
 
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { placePanel } from '../component/panel_placement';
 import { pluginServices } from '../../services/plugin_services';
 import { initializeDashboard } from './create/create_dashboard';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
+import { DashboardAppLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
@@ -102,6 +103,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
+  public locator?: LocatorPublic<DashboardAppLocatorParams>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -155,6 +157,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       customBranding: this.customBranding,
     } = pluginServices.getServices());
 
+    this.locator = creationOptions?.locator;
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.dashboardCreationStartTime = dashboardCreationStartTime;
