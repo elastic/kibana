@@ -64,6 +64,10 @@ describe('Component BulkEditRuleErrorsList', () => {
       "2 custom machine learning rules (these rules don't have index patterns)",
     ],
     [
+      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      "2 custom ES|QL rules (these rules don't have index patterns)",
+    ],
+    [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
       "2 machine learning rules can't be edited (test failure)",
     ],
