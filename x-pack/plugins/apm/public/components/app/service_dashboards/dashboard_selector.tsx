@@ -13,7 +13,7 @@ import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 interface Props {
   serviceDashboards: SavedServiceDashboard[];
   currentDashboard?: SavedServiceDashboard;
-  handleOnChange: (selectedId: string) => void;
+  handleOnChange: (selectedId?: string) => void;
 }
 
 export function DashboardSelector({

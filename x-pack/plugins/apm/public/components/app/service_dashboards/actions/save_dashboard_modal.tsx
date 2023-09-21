@@ -86,26 +86,29 @@ export function SaveDashboardModal({
     async function () {
       const [newDashboard] = selectedDashboard;
       try {
-        await callApmApi('POST /internal/apm/service-dashboard', {
-          params: {
-            query: { serviceDashboardId: currentDashboard?.id },
-            body: {
-              dashboardTitle: newDashboard.label,
-              dashboardSavedObjectId: newDashboard.value,
-              useContextFilter,
-              linkTo: DashboardTypeEnum.single, // iteration-1: Only single supported
-              serviceName,
+        if (newDashboard.value) {
+          await callApmApi('POST /internal/apm/service-dashboard', {
+            params: {
+              query: { serviceDashboardId: currentDashboard?.id },
+              body: {
+                dashboardTitle: newDashboard.label,
+                dashboardSavedObjectId: newDashboard.value,
+                useContextFilter,
+                linkTo: DashboardTypeEnum.single, // iteration-1: Only single supported
+                serviceName,
+                kuery: undefined,
+              },
             },
-          },
-          signal: null,
-        });
+            signal: null,
+          });
 
-        notifications.toasts.addSuccess(
-          isEditMode
-            ? getEditSuccessToastLabels(newDashboard.label)
-            : getLinkSuccessToastLabels(newDashboard.label)
-        );
-        reloadServiceDashboards();
+          notifications.toasts.addSuccess(
+            isEditMode
+              ? getEditSuccessToastLabels(newDashboard.label)
+              : getLinkSuccessToastLabels(newDashboard.label)
+          );
+          reloadServiceDashboards();
+        }
       } catch (error) {
         console.error(error);
         notifications.toasts.addDanger({

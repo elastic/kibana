@@ -96,7 +96,7 @@ export function ServiceDashboards() {
     });
   }, [dataView, serviceName, environment, dashboard, currentDashboard]);
 
-  const handleOnChange = (selectedId: string) => {
+  const handleOnChange = (selectedId?: string) => {
     setCurrentDashboard(
       serviceDashboards.find(
         ({ dashboardSavedObjectId }) => dashboardSavedObjectId === selectedId

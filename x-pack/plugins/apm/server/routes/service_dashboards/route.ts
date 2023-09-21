@@ -34,7 +34,7 @@ const serviceDashboardSaveRoute = createApmServerRoute({
       dashboardSavedObjectId: t.string,
       dashboardTitle: t.string,
       kuery: t.union([t.string, t.undefined]),
-      serviceName: t.union([t.string, t.undefined]),
+      serviceName: t.string,
       useContextFilter: t.boolean,
       linkTo: linkToRt,
     }),
