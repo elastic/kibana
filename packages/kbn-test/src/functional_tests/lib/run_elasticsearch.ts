@@ -21,6 +21,7 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
+  esPort?: number;
 }
 
 interface CcsConfig {
