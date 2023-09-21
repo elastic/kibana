@@ -1261,7 +1261,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.credential_access',
       {
         defaultMessage:
-          'Controls whether Credential Access API events are enabled. Set to false to disable just this event collection. Default: true',
+          'Controls whether Credential Access API events are enabled. Default: true',
       }
     ),
   },
@@ -1272,7 +1272,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.etw_threat_intelligence',
       {
         defaultMessage:
-          'Controls whether Microsoft-Windows-Threat-Intelligence API events are enabled. Set to false to disable just this event collection. Default: true',
+          'Controls whether Microsoft-Windows-Threat-Intelligence API events are enabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api.etw_win32k',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.etw_win32k',
+      {
+        defaultMessage:
+          'Controls whether Microsoft-Windows-Win32k API events are enabled. Default: true',
       }
     ),
   },
@@ -1283,7 +1294,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.disbaled',
       {
         defaultMessage:
-          'A comma separated list of Threat-Intelligence API names to selectively disable.',
+          'A comma separated list of API names to selectively disable.',
       }
     ),
   },
@@ -1294,7 +1305,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.verbose',
       {
         defaultMessage:
-          'Controls whether high volume in-process and parent-child API events are enabled. Event filtering is recommended if enabled. Default: false',
+          'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
       }
     ),
   },
