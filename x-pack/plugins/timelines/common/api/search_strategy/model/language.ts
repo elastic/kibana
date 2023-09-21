@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy/first_seen_last_seen/first_seen_last_seen';
+import { z } from 'zod';
 
-export const parseOptions = (options: unknown) => firstLastSeenRequestOptionsSchema.parse(options);
+export const language = z.union([z.literal('kuery'), z.literal('lucene')]);
