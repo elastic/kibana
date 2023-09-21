@@ -73,6 +73,18 @@ export class KibanaPage {
     });
   }
 
+  async waitForChartsSuggestions(count: number) {
+    await this.page.waitForFunction(
+      function renderCompleted(args: { count: number }) {
+        const renderingItems = Array.from(
+          document.querySelectorAll('button[data-test-subj="lnsSuggestion"]')
+        );
+        return renderingItems.length === args.count;
+      },
+      { count }
+    );
+  }
+
   async clearInput(locator: string) {
     const textArea = this.page.locator(locator);
     await textArea.clear();
