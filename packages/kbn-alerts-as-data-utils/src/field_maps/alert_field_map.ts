@@ -32,7 +32,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_URL,
   ALERT_UUID,
-  ALERT_WORKFLOW_ASSIGNEES,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
@@ -183,7 +183,7 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
-  [ALERT_WORKFLOW_ASSIGNEES]: {
+  [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: 'keyword',
     array: true,
     required: false,

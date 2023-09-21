@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ALERT_WORKFLOW_ASSIGNEES } from '@kbn/rule-data-utils';
+import type { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   Ancestor890,
@@ -26,7 +26,7 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 export type { Ancestor890 as Ancestor8110 };
 
 export interface BaseFields8110 extends BaseFields890 {
-  [ALERT_WORKFLOW_ASSIGNEES]: string[];
+  [ALERT_WORKFLOW_ASSIGNEE_IDS]: string[];
 }
 
 export interface WrappedFields8110<T extends BaseFields8110> {

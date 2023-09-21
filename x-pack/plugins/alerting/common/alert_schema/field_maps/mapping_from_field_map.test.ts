@@ -306,7 +306,7 @@ describe('mappingFromFieldMap', () => {
                 workflow_tags: {
                   type: 'keyword',
                 },
-                workflow_assignees: {
+                workflow_assignee_ids: {
                   type: 'keyword',
                 },
               },

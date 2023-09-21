@@ -11,7 +11,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
-  ALERT_WORKFLOW_ASSIGNEES,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
-        [ALERT_WORKFLOW_ASSIGNEES]: [],
+        [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
         [ALERT_DEPTH]: 1,
         [ALERT_ANCESTORS]: [
           {

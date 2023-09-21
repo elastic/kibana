@@ -70,8 +70,8 @@ const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
 // kibana.alert.workflow_tags - user workflow alert tags
 const ALERT_WORKFLOW_TAGS = `${ALERT_NAMESPACE}.workflow_tags` as const;
 
-// kibana.alert.workflow_assignees - user workflow alert assignees
-const ALERT_WORKFLOW_ASSIGNEES = `${ALERT_NAMESPACE}.workflow_assignees` as const;
+// kibana.alert.workflow_assignee_ids - user workflow alert assignees
+const ALERT_WORKFLOW_ASSIGNEE_IDS = `${ALERT_NAMESPACE}.workflow_assignee_ids` as const;
 
 // kibana.alert.rule.category - rule type name for rule that generated this alert
 const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
@@ -138,7 +138,7 @@ const fields = {
   ALERT_TIME_RANGE,
   ALERT_URL,
   ALERT_UUID,
-  ALERT_WORKFLOW_ASSIGNEES,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
@@ -178,7 +178,7 @@ export {
   ALERT_TIME_RANGE,
   ALERT_URL,
   ALERT_UUID,
-  ALERT_WORKFLOW_ASSIGNEES,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
