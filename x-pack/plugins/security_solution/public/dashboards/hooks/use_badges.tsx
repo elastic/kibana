@@ -34,16 +34,19 @@ export const useBadges: (params: { dashboardContainer: DashboardAPI }) => Badge[
     if (hasUnsavedChanges) {
       allBadges.push({
         'data-test-subj': 'dashboardUnsavedChangesBadge',
-        badgeText: i18n.translate('securitySolution.dashboard.unsavedChangesBadge', {
+        badgeText: i18n.translate('xpack.securitySolution.dashboard.unsavedChangesBadge', {
           defaultMessage: 'Unsaved changes',
         }),
         title: '',
         color: 'warning',
         toolTipProps: {
-          content: i18n.translate('securitySolution.dashboard.unsavedChangesBadgeToolTipContent', {
-            defaultMessage:
-              ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
-          }),
+          content: i18n.translate(
+            'xpack.securitySolution.dashboard.unsavedChangesBadgeToolTipContent',
+            {
+              defaultMessage:
+                ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+            }
+          ),
           position: 'bottom',
         },
       });
@@ -51,7 +54,7 @@ export const useBadges: (params: { dashboardContainer: DashboardAPI }) => Badge[
     if (hasRunMigrations) {
       allBadges.push({
         'data-test-subj': 'dashboardSaveRecommendedBadge',
-        badgeText: i18n.translate('securitySolution.dashboard.hasRunMigrationsBadge', {
+        badgeText: i18n.translate('xpack.securitySolution.dashboard.hasRunMigrationsBadge', {
           defaultMessage: 'Save recommended',
         }),
         title: '',
@@ -59,7 +62,7 @@ export const useBadges: (params: { dashboardContainer: DashboardAPI }) => Badge[
         iconType: 'save',
         toolTipProps: {
           content: i18n.translate(
-            'securitySolution.dashboard.hasRunMigrationsBadgeToolTipContent',
+            'xpack.securitySolution.dashboard.hasRunMigrationsBadgeToolTipContent',
             {
               defaultMessage:
                 'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
