@@ -12,7 +12,6 @@ import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
-import { UNKNOWN } from '../translations';
 
 const EditComponent: CustomFieldType['Edit'] = ({
   customField,
@@ -21,8 +20,8 @@ const EditComponent: CustomFieldType['Edit'] = ({
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = customField?.field.value?.[0] as boolean;
-  const title = customFieldConfiguration.label ?? UNKNOWN;
+  const initialValue = Boolean(customField?.field.value?.[0]);
+  const title = customFieldConfiguration.label;
 
   const { form } = useForm({
     defaultValue: { value: initialValue },
@@ -42,7 +41,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
   };
 
   return (
-    <EuiFlexItem grow={false}>
+    <>
       <EuiFlexGroup
         alignItems="center"
         gutterSize="none"
@@ -75,7 +74,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
           />
         </Form>
       </EuiFlexGroup>
-    </EuiFlexItem>
+    </>
   );
 };
 

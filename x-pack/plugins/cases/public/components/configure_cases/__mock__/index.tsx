@@ -35,6 +35,12 @@ export const useCaseConfigureResponse = {
   refetch: jest.fn(),
 };
 
+export const usePersistConfigurationMockResponse = {
+  isLoading: false,
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
+};
+
 export const useConnectorsResponse = {
   isLoading: false,
   data: connectors,

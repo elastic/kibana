@@ -32,7 +32,6 @@ import {
   NO_CUSTOM_FIELD_SET,
   REQUIRED_FIELD,
   SAVE,
-  UNKNOWN,
 } from '../translations';
 
 interface FormState {
@@ -129,11 +128,11 @@ const EditComponent: CustomFieldType['Edit'] = ({
   };
 
   const initialValue = (customField?.field.value?.[0] as string) ?? '';
-  const title = customFieldConfiguration?.label ?? UNKNOWN;
+  const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
 
   return (
-    <EuiFlexItem grow={false}>
+    <>
       <EuiFlexGroup
         alignItems="center"
         gutterSize="none"
@@ -215,7 +214,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
           </EuiFlexGroup>
         )}
       </EuiFlexGroup>
-    </EuiFlexItem>
+    </>
   );
 };
 
