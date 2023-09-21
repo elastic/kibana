@@ -27,6 +27,7 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
+  EuiDataGridStyle,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -282,6 +283,10 @@ export interface UnifiedDataTableProps {
    * Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour.
    */
   componentsTourSteps?: Record<string, string>;
+  /**
+   * Optional gridStyle override.
+   */
+  gridStyle?: EuiDataGridStyle;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -335,6 +340,7 @@ export const UnifiedDataTable = ({
   externalCustomRenderers,
   consumer = 'discover',
   componentsTourSteps,
+  gridStyle,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -716,6 +722,16 @@ export const UnifiedDataTable = ({
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
+  const gridStyleOverride = useMemo(() => {
+    if (gridStyle) {
+      return {
+        ...GRID_STYLE,
+        ...gridStyle,
+      };
+    }
+    return GRID_STYLE;
+  }, [gridStyle]);
+
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightState,
     onUpdateRowHeight,
@@ -789,7 +805,7 @@ export const UnifiedDataTable = ({
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
             inMemory={inMemory}
-            gridStyle={GRID_STYLE}
+            gridStyle={gridStyleOverride}
             renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
           />
