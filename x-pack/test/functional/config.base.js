@@ -559,7 +559,7 @@ export default async function ({ readConfigFile }) {
 
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_index_templates'],
+            cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
             indices: [
               {
                 names: ['*'],
