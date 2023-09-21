@@ -157,7 +157,7 @@ describe('buildAlert', () => {
         expect(intersection).toEqual(expected);
       });
 
-      test('should work with arrays with differing lengths', () => {
+      test('returns the intersection of arrays with differing lengths', () => {
         const a = {
           field1: 1,
         };
