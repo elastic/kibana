@@ -271,7 +271,7 @@ describe('buildAlert', () => {
       expect(intersection).toEqual(expected);
     });
 
-    test('should work with arrays', () => {
+    test('returns the intersection of values for fields containing arrays', () => {
       const a = {
         array_field1: [1, 2],
         array_field2: [1, 2],
