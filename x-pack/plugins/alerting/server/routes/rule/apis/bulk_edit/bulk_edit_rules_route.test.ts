@@ -114,6 +114,7 @@ describe('bulkEditRulesRoute', () => {
                   foo: true,
                 },
                 uuid: '123-456',
+                use_alert_data_from_template: false,
               },
             ],
           }),

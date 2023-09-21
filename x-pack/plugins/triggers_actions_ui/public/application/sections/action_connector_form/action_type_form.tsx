@@ -43,6 +43,7 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
@@ -195,6 +196,10 @@ export const ActionTypeForm = ({
   const templateFields = useMemo(
     () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
     [aadTemplateFields, availableActionVariables, useAadTemplateFields]
+  );
+
+  const showMustacheAutocompleteSwitch = getIsExperimentalFeatureEnabled(
+    'showMustacheAutocompleteSwitch'
   );
 
   const handleUseAadTemplateFields = useCallback(
@@ -493,13 +498,15 @@ export const ActionTypeForm = ({
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
             <EuiFlexGroup gutterSize="m" direction="column">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label="Use template fields from alerts index"
-                  checked={useAadTemplateFields}
-                  onChange={handleUseAadTemplateFields}
-                />
-              </EuiFlexItem>
+              {showMustacheAutocompleteSwitch && (
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label="Use template fields from alerts index"
+                    checked={useAadTemplateFields}
+                    onChange={handleUseAadTemplateFields}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <Suspense fallback={null}>
                   <ParamsFieldsComponent
