@@ -200,68 +200,63 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-const getServerlessNodes: Array<Omit<ServerlessEsNodeArgs, 'image'>> = (port) => {
-  const es01 = `es01${port}`;
-  const es02 = `es02${port}`;
-  const es03 = `es03${port}`;
-  return [
-    {
-      name: es01,
-      params: [
-        '-p',
-        '127.0.0.1:9300:9300',
+const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+  {
+    name: 'es01',
+    params: [
+      '-p',
+      '127.0.0.1:9300:9300',
 
-        '--env',
-        `discovery.seed_hosts=${es02},${es03}`,
+      '--env',
+      'discovery.seed_hosts=es02,es03',
 
-        '--env',
-        'node.roles=["master","remote_cluster_client","ingest","index"]',
-      ],
-      esArgs: [
-        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+      '--env',
+      'node.roles=["master","remote_cluster_client","ingest","index"]',
+    ],
+    esArgs: [
+      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
 
-        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ],
-    },
-    {
-      name: es02,
-      params: [
-        '-p',
-        '127.0.0.1:9202:9202',
+      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+    ],
+  },
+  {
+    name: 'es02',
+    params: [
+      '-p',
+      '127.0.0.1:9202:9202',
 
-        '-p',
-        '127.0.0.1:9302:9302',
+      '-p',
+      '127.0.0.1:9302:9302',
 
-        '--env',
-        `discovery.seed_hosts=${es01},${es03}`,
+      '--env',
+      'discovery.seed_hosts=es01,es03',
 
-        '--env',
-        'node.roles=["master","remote_cluster_client","search"]',
-      ],
-      esArgs: [
-        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+      '--env',
+      'node.roles=["master","remote_cluster_client","search"]',
+    ],
+    esArgs: [
+      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
 
-        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ],
-    },
-    {
-      name: es03,
-      params: [
-        '-p',
-        '127.0.0.1:9203:9203',
+      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+    ],
+  },
+  {
+    name: 'es03',
+    params: [
+      '-p',
+      '127.0.0.1:9203:9203',
 
-        '-p',
-        '127.0.0.1:9303:9303',
+      '-p',
+      '127.0.0.1:9303:9303',
 
-        '--env',
-        `discovery.seed_hosts=${es01},${es02}`,
+      '--env',
+      'discovery.seed_hosts=es01,es02',
 
-        '--env',
-        'node.roles=["master","remote_cluster_client","ml","transform"]',
-      ],
-    },
-  ];
-};
+      '--env',
+      'node.roles=["master","remote_cluster_client","ml","transform"]',
+    ],
+  },
+];
 
 /**
  * Determine the Docker image from CLI options and defaults
@@ -366,8 +361,6 @@ export async function detectRunningNodes(
   log: ToolingLog,
   options: ServerlessOptions | DockerOptions
 ) {
-  const SERVERLESS_NODES = getServerlessNodes(options.port);
-
   const namesCmd = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
     acc.push('--filter', `name=${name}`);
 
@@ -575,8 +568,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
 
-  console.log({ options });
-  const SERVERLESS_NODES = getServerlessNodes(options.port);
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
       await runServerlessEsNode(log, {
