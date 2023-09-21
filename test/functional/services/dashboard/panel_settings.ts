@@ -41,6 +41,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     }
 
     public async findCustomTimeRangeToggleButton(): Promise<WebElementWrapper> {
+      log.debug('findCustomTimeRangeToggleButton');
       let button: WebElementWrapper | undefined;
       await retry.waitFor('custom time range toggle button', async () => {
         button = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
@@ -99,18 +100,14 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
 
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
-      const button = await this.findDatePickerQuickMenuButton();
-
-      await retry.try(async () => {
-        if (!(await testSubjects.isDisplayed('superDatePickerQuickMenu'))) {
-          await button.click();
-          await retry.waitForWithTimeout(
-            'super date picker quick menu to be displayed',
-            1000,
-            async () => await testSubjects.isDisplayed('superDatePickerQuickMenu')
-          );
-        }
+      let button: WebElementWrapper | undefined;
+      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
+        button = await this.findDatePickerQuickMenuButton();
+        return Boolean(button);
       });
+      if (button) {
+        await button.click();
+      }
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
