@@ -432,13 +432,15 @@ describe('Create case', () => {
     it('should select the default connector set in the configuration', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'servicenow-1',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'servicenow-1',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
         },
-        persistLoading: false,
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -482,13 +484,15 @@ describe('Create case', () => {
     it('should default to none if the default connector does not exist in connectors', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'not-exist',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'not-exist',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
         },
-        persistLoading: false,
       }));
 
       useGetConnectorsMock.mockReturnValue({

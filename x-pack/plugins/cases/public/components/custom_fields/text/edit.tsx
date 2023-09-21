@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
@@ -29,7 +30,6 @@ import {
   EDIT_CUSTOM_FIELDS_ARIA_LABEL,
   NO_CUSTOM_FIELD_SET,
   SAVE,
-  UNKNOWN,
 } from '../translations';
 import { getTextFieldConfig } from './config';
 
@@ -113,11 +113,13 @@ const EditComponent: CustomFieldType['Edit'] = ({
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
+      const value = isEmpty(data.value) ? null : [data.value];
+
       onSubmit({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TEXT,
-        field: { value: [data.value] },
+        field: { value },
       });
     }
 
@@ -125,11 +127,12 @@ const EditComponent: CustomFieldType['Edit'] = ({
   };
 
   const initialValue = (customField?.field.value?.[0] as string) ?? '';
-  const title = customFieldConfiguration?.label ?? UNKNOWN;
+  const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
+  const isCustomFieldValueDefined = !isEmpty(customField?.field.value);
 
   return (
-    <EuiFlexItem grow={false}>
+    <>
       <EuiFlexGroup
         alignItems="center"
         gutterSize="none"
@@ -163,10 +166,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
         data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
-        {!customField && !isEdit && (
+        {!isCustomFieldValueDefined && !isEdit && (
           <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
         )}
-        {!isEdit && customField && (
+        {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
@@ -211,7 +214,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
           </EuiFlexGroup>
         )}
       </EuiFlexGroup>
-    </EuiFlexItem>
+    </>
   );
 };
 

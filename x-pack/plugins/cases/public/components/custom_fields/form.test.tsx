@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
+import userEvent from '@testing-library/user-event';
 
 describe('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
@@ -55,5 +57,56 @@ describe('CustomFieldsForm ', () => {
 
     expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+  });
+
+  it('serializes the data correctly if required is selected', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(screen.getByTestId('text-custom-field-options'));
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
+  it('serializes the data correctly if required is not selected', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: false,
+        type: 'text',
+      });
+    });
   });
 });
