@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { assign } from 'lodash';
+
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  ConcreteTaskInstance,
+} from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -17,11 +22,7 @@ import { ProductLine, ProductTier } from '../../common/product';
 
 import { usageReportingService } from '../common/services';
 import type { ServerlessSecurityConfig } from '../config';
-import type {
-  SecurityUsageReportingTaskSetupContract,
-  UsageRecord,
-  MeteringCallback,
-} from '../types';
+import type { SecurityUsageReportingTaskSetupContract, UsageRecord } from '../types';
 
 import { SecurityUsageReportingTask } from './usage_reporting_task';
 
@@ -40,26 +41,31 @@ describe('SecurityUsageReportingTask', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let reportUsageSpy: jest.SpyInstance;
   let meteringCallbackMock: jest.Mock;
   let taskArgs: SecurityUsageReportingTaskSetupContract;
   let usageRecord: UsageRecord;
 
-  function buildMockTaskInstance() {
-    return {
-      id: `${TYPE}:${VERSION}`,
-      runAt: new Date(),
-      attempts: 0,
-      ownerId: '',
-      status: TaskStatus.Running,
-      startedAt: new Date(),
-      scheduledAt: new Date(),
-      retryAt: new Date(),
-      params: {},
-      state: {
-        lastSuccessfulReport: new Date().toISOString(),
+  function buildMockTaskInstance(overrides?: Partial<ConcreteTaskInstance>): ConcreteTaskInstance {
+    const timestamp = new Date(new Date().setMinutes(-15));
+    return assign(
+      {
+        id: `${TYPE}:${VERSION}`,
+        runAt: timestamp,
+        attempts: 0,
+        ownerId: '',
+        status: TaskStatus.Running,
+        startedAt: timestamp,
+        scheduledAt: timestamp,
+        retryAt: timestamp,
+        params: {},
+        state: {
+          lastSuccessfulReport: timestamp,
+        },
+        taskType: TYPE,
       },
-      taskType: TYPE,
-    };
+      overrides
+    );
   }
 
   function buildUsageRecord() {
@@ -83,52 +89,54 @@ describe('SecurityUsageReportingTask', () => {
     };
   }
 
-  function buildTaskArgs({
-    core,
-    taskManager,
-    meteringCallback,
-  }: {
-    core: CoreSetup;
-    taskManager: TaskManagerSetupContract;
-    meteringCallback: MeteringCallback;
-  }): SecurityUsageReportingTaskSetupContract {
-    return {
-      core,
-      logFactory: loggingSystemMock.create(),
-      config: {
-        productTypes: [
-          {
-            product_line: ProductLine.security,
-            product_tier: ProductTier.complete,
+  function buildTaskArgs(
+    overrides?: Partial<SecurityUsageReportingTaskSetupContract>
+  ): SecurityUsageReportingTaskSetupContract {
+    return assign(
+      {
+        core: mockCore,
+        logFactory: loggingSystemMock.create(),
+        config: {
+          productTypes: [
+            {
+              product_line: ProductLine.security,
+              product_tier: ProductTier.complete,
+            },
+          ],
+        } as ServerlessSecurityConfig,
+        taskManager: mockTaskManagerSetup,
+        cloudSetup: {
+          serverless: {
+            projectId: PROJECT_ID,
           },
-        ],
-      } as ServerlessSecurityConfig,
-      taskManager,
-      cloudSetup: {
-        serverless: {
-          projectId: PROJECT_ID,
-        },
-      } as CloudSetup,
-      taskType: TYPE,
-      taskTitle: TITLE,
-      version: VERSION,
-      meteringCallback,
-    };
+        } as CloudSetup,
+        taskType: TYPE,
+        taskTitle: TITLE,
+        version: VERSION,
+        meteringCallback: meteringCallbackMock,
+      },
+      overrides
+    );
   }
 
-  beforeEach(async () => {
+  async function setupMocks() {
     mockCore = coreSetupMock();
     mockEsClient = (await mockCore.getStartServices())[0].elasticsearch.client
       .asInternalUser as jest.Mocked<ElasticsearchClient>;
     mockTaskManagerSetup = tmSetupMock();
     usageRecord = buildUsageRecord();
+    reportUsageSpy = jest.spyOn(usageReportingService, 'reportUsage');
     meteringCallbackMock = jest.fn().mockResolvedValueOnce([usageRecord]);
-    taskArgs = buildTaskArgs({
-      core: mockCore,
-      taskManager: mockTaskManagerSetup,
-      meteringCallback: meteringCallbackMock,
-    });
+    taskArgs = buildTaskArgs();
     mockTask = new SecurityUsageReportingTask(taskArgs);
+  }
+
+  beforeEach(async () => {
+    await setupMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('task lifecycle', () => {
@@ -148,11 +156,11 @@ describe('SecurityUsageReportingTask', () => {
   });
 
   describe('task logic', () => {
-    async function runTask(taskInstance = buildMockTaskInstance()) {
+    async function runTask(taskInstance = buildMockTaskInstance(), callNum: number = 0) {
       const mockTaskManagerStart = tmStartMock();
       await mockTask.start({ taskManager: mockTaskManagerStart, interval: '5m' });
       const createTaskRunner =
-        mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
+        mockTaskManagerSetup.registerTaskDefinitions.mock.calls[callNum][0][TYPE].createTaskRunner;
       const taskRunner = createTaskRunner({ taskInstance });
       return taskRunner.run();
     }
@@ -171,7 +179,6 @@ describe('SecurityUsageReportingTask', () => {
     });
 
     it('should report metering records', async () => {
-      const reportUsageSpy = jest.spyOn(usageReportingService, 'reportUsage');
       await runTask();
       expect(reportUsageSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -188,6 +195,62 @@ describe('SecurityUsageReportingTask', () => {
           }),
         ])
       );
+    });
+
+    describe('lastSuccessfulReport', () => {
+      it('should set lastSuccessfulReport correctly if report success', async () => {
+        reportUsageSpy.mockResolvedValueOnce({ status: 201 });
+        const taskInstance = buildMockTaskInstance();
+        const task = await runTask(taskInstance);
+        const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
+        expect(newLastSuccessfulReport).toEqual(expect.any(Date));
+        expect(newLastSuccessfulReport).not.toEqual(taskInstance.state.lastSuccessfulReport);
+      });
+
+      describe('and response is NOT 201', () => {
+        beforeEach(() => {
+          reportUsageSpy.mockResolvedValueOnce({ status: 500 });
+        });
+
+        it('should set lastSuccessfulReport correctly', async () => {
+          const lastSuccessfulReport = new Date(new Date().setMinutes(-15));
+          const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
+          const task = await runTask(taskInstance);
+          const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+
+          expect(newLastSuccessfulReport).toEqual(taskInstance.state.lastSuccessfulReport);
+        });
+
+        describe('and lookBackLimitMinutes is set', () => {
+          it('should limit lastSuccessfulReport if past threshold', async () => {
+            taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 5 } });
+            mockTask = new SecurityUsageReportingTask(taskArgs);
+
+            const lastSuccessfulReport = new Date(new Date().setMinutes(-30));
+            const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
+            const task = await runTask(taskInstance, 1);
+            const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+
+            // should be ~5 minutes so asserting between 4-6 minutes ago
+            const sixMinutesAgo = new Date().setMinutes(-6);
+            expect(newLastSuccessfulReport.getTime()).toBeGreaterThanOrEqual(sixMinutesAgo);
+            const fourMinutesAgo = new Date().setMinutes(-4);
+            expect(newLastSuccessfulReport.getTime()).toBeLessThanOrEqual(fourMinutesAgo);
+          });
+
+          it('should NOT limit lastSuccessfulReport if NOT past threshold', async () => {
+            taskArgs = buildTaskArgs({ options: { lookBackLimitMinutes: 30 } });
+            mockTask = new SecurityUsageReportingTask(taskArgs);
+
+            const lastSuccessfulReport = new Date(new Date().setMinutes(-15));
+            const taskInstance = buildMockTaskInstance({ state: { lastSuccessfulReport } });
+            const task = await runTask(taskInstance, 1);
+            const newLastSuccessfulReport = task?.state.lastSuccessfulReport as Date;
+
+            expect(newLastSuccessfulReport).toEqual(taskInstance.state.lastSuccessfulReport);
+          });
+        });
+      });
     });
   });
 });
