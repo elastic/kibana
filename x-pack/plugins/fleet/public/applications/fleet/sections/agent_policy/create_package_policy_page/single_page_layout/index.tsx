@@ -415,6 +415,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
             />
           )}
+        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
+          <PostInstallCloudFormationModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
         {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
           <PostInstallCloudFormationModal
             agentPolicy={agentPolicy}
