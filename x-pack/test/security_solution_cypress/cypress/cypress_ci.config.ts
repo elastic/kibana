@@ -7,7 +7,6 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
-import { oldHeadless } from './support/old_headless';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
