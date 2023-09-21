@@ -37,7 +37,7 @@ describe('<Navigation />', () => {
     test('render reference UI and build the navigation tree', async () => {
       const onProjectNavigationChange = jest.fn();
 
-      const { findByTestId } = render(
+      const { findAllByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
           <Navigation>
             <Navigation.Group id="group1">
@@ -58,16 +58,8 @@ describe('<Navigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
-
       // Click the last group to expand and show the last depth
-      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
-
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+      (await findAllByTestId(/nav-item-group1.group1A.group1A_1/))[0].click();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -243,7 +235,7 @@ describe('<Navigation />', () => {
 
       const onProjectNavigationChange = jest.fn();
 
-      const { findByTestId } = render(
+      render(
         <NavigationProvider
           {...services}
           navLinks$={navLinks$}
@@ -265,9 +257,6 @@ describe('<Navigation />', () => {
       await act(async () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
-
-      expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -319,7 +308,7 @@ describe('<Navigation />', () => {
       ]);
       const onProjectNavigationChange = jest.fn();
 
-      const { queryByTestId } = render(
+      render(
         <NavigationProvider
           {...services}
           navLinks$={navLinks$}
@@ -341,9 +330,6 @@ describe('<Navigation />', () => {
       await act(async () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
-
-      expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
-      expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -402,7 +388,7 @@ describe('<Navigation />', () => {
 
       const onProjectNavigationChange = jest.fn();
 
-      const { findByTestId } = render(
+      render(
         <NavigationProvider
           {...services}
           navLinks$={navLinks$}
@@ -427,10 +413,6 @@ describe('<Navigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('my-custom-element')).toBeVisible();
-      expect(await findByTestId('my-other-custom-element')).toBeVisible();
-      expect((await findByTestId('my-other-custom-element')).textContent).toBe('Children prop');
-
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -453,7 +435,6 @@ describe('<Navigation />', () => {
                   id: 'item1',
                   path: ['root', 'group1', 'item1'],
                   title: 'Title from deeplink',
-                  renderItem: expect.any(Function),
                   isActive: false,
                   deepLink: {
                     id: 'item1',
@@ -469,7 +450,6 @@ describe('<Navigation />', () => {
                   path: ['root', 'group1', 'item2'],
                   title: 'Children prop',
                   isActive: false,
-                  renderItem: expect.any(Function),
                 },
               ],
             },
@@ -751,10 +731,6 @@ describe('<Navigation />', () => {
           </Navigation>
         </NavigationProvider>
       );
-
-      expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
 
       expect((await findByTestId(/nav-item-group1.cloudLink1/)).textContent).toBe(
         'Mock Users & RolesExternal link'

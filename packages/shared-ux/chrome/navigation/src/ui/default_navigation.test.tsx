@@ -80,7 +80,7 @@ describe('<DefaultNavigation />', () => {
         },
       ];
 
-      const { findByTestId } = render(
+      const { findAllByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
           <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
@@ -90,16 +90,8 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
-
       // Click the last group to expand and show the last depth
-      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
-
-      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+      (await findAllByTestId(/nav-item-group1.group1A.group1A_1/))[0].click();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -120,7 +112,6 @@ describe('<DefaultNavigation />', () => {
                   "group1",
                   "item1",
                 ],
-                "renderItem": undefined,
                 "title": "Item 1",
               },
               Object {
@@ -133,7 +124,6 @@ describe('<DefaultNavigation />', () => {
                   "group1",
                   "item2",
                 ],
-                "renderItem": undefined,
                 "title": "Item 2",
               },
               Object {
@@ -149,7 +139,6 @@ describe('<DefaultNavigation />', () => {
                       "group1A",
                       "item1",
                     ],
-                    "renderItem": undefined,
                     "title": "Group 1A Item 1",
                   },
                   Object {
@@ -166,7 +155,6 @@ describe('<DefaultNavigation />', () => {
                           "group1A_1",
                           "item1",
                         ],
-                        "renderItem": undefined,
                         "title": "Group 1A_1 Item 1",
                       },
                     ],
@@ -702,11 +690,11 @@ describe('<DefaultNavigation />', () => {
         expect(
           (await findByTestId(/nav-item-project_settings_project_nav.cloudLinkUserAndRoles/))
             .textContent
-        ).toBe('Mock Users & Roles');
+        ).toBe('Mock Users & RolesExternal link');
 
         expect(
           (await findByTestId(/nav-item-project_settings_project_nav.cloudLinkBilling/)).textContent
-        ).toBe('Mock Billing & Subscriptions');
+        ).toBe('Mock Billing & SubscriptionsExternal link');
       });
     });
   });

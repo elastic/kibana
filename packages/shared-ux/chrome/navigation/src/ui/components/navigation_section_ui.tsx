@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, useEffect, useState } from 'react';
+
 import {
   EuiCollapsibleNavItem,
   EuiCollapsibleNavItemProps,
@@ -13,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
+import { isAbsoluteLink } from '../../utils';
 import { GroupAsLink } from './group_as_link';
 
 const navigationNodeToEuiItem = (
@@ -24,6 +26,7 @@ const navigationNodeToEuiItem = (
 ): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
+  const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
@@ -39,6 +42,7 @@ const navigationNodeToEuiItem = (
     accordionProps: {
       initialIsOpen: true, // FIXME should use item.isActive
     },
+    linkProps: { external: isExternal },
     onClick:
       href !== undefined
         ? (event: React.MouseEvent) => {
