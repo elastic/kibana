@@ -23,14 +23,3 @@ export const rowToDocument = (
     return acc;
   }, {});
 };
-
-export const pickCells = (
-  columns: EsqlResultColumn[],
-  row: EsqlResultRow,
-  columnsNames: string[]
-): EsqlResultRow => {
-  const namesSet = new Set(columnsNames);
-  return row.filter((cell, i) => {
-    return namesSet.has(columns[i].name);
-  });
-};

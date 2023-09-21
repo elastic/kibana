@@ -53,6 +53,8 @@ export const buildEsqlSearchRequest = ({
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
 
   return {
+    // we limit size of the response to maxAlertNumber + 1
+    // ES|QL currently does not support pagination and returns 10,000 results
     query: `${query} | limit ${size + 1}`,
     filter: {
       bool: {

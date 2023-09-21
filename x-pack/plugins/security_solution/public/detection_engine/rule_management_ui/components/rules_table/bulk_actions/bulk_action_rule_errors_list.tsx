@@ -62,7 +62,7 @@ const BulkEditRuleErrorItem = ({
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
             defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
-            values={{ rulesCount, message }}
+            values={{ rulesCount }}
           />
         </li>
       );
