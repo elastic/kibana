@@ -37,7 +37,10 @@ import { getUserPrivilegesMockDefaultValue } from '../../../common/components/us
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
-import { ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE } from '../../../common/components/toolbar/bulk_actions/translations';
+import {
+  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+} from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -247,6 +250,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
         ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
+    test('should render "Apply alert assignees"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
+        ).toEqual(ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE);
       });
     });
   });
