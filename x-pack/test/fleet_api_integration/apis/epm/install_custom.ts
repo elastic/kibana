@@ -39,9 +39,9 @@ export default function (providerContext: FtrProviderContext) {
           force: true,
           integrationName: INTEGRATION_NAME,
           datasets: [
-            { name: 'access', type: 'logs' },
-            { name: 'error', type: 'metrics' },
-            { name: 'warning', type: 'logs' },
+            { name: `${INTEGRATION_NAME}.access`, type: 'logs' },
+            { name: `${INTEGRATION_NAME}.error`, type: 'metrics' },
+            { name: `${INTEGRATION_NAME}.warning`, type: 'logs' },
           ],
         })
         .expect(200);
@@ -108,9 +108,9 @@ export default function (providerContext: FtrProviderContext) {
           force: true,
           integrationName: INTEGRATION_NAME,
           datasets: [
-            { name: 'access', type: 'logs' },
-            { name: 'error', type: 'metrics' },
-            { name: 'warning', type: 'logs' },
+            { name: `${INTEGRATION_NAME}.access`, type: 'logs' },
+            { name: `${INTEGRATION_NAME}.error`, type: 'metrics' },
+            { name: `${INTEGRATION_NAME}.warning`, type: 'logs' },
           ],
         })
         .expect(200);
@@ -123,9 +123,9 @@ export default function (providerContext: FtrProviderContext) {
           force: true,
           integrationName: INTEGRATION_NAME,
           datasets: [
-            { name: 'access', type: 'logs' },
-            { name: 'error', type: 'metrics' },
-            { name: 'warning', type: 'logs' },
+            { name: `${INTEGRATION_NAME}.access`, type: 'logs' },
+            { name: `${INTEGRATION_NAME}.error`, type: 'metrics' },
+            { name: `${INTEGRATION_NAME}.warning`, type: 'logs' },
           ],
         })
         .expect(409);
@@ -145,13 +145,56 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           force: true,
           integrationName: pkgName,
-          datasets: [{ name: 'error', type: 'logs' }],
+          datasets: [{ name: `${INTEGRATION_NAME}.error`, type: 'logs' }],
         })
         .expect(409);
 
       expect(response.body.message).to.be(
         `Failed to create the integration as an integration with the name ${pkgName} already exists in the package registry or as a bundled package.`
       );
+    });
+
+    it('Throws an error when dataset names are not prefixed correctly', async () => {
+      const response = await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [{ name: 'error', type: 'logs' }],
+        })
+        .expect(422);
+
+      expect(response.body.message).to.be(
+        `Dataset names 'error' must either match integration name '${INTEGRATION_NAME}' exactly or be prefixed with integration name and a dot (e.g. '${INTEGRATION_NAME}.<dataset_name>').`
+      );
+
+      await uninstallPackage();
+
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [{ name: INTEGRATION_NAME, type: 'logs' }],
+        })
+        .expect(200);
+
+      await uninstallPackage();
+
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [{ name: `${INTEGRATION_NAME}.error`, type: 'logs' }],
+        })
+        .expect(200);
     });
   });
 }
