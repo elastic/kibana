@@ -12,10 +12,9 @@ import { EuiSpacer } from '@elastic/eui';
 import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { RequestDetailsProps } from '../../types';
-import { getLocalClusterDetails } from './local_cluster';
+import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
-import { LOCAL_CLUSTER_KEY } from './constants';
 
 export class ClustersView extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>

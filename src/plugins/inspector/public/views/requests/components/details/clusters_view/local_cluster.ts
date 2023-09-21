@@ -9,6 +9,8 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { ClusterDetails } from '@kbn/es-types';
 
+export const LOCAL_CLUSTER_KEY = '(local)';
+
 function getLocalClusterStatus(rawResponse: estypes.SearchResponse): ClusterDetails['status'] {
   if (rawResponse._shards?.successful === 0) {
     return 'failed';

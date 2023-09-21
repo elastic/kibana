@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
-import { LOCAL_CLUSTER_KEY } from '../constants';
+import { LOCAL_CLUSTER_KEY } from '../local_cluster';
 
 function getInitialExpandedRow(clusters: Record<string, ClusterDetails>) {
   const clusterNames = Object.keys(clusters);
