@@ -37,7 +37,7 @@ describe('Generative AI Connector', () => {
   });
   test('exposes the connector as `Generative AI` with id `.gen-ai`', () => {
     expect(connectorType.id).toEqual('.gen-ai');
-    expect(connectorType.name).toEqual('Generative AI');
+    expect(connectorType.name).toEqual('OpenAI');
   });
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
