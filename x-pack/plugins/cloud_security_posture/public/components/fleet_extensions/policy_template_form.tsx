@@ -138,18 +138,17 @@ const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
-    // disabled: isAwsOrgDisabled,
-    // tooltip: isAwsOrgDisabled
-    //   ? i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip', {
-    //       defaultMessage: 'Supported from integration version 1.5.0 and above',
-    //     })
-    //   : undefined,
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
+    disabled: true,
+    tooltip: i18n.translate(
+      'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+      { defaultMessage: 'Coming soon' }
+    ),
   },
 ];
 
@@ -204,7 +203,7 @@ const AwsAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization."
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -319,12 +318,6 @@ const AzureAccountTypeSelect = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
 }) => {
-  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  // const isValidSemantic = semverValid(packageInfo.version);
-  // const isAwsOrgDisabled = isValidSemantic
-  //   ? semverCompare(packageInfo.version, AZURE_MINIMUM_PACKAGE_VERSION) < 0
-  //   : true;
-
   const azureAccountTypeOptions = useMemo(() => getAzureAccountTypeOptions(), []);
 
   useEffect(() => {
@@ -339,14 +332,14 @@ const AzureAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [input]);
 
   return (
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization."
+          id="xpack.csp.fleetIntegration.azureAccountTypeDescriptionLabel"
+          defaultMessage="Select between onboarding an Azure Organization (tenant root group) or a single Azure subscription, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -370,8 +363,8 @@ const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
-              defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
+              id="xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDescription"
+              defaultMessage="Connect Elastic to every Azure Subscription (current and future) in your environment by providing Elastic with read-only (configuration) access to your Azure Organization (tenant root group)."
             />
           </EuiText>
         </>
@@ -381,8 +374,8 @@ const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+              id="xpack.csp.fleetIntegration.azureAccountType.singleAccountDescription"
+              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
             />
           </EuiText>
         </>
@@ -551,13 +544,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
         <EuiSpacer size="l" />
 
-        {/* Defines the name/description */}
-        <IntegrationSettings
-          fields={integrationFields}
-          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
-        />
-        <EuiSpacer size="l" />
-
         {/* AWS account type selection box */}
         {input.type === 'cloudbeat/cis_aws' && (
           <AwsAccountTypeSelect
@@ -585,6 +571,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             packageInfo={packageInfo}
           />
         )}
+
+        {/* Defines the name/description */}
+        <EuiSpacer size="l" />
+        <IntegrationSettings
+          fields={integrationFields}
+          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+        />
 
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm

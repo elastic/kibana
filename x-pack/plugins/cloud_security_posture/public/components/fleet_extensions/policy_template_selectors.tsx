@@ -82,6 +82,8 @@ export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFo
       return <EksCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_gcp':
       return <GcpCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_azure':
+      return <AwsCredentialsForm {...props} input={input} />;
     default:
       return null;
   }
