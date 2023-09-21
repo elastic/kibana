@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +34,9 @@ import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -250,6 +253,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     'discover:sidebarWidth',
     defaultSidebarWidth
   );
+  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
+    useState<UnifiedFieldListSidebarContainerApi | null>(null);
+  const isSidebarCollapsed = useObservable(
+    unifiedFieldListSidebarContainerApi?.isSidebarCollapsed$ ?? of(true),
+    true
+  );
 
   return (
     <EuiPage
@@ -319,6 +328,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                   onFieldEdited={onFieldEdited}
                   onDataViewCreated={stateContainer.actions.onDataViewCreated}
                   availableFields$={stateContainer.dataState.data$.availableFields$}
+                  unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+                  setUnifiedFieldListSidebarContainerApi={setUnifiedFieldListSidebarContainerApi}
                 />
               </EuiFlexItem>
               <EuiHideFor sizes={['xs', 's']}>
@@ -377,7 +388,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           </InPortal>
           <Panels
             className="dscPageBody__contents"
-            mode={isMobile ? PANELS_MODE.FIXED : PANELS_MODE.RESIZABLE}
+            mode={isMobile || isSidebarCollapsed ? PANELS_MODE.FIXED : PANELS_MODE.RESIZABLE}
             direction={isMobile ? PANELS_DIRECTION.VERTICAL : PANELS_DIRECTION.HORIZONTAL}
             resizeRef={mainResizeRef}
             fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
