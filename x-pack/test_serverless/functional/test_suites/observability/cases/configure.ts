@@ -17,15 +17,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
 
-  describe('Configure Case', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/166448
+  describe.skip('Configure Case', function () {
     before(async () => {
       await svlCommonPage.login();
 
       await svlObltNavigation.navigateToLandingPage();
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
     });
 
     after(async () => {
@@ -34,6 +33,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      before(async () => {
+        await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      });
+
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
