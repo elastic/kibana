@@ -144,7 +144,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
           fullWidth
           onChange={(event) => setQuery(event.target.value)}
           value={query}
-          data-test-subj="optionsList-control-search-input"
+          data-test-subj="dashboard-picker-search"
           placeholder={i18n.translate(
             'presentationUtil.dashboardPicker.searchDashboardPlaceholder',
             {
@@ -155,7 +155,6 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
       </EuiPopoverTitle>
 
       <EuiSelectable
-        isLoading={isLoading}
         singleSelection={true}
         options={dashboardOptions}
         onChange={(newOptions, event, selected) => {
