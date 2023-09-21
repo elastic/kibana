@@ -15,7 +15,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { DatasetSelection } from '../../../utils/dataset_selection';
+import { DatasetSelection } from '../../../../common/dataset_selection';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 

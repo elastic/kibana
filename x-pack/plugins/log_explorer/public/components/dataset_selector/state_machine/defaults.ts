@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllDatasetSelection } from '../../../utils/dataset_selection';
+import { AllDatasetSelection } from '../../../../common/dataset_selection';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID } from '../constants';
 import { DatasetsSelectorSearchParams } from '../types';
