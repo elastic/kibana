@@ -7,6 +7,7 @@
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, type ConfigSchema } from '../common/constants/app';
+import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
   DatafeedStats as MlDatafeedStats,
@@ -26,7 +27,6 @@ export {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
 } from './shared';
-import { configSchema, type ConfigSchema } from './config_schema';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
