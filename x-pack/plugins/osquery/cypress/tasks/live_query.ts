@@ -102,7 +102,26 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 
 export const loadRuleAlerts = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
-  toggleRuleOffAndOn(ruleName);
+  // additional trigger - in serverless alerts do not appear instantly in tests
+  const isServerless = Cypress.env().IS_SERVERLESS;
+  if (isServerless) {
+    toggleRuleOffAndOn(ruleName);
+  }
+
+  cy.visit('/app/security/rules');
+  clickRuleName(ruleName);
+  cy.getBySel('alertsTable').within(() => {
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('exist');
+      });
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('not.exist');
+      });
+  });
 };
 
 export const addToCase = (caseId: string) => {
@@ -160,8 +179,4 @@ export const takeOsqueryActionWithParams = () => {
 
 export const clickRuleName = (ruleName: string) => {
   cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
-};
-
-export const clickRefreshButton = () => {
-  cy.contains('Refresh').should('not.be.disabled').click({ force: true });
 };

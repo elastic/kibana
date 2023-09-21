@@ -7,7 +7,6 @@
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
-  clickRefreshButton,
   clickRuleName,
   inputQuery,
   loadRuleAlerts,
@@ -36,7 +35,6 @@ describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless']
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
-    clickRefreshButton();
   });
 
   it('should substitute parameters in investigation guide', () => {
@@ -98,7 +96,7 @@ describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless']
     });
 
     it('should substitute params in osquery ran from timelines alerts', () => {
-      // loadRuleAlerts(ruleName);
+      loadRuleAlerts(ruleName);
       cy.getBySel('send-alert-to-timeline-button').first().click();
       cy.getBySel('query-events-table').within(() => {
         cy.getBySel('expand-event').first().click();
