@@ -35,8 +35,8 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const CommonUseField = getUseField({ component: Field });
-interface TimelineTitleAndDescriptionProps {
-  closeSaveTimeline: () => void;
+interface EditTimelineModalProps {
+  closeEditTimeline: () => void;
   initialFocus: 'title' | 'description';
   timelineId: string;
   showWarning?: boolean;
@@ -45,8 +45,8 @@ interface TimelineTitleAndDescriptionProps {
 // when showWarning equals to true,
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
-export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ closeSaveTimeline, initialFocus, timelineId, showWarning }) => {
+export const EditTimelineModal = React.memo<EditTimelineModalProps>(
+  ({ closeEditTimeline, initialFocus, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const {
@@ -112,8 +112,8 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       if (showWarning) {
         handleCreateNewTimeline();
       }
-      closeSaveTimeline();
-    }, [closeSaveTimeline, handleCreateNewTimeline, showWarning]);
+      closeEditTimeline();
+    }, [closeEditTimeline, handleCreateNewTimeline, showWarning]);
 
     const closeModalText = useMemo(() => {
       if (status === TimelineStatus.draft && showWarning) {
@@ -157,7 +157,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       () => ({
         'aria-label': i18n.TIMELINE_TITLE,
         autoFocus: initialFocus === 'title',
-        'data-test-subj': 'save-timeline-title',
+        'data-test-subj': 'edit-timeline-title',
         disabled: isSaving,
         spellCheck: true,
         placeholder:
@@ -172,7 +172,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       () => ({
         'aria-label': i18n.TIMELINE_DESCRIPTION,
         autoFocus: initialFocus === 'description',
-        'data-test-subj': 'save-timeline-description',
+        'data-test-subj': 'edit-timeline-description',
         disabled: isSaving,
         placeholder: commonI18n.DESCRIPTION,
       }),
@@ -181,15 +181,15 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
     useEffect(() => {
       if (isSubmitted && !isSaving && prevIsSaving) {
-        closeSaveTimeline();
+        closeEditTimeline();
       }
-    }, [isSubmitted, isSaving, prevIsSaving, closeSaveTimeline]);
+    }, [isSubmitted, isSaving, prevIsSaving, closeEditTimeline]);
 
     return (
       <EuiModal
-        data-test-subj="save-timeline-modal"
+        data-test-subj="edit-timeline-modal"
         maxWidth={NOTES_PANEL_WIDTH}
-        onClose={closeSaveTimeline}
+        onClose={closeEditTimeline}
       >
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
@@ -203,7 +203,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 title={calloutMessage}
                 color="danger"
                 iconType="warning"
-                data-test-subj="save-timeline-callout"
+                data-test-subj="edit-timeline-callout"
               />
               <EuiSpacer size="m" />
             </EuiFlexItem>
@@ -260,4 +260,4 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
   }
 );
 
-TimelineTitleAndDescription.displayName = 'TimelineTitleAndDescription';
+EditTimelineModal.displayName = 'EditTimelineModal';
