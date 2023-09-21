@@ -155,7 +155,7 @@ export const DiffableEsqlFields = buildSchema({
     data_query: RuleEsqlQuery, // NOTE: new field
   },
   // this is a new type of rule, no prebuilt rules created yet.
-  // new properties might be added here during further rule type developmewnt
+  // new properties might be added here during further rule type development
   optional: {},
 });
 
