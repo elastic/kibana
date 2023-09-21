@@ -72,7 +72,7 @@ export class SecuritySolutionServerlessPlugin
       logFactory: this.initializerContext.logger,
       config: this.config,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
       taskType: cloudSecurityMetringTaskProperties.taskType,
       taskTitle: cloudSecurityMetringTaskProperties.taskTitle,
       version: cloudSecurityMetringTaskProperties.version,
@@ -88,7 +88,10 @@ export class SecuritySolutionServerlessPlugin
       version: ENDPOINT_METERING_TASK.VERSION,
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
-      cloudSetup: pluginsSetup.cloudSetup,
+      cloudSetup: pluginsSetup.cloud,
+      options: {
+        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
+      },
     });
 
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);

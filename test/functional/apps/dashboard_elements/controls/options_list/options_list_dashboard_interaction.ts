@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     const returnToDashboard = async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag();
       await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);

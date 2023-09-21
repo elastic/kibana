@@ -10,6 +10,8 @@ import { ScopedHistory } from '@kbn/core-application-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
@@ -38,6 +40,7 @@ export const createLogExplorer = ({
 }: CreateLogExplorerArgs) => {
   const overrideServices = {
     data: createDataServiceProxy(data),
+    uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
   return ({ scopedHistory, state$ }: LogExplorerProps) => {
@@ -73,5 +76,26 @@ const createDataServiceProxy = (data: DataPublicPluginStart) => {
 
   return createPropertyGetProxy(data, {
     search: () => searchServiceProxy,
+  });
+};
+/**
+ * Create proxy for the uiSettings service, in which settings preferences are overwritten
+ * with custom values
+ */
+const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
+  const overrides: Record<string, any> = {
+    [HIDE_ANNOUNCEMENTS]: true,
+  };
+
+  return createPropertyGetProxy(uiSettings, {
+    get:
+      () =>
+      (key, ...args) => {
+        if (key in overrides) {
+          return overrides[key];
+        }
+
+        return uiSettings.get(key, ...args);
+      },
   });
 };
