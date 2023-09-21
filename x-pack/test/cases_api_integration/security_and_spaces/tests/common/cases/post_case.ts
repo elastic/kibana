@@ -21,6 +21,8 @@ import {
   removeServerGeneratedPropertiesFromCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -168,6 +170,48 @@ export default ({ getService }: FtrProviderContext): void => {
         const data = removeServerGeneratedPropertiesFromCase(postedCase);
 
         expect(data).to.eql(postCaseResp());
+      });
+
+      it('should post a case with customFields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+        await createCase(
+          supertest,
+          getPostCaseRequest({
+            customFields: [
+              {
+                key: 'valid_key_1',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['this is a text field value'] },
+              },
+              {
+                key: 'valid_key_2',
+                type: CustomFieldTypes.TOGGLE,
+                field: { value: [true] },
+              },
+            ],
+          }),
+          400
+        );
       });
     });
 
@@ -342,6 +386,23 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
                 {
                   key: 'duplicated_key',
+                  type: CustomFieldTypes.TEXT,
+                  field: { value: ['this is a text field value'] },
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with non existant customField key', async () => {
+          await createConfiguration(supertest);
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'invalid_key',
                   type: CustomFieldTypes.TEXT,
                   field: { value: ['this is a text field value'] },
                 },

@@ -7,8 +7,10 @@
 
 import Boom from '@hapi/boom';
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { OWNER_FIELD } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
@@ -21,7 +23,60 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import { throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
+import type { CaseConfigureService } from '../../services';
+import { buildFilter, throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
+
+/**
+ * Throws if any of the custom field keys in the request does not exist in the case configuration.
+ */
+async function throwIfCustomFieldKeysInvalid({
+  casePostRequest,
+  caseConfigureService,
+  unsecuredSavedObjectsClient,
+}: {
+  casePostRequest: CasePostRequest;
+  caseConfigureService: CaseConfigureService;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+}) {
+  const customFields = casePostRequest.customFields;
+
+  if (!Array.isArray(customFields) || !customFields.length) {
+    return;
+  }
+
+  const invalidCustomFieldKeys: string[] = [];
+  const ownerFilter = buildFilter({
+    filters: casePostRequest.owner,
+    field: OWNER_FIELD,
+    operator: 'or',
+    type: Operations.findConfigurations.savedObjectType,
+  });
+
+  const configuration = await caseConfigureService.find({
+    unsecuredSavedObjectsClient,
+    options: { filter: ownerFilter },
+  });
+
+  customFields.forEach((customField) => {
+    let validKey = false;
+
+    configuration.saved_objects[0].attributes.customFields.every(({ key }) => {
+      if (key === customField.key) {
+        validKey = true;
+      }
+
+      return !validKey;
+    });
+
+    if (!validKey) {
+      invalidCustomFieldKeys.push(customField.key);
+    }
+  });
+
+  if (invalidCustomFieldKeys.length) {
+    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
+  }
+}
 
 /**
  * Creates a new case.
@@ -30,7 +85,14 @@ import { throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
  */
 export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
-    services: { caseService, userActionService, licensingService, notificationService },
+    unsecuredSavedObjectsClient,
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      notificationService,
+      caseConfigureService,
+    },
     user,
     logger,
     authorization: auth,
@@ -40,6 +102,11 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
 
     throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: query.customFields });
+    await throwIfCustomFieldKeysInvalid({
+      casePostRequest: query,
+      caseConfigureService,
+      unsecuredSavedObjectsClient,
+    });
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
