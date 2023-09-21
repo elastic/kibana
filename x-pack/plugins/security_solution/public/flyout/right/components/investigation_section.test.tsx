@@ -16,14 +16,15 @@ import { RightPanelContext } from '../context';
 import { InvestigationSection } from './investigation_section';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 
-const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
 const panelContextValue = {
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser.filter(
+    (d) => d.field !== 'kibana.alert.rule.type'
+  ),
 } as unknown as RightPanelContext;
 
 const renderInvestigationSection = (expanded: boolean = false) =>
@@ -40,7 +41,7 @@ const renderInvestigationSection = (expanded: boolean = false) =>
 describe('<InvestigationSection />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRuleWithFallback.mockReturnValue({ rule: { note: 'test note' } });
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ rule: { note: 'test note' } });
   });
   it('should render the component collapsed', () => {
     const { getByTestId } = renderInvestigationSection();
