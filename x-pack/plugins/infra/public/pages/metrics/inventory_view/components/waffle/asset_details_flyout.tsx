@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction } from 'react';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -29,6 +30,9 @@ export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVis
         },
         alertRule: {
           onCreateRuleClick: () => setIsAlertFlyoutVisible(true),
+          inventoryRuleLabel: i18n.translate('xpack.infra.infra.nodeDetails.createAlertLink', {
+            defaultMessage: 'Create inventory rule',
+          }),
         },
       }}
       tabs={orderedFlyoutTabs}

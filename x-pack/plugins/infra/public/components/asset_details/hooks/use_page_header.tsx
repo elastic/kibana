@@ -93,10 +93,20 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
       nodeDetails: <LinkToNodeDetails asset={asset} assetType={assetType} />,
-      alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
+      alertRule: (
+        <LinkToAlertsRule
+          onClick={overrides?.alertRule?.onCreateRuleClick}
+          inventoryRuleLabel={overrides?.alertRule?.inventoryRuleLabel}
+        />
+      ),
       apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
-    [asset, assetType, overrides?.alertRule?.onCreateRuleClick]
+    [
+      asset,
+      assetType,
+      overrides?.alertRule?.inventoryRuleLabel,
+      overrides?.alertRule?.onCreateRuleClick,
+    ]
   );
 
   const rightSideItems = useMemo(

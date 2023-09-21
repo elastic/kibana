@@ -10,9 +10,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface LinkToAlertsRuleProps {
   onClick?: () => void;
+  inventoryRuleLabel?: string;
 }
 
-export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
+export const LinkToAlertsRule = ({ onClick, inventoryRuleLabel }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj="infraAssetDetailsCreateAlertsRuleButton"
@@ -22,10 +23,14 @@ export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
       flush="both"
       iconType="bell"
     >
-      <FormattedMessage
-        id="xpack.infra.infra.assetDetails.alerts.createAlertLink"
-        defaultMessage="Create rule"
-      />
+      {inventoryRuleLabel ? (
+        inventoryRuleLabel
+      ) : (
+        <FormattedMessage
+          id="xpack.infra.infra.assetDetails.alerts.createAlertLink"
+          defaultMessage="Create rule"
+        />
+      )}
     </EuiButtonEmpty>
   );
 };
