@@ -7,6 +7,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -293,17 +294,24 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       iconSide="right"
       onClick={() => setManagePopOver(!isManagePopOverOpen)}
     >
-      Manage
+      <FormattedMessage
+        id="xpack.idxMgmt.dataStreamsDetailsPanel.manageButtonLabel"
+        defaultMessage="Manage"
+      />
     </EuiButton>
   );
 
   const panels = [
     {
       id: 0,
-      title: 'Data stream options',
+      title: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelTitle', {
+        defaultMessage: 'Data stream options',
+      }),
       items: [
         {
-          name: 'Edit data retention',
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
+            defaultMessage: 'Edit data retention',
+          }),
           icon: <EuiIcon type="pencil" size="m" />,
           onClick: () => {
             closePopover();
@@ -313,7 +321,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ...(dataStream?.privileges.delete_index
           ? [
               {
-                name: 'Delete',
+                name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelDelete', {
+                  defaultMessage: 'Delete',
+                }),
                 color: 'danger',
                 'data-test-subj': 'deleteDataStreamButton',
                 icon: <EuiIcon type="trash" size="m" color="danger" />,
