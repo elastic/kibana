@@ -121,7 +121,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-module": "2225cbb4bd508ea5f69db4b848be9d8a74b60198",
         "ml-trained-model": "482195cefd6b04920e539d34d7356d22cb68e4f3",
         "monitoring-telemetry": "5d91bf75787d9d4dd2fae954d0b3f76d33d2e559",
-        "navigation_embeddable": "de71a127ed325261ca6bc926d93c4cd676d17a05",
+        "navigation_embeddable": "0019fdbbc07547035dac1720a2fe4b42711ed52b",
         "observability-onboarding-state": "b16064c516aac64ae699c737d7d10b6e199bfded",
         "osquery-manager-usage-metric": "983bcbc3b7dda0aad29b20907db233abba709bcc",
         "osquery-pack": "6ab4358ca4304a12dcfc1777c8135b75cffb4397",
