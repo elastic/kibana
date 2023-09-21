@@ -24,8 +24,6 @@ import {
   testIndexSettings,
   testIndexStats,
 } from './mocks';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
-import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
