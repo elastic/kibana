@@ -19,7 +19,7 @@ import { pipe } from 'fp-ts/function';
 import { RECORD_SEPARATOR } from './constants';
 
 const anyCharButNotWhiteSpaces = (): RegExp => /[^\s]/;
-const toBoolean = (x: RegExpMatchArray | null) => Boolean(x);
+const bool = (x: RegExpMatchArray | null) => Boolean(x);
 
 export function createParseArchiveStreams({ gzip = false } = {}) {
   return [
@@ -27,8 +27,8 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
     createFilterStream<string>((a: string) =>
-      pipe(a, (x) => x.match(anyCharButNotWhiteSpaces()), toBoolean)
+      pipe(a, (x) => x.match(anyCharButNotWhiteSpaces()), bool)
     ),
-    createMapStream<string>((json) => JSON.parse(json.trim())),
+    createMapStream<string>((json: string) => JSON.parse(json.trim())),
   ];
 }

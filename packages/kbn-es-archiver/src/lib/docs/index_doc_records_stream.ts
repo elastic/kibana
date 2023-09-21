@@ -57,6 +57,38 @@ export function createIndexDocRecordsStream(
     },
   });
 }
+
+export function createIndexDocRecordsStreamSRVRLESS(
+  client: Client,
+  stats: Stats,
+  useCreate: boolean = false
+): Writable {
+  const doIndexDocs = indexDocs(stats, client, useCreate);
+
+  return new Writable({
+    highWaterMark: 5000,
+    objectMode: true,
+
+    async write(record, enc, callback): Promise<void> {
+      try {
+        await doIndexDocs([record.value]);
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+
+    async writev(chunks, callback): Promise<void> {
+      try {
+        await doIndexDocs(chunks.map(({ chunk: record }) => record.value));
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+  });
+}
+
 const mapper = (operation) => (ops) => (doc) => {
   const body = doc.source;
   const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -99,6 +131,7 @@ Bulk doc failure [operation=${operation}]:\n  doc: ${JSON.stringify(
 
     if (errors.length) throw new AggregateError(errors);
 
+    // TODO-TRE: Inline this somewhere, a place we are already iterating?
     for (const stanza of jsonStanzasWithinArchive)
       stats.indexedDoc(stanza.data_stream || stanza.index);
   };

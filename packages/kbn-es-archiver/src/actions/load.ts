@@ -24,12 +24,11 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  createIndexDocRecordsStream,
+  // createIndexDocRecordsStream,
+  createIndexDocRecordsStreamSRVRLESS,
   migrateSavedObjectIndices,
-  Progress,
   createDefaultSpace,
 } from '../lib';
-import { IndexStats } from '../lib/stats';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -55,54 +54,49 @@ export async function loadAction({
   client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
-}): Promise<Record<string, IndexStats>> {
+}) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const GZIP_FILE_NAME = 'data.json.gz' as const;
-  let docIsCompressed = false;
 
+  const mapFactory = (archiveDir: string) => (archiveName: string) => (fileName: string) => () => {
+    log.verbose('[%s] Loading %j', archiveName, fileName);
+    return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
+      createReadStream(resolve(archiveDir, fileName)),
+      ...createParseArchiveStreams({ gzip: isGzip(fileName) })
+    );
+  };
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
-    prioritizeMappings(await readDirectory(inputDir)).map((filename) => () => {
-      log.verbose('[%s] Loading %j', name, filename);
-      if (filename === GZIP_FILE_NAME) docIsCompressed = true;
-
-      return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
-        createReadStream(resolve(inputDir, filename)),
-        ...createParseArchiveStreams({ gzip: isGzip(filename) })
-      );
-    }),
+    prioritizeMappings(await readDirectory(inputDir)).map(mapFactory(inputDir)(name)),
     { objectMode: true }
   );
 
-  const progress = new Progress();
-  progress.activate(log);
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, docIsCompressed),
+    createIndexDocRecordsStreamSRVRLESS(client, stats, useCreate),
   ]);
 
-  progress.deactivate();
-  const result = stats.toJSON();
+  const complete = async () => {
+    const result = stats.toJSON();
 
-  const indicesWithDocs: string[] = [];
+    const indicesWithDocs: string[] = [];
+    for (const [index, { docs }] of Object.entries(result))
+      if (indexingOccurred(docs)) indicesWithDocs.push(index);
 
-  for (const [index, { docs }] of Object.entries(result))
-    if (indexingOccurred(docs)) indicesWithDocs.push(index);
+    // If we affected saved objects indices, we need to ensure they are migrated...
+    if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
+      await freshenUp(client, indicesWithDocs);
+      await migrateSavedObjectIndices(kbnClient);
 
-  // If we affected saved objects indices, we need to ensure they are migrated...
-  if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
-    await freshenUp(client, indicesWithDocs);
-    await migrateSavedObjectIndices(kbnClient);
-
-    // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
-    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
-      await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
-  }
-  return result;
+      // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+      if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
+        await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
+    }
+  };
+  await complete();
 }
 function atLeastOne(predicate: {
   (x: string): boolean;
