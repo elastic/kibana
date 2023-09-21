@@ -14,7 +14,7 @@ import {
 import { logRate } from '../metric_charts/log';
 import { memoryUsage, memoryUsageBreakdown } from '../metric_charts/memory';
 import { rxTx } from '../metric_charts/network';
-import type { XYConfig } from '../metric_charts/types';
+import type { XYConfig } from '../../types';
 
 export const hostMetricFlyoutCharts: XYConfig[] = [
   cpuUsage,

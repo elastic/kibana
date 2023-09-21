@@ -9,11 +9,11 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
+import { PREVALENCE_NO_DATA_TEST_ID, PREVALENCE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { PREVALENCE_NO_DATA, PREVALENCE_ROW_UNCOMMON, PREVALENCE_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
@@ -70,24 +70,41 @@ export const PrevalenceOverview: FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: PREVALENCE_TITLE,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTitle"
+            defaultMessage="Prevalence"
+          />
+        ),
         callback: goToCorrelationsTab,
         iconType: 'arrowStart',
       }}
       content={{ loading, error }}
-      data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+      data-test-subj={PREVALENCE_TEST_ID}
     >
       <EuiFlexGroup direction="column" gutterSize="none">
         {uncommonData.length > 0 ? (
           uncommonData.map((d) => (
             <InsightsSummaryRow
               icon={'warning'}
-              text={`${d.field}, ${d.value} ${PREVALENCE_ROW_UNCOMMON}`}
-              data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}${d.field}`}
+              text={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
+                  defaultMessage="{field}, {value} is uncommon"
+                  values={{ field: d.field, value: d.value }}
+                />
+              }
+              data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
+              key={`${PREVALENCE_TEST_ID}${d.field}`}
             />
           ))
         ) : (
-          <div data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}Error`}>{PREVALENCE_NO_DATA}</div>
+          <p data-test-subj={PREVALENCE_NO_DATA_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.prevalence.noDataDescription"
+              defaultMessage="No prevalence data available."
+            />
+          </p>
         )}
       </EuiFlexGroup>
     </ExpandablePanel>

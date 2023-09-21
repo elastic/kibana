@@ -122,23 +122,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "observabilityOnboarding",
-        "id": "def-public.OBSERVABILITY_ONBOARDING_LOCATOR",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ONBOARDING_LOCATOR",
-        "description": [],
-        "signature": [
-          "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_onboarding/public/locators/onboarding_locator/locator_definition.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "observabilityOnboarding",
