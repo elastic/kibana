@@ -143,7 +143,7 @@ export const CreateCustomIntegrationForm = ({
                     'customIntegrationsPackage.create.integration.name.tooltip',
                     {
                       defaultMessage:
-                        'Provide a name for the integration that will be created to organise these custom logs.',
+                        'Provide a name for the integration that will be created to organize these custom logs.',
                     }
                   )}
                   position="right"
@@ -187,7 +187,7 @@ export const CreateCustomIntegrationForm = ({
                 <EuiIconTip
                   content={i18n.translate('customIntegrationsPackage.create.dataset.name.tooltip', {
                     defaultMessage:
-                      'Provide a dataset name to help organise these custom logs. This dataset will be associated with the integration. ',
+                      'Provide a dataset name to help organize these custom logs. This dataset is associated with this integration. ',
                   })}
                   position="right"
                 />
