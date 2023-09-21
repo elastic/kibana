@@ -427,7 +427,15 @@
             "section": "def-common.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
-          "<T, V> extends UiSetting<V>"
+          "<T, V> extends ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UiSetting",
+            "text": "UiSetting"
+          },
+          "<V>"
         ],
         "path": "packages/kbn-management/settings/types/metadata.ts",
         "deprecated": false,
@@ -1259,6 +1267,74 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.OnChangeFn",
+        "type": "Type",
+        "tags": [],
+        "label": "OnChangeFn",
+        "description": [
+          "\nA function that is called when the value of a {@link FieldInput} changes."
+        ],
+        "signature": [
+          "(change?: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T> | undefined) => void"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.OnChangeFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [
+              "The {@link UnsavedFieldChange } passed to the handler."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.ResetInputRef",
+        "type": "Type",
+        "tags": [],
+        "label": "ResetInputRef",
+        "description": [
+          "\nA React `ref` that indicates an input can be reset using an\nimperative handle."
+        ],
+        "signature": [
+          "{ reset: () => void; } | null"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
         "id": "def-common.SelectUiSettingMetadata",
         "type": "Type",
         "tags": [],
@@ -1407,6 +1483,38 @@
           "<\"string\">"
         ],
         "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.UiSetting",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSetting",
+        "description": [
+          "\nCreating this type based on {@link UiSettingsClientCommon} and exporting for ease."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.PublicUiSettingsParams",
+            "text": "PublicUiSettingsParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UserProvidedValues",
+            "text": "UserProvidedValues"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

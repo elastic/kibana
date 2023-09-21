@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
