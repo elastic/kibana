@@ -626,8 +626,39 @@ export const tasks: TelemetryTask[] = [
         Promise.resolve({} as Record<AgentName, number>)
       );
 
+      const services = await telemetryClient.search({
+        index: [
+          indices.error,
+          indices.span,
+          indices.metric,
+          indices.transaction,
+        ],
+        terminate_after: 1,
+        body: {
+          size: 0,
+          track_total_hits: false,
+          query: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    exists: {
+                      field: SERVICE_NAME,
+                    },
+                  },
+                  range1d,
+                ],
+              },
+            },
+          },
+          timeout,
+        },
+      });
+
       return {
-        has_any_services: sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services_per_official_agent:
+          sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services: services.hits.total.value > 0,
         services_per_agent: servicesPerAgent,
       };
     },
