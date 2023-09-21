@@ -10,14 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleCreationValidConsumer } from '../../../types';
 
-const mockConsumers: RuleCreationValidConsumer[] = [
-  'logs',
-  'infrastructure',
-  'apm',
-  'uptime',
-  'slo',
-  'stackAlerts',
-];
+const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];
 
 const mockOnChange = jest.fn();
 
@@ -27,81 +20,62 @@ describe('RuleFormConsumerSelectionModal', () => {
   });
 
   it('renders correctly', async () => {
-    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
+    render(
+      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+    );
 
     expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
-
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
-    expect(screen.getByText('APM and User Experience')).toBeInTheDocument();
-    expect(screen.getByText('Synthetics and Uptime')).toBeInTheDocument();
-    expect(screen.getByText('SLOs')).toBeInTheDocument();
     expect(screen.getByText('Stack Rules')).toBeInTheDocument();
   });
 
-  it('should initialize dropdown if provided with a valid initial consumer', () => {
-    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
+  it('should initialize dropdown to null', () => {
+    render(
+      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+    );
 
     // Selects first option if no initial value is provided
-    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
+    expect(mockOnChange).toHaveBeenLastCalledWith(null);
     mockOnChange.mockClear();
+  });
 
-    // Selects initial consumer
+  it('should be able to select infrastructure and call onChange', () => {
+    render(
+      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+    );
+
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(screen.getByTestId('infrastructure'));
+    expect(mockOnChange).toHaveBeenLastCalledWith('infrastructure');
+  });
+
+  it('should be able to select logs and call onChange', () => {
+    render(
+      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+    );
+
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(screen.getByTestId('logs'));
+    expect(mockOnChange).toHaveBeenLastCalledWith('logs');
+  });
+
+  it('should be able to show errors when there is one', () => {
     render(
       <RuleFormConsumerSelection
         consumers={mockConsumers}
-        initialConsumer={'slo'}
         onChange={mockOnChange}
+        errors={{ consumer: ['Scope is required'] }}
       />
     );
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('slo');
-    mockOnChange.mockClear();
-
-    // Selects first value if provided with invalid consumer
-    render(
-      <RuleFormConsumerSelection
-        consumers={mockConsumers}
-        initialConsumer={'invalidConsumer' as RuleCreationValidConsumer}
-        onChange={mockOnChange}
-      />
-    );
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
-  });
-
-  it('should select options and call onChange', () => {
-    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
-
-    mockConsumers.forEach((consumer) => {
-      fireEvent.change(screen.getByTestId('ruleFormConsumerSelect'), {
-        target: { value: consumer },
-      });
-
-      expect(mockOnChange).toHaveBeenLastCalledWith(consumer);
-    });
-  });
-
-  it('should default selection to the first option sorted alphabetically', () => {
-    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
-  });
-
-  it('should default to specified consumer if passed in', () => {
-    render(
-      <RuleFormConsumerSelection
-        initialConsumer={'stackAlerts'}
-        consumers={mockConsumers}
-        onChange={mockOnChange}
-      />
-    );
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
+    expect(screen.queryAllByText('Scope is required')).toHaveLength(1);
   });
 
   it('should display nothing if there is only 1 consumer to select', () => {
-    render(<RuleFormConsumerSelection consumers={['stackAlerts']} onChange={mockOnChange} />);
+    render(
+      <RuleFormConsumerSelection consumers={['stackAlerts']} onChange={mockOnChange} errors={{}} />
+    );
 
     expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();

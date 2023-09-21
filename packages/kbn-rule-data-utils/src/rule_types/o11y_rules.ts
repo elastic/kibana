@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
+export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';

@@ -237,7 +237,6 @@ describe('aggregateRulesRoute', () => {
           },
           "options": Object {
             "defaultSearchOperator": "AND",
-            "filterConsumers": undefined,
           },
         },
       ]

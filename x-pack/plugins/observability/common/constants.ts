@@ -58,9 +58,6 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
 ];
 
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
-  AlertConsumers.APM,
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
-  AlertConsumers.UPTIME,
-  AlertConsumers.SLO,
 ];

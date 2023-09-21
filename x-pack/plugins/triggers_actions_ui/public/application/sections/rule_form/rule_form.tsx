@@ -134,7 +134,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   canShowConsumerSelection?: boolean;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  setConsumer?: (consumer: RuleCreationValidConsumer) => void;
+  setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   hideInterval?: boolean;
@@ -525,10 +525,7 @@ export const RuleForm = ({
                       setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                     }
 
-                    if (
-                      useRuleProducer &&
-                      validConsumers?.includes(solution as RuleCreationValidConsumer)
-                    ) {
+                    if (useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(item.id)) {
                       setConsumer(solution as RuleCreationValidConsumer);
                     }
                   }}
@@ -740,8 +737,8 @@ export const RuleForm = ({
           <EuiFlexItem>
             <RuleFormConsumerSelection
               consumers={authorizedConsumers}
-              initialConsumer={rule.consumer as RuleCreationValidConsumer}
               onChange={setConsumer}
+              errors={errors}
             />
           </EuiFlexItem>
         </>

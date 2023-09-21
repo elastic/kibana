@@ -86,7 +86,9 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
-  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
+  const [selectedConsumer, setSelectedConsumer] = useState<
+    RuleCreationValidConsumer | null | undefined
+  >();
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -201,8 +203,16 @@ const RuleAdd = ({
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
-    () => getRuleErrors(rule as Rule, ruleType, config),
-    [rule, ruleType, config]
+    () =>
+      getRuleErrors(
+        {
+          ...rule,
+          ...(selectedConsumer !== undefined ? { consumer: selectedConsumer } : {}),
+        } as Rule,
+        ruleType,
+        config
+      ),
+    [rule, selectedConsumer, ruleType, config]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule

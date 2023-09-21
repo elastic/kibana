@@ -826,7 +826,4 @@ export interface NotifyWhenSelectOptions {
 export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS
   | typeof AlertConsumers.INFRASTRUCTURE
-  | typeof AlertConsumers.APM
-  | typeof AlertConsumers.UPTIME
-  | typeof AlertConsumers.SLO
   | typeof STACK_ALERTS_FEATURE_ID;

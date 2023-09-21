@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RuleCreationValidConsumer } from '../../../types';
+import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
 
 const SELECT_LABEL: string = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
@@ -60,82 +60,97 @@ const featureNameMap: Record<string, string> = {
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.APM,
-  AlertConsumers.UPTIME,
-  AlertConsumers.SLO,
   'stackAlerts',
 ];
 
 export interface RuleFormConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
-  initialConsumer?: RuleCreationValidConsumer;
-  onChange: (consumer: RuleCreationValidConsumer) => void;
+  onChange: (consumer: RuleCreationValidConsumer | null) => void;
+  errors: IErrorObject;
 }
 
-export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
-  const { consumers, initialConsumer, onChange } = props;
-  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer>();
+const SINGLE_SELECTION = { asPlainText: true };
 
+export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
+  const { consumers, errors, onChange } = props;
+  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
+  const isInvalid = errors?.consumer?.length > 0;
   const handleOnChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedConsumer(e.target.value as RuleCreationValidConsumer);
-      onChange(e.target.value as RuleCreationValidConsumer);
+    (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
+      if (selected.length > 0) {
+        const newSelectedConsumer = selected[0];
+        setSelectedConsumer(newSelectedConsumer.value);
+        onChange(newSelectedConsumer.value!);
+      } else {
+        setSelectedConsumer(undefined);
+        onChange(null);
+      }
     },
-    [setSelectedConsumer, onChange]
+    [onChange]
+  );
+  const selectedOptions = useMemo(
+    () =>
+      selectedConsumer
+        ? [{ value: selectedConsumer, label: featureNameMap[selectedConsumer] }]
+        : [],
+    [selectedConsumer]
   );
 
-  const formattedSelectOptions: EuiSelectOption[] = useMemo(() => {
-    return consumers
-      .reduce<EuiSelectOption[]>((result, consumer) => {
-        if (featureNameMap[consumer]) {
-          result.push({
-            value: consumer,
-            text: featureNameMap[consumer],
-          });
-        }
-        return result;
-      }, [])
-      .sort((a, b) => {
-        return (a.value as RuleCreationValidConsumer).localeCompare(
-          b.value as RuleCreationValidConsumer
-        );
-      });
-  }, [consumers]);
+  const formattedSelectOptions: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>> =
+    useMemo(() => {
+      return consumers
+        .reduce<Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>>((result, consumer) => {
+          if (featureNameMap[consumer]) {
+            result.push({
+              value: consumer,
+              'data-test-subj': consumer,
+              label: featureNameMap[consumer],
+            });
+          }
+          return result;
+        }, [])
+        .sort((a, b) => {
+          return a.value!.localeCompare(b.value!);
+        });
+    }, [consumers]);
 
-  // Initialize dropdown with the initial consumer, otherwise the first option
   useEffect(() => {
-    if (selectedConsumer || formattedSelectOptions.length === 0) {
-      return;
-    }
-
-    if (
-      initialConsumer &&
-      formattedSelectOptions.find((option) => option.value === initialConsumer)
-    ) {
-      setSelectedConsumer(initialConsumer);
-      onChange(initialConsumer);
-      return;
-    }
-
-    const firstConsumer = formattedSelectOptions[0].value as RuleCreationValidConsumer;
-    setSelectedConsumer(firstConsumer);
-    onChange(firstConsumer);
+    // At initialization we set to NULL to know that nobody selected anything
+    onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConsumer, formattedSelectOptions, initialConsumer]);
+  }, []);
+
+  useEffect(() => {
+    if (formattedSelectOptions.length === 1) {
+      onChange(formattedSelectOptions[0].value as RuleCreationValidConsumer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formattedSelectOptions]);
 
   if (formattedSelectOptions.length <= 1) {
     return null;
   }
-
   return (
-    <EuiFormRow fullWidth label={SELECT_LABEL}>
-      <EuiSelect
-        fullWidth
-        hasNoInitialSelection
-        value={selectedConsumer}
-        onChange={handleOnChange}
-        options={formattedSelectOptions}
+    <EuiFormRow fullWidth label={SELECT_LABEL} isInvalid={isInvalid} error={errors?.consumer ?? ''}>
+      <EuiComboBox
         data-test-subj="ruleFormConsumerSelect"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.comboBox.ariaLabel',
+          {
+            defaultMessage: 'Select a scope',
+          }
+        )}
+        placeholder={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.comboBox.placeholder',
+          {
+            defaultMessage: 'Select a scope',
+          }
+        )}
+        fullWidth
+        singleSelection={SINGLE_SELECTION}
+        options={formattedSelectOptions}
+        selectedOptions={selectedOptions}
+        onChange={handleOnChange}
       />
     </EuiFormRow>
   );

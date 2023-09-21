@@ -14,7 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ActionForm } from '../action_connector_form';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import {
   ValidationResult,
@@ -261,6 +261,7 @@ describe('rule_form', () => {
       validConsumers?: RuleCreationValidConsumer[];
       ruleTypesOverwrite?: RuleType[];
       ruleTypeModelOverwrite?: RuleTypeModel;
+      useRuleProducer?: boolean;
     }) {
       const {
         showRulesList = false,
@@ -271,6 +272,7 @@ describe('rule_form', () => {
         validConsumers,
         ruleTypesOverwrite,
         ruleTypeModelOverwrite,
+        useRuleProducer = false,
       } = options || {};
 
       const mocks = coreMock.createSetup();
@@ -343,6 +345,7 @@ describe('rule_form', () => {
         ruleTypeNonEditable,
         disabledByLicenseRuleType,
       ]);
+      ruleTypeRegistry.get.mockReturnValue(ruleTypeModelOverwrite || ruleType);
       ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -382,6 +385,7 @@ describe('rule_form', () => {
           onChangeMetaData={jest.fn()}
           validConsumers={validConsumers}
           setConsumer={mockSetConsumer}
+          useRuleProducer={useRuleProducer}
         />
       );
 
@@ -512,20 +516,20 @@ describe('rule_form', () => {
       ).toBeTruthy();
     });
 
-    it('should display the consumer select for specific rule types', async () => {
+    it('should select the only one available consumer', async () => {
       await setup({
         initialRuleOverwrite: {
           name: 'Simple rule',
           consumer: 'alerts',
-          ruleTypeId: 'observability.rules.threshold',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           schedule: {
             interval: '1h',
           },
         },
         ruleTypesOverwrite: [
           {
-            id: 'observability.rules.threshold',
-            name: 'Threshold Rule',
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+            name: 'Threshold Rule 1',
             actionGroups: [
               {
                 id: 'testActionGroup',
@@ -542,11 +546,11 @@ describe('rule_form', () => {
               apm: { read: true, all: true },
               discover: { read: true, all: true },
               infrastructure: { read: true, all: true },
-              logs: { read: true, all: true },
+              // Setting logs all to false, this shouldn't show up
+              logs: { read: true, all: false },
               ml: { read: true, all: true },
               monitoring: { read: true, all: true },
               siem: { read: true, all: true },
-              // Setting SLO all to false, this shouldn't show up
               slo: { read: true, all: false },
               stackAlerts: { read: true, all: true },
               uptime: { read: true, all: true },
@@ -559,7 +563,7 @@ describe('rule_form', () => {
           },
         ],
         ruleTypeModelOverwrite: {
-          id: 'observability.rules.threshold',
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           iconClass: 'test',
           description: 'test',
           documentationUrl: null,
@@ -569,49 +573,35 @@ describe('rule_form', () => {
           ruleParamsExpression: TestExpression,
           requiresAppContext: false,
         },
-        validConsumers: [
-          AlertConsumers.APM,
-          AlertConsumers.INFRASTRUCTURE,
-          AlertConsumers.LOGS,
-          AlertConsumers.UPTIME,
-          AlertConsumers.SLO,
-        ],
+        validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
       });
 
       await act(async () => {
         await nextTick();
         wrapper.update();
       });
-
-      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeTruthy();
-      expect(wrapper.find(RuleFormConsumerSelection).props().consumers).toEqual([
-        'apm',
-        'infrastructure',
-        'logs',
-        'uptime',
-      ]);
+      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
 
       await act(async () => {
         await nextTick();
         wrapper.update();
       });
-
-      expect(mockSetConsumer).toHaveBeenLastCalledWith('apm');
+      expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
     });
 
-    it('should not display the consumer select if there is only 1 consumer', async () => {
+    it('should be able to select multiple consumer', async () => {
       await setup({
         initialRuleOverwrite: {
           name: 'Simple rule',
           consumer: 'alerts',
-          ruleTypeId: 'observability.rules.threshold',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           schedule: {
             interval: '1h',
           },
         },
         ruleTypesOverwrite: [
           {
-            id: 'observability.rules.threshold',
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
             name: 'Threshold Rule',
             actionGroups: [
               {
@@ -625,7 +615,8 @@ describe('rule_form', () => {
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
             producer: ALERTS_FEATURE_ID,
             authorizedConsumers: {
-              apm: { read: true, all: true },
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
             },
             actionVariables: {
               context: [],
@@ -635,7 +626,7 @@ describe('rule_form', () => {
           },
         ],
         ruleTypeModelOverwrite: {
-          id: 'observability.rules.threshold',
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           iconClass: 'test',
           description: 'test',
           documentationUrl: null,
@@ -652,14 +643,17 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
-
+      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeTruthy();
+      expect(wrapper.find(RuleFormConsumerSelection).props().consumers).toEqual([
+        'infrastructure',
+        'logs',
+      ]);
       await act(async () => {
         await nextTick();
         wrapper.update();
       });
 
-      expect(mockSetConsumer).toHaveBeenLastCalledWith('apm');
+      expect(mockSetConsumer).toHaveBeenLastCalledWith(null);
     });
 
     it('should not display the consumer select for invalid rule types', async () => {
