@@ -58,6 +58,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+import { findFunctionName, withSpan } from './apm_utils';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -331,7 +332,7 @@ export class HttpServer {
   }
 
   private setupGracefulShutdownHandlers() {
-    this.registerOnPreRouting((request, response, toolkit) => {
+    const gracefulShutdownHandler: OnPreRoutingHandler = (request, response, toolkit) => {
       if (this.stopping || this.stopped) {
         return response.customError({
           statusCode: 503,
@@ -339,7 +340,8 @@ export class HttpServer {
         });
       }
       return toolkit.next();
-    });
+    };
+    this.registerOnPreRouting(gracefulShutdownHandler);
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
@@ -347,7 +349,7 @@ export class HttpServer {
       return;
     }
 
-    this.registerOnPreRouting((request, response, toolkit) => {
+    const basePathRewrite: OnPreRoutingHandler = (request, response, toolkit) => {
       const oldUrl = request.url.pathname + request.url.search;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
@@ -355,7 +357,9 @@ export class HttpServer {
         return toolkit.rewriteUrl(newURL);
       }
       return response.notFound();
-    });
+    };
+
+    this.registerOnPreRouting(basePathRewrite);
   }
 
   private setupConditionalCompression(config: HttpConfig) {
@@ -369,22 +373,26 @@ export class HttpServer {
     const { enabled, referrerWhitelist: list } = config.compression;
     if (!enabled) {
       this.log.debug('HTTP compression is disabled');
-      this.server.ext('onRequest', (request, h) => {
-        request.info.acceptEncoding = '';
-        return h.continue;
-      });
+      this.server.ext('onRequest', (request, h) =>
+        withSpan(`onRequest conditionalCompression:disabled`, () => {
+          request.info.acceptEncoding = '';
+          return h.continue;
+        })
+      );
     } else if (list) {
       this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
-      this.server.ext('onRequest', (request, h) => {
-        const { referrer } = request.info;
-        if (referrer !== '') {
-          const { hostname } = url.parse(referrer);
-          if (!hostname || !list.includes(hostname)) {
-            request.info.acceptEncoding = '';
+      this.server.ext('onRequest', (request, h) =>
+        withSpan('onRequest conditionalCompression:list', () => {
+          const { referrer } = request.info;
+          if (referrer !== '') {
+            const { hostname } = url.parse(referrer);
+            if (!hostname || !list.includes(hostname)) {
+              request.info.acceptEncoding = '';
+            }
           }
-        }
-        return h.continue;
-      });
+          return h.continue;
+        })
+      );
     }
   }
 
@@ -399,10 +407,12 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      if (log.isLevelEnabled('debug')) {
-        const { message, meta } = getEcsResponseLog(request, this.log);
-        log.debug(message!, meta);
-      }
+      withSpan('response responseLogging', () => {
+        if (log.isLevelEnabled('debug')) {
+          const { message, meta } = getEcsResponseLog(request, this.log);
+          log.debug(message!, meta);
+        }
+      });
     };
 
     this.server.events.on('response', this.handleServerResponseEvent);
@@ -413,47 +423,51 @@ export class HttpServer {
     executionContext?: InternalExecutionContextSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
-      const stop = (request.app as KibanaRequestState).measureElu;
+      return withSpan('onPreResponse requestStateAssignment', () => {
+        const stop = (request.app as KibanaRequestState).measureElu;
 
-      if (!stop) {
-        return responseToolkit.continue;
-      }
+        if (!stop) {
+          return responseToolkit.continue;
+        }
 
-      if (isBoom(request.response)) {
-        stop();
-      } else {
-        request.response.events.once('finish', () => {
+        if (isBoom(request.response)) {
           stop();
-        });
-      }
+        } else {
+          request.response.events.once('finish', () => {
+            stop();
+          });
+        }
 
-      return responseToolkit.continue;
+        return responseToolkit.continue;
+      });
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
-      const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
+      return withSpan('onRequest requestStateAssignment', () => {
+        const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
 
-      const requestId = getRequestId(request, config.requestId);
+        const requestId = getRequestId(request, config.requestId);
 
-      const parentContext = executionContext?.getParentContextFrom(request.headers);
+        const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      if (executionContext && parentContext) {
-        executionContext.set(parentContext);
-        apm.addLabels(executionContext.getAsLabels());
-      }
+        if (executionContext && parentContext) {
+          executionContext.set(parentContext);
+          apm.addLabels(executionContext.getAsLabels());
+        }
 
-      executionContext?.setRequestId(requestId);
+        executionContext?.setRequestId(requestId);
 
-      request.app = {
-        ...(request.app ?? {}),
-        requestId,
-        requestUuid: uuidv4(),
-        measureElu: stop,
-        // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
-        // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
-      } as KibanaRequestState;
-      return responseToolkit.continue;
+        request.app = {
+          ...(request.app ?? {}),
+          requestId,
+          requestUuid: uuidv4(),
+          measureElu: stop,
+          // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
+          // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
+          traceId: apm.currentTraceIds['trace.id'],
+        } as KibanaRequestState;
+        return responseToolkit.continue;
+      });
     });
   }
 
@@ -465,7 +479,11 @@ export class HttpServer {
       this.log.warn(`registerOnPreAuth called after stop`);
     }
 
-    this.server.ext('onPreAuth', adoptToHapiOnPreAuth(fn, this.log));
+    const functionName = `onPreAuth ${findFunctionName(fn)}`;
+
+    this.server.ext('onPreAuth', (req, res) =>
+      withSpan(functionName, () => adoptToHapiOnPreAuth(fn, this.log)(req, res))
+    );
   }
 
   private registerOnPostAuth(fn: OnPostAuthHandler) {
@@ -476,7 +494,11 @@ export class HttpServer {
       this.log.warn(`registerOnPostAuth called after stop`);
     }
 
-    this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
+    const functionName = `onPostAuth ${findFunctionName(fn)}`;
+
+    this.server.ext('onPostAuth', (req, res) =>
+      withSpan(functionName, () => adoptToHapiOnPostAuthFormat(fn, this.log)(req, res))
+    );
   }
 
   private registerOnPreRouting(fn: OnPreRoutingHandler) {
@@ -487,7 +509,11 @@ export class HttpServer {
       this.log.warn(`registerOnPreRouting called after stop`);
     }
 
-    this.server.ext('onRequest', adoptToHapiOnRequest(fn, this.log));
+    const functionName = `onRequest ${findFunctionName(fn)}`;
+
+    this.server.ext('onRequest', (req, res) =>
+      withSpan(functionName, () => adoptToHapiOnRequest(fn, this.log)(req, res))
+    );
   }
 
   private registerOnPreResponse(fn: OnPreResponseHandler) {
@@ -498,7 +524,11 @@ export class HttpServer {
       this.log.warn(`registerOnPreResponse called after stop`);
     }
 
-    this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
+    const functionName = `onPreResponse ${findFunctionName(fn)}`;
+
+    this.server.ext('onPreResponse', (req, res) =>
+      withSpan(functionName, () => adoptToHapiOnPreResponseFormat(fn, this.log)(req, res))
+    );
   }
 
   private async createCookieSessionStorageFactory<T>(
@@ -537,24 +567,23 @@ export class HttpServer {
     this.authRegistered = true;
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(
-        fn,
-        this.log,
-        (req, { state, requestHeaders, responseHeaders }) => {
-          this.authState.set(req, state);
+      authenticate: (request, response) =>
+        withSpan('authenticate', () =>
+          adoptToHapiAuthFormat(fn, this.log, (req, { state, requestHeaders, responseHeaders }) => {
+            this.authState.set(req, state);
 
-          if (responseHeaders) {
-            this.authResponseHeaders.set(req, responseHeaders);
-          }
+            if (responseHeaders) {
+              this.authResponseHeaders.set(req, responseHeaders);
+            }
 
-          if (requestHeaders) {
-            this.authRequestHeaders.set(req, requestHeaders);
-            // we mutate headers only for the backward compatibility with the legacy platform.
-            // where some plugin read directly from headers to identify whether a user is authenticated.
-            Object.assign(req.headers, requestHeaders);
-          }
-        }
-      ),
+            if (requestHeaders) {
+              this.authRequestHeaders.set(req, requestHeaders);
+              // we mutate headers only for the backward compatibility with the legacy platform.
+              // where some plugin read directly from headers to identify whether a user is authenticated.
+              Object.assign(req.headers, requestHeaders);
+            }
+          })(request, response)
+        ),
     }));
     this.server.auth.strategy('session', 'login');
 
@@ -564,10 +593,16 @@ export class HttpServer {
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
 
-    this.registerOnPreResponse((request, preResponseInfo, t) => {
+    const authResponseHeadersPreResponseHandler: OnPreResponseHandler = (
+      request,
+      preResponseInfo,
+      t
+    ) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
-    });
+    };
+
+    this.registerOnPreResponse(authResponseHeadersPreResponseHandler);
   }
 
   private registerStaticDir(path: string, dirPath: string) {

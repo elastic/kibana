@@ -158,13 +158,24 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
-          handler: async (req, responseToolkit) =>
-            await this.handle({
-              routeSchemas,
-              request: req,
-              responseToolkit,
-              handler: this.enhanceWithContext(handler),
-            }),
+          handler: async (req, responseToolkit) => {
+            const currentSpan = apm.currentTransaction?.startSpan(`http handler`);
+            try {
+              const result = await this.handle({
+                routeSchemas,
+                request: req,
+                responseToolkit,
+                handler: this.enhanceWithContext(handler),
+              });
+              currentSpan?.setOutcome('success');
+              currentSpan?.end();
+              return result;
+            } catch (error) {
+              currentSpan?.setOutcome('failure');
+              currentSpan?.end();
+              throw error;
+            }
+          },
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),

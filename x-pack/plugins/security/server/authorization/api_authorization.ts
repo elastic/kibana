@@ -14,7 +14,7 @@ export function initAPIAuthorization(
   { actions, checkPrivilegesDynamicallyWithRequest, mode }: AuthorizationServiceSetup,
   logger: Logger
 ) {
-  http.registerOnPostAuth(async (request, response, toolkit) => {
+  http.registerOnPostAuth(async function apiAuthorization(request, response, toolkit) {
     // if we aren't using RBAC for this request, just continue
     if (!mode.useRbacForRequest(request)) {
       return toolkit.next();

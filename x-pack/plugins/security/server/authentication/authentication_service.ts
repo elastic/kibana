@@ -14,6 +14,7 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
+  OnPreResponseHandler,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -195,7 +196,7 @@ export class AuthenticationService {
       return t.notHandled();
     });
 
-    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
+    const authentication: OnPreResponseHandler = async (request, preResponse, toolkit) => {
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
         return toolkit.next();
       }
@@ -245,7 +246,9 @@ export class AuthenticationService {
           )}`,
         },
       });
-    });
+    };
+
+    http.registerOnPreResponse(authentication);
 
     elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
       if (!this.authenticator) {

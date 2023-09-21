@@ -179,7 +179,7 @@ export class AuthorizationService {
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
-    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
+    http.registerOnPreResponse(async function authorizationService(request, preResponse, toolkit) {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const customBrandingValue = await customBranding.getBrandingFor(request, {
           unauthenticated: false,

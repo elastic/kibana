@@ -196,7 +196,7 @@ export class AuditService {
       enabled,
     });
 
-    http.registerOnPostAuth((request, response, t) => {
+    http.registerOnPostAuth(function auditService(request, response, t) {
       if (request.auth.isAuthenticated) {
         asScoped(request).log(httpRequestEvent({ request }));
       }

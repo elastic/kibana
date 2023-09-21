@@ -17,7 +17,7 @@ const KIBANA_NAME_HEADER = 'kbn-name';
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
   const { allowlist, disableProtection } = config.xsrf;
 
-  return (request, response, toolkit) => {
+  return function xsrfPostAuthHandler(request, response, toolkit) {
     if (
       disableProtection ||
       allowlist.includes(request.route.path) ||
@@ -42,7 +42,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
 ): OnPostAuthHandler => {
   const isRestrictionEnabled = config.restrictInternalApis;
 
-  return (request, response, toolkit) => {
+  return function restrictInternalRoutesPostAuthHandler(request, response, toolkit) {
     const isInternalRoute = request.route.options.access === 'internal';
     if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
       // throw 400
@@ -55,7 +55,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
 };
 
 export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPostAuthHandler => {
-  return (request, response, toolkit) => {
+  return function versionCheckPostAuthHandler(request, response, toolkit) {
     const requestVersion = request.headers[VERSION_HEADER];
     if (requestVersion && requestVersion !== kibanaVersion) {
       return response.badRequest({
@@ -82,7 +82,7 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     csp: { header: cspHeader },
   } = config;
 
-  return (request, response, toolkit) => {
+  return function customHeaders(request, response, toolkit) {
     const additionalHeaders = {
       ...securityResponseHeaders,
       ...customResponseHeaders,

@@ -17,6 +17,7 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
+import apm from 'elastic-apm-node';
 
 // Ugly as hell but we need this conditional typing to have proper type inference
 type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
@@ -60,7 +61,15 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getParams(data: unknown, namespace?: string): Readonly<P> {
-    return this.validate(this.config.params, this.options.unsafe?.params, data, namespace) as P;
+    const currentSpan = apm.currentTransaction?.startSpan(`validate getParams ${namespace}`);
+    const result = this.validate(
+      this.config.params,
+      this.options.unsafe?.params,
+      data,
+      namespace
+    ) as P;
+    currentSpan?.end();
+    return result;
   }
 
   /**
@@ -68,7 +77,15 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
-    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace) as Q;
+    const currentSpan = apm.currentTransaction?.startSpan(`validate getQuery ${namespace}`);
+    const result = this.validate(
+      this.config.query,
+      this.options.unsafe?.query,
+      data,
+      namespace
+    ) as Q;
+    currentSpan?.end();
+    return result;
   }
 
   /**
@@ -76,7 +93,10 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getBody(data: unknown, namespace?: string): Readonly<B> {
-    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace) as B;
+    const currentSpan = apm.currentTransaction?.startSpan(`validate getBody ${namespace}`);
+    const result = this.validate(this.config.body, this.options.unsafe?.body, data, namespace) as B;
+    currentSpan?.end();
+    return result;
   }
 
   /**

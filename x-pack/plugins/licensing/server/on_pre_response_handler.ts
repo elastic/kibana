@@ -13,7 +13,7 @@ export function createOnPreResponseHandler(
   refresh: () => Promise<ILicense>,
   license$: Observable<ILicense>
 ): OnPreResponseHandler {
-  return async (req, res, t) => {
+  return async function licensing(req, res, t) {
     // If we're returning an error response, refresh license info from
     // Elasticsearch in case the error is due to a change in license information
     // in Elasticsearch. https://github.com/elastic/x-pack-kibana/pull/2876
