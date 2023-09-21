@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
@@ -69,8 +69,7 @@ describe('Form', () => {
     expect(getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).toBeInTheDocument();
   });
 
-  // TODO: fix
-  it.skip('fires saveChanges when Save button is clicked', () => {
+  it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
     const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={true} />, services));
 
@@ -99,8 +98,7 @@ describe('Form', () => {
     expect(input).toHaveValue(settingsMock[testFieldType].value);
   });
 
-  // TODO: fix
-  it.skip('fires showError when saving is unsuccessful', () => {
+  it('fires showError when saving is unsuccessful', () => {
     const services: FormServices = createFormServicesMock();
     const saveChangesWithError = jest.fn(() => {
       throw new Error('Unable to save');
@@ -121,14 +119,13 @@ describe('Form', () => {
     expect(testServices.showError).toHaveBeenCalled();
   });
 
-  // TODO: fix
-  it.skip('fires showReloadPagePrompt when changing a reloadPageRequired setting', () => {
+  it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
     const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
-    const testFields = fields.map((field) => {
-      return { ...field, requiresPageReload: true };
-    });
-
+    const testFields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+      getSettingsMock(true),
+      uiSettingsClientMock
+    );
     const { getByTestId } = render(
       wrap(<Form fields={testFields} isSavingEnabled={true} />, services)
     );
@@ -140,6 +137,8 @@ describe('Form', () => {
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     fireEvent.click(saveButton);
 
-    expect(services.showReloadPagePrompt).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(services.showReloadPagePrompt).toHaveBeenCalled();
+    });
   });
 });

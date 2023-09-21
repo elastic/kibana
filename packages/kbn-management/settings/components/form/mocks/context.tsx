@@ -50,5 +50,5 @@ export const TestWrapper = ({
 };
 
 export const wrap = (component: JSX.Element, services: FormServices = createFormServicesMock()) => (
-  <TestWrapper {...services}>{component}</TestWrapper>
+  <TestWrapper services={services} children={component} />
 );
