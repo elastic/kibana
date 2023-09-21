@@ -106,7 +106,7 @@ export class MlServerPlugin
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
-    initEnabledFeatures(ctx.config.get());
+    initEnabledFeatures(this.enabledFeatures, ctx.config.get());
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
