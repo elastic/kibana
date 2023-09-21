@@ -145,9 +145,12 @@ export interface NodeDefinition<
   cloudLink?: CloudLinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
-  /** Optional flag to indicate if the node must be treated as a group title */
+  /**
+   * Optional flag to indicate if the node must be treated as a group title.
+   * Can not be used with `children`
+   */
   isGroupTitle?: boolean;
-  /** Optional children of the navigation node */
+  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Use href for absolute links only. Internal links should use "link".
