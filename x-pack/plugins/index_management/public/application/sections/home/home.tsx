@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { breadcrumbService } from '../../services/breadcrumbs';
 import { documentationService } from '../../services/documentation';
 import { useAppContext } from '../../app_context';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { IndexList } from './index_list';
+import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
 import { DataStreamList } from './data_stream_list';
 import { TemplateList } from './template_list';
@@ -24,6 +24,7 @@ export enum Section {
   DataStreams = 'data_streams',
   IndexTemplates = 'templates',
   ComponentTemplates = 'component_templates',
+  EnrichPolicies = 'enrich_policies',
 }
 
 export const homeSections = [
@@ -31,6 +32,7 @@ export const homeSections = [
   Section.DataStreams,
   Section.IndexTemplates,
   Section.ComponentTemplates,
+  Section.EnrichPolicies,
 ];
 
 interface MatchParams {
@@ -78,15 +80,20 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
     },
+    {
+      id: Section.EnrichPolicies,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.enrichPoliciesTabTitle"
+          defaultMessage="Enrich Policies"
+        />
+      ),
+    },
   ];
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
   };
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs('home');
-  }, []);
 
   const indexManagementTabs = (
     <>
@@ -142,6 +149,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
+        <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
     </>
   );
