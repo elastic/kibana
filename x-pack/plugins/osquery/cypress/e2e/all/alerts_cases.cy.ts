@@ -18,6 +18,7 @@ import {
 import {
   addToCase,
   checkActionItemsInResults,
+  clickRefreshButton,
   clickRuleName,
   loadRuleAlerts,
   submitQuery,
@@ -48,6 +49,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
+    clickRefreshButton();
   });
 
   after(() => {
