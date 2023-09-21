@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ConfigSchema, MlFeatures } from '../constants/app';
+import type { ConfigSchema, MlFeatures } from '../constants/app';
 
 export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
   if (config.ad?.enabled !== undefined) {
