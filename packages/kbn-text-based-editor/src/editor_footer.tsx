@@ -89,7 +89,7 @@ export function ErrorsWarningsPopover({
                   }
                 `}
                 onClick={() => {
-                  refreshErrors();
+                  // refreshErrors();
                   setIsPopoverOpen(!isPopoverOpen);
                 }}
               >
@@ -168,7 +168,8 @@ export const EditorFooter = memo(function EditorFooter({
   refreshErrors,
   hideRunQueryText,
 }: EditorFooterProps) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
+  const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -181,21 +182,31 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           {errors && errors.length > 0 && (
             <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
+              isPopoverOpen={isErrorPopoverOpen}
               items={errors}
               type="error"
               refreshErrors={refreshErrors}
-              setIsPopoverOpen={setIsPopoverOpen}
+              setIsPopoverOpen={(isOpen) => {
+                if (isOpen) {
+                  setIsWarningPopoverOpen(false);
+                }
+                setIsErrorPopoverOpen(isOpen);
+              }}
               onErrorClick={onErrorClick}
             />
           )}
           {warning && warning.length > 0 && (
             <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
+              isPopoverOpen={isWarningPopoverOpen}
               items={warning}
               type="warning"
               refreshErrors={refreshErrors}
-              setIsPopoverOpen={setIsPopoverOpen}
+              setIsPopoverOpen={(isOpen) => {
+                if (isOpen) {
+                  setIsErrorPopoverOpen(false);
+                }
+                setIsWarningPopoverOpen(isOpen);
+              }}
               onErrorClick={onErrorClick}
             />
           )}

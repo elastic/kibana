@@ -77,8 +77,6 @@ import {
   type IntegerValueContext,
   type StringContext,
   type ComparisonOperatorContext,
-  type ExplainCommandContext,
-  type SubqueryExpressionContext,
   type ShowCommandContext,
   type EnrichCommandContext,
   type EnrichWithClauseContext,
@@ -87,21 +85,20 @@ import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_pars
 import {
   createError,
   createCommand,
-  createSource,
   createLiteral,
   getPosition,
   getParentCommand,
   createColumn,
   createOption,
-  getLastArgIfType,
   createFunction,
+  collectAllSourceIdentifiers,
+  collectAllFieldsStatements,
 } from './helpers';
-import { ESQLAst, ESQLAstItem, ESQLCommand, ESQLErrors } from './types';
+import { ESQLAst, ESQLMessage } from './types';
 
 export class AstListener implements ESQLParserListener {
   private ast: ESQLAst = [];
-  private errors: ESQLErrors[] = [];
-  private lastCommand: ESQLCommand | undefined;
+  private errors: ESQLMessage[] = [];
 
   public getAstAndErrors() {
     return { ast: this.ast, errors: this.errors };
@@ -327,7 +324,6 @@ export class AstListener implements ESQLParserListener {
       this.errors.push(createError(ctx.exception));
     }
     const commandAst = createCommand('show', ctx);
-    this.lastCommand = commandAst;
 
     this.ast.push(commandAst);
     // update the text
@@ -352,7 +348,6 @@ export class AstListener implements ESQLParserListener {
     }
 
     const commandAst = createCommand('show', ctx);
-    this.lastCommand = commandAst;
     this.ast.push(commandAst);
     // update the text
     commandAst.text = ctx.text;
@@ -845,6 +840,7 @@ export class AstListener implements ESQLParserListener {
     const commandAst = getParentCommand(this.ast)!;
     if (commandAst) {
       commandAst.text = ctx.text;
+      commandAst.args.push(...collectAllSourceIdentifiers(ctx));
       const metadataContext = ctx.metadata();
       if (metadataContext) {
         const option = createOption(metadataContext.text.toLowerCase(), metadataContext);
@@ -884,6 +880,8 @@ export class AstListener implements ESQLParserListener {
     if (ctx.exception) {
       this.errors.push(createError(ctx.exception));
     }
+    const commandAst = getParentCommand(this.ast)!;
+    commandAst.args.push(...collectAllFieldsStatements(ctx.fields()));
   }
 
   /**
@@ -950,15 +948,6 @@ export class AstListener implements ESQLParserListener {
   exitSourceIdentifier(ctx: SourceIdentifierContext) {
     if (ctx.exception) {
       this.errors.push(createError(ctx.exception));
-    }
-    const commandAst = getParentCommand(this.ast);
-    if (commandAst) {
-      const optionAst = getLastArgIfType(commandAst, 'option');
-      if (optionAst) {
-        optionAst.args.push(createSource(ctx));
-      } else {
-        commandAst.args.push(createSource(ctx));
-      }
     }
   }
 

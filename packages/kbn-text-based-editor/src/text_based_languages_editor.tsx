@@ -275,11 +275,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       } else if (code && language === 'esql') {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
         const parser = createAstGenerator();
-        const { ast, errors: parserErrors } = parser.getAst(
+        const { warnings: parserWarnings, errors: parserErrors } = parser.validateAst(
           editorModel.current,
           new monaco.Position(0, 1)
         );
-        console.log({ ast });
+        const markers = [];
 
         if (parserErrors.length) {
           const monacoErrors = parserErrors.map((e) => {
@@ -291,7 +291,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               : { column: 0, lineNumber: 0 };
             return {
               message: e.text,
-              startColumn: startPosition.column + 1,
+              startColumn: startPosition.column,
               startLineNumber: startPosition.lineNumber,
               endColumn: endPosition.column + 1,
               endLineNumber: endPosition.lineNumber,
@@ -299,18 +299,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               source: 'client' as const,
             };
           });
-          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', monacoErrors);
+          markers.push(...monacoErrors);
           setEditorErrors(monacoErrors);
-        } else {
-          if (warning) {
-            const parsedWarning = parseWarning(warning);
-            setEditorWarning(parsedWarning);
-          } else {
-            setEditorWarning([]);
-          }
-          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-          setEditorErrors([]);
         }
+        if (parserWarnings.length) {
+          const monacoWarnings = parserWarnings.map((e) => {
+            const startPosition = e.location
+              ? offsetToRowColumn(code, e.location.min)
+              : { column: 0, lineNumber: 0 };
+            const endPosition = e.location
+              ? offsetToRowColumn(code, e.location.max || 0)
+              : { column: 0, lineNumber: 0 };
+            return {
+              message: e.text,
+              startColumn: startPosition.column,
+              startLineNumber: startPosition.lineNumber,
+              endColumn: endPosition.column + 1,
+              endLineNumber: endPosition.lineNumber,
+              severity: monaco.MarkerSeverity.Warning,
+              source: 'client' as const,
+            };
+          });
+          markers.push(...monacoWarnings);
+          setEditorWarning(monacoWarnings);
+        }
+        if (markers.length) {
+          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
+          return;
+        }
+        if (warning) {
+          const parsedWarning = parseWarning(warning);
+          setEditorWarning(parsedWarning);
+        } else {
+          setEditorWarning([]);
+        }
+        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+        setEditorErrors([]);
       }
     },
     { skipFirstRender: false },

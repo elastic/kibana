@@ -8,13 +8,16 @@
 
 export type ESQLAst = ESQLCommand[];
 
-export type ESQLAstItem =
+export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
   | ESQLColumn
-  | ESQLVariable
+  | ESQLTimeInterval
+  | ESQLList
   | ESQLLiteral;
+
+export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {
   min: number;
@@ -45,15 +48,16 @@ export interface ESQLFunction {
   args: ESQLAstItem[];
 }
 
-export interface ESQLSource {
-  type: 'source';
-  name: string;
+export interface ESQLTimeInterval {
+  type: 'timeInterval';
+  unit: string;
+  quantity: number;
   text: string;
   location?: ESQLLocation;
 }
 
-export interface ESQLVariable {
-  type: 'variable';
+export interface ESQLSource {
+  type: 'source';
   name: string;
   text: string;
   location?: ESQLLocation;
@@ -66,16 +70,24 @@ export interface ESQLColumn {
   location?: ESQLLocation;
 }
 
+export interface ESQLList {
+  type: 'list';
+  values: ESQLLiteral[];
+  text: string;
+  location?: ESQLLocation;
+}
+
 export interface ESQLLiteral {
   type: 'literal';
-  literalType: 'string' | 'number' | 'time';
+  literalType: 'string' | 'number' | 'boolean' | 'null';
+  name?: string;
   value: string | number;
   text: string;
   location?: ESQLLocation;
 }
 
-export interface ESQLErrors {
-  type: 'error';
+export interface ESQLMessage {
+  type: 'error' | 'warning';
   text: string;
   location?: ESQLLocation;
 }
