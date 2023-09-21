@@ -21,15 +21,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useForm,
   Form,
-  fieldValidators,
+  fieldFormatters,
   FormSchema,
   FIELD_TYPES,
   UseField,
   NumericField,
 } from '../../../../../shared_imports';
+
+import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
+import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
+  dataStreamName: string;
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }
 
@@ -108,16 +112,31 @@ const configurationFormSchema: FormSchema = {
         defaultMessage: 'Data retention',
       }
     ),
+    formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: fieldValidators.emptyField(
-          i18n.translate(
-            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
-            {
-              defaultMessage: 'A data retention value is required.',
-            }
-          )
-        ),
+        validator: ({ value }) => {
+          if (!value || value === 0) {
+            return {
+              message: i18n.translate(
+                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
+                {
+                  defaultMessage: 'A data retention value is required.',
+                }
+              ),
+            };
+          }
+          if (value < 0) {
+            return {
+              message: i18n.translate(
+                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
+                {
+                  defaultMessage: `Data retention value can't be negative.`,
+                }
+              ),
+            };
+          }
+        },
       },
     ],
   },
@@ -133,12 +152,15 @@ const configurationFormSchema: FormSchema = {
 };
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
+  dataStreamName,
   onClose,
-}: {
-  onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }) => {
+  const {
+    services: { notificationService },
+  } = useAppContext();
+
   const { form } = useForm({
-    defaultValue: { timeUnit: 'd' },
+    defaultValue: { dataRetention: '', timeUnit: 'd' },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
@@ -150,8 +172,30 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    console.log('submit:');
-    console.log(data);
+    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}}`).then(
+      ({ data: responseData, error }) => {
+        if (responseData) {
+          const successMessage = i18n.translate(
+            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
+            { defaultMessage: 'Data retention updated' }
+          );
+          notificationService.showSuccessToast(successMessage);
+        }
+
+        if (error) {
+          const errorMessage = i18n.translate(
+            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
+            {
+              defaultMessage: "Error updating data retention: '{error}'",
+              values: { error: error.message },
+            }
+          );
+          notificationService.showDangerToast(errorMessage);
+        }
+
+        onClose();
+      }
+    );
   };
 
   return (

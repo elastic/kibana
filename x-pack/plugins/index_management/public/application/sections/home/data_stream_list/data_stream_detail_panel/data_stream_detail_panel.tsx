@@ -355,13 +355,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
       {isEditingDataRetention && (
         <EditDataRetentionModal
-          onClose={(data) => {
-            if (data && data.hasDeletedDataStreams) {
-              onClose(true);
-            } else {
-              setIsEditingDataRetention(false);
-            }
-          }}
+          onClose={() => setIsEditingDataRetention(false)}
+          dataStreamName={dataStreamName}
         />
       )}
 
