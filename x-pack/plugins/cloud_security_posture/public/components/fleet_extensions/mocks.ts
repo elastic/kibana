@@ -179,6 +179,7 @@ const getPolicyMock = (
         streams: [{ enabled: type === CLOUDBEAT_GCP, data_stream: dataStream, vars: gcpVarsMock }],
       },
       {
+        // TODO: update mock
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
         enabled: false,

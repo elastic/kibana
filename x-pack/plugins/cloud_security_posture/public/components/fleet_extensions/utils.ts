@@ -100,7 +100,6 @@ const getPostureInput = (
       enabled: isInputEnabled,
       // Merge new vars with existing vars
       ...(isInputEnabled &&
-        stream.vars &&
         inputVars && {
           vars: {
             ...stream.vars,

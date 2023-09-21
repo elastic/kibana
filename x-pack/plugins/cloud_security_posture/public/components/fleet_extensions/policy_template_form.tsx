@@ -83,7 +83,11 @@ export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
 export const GCP_SINGLE_ACCOUNT = 'single-account-gcp';
 export const GCP_ORGANIZATION_ACCOUNT = 'organization-account-gcp';
+export const AZURE_SINGLE_ACCOUNT = 'single-account-azure';
+export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account-azure';
+
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
+type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -128,9 +132,34 @@ const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
   },
 ];
 
+const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+  {
+    id: AZURE_ORGANIZATION_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
+      defaultMessage: 'Azure Organization',
+    }),
+    // disabled: isAwsOrgDisabled,
+    // tooltip: isAwsOrgDisabled
+    //   ? i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip', {
+    //       defaultMessage: 'Supported from integration version 1.5.0 and above',
+    //     })
+    //   : undefined,
+  },
+  {
+    id: AZURE_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Subscription',
+    }),
+  },
+];
+
 const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
+
+const getAzureAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
+): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
 
@@ -277,6 +306,91 @@ const GcpAccountTypeSelect = ({
   );
 };
 
+// const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0-preview1';
+
+const AzureAccountTypeSelect = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+}: {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
+  // const isValidSemantic = semverValid(packageInfo.version);
+  // const isAwsOrgDisabled = isValidSemantic
+  //   ? semverCompare(packageInfo.version, AZURE_MINIMUM_PACKAGE_VERSION) < 0
+  //   : true;
+
+  const azureAccountTypeOptions = useMemo(() => getAzureAccountTypeOptions(), []);
+
+  useEffect(() => {
+    if (!getAzureAccountType(input)) {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'azure.account_type': {
+            value: AZURE_ORGANIZATION_ACCOUNT,
+            type: 'text',
+          },
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
+          defaultMessage="Select between single account or organization."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <RadioGroup
+        idSelected={getAzureAccountType(input) || ''}
+        options={azureAccountTypeOptions}
+        onChange={(accountType) => {
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              'azure.account_type': {
+                value: accountType,
+                type: 'text',
+              },
+            })
+          );
+        }}
+        size="m"
+      />
+      {getAzureAccountType(input) === AZURE_ORGANIZATION_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
+            />
+          </EuiText>
+        </>
+      )}
+      {getAzureAccountType(input) === AZURE_SINGLE_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.singleAccountDescription"
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+            />
+          </EuiText>
+        </>
+      )}
+    </>
+  );
+};
+
 const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
   <div>
     {fields.map(({ value, id, label, error }) => (
@@ -303,7 +417,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => onChange({ isValid, updatedPolicy }),
+      (updatedPolicy: NewPackagePolicy) => {
+        console.log(updatedPolicy);
+        onChange({ isValid, updatedPolicy });
+      },
       [onChange, isValid]
     );
     /**
@@ -453,6 +570,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
         {input.type === 'cloudbeat/cis_gcp' && (
           <GcpAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+          />
+        )}
+
+        {input.type === 'cloudbeat/cis_azure' && (
+          <AzureAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
