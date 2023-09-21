@@ -81,7 +81,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
       defaultMessage:
-        'View, export, and import analytics, anomaly detection, and trained model items.',
+        'View, export, and import anomaly detection, analytics, and trained model items.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
