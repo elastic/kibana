@@ -35,7 +35,6 @@ export const ObservablityLogExplorerMainRoute = ({
       <LogExplorerTopNavMenu
         setHeaderActionMenu={setHeaderActionMenu}
         services={services}
-        state$={state$}
         theme$={theme$}
       />
       <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
