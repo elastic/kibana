@@ -95,7 +95,10 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
     }`;
   }
-
+  /**
+   * responsible for making a POST request to the external API endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
@@ -114,6 +117,14 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     return response.data;
   }
 
+  /**
+   *  responsible for making a POST request to a specified URL with a given request body.
+   *  The method can handle both regular API requests and streaming requests based on the stream parameter.
+   *  It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
+   *  The response is then processed based on whether it is a streaming response or a regular response.
+   * @param body request body for the API request
+   * @param stream flag indicating whether it is a streaming request or not
+   */
   public async streamApi({
     body,
     stream,
@@ -137,6 +148,11 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     return stream ? pipeStreamingResponse(response) : response.data;
   }
 
+  /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
   public async getDashboard({
     dashboardId,
   }: GenAiDashboardActionParams): Promise<GenAiDashboardActionResponse> {
@@ -167,6 +183,11 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     return { available: response.success };
   }
 
+  /**
+   * takes an array of messages and a model as input and returns a promise that resolves to a string.
+   * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
+   * @param body An object containing array of message objects, and possible other OpenAI properties
+   */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });
 
@@ -176,6 +197,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     }
 
     // TO DO: Pass actual error
+    // tracked here https://github.com/elastic/security-team/issues/7373
     return 'An error occurred sending your message. If the problem persists, please test the connector configuration.';
   }
 }

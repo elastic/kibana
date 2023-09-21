@@ -80,6 +80,11 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     }`;
   }
 
+  /**
+   * provides the AWS signature to the external API endpoint
+   * @param body The request body to be signed.
+   * @param path The path of the request URL.
+   */
   private signRequest(body: string, path: string) {
     const host = this.url.split('://')[1];
     return aws.sign(
@@ -102,6 +107,11 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     ) as SignedRequest;
   }
 
+  /**
+   * responsible for making a POST request to the external API endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   */
   public async runApi({
     body,
     model: reqModel,
@@ -119,6 +129,13 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     return response.data;
   }
 
+  /**
+   * takes in an array of messages and a model as input, and returns a promise that resolves to a string.
+   * The method combines the messages into a single prompt formatted for bedrock,sends a request to the
+   * runApi method with the prompt and model, and returns the trimmed completion from the response.
+   * @param messages An array of message objects, where each object has a role (string) and content (string) property.
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   */
   public async invokeAI({
     messages,
     model,
