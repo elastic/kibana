@@ -46,7 +46,7 @@ describe('fetchConnectorExecuteAction', () => {
     expect(mockHttp.fetch).toHaveBeenCalledWith(
       '/internal/elastic_assistant/actions/connector/foo/_execute',
       {
-        body: '{"params":{"subActionParams":{"body":"{\\"model\\":\\"gpt-4\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"This is a test\\"}],\\"n\\":1,\\"stop\\":null,\\"temperature\\":0.2}"},"subAction":"test"}}',
+        body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
         signal: undefined,
@@ -65,7 +65,7 @@ describe('fetchConnectorExecuteAction', () => {
     await fetchConnectorExecuteAction(testProps);
 
     expect(mockHttp.fetch).toHaveBeenCalledWith('/api/actions/connector/foo/_execute', {
-      body: '{"params":{"subActionParams":{"body":"{\\"model\\":\\"gpt-4\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"This is a test\\"}],\\"n\\":1,\\"stop\\":null,\\"temperature\\":0.2}"},"subAction":"test"}}',
+      body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
       signal: undefined,
@@ -88,7 +88,7 @@ describe('fetchConnectorExecuteAction', () => {
   });
 
   it('returns API_ERROR when there are no choices', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: {} });
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
     const testProps: FetchConnectorExecuteAction = {
       assistantLangChain: false,
       http: mockHttp,
@@ -99,31 +99,5 @@ describe('fetchConnectorExecuteAction', () => {
     const result = await fetchConnectorExecuteAction(testProps);
 
     expect(result).toBe(API_ERROR);
-  });
-
-  it('return the trimmed first `choices` `message` `content` when the API call is successful', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: {
-        choices: [
-          {
-            message: {
-              content: '   Test response    ', // leading and trailing whitespace
-            },
-          },
-        ],
-      },
-    });
-
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: false,
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toBe('Test response');
   });
 });

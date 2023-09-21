@@ -9,7 +9,7 @@ import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/s
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { BaseMessage } from 'langchain/schema';
 
-import { mockActionResultData } from '../__mocks__/action_result_data';
+import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -35,7 +35,7 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
       if (connectorId === 'mock-connector-id') {
         return {
           connector_id: 'mock-connector-id',
-          data: mockActionResultData,
+          data: mockActionResponse,
           status: 'ok',
         };
       } else {
@@ -62,9 +62,23 @@ const mockRequest = {
   body: {
     params: {
       subActionParams: {
-        body: '{"messages":[{"role":"user","content":"\\n\\n\\n\\nWhat is my name?"},{"role":"assistant","content":"I\'m sorry, but I don\'t have the information about your name. You can tell me your name if you\'d like, and we can continue our conversation from there."},{"role":"user","content":"\\n\\nMy name is Andrew"},{"role":"assistant","content":"Hello, Andrew! It\'s nice to meet you. What would you like to talk about today?"},{"role":"user","content":"\\n\\nDo you know my name?"}]}',
+        messages: [
+          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
+          {
+            role: 'assistant',
+            content:
+              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
+          },
+          { role: 'user', content: '\\n\\nMy name is Andrew' },
+          {
+            role: 'assistant',
+            content:
+              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
+          },
+          { role: 'user', content: '\\n\\nDo you know my name?' },
+        ],
       },
-      subAction: 'test',
+      subAction: 'invokeAI',
     },
   },
 };
@@ -87,7 +101,7 @@ describe('postActionsConnectorExecuteRoute', () => {
         expect(result).toEqual({
           body: {
             connector_id: 'mock-connector-id',
-            data: mockActionResultData,
+            data: mockActionResponse,
             status: 'ok',
           },
         });

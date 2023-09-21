@@ -71,7 +71,7 @@ export const fetchConnectorExecuteAction = async ({
       }
     );
 
-    if (response.status !== 'ok') {
+    if (response.status !== 'ok' || !response.data) {
       return API_ERROR;
     }
 

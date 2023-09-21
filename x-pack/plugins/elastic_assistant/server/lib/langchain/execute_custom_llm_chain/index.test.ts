@@ -10,7 +10,7 @@ import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/s
 
 import { ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { mockActionResultData } from '../../../__mocks__/action_result_data';
+import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { executeCustomLlmChain } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -48,7 +48,7 @@ describe('executeCustomLlmChain', () => {
 
     ActionsClientLlm.prototype.getActionResultData = jest
       .fn()
-      .mockReturnValueOnce(mockActionResultData);
+      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
@@ -113,7 +113,7 @@ describe('executeCustomLlmChain', () => {
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResultData,
+      data: mockActionResponse,
       status: 'ok',
     });
   });
