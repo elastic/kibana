@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -25,6 +26,7 @@ import {
   threadingParamsSchema,
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
+  modelDownloadsQuery,
 } from './schemas/inference_schema';
 import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
@@ -644,6 +646,73 @@ export function trainedModelsRoutes({
             },
             ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
           });
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/model_downloads Gets available models for download
+   * @apiName GetTrainedModelDownloadList
+   * @apiDescription Gets available models for download.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: modelDownloadsQuery,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
+        try {
+          const nodesInfoResponse =
+            await client.asInternalUser.transport.request<estypes.NodesInfoResponseBase>({
+              method: 'GET',
+              path: `/_nodes/ml:true/os`,
+            });
+
+          let osName: string | undefined;
+          let arch: string | undefined;
+          // Indicates that all ML nodes have the same architecture
+          let sameArch = true;
+          for (const node of Object.values(nodesInfoResponse.nodes)) {
+            if (!osName) {
+              osName = node.os?.name;
+            }
+            if (!arch) {
+              arch = node.os?.arch;
+            }
+            if (node.os?.name !== osName || node.os?.arch !== arch) {
+              sameArch = false;
+              break;
+            }
+          }
+
+          const body = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+            const recommended = sameArch && !!def?.os && def?.os === osName && def?.arch === arch;
+            return {
+              ...def,
+              name,
+              ...(recommended ? { recommended } : {}),
+            };
+          });
+
           return response.ok({
             body,
           });

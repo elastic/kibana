@@ -87,3 +87,5 @@ export const createIngestPipelineSchema = schema.object({
     })
   ),
 });
+
+export const modelDownloadsQuery = schema.object({});
