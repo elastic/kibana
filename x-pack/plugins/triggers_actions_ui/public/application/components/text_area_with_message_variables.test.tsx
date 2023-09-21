@@ -8,6 +8,8 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TextAreaWithMessageVariables } from './text_area_with_message_variables';
+import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 describe('TextAreaWithMessageVariables', () => {
   const editAction = jest.fn();
@@ -23,6 +25,10 @@ describe('TextAreaWithMessageVariables', () => {
     editAction,
     label: 'label',
   };
+
+  beforeAll(() => {
+    TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
+  });
 
   beforeEach(() => jest.resetAllMocks());
 

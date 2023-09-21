@@ -25,6 +25,8 @@ import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ExperimentalFeaturesService as TriggersActionsUIFeatureFlagService } from '../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -75,6 +77,10 @@ const queryClient = new QueryClient({
 });
 
 describe('action_type_form', () => {
+  beforeAll(() => {
+    TriggersActionsUIFeatureFlagService.init({ experimentalFeatures: allowedExperimentalValues });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
