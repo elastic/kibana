@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import type { ClusterDetails } from '@kbn/es-types';
 import { ClusterView } from './cluster_view';
 
 describe('render', () => {
@@ -42,7 +43,7 @@ describe('render', () => {
           },
         },
       ],
-    };
+    } as ClusterDetails;
     const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -59,7 +60,7 @@ describe('render', () => {
         skipped: 0,
         failed: 0,
       },
-    };
+    } as ClusterDetails;
     const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
     expect(wrapper).toMatchSnapshot();
   });
