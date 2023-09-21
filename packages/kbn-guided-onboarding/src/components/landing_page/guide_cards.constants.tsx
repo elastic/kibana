@@ -63,7 +63,7 @@ export const guideCards: GuideCardConstants[] = [
     solution: 'search',
     icon: 'magnifyWithPlus',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-      defaultMessage: 'Build a AI-powered search experience',
+      defaultMessage: 'Build an AI-powered search experience',
     }),
     navigateTo: {
       appId: 'enterpriseSearchAISearch',
