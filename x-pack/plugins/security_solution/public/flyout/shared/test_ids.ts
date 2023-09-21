@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/* Visualization tab */
-
-const PREFIX = 'securitySolutionDocumentDetailsFlyout' as const;
+export const PREFIX = 'securitySolutionFlyout' as const;
 
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
