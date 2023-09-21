@@ -11,7 +11,7 @@ import { EuiText } from '@elastic/eui';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType['View'] = ({ customField }) => {
-  const value = (customField?.field.value?.[0] as string) ?? '';
+  const value = (customField?.field.value?.[0] as string) ?? '-';
 
   return <EuiText>{value}</EuiText>;
 };

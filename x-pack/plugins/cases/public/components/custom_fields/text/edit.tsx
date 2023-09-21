@@ -29,6 +29,7 @@ import {
   CANCEL,
   EDIT_CUSTOM_FIELDS_ARIA_LABEL,
   MAX_LENGTH_ERROR,
+  NO_CUSTOM_FIELD_SET,
   REQUIRED_FIELD,
   SAVE,
   UNKNOWN,
@@ -164,7 +165,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
         data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
-        {!isEdit && (
+        {!customField && !isEdit && (
+          <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
+        )}
+        {!isEdit && customField && (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
