@@ -72,7 +72,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  private async createRole(role: Role): Promise<void> {
+  protected async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
     this.logger.debug(`creating role:`, roleDefinition);
@@ -95,7 +95,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .catch(this.logPromiseError);
   }
 
-  private async createUser(
+  protected async createUser(
     username: string,
     password: string,
     roles: string[] = []

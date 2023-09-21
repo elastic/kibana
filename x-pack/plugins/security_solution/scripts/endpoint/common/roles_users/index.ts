@@ -36,9 +36,17 @@ export * from './endpoint_operations_analyst';
 export * from './endpoint_security_policy_manager';
 export * from './detections_engineer';
 
-const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
-  // --------------------------------------
-  // Set of roles used in serverless
+/**
+ * Security Solution set of roles that are loaded and used in serverless deployments.
+ * The source of these role definitions is under `project-controller` at:
+ *
+ * @see https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+ *
+ * The role definition spreadsheet can be found here:
+ *
+ * @see https://docs.google.com/spreadsheets/d/16aGow187AunLCBFZLlbVyS81iQNuMpNxd96LOerWj4c/edit#gid=1936689222
+ */
+const SECURITY_SERVERLESS_ROLE_NAMES = Object.freeze({
   t1_analyst: 't1_analyst',
   t2_analyst: 't2_analyst',
   t3_analyst: 't3_analyst',
@@ -49,11 +57,16 @@ const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   platform_engineer: 'platform_engineer',
   endpoint_operations_analyst: 'endpoint_operations_analyst',
   endpoint_policy_manager: 'endpoint_policy_manager',
+});
+
+const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
+  // --------------------------------------
+  // Set of roles used in serverless
+  ...SECURITY_SERVERLESS_ROLE_NAMES,
 
   // --------------------------------------
   // Other roles used for testing
-  analyst_hunter: 'hunter',
-  endpoint_security_policy_manager: 'endpointSecurityPolicyManager',
+  hunter: 'hunter',
   endpoint_response_actions_access: 'endpointResponseActionsAccess',
   endpoint_response_actions_no_access: 'endpointResponseActionsNoAccess',
   endpoint_security_policy_management_read: 'endpointSecurityPolicyManagementRead',
@@ -108,17 +121,17 @@ export const getAllEndpointSecurityRoles = (): {
       ...getHunter(),
       name: 'hunter',
     },
-    endpointResponseActionsAccess: {
+    endpoint_response_actions_access: {
       ...getWithResponseActionsRole(),
-      name: 'endpointResponseActionsAccess',
+      name: 'endpoint_response_actions_access',
     },
-    endpointResponseActionsNoAccess: {
+    endpoint_response_actions_no_access: {
       ...getNoResponseActionsRole(),
-      name: 'endpointResponseActionsNoAccess',
+      name: 'endpoint_response_actions_no_access',
     },
-    endpointSecurityPolicyManagementRead: {
+    endpoint_security_policy_management_read: {
       ...getEndpointSecurityPolicyManagementReadRole(),
-      name: 'endpointSecurityPolicyManagementRead',
+      name: 'endpoint_security_policy_management_read',
     },
   };
 };
