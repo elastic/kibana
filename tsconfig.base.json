@@ -1152,6 +1152,8 @@
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
       "@kbn/reporting-plugin": ["x-pack/plugins/reporting"],
       "@kbn/reporting-plugin/*": ["x-pack/plugins/reporting/*"],
+      "@kbn/resizable-layout": ["packages/kbn-resizable-layout"],
+      "@kbn/resizable-layout/*": ["packages/kbn-resizable-layout/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
       "@kbn/response-stream-plugin": ["examples/response_stream"],

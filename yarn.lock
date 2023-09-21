@@ -5247,6 +5247,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/resizable-layout@link:packages/kbn-resizable-layout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
   version "0.0.0"
   uid ""
