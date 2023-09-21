@@ -7,9 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { EndpointSecurityRoleNames } from '../../../scripts/endpoint/common/roles_users';
 import type { ActionDetails } from '../../../common/endpoint/types';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
+import type { SecurityTestUser } from './common/constants';
 
 type PossibleChainable =
   | Cypress.Chainable<any>
@@ -59,5 +59,5 @@ export interface HostActionResponse {
 }
 
 export interface LoadUserAndRoleCyTaskOptions {
-  name: EndpointSecurityRoleNames;
+  name: SecurityTestUser;
 }

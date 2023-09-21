@@ -11,10 +11,13 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { KibanaKnownUserAccounts } from '../common/constants';
+import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import type {
   EndpointSecurityRoleDefinitions,
   EndpointSecurityRoleNames,
 } from '../../../../scripts/endpoint/common/roles_users';
+import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import type {
   LoadedRoleAndUser,
   RoleAndUserLoader,
@@ -33,6 +36,13 @@ import type {
   CreateAndEnrollEndpointHostOptions,
   CreateAndEnrollEndpointHostResponse,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import {
+  createAndEnrollEndpointHost,
+  destroyEndpointHost,
+  startEndpointHost,
+  stopEndpointHost,
+  VAGRANT_CWD,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
   deleteIndexedEndpointPolicyResponse,
@@ -41,38 +51,24 @@ import {
 import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
 import type { IndexEndpointHostsCyTaskOptions, LoadUserAndRoleCyTaskOptions } from '../types';
 import type {
-  IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
+  IndexedEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
-import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  indexFleetEndpointPolicy,
-  deleteIndexedFleetEndpointPolicies,
-} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
-import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
+import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
+import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
-  startEndpointHost,
-  createAndEnrollEndpointHost,
-  destroyEndpointHost,
-  stopEndpointHost,
-  VAGRANT_CWD,
-} from '../../../../scripts/endpoint/common/endpoint_host_services';
-import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
-
-const KIBANA_KNOWN_DEFAULT_ACCOUNTS = [
-  'elastic',
-  'elastic_serverless',
-  'system_indices_superuser',
-] as const;
+  deleteIndexedFleetEndpointPolicies,
+  indexFleetEndpointPolicy,
+} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
 
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
@@ -86,8 +82,10 @@ class TestRoleAndUserLoader extends EndpointSecurityTestRolesLoader {
     super(kbnClient, logger);
   }
 
-  async load(name: EndpointSecurityRoleNames): Promise<LoadedRoleAndUser> {
-    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS.includes(name)) {
+  async load(
+    name: EndpointSecurityRoleNames | KibanaKnownUserAccounts
+  ): Promise<LoadedRoleAndUser> {
+    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS.includes(name as KibanaKnownUserAccounts)) {
       return {
         role: name,
         username: name,
@@ -113,7 +111,7 @@ class TestRoleAndUserLoader extends EndpointSecurityTestRolesLoader {
       };
     }
 
-    return super.load(name);
+    return super.load(name as EndpointSecurityRoleNames);
   }
 }
 

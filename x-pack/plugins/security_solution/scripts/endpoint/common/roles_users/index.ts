@@ -36,6 +36,10 @@ export * from './endpoint_operations_analyst';
 export * from './endpoint_security_policy_manager';
 export * from './detections_engineer';
 
+export type EndpointSecurityRoleNames = keyof typeof ENDPOINT_SECURITY_ROLE_NAMES;
+
+export type EndpointSecurityRoleDefinitions = Record<EndpointSecurityRoleNames, Role>;
+
 /**
  * Security Solution set of roles that are loaded and used in serverless deployments.
  * The source of these role definitions is under `project-controller` at:
@@ -59,7 +63,7 @@ export const SECURITY_SERVERLESS_ROLE_NAMES = Object.freeze({
   endpoint_policy_manager: 'endpoint_policy_manager',
 });
 
-const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
+export const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   // --------------------------------------
   // Set of roles used in serverless
   ...SECURITY_SERVERLESS_ROLE_NAMES,
@@ -71,9 +75,6 @@ const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   endpoint_response_actions_no_access: 'endpoint_response_actions_no_access',
   endpoint_security_policy_management_read: 'endpoint_security_policy_management_read',
 });
-
-export type EndpointSecurityRoleNames = keyof typeof ENDPOINT_SECURITY_ROLE_NAMES;
-export type EndpointSecurityRoleDefinitions = Record<EndpointSecurityRoleNames, Role>;
 
 export const getAllEndpointSecurityRoles = (): EndpointSecurityRoleDefinitions => {
   return {
