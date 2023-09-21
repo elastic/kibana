@@ -123,6 +123,9 @@
                 }
               },
               "examples": {
+                "createEmailConnectorRequest": {
+                  "$ref": "#/components/examples/create_email_connector_request"
+                },
                 "createIndexConnectorRequest": {
                   "$ref": "#/components/examples/create_index_connector_request"
                 },
@@ -145,6 +148,9 @@
                   "$ref": "#/components/schemas/connector_response_properties"
                 },
                 "examples": {
+                  "createEmailConnectorResponse": {
+                    "$ref": "#/components/examples/create_email_connector_response"
+                  },
                   "createIndexConnectorResponse": {
                     "$ref": "#/components/examples/create_index_connector_response"
                   },
@@ -461,6 +467,12 @@
                     "$ref": "#/components/schemas/update_connector_request_d3security"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_email"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_genai"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_index"
                   },
                   {
@@ -495,6 +507,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/update_connector_request_teams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_webhook"
                   },
                   {
                     "$ref": "#/components/schemas/update_connector_request_xmatters"
@@ -1635,14 +1650,78 @@
       "config_properties_email": {
         "title": "Connector request properties for an email connector",
         "description": "Defines properties for connectors when type is `.email`.",
+        "required": [
+          "from"
+        ],
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "clientId": {
+            "description": "The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
+            "type": "string",
+            "nullable": true
+          },
+          "from": {
+            "description": "The from address for all emails sent by the connector. It must be specified in `user@host-name` format.\n",
+            "type": "string"
+          },
+          "hasAuth": {
+            "description": "Specifies whether a user and password are required inside the secrets configuration.\n",
+            "default": true,
+            "type": "boolean"
+          },
+          "host": {
+            "description": "The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
+            "type": "string"
+          },
+          "oauthTokenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "port": {
+            "description": "The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
+            "type": "integer"
+          },
+          "secure": {
+            "description": "Specifies whether the connection to the service provider will use TLS. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.\n",
+            "type": "boolean"
+          },
+          "service": {
+            "description": "The name of the email service.\n",
+            "type": "string",
+            "enum": [
+              "elastic_cloud",
+              "exchange_server",
+              "gmail",
+              "other",
+              "outlook365",
+              "ses"
+            ]
+          },
+          "tenantId": {
+            "description": "The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "secrets_properties_email": {
         "title": "Connector secrets properties for an email connector",
         "description": "Defines secrets for connectors when type is `.email`.",
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "clientSecret": {
+            "type": "string",
+            "description": "The Microsoft Exchange Client secret for OAuth 2.0 client credentials authentication. It must be URL-encoded. If `service` is `exchange_server`, this property is required.\n"
+          },
+          "password": {
+            "type": "string",
+            "description": "The password for HTTP basic authentication. If `hasAuth` is set to `true`, this property is required.\n"
+          },
+          "user": {
+            "type": "string",
+            "description": "The username for HTTP basic authentication. If `hasAuth` is set to `true`, this property is required.\n"
+          }
+        }
       },
       "create_connector_request_email": {
         "title": "Create email connector request",
@@ -1679,16 +1758,54 @@
       "config_properties_genai": {
         "title": "Connector request properties for a generative AI connector",
         "description": "Defines properties for connectors when type is `.gen-ai`.",
-        "type": "object",
-        "properties": {
-          "apiProvider": {
-            "type": "string",
-            "description": "The OpenAI API provider."
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "apiProvider",
+              "apiUrl"
+            ],
+            "properties": {
+              "apiProvider": {
+                "type": "string",
+                "description": "The OpenAI API provider.",
+                "enum": [
+                  "Azure OpenAI"
+                ]
+              },
+              "apiUrl": {
+                "type": "string",
+                "description": "The OpenAI API endpoint."
+              }
+            }
           },
-          "apiUrl": {
-            "type": "string",
-            "description": "The OpenAI API endpoint."
+          {
+            "type": "object",
+            "required": [
+              "apiProvider",
+              "apiUrl"
+            ],
+            "properties": {
+              "apiProvider": {
+                "type": "string",
+                "description": "The OpenAI API provider.",
+                "enum": [
+                  "OpenAI"
+                ]
+              },
+              "apiUrl": {
+                "type": "string",
+                "description": "The OpenAI API endpoint."
+              },
+              "defaultModel": {
+                "type": "string",
+                "description": "The default model to use for requests."
+              }
+            }
           }
+        ],
+        "discriminator": {
+          "propertyName": "apiProvider"
         }
       },
       "secrets_properties_genai": {
@@ -3855,6 +3972,26 @@
           }
         }
       },
+      "update_connector_request_email": {
+        "title": "Update email connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_email"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_email"
+          }
+        }
+      },
       "update_connector_request_index": {
         "title": "Update index connector request",
         "type": "object",
@@ -4081,6 +4218,27 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_teams"
+          }
+        }
+      },
+      "update_connector_request_webhook": {
+        "title": "Update Webhook connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_webhook"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_webhook"
           }
         }
       },
@@ -4858,6 +5016,25 @@
       }
     },
     "examples": {
+      "create_email_connector_request": {
+        "summary": "Create an email connector.",
+        "value": {
+          "name": "email-connector-1",
+          "connector_type_id": ".email",
+          "config": {
+            "from": "tester@example.com",
+            "hasAuth": true,
+            "host": "https://example.com",
+            "port": 1025,
+            "secure": false,
+            "service": "other"
+          },
+          "secrets": {
+            "user": "username",
+            "password": "password"
+          }
+        }
+      },
       "create_index_connector_request": {
         "summary": "Create an index connector.",
         "value": {
@@ -4897,6 +5074,29 @@
           "secrets": {
             "secretsUrl": "https://example.com?apiKey=xxxxx"
           }
+        }
+      },
+      "create_email_connector_response": {
+        "summary": "A new email connector.",
+        "value": {
+          "id": "90a82c60-478f-11ee-a343-f98a117c727f",
+          "connector_type_id": ".email",
+          "name": "email-connector-1",
+          "config": {
+            "from": "tester@example.com",
+            "service": "other",
+            "host": "https://example.com",
+            "port": 1025,
+            "secure": false,
+            "hasAuth": true,
+            "tenantId": null,
+            "clientId": null,
+            "oauthTokenUrl": null
+          },
+          "is_preconfigured": false,
+          "is_deprecated": false,
+          "is_missing_secrets": false,
+          "is_system_action": false
         }
       },
       "create_index_connector_response": {

@@ -243,6 +243,14 @@ export class CommonPageObject extends FtrService {
     } = {}
   ) {
     let appUrl: string;
+
+    // See https://github.com/elastic/kibana/pull/164376
+    if (appName === 'canvas' && !path) {
+      throw new Error(
+        'This causes flaky test failures. Use Canvas page object goToListingPage instead'
+      );
+    }
+
     if (this.config.has(['apps', appName])) {
       // Legacy applications
       const appConfig = this.config.get(['apps', appName]);
@@ -299,7 +307,7 @@ export class CommonPageObject extends FtrService {
         const navSuccessful = currentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl);
+          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
