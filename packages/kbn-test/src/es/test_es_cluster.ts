@@ -248,7 +248,6 @@ export function createTestEsCluster<
           tag: esServerlessOptions?.tag,
           port,
           clean: true,
-          teardown: true,
           background: true,
           files,
           ssl,

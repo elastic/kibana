@@ -27,18 +27,18 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ESS to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
-      --image             Full path of ESS image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
-      --background        Start ESS without attaching to the first node's logs
+      --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
+      --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
+      --background        Start ES serverless without attaching to the first node's logs
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
-      --kill              Kill running ESS nodes if detected on startup
+      --kill              Kill running ES serverless nodes if detected on startup
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Enable HTTP SSL on Elasticsearch
-      --teardown          If this process exits, teardown the ES cluster as well
+      --ssl               Enable HTTP SSL on the ES cluster
+      --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
 
-      -E                  Additional key=value settings to pass to Elasticsearch
+      -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 
     Examples:
@@ -64,10 +64,20 @@ export const serverless: Command = {
       },
 
       string: ['tag', 'image', 'basePath'],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'teardown', 'waitForReady'],
+      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
       default: defaults,
     }) as unknown as ServerlessOptions;
+
+    /*
+     * The nodes will be killed immediately if background = true and skipTeardown = false
+     * because the CLI process exits after starting the nodes. We handle this here instead of
+     * in runServerless because in FTR we run the nodes in the background but the parent
+     * process continues for testing and we want to be able to SIGINT for teardown.
+     */
+    if (options.background && !options.skipTeardown) {
+      options.skipTeardown = true;
+    }
 
     const cluster = new Cluster();
     await cluster.runServerless({
