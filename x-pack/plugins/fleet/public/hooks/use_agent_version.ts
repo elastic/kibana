@@ -23,7 +23,7 @@ export const useAgentVersion = (): string | undefined => {
       try {
         const res = await sendGetAgentsAvailableVersions();
         const availableVersions = res?.data?.items;
-        let agentVersionToUse = kibanaVersion;
+        let agentVersionToUse;
 
         if (
           availableVersions &&
