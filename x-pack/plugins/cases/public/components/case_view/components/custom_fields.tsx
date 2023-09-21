@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
-import type { CasesConfigurationUI } from '../../../../common/ui';
+import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
@@ -16,7 +16,7 @@ interface Props {
   isLoading: boolean;
   customFields: CaseUI['customFields'];
   customFieldsConfiguration: CasesConfigurationUI['customFields'];
-  onSubmit: (customField: CaseUI['customFields'][number]) => void;
+  onSubmit: (customField: CaseUICustomField) => void;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({

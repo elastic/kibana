@@ -7,17 +7,17 @@
 
 import type React from 'react';
 import type { CustomFieldTypes } from '../../../common/types/domain';
-import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
+import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../containers/types';
 
 export interface CustomFieldType {
   Configure: React.FC;
   View: React.FC<{
-    customField?: CaseUI['customFields'][number];
+    customField?: CaseUICustomField;
   }>;
   Edit: React.FC<{
-    customField?: CaseUI['customFields'][number];
-    customFieldConfiguration: CasesConfigurationUI['customFields'][number];
-    onSubmit: (customField: CaseUI['customFields'][number]) => void;
+    customField?: CaseUICustomField;
+    customFieldConfiguration: CasesConfigurationUICustomField;
+    onSubmit: (customField: CaseUICustomField) => void;
     isLoading: boolean;
     canUpdate: boolean;
   }>;

@@ -10,7 +10,7 @@ import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import type { CaseUI } from '../../../../common';
+import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { UNKNOWN } from '../translations';
 
@@ -34,8 +34,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
     if (isValid) {
       onSubmit({
         ...customField,
+        key: customField?.key ?? customFieldConfiguration.key,
+        type: CustomFieldTypes.TOGGLE,
         field: { value: [data.value] },
-      } as CaseUI['customFields'][number]);
+      });
     }
   };
 

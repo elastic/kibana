@@ -40,6 +40,7 @@ import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
+import { addOrReplaceCustomField } from './helpers';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -155,14 +156,8 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitCustomFields = useCallback(
-    (customField) => {
-      const updatedCustomFields = caseData.customFields.map((field) => {
-        if (field.key !== customField.key) {
-          return field;
-        }
-
-        return customField;
-      });
+    (customFieldToAdd) => {
+      const updatedCustomFields = addOrReplaceCustomField(caseData.customFields, customFieldToAdd);
 
       onUpdateField({
         key: 'customFields',

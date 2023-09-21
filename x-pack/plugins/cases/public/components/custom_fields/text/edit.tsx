@@ -19,13 +19,18 @@ import {
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, UseField, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CasesConfigurationUI } from '../../../../common/ui';
-import type { CaseUI } from '../../../../common';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { CustomFieldTypes } from '../../../../common/types/domain';
+import type { CasesConfigurationUICustomField } from '../../../../common/ui';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 import type { CustomFieldType } from '../types';
 import { View } from './view';
 import {
   CANCEL,
   EDIT_CUSTOM_FIELDS_ARIA_LABEL,
+  MAX_LENGTH_ERROR,
+  NO_CUSTOM_FIELD_SET,
+  REQUIRED_FIELD,
   SAVE,
   UNKNOWN,
 } from '../translations';
@@ -39,7 +44,7 @@ interface FormState {
 interface FormWrapper {
   initialValue: string;
   isLoading: boolean;
-  customFieldConfiguration: CasesConfigurationUI['customFields'][number];
+  customFieldConfiguration: CasesConfigurationUICustomField;
   onChange: (state: FormState) => void;
 }
 
@@ -113,8 +118,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
     if (isValid) {
       onSubmit({
         ...customField,
+        key: customField?.key ?? customFieldConfiguration.key,
+        type: CustomFieldTypes.TEXT,
         field: { value: [data.value] },
-      } as CaseUI['customFields'][number]);
+      });
     }
 
     setIsEdit(false);
@@ -159,7 +166,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
         data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
         direction="column"
       >
-        {!isEdit && (
+        {!customField && !isEdit && (
+          <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
+        )}
+        {!isEdit && customField && (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
