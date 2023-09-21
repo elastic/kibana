@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative, extname } from "path";
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -58,17 +58,16 @@ export async function loadAction({
 }): Promise<Record<string, IndexStats>> {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const GZIP_FILE_NAME = 'data.json.gz' as const;
   let docIsCompressed = false;
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
-    files.map((filename) => () => {
-      log.info('[%s] Loading %j', name, filename);
-      if (filename === 'data.json.gz') docIsCompressed = true;
+    prioritizeMappings(await readDirectory(inputDir)).map((filename) => () => {
+      log.verbose('[%s] Loading %j', name, filename);
+      if (filename === GZIP_FILE_NAME) docIsCompressed = true;
 
       return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
         createReadStream(resolve(inputDir, filename)),
@@ -100,7 +99,7 @@ export async function loadAction({
     await migrateSavedObjectIndices(kbnClient);
 
     // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
-    if (kibanaPluginIds.includes('spaces'))
+    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
   }
   return result;

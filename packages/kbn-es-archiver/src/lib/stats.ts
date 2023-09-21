@@ -29,6 +29,8 @@ export interface IndexStats {
 export type Stats = ReturnType<typeof createStats>;
 
 export function createStats(name: string, log: ToolingLog) {
+  // TODO-TRE: Add an `ifServerless` predicate and use it below:
+  log = Object.assign({}, log, { info: () => {}, debug: () => {} });
   const info = (msg: string, ...args: any[]) => log.info(`[${name}] ${msg}`, ...args);
   const debug = (msg: string, ...args: any[]) => log.debug(`[${name}] ${msg}`, ...args);
 

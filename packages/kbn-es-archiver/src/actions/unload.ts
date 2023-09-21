@@ -40,6 +40,10 @@ export async function unloadAction({
   const stats = createStats(name, log);
 
   const files = prioritizeMappings(await readDirectory(inputDir));
+
+  // TODO-TRE: Add an `ifServerless` predicate and use it below:
+  log = Object.assign({}, log, { info: () => {}, debug: () => {} });
+
   for (const filename of files) {
     log.info('[%s] Unloading indices from %j', name, filename);
 
