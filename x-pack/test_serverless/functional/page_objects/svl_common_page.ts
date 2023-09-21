@@ -34,6 +34,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             path: Url.format({
               protocol: config.get('servers.kibana.protocol'),
               hostname: config.get('servers.kibana.hostname'),
+              port: config.get('servers.kibana.port'),
               pathname: 'internal/security/login',
             }),
             body: {
@@ -42,6 +43,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
               currentURL: Url.format({
                 protocol: config.get('servers.kibana.protocol'),
                 hostname: config.get('servers.kibana.hostname'),
+                port: config.get('servers.kibana.port'),
                 pathname: 'login',
               }),
               params: {
@@ -50,8 +52,13 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
               },
             },
           });
-          log.debug(`Login via API completed with status: ${response.status}`);
-          return response.status === 200;
+          if (response.status !== 200) {
+            throw new Error(
+              `Login via API failed with status ${response.status}, but expected 200`
+            );
+          } else {
+            return true;
+          }
         },
         async () => {
           log.debug('Waiting 2000 ms before retry');
