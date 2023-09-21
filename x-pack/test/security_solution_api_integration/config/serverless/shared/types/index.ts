@@ -5,10 +5,10 @@
  * 2.0.
  */
 // TODO need to move serverless services
-import { InheritedServices } from '../../serverless_services';
+import { InheritedServices } from '../../services';
 
 export interface CreateTestConfigOptions {
-  serverlessProject: 'es' | 'oblt' | 'security';
+  serverlessProject: 'security';
   kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };

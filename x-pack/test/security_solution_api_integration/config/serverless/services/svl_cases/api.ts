@@ -12,7 +12,7 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');

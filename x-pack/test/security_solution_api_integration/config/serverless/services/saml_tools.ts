@@ -12,7 +12,7 @@ import { kbnTestConfig } from '@kbn/test';
 
 import { parse as parseCookie } from 'tough-cookie';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

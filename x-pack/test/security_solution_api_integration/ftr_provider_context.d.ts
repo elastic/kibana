@@ -7,6 +7,7 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './serverless_services';
+// TODO check if we can move services to be commonly used
+import { services } from './config/serverless/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

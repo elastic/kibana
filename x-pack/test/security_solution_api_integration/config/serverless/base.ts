@@ -18,7 +18,7 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { services } from '../../shared/services';
+import { services } from './shared/services';
 
 // eslint-disable-next-line import/no-default-export
 export default async () => {

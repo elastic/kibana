@@ -6,7 +6,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { services as xpackApiIntegrationServices } from '../../api_integration/services';
+import { services as xpackApiIntegrationServices } from '../../../../api_integration/services';
 import { services as svlSharedServices } from '../shared/services';
 
 import { AlertingApiProvider } from './alerting_api';

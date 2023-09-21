@@ -7,7 +7,7 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function SupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');

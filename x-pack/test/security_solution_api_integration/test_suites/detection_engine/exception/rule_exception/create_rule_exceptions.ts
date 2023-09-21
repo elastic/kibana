@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
 
-  describe('create_rule_exception_route @serverless', () => {
+  describe('create_rule_exception_route', () => {
     before(async () => {
       await createSignalsIndex(supertest, log);
     });

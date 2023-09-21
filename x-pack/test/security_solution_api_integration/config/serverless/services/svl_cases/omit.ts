@@ -7,7 +7,7 @@
 
 import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
   interface CommonSavedObjectAttributes {
