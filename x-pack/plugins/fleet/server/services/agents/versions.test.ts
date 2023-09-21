@@ -30,7 +30,7 @@ describe('getAvailableVersions', () => {
     mockKibanaVersion = '300.0.0';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
 
-    const res = await getAvailableVersions(false);
+    const res = await getAvailableVersions({ cached: false });
 
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
@@ -39,7 +39,7 @@ describe('getAvailableVersions', () => {
     mockKibanaVersion = '300.0.0-SNAPSHOT';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
 
-    const res = await getAvailableVersions(false);
+    const res = await getAvailableVersions({ cached: false });
     expect(res).toEqual(['300.0.0-SNAPSHOT', '8.1.0', '8.0.0', '7.17.0']);
   });
 
@@ -52,7 +52,16 @@ describe('getAvailableVersions', () => {
     };
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
 
-    const res = await getAvailableVersions(false);
+    const res = await getAvailableVersions({ cached: false });
+
+    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+  });
+
+  it('should not include the current version if includeCurrentVersion = false', async () => {
+    mockKibanaVersion = '300.0.0-SNAPSHOT';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+
+    const res = await getAvailableVersions({ cached: false, includeCurrentVersion: false });
 
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
   });
