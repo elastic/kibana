@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`render should display callout when cluster is skipped 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    size="s"
+    title="Cluster skipped"
+  >
+    <p>
+      Search failed, no such remote cluster: [remote1]
+    </p>
+  </EuiCallOut>
+  <ShardsView
+    failures={Array []}
+  />
+</EuiText>
+`;
+
 exports[`render should display callout when request timed out 1`] = `
 <EuiText
   size="xs"
