@@ -20,8 +20,12 @@ import type {
   Suggestion,
 } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  ResizableLayout,
+  ResizableLayoutMode,
+  ResizableLayoutDirection,
+} from '@kbn/resizable-layout';
 import { Chart } from '../chart';
-import { Panels, PANELS_MODE } from '../panels';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -248,14 +252,15 @@ export const UnifiedHistogramLayout = ({
   const panelsMode =
     chart || hits
       ? showFixedPanels
-        ? PANELS_MODE.FIXED
-        : PANELS_MODE.RESIZABLE
-      : PANELS_MODE.SINGLE;
+        ? ResizableLayoutMode.Static
+        : ResizableLayoutMode.Resizable
+      : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
   const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
+    return currentTopPanelHeight !== defaultTopPanelHeight &&
+      panelsMode === ResizableLayoutMode.Resizable
       ? () => onTopPanelHeightChange?.(undefined)
       : undefined;
   }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
@@ -300,16 +305,17 @@ export const UnifiedHistogramLayout = ({
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
-      <Panels
+      <ResizableLayout
         className={className}
         mode={panelsMode}
+        direction={ResizableLayoutDirection.Vertical}
         resizeRef={resizeRef}
-        topPanelHeight={currentTopPanelHeight}
-        minTopPanelHeight={defaultTopPanelHeight}
-        minMainPanelHeight={minMainPanelHeight}
-        topPanel={<OutPortal node={topPanelNode} />}
-        mainPanel={<OutPortal node={mainPanelNode} />}
-        onTopPanelHeightChange={onTopPanelHeightChange}
+        fixedPanelSize={currentTopPanelHeight}
+        minFixedPanelSize={defaultTopPanelHeight}
+        minFlexPanelSize={minMainPanelHeight}
+        fixedPanel={<OutPortal node={topPanelNode} />}
+        flexPanel={<OutPortal node={mainPanelNode} />}
+        onFixedPanelSizeChange={onTopPanelHeightChange}
       />
     </>
   );
