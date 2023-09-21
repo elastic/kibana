@@ -65,10 +65,11 @@ export class Summary extends React.PureComponent {
     const { index } = this.props;
     const extensions = extensionsService.summaries;
     return extensions.map((summaryExtension, i) => {
+      const ExtensionSummaryComponent = summaryExtension;
       return (
         <Fragment key={`summaryExtension-${i}`}>
           <EuiHorizontalRule />
-          {summaryExtension(index, getUrlForApp)}
+          <ExtensionSummaryComponent index={index} getUrlForApp={getUrlForApp} />
         </Fragment>
       );
     });
