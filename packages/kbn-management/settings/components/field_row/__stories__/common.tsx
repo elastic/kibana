@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
-import { SettingType } from '@kbn/management-settings-types';
+import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import { KnownTypeToMetadata, UiSettingMetadata } from '@kbn/management-settings-types/metadata';
-import {
-  useFieldDefinition,
-  getDefaultValue,
-  getUserValue,
-} from '@kbn/management-settings-field-definition/storybook';
+import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldRow as Component, FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
-import { OnChangeFn } from '../types';
+import { RowOnChangeFn } from '../types';
 
 /**
  * Props for a {@link FieldInput} Storybook story.
@@ -108,7 +105,7 @@ export const storyArgs = {
  */
 export const getFieldRowStory = (
   type: SettingType,
-  settingFields: Partial<UiSettingMetadata<SettingType>>
+  settingFields?: Partial<UiSettingMetadata<SettingType>>
 ) => {
   const Story = ({
     isCustom,
@@ -118,33 +115,61 @@ export const getFieldRowStory = (
     userValue,
     value,
   }: StoryProps<typeof type>) => {
+    const [unsavedChange, setUnsavedChange] = useState<
+      UnsavedFieldChange<typeof type> | undefined
+    >();
+
     const setting: UiSettingMetadata<typeof type> = {
       type,
       value,
-      userValue,
+      userValue: userValue === '' ? null : userValue,
       name: `Some ${type} setting`,
+      deprecation: isDeprecated
+        ? { message: 'This setting is deprecated', docLinksKey: 'storybook' }
+        : undefined,
+      category: ['categoryOne', 'categoryTwo'],
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu odio velit. Integer et mauris quis ligula elementum commodo. Morbi eu ipsum diam. Nulla auctor orci eget egestas vehicula. Aliquam gravida, dolor eu posuere vulputate, neque enim viverra odio, id viverra ipsum quam et ipsum.',
+      requiresPageReload: false,
       ...settingFields,
     };
 
-    const [field, unsavedChange, onChangeFn] = useFieldDefinition(setting, {
-      isCustom,
-      isDeprecated,
-      isOverridden,
+    const field = getFieldDefinition({
+      id: setting.name?.split(' ').join(':').toLowerCase() || setting.type,
+      setting,
+      params: {
+        isCustom,
+        isOverridden,
+      },
     });
 
-    const onChange: OnChangeFn<typeof type> = (_key, change) => {
-      const { error, isInvalid, unsavedValue } = change;
-      onChangeFn({ error: error === null ? undefined : error, isInvalid, value: unsavedValue });
+    const onChange: RowOnChangeFn<typeof type> = (_id, newChange) => {
+      setUnsavedChange(newChange);
+
+      action('onChange')({
+        type,
+        unsavedValue: newChange?.unsavedValue,
+        savedValue: field.savedValue,
+      });
     };
 
     return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onChange }} />;
   };
 
-  Story.args = {
-    userValue: getUserValue(type),
-    value: getDefaultValue(type),
-    ...storyArgs,
-  };
+  // In Kibana, the image default value is never anything other than null.  There would be a number
+  // of issues if it was anything but, so, in Storybook, we want to remove the default value argument.
+  if (type === 'image') {
+    Story.args = {
+      userValue: getUserValue(type),
+      ...storyArgs,
+    };
+  } else {
+    Story.args = {
+      userValue: getUserValue(type),
+      value: getDefaultValue(type),
+      ...storyArgs,
+    };
+  }
 
   return Story;
 };
