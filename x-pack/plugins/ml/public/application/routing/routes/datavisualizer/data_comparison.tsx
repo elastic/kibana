@@ -15,7 +15,7 @@ import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import {
   breadcrumbOnClickFactory,
-  DATA_COMPARISON_BREADCRUMB,
+  DATA_DRIFT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
@@ -37,8 +37,8 @@ export const dataDriftRouteFactory = (
       text: DATA_VISUALIZER_BREADCRUMB.text,
       ...(navigateToPath
         ? {
-            href: `${basePath}/app/ml${DATA_COMPARISON_BREADCRUMB.href}`,
-            onClick: breadcrumbOnClickFactory(DATA_COMPARISON_BREADCRUMB.href, navigateToPath),
+            href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
+            onClick: breadcrumbOnClickFactory(DATA_DRIFT_BREADCRUMB.href, navigateToPath),
           }
         : {}),
     },
