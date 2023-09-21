@@ -5,17 +5,23 @@
  * 2.0.
  */
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ComponentType } from 'react';
+import { LogExplorerLocators } from '../common/locators';
 import type { LogExplorerProps } from './components/log_explorer';
 
-export type LogExplorerPluginSetup = void;
+export interface LogExplorerPluginSetup {
+  locators: LogExplorerLocators;
+}
 export interface LogExplorerPluginStart {
   LogExplorer: ComponentType<LogExplorerProps>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogExplorerSetupDeps {}
+export interface LogExplorerSetupDeps {
+  share: SharePluginSetup;
+  discover: DiscoverSetup;
+}
 
 export interface LogExplorerStartDeps {
   data: DataPublicPluginStart;

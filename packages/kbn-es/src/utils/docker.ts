@@ -358,7 +358,7 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
     throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
 ${message}`
@@ -607,6 +607,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     `);
   }
 
+  if (!options.skipTeardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
 
@@ -633,7 +638,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           }
         : {}),
     });
-    await waitUntilClusterReady({ client, log });
+    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
     log.success('ES is ready');
   }
 
@@ -647,14 +652,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
-    }).catch((error) => {
+    }).catch(() => {
       /**
-       * 255 is a generic exit code which is triggered from docker logs command
-       * if we teardown the cluster since the entrypoint doesn't exit normally
+       * docker logs will throw errors when the nodes are killed through SIGINT
+       * and the entrypoint doesn't exit normally, so we silence the errors.
        */
-      if (error.exitCode !== 255) {
-        log.error(error.message);
-      }
     });
   }
 

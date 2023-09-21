@@ -38,6 +38,7 @@ import {
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
 } from '../paths';
+import * as waitClusterUtil from './wait_until_cluster_ready';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -47,6 +48,10 @@ jest.mock('@elastic/elasticsearch', () => {
   };
 });
 
+jest.mock('./wait_until_cluster_ready', () => ({
+  waitUntilClusterReady: jest.fn(),
+}));
+
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
@@ -55,6 +60,8 @@ const KIBANA_ROOT = process.cwd();
 const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
+
+const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -482,24 +489,18 @@ describe('runServerlessCluster()', () => {
     // setupDocker execa calls then run three nodes and attach logger
     expect(execa.mock.calls).toHaveLength(8);
   });
-  describe('waitForReady', () => {
-    test('should wait for serverless nodes to be ready to serve requests', async () => {
-      mockFs({
-        [baseEsPath]: {},
-      });
-      execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-      const health = jest.fn();
-      jest
-        .requireMock('@elastic/elasticsearch')
-        .Client.mockImplementation(() => ({ cluster: { health } }));
 
-      health.mockImplementationOnce(() => Promise.reject()); // first call fails
-      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
-      health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
+  test(`should wait for serverless nodes to return 'green' status`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-      await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
-      expect(health).toHaveBeenCalledTimes(3);
-    }, 10000);
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
   });
 });
 
