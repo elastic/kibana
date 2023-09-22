@@ -57,6 +57,10 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
 
   await setupFleetAgent(context);
 
+  new Promise((res) => {
+    setTimeout(() => res('Waited 1 minute'), 60000);
+  });
+
   return {
     FORCE_COLOR: '1',
     baseUrl: Url.format({

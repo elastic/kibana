@@ -48,6 +48,10 @@ export class AgentManager extends Manager {
     ];
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
+
+    this.log.info(`Done. Agent is running and connected to Fleet.
+        Container Id:   ${this.agentContainerId}
+      `);
   }
 
   public cleanup() {
