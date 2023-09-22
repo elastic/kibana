@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { deprecations } = body as DeprecationsGetResponse;
       // eslint-disable-next-line no-console
-      console['log']('DeBug: ', JSON.stringify(deprecations));
+      console.log('DeBug: ', JSON.stringify(deprecations));
       const dataPluginDeprecations = deprecations.filter(
         ({ domainId }) => domainId === 'dataViews'
       );
