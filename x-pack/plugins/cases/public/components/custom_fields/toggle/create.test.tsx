@@ -31,7 +31,7 @@ describe('Create ', () => {
 
     expect(screen.getByText(customFieldConfiguration.label)).toBeInTheDocument();
     expect(
-      screen.getByTestId(`${customFieldConfiguration.label}-toggle-create-custom-field`)
+      screen.getByTestId(`${customFieldConfiguration.key}-toggle-create-custom-field`)
     ).toBeInTheDocument();
     expect(screen.getByRole('switch')).not.toBeChecked();
   });
@@ -51,7 +51,9 @@ describe('Create ', () => {
       // data, isValid
       expect(onSubmit).toHaveBeenCalledWith(
         {
-          [customFieldConfiguration.key]: true,
+          customFields: {
+            [customFieldConfiguration.key]: true,
+          },
         },
         true
       );
@@ -73,7 +75,9 @@ describe('Create ', () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
         {
-          [customFieldConfiguration.key]: false,
+          customFields: {
+            [customFieldConfiguration.key]: false,
+          },
         },
         true
       );

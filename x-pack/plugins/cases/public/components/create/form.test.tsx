@@ -238,7 +238,7 @@ describe('CreateCaseForm', () => {
 
     for (const item of customFieldsConfigurationMock) {
       expect(
-        result.getByTestId(`${item.label}-${item.type}-create-custom-field`)
+        result.getByTestId(`${item.key}-${item.type}-create-custom-field`)
       ).toBeInTheDocument();
     }
   });

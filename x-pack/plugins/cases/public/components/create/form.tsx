@@ -149,6 +149,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         availableOwners,
         draftStorageKey,
         customFieldsConfiguration,
+        isLoadingCaseConfiguration,
       ]
     );
 

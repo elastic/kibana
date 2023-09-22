@@ -456,12 +456,12 @@ describe.skip('Create case', () => {
       expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
 
       userEvent.paste(
-        screen.getByTestId(`${textField.label}-${textField.type}-create-custom-field`),
+        screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
         'My text test value 1'
       );
 
       userEvent.click(
-        screen.getByTestId(`${toggleField.label}-${toggleField.type}-create-custom-field`)
+        screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
       userEvent.click(screen.getByTestId('create-case-submit'));

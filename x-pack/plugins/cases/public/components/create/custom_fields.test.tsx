@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, readCasesPermissions } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
@@ -35,7 +35,7 @@ describe('CustomFields', () => {
 
     for (const item of customFieldsConfigurationMock) {
       expect(
-        screen.getByTestId(`${item.label}-${item.type}-create-custom-field`)
+        screen.getByTestId(`${item.key}-${item.type}-create-custom-field`)
       ).toBeInTheDocument();
     }
   });
@@ -69,18 +69,6 @@ describe('CustomFields', () => {
     expect(customFields[1]).toHaveTextContent('My test label 2');
   });
 
-  it('should not show the custom fields when no permissions to create', async () => {
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
-
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
-      </FormTestComponent>
-    );
-
-    expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
-  });
-
   it('should update the custom fields', async () => {
     appMockRender = createAppMockRenderer();
 
@@ -94,11 +82,11 @@ describe('CustomFields', () => {
     const toggleField = customFieldsConfigurationMock[1];
 
     userEvent.type(
-      screen.getByTestId(`${textField.label}-${textField.type}-create-custom-field`),
+      screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
     userEvent.click(
-      screen.getByTestId(`${toggleField.label}-${toggleField.type}-create-custom-field`)
+      screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
     userEvent.click(screen.getByText('Submit'));
@@ -107,8 +95,10 @@ describe('CustomFields', () => {
       // data, isValid
       expect(onSubmit).toHaveBeenCalledWith(
         {
-          [textField.key]: 'hello',
-          [toggleField.key]: true,
+          customFields: {
+            [textField.key]: 'hello',
+            [toggleField.key]: true,
+          },
         },
         true
       );

@@ -17,13 +17,13 @@ const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, 
 
   return (
     <UseField
-      path={key}
+      path={`customFields.${key}`}
       config={config}
       component={TextField}
+      label={label}
       componentProps={{
-        label,
         euiFieldProps: {
-          'data-test-subj': `${label}-text-create-custom-field`,
+          'data-test-subj': `${key}-text-create-custom-field`,
           fullWidth: true,
           disabled: isLoading,
           isLoading,

@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CasesConfigurationUI } from '../../../common/ui';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 interface Props {
@@ -18,8 +17,6 @@ interface Props {
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfiguration }) => {
-  const { permissions } = useCasesContext();
-
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(customFieldsConfiguration),
     [customFieldsConfiguration]
@@ -31,10 +28,6 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfigu
       const customFieldType = customFieldFactory().build();
 
       const CreateComponent = customFieldType.Create;
-
-      if (!permissions.create || !permissions.update) {
-        return null;
-      }
 
       return (
         <CreateComponent

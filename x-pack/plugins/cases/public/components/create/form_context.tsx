@@ -55,6 +55,10 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
+interface FormPropsWithCustomFields extends FormProps {
+  [x: `customFields.${string}`]: string | boolean;
+}
+
 export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   children,
@@ -94,20 +98,29 @@ export const FormContext: React.FC<Props> = ({
     return formData;
   };
 
-  const mapCustomFieldsData = useCallback(
-    (userFormData: CaseUI & Record<string, string | boolean>) => {
-      if (!customFieldsConfiguration.length || isLoadingCaseConfiguration) {
+  const transformCustomFieldsData = useCallback(
+    (customFields: { [x: `customFields.${string}`]: string | boolean }) => {
+      const transformedCustomFields = [];
+
+      if (!customFields || !customFieldsConfiguration.length || isLoadingCaseConfiguration) {
         return [];
       }
-      return customFieldsConfiguration.map((field) => {
-        return {
-          key: field.key,
-          type: field.type,
-          field: {
-            value: [userFormData[field.key]],
-          },
-        };
-      });
+
+      for (const [key, value] of Object.entries(customFields)) {
+        const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
+
+        if (configCustomField) {
+          transformedCustomFields.push({
+            key: configCustomField.key,
+            type: configCustomField.type,
+            field: {
+              value: [value],
+            },
+          });
+        }
+      }
+
+      return transformedCustomFields;
     },
     [customFieldsConfiguration, isLoadingCaseConfiguration]
   );
@@ -123,7 +136,7 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
-        const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
+        const { selectedOwner, customFields, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const defaultOwner = owner[0] ?? availableOwners[0];
 
@@ -133,10 +146,7 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        const customFieldsMapped = mapCustomFieldsData(userFormData);
-
-        // remove custom fields keys from userFormData
-        customFieldsConfiguration.forEach((item) => delete userFormData[item.key]);
+        const transformedCustomFields = transformCustomFieldsData(customFields);
 
         const trimmedData = trimUserFormData(userFormData);
 
@@ -146,7 +156,7 @@ export const FormContext: React.FC<Props> = ({
             connector: connectorToUpdate,
             settings: { syncAlerts },
             owner: selectedOwner ?? defaultOwner,
-            customFields: customFieldsMapped as CaseUI['customFields'],
+            customFields: transformedCustomFields as CaseUI['customFields'],
           },
         });
 
@@ -175,7 +185,6 @@ export const FormContext: React.FC<Props> = ({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       isSyncAlertsEnabled,
       connectors,
@@ -189,11 +198,11 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       createAttachments,
       pushCaseToExternalService,
-      customFieldsConfiguration,
+      transformCustomFieldsData,
     ]
   );
 
-  const { form } = useForm({
+  const { form } = useForm<FormPropsWithCustomFields>({
     defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,

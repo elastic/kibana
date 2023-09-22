@@ -32,7 +32,7 @@ describe('Create ', () => {
 
     expect(screen.getByText(customFieldConfiguration.label)).toBeInTheDocument();
     expect(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`)
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     ).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe('Create ', () => {
     );
 
     expect(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`)
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     ).toHaveAttribute('disabled');
   });
 
@@ -66,7 +66,7 @@ describe('Create ', () => {
     );
 
     userEvent.type(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`),
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       'this is a sample text!'
     );
 
@@ -76,7 +76,9 @@ describe('Create ', () => {
       // data, isValid
       expect(onSubmit).toHaveBeenCalledWith(
         {
-          [customFieldConfiguration.key]: 'this is a sample text!',
+          customFields: {
+            [customFieldConfiguration.key]: 'this is a sample text!',
+          },
         },
         true
       );
@@ -93,7 +95,7 @@ describe('Create ', () => {
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
     userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`),
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
 
@@ -120,7 +122,7 @@ describe('Create ', () => {
     );
 
     userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`),
+      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       ''
     );
 
@@ -131,6 +133,23 @@ describe('Create ', () => {
         screen.getByText(`${customFieldConfiguration.label} is required.`)
       ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
+    });
+  });
+
+  it('does not show error when text is not required but is empty', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create
+          isLoading={false}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+        />
+      </FormTestComponent>
+    );
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({}, true);
     });
   });
 });
