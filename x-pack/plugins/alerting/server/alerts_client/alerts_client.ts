@@ -416,12 +416,7 @@ export class AlertsClient<
       };
 
       try {
-        const response = await esClient.bulk({
-          refresh: 'wait_for',
-          index: this.indexTemplateAndPattern.alias,
-          require_alias: !this.isUsingDataStreams(),
-          body: bulkBody,
-        });
+        const response = await esClient.bulk(bulkRequest);
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {

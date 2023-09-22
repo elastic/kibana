@@ -89,7 +89,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.always-firing-alert-as-data',
         'test.patternFiringAad',
         'test.waitingRule',
-        'test.waitingLifecycleRule',
       ],
       privileges: {
         all: {
@@ -120,7 +119,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.always-firing-alert-as-data',
                 'test.patternFiringAad',
                 'test.waitingRule',
-                'test.waitingLifecycleRule',
               ],
             },
           },
@@ -154,7 +152,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.always-firing-alert-as-data',
                 'test.patternFiringAad',
                 'test.waitingRule',
-                'test.waitingLifecycleRule',
               ],
             },
           },
