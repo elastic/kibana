@@ -32,12 +32,7 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type {
-  GroupDefinition,
-  NavigationTreeDefinition,
-  NonEmptyArray,
-  ProjectNavigationDefinition,
-} from './types';
+import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from './types';
 
 const storybookMock = new NavigationStorybookMock();
 
@@ -159,60 +154,79 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-export const UpdatingState = (args: NavigationServices) => {
-  const groupDef: GroupDefinition = {
-    type: 'navGroup',
-    id: 'observability_project_nav',
-    title: 'Observability',
-    icon: 'logoObservability',
-    accordionProps: { arrowProps: { css: { display: 'none' } } },
-    children: [
-      {
-        id: 'aiops',
-        title: 'AIOps',
-        icon: 'branch',
-        children: [
-          {
-            title: 'Anomaly detection',
-            link: 'ml:anomalyDetection',
-          },
-          { title: 'Log Rate Analysis', link: 'ml:logRateAnalysis' },
-          {
-            title: 'Change Point Detections',
-            link: 'ml:changePointDetections',
-          },
-          {
-            title: 'Job Notifications',
-            link: 'ml:notifications',
-          },
-        ],
-      },
-      {
-        id: 'project_settings_project_nav',
-        title: 'Project settings',
-        icon: 'gear',
-        children: [{ link: 'management' }, { link: 'integrations' }, { link: 'fleet' }],
-      },
-    ],
-  };
+const simpleNavigationGroupDefinition: GroupDefinition = {
+  type: 'navGroup',
+  id: 'observability_project_nav',
+  title: 'Observability',
+  icon: 'logoObservability',
+  accordionProps: { arrowProps: { css: { display: 'none' } } },
+  children: [
+    {
+      id: 'aiops',
+      title: 'AIOps',
+      icon: 'branch',
+      children: [
+        {
+          title: 'Anomaly detection',
+          link: 'ml:anomalyDetection',
+        },
+        { title: 'Log Rate Analysis', link: 'ml:logRateAnalysis' },
+        {
+          title: 'Change Point Detections',
+          link: 'ml:changePointDetections',
+        },
+        {
+          title: 'Job Notifications',
+          link: 'ml:notifications',
+        },
+      ],
+    },
+    {
+      id: 'project_settings_project_nav',
+      title: 'Project settings',
+      icon: 'gear',
+      children: [{ link: 'management' }, { link: 'integrations' }, { link: 'fleet' }],
+    },
+  ],
+};
 
-  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
+const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
+  [
+    {
+      ...simpleNavigationGroupDefinition,
+      path: ['observability_project_nav'],
+    } as unknown as ChromeProjectNavigationNode,
+    {
+      ...simpleNavigationGroupDefinition.children?.[0],
+      path: ['observability_project_nav', 'aiops'],
+    } as unknown as ChromeProjectNavigationNode,
+    {
+      ...simpleNavigationGroupDefinition.children?.[0].children?.[0],
+      path: ['observability_project_nav', 'aiops', 'ml:logRateAnalysis'],
+    } as unknown as ChromeProjectNavigationNode,
+  ],
+]);
+
+const controlActiveNode = () => {
+  activeNodes$.next([
     [
       {
-        ...groupDef,
+        ...simpleNavigationGroupDefinition,
         path: ['observability_project_nav'],
       } as unknown as ChromeProjectNavigationNode,
       {
-        ...groupDef.children?.[0],
+        ...simpleNavigationGroupDefinition.children?.[0],
         path: ['observability_project_nav', 'aiops'],
       } as unknown as ChromeProjectNavigationNode,
       {
-        ...groupDef.children?.[0].children?.[0],
-        path: ['observability_project_nav', 'aiops', 'ml:logRateAnalysis'],
+        ...simpleNavigationGroupDefinition.children?.[1].children?.[0],
+        path: ['observability_project_nav', 'project_settings_project_nav', 'management'],
       } as unknown as ChromeProjectNavigationNode,
     ],
   ]);
+};
 
+export const UpdatingState = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     activeNodes$,
@@ -222,19 +236,23 @@ export const UpdatingState = (args: NavigationServices) => {
     },
   });
 
-  const myNavigationTree: NavigationTreeDefinition = {
-    body: [groupDef],
-  };
-
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <DefaultNavigation navigationTree={myNavigationTree} />
+        <DefaultNavigation
+          navigationTree={{
+            body: [simpleNavigationGroupDefinition],
+          }}
+        />
       </NavigationProvider>
     </NavigationWrapper>
   );
 };
-UpdatingState.argTypes = storybookMock.getArgumentTypes();
+UpdatingState.argTypes = {
+  updateActiveNodes: { action: 'updateActiveNodes' },
+  ...storybookMock.getArgumentTypes(),
+};
+UpdatingState.args = {};
 
 const navigationDefinition: ProjectNavigationDefinition = {
   navigationTree: {

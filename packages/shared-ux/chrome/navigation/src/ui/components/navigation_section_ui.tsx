@@ -40,7 +40,7 @@ const navigationNodeToEuiItem = (
     title: item.title,
     isSelected,
     accordionProps: {
-      initialIsOpen: true, // FIXME should use item.isActive
+      initialIsOpen: item.isActive, // FIXME dynamic is not working
     },
     linkProps: { external: isExternal },
     onClick:
