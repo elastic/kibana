@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -29,18 +30,34 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
+import { CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
+  CustomFieldToggle,
+  customFieldValue,
   RelatedCaseRt,
-  CustomFieldRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
+
+const CustomFieldText = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  field: customFieldValue(
+    limitedStringSchema({
+      fieldName: 'value',
+      min: 0,
+      max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+    })
+  ),
+});
+
+const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
 
 const CustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,

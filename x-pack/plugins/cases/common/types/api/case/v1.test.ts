@@ -17,6 +17,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -299,6 +300,25 @@ describe('CasePostRequestRt', () => {
     const { customFields, ...rest } = defaultRequest;
 
     expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
+  });
+
+  it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: 'text',
+              field: { value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)] },
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+    );
   });
 });
 
@@ -678,6 +698,25 @@ describe('CasePatchRequestRt', () => {
       )
     ).toContain(
       `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+    );
+  });
+
+  it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+    expect(
+      PathReporter.report(
+        CasePatchRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: 'text',
+              field: { value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)] },
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
   });
 });
