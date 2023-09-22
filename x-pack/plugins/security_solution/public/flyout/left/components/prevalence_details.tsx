@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
@@ -27,6 +26,7 @@ import { useLicense } from '../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
@@ -35,7 +35,6 @@ import {
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
@@ -320,16 +319,7 @@ export const PrevalenceDetails: React.FC = () => {
   );
 
   if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={PREVALENCE_DETAILS_LOADING_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <FlyoutLoading size="xxl" data-test-subj={PREVALENCE_DETAILS_LOADING_TEST_ID} />;
   }
 
   const upsell = (
@@ -373,12 +363,10 @@ export const PrevalenceDetails: React.FC = () => {
             data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
           />
         ) : (
-          <p data-test-subj={PREVALENCE_DETAILS_NO_DATA_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
-              defaultMessage="No prevalence data available."
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
+            defaultMessage="No prevalence data available."
+          />
         )}
       </EuiPanel>
     </>

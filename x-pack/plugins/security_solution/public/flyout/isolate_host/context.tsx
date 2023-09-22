@@ -66,7 +66,7 @@ export const IsolateHostPanelProvider = memo(
     );
 
     if (loading) {
-      return <FlyoutLoading />;
+      return <FlyoutLoading size="xxl" />;
     }
 
     if (!contextValue) {

@@ -16,6 +16,7 @@ import {
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
@@ -100,6 +101,33 @@ describe('<HostEntityContent />', () => {
     });
   });
 
+  it('should render loading spinner if loading for host details is true', () => {
+    mockUseHostDetails.mockReturnValue([true, { hostDetails: null }]);
+    mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render loading spinner if loading for risk score is true', () => {
+    mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
+    mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true, loading: true });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
   describe('license is not valid', () => {
     it('should render os family and last seen', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);

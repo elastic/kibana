@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useState, useEffect } from 'react';
-import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetSavedQuery } from '../../../detections/pages/detection_engine/rules/use_get_saved_query';
@@ -19,6 +19,7 @@ import { StepAboutRuleReadOnly } from '../../../detections/components/rules/step
 import { StepDefineRuleReadOnly } from '../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../detections/components/rules/step_schedule_rule';
 import { StepRuleActionsReadOnly } from '../../../detections/components/rules/step_rule_actions';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
   RULE_PREVIEW_BODY_TEST_ID,
   RULE_PREVIEW_ABOUT_TEST_ID,
@@ -79,7 +80,9 @@ export const RulePreview: React.FC = memo(() => {
   const hasResponseActions = Boolean(ruleActionsData?.responseActions?.length);
   const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
 
-  return rule ? (
+  return ruleLoading ? (
+    <FlyoutLoading size="xxl" data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
+  ) : rule ? (
     <EuiPanel hasShadow={false} data-test-subj={RULE_PREVIEW_BODY_TEST_ID} className="eui-yScroll">
       <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
@@ -169,8 +172,6 @@ export const RulePreview: React.FC = memo(() => {
         </ExpandableSection>
       )}
     </EuiPanel>
-  ) : ruleLoading ? (
-    <EuiLoadingSpinner size="l" data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
   ) : null;
 });
 

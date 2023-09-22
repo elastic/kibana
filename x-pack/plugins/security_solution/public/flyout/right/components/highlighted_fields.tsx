@@ -15,12 +15,17 @@ import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlight
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
+import {
+  HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
+  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
+  HIGHLIGHTED_FIELDS_LOADING_TEST_ID,
+} from './test_ids';
 import { useRightPanelContext } from '../context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
@@ -95,7 +100,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
 export const HighlightedFields: FC = () => {
   const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const { loading, error, rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
@@ -105,10 +110,6 @@ export const HighlightedFields: FC = () => {
     () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
     [highlightedFields, scopeId]
   );
-
-  if (items.length === 0) {
-    return null;
-  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -122,11 +123,22 @@ export const HighlightedFields: FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
-        <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={items} columns={columns} compressed />
-        </EuiPanel>
-      </EuiFlexItem>
+      {loading ? (
+        <FlyoutLoading data-test-subj={HIGHLIGHTED_FIELDS_LOADING_TEST_ID} />
+      ) : items.length === 0 || error ? (
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
+            defaultMessage="There are no highlighted fields for this alert."
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
+          <EuiPanel hasBorder hasShadow={false}>
+            <EuiInMemoryTable items={items} columns={columns} compressed />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

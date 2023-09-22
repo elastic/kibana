@@ -36,6 +36,7 @@ import { RiskScore } from '../../../explore/components/risk_score/severity/commo
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import * as i18n from '../../../overview/components/user_overview/translations';
 import {
   ENTITIES_USER_OVERVIEW_TEST_ID,
@@ -44,6 +45,7 @@ import {
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   TECHNICAL_PREVIEW_ICON_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
@@ -90,14 +92,18 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [_, { userDetails }] = useObservedUserDetails({
+  const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
     endDate: to,
     userName,
     indexNames: selectedPatterns,
     startDate: from,
   });
 
-  const { data: userRisk, isAuthorized } = useRiskScore({
+  const {
+    data: userRisk,
+    isAuthorized,
+    loading: isRiskScoreLoading,
+  } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.user,
     timerange,
@@ -206,27 +212,31 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <OverviewDescriptionList
-              dataTestSubj={ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID}
-              descriptionList={userDomain}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {isAuthorized ? (
-              <DescriptionListStyled
-                data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
-                listItems={[userRiskLevel]}
-              />
-            ) : (
+        {isUserDetailsLoading || isRiskScoreLoading ? (
+          <FlyoutLoading data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID} />
+        ) : (
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <OverviewDescriptionList
-                dataTestSubj={ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID}
-                descriptionList={userLastSeen}
+                dataTestSubj={ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID}
+                descriptionList={userDomain}
               />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {isAuthorized ? (
+                <DescriptionListStyled
+                  data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
+                  listItems={[userRiskLevel]}
+                />
+              ) : (
+                <OverviewDescriptionList
+                  dataTestSubj={ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID}
+                  descriptionList={userLastSeen}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

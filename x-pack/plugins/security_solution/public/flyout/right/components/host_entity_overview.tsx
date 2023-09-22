@@ -35,6 +35,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import * as i18n from '../../../overview/components/host_overview/translations';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
@@ -43,6 +44,7 @@ import {
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
   TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
@@ -91,14 +93,18 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     [hostName]
   );
 
-  const { data: hostRisk, isAuthorized } = useRiskScore({
+  const {
+    data: hostRisk,
+    isAuthorized,
+    loading: isRiskScoreLoading,
+  } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.host,
     skip: hostName == null,
     timerange,
   });
 
-  const [_, { hostDetails }] = useHostDetails({
+  const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
     indexNames: selectedPatterns,
     startDate: from,
@@ -206,29 +212,33 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <OverviewDescriptionList
-              dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}
-              descriptionList={hostOSFamily}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {isAuthorized ? (
-              <DescriptionListStyled
-                data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
-                listItems={[hostRiskLevel]}
-              />
-            ) : (
+      {isRiskScoreLoading || isHostDetailsLoading ? (
+        <FlyoutLoading data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID} />
+      ) : (
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <OverviewDescriptionList
-                dataTestSubj={ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID}
-                descriptionList={hostLastSeen}
+                dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}
+                descriptionList={hostOSFamily}
               />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {isAuthorized ? (
+                <DescriptionListStyled
+                  data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
+                  listItems={[hostRiskLevel]}
+                />
+              ) : (
+                <OverviewDescriptionList
+                  dataTestSubj={ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID}
+                  descriptionList={hostLastSeen}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -69,6 +69,7 @@ export const Reason: FC = () => {
               defaultMessage: 'Show full reason',
             }
           )}
+          disabled={!alertReason}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
@@ -77,7 +78,16 @@ export const Reason: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [openRulePreview]
+    [alertReason, openRulePreview]
+  );
+
+  const alertReasonText = alertReason ? (
+    alertReason
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.about.reason.noReasonDescription"
+      defaultMessage="There is no alert reason for this alert."
+    />
   );
 
   return (
@@ -108,7 +118,9 @@ export const Reason: FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>{alertReason}</EuiFlexItem>
+      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
+        {isAlert ? alertReasonText : '-'}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

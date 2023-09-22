@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_session_view_tab';
+import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_session_view_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
@@ -50,10 +47,10 @@ describe.skip(
         .and('have.text', 'Session View');
 
       // TODO ideally we would have a test for the session view component instead
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
-        .should('be.visible')
-        .and('contain.text', 'Unable to display session view')
-        .and('contain.text', 'There was an error displaying session view');
+      // cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
+      //   .should('be.visible')
+      //   .and('contain.text', 'Unable to display session view')
+      //   .and('contain.text', 'There was an error displaying session view');
     });
   }
 );

@@ -27,6 +27,8 @@ const renderHighlightedFields = (contextValue: RightPanelContext) =>
     </TestProviders>
   );
 
+const NO_DATA_MESSAGE = 'There are no highlighted fields for this alert.';
+
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
     (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
@@ -49,15 +51,15 @@ describe('<HighlightedFields />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
-  it(`should render empty component if there aren't any highlighted fields`, () => {
+  it(`should render no data message if there aren't any highlighted fields`, () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-    const { container } = renderHighlightedFields(contextValue);
-
-    expect(container).toBeEmptyDOMElement();
+    const { getByText, queryByTestId } = renderHighlightedFields(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(queryByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).not.toBeInTheDocument();
   });
 });
