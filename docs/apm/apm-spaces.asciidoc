@@ -6,7 +6,7 @@ Starting in version 8.2.0, the APM app is <<xpack-spaces,{kib} Space>> aware.
 This allows you to separate your data--and access to that data--by team, use case, service environment,
 or any other filter that you choose.
 
-To take advantage of this feature, your APM data needs to be written to different data steams.
+To take advantage of this feature, your APM data needs to be written to different data streams.
 One way to accomplish this is with different namespaces.
 For example, you can send production data to an APM integration with a namespace of `production`,
 while sending staging data to a different APM integration with a namespace of `staging`.
