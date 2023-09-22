@@ -312,7 +312,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: classnames('unifiedFieldListSidebar', {
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
-      ['unifiedFieldListSidebar-fullWidth']: fullWidth,
+      ['unifiedFieldListSidebar--fullWidth']: fullWidth,
     }),
     minWidth: 0,
     'aria-label': i18n.translate(

@@ -10,7 +10,7 @@
     padding: $euiSizeS $euiSizeS 0;
   }
 
-  &:not(.unifiedFieldListSidebar-fullWidth) {
+  &:not(.unifiedFieldListSidebar--fullWidth) {
     width: $euiSize * 19;
   }
 
