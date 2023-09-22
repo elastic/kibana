@@ -10,10 +10,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiForm,
+  EuiBadge,
   EuiTitle,
   EuiButton,
+  EuiSpacer,
   EuiSwitch,
   EuiFormRow,
+  EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiDroppable,
@@ -159,15 +162,29 @@ const NavigationEmbeddablePanelEditor = ({
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="navEmbeddable--panelEditor--title">
-          <h2>
-            {isEditingExisting
-              ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
-              : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="navEmbeddable--panelEditor--title">
+              <h2>
+                {isEditingExisting
+                  ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
+                  : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={NavEmbeddableStrings.editor.panelEditor.getTechnicalPreviewTooltip()}
+            >
+              <EuiBadge iconType="beaker" color="hollow">
+                {NavEmbeddableStrings.editor.panelEditor.getTechnicalPreviewLabel()}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiSpacer size="m" />
         <EuiForm fullWidth>
           <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup

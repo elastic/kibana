@@ -23,9 +23,12 @@ export const projectIDs = [
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
+const technicalPreviewLabel = i18n.translate(
+  'presentationUtil.advancedSettings.technicalPreviewLabel',
+  {
+    defaultMessage: 'technical preview',
+  }
+);
 
 /**
  * This is a list of active Labs Projects for the Presentation Team.  It is the "source of truth" for all projects
