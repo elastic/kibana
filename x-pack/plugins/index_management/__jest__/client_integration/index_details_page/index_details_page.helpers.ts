@@ -80,6 +80,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       indexStatsContentExists: () => boolean;
       indexDetailsContentExists: () => boolean;
       addDocCodeBlockExists: () => boolean;
+      extensionSummaryExists: (index: number) => boolean;
     };
   };
 }
@@ -130,6 +131,9 @@ export const setup = async (
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
+    },
+    extensionSummaryExists: (index: number) => {
+      return exists(`extensionsSummary-${index}`);
     },
   };
 
