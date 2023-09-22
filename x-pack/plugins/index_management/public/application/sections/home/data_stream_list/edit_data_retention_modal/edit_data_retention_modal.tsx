@@ -20,11 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useForm,
+  useFormData,
   Form,
   fieldFormatters,
   FormSchema,
   FIELD_TYPES,
   UseField,
+  ToggleField,
   NumericField,
 } from '../../../../../shared_imports';
 
@@ -150,6 +152,15 @@ const configurationFormSchema: FormSchema = {
       }
     ),
   },
+  infiniteRetentionPeriod: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+    deserializer: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
+    serializer: (value: unknown) => (v: boolean) => v === value ? undefined : v,
+    label: i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField', {
+      defaultMessage: 'Never delete data',
+    }),
+  }
 };
 
 const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
@@ -179,10 +190,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   } = useAppContext();
 
   const { form } = useForm({
-    defaultValue: { dataRetention: size, timeUnit: unit },
+    defaultValue: { dataRetention: size, timeUnit: unit, infiniteRetentionPeriod: false },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
+  const [formData] = useFormData({ form });
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -238,12 +250,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             componentProps={{
               fullWidth: false,
               euiFieldProps: {
+                disabled: formData.infiniteRetentionPeriod,
                 'data-test-subj': `policyNameField`,
                 min: 1,
                 append: (
                   <UnitField
                     path="timeUnit"
                     options={timeUnits}
+                    disabled={formData.infiniteRetentionPeriod}
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
@@ -257,6 +271,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                 ),
               },
             }}
+          />
+
+          <UseField
+            path="infiniteRetentionPeriod"
+            component={ToggleField}
           />
 
           <EuiSpacer />

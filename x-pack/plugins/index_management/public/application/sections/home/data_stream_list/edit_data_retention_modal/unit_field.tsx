@@ -11,6 +11,7 @@ import { UseField } from '../../../../../shared_imports';
 
 interface Props {
   path: string;
+  disabled?: boolean;
   euiFieldProps?: Record<string, any>;
   options: Array<{
     value: string;
@@ -18,7 +19,7 @@ interface Props {
   }>;
 }
 
-export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldProps }) => {
+export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, euiFieldProps }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,6 +40,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
                 iconType="arrowDown"
                 onClick={() => setOpen((x) => !x)}
                 data-test-subj="show-filters-button"
+                disabled={disabled}
               >
                 {options.find((x) => x.value === field.value)?.text ?? `${field.value}`}
               </EuiButtonEmpty>
