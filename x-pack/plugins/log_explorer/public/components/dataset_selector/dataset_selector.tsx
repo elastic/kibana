@@ -7,15 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from '@emotion/styled';
-import {
-  EuiBadge,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
   dataViewsLabel,
@@ -25,7 +17,6 @@ import {
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
-  openDiscoverLabel,
   uncategorizedLabel,
   UNCATEGORIZED_PANEL_ID,
   UNCATEGORIZED_TAB_ID,
@@ -42,6 +33,7 @@ import {
   createUncategorizedStatusItem,
 } from './utils';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
+import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
 
 export function DatasetSelector({
   datasets,
@@ -289,17 +281,6 @@ export function DatasetSelector({
     </DatasetsPopover>
   );
 }
-
-const DataViewsPanelTitle = () => {
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>{dataViewsLabel}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge iconType="discoverApp">{openDiscoverLabel}</EuiBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const Tabs = styled(EuiTabs)`
   padding: 0 8px;
