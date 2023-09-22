@@ -329,7 +329,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
           showQueryInput={!hideQueryInput}
-          showSaveQuery={true} // TODO: check why is it always `true`. Should be based on "Save Query Management" privilege.
+          saveQueryMenuVisibility="allowed_by_app_privilege"
           dataTestSubj={dataTestSubj}
         />
       </div>

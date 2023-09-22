@@ -523,7 +523,7 @@ export class MapApp extends React.Component<Props, State> {
         showFilterBar={true}
         showDatePicker={true}
         saveQueryMenuVisibility={
-          getMapsCapabilities().saveQuery ? 'allowed_by_additional_privilege' : 'globally_managed'
+          getMapsCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
         }
         savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}

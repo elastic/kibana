@@ -1187,7 +1187,7 @@ describe('Lens App', () => {
       };
       await mountWith({ services });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({ showSaveQuery: false }),
+        expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
         {}
       );
     });
@@ -1196,7 +1196,7 @@ describe('Lens App', () => {
       const { instance, services } = await mountWith({});
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          showSaveQuery: true,
+          saveQueryMenuVisibility: 'allowed_by_app_privilege',
           savedQuery: undefined,
           onSaved: expect.any(Function),
           onSavedQueryUpdated: expect.any(Function),

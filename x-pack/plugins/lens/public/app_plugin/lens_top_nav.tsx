@@ -1056,7 +1056,7 @@ export const LensTopNavMenu = ({
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery
-          ? 'allowed_by_additional_privilege'
+          ? 'allowed_by_app_privilege'
           : 'globally_managed'
       }
       savedQuery={savedQuery}

@@ -308,9 +308,7 @@ const TopNav = ({
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
       saveQueryMenuVisibility={
-        services.visualizeCapabilities.saveQuery
-          ? 'allowed_by_additional_privilege'
-          : 'globally_managed'
+        services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern

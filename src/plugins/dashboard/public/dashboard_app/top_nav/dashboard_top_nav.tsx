@@ -297,9 +297,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}
-        saveQueryMenuVisibility={
-          allowSaveQuery ? 'allowed_by_additional_privilege' : 'globally_managed'
-        }
+        saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
         setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}

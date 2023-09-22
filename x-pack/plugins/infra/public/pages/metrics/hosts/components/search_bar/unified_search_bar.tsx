@@ -59,7 +59,7 @@ export const UnifiedSearchBar = () => {
             onQuerySubmit={handleRefresh}
             saveQueryMenuVisibility={
               application?.capabilities?.visualize?.saveQuery
-                ? 'allowed_by_additional_privilege'
+                ? 'allowed_by_app_privilege'
                 : 'globally_managed'
             }
             showDatePicker

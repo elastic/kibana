@@ -13,7 +13,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 export type SavedQueryMenuVisibility =
   | 'hidden'
   | 'globally_managed' // managed by "Saved Query Management" global privilege
-  | 'allowed_by_additional_privilege'; // use only if your Kibana app grants this privilege, otherwise default to `globally_managed`
+  | 'allowed_by_app_privilege'; // use only if your Kibana app grants this privilege, otherwise default to `globally_managed`
 
 export const canShowSavedQuery = ({
   saveQueryMenuVisibility = 'hidden',
@@ -37,7 +37,7 @@ export const canShowSavedQuery = ({
   const isAllowedGlobally = Boolean(core.application.capabilities.savedQueryManagement?.saveQuery);
 
   // users can allow saving queries globally or grant permission per app
-  if (saveQueryMenuVisibility === 'allowed_by_additional_privilege') {
+  if (saveQueryMenuVisibility === 'allowed_by_app_privilege') {
     return true;
   }
 

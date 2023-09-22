@@ -221,9 +221,7 @@ export const DiscoverTopNav = ({
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
       saveQueryMenuVisibility={
-        services.capabilities.discover.saveQuery
-          ? 'allowed_by_additional_privilege'
-          : 'globally_managed'
+        services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
       showSearchBar={true}
       useDefaultBehaviors={true}
