@@ -41,11 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await inspector.open();
         await inspector.openInspectorRequestsView();
-        const requestTab = await inspector.getOpenRequestDetailRequestButton();
-        await requestTab.click();
-        const requestJSON = JSON.parse(await monacoEditor.getCodeEditorValue(1));
-
-        expect(requestJSON.aggs['2'].max).property('missing', 10);
+        const { body } = await inspector.getRequest(1);
+        expect(body.aggs['2'].max).property('missing', 10);
       });
 
       after(async () => {
