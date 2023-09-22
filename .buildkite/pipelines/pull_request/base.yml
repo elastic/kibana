@@ -137,12 +137,12 @@ steps:
           limit: 3
 
 # Temporarily replace with a flag-based check
-  - command: .buildkite/scripts/steps/check_types_commits.sh
-    label: 'Check Types Commits'
-    agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+#  - command: .buildkite/scripts/steps/check_types.sh
+#    label: 'Check Types'
+#    agents:
+#      queue: n2-16-spot
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3

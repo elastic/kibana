@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+.buildkite/scripts/bootstrap.sh
+
 if [[ "${CI-}" == "true" ]]; then
   sha1="${GITHUB_PR_TARGET_BRANCH-}"
   sha2="${GITHUB_PR_TRIGGERED_SHA-}"
