@@ -6,26 +6,31 @@
  */
 
 import React, { useMemo } from 'react';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { EuiFlexGroup, EuiText, EuiFlexItem, EuiTextColor, EuiCheckboxGroup } from '@elastic/eui';
 
 import * as i18n from '../translations';
 
 const CHECKBOX_OPTIONS = [
   {
-    id: 'kibana',
-    label: 'Kibana',
+    id: DEFAULT_APP_CATEGORIES.kibana.id,
+    label: DEFAULT_APP_CATEGORIES.kibana.label,
+    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.kibana.id}`,
   },
   {
-    id: 'observability',
-    label: 'Observability',
+    id: DEFAULT_APP_CATEGORIES.observability.id,
+    label: DEFAULT_APP_CATEGORIES.observability.label,
+    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.observability.id}`,
   },
   {
-    id: 'securitySolution',
-    label: 'Security',
+    id: DEFAULT_APP_CATEGORIES.security.id,
+    label: DEFAULT_APP_CATEGORIES.security.label,
+    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.security.id}`,
   },
   {
-    id: 'management',
-    label: 'Management',
+    id: DEFAULT_APP_CATEGORIES.management.id,
+    label: DEFAULT_APP_CATEGORIES.management.label,
+    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.management.id}`,
   },
 ];
 
@@ -33,13 +38,13 @@ const checkboxGroupLegend = {
   children: <span>{i18n.CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE}</span>,
 };
 
-export interface MaintenanceWindowSolutionSelectionFormProps {
+export interface MaintenanceWindowSolutionSelectionProps {
   selectedCategories: string[];
   onChange: (category: string) => void;
 }
 
-export const MaintenanceWindowSolutionSelectionForm = (
-  props: MaintenanceWindowSolutionSelectionFormProps
+export const MaintenanceWindowSolutionSelection = (
+  props: MaintenanceWindowSolutionSelectionProps
 ) => {
   const { selectedCategories = [], onChange } = props;
 
@@ -51,7 +56,7 @@ export const MaintenanceWindowSolutionSelectionForm = (
   }, [selectedCategories]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj="maintenanceWindowSolutionSelection">
       <EuiFlexItem>
         <EuiText size="s">
           <h4>{i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}</h4>

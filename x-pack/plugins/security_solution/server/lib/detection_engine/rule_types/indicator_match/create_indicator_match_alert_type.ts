@@ -7,7 +7,9 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { SERVER_APP_ID, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { ThreatRuleParams } from '../../rule_schema';
 import { threatRuleParams } from '../../rule_schema';
@@ -60,7 +62,7 @@ export const createIndicatorMatchAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    category: APP_ID,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { within } from '@testing-library/react';
+import { within, fireEvent } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
   CreateMaintenanceWindowFormProps,
@@ -38,6 +38,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(result.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
@@ -50,6 +51,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(result.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.getByTestId('timezone-field')).toBeInTheDocument();
   });
@@ -81,7 +83,7 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
-          categoryIds: [],
+          categoryIds: ['observability', 'management'],
         }}
       />
     );
@@ -94,10 +96,61 @@ describe('CreateMaintenanceWindowForm', () => {
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
     const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('input');
 
+    const kibanaInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-kibana');
+    const observabilityInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-observability');
+    const securityInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-securitySolution');
+    const managementInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-management');
+
+    expect(kibanaInput).not.toBeChecked();
+    expect(observabilityInput).toBeChecked();
+    expect(securityInput).not.toBeChecked();
+    expect(managementInput).toBeChecked();
+
     expect(titleInput).toHaveValue('test');
     expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
     expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
     expect(recurringInput).toBeChecked();
     expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
+  });
+
+  it('can select category IDs', () => {
+    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    const kibanaInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-kibana');
+    const observabilityInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-observability');
+    const securityInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-securitySolution');
+    const managementInput = within(
+      result.getByTestId('maintenanceWindowSolutionSelection')
+    ).getByTestId('checkbox-management');
+
+    fireEvent.click(kibanaInput);
+    fireEvent.click(observabilityInput);
+
+    expect(kibanaInput).toBeChecked();
+    expect(observabilityInput).toBeChecked();
+    expect(securityInput).not.toBeChecked();
+    expect(managementInput).not.toBeChecked();
+
+    fireEvent.click(kibanaInput);
+    fireEvent.click(observabilityInput);
+
+    expect(kibanaInput).not.toBeChecked();
+    expect(observabilityInput).not.toBeChecked();
+    expect(securityInput).not.toBeChecked();
+    expect(managementInput).not.toBeChecked();
   });
 });

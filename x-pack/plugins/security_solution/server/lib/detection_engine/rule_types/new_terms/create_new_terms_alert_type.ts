@@ -7,7 +7,8 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { SERVER_APP_ID, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { NewTermsRuleParams } from '../../rule_schema';
 import { newTermsRuleParams } from '../../rule_schema';
@@ -91,7 +92,7 @@ export const createNewTermsAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    category: APP_ID,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
