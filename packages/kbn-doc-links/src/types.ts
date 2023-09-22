@@ -438,6 +438,7 @@ export interface DocLinks {
     slackApiAction: string;
     teamsAction: string;
     connectors: string;
+    serverlessConnectors: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;

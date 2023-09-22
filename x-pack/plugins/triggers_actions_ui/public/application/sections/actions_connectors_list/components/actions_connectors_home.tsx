@@ -99,7 +99,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           <EuiButtonEmpty
             data-test-subj="documentationButton"
             key="documentation-button"
-            href={docLinks.links.alerting.actionTypes}
+            href={docLinks.links.alerting.serverlessConnectors}
             iconType="help"
           >
             <FormattedMessage

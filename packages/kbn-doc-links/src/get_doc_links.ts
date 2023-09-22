@@ -564,6 +564,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
+      serverlessConnectors: `${SERVERLESS_DOCS}action-connectors`,
     },
     taskManager: {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
