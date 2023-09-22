@@ -22,7 +22,7 @@ import {
   EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -752,66 +752,75 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
             <EuiPageTemplate
               className="eui-fullHeight"
-              pageHeader={{
-                pageTitle: (
+              restrictWidth={1000}
+            >
+              <EuiPageTemplate.Header
+                paddingSize='m'
+                pageTitle={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.title"
                     defaultMessage="Profile"
                   />
-                ),
-                pageTitleProps: { id: titleId },
-                rightSideItems: rightSideItems.reverse().map((item) => (
-                  <EuiDescriptionList
-                    textStyle="reverse"
-                    listItems={[
-                      {
-                        title: (
-                          <EuiText color={euiTheme.colors.darkestShade} size="s">
-                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                                <EuiIconTip type="questionInCircle" content={item.helpText} />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiText>
-                        ),
-                        description: (
-                          <span data-test-subj={item.testSubj}>
-                            {item.description || (
-                              <EuiText color={euiTheme.colors.disabledText} size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.noneProvided"
-                                  defaultMessage="None provided"
-                                />
-                              </EuiText>
-                            )}
-                          </span>
-                        ),
-                      },
-                    ]}
-                    compressed
+                }
+                id={titleId}
+                rightSideItems={
+                  rightSideItems.reverse().map((item) => (
+                    <EuiDescriptionList
+                      textStyle="reverse"
+                      listItems={[
+                        {
+                          title: (
+                            <EuiText color={euiTheme.colors.darkestShade} size="s">
+                              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                                <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                                <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                  <EuiIconTip type="questionInCircle" content={item.helpText} />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiText>
+                          ),
+                          description: (
+                            <span data-test-subj={item.testSubj}>
+                              {item.description || (
+                                <EuiText color={euiTheme.colors.disabledText} size="s">
+                                  <FormattedMessage
+                                    id="xpack.security.accountManagement.userProfile.noneProvided"
+                                    defaultMessage="None provided"
+                                  />
+                                </EuiText>
+                              )}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      compressed
+                    />
+                  ))}
+              />
+              <EuiPageTemplate.Section>
+                <Form aria-labelledby={titleId}>
+                  <UserDetailsEditor user={user} />
+                  {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
+                  <UserPasswordEditor
+                    user={user}
+                    onShowPasswordForm={() => setShowChangePasswordForm(true)}
                   />
-                )),
-              }}
-              bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-              bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-              restrictWidth={1000}
-            >
-              <Form aria-labelledby={titleId}>
-                <UserDetailsEditor user={user} />
-                {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
-                <UserPasswordEditor
-                  user={user}
-                  onShowPasswordForm={() => setShowChangePasswordForm(true)}
-                />
-                {isCloudUser ? null : (
-                  <UserSettingsEditor
-                    formik={formik}
-                    isThemeOverridden={isThemeOverridden}
-                    isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
-                  />
-                )}
-              </Form>
+                  {isCloudUser ? null : (
+                    <UserSettingsEditor
+                      formik={formik}
+                      isThemeOverridden={isThemeOverridden}
+                      isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                    />
+                  )}
+                </Form>
+              </EuiPageTemplate.Section>
+              {(formChanges.count > 0 ?
+                <EuiPageTemplate.BottomBar
+                  paddingSize='m'
+                  position='fixed'
+                >
+                  <SaveChangesBottomBar/>
+                </EuiPageTemplate.BottomBar> : null)}
             </EuiPageTemplate>
           </Breadcrumb>
         </FormChangesProvider>
