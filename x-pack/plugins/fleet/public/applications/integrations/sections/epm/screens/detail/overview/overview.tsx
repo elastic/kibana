@@ -4,9 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiButton } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiLink,
+  EuiButton,
+  EuiSideNav,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,6 +27,7 @@ import {
   useGetPackageVerificationKeyId,
   useLink,
   useStartServices,
+  sendGetFileByPath,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -33,12 +42,22 @@ interface Props {
   latestGAVersion?: string;
 }
 
-const LeftColumn = styled(EuiFlexItem)`
-  /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-  &&& {
-    margin-top: 77px;
-  }
-`;
+interface Item {
+  id: string;
+  name: string;
+  items?: Item[];
+  isSelected?: boolean;
+  forceOpen: boolean;
+  // isSelected
+  // onClick: () => selectItem(name),
+}
+
+// const LeftColumn = styled(EuiFlexItem)`
+//   /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
+//   &&& {
+//     margin-top: 77px;
+//   }
+// `;
 
 const UnverifiedCallout: React.FC = () => {
   const { docLinks } = useStartServices();
@@ -122,9 +141,77 @@ export const OverviewPage: React.FC<Props> = memo(
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
+    const [markdown, setMarkdown] = useState<string | undefined>(undefined);
+    const [selectedItemName, setSelectedItem] = useState(null);
+
+    const readmePath =
+      integrationInfo && isIntegrationPolicyTemplate(integrationInfo) && integrationInfo?.readme
+        ? integrationInfo?.readme
+        : packageInfo.readme;
+
+    useEffect(() => {
+      sendGetFileByPath(readmePath).then((res) => {
+        setMarkdown(res.data || '');
+      });
+    }, [readmePath]);
+
+    const extractHeadings = (markDown: string | undefined) => {
+      if (!markDown) return [];
+      const regex = /^\s*#+\s+(.+)/;
+      return markDown.split('\n').filter((line) => line.match(regex));
+    };
+
+    const getName = (heading: string) => heading.replace(/^#+\s*/, '');
+
+    const headingsToNavItems = (headings: string[]): any[] => {
+      const options = { forceOpen: true };
+      return headings.reduce((acc: any[], heading: string, index: number) => {
+        if (heading.startsWith('## ')) {
+          const name = getName(heading);
+          acc.push({ name, id: `${name}-${index}`, items: [], ...options });
+        } else if (heading.startsWith('### ')) {
+          const name = getName(heading);
+          const subGroup: Item = { name, id: `${name}-${index}`, items: [], ...options };
+          let i = index + 1;
+          while (i < headings.length && headings[i].startsWith('#### ')) {
+            const subGroupName = getName(headings[i]);
+            subGroup.items?.push({
+              name: subGroupName,
+              id: `${subGroupName}-${index}`,
+              items: [],
+              ...options,
+            });
+            i++;
+          }
+          acc[acc.length - 1].items.push(subGroup);
+        }
+        return acc;
+      }, []);
+    };
+
+    const headings = extractHeadings(markdown);
+    console.log(headings);
+    const navItems = headingsToNavItems(headings);
+    console.log('navItems', navItems);
+
+    const sideNavItems = [
+      {
+        name: 'Title',
+        id: 'title',
+        items: navItems,
+      },
+    ];
+
     return (
-      <EuiFlexGroup alignItems="flexStart">
-        <LeftColumn grow={2} />
+      <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
+        <EuiFlexItem grow={2}>
+          <EuiSideNav
+            mobileTitle="Nav Items"
+            // toggleOpenOnMobile={toggleOpenOnMobile}
+            // isOpenOnMobile={isSideNavOpenOnMobile}
+            items={sideNavItems}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
           {isPrerelease && (
@@ -136,13 +223,7 @@ export const OverviewPage: React.FC<Props> = memo(
           )}
           {packageInfo.readme ? (
             <Readme
-              readmePath={
-                integrationInfo &&
-                isIntegrationPolicyTemplate(integrationInfo) &&
-                integrationInfo?.readme
-                  ? integrationInfo?.readme
-                  : packageInfo.readme
-              }
+              markdown={markdown}
               packageName={packageInfo.name}
               version={packageInfo.version}
             />

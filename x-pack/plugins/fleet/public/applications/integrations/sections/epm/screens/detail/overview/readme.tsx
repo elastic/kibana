@@ -6,24 +6,23 @@
  */
 
 import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
-import React, { Fragment, useEffect, useState } from 'react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { useLinks, sendGetFileByPath } from '../../../../../hooks';
+import { useLinks } from '../../../../../hooks';
 
 import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({
-  readmePath,
   packageName,
   version,
+  markdown,
 }: {
-  readmePath: string;
   packageName: string;
   version: string;
+  markdown: string | undefined;
 }) {
-  const [markdown, setMarkdown] = useState<string | undefined>(undefined);
   const { toRelativeImage } = useLinks();
   const handleImageUri = React.useCallback(
     (uri: string) => {
@@ -35,14 +34,8 @@ export function Readme({
     [toRelativeImage, packageName, version]
   );
 
-  useEffect(() => {
-    sendGetFileByPath(readmePath).then((res) => {
-      setMarkdown(res.data || '');
-    });
-  }, [readmePath]);
-
   return (
-    <Fragment>
+    <>
       {markdown !== undefined ? (
         <EuiText grow={true}>
           <ReactMarkdown
@@ -63,6 +56,6 @@ export function Readme({
           <EuiSkeletonText lines={4} />
         </EuiText>
       )}
-    </Fragment>
+    </>
   );
 }

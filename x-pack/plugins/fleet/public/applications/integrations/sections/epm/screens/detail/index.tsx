@@ -293,7 +293,7 @@ export function Detail() {
 
   const headerLeftContent = useMemo(
     () => (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
