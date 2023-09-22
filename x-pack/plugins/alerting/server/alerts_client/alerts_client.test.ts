@@ -11,7 +11,6 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   RecoveredActionGroup,
   RuleAlertData,
-  RuleNotifyWhen,
 } from '../types';
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { LegacyAlertsClient } from './legacy_alerts_client';
@@ -62,6 +61,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
     shouldWrite: true,
   },
+  validLegacyConsumers: [],
 };
 
 const mockLegacyAlertsClient = legacyAlertsClientMock.create();
@@ -114,7 +114,7 @@ describe('Alerts Client', () => {
           ruleRunMetricsStore,
           shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          notifyWhen: RuleNotifyWhen.CHANGE,
+          notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
         };
       });
@@ -1300,6 +1300,236 @@ describe('Alerts Client', () => {
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing 1 out of 2 alerts - [{\"type\":\"action_request_validation_exception\",\"reason\":\"Validation Failed: 1: index is missing;2: type is missing;\"}]`
+          );
+        });
+
+        test('should log if alert to update belongs to a non-standard index', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: {
+                relation: 'eq',
+                value: 2,
+              },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: 'partial-.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: {
+                    '@timestamp': '2023-03-28T12:27:28.159Z',
+                    event: {
+                      action: 'active',
+                      kind: 'signal',
+                    },
+                    kibana: {
+                      alert: {
+                        action_group: 'default',
+                        duration: {
+                          us: '0',
+                        },
+                        flapping: false,
+                        flapping_history: [true],
+                        instance: {
+                          id: '1',
+                        },
+                        rule: {
+                          category: 'My test rule',
+                          consumer: 'bar',
+                          execution: {
+                            uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                          },
+                          name: 'rule-name',
+                          parameters: {
+                            bar: true,
+                          },
+                          producer: 'alerts',
+                          revision: 0,
+                          rule_type_id: 'test.rule-type',
+                          tags: ['rule-', '-tags'],
+                          uuid: '1',
+                        },
+                        start: '2023-03-28T12:27:28.159Z',
+                        status: 'active',
+                        time_range: {
+                          gte: '2023-03-28T12:27:28.159Z',
+                        },
+                        uuid: 'abc',
+                        workflow_status: 'open',
+                      },
+                      space_ids: ['default'],
+                      version: '8.8.0',
+                    },
+                    tags: ['rule-', '-tags'],
+                  },
+                },
+                {
+                  _id: 'xyz',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: {
+                    '@timestamp': '2023-03-28T12:27:28.159Z',
+                    event: {
+                      action: 'active',
+                      kind: 'signal',
+                    },
+                    kibana: {
+                      alert: {
+                        action_group: 'default',
+                        duration: {
+                          us: '0',
+                        },
+                        flapping: false,
+                        flapping_history: [true],
+                        instance: {
+                          id: '2',
+                        },
+                        rule: {
+                          category: 'My test rule',
+                          consumer: 'bar',
+                          execution: {
+                            uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                          },
+                          name: 'rule-name',
+                          parameters: {
+                            bar: true,
+                          },
+                          producer: 'alerts',
+                          revision: 0,
+                          rule_type_id: 'test.rule-type',
+                          tags: ['rule-', '-tags'],
+                          uuid: '1',
+                        },
+                        start: '2023-03-28T12:27:28.159Z',
+                        status: 'active',
+                        time_range: {
+                          gte: '2023-03-28T12:27:28.159Z',
+                        },
+                        uuid: 'xyz',
+                        workflow_status: 'open',
+                      },
+                      space_ids: ['default'],
+                      version: '8.8.0',
+                    },
+                    tags: ['rule-', '-tags'],
+                  },
+                },
+              ],
+            },
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {
+              '1': {
+                state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+                meta: {
+                  flapping: false,
+                  flappingHistory: [true],
+                  maintenanceWindowIds: [],
+                  lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+                  uuid: 'abc',
+                },
+              },
+              '2': {
+                state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+                meta: {
+                  flapping: false,
+                  flappingHistory: [true],
+                  maintenanceWindowIds: [],
+                  lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+                  uuid: 'xyz',
+                },
+              },
+            },
+            recoveredAlertsFromState: {},
+          });
+
+          // Report 2 active alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'xyz',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              // ongoing alert doc
+              {
+                '@timestamp': date,
+                event: {
+                  action: 'active',
+                  kind: 'signal',
+                },
+                kibana: {
+                  alert: {
+                    action_group: 'default',
+                    duration: {
+                      us: '36000000000000',
+                    },
+                    flapping: false,
+                    flapping_history: [true, false],
+                    instance: {
+                      id: '2',
+                    },
+                    maintenance_window_ids: [],
+                    rule: {
+                      category: 'My test rule',
+                      consumer: 'bar',
+                      execution: {
+                        uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                      },
+                      name: 'rule-name',
+                      parameters: {
+                        bar: true,
+                      },
+                      producer: 'alerts',
+                      revision: 0,
+                      rule_type_id: 'test.rule-type',
+                      tags: ['rule-', '-tags'],
+                      uuid: '1',
+                    },
+                    start: '2023-03-28T12:27:28.159Z',
+                    status: 'active',
+                    time_range: {
+                      gte: '2023-03-28T12:27:28.159Z',
+                    },
+                    uuid: 'xyz',
+                    workflow_status: 'open',
+                  },
+                  space_ids: ['default'],
+                  version: '8.9.0',
+                },
+                tags: ['rule-', '-tags'],
+              },
+            ],
+          });
+
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported.`
           );
         });
 

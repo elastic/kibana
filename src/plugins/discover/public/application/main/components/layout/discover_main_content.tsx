@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
 import useObservable from 'react-use/lib/useObservable';
 import React, { useCallback } from 'react';
@@ -97,7 +97,6 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="none" />
             {!isPlainRecord && (
               <DocumentViewModeToggle
                 viewMode={viewMode}

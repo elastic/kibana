@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { InfraMetadata } from '../../../common/http_api';
+import { INTEGRATIONS } from './constants';
+
 export const toTimestampRange = ({ from, to }: { from: string; to: string }) => {
   const fromTs = new Date(from).getTime();
   const toTs = new Date(to).getTime();
@@ -20,4 +23,14 @@ export const getDefaultDateRange = () => {
     from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
     to: new Date(now).toISOString(),
   };
+};
+
+export const getIntegrationsAvailable = (metadata?: InfraMetadata | null) => {
+  if (!metadata) {
+    return [];
+  }
+
+  return Object.entries(INTEGRATIONS)
+    .filter(([_, fields]) => metadata?.features?.some((f) => fields.includes(f.name)))
+    .map(([name]) => name);
 };

@@ -695,6 +695,14 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/subscription-tracking",
+                "path": "packages/kbn-subscription-tracking/src/use_go_to_subscription.ts"
+              },
+              {
+                "plugin": "@kbn/subscription-tracking",
+                "path": "packages/kbn-subscription-tracking/src/use_impression.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/types.ts"
               },
@@ -711,8 +719,8 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",
@@ -725,6 +733,14 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "infra",
@@ -881,6 +897,14 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "infra",

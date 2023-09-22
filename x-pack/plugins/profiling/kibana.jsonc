@@ -24,6 +24,7 @@
       "observabilityAIAssistant",
       "unifiedSearch",
       "share",
+      "embeddable",
       "profilingDataAccess"
     ],
     "requiredBundles": [

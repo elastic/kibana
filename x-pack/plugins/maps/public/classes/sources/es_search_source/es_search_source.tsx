@@ -152,17 +152,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     this._descriptor = sourceDescriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
       ? this._descriptor.tooltipProperties.map((property) => {
-          return this.createField({ fieldName: property });
+          return this.getFieldByName(property);
         })
       : [];
-  }
-
-  createField({ fieldName }: { fieldName: string }): ESDocField {
-    return new ESDocField({
-      fieldName,
-      source: this,
-      origin: FIELD_ORIGIN.SOURCE,
-    });
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -213,12 +205,20 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       });
 
       return fields.map((field): IField => {
-        return this.createField({ fieldName: field.name });
+        return this.getFieldByName(field.name);
       });
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
     }
+  }
+
+  getFieldByName(fieldName: string): ESDocField {
+    return new ESDocField({
+      fieldName,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
   }
 
   isMvt() {
@@ -747,7 +747,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
     return getSourceFields(indexPattern.fields).map((field): IField => {
-      return this.createField({ fieldName: field.name });
+      return this.getFieldByName(field.name);
     });
   }
 

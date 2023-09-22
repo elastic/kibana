@@ -40,62 +40,58 @@ jest.mock('react-redux', () => {
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
 
+const renderEntitiesDetails = (contextValue: LeftPanelContext) =>
+  render(
+    <TestProviders>
+      <LeftPanelContext.Provider value={contextValue}>
+        <EntitiesDetails />
+      </LeftPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('<EntitiesDetails />', () => {
   it('renders entities details correctly', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={mockContextValue}>
-          <EntitiesDetails />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = renderEntitiesDetails(mockContextValue);
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message if user name and host name are not available', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider
-          value={{
-            ...mockContextValue,
-            getFieldsData: (fieldName) =>
-              fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
-          }}
-        >
-          <EntitiesDetails />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const contextValue = {
+      ...mockContextValue,
+      getFieldsData: (fieldName: string) =>
+        fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
+    };
+    const { getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
     expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'Host and user information are unavailable for this alert.'
+    );
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('does not render user and host details if @timestamp is not available', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <LeftPanelContext.Provider
-          value={{
-            ...mockContextValue,
-            getFieldsData: (fieldName) => {
-              switch (fieldName) {
-                case 'host.name':
-                  return ['host1'];
-                case 'user.name':
-                  return ['user1'];
-                default:
-                  return [];
-              }
-            },
-          }}
-        >
-          <EntitiesDetails />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const contextValue = {
+      ...mockContextValue,
+      getFieldsData: (fieldName: string) => {
+        switch (fieldName) {
+          case 'host.name':
+            return ['host1'];
+          case 'user.name':
+            return ['user1'];
+          default:
+            return [];
+        }
+      },
+    };
+    const { getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
     expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'Host and user information are unavailable for this alert.'
+    );
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });

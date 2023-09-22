@@ -57,7 +57,7 @@ export const ElasticsearchOverview = () => {
   const elasticsearchURL = useMemo(() => {
     return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
   }, [cloud]);
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,

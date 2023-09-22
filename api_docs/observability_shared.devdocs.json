@@ -272,6 +272,72 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFlamegraph",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFlamegraph",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFlamegraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFunctions",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFunctions",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFunctions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -2358,6 +2424,40 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FLAMEGRAPH",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FLAMEGRAPH",
+        "description": [
+          "Profiling flamegraph embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FLAMEGRAPH\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FUNCTIONS",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FUNCTIONS",
+        "description": [
+          "Profiling functions embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FUNCTIONS\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

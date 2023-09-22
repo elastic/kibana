@@ -51,6 +51,18 @@ export const useDatasetSelector = ({
 
   const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
+  const selection = useSelector(datasetsSelectorStateService, (state) => state.context.selection);
+  const tabId = useSelector(datasetsSelectorStateService, (state) => state.context.tabId);
+
+  const switchToIntegrationsTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_INTEGRATIONS_TAB' }),
+    [datasetsSelectorStateService]
+  );
+
+  const switchToUncategorizedTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
+    [datasetsSelectorStateService]
+  );
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
@@ -98,17 +110,23 @@ export const useDatasetSelector = ({
 
   return {
     // Data
-    isOpen,
     panelId,
     search,
+    selection,
+    tabId,
+    // Flags
+    isOpen,
+    isAllMode: selection.selectionType === 'all',
     // Actions
-    closePopover,
     changePanel,
+    closePopover,
     scrollToIntegrationsBottom,
     searchByName,
     selectAllLogDataset,
     selectDataset,
     sortByOrder,
+    switchToIntegrationsTab,
+    switchToUncategorizedTab,
     togglePopover,
   };
 };
