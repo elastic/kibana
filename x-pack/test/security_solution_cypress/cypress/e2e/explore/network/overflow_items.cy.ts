@@ -23,7 +23,8 @@ const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165692
-describe('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
