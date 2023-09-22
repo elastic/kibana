@@ -391,6 +391,7 @@ describe('create', () => {
     clientArgs.services.caseConfigureService.find.mockResolvedValue({
       saved_objects: [
         {
+          // @ts-ignore: incomplete attributes
           attributes: {
             owner: theCase.owner,
             customFields: [

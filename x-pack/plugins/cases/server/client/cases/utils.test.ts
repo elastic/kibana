@@ -27,8 +27,10 @@ import {
   mapCaseFieldsToExternalSystemFields,
   formatComments,
   addKibanaInformationToDescription,
+  validateCustomFieldKeysAgainstConfiguration,
 } from './utils';
-import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
+import type { CaseCustomFields } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes, UserActionActions } from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -1339,6 +1341,78 @@ describe('utils', () => {
           userProfilesMapNoFullNames
         )
       ).toEqual(userProfiles[0].user.username);
+    });
+  });
+
+  describe('validateCustomFieldKeysAgainstConfiguration', () => {
+    const requestCustomFields: CaseCustomFields = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        field: { value: ['this is a text field value', 'this is second'] },
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        field: { value: [true] },
+      },
+    ];
+    const configurationCustomFields = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'foo',
+        required: false,
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'foo',
+        required: false,
+      },
+    ];
+
+    it('returns empty array when no key is missing', () => {
+      expect(
+        validateCustomFieldKeysAgainstConfiguration({
+          requestCustomFields,
+          configurationCustomFields,
+        })
+      ).toEqual([]);
+    });
+
+    it('does not throw when requestCustomFields is empty', () => {
+      expect(
+        validateCustomFieldKeysAgainstConfiguration({
+          requestCustomFields: [],
+          configurationCustomFields,
+        })
+      ).toEqual([]);
+    });
+
+    it('returns missing keys', () => {
+      expect(
+        validateCustomFieldKeysAgainstConfiguration({
+          requestCustomFields: [
+            ...requestCustomFields,
+            {
+              key: 'missing_key',
+              type: CustomFieldTypes.TOGGLE,
+              field: { value: [true] },
+            },
+          ],
+          configurationCustomFields,
+        })
+      ).toEqual(['missing_key']);
+    });
+
+    it('returns every key if no configurationCustomFields', () => {
+      expect(
+        validateCustomFieldKeysAgainstConfiguration({
+          requestCustomFields,
+          configurationCustomFields: [],
+        })
+      ).toEqual(['first_key', 'second_key']);
     });
   });
 });

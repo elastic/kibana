@@ -19,11 +19,15 @@ import type {
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
+  CustomFieldsConfiguration,
   ExternalService,
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import type {
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -452,4 +456,31 @@ export const getUserProfiles = async (
     acc.set(profile.uid, profile);
     return acc;
   }, new Map());
+};
+
+export const validateCustomFieldKeysAgainstConfiguration = ({
+  requestCustomFields,
+  configurationCustomFields = [],
+}: {
+  requestCustomFields: CaseRequestCustomFields;
+  configurationCustomFields?: CustomFieldsConfiguration;
+}): string[] => {
+  const invalidCustomFieldKeys: string[] = [];
+
+  requestCustomFields.forEach((customField) => {
+    let validKey = false;
+    configurationCustomFields.every(({ key: keyInConfiguration }) => {
+      if (keyInConfiguration === customField.key) {
+        validKey = true;
+      }
+
+      return !validKey;
+    });
+
+    if (!validKey) {
+      invalidCustomFieldKeys.push(customField.key);
+    }
+  });
+
+  return invalidCustomFieldKeys;
 };

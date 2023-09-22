@@ -880,28 +880,42 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.caseConfigureService.find.mockResolvedValue({
+        saved_objects: [
+          {
+            // @ts-ignore: incomplete attributes
+            attributes: {
+              owner: mockCases[0].attributes.owner,
+              customFields: [
+                {
+                  key: 'first_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'foo',
+                  required: false,
+                },
+                {
+                  key: 'second_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'foo',
+                  required: false,
+                },
+              ],
+            },
+          },
+        ],
+      });
     });
 
     it('can update customFields', async () => {
       const customFields = [
         {
-          key: 'string_custom_field_1',
+          key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
           field: { value: ['this is a text field value', 'this is second'] },
         },
         {
-          key: 'string_custom_field_2',
+          key: 'second_key',
           type: CustomFieldTypes.TEXT as const,
-          field: { value: null },
-        },
-        {
-          key: 'boolean_custom_field_1',
-          type: CustomFieldTypes.TOGGLE as const,
-          field: { value: [true] },
-        },
-        {
-          key: 'boolean_custom_field_2',
-          type: CustomFieldTypes.TOGGLE as const,
           field: { value: null },
         },
       ];
@@ -997,6 +1011,34 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
+    });
+
+    it('throws when customFields keys are not present in configuration', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['this is a text field value', 'this is second'] },
+                  },
+                  {
+                    key: 'missing_key',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: null },
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow('Error: Invalid custom field keys: missing_key');
     });
   });
 

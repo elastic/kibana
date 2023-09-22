@@ -25,6 +25,7 @@ import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import type { CaseConfigureService } from '../../services';
 import { buildFilter, throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
+import { validateCustomFieldKeysAgainstConfiguration } from './utils';
 
 /**
  * Throws if any of the custom field keys in the request does not exist in the case configuration.
@@ -44,7 +45,6 @@ async function throwIfCustomFieldKeysInvalid({
     return;
   }
 
-  const invalidCustomFieldKeys: string[] = [];
   const ownerFilter = buildFilter({
     filters: casePostRequest.owner,
     field: OWNER_FIELD,
@@ -61,20 +61,9 @@ async function throwIfCustomFieldKeysInvalid({
     throw Boom.badRequest('Invalid custom fields passed in request.');
   }
 
-  customFields.forEach((customField) => {
-    let validKey = false;
-
-    configuration.saved_objects[0].attributes.customFields?.every(({ key }) => {
-      if (key === customField.key) {
-        validKey = true;
-      }
-
-      return !validKey;
-    });
-
-    if (!validKey) {
-      invalidCustomFieldKeys.push(customField.key);
-    }
+  const invalidCustomFieldKeys = validateCustomFieldKeysAgainstConfiguration({
+    requestCustomFields: customFields,
+    configurationCustomFields: configuration.saved_objects[0].attributes.customFields,
   });
 
   if (invalidCustomFieldKeys.length) {

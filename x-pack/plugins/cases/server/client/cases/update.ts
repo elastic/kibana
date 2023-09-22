@@ -48,7 +48,12 @@ import {
   getCaseToUpdate,
   throwIfDuplicatedCustomFieldKeysInRequest,
 } from '../utils';
-import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import {
+  dedupAssignees,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
+  validateCustomFieldKeysAgainstConfiguration,
+} from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -122,7 +127,7 @@ async function throwIfCustomFieldKeysInvalid({
 }) {
   const configurations = await caseConfigureService.find({ unsecuredSavedObjectsClient });
   const configurationMap: Record<string, ConfigurationTransformedAttributes> = {};
-  const invalidCustomFieldKeys: string[] = [];
+  let invalidCustomFieldKeys: string[] = [];
 
   configurations?.saved_objects.forEach((e) => {
     if (!(e.attributes.owner in configurationMap)) {
@@ -131,25 +136,18 @@ async function throwIfCustomFieldKeysInvalid({
   });
 
   casesToUpdate.forEach(({ updateReq, originalCase }) => {
-    updateReq.customFields?.forEach((customField) => {
+    if (updateReq.customFields) {
       const owner = originalCase.attributes.owner;
+      const configurationCustomFields =
+        owner in configurationMap ? configurationMap[owner].customFields : [];
 
-      if (owner in configurationMap) {
-        let validKey = false;
-
-        configurationMap[owner]?.customFields?.every(({ key }) => {
-          if (key === customField.key) {
-            validKey = true;
-          }
-
-          return !validKey;
-        });
-
-        if (!validKey) {
-          invalidCustomFieldKeys.push(customField.key);
-        }
-      }
-    });
+      invalidCustomFieldKeys = invalidCustomFieldKeys.concat(
+        validateCustomFieldKeysAgainstConfiguration({
+          requestCustomFields: updateReq.customFields,
+          configurationCustomFields,
+        })
+      );
+    }
   });
 
   if (invalidCustomFieldKeys.length) {
