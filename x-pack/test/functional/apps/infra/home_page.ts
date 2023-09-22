@@ -16,7 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
   // Failing: See https://github.com/elastic/kibana/issues/164452
-  // Failing: See https://github.com/elastic/kibana/issues/157767
   describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
@@ -75,7 +74,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });
