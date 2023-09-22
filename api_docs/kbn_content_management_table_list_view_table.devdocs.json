@@ -125,7 +125,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, showEditActionForItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, itemIsEditable, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "common",
@@ -781,12 +781,12 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.showEditActionForItem",
+            "id": "def-common.TableListViewTableProps.itemIsEditable",
             "type": "Function",
             "tags": [],
-            "label": "showEditActionForItem",
+            "label": "itemIsEditable",
             "description": [
-              "\nHandler to set edit action visiblity per item."
+              "\nHandler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable."
             ],
             "signature": [
               "((item: T) => boolean) | undefined"
@@ -797,7 +797,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.showEditActionForItem.$1",
+                "id": "def-common.TableListViewTableProps.itemIsEditable.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",
@@ -983,6 +983,20 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
+            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-common.UserContentCommonSchema.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
