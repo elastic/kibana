@@ -157,10 +157,13 @@ const configurationFormSchema: FormSchema = {
   infiniteRetentionPeriod: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    label: i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField', {
-      defaultMessage: 'Never delete data',
-    }),
-  }
+    label: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
+      {
+        defaultMessage: 'Never delete data',
+      }
+    ),
+  },
 };
 
 const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
@@ -203,32 +206,30 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    return updateDataRetention(dataStreamName, data)
-      .then(({ data: responseData, error }) => {
-        if (responseData) {
-          const successMessage = i18n.translate(
-            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
-            { defaultMessage: 'Data retention updated' }
-          );
-          notificationService.showSuccessToast(successMessage);
+    return updateDataRetention(dataStreamName, data).then(({ data: responseData, error }) => {
+      if (responseData) {
+        const successMessage = i18n.translate(
+          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
+          { defaultMessage: 'Data retention updated' }
+        );
+        notificationService.showSuccessToast(successMessage);
 
-          return onClose({ hasUpdatedDataRetention: true });
-        }
-
-        if (error) {
-          const errorMessage = i18n.translate(
-            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
-            {
-              defaultMessage: "Error updating data retention: '{error}'",
-              values: { error: error.message },
-            }
-          );
-          notificationService.showDangerToast(errorMessage);
-        }
-
-        onClose();
+        return onClose({ hasUpdatedDataRetention: true });
       }
-    );
+
+      if (error) {
+        const errorMessage = i18n.translate(
+          'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
+          {
+            defaultMessage: "Error updating data retention: '{error}'",
+            values: { error: error.message },
+          }
+        );
+        notificationService.showDangerToast(errorMessage);
+      }
+
+      onClose();
+    });
   };
 
   return (
@@ -273,10 +274,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             }}
           />
 
-          <UseField
-            path="infiniteRetentionPeriod"
-            component={ToggleField}
-          />
+          <UseField path="infiniteRetentionPeriod" component={ToggleField} />
 
           <EuiSpacer />
         </EuiModalBody>
