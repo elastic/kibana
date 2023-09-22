@@ -12,37 +12,20 @@ import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { ShardsView } from './shards_view';
-
-export function getFailures(clusterDetails: ClusterDetails) {
-  const clusterFailures: estypes.ShardFailure[] = [];
-  const shardFailures: estypes.ShardFailure[] = [];
-  (clusterDetails.failures ?? []).forEach((failure) => {
-    if (failure.shard < 0) {
-      clusterFailures.push(failure);
-      (failure?.reason?.failed_shards ?? []).forEach((reasonFailure: estypes.ShardFailure) => {
-        shardFailures.push(reasonFailure);
-      });
-    } else {
-      shardFailures.push(failure);
-    }
-  });
-
-  return {
-    clusterFailures,
-    shardFailures,
-  };
-}
-
-function printErrorCause(errorCause: ErrorCause) {
-  return errorCause.reason ? `${errorCause.type}: "${errorCause.reason}"` : errorCause.type;
-}
+import { OpenShardFailureFlyoutButton } from './shards_view';
 
 interface Props {
   clusterDetails: ClusterDetails;
 }
 
 export function ClusterView({ clusterDetails }: Props) {
-  const { clusterFailures, shardFailures } = getFailures(clusterDetails);
+  const clusterFailure = (clusterDetails.failures ?? []).find(failure => {
+    return failure.shard < 0;
+  });
+  const shardFailures = (clusterDetails.failures ?? []).filter(failure => {
+    return failure.shard >= 0;
+  });
+  
   return (
     <EuiText style={{ width: '100%' }} size="xs">
       {clusterDetails.timed_out ? (
@@ -57,16 +40,19 @@ export function ClusterView({ clusterDetails }: Props) {
         />
       ) : null}
 
-      {clusterDetails.status === 'skipped' ? (
+      {clusterFailure ? (
         <EuiCallOut
           size="s"
           color="warning"
-          title={i18n.translate('inspector.requests.clusters.skippedClusterMessage', {
+          title={i18n.translate('inspector.requests.clusters.failedClusterMessage', {
             defaultMessage: 'Search failed',
           })}
           iconType="warning"
         >
-          {clusterFailures[0]?.reason ? printErrorCause(clusterFailures[0]?.reason) : ''}
+          <p>
+            {clusterFailure.reason.reason ? `${clusterFailure.reason.type}: "${clusterFailure.reason.reason}"` : clusterFailure.reason.type}
+          </p>
+          {clusterFailure.reason.failed_shards ? <OpenShardFailureFlyoutButton failures={clusterFailure.reason.failed_shards} /> : null}
         </EuiCallOut>
       ) : null}
 

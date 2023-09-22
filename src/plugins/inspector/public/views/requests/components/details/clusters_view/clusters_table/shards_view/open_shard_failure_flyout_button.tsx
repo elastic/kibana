@@ -23,7 +23,7 @@ export function OpenShardFailureFlyoutButton({ failures }: Props) {
     <>
       {failures.length ? (
         <EuiButtonEmpty
-          flush="right"
+          flush="both"
           onClick={() => {
             setShowFailures(!showFailures);
           }}

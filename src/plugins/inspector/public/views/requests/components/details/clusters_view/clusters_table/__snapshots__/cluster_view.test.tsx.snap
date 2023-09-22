@@ -1,29 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`render should display callout when cluster is skipped 1`] = `
-<EuiText
-  size="xs"
-  style={
-    Object {
-      "width": "100%",
-    }
-  }
->
-  <EuiCallOut
-    color="warning"
-    iconType="warning"
-    size="s"
-    title="Search failed"
-  >
-    no_such_remote_cluster_exception: "no such remote cluster: [remote1]"
-  </EuiCallOut>
-  <ShardsView
-    failures={Array []}
-  />
-</EuiText>
-`;
-
-exports[`render should display callout when request timed out 1`] = `
+exports[`render partial should display callout when request timed out 1`] = `
 <EuiText
   size="xs"
   style={
@@ -52,7 +29,7 @@ exports[`render should display callout when request timed out 1`] = `
 </EuiText>
 `;
 
-exports[`render should show failures 1`] = `
+exports[`render partial should show view shard failure button when there are shard failures 1`] = `
 <EuiText
   size="xs"
   style={
@@ -89,6 +66,100 @@ exports[`render should show failures 1`] = `
         "total": 2,
       }
     }
+  />
+</EuiText>
+`;
+
+exports[`render should display success 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <ShardsView
+    failures={Array []}
+    shardStats={
+      Object {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 3,
+        "total": 3,
+      }
+    }
+  />
+</EuiText>
+`;
+
+exports[`render skipped or failed should display callout when cluster is unavailable 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    size="s"
+    title="Search failed"
+  >
+    <p>
+      no_such_remote_cluster_exception: "no such remote cluster: [remote1]"
+    </p>
+  </EuiCallOut>
+  <ShardsView
+    failures={Array []}
+  />
+</EuiText>
+`;
+
+exports[`render skipped or failed should display callout with view failed shards button when all shards fail 1`] = `
+<EuiText
+  size="xs"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+>
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    size="s"
+    title="Search failed"
+  >
+    <p>
+      search_phase_execution_exception: "all shards failed"
+    </p>
+    <OpenShardFailureFlyoutButton
+      failures={
+        Array [
+          Object {
+            "index": "remote1:.ds-kibana_sample_data_logs-2023.09.21-000001",
+            "node": "_JVoOnN5QKidGGXFJAlgpA",
+            "reason": Object {
+              "caused_by": Object {
+                "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123",
+                "type": "runtime_exception",
+              },
+              "index": "remote1:.ds-kibana_sample_data_logs-2023.09.21-000001",
+              "index_uuid": "PAa7v-dKRIyo4kv6b8dxkQ",
+              "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123",
+              "type": "query_shard_exception",
+            },
+            "shard": 0,
+          },
+        ]
+      }
+    />
+  </EuiCallOut>
+  <ShardsView
+    failures={Array []}
   />
 </EuiText>
 `;
