@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import { DATES, INVENTORY_PATH } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
@@ -17,12 +18,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'infraHome',
+    'timePicker',
+    'assetDetails',
+    'infraSavedViews',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164164
-  describe.skip('Home page', function () {
+  const returnTo = async (path: string, timeout = 2000) =>
+    retry.waitForWithTimeout('returned to inventory', timeout, async () => {
+      await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const currentUrl = await browser.getCurrentUrl();
+      return !!currentUrl.match(path);
+    });
+
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -111,6 +126,92 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
+
+      describe('Asset Details flyout', () => {
+        before(async () => {
+          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.getWaffleMap();
+          await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
+          await pageObjects.infraHome.clickOnNode();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'normalizedLoad1m', value: '1.4%' },
+            { metric: 'memoryUsage', value: '18.0%' },
+            { metric: 'diskSpaceUsage', value: '17.5%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          it('should render 9 charts in the Metrics section', async () => {
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+            expect(hosts.length).to.equal(9);
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
+
+            expect(url.pathname).to.eql('/app/apm/traces');
+            expect(query).to.contain(kuery);
+
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+      });
+
       it('shows query suggestions', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.clickQueryBar();

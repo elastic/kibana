@@ -414,6 +414,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await queryBar.type('h');
     },
 
+    async inputAddHostNameFilter(hostName: string) {
+      await this.enterSearchTerm(`host.name:"${hostName}"`);
+    },
+
+    async clickOnNode() {
+      return testSubjects.click('nodeContainer');
+    },
+
     async ensureSuggestionsPanelVisible() {
       await testSubjects.find('infraSuggestionsPanel');
     },
