@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { action } from '@storybook/addon-actions';
+import { useState } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { EventHandler, FC, PropsWithChildren, MouseEvent } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
@@ -25,6 +25,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -36,9 +38,10 @@ import type { GroupDefinition, NonEmptyArray, ProjectNavigationDefinition } from
 
 const storybookMock = new NavigationStorybookMock();
 
-const NavigationWrapper: FC<PropsWithChildren<unknown> & Partial<EuiCollapsibleNavBetaProps>> = (
-  props
-) => {
+const NavigationWrapper: FC<
+  PropsWithChildren<{ clickAction?: EventHandler<MouseEvent>; clickActionText?: string }> &
+    Partial<EuiCollapsibleNavBetaProps>
+> = (props) => {
   return (
     <>
       <EuiHeader position="fixed">
@@ -47,7 +50,13 @@ const NavigationWrapper: FC<PropsWithChildren<unknown> & Partial<EuiCollapsibleN
         </EuiHeaderSection>
       </EuiHeader>
       <EuiPageTemplate>
-        <EuiPageTemplate.Section>Hello world</EuiPageTemplate.Section>
+        <EuiPageTemplate.Section>
+          {props.clickAction ? (
+            <button onClick={props.clickAction}>{props.clickActionText ?? 'Click me'}</button>
+          ) : (
+            <p>Hello world</p>
+          )}
+        </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </>
   );
@@ -154,79 +163,99 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
-const simpleNavigationGroupDefinition: GroupDefinition = {
-  type: 'navGroup',
-  id: 'observability_project_nav',
-  title: 'Observability',
-  icon: 'logoObservability',
-  accordionProps: { arrowProps: { css: { display: 'none' } } },
-  children: [
-    {
-      id: 'aiops',
-      title: 'AIOps',
-      icon: 'branch',
-      children: [
-        {
-          title: 'Anomaly detection',
-          link: 'ml:anomalyDetection',
-        },
-        { title: 'Log Rate Analysis', link: 'ml:logRateAnalysis' },
-        {
-          title: 'Change Point Detections',
-          link: 'ml:changePointDetections',
-        },
-        {
-          title: 'Job Notifications',
-          link: 'ml:notifications',
-        },
-      ],
-    },
-    {
-      id: 'project_settings_project_nav',
-      title: 'Project settings',
-      icon: 'gear',
-      children: [{ link: 'management' }, { link: 'integrations' }, { link: 'fleet' }],
-    },
-  ],
-};
-
-const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
-  [
-    {
-      ...simpleNavigationGroupDefinition,
-      path: ['observability_project_nav'],
-    } as unknown as ChromeProjectNavigationNode,
-    {
-      ...simpleNavigationGroupDefinition.children?.[0],
-      path: ['observability_project_nav', 'aiops'],
-    } as unknown as ChromeProjectNavigationNode,
-    {
-      ...simpleNavigationGroupDefinition.children?.[0].children?.[0],
-      path: ['observability_project_nav', 'aiops', 'ml:logRateAnalysis'],
-    } as unknown as ChromeProjectNavigationNode,
-  ],
-]);
-
-const controlActiveNode = () => {
-  activeNodes$.next([
-    [
-      {
-        ...simpleNavigationGroupDefinition,
-        path: ['observability_project_nav'],
-      } as unknown as ChromeProjectNavigationNode,
-      {
-        ...simpleNavigationGroupDefinition.children?.[0],
-        path: ['observability_project_nav', 'aiops'],
-      } as unknown as ChromeProjectNavigationNode,
-      {
-        ...simpleNavigationGroupDefinition.children?.[1].children?.[0],
-        path: ['observability_project_nav', 'project_settings_project_nav', 'management'],
-      } as unknown as ChromeProjectNavigationNode,
-    ],
-  ]);
-};
-
 export const UpdatingState = (args: NavigationServices) => {
+  const simpleGroupDef: GroupDefinition = {
+    type: 'navGroup',
+    id: 'observability_project_nav',
+    title: 'Observability',
+    icon: 'logoObservability',
+    children: [
+      {
+        id: 'aiops',
+        title: 'AIOps',
+        icon: 'branch',
+        children: [
+          {
+            title: 'Anomaly detection',
+            id: 'ml:anomalyDetection',
+            link: 'ml:anomalyDetection',
+          },
+          {
+            title: 'Log Rate Analysis',
+            id: 'ml:logRateAnalysis',
+            link: 'ml:logRateAnalysis',
+          },
+          {
+            title: 'Change Point Detections',
+            link: 'ml:changePointDetections',
+            id: 'ml:changePointDetections',
+          },
+          {
+            title: 'Job Notifications',
+            link: 'ml:notifications',
+            id: 'ml:notifications',
+          },
+        ],
+      },
+      {
+        id: 'project_settings_project_nav',
+        title: 'Project settings',
+        icon: 'gear',
+        children: [
+          { id: 'management', link: 'management' },
+          { id: 'integrations', link: 'integrations' },
+          { id: 'fleet', link: 'fleet' },
+        ],
+      },
+    ],
+  };
+  const firstSection = simpleGroupDef.children![0];
+  const firstSectionFirstChild = firstSection.children![0];
+  const secondSection = simpleGroupDef.children![1];
+  const secondSectionFirstChild = secondSection.children![0];
+
+  const activeNodeSets: ChromeProjectNavigationNode[][][] = [
+    [
+      [
+        {
+          ...simpleGroupDef,
+          path: [simpleGroupDef.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...firstSection,
+          path: [simpleGroupDef.id, firstSection.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...firstSectionFirstChild,
+          path: [simpleGroupDef.id, firstSection.id, firstSectionFirstChild.id],
+        } as unknown as ChromeProjectNavigationNode,
+      ],
+    ],
+    [
+      [
+        {
+          ...simpleGroupDef,
+          path: [simpleGroupDef.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...secondSection,
+          path: [simpleGroupDef.id, secondSection.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...secondSectionFirstChild,
+          path: [simpleGroupDef.id, secondSection.id, secondSectionFirstChild.id],
+        } as unknown as ChromeProjectNavigationNode,
+      ],
+    ],
+  ];
+  const [activeNodeIndex, setActiveNodeIndex] = useState<number>(1);
+  const toggleActiveNode = () => {
+    const value = (activeNodeIndex + 1) % 2;
+    setActiveNodeIndex(value);
+  };
+  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  activeNodes$.next(activeNodeSets[activeNodeIndex]);
+
   const services = storybookMock.getServices({
     ...args,
     activeNodes$,
@@ -237,22 +266,17 @@ export const UpdatingState = (args: NavigationServices) => {
   });
 
   return (
-    <NavigationWrapper>
+    <NavigationWrapper clickAction={toggleActiveNode} clickActionText="Toggle active node">
       <NavigationProvider {...services}>
         <DefaultNavigation
           navigationTree={{
-            body: [simpleNavigationGroupDefinition],
+            body: [simpleGroupDef],
           }}
         />
       </NavigationProvider>
     </NavigationWrapper>
   );
 };
-UpdatingState.argTypes = {
-  updateActiveNodes: { action: 'updateActiveNodes' },
-  ...storybookMock.getArgumentTypes(),
-};
-UpdatingState.args = {};
 
 const navigationDefinition: ProjectNavigationDefinition = {
   navigationTree: {
