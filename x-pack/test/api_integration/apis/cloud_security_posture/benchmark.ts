@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
     let agentPolicyId2: string;
     let agentPolicyId3: string;
+    let agentPolicyId4: string;
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -54,6 +55,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       agentPolicyId3 = agentPolicyResponse3.item.id;
 
+      const { body: agentPolicyResponse4 } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 4',
+          namespace: 'default',
+        });
+
+      agentPolicyId4 = agentPolicyResponse4.item.id;
+
       await createPackagePolicy(
         supertest,
         agentPolicyId,
@@ -76,22 +87,22 @@ export default function ({ getService }: FtrProviderContext) {
 
       await createPackagePolicy(
         supertest,
-        agentPolicyId2,
-        'kspm',
-        'cloudbeat/cis_k8s',
-        'vanilla',
-        'kspm',
-        'KSPM-2'
-      );
-
-      await createPackagePolicy(
-        supertest,
         agentPolicyId3,
         'vuln_mgmt',
         'cloudbeat/vuln_mgmt_aws',
         'aws',
         'vuln_mgmt',
         'CNVM-1'
+      );
+
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId4,
+        'kspm',
+        'cloudbeat/cis_k8s',
+        'vanilla',
+        'kspm',
+        'KSPM-2'
       );
     });
 
@@ -129,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(2);
+      expect(res.items.length).equal(1);
       expect(res.total).equal(3);
     });
 

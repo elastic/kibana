@@ -108,7 +108,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         }
 
         const cspContext = await context.csp;
-
+        const excludeVulnMgmtPackages = true;
         try {
           const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
             cspContext.soClient,
@@ -116,7 +116,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
             request.query,
             POSTURE_TYPE_ALL,
-            true
+            excludeVulnMgmtPackages
           );
 
           const agentPolicies = await getCspAgentPolicies(

@@ -118,7 +118,7 @@ export const getCspPackagePolicies = async (
     if (excludeVulnMgmtPackages) {
       return showCSPMKSPMPackagesPolicies;
     }
-    if ((postureType = 'all')) {
+    if (postureType === 'all') {
       return showAllPackages;
     }
 
