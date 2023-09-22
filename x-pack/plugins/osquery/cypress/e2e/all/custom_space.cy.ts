@@ -20,7 +20,7 @@ const testSpaces = [
   { name: 'default', tags: ['@ess', '@serverless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
-describe('ALL - Custom space', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
     describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
