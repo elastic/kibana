@@ -8,6 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 import { API_BASE_PATH } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
@@ -40,6 +44,7 @@ const urlServiceMock = {
 describe('Data Streams tab', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: DataStreamsTabTestBed;
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('when there are no data streams', () => {
     beforeEach(async () => {
@@ -119,6 +124,12 @@ describe('Data Streams tab', () => {
 
       testBed.component.update();
       expect(testBed.find('dataStreamTable').text()).toContain('No data streams found');
+    });
+
+    test('updates the breadcrumbs to data streams', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.dataStreams
+      );
     });
   });
 
