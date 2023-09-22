@@ -6,17 +6,22 @@
  */
 
 import React, { useEffect } from 'react';
+import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
+import { type BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiHeader,
+  EuiHeaderLink,
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   useEuiTheme,
 } from '@elastic/eui';
+import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   ObservabilityOnboardingLocatorParams,
@@ -28,6 +33,7 @@ import { PluginKibanaContextValue } from '../utils/use_kibana';
 import {
   betaBadgeDescription,
   betaBadgeTitle,
+  discoverLinkTitle,
   onboardingLinkTitle,
 } from '../../common/translations';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
@@ -35,28 +41,45 @@ import { getRouterLinkProps } from '../utils/get_router_link_props';
 interface LogExplorerTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
+  state$: BehaviorSubject<LogExplorerStateContainer>;
   theme$: AppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
   setHeaderActionMenu,
   services,
+  state$,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
   const { serverless } = services;
 
   return Boolean(serverless) ? (
-    <ServerlessTopNav services={services} />
+    <ServerlessTopNav services={services} state$={state$} />
   ) : (
-    <StatefulTopNav services={services} setHeaderActionMenu={setHeaderActionMenu} theme$={theme$} />
+    <StatefulTopNav
+      services={services}
+      setHeaderActionMenu={setHeaderActionMenu}
+      state$={state$}
+      theme$={theme$}
+    />
   );
 };
 
-const ServerlessTopNav = ({ services }: Pick<LogExplorerTopNavMenuProps, 'services'>) => {
+const ServerlessTopNav = ({
+  services,
+  state$,
+}: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu">
+      <EuiHeaderSection>
+        <EuiHeaderSectionItem>
+          <EuiHeaderLinks gutterSize="xs">
+            <DiscoverLink services={services} state$={state$} />
+          </EuiHeaderLinks>
+        </EuiHeaderSectionItem>
+      </EuiHeaderSection>
       <EuiHeaderSection
         side="right"
         css={css`
@@ -80,7 +103,12 @@ const ServerlessTopNav = ({ services }: Pick<LogExplorerTopNavMenuProps, 'servic
   );
 };
 
-const StatefulTopNav = ({ setHeaderActionMenu, services, theme$ }: LogExplorerTopNavMenuProps) => {
+const StatefulTopNav = ({
+  setHeaderActionMenu,
+  services,
+  state$,
+  theme$,
+}: LogExplorerTopNavMenuProps) => {
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
@@ -116,6 +144,7 @@ const StatefulTopNav = ({ setHeaderActionMenu, services, theme$ }: LogExplorerTo
       <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
+            <DiscoverLink services={services} state$={state$} />
             <OnboardingLink services={services} />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
@@ -123,6 +152,57 @@ const StatefulTopNav = ({ setHeaderActionMenu, services, theme$ }: LogExplorerTo
     </HeaderMenuPortal>
   );
 };
+
+const DiscoverLink = React.memo(
+  ({ services, state$ }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
+    const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
+      state$.pipe(
+        distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
+          if (!prev.appState || !curr.appState) return false;
+          return deepEqual(
+            [
+              prev.appState.columns,
+              prev.appState.filters,
+              prev.appState.index,
+              prev.appState.query,
+            ],
+            [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
+          );
+        })
+      ),
+      { appState: {}, logExplorerState: {} }
+    );
+
+    const discoverLinkParams = {
+      columns: appState?.columns,
+      filters: appState?.filters,
+      query: appState?.query,
+      dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
+    };
+
+    const discoverUrl = services.discover.locator?.getRedirectUrl(discoverLinkParams);
+
+    const navigateToDiscover = () => {
+      services.discover.locator?.navigate(discoverLinkParams);
+    };
+
+    const discoverLinkProps = getRouterLinkProps({
+      href: discoverUrl,
+      onClick: navigateToDiscover,
+    });
+
+    return (
+      <EuiHeaderLink
+        {...discoverLinkProps}
+        color="primary"
+        iconType="discoverApp"
+        data-test-subj="logExplorerDiscoverFallbackLink"
+      >
+        {discoverLinkTitle}
+      </EuiHeaderLink>
+    );
+  }
+);
 
 const OnboardingLink = React.memo(({ services }: Pick<LogExplorerTopNavMenuProps, 'services'>) => {
   const locator = services.share.url.locators.get<ObservabilityOnboardingLocatorParams>(
