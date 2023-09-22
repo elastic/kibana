@@ -1006,6 +1006,22 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
   },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
+  top_traces: {
+    max: {
+      type: 'long',
+      _meta: {
+        description:
+          'Max number of documents in top 100 traces withing the last day',
+      },
+    },
+    median: {
+      type: 'long',
+      _meta: {
+        description:
+          'Median number of documents in top 100 traces within the last day',
+      },
+    },
+  },
   tasks: {
     aggregated_transactions: {
       took: {
@@ -1165,6 +1181,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "per_service" task',
+          },
+        },
+      },
+    },
+    top_traces: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "top_traces" task',
           },
         },
       },

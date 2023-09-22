@@ -7,10 +7,10 @@
 
 import type { VFC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
-import { RESPONSE_TITLE } from './translations';
 export interface ResponseSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -25,7 +25,12 @@ export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false })
   return (
     <ExpandableSection
       expanded={expanded}
-      title={RESPONSE_TITLE}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.response.sectionTitle"
+          defaultMessage="Response"
+        />
+      }
       data-test-subj={RESPONSE_SECTION_TEST_ID}
     >
       <ResponseButton />

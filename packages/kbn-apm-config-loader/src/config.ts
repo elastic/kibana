@@ -20,7 +20,6 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
   contextPropagationOnly: true,
   environment: 'development',
-  logUncaughtExceptions: true,
   globalLabels: {},
 };
 
