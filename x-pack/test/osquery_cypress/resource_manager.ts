@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-const CLEANUP_EVENTS = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
+const CLEANUP_EVENTS = [
+  'SIGINT',
+  'exit',
+  'uncaughtException',
+  'unhandledRejection',
+  'shutdownCypressFleetServerAndAgents',
+];
 export class Manager {
   constructor() {
     const cleanup = () => this.cleanup();
