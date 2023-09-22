@@ -58,7 +58,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
-  '.elser_model_2': {
+  '.elser_model_2_SNAPSHOT': {
     version: 2,
     default: true,
     config: {
@@ -70,7 +70,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
     }),
   },
-  '.elser_model_2_linux-x86_64': {
+  '.elser_model_2_linux-x86_64_SNAPSHOT': {
     version: 2,
     os: 'Linux',
     arch: 'amd64',
