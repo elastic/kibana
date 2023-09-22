@@ -11,6 +11,7 @@ import { Collector, CollectorOptions, QUERY_MAX_SIZE } from '../collectors';
 import { Asset } from '../../../common/types_api';
 import { withSpan } from './helpers';
 
+const AGENT_TYPE = 'implicit_collector';
 const TRANSACTION_TYPE = 'asset_manager-implicit_collection';
 const transactionName = (collectorName: string) => `asset_manager-collector_${collectorName}`;
 
@@ -53,6 +54,7 @@ export class CollectorRunner {
         if (collectorResult.assets.length) {
           totalAssets += collectorResult.assets.length;
           const bulkBody = collectorResult.assets.flatMap((asset: Asset) => {
+            asset['agent.type'] = AGENT_TYPE;
             return [{ create: { _index: `assets-raw-default` } }, asset];
           });
 

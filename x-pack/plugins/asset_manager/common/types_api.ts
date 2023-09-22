@@ -19,6 +19,7 @@ export const assetKindRT = rt.union([
   rt.literal('cluster'),
   rt.literal('host'),
   rt.literal('pod'),
+  rt.literal('container_group'),
   rt.literal('container'),
   rt.literal('service'),
   rt.literal('alert'),
@@ -79,6 +80,7 @@ export interface Asset extends ECSDocument {
   'asset.namespace'?: string;
   'host.hostname'?: string;
   'host.id'?: string;
+  'agent.type'?: string;
 }
 
 export type AssetWithoutTimestamp = Omit<Asset, '@timestamp'>;
