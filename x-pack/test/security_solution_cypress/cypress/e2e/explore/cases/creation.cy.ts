@@ -53,7 +53,8 @@ import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/logi
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
-describe('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
