@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -51,11 +52,10 @@ export function filterForEnabledFeatureModels(
   return filteredModels;
 }
 
-export function trainedModelsRoutes({
-  router,
-  routeGuard,
-  getEnabledFeatures,
-}: RouteInitialization) {
+export function trainedModelsRoutes(
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  { cloud }: { cloud: CloudSetup }
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -681,6 +681,8 @@ export function trainedModelsRoutes({
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
         try {
+          const isCloud = !!cloud.cloudId;
+
           const nodesInfoResponse =
             await client.asInternalUser.transport.request<estypes.NodesInfoResponseBase>({
               method: 'GET',
@@ -705,7 +707,9 @@ export function trainedModelsRoutes({
           }
 
           const body = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
-            const recommended = sameArch && !!def?.os && def?.os === osName && def?.arch === arch;
+            const recommended =
+              (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
+              (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
             return {
               ...def,
               name,

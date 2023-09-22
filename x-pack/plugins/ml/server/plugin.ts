@@ -250,7 +250,7 @@ export class MlServerPlugin
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
-    trainedModelsRoutes(routeInit);
+    trainedModelsRoutes(routeInit, { cloud: plugins.cloud });
     notificationsRoutes(routeInit);
     jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
