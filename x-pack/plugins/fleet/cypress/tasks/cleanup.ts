@@ -50,9 +50,12 @@ export function cleanupDownloadSources() {
         });
     })
     .then(() =>
+      // Restore the default download source to its original state
       request({
         url: `/api/fleet/agent_download_sources/${DEFAULT_DOWNLOAD_SOURCE_ID}`,
         method: 'PUT',
+        // Ignore 404's, etc, when no download source exists
+        failOnStatusCode: false,
         body: {
           name: 'Elastic Artifacts',
           host: DEFAULT_DOWNLOAD_SOURCE_URI,
