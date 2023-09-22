@@ -172,6 +172,7 @@
     "@kbn/security-solution-features",
     "@kbn/handlebars",
     "@kbn/content-management-plugin",
-    "@kbn/subscription-tracking"
+    "@kbn/subscription-tracking",
+    "@kbn/core-application-common"
   ]
 }
