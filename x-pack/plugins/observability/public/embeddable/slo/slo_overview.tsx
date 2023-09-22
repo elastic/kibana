@@ -58,13 +58,10 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   if (isSloNotFound) {
     return null;
   }
-
+  const sloSummary = slo?.summary;
+  const sloStatus = sloSummary?.status;
   const color =
-    slo?.summary.status === 'NO_DATA'
-      ? '#f8e9e9'
-      : slo?.summary.status !== 'HEALTHY'
-      ? '#f8e9e9'
-      : '#e6f9f7';
+    sloStatus === 'NO_DATA' ? '#f8e9e9' : sloStatus !== 'HEALTHY' ? '#f8e9e9' : '#e6f9f7';
 
   const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
   // eslint-disable-next-line react/no-danger
@@ -75,10 +72,10 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
           {
             color,
             title: slo.name,
-            subtitle: slo.groupBy !== '*' ? `${slo.groupBy}:${slo.instanceId}` : '',
+            subtitle: slo.groupBy !== ALL_VALUE ? `${slo.groupBy}:${slo.instanceId}` : '',
             icon: getIcon('visGauge'),
             value:
-              slo.summary.status === 'NO_DATA'
+              sloStatus === 'NO_DATA'
                 ? NOT_AVAILABLE_LABEL
                 : numeral(Number.parseFloat(slo.summary.sliValue.toString())).format(percentFormat),
             valueFormatter: (value: number) => `${value}%`,
@@ -103,7 +100,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
             );
           }}
         />
-        <Metric id="1" data={[metricData]} />
+        <Metric id={`${slo?.id}-${slo?.instanceId}`} data={[metricData]} />
       </Chart>
     </>
   );
