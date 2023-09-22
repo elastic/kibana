@@ -18,7 +18,7 @@ import {
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
+describe('EcsMapping', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

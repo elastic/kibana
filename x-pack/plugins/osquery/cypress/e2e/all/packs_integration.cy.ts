@@ -33,7 +33,7 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Packs', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(

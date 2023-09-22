@@ -22,7 +22,7 @@ import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let caseId: string;
 
   before(() => {

@@ -14,7 +14,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Add to Cases', () => {
+describe('Add to Cases', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {

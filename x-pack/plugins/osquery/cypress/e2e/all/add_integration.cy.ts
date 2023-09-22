@@ -30,7 +30,7 @@ import {
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
-describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
