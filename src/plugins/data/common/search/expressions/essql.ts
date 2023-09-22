@@ -217,14 +217,14 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, took }) {
+              next(finalResponse) {
                 logInspectorRequest()
                   .stats({
                     hits: {
                       label: i18n.translate('data.search.es_search.hitsLabel', {
                         defaultMessage: 'Hits',
                       }),
-                      value: `${rawResponse.rows.length}`,
+                      value: `${finalResponse.rawResponse.rows.length}`,
                       description: i18n.translate('data.search.es_search.hitsDescription', {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
@@ -235,7 +235,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
                       }),
                       value: i18n.translate('data.search.es_search.queryTimeValue', {
                         defaultMessage: '{queryTime}ms',
-                        values: { queryTime: took },
+                        values: { queryTime: finalResponse.took },
                       }),
                       description: i18n.translate('data.search.es_search.queryTimeDescription', {
                         defaultMessage:
@@ -245,10 +245,10 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: rawResponse });
+                  .ok({ json: finalResponse });
               },
               error(error) {
-                logInspectorRequest().error({ json: error });
+                logInspectorRequest().json(params).error({ json: error });
               },
             })
           );
