@@ -117,11 +117,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
-    this.sharedMlServices = getMlSharedServices(
-      core.http,
-      this.isServerless,
-      pluginsSetup.usageCollection
-    );
+    this.sharedMlServices = getMlSharedServices(core.http);
 
     core.application.register({
       id: PLUGIN_ID,

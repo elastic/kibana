@@ -7,43 +7,45 @@
 
 import { ElasticModels } from './elastic_models_service';
 import { type TrainedModelsApiService } from './ml_api_service/trained_models';
+import { type ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
 
-const getMockResponse = () => [
-  {
-    version: 1,
-    config: {
-      input: {
-        field_names: ['text_field'],
+export const getMockResponse = () =>
+  [
+    {
+      version: 1,
+      config: {
+        input: {
+          field_names: ['text_field'],
+        },
       },
+      description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
+      name: '.elser_model_1',
     },
-    description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
-    name: '.elser_model_1',
-  },
-  {
-    version: 2,
-    default: true,
-    config: {
-      input: {
-        field_names: ['text_field'],
+    {
+      version: 2,
+      default: true,
+      config: {
+        input: {
+          field_names: ['text_field'],
+        },
       },
+      description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+      name: '.elser_model_2',
     },
-    description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
-    name: '.elser_model_2',
-  },
-  {
-    version: 2,
-    os: 'linux',
-    arch: 'x86_64',
-    config: {
-      input: {
-        field_names: ['text_field'],
+    {
+      version: 2,
+      os: 'linux',
+      arch: 'x86_64',
+      config: {
+        input: {
+          field_names: ['text_field'],
+        },
       },
+      description: 'Elastic Learned Sparse EncodeR v2, x86-64 (Tech Preview)',
+      name: '.elser_model_2_linux-x86_64',
+      recommended: true,
     },
-    description: 'Elastic Learned Sparse EncodeR v2, x86-64 (Tech Preview)',
-    name: '.elser_model_2_linux-x86_64',
-    recommended: true,
-  },
-];
+  ] as ModelDefinitionResponse[];
 
 describe('ElasticModels', () => {
   const trainedModelsApi = {
