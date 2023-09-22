@@ -20,10 +20,10 @@ export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
 
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
 
-export const LOG_RATE_ANALYSIS = 'AIOpsLogRateAnalysis';
+export const LOG_RATE_ANALYSIS_RUN = 'aiops_log_rate_analysis_run';
 
-export const LOG_PATTERN_ANALYSIS = 'AIOpsLogPatternAnalysis';
+export const LOG_PATTERN_ANALYSIS_RUN = 'aiops_log_pattern_analysis_run';
 
-export const CHANGE_POINT_DETECTION = 'AIOpsChangePointDetection';
+export const CHANGE_POINT_DETECTION_RUN = 'aiops_change_point_detection_run';
 
-export const AIOPS_DEFAULT_SOURCE = 'mlAIOpsLabs';
+export const AIOPS_DEFAULT_SOURCE = 'ml_aiops_labs';
