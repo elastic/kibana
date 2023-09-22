@@ -17,9 +17,12 @@ interface EuiValues {
 
 export const getEuiContextMapping = (): EuiTokensObject => {
   return {
-    'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
-      defaultMessage: 'Loading',
-    }),
+    'euiAccordionChildrenLoading.message': i18n.translate(
+      'core.euiAccordionChildrenLoading.message',
+      {
+        defaultMessage: 'Loading',
+      }
+    ),
     'euiAutoRefresh.autoRefreshLabel': i18n.translate('core.euiAutoRefresh.autoRefreshLabel', {
       defaultMessage: 'Auto refresh',
     }),
@@ -419,6 +422,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
         values: { landmarkHeading },
       }),
+    'euiGlobalToastList.clearAllToastsButtonAriaLabel': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonAriaLabel',
+      {
+        defaultMessage: 'Clear all toast notifications',
+      }
+    ),
+    'euiGlobalToastList.clearAllToastsButtonDisplayText': i18n.translate(
+      'core.euiGlobalToastList.clearAllToastsButtonDisplayText',
+      {
+        defaultMessage: 'Clear all',
+      }
+    ),
     'euiKeyboardShortcuts.title': i18n.translate('core.euiKeyboardShortcuts.title', {
       defaultMessage: 'Keyboard shortcuts',
     }),
