@@ -204,12 +204,6 @@ export function createSearchBar({
       core,
     });
 
-    // console.log(
-    //   'savedQueryManagement',
-    //   core.application.capabilities.savedQueryManagement?.saveQuery
-    // );
-    // console.log('local', props.showSaveQuery);
-
     return (
       <KibanaContextProvider
         services={{
