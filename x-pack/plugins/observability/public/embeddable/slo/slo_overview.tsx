@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -46,6 +46,26 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
     []
   );
 
+  const sloSummary = slo?.summary;
+  const sloStatus = sloSummary?.status;
+  let color;
+  switch (sloStatus) {
+    case 'HEALTHY':
+      color = '#e6f9f7';
+      break;
+    case 'NO_DATA':
+      color = 'f7f8fc';
+      break;
+    case 'DEGRADING':
+      color = 'fff9e8';
+      break;
+    case 'VIOLATED':
+      color = 'f8e9e9';
+      break;
+    default:
+      color = 'f7f8fc';
+  }
+
   if (isRefetching) {
     return (
       <LoadingContainer>
@@ -55,13 +75,10 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       </LoadingContainer>
     );
   }
+
   if (isSloNotFound) {
     return null;
   }
-  const sloSummary = slo?.summary;
-  const sloStatus = sloSummary?.status;
-  const color =
-    sloStatus === 'NO_DATA' ? '#f8e9e9' : sloStatus !== 'HEALTHY' ? '#f8e9e9' : '#e6f9f7';
 
   const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
   // eslint-disable-next-line react/no-danger
