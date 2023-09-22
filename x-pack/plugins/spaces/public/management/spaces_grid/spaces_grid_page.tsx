@@ -12,8 +12,8 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

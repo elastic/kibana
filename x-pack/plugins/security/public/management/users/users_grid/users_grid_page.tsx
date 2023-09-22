@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';

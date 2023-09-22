@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const PermissionDenied = () => (
-  <EuiPageSection alignment='center' color="danger">
+  <EuiPageSection alignment="center" color="danger">
     <EuiEmptyPrompt
       iconType="securityApp"
       title={
