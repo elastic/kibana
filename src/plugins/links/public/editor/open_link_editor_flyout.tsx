@@ -14,7 +14,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';
-import { LinksEditorLink } from '../components/editor/links_editor_link';
+import { LinkEditor } from '../components/editor/links_editor_link';
 
 export interface LinksEditorProps {
   link?: Link;
@@ -26,7 +26,7 @@ export interface LinksEditorProps {
  * This editor has no context about other links, so it cannot determine order; order will be determined
  * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
  */
-export type UnorderedLinks = Omit<Link, 'order'>;
+export type UnorderedLink = Omit<Link, 'order'>;
 
 /**
  * @throws in case user cancels
@@ -35,7 +35,7 @@ export async function openLinkEditorFlyout({
   ref,
   link,
   parentDashboard,
-}: LinksEditorProps): Promise<UnorderedLinks | undefined> {
+}: LinksEditorProps): Promise<UnorderedLink | undefined> {
   const unmountFlyout = async () => {
     if (ref.current) {
       ref.current.children[1].className = 'linkEditor out';
@@ -48,8 +48,8 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<UnorderedLinks | undefined>((resolve, reject) => {
-    const onSave = async (newLink: UnorderedLinks) => {
+  return new Promise<UnorderedLink | undefined>((resolve, reject) => {
+    const onSave = async (newLink: UnorderedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };
@@ -61,7 +61,7 @@ export async function openLinkEditorFlyout({
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-        <LinksEditorLink
+        <LinkEditor
           link={link}
           onSave={onSave}
           onClose={onCancel}

@@ -37,11 +37,11 @@ import {
 } from '../../../common/content_management';
 import { LinkInfo } from '../../embeddable/types';
 import { LinksStrings } from '../links_strings';
-import { UnorderedLinks } from '../../editor/open_link_editor_flyout';
+import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkOptionsComponent } from './link_options';
 import { LinkDestination } from './link_destination';
 
-export const LinksEditorLink = ({
+export const LinkEditor = ({
   link,
   onSave,
   onClose,
@@ -49,7 +49,7 @@ export const LinksEditorLink = ({
 }: {
   onClose: () => void;
   parentDashboard?: DashboardContainer;
-  link?: UnorderedLinks; // will only be defined if **editing** a link; otherwise, creating a new link
+  link?: UnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
   onSave: (newLink: Omit<Link, 'order'>) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(

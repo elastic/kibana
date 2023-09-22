@@ -27,7 +27,7 @@ import {
   LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import { UnorderedLinks } from '../../editor/open_link_editor_flyout';
+import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 
 export const LinkOptionsComponent = ({
   link,
@@ -35,7 +35,7 @@ export const LinkOptionsComponent = ({
   selectedLinkType,
 }: {
   selectedLinkType: LinkType;
-  link?: UnorderedLinks;
+  link?: UnorderedLink;
   setLinkOptions: (options: LinkOptions) => void;
 }) => {
   const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardDrilldownOptions>({
