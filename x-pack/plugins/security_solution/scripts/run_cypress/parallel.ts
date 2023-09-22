@@ -360,7 +360,8 @@ Cypress FTR setup for file: ${filePath}:
               // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
               ELASTICSEARCH_URL:
                 ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
-              ELASTICSEARCH_URL_WITH_AUTH: createUrlFromFtrConfig('elasticsearch', true),
+              ELASTICSEARCH_URL_WITH_AUTH:
+                ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
               ELASTICSEARCH_USERNAME:
                 ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
               ELASTICSEARCH_PASSWORD:
