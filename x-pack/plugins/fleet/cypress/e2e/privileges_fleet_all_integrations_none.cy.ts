@@ -12,7 +12,7 @@ import {
   FleetAllIntegrNoneUser,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { MISSING_PRIVILEGES } from '../screens/fleet';
 const rolesToCreate = [FleetAllIntegrNoneRole];
@@ -21,6 +21,10 @@ const usersToCreate = [FleetAllIntegrNoneUser];
 describe('When the user has All privilege for Fleet but None for integrations', () => {
   before(() => {
     createUsersAndRoles(usersToCreate, rolesToCreate);
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   afterEach(() => {

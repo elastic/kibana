@@ -13,7 +13,7 @@ import type { AgentsRequestOptions } from '../../../../../common/search_strategy
 
 export const buildAgentsQuery = ({
   kuery,
-  pagination: { cursorStart, querySize },
+  pagination: { cursorStart },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
   const activeQuery = `active: true`;
@@ -24,7 +24,7 @@ export const buildAgentsQuery = ({
 
   const filterQuery = getQueryFilter({ filter });
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: AGENTS_INDEX,
     ignore_unavailable: true,
@@ -39,17 +39,11 @@ export const buildAgentsQuery = ({
           terms: {
             field: 'local_metadata.os.platform',
           },
-          aggs: {
-            policies: {
-              terms: {
-                field: 'policy_id',
-              },
-            },
-          },
         },
         policies: {
           terms: {
             field: 'policy_id',
+            size: 2000,
           },
         },
       },
@@ -61,10 +55,8 @@ export const buildAgentsQuery = ({
           },
         },
       ],
-      size: querySize,
+      size: 0,
       from: cursorStart,
     },
   };
-
-  return dslQuery;
 };

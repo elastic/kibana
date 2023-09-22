@@ -80,7 +80,7 @@ export const loadDashboardState = async ({
   /**
    * Inject saved object references back into the saved object attributes
    */
-  const { references, attributes: rawAttributes } = rawDashboardContent;
+  const { references, attributes: rawAttributes, managed } = rawDashboardContent;
   const attributes = (() => {
     if (!references || references.length === 0) return rawAttributes;
     return injectReferences(
@@ -168,6 +168,7 @@ export const loadDashboardState = async ({
   );
 
   return {
+    managed,
     resolveMeta,
     dashboardInput,
     anyMigrationRun,
