@@ -6,10 +6,8 @@
  */
 
 import type { EuiTableActionsColumnType } from '@elastic/eui';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
 import type { TransformStats } from '../../../common/types/transform_stats';
-import { FETCH_STATUS } from '../../../common/types/transform_stats';
 import type { TransformHealthAlertRule } from '../../../common/types/alerting';
 
 // Used to pass on attribute names to table columns
@@ -18,17 +16,11 @@ export enum TRANSFORM_LIST_COLUMN {
   ID = 'id',
 }
 
-export interface BulkTransformsStat extends TransformStats {
-  id: TransformId;
-  fetchStatus: FETCH_STATUS;
-  fetchError?: IHttpFetchError;
-}
-
 export interface TransformListRow {
   id: TransformId;
   config: TransformConfigUnion;
   mode?: string; // added property on client side to allow filtering by this field
-  stats?: BulkTransformsStat;
+  stats?: TransformStats;
   alerting_rules?: TransformHealthAlertRule[];
 }
 
@@ -39,7 +31,7 @@ export type TransformListRowWithStats = TransformListRow & {
 export function isTransformListRowWithStats(
   arg: TransformListRow
 ): arg is TransformListRowWithStats {
-  return arg && arg.stats !== undefined && arg.stats.state !== undefined;
+  return arg.stats !== undefined;
 }
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single

@@ -28,7 +28,7 @@ import {
 } from '../action_reauthorize';
 import type { TransformId } from '../../../../../../common/types/transform';
 
-import { TRANSFORM_LIST_COLUMN, type TransformListRow } from '../../../../common';
+import { type TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useRefreshTransformList, useTransformCapabilities } from '../../../../hooks';
 
 import { CreateTransformButton } from '../create_transform_button';
@@ -70,12 +70,19 @@ type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[],
-  onAlertEdit: (alertRule: TransformHealthAlertRule) => void
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void,
+  transformsStatsLoading: boolean
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
+      m[transformId] = (
+        <ExpandedRow
+          item={item}
+          onAlertEdit={onAlertEdit}
+          transformsStatsLoading={transformsStatsLoading}
+        />
+      );
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -87,6 +94,7 @@ interface TransformListProps {
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
+  transformsStatsLoading: boolean;
 }
 
 export const TransformList: FC<TransformListProps> = ({
@@ -95,6 +103,7 @@ export const TransformList: FC<TransformListProps> = ({
   transformNodes,
   transforms,
   transformsLoading,
+  transformsStatsLoading,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
@@ -126,7 +135,8 @@ export const TransformList: FC<TransformListProps> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     transformNodes,
-    transformSelection
+    transformSelection,
+    transformsStatsLoading
   );
 
   const searchError = query?.error ? query?.error.message : undefined;
@@ -166,7 +176,8 @@ export const TransformList: FC<TransformListProps> = ({
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
     expandedRowItemIds,
     transforms,
-    setEditAlertRule
+    setEditAlertRule,
+    transformsStatsLoading
   );
 
   const bulkActionMenuItems = [

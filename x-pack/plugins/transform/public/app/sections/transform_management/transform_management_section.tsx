@@ -19,9 +19,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { TransformListRow } from '../../common';
-import { useBulkTransformsStats } from '../../hooks/use_get_transform_stats';
+import { isTransformStats } from '../../../../common/types/transform_stats';
+import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useIsServerless } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
@@ -35,6 +37,7 @@ import {
 } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { SearchSelection } from './components/search_selection';
@@ -45,7 +48,30 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
-import { ErrorMessageCallout } from './components/error_message_callout';
+
+const ErrorMessageCallout: FC<{
+  text: JSX.Element;
+  errorMessage: IHttpFetchError<unknown> | null;
+}> = ({ text, errorMessage }) => {
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        title={
+          <>
+            {text}{' '}
+            {errorMessage !== null && (
+              <ToastNotificationText inline={true} forceModal={true} text={errorMessage} />
+            )}
+          </>
+        }
+        color="danger"
+        iconType="error"
+      />
+    </>
+  );
+};
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
@@ -66,27 +92,32 @@ export const TransformManagement: FC = () => {
     error: transformsErrorMessage,
     data: { transforms: transformsWithoutStats, transformIdsWithoutConfig },
   } = useGetTransforms({
-    enabled: !transformNodesInitialLoading && transformNodes > 0,
+    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
   });
 
-  const { error: transformsStatsErrorMessage, data: parallelTransformsStats } =
-    useBulkTransformsStats({
-      transformIds: Array.isArray(transformsWithoutStats)
-        ? transformsWithoutStats.map((t) => t.id)
-        : [],
-      enabled: !transformNodesInitialLoading && transformNodes > 0,
-    });
+  const {
+    isLoading: transformsStatsLoading,
+    error: transformsStatsErrorMessage,
+    data: transformsStats,
+  } = useGetTransformsStats({
+    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
+  });
 
   const transforms: TransformListRow[] = useMemo(() => {
-    if (!parallelTransformsStats) return transformsWithoutStats;
+    if (!transformsStats) return transformsWithoutStats;
 
-    return transformsWithoutStats.map((transformWithoutStats) => {
-      const stats = parallelTransformsStats.find((d) => transformWithoutStats.config.id === d.id);
-      if (!stats) return transformWithoutStats;
+    return transformsWithoutStats.map((t) => {
+      const stats = transformsStats.transforms.find((d) => t.config.id === d.id);
 
-      return { ...transformWithoutStats, stats };
+      // A newly created transform might not have corresponding stats yet.
+      // If that's the case we just skip the transform and don't add it to the transform list yet.
+      if (!isTransformStats(stats)) {
+        return t;
+      }
+
+      return { ...t, stats };
     });
-  }, [parallelTransformsStats, transformsWithoutStats]);
+  }, [transformsStats, transformsWithoutStats]);
 
   const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
@@ -284,6 +315,7 @@ export const TransformManagement: FC = () => {
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
+                  transformsStatsLoading={transformsStatsLoading}
                 />
               )}
               <TransformAlertFlyoutWrapper />
