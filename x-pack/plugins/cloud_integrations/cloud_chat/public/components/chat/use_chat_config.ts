@@ -31,7 +31,8 @@ const MESSAGE_WIDGET_READY = 'driftWidgetReady';
 const MESSAGE_IFRAME_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
 const MESSAGE_SET_CONTEXT = 'driftSetContext';
-// const MESSAGE_UPDATE_CONTEXT = 'driftUpdateContext';
+const MESSAGE_CHAT_CLOSED = 'driftChatClosed';
+const MESSAGE_PLAYBOOK_FIRED = 'driftPlaybookFired';
 
 type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
 
@@ -149,11 +150,11 @@ export const useChatConfig = ({
           onReady(chatApi);
           break;
 
-        case 'driftChatClosed':
+        case MESSAGE_CHAT_CLOSED:
           chatApi.hide();
           break;
 
-        case 'driftPlaybookFired':
+        case MESSAGE_PLAYBOOK_FIRED:
           onPlaybookFired();
           break;
 
