@@ -58,6 +58,7 @@ export class AgentManager extends Manager {
 
       try {
         execa.sync('docker', ['kill', this.agentContainerId]);
+        this.agentContainerId = null;
       } catch (err) {
         this.log.error('Error closing fleet agent process');
       }

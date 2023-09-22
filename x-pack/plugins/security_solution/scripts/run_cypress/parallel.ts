@@ -288,7 +288,6 @@ Cypress FTR setup for file: ${filePath}:
                 runElasticsearch({
                   config,
                   log,
-                  esPort,
                   name: `ftr-${esPort}`,
                   esFrom: config.get('esTestCluster')?.from || 'snapshot',
                   onEarlyExit,
@@ -421,6 +420,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               }
             }
 
+            process.emit('shutdownCypressFleetServerAndAgents');
             await procs.stop('kibana');
             await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
