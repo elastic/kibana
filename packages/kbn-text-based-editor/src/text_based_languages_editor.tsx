@@ -41,7 +41,6 @@ import {
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
 
-import { createAstGenerator } from '@kbn/monaco/src/esql/lib/monaco/esql_ast_provider';
 import {
   textBasedLanguagedEditorStyles,
   EDITOR_INITIAL_HEIGHT,
@@ -106,21 +105,6 @@ const languageId = (language: string) => {
   }
 };
 
-function offsetToRowColumn(expression: string, offset: number): monaco.Position {
-  const lines = expression.split(/\n/);
-  let remainingChars = offset;
-  let lineNumber = 1;
-  for (const line of lines) {
-    if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars + 1);
-    }
-    remainingChars -= line.length + 1;
-    lineNumber++;
-  }
-
-  throw new Error('Algorithm failure');
-}
-
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
@@ -160,6 +144,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors ? parseErrors(errors, code) : []
   );
   const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
+  const [editorLanguageProvider, setLanguageProvider] = useState<
+    | { validate: Function; getSuggestions: () => monaco.languages.CompletionItemProvider }
+    | undefined
+  >(undefined);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -272,56 +260,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const parsedErrors = parseErrors(errors, code);
         setEditorErrors(parsedErrors);
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
-      } else if (code && language === 'esql') {
+      } else if (code && editorLanguageProvider) {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-        const parser = createAstGenerator();
-        const { warnings: parserWarnings, errors: parserErrors } = parser.validateAst(
+        const { warnings: parserWarnings, errors: parserErrors } = editorLanguageProvider.validate(
           editorModel.current,
           new monaco.Position(0, 1)
         );
         const markers = [];
 
         if (parserErrors.length) {
-          const monacoErrors = parserErrors.map((e) => {
-            const startPosition = e.location
-              ? offsetToRowColumn(code, e.location.min)
-              : { column: 0, lineNumber: 0 };
-            const endPosition = e.location
-              ? offsetToRowColumn(code, e.location.max || 0)
-              : { column: 0, lineNumber: 0 };
-            return {
-              message: e.text,
-              startColumn: startPosition.column,
-              startLineNumber: startPosition.lineNumber,
-              endColumn: endPosition.column + 1,
-              endLineNumber: endPosition.lineNumber,
-              severity: monaco.MarkerSeverity.Error,
-              source: 'client' as const,
-            };
-          });
-          markers.push(...monacoErrors);
-          setEditorErrors(monacoErrors);
+          markers.push(...parserErrors);
+          setEditorErrors(parserErrors);
         }
         if (parserWarnings.length) {
-          const monacoWarnings = parserWarnings.map((e) => {
-            const startPosition = e.location
-              ? offsetToRowColumn(code, e.location.min)
-              : { column: 0, lineNumber: 0 };
-            const endPosition = e.location
-              ? offsetToRowColumn(code, e.location.max || 0)
-              : { column: 0, lineNumber: 0 };
-            return {
-              message: e.text,
-              startColumn: startPosition.column,
-              startLineNumber: startPosition.lineNumber,
-              endColumn: endPosition.column + 1,
-              endLineNumber: endPosition.lineNumber,
-              severity: monaco.MarkerSeverity.Warning,
-              source: 'client' as const,
-            };
-          });
-          markers.push(...monacoWarnings);
-          setEditorWarning(monacoWarnings);
+          markers.push(...parserWarnings);
+          setEditorWarning(parserWarnings);
         }
         if (markers.length) {
           monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
@@ -441,17 +394,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [language, documentationSections]);
 
-  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
-    useCallback(async () => {
-      const indices = await dataViews.getIndices({
-        showAllIndices: false,
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-      return indices.map((i) => i.name);
-    }, [dataViews]);
+  const getSources: ESQLCustomAutocompleteCallbacks['getSources'] = useCallback(async () => {
+    const indices = await dataViews.getIndices({
+      showAllIndices: false,
+      pattern: '*',
+      isRollupIndex: () => false,
+    });
+    return indices.map((i) => i.name);
+  }, [dataViews]);
 
-  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = useCallback(
+  const getFields: ESQLCustomAutocompleteCallbacks['getFields'] = useCallback(
     async (ctx) => {
       const pipes = currentCursorContent?.split('|');
       pipes?.pop();
@@ -463,7 +415,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         };
         try {
           const table = await fetchFieldsFromESQL(esqlQuery, expressions);
-          return table?.columns.map((c) => c.name) || [];
+          return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
         } catch (e) {
           // no action yet
         }
@@ -473,45 +425,57 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [expressions]
   );
 
-  const getPoliciesIdentifiers: ESQLCustomAutocompleteCallbacks['getPoliciesIdentifiers'] =
-    useCallback(
-      async (ctx) => {
-        const { data: policies, error } =
-          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
-        policiesRef.current = policies || [];
-        if (error || !policies) {
-          return [];
-        }
-        return policies.map(({ name, sourceIndices }) => ({ name, indices: sourceIndices }));
-      },
-      [indexManagementApiService]
-    );
+  const getPolicies: ESQLCustomAutocompleteCallbacks['getPolicies'] = useCallback(
+    async (ctx) => {
+      const { data: policies, error } =
+        (await indexManagementApiService?.getAllEnrichPolicies()) || {};
+      policiesRef.current = policies || [];
+      if (error || !policies) {
+        return [];
+      }
+      return policies.map(({ name, sourceIndices }) => ({ name, indices: sourceIndices }));
+    },
+    [indexManagementApiService]
+  );
 
-  const getPolicyFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getPolicyFieldsIdentifiers'] =
-    useCallback(
-      async (ctx) =>
-        policiesRef.current
-          .filter(({ name }) => ctx.userDefinedVariables.policyIdentifiers.includes(name))
-          .flatMap(({ enrichFields }) => enrichFields),
-      []
-    );
+  const getPolicyFields: ESQLCustomAutocompleteCallbacks['getPolicyFields'] = useCallback(
+    async (ctx) =>
+      policiesRef.current
+        .filter(({ name }) => ctx.userDefinedVariables.policy.includes(name))
+        .flatMap(({ enrichFields }) => enrichFields),
+    []
+  );
 
-  const getPolicyMatchingFieldIdentifiers: ESQLCustomAutocompleteCallbacks['getPolicyMatchingFieldIdentifiers'] =
+  const getPolicyMatchingField: ESQLCustomAutocompleteCallbacks['getPolicyMatchingField'] =
     useCallback(
       async (ctx) => {
         // try to load the list if none is present yet but
         // at least one policy is declared in the userDefinedVariables
         // (this happens if the user pastes an ESQL statement with the policy name in it)
         if (!policiesRef.current.length && ctx.userDefinedVariables.policyIdentifiers.length) {
-          await getPoliciesIdentifiers(ctx);
+          await getPolicies(ctx);
         }
         const matchingField = policiesRef.current.find(({ name }) =>
-          ctx.userDefinedVariables.policyIdentifiers.includes(name)
+          ctx.userDefinedVariables.policy.includes(name)
         )?.matchField;
         return matchingField ? [matchingField] : [];
       },
-      [getPoliciesIdentifiers]
+      [getPolicies]
     );
+
+  useEffect(() => {
+    if (language === 'esql') {
+      setLanguageProvider(
+        ESQLLang.getLanguageProvider?.({
+          getSources,
+          getFields,
+          getPolicies,
+          getPolicyFields,
+          getPolicyMatchingField,
+        })
+      );
+    }
+  }, [getFields, getPolicies, getPolicyFields, getPolicyMatchingField, getSources, language]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -727,17 +691,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
-                      suggestionProvider={
-                        language === 'esql'
-                          ? ESQLLang.getSuggestionProvider?.({
-                              getSourceIdentifiers,
-                              getFieldsIdentifiers,
-                              getPoliciesIdentifiers,
-                              getPolicyFieldsIdentifiers,
-                              getPolicyMatchingFieldIdentifiers,
-                            })
-                          : undefined
-                      }
+                      suggestionProvider={editorLanguageProvider?.getSuggestions()}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

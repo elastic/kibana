@@ -12,6 +12,7 @@ import { buildDocumentation, buildFunctionDocumentation } from './utils';
 import type { AutocompleteCommandDefinition } from '../types';
 import { mathCommandFullDefinitions } from '../../definitions/functions';
 import { printArguments } from '../../definitions/helpers';
+import { FunctionDefinition } from '../../definitions/types';
 
 export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
   {
@@ -31,8 +32,8 @@ export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
   },
 ];
 
-export const mathCommandDefinition: AutocompleteCommandDefinition[] =
-  mathCommandFullDefinitions.map(({ name, description, signatures }) => ({
+function getMathCommandDefinition({ name, description, signatures }: FunctionDefinition) {
+  return {
     label: name,
     insertText: name,
     kind: 1,
@@ -48,7 +49,24 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] =
       ),
     },
     sortText: 'C',
-  }));
+  };
+}
+
+export const mathCommandDefinition: AutocompleteCommandDefinition[] =
+  mathCommandFullDefinitions.map(getMathCommandDefinition);
+
+export const getCompatibleMathCommandDefinition = (
+  returnTypes?: string[]
+): AutocompleteCommandDefinition[] => {
+  if (!returnTypes) {
+    return mathCommandDefinition;
+  }
+  return mathCommandFullDefinitions
+    .filter((mathDefinition) =>
+      mathDefinition.signatures.some((signature) => returnTypes.includes(signature.returnType))
+    )
+    .map(getMathCommandDefinition);
+};
 
 export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
   {

@@ -11,7 +11,11 @@ import { ANTLREErrorListener } from '../../../common/error_listener';
 import { monaco } from '../../../monaco_imports';
 import { getParser } from '../antlr_facade';
 import { AstListener } from '../ast/ast_factory';
+import { suggest } from '../ast/autocomplete';
+import { offsetToRowColumn } from '../ast/helpers';
+import { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation';
+import { ESQLCustomAutocompleteCallbacks } from '../autocomplete/types';
 
 const ROOT_STATEMENT = 'singleStatement';
 
@@ -38,8 +42,28 @@ function createParserListener(debug: boolean = false) {
   return parserListener;
 }
 
-export function createAstGenerator() {
-  const getAst = (model: monaco.editor.IReadOnlyModel, position: monaco.Position) => {
+function wrapAsMonacoMessage(type: 'error' | 'warning', code: string, messages: ESQLMessage[]) {
+  return messages.map((e) => {
+    const startPosition = e.location
+      ? offsetToRowColumn(code, e.location.min)
+      : { column: 0, lineNumber: 0 };
+    const endPosition = e.location
+      ? offsetToRowColumn(code, e.location.max || 0)
+      : { column: 0, lineNumber: 0 };
+    return {
+      message: e.text,
+      startColumn: startPosition.column,
+      startLineNumber: startPosition.lineNumber,
+      endColumn: endPosition.column + 1,
+      endLineNumber: endPosition.lineNumber,
+      severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+      source: 'client' as const,
+    };
+  });
+}
+
+export function createAstGenerator(callbacks?: ESQLCustomAutocompleteCallbacks) {
+  const getAst = (model: monaco.editor.ITextModel, position: monaco.Position) => {
     const text = model?.getValue();
 
     if (!text) {
@@ -57,10 +81,25 @@ export function createAstGenerator() {
   };
   return {
     getAst,
-    validateAst: (model: monaco.editor.IReadOnlyModel, position: monaco.Position) => {
+    validate: (model: monaco.editor.ITextModel, position: monaco.Position) => {
       const { ast, errors: syntaxErrors } = getAst(model, position);
       const { errors, warnings } = validateAst(ast);
-      return { errors: syntaxErrors.concat(errors), warnings };
+      const code = model?.getValue();
+      const monacoErrors = wrapAsMonacoMessage('error', code, syntaxErrors.concat(errors));
+      const monacoWarnings = wrapAsMonacoMessage('warning', code, warnings);
+      return { errors: monacoErrors, warnings: monacoWarnings };
+    },
+    getSuggestions: (): monaco.languages.CompletionItemProvider => {
+      return {
+        triggerCharacters: [',', '(', '=', ' '], // [',', '.', '(', '=', ' '],
+        async provideCompletionItems(
+          model: monaco.editor.ITextModel,
+          position: monaco.Position,
+          context: monaco.languages.CompletionContext
+        ): Promise<monaco.languages.CompletionList> {
+          return suggest(model, position, context, callbacks);
+        },
+      };
     },
   };
 }

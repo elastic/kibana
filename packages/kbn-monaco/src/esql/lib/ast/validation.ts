@@ -7,15 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { builtinFunctions } from '../definitions/builtin';
-import { mathCommandFullDefinitions } from '../definitions/functions';
-import { FunctionDefinition } from '../definitions/types';
+import { getFunctionDefinition, isEqualType, isSupportedFunction } from './helpers';
 import { ESQLAst, ESQLFunction, ESQLLocation, ESQLMessage, ESQLSingleAstItem } from './types';
-
-const fnLookups = builtinFunctions.concat(mathCommandFullDefinitions).reduce((memo, def) => {
-  memo.set(def.name, def);
-  return memo;
-}, new Map<string, FunctionDefinition>());
 
 interface ValidationErrors {
   wrongArgumentType: {
@@ -60,7 +53,7 @@ function getMessageFromId<K extends ErrorTypes>({
     case 'wrongArgumentType':
       message = i18n.translate('monaco.esql.validation.wrongArgumentType', {
         defaultMessage:
-          'argument of [{name}] must be [{expectedType}], found value [{argValue}] type [{actualType}]',
+          'argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
         values,
       });
       break;
@@ -98,10 +91,10 @@ function createMessage(type: 'error' | 'warning', message: string, location?: ES
   };
 }
 
-function validateFunction(astFunction: ESQLFunction) {
+function validateFunction(astFunction: ESQLFunction, parentCommand: string) {
   const errors: ESQLMessage[] = [];
   const warnings: ESQLMessage[] = [];
-  if (!fnLookups.has(astFunction.name)) {
+  if (!isSupportedFunction(astFunction.name, parentCommand)) {
     errors.push(
       getMessageFromId({
         messageId: 'unknownFunction',
@@ -113,7 +106,7 @@ function validateFunction(astFunction: ESQLFunction) {
     );
     return { errors, warnings };
   }
-  const fnDefinition = fnLookups.get(astFunction.name)!;
+  const fnDefinition = getFunctionDefinition(astFunction.name)!;
   const matchingSignatures = fnDefinition.signatures.filter((def) => {
     return (
       def.params.filter(({ optional }) => !optional).length === astFunction.args.length ||
@@ -138,7 +131,7 @@ function validateFunction(astFunction: ESQLFunction) {
   for (const arg of astFunction.args) {
     if (!Array.isArray(arg)) {
       if (arg.type === 'function') {
-        const payload = validateFunction(arg);
+        const payload = validateFunction(arg, parentCommand);
         if (payload.errors) {
           errors.push(...payload.errors);
         }
@@ -149,7 +142,7 @@ function validateFunction(astFunction: ESQLFunction) {
     } else {
       for (const subArg of arg) {
         if (!Array.isArray(subArg) && subArg.type === 'function') {
-          const payload = validateFunction(subArg);
+          const payload = validateFunction(subArg, parentCommand);
           if (payload.errors) {
             errors.push(...payload.errors);
           }
@@ -178,7 +171,7 @@ function validateFunction(astFunction: ESQLFunction) {
       const argDefTypes = Array.isArray(argDef.type) ? argDef.type : [argDef.type];
       if (!Array.isArray(actualArg)) {
         if (actualArg.type === 'literal') {
-          if (!argDefTypes.includes(actualArg.literalType) && argDefTypes[0] !== 'any') {
+          if (!isEqualType(actualArg, argDefTypes, parentCommand)) {
             if (actualArg.literalType === 'string') {
               failingSignature.push(
                 getMessageFromId({
@@ -205,9 +198,9 @@ function validateFunction(astFunction: ESQLFunction) {
             }
           }
         }
-        if (actualArg.type === 'function' && fnLookups.has(actualArg.name)) {
-          const argFn = fnLookups.get(actualArg.name)!;
-          if (argFn.signatures.every(({ returnType }) => !argDefTypes.includes(returnType))) {
+        if (actualArg.type === 'function' && isSupportedFunction(actualArg.name, parentCommand)) {
+          const argFn = getFunctionDefinition(actualArg.name)!;
+          if (!isEqualType(actualArg, argDefTypes, parentCommand)) {
             failingSignature.push(
               getMessageFromId({
                 messageId: 'wrongArgumentType',
@@ -228,7 +221,7 @@ function validateFunction(astFunction: ESQLFunction) {
       failingSignatures.push(failingSignature);
     }
   }
-  if (failingSignatures.length === matchingSignatures.length) {
+  if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
     errors.push(...failingSignatures[0]);
   }
   return { errors, warnings };
@@ -248,7 +241,7 @@ export function validateAst(ast: ESQLAst): { errors: ESQLMessage[]; warnings: ES
     // first check that all function used here are valid
     for (const arg of command.args) {
       if (!Array.isArray(arg) && arg.type === 'function') {
-        const payload = validateFunction(arg);
+        const payload = validateFunction(arg, command.name);
         if (payload.errors) {
           errors.push(...payload.errors);
         }

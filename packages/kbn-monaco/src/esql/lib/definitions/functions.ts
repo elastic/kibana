@@ -719,4 +719,6 @@ export const mathCommandFullDefinitions: FunctionDefinition[] = [
       },
     ],
   },
-].sort(({ name: a }, { name: b }) => a.localeCompare(b));
+]
+  .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+  .map((def) => ({ ...def, supportedCommands: ['eval'] }));

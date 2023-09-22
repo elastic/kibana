@@ -10,23 +10,23 @@ import { monaco } from '../../../..';
 
 /** @public **/
 export interface ESQLCustomAutocompleteCallbacks {
-  getSourceIdentifiers?: CallbackFn;
-  getFieldsIdentifiers?: CallbackFn;
-  getPoliciesIdentifiers?: CallbackFn<{ name: string; indices: string[] }>;
-  getPolicyFieldsIdentifiers?: CallbackFn;
-  getPolicyMatchingFieldIdentifiers?: CallbackFn;
+  getSources?: CallbackFn;
+  getFields?: CallbackFn<{ name: string; type: string | string[] }>;
+  getPolicies?: CallbackFn<{ name: string; indices: string[] }>;
+  getPolicyFields?: CallbackFn;
+  getPolicyMatchingField?: CallbackFn;
 }
 
 /** @internal **/
 type CallbackFn<T = string> = (ctx: {
   word: string;
-  userDefinedVariables: UserDefinedVariables;
+  variables: UserDefinedVariables;
 }) => T[] | Promise<T[]>;
 
 /** @internal **/
 export interface UserDefinedVariables {
-  sourceIdentifiers: string[];
-  policyIdentifiers: string[];
+  userDefined: string[];
+  policies: string[];
 }
 
 /** @internal **/

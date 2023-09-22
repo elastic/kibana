@@ -25,6 +25,16 @@ export interface CompleteLangModuleType extends LangModuleType {
 
 export interface CustomLangModuleType extends LangModuleType {
   onLanguage: () => void;
+  getLanguageProvider: <Deps = unknown>(
+    deps: Deps
+  ) => {
+    getAst: Function;
+    validate: (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position
+    ) => { errors: object[]; warnings: object[] };
+    getSuggestions: () => monaco.languages.CompletionItemProvider;
+  };
 }
 
 export interface EditorError {

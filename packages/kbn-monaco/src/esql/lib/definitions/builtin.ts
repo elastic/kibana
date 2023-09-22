@@ -17,6 +17,7 @@ function createMathDefinition(
   return {
     name,
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: types.map((type) => ({
       params: [
         { name: 'left', type },
@@ -32,6 +33,7 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
   return {
     name,
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [
@@ -45,10 +47,10 @@ function createComparisonDefinition(name: string, warning?: FunctionDefinition['
 }
 
 export const builtinFunctions: FunctionDefinition[] = [
-  createMathDefinition('add', ['number', 'date']),
-  createMathDefinition('subtract', ['number', 'date']),
-  createMathDefinition('multiply', ['number']),
-  createMathDefinition('divide', ['number'], (left, right) => {
+  createMathDefinition('+', ['number', 'date']),
+  createMathDefinition('-', ['number', 'date']),
+  createMathDefinition('*', ['number']),
+  createMathDefinition('/', ['number'], (left, right) => {
     if (right.type === 'literal' && right.literalType === 'number') {
       return right.value === 0
         ? i18n.translate('monaco.esql.divide.warning.divideByZero', {
@@ -61,10 +63,24 @@ export const builtinFunctions: FunctionDefinition[] = [
         : undefined;
     }
   }),
-  ...['eq', 'neq', 'lt', 'lte', 'gt', 'gte'].map((op) => createComparisonDefinition(op)),
+  createMathDefinition('%', ['number'], (left, right) => {
+    if (right.type === 'literal' && right.literalType === 'number') {
+      return right.value === 0
+        ? i18n.translate('monaco.esql.divide.warning.zeroModule', {
+            defaultMessage: 'Module by zero can return null value: {left}/{right}',
+            values: {
+              left: left.text,
+              right: right.value,
+            },
+          })
+        : undefined;
+    }
+  }),
+  ...['==', '!=', '<', '<=', '>', '>='].map((op) => createComparisonDefinition(op)),
   ...['like', 'not_like', 'rlike', 'not_rlike'].map((name) => ({
     name,
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [
@@ -78,6 +94,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['in', 'not_in'].map((name) => ({
     name,
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [
@@ -91,6 +108,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...['and', 'or'].map((name) => ({
     name,
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [
@@ -104,6 +122,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   {
     name: 'not',
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -112,8 +131,9 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   },
   {
-    name: 'assign',
+    name: '=',
     description: '',
+    supportedCommands: ['eval', 'stats'],
     signatures: [
       {
         params: [

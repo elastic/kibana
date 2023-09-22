@@ -92,7 +92,7 @@ import {
   createFunction,
   collectAllSourceIdentifiers,
   collectAllFieldsStatements,
-} from './helpers';
+} from './ast_walker';
 import { ESQLAst, ESQLMessage } from './types';
 
 export class AstListener implements ESQLParserListener {

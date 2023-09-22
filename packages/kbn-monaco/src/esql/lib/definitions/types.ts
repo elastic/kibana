@@ -11,6 +11,7 @@ import { ESQLSingleAstItem } from '../ast/types';
 export interface FunctionDefinition {
   name: string;
   description: string;
+  supportedCommands: string[];
   signatures: Array<{
     params: Array<{
       name: string;
