@@ -13,7 +13,8 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
-import { CasePostRequest, SECURITY_SOLUTION_OWNER } from '../../../common';
+import type { CasePostRequest } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create, throwIfCustomFieldKeysInvalid } from './create';
