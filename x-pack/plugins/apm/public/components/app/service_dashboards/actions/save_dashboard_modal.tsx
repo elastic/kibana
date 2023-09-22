@@ -29,6 +29,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
 import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
+import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 
 interface Props {
   onClose: () => void;
@@ -92,12 +93,9 @@ export function SaveDashboardModal({
             params: {
               query: { serviceDashboardId: currentDashboard?.id },
               body: {
-                dashboardTitle: newDashboard.label,
                 dashboardSavedObjectId: newDashboard.value,
                 useContextFilter,
-                linkTo: DashboardTypeEnum.single, // iteration-1: Only single supported
-                serviceName,
-                kuery: undefined,
+                kuery: `${SERVICE_NAME}: ${serviceName}`,
               },
             },
             signal: null,

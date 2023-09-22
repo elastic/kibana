@@ -8,4 +8,4 @@
 export { apmTelemetry } from './apm_telemetry';
 export { apmServerSettings } from './apm_server_settings';
 export { apmServiceGroups } from './apm_service_groups';
-export { apmServiceDashboards } from './apm_service_dashboards';
+export { apmCustomDashboards } from './apm_custom_dashboards';

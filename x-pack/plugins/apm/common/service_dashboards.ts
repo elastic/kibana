@@ -19,11 +19,8 @@ export type DashboardType =
 
 export interface ServiceDashboard {
   dashboardSavedObjectId: string;
-  dashboardTitle: string;
   useContextFilter: boolean;
   kuery?: string;
-  serviceName: string;
-  linkTo: DashboardType;
 }
 
 export interface SavedServiceDashboard extends ServiceDashboard {

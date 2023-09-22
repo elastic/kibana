@@ -10,18 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../common/service_dashboards';
 
-export const apmServiceDashboards: SavedObjectsType = {
+export const apmCustomDashboards: SavedObjectsType = {
   name: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'multiple',
   mappings: {
     properties: {
       dashboardSavedObjectId: { type: 'keyword' },
-      dashboardTitle: { type: 'text' },
       kuery: { type: 'text' },
       useContextFilter: { type: 'boolean' },
-      linkTo: { type: 'keyword' },
-      serviceName: { type: 'keyword' },
     },
   },
   management: {
@@ -38,11 +35,8 @@ export const apmServiceDashboards: SavedObjectsType = {
       schemas: {
         create: schema.object({
           dashboardSavedObjectId: schema.string(),
-          dashboardTitle: schema.string(),
           kuery: schema.maybe(schema.string()),
           useContextFilter: schema.boolean(),
-          linkTo: schema.string(),
-          serviceName: schema.string(),
         }),
       },
     },
