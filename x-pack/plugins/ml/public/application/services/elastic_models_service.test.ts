@@ -77,5 +77,10 @@ describe('ElasticModels', () => {
       const result = await elasticModel.getELSER({ version: 1 });
       expect(result.name).toEqual('.elser_model_1');
     });
+
+    test('provides the requested version of a recommended architecture', async () => {
+      const result = await elasticModel.getELSER({ version: 2 });
+      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
+    });
   });
 });

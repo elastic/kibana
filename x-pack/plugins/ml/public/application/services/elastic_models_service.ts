@@ -14,18 +14,21 @@ export class ElasticModels {
   constructor(private readonly trainedModels: TrainedModelsApiService) {}
 
   /**
-   * Provides an ELSER config
-   * @param version
+   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
    */
   public async getELSER(options?: { version?: ElserVersion }): Promise<ModelDefinitionResponse> {
     const response = await this.trainedModels.getTrainedModelDownloads();
 
+    let requestedModel: ModelDefinitionResponse | undefined;
     let recommendedModel: ModelDefinitionResponse | undefined;
     let defaultModel: ModelDefinitionResponse | undefined;
 
     for (const model of response) {
       if (options?.version === model.version) {
-        return model;
+        requestedModel = model;
+        if (model.recommended) {
+          requestedModel = model;
+        }
       } else if (model.recommended) {
         recommendedModel = model;
       } else if (model.default) {
@@ -33,10 +36,10 @@ export class ElasticModels {
       }
     }
 
-    if (!defaultModel && !recommendedModel) {
+    if (!requestedModel && !defaultModel && !recommendedModel) {
       throw new Error('Requested model not found');
     }
 
-    return recommendedModel ?? defaultModel!;
+    return requestedModel || recommendedModel || defaultModel!;
   }
 }
