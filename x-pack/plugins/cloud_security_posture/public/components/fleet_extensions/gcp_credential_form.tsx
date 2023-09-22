@@ -25,6 +25,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { GcpCredentialsType } from '../../../common/types';
 import {
   CLOUDBEAT_GCP,
   SETUP_ACCESS_CLOUD_SHELL,
@@ -107,19 +108,19 @@ const GoogleCloudShellSetup = ({
             />
           </li>
           {accountType === GCP_ORGANIZATION_ACCOUNT ? (
-          <li>
-          <FormattedMessage
-            id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
-            defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
-          />
-        </li>
+            <li>
+              <FormattedMessage
+                id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
+                defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
+              />
+            </li>
           ) : (
             <li>
-            <FormattedMessage
-              id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
-              defaultMessage="Note down the GCP project ID of the project you wish to monitor"
-            />
-          </li>
+              <FormattedMessage
+                id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
+                defaultMessage="Note down the GCP project ID of the project you wish to monitor"
+              />
+            </li>
           )}
 
           <li>
@@ -132,7 +133,7 @@ const GoogleCloudShellSetup = ({
       </EuiText>
       <EuiSpacer size="l" />
       <EuiForm component="form">
-      {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
+        {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -143,7 +144,7 @@ const GoogleCloudShellSetup = ({
             />
           </EuiFormRow>
         )}
-      {projectIdFields && (
+        {projectIdFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -159,80 +160,6 @@ const GoogleCloudShellSetup = ({
     </>
   );
 };
-
-// const OrganizationGoogleCloudShellSetup = ({
-//   fields,
-//   onChange,
-// }: {
-//   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
-//   onChange: (key: string, value: string) => void;
-// }) => {
-//   const getFieldById = (id: keyof GcpInputFields['fields']) => {
-//     return fields.find((element) => element.id === id);
-//   };
-//   const projectIdFields = getFieldById('gcp.project_id');
-//   const organizationIdFields = getFieldById('gcp.organization_id');
-//   return (
-//     <>
-//       <EuiText
-//         color="subdued"
-//         size="s"
-//         data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
-//       >
-//         <ol
-//           css={css`
-//             list-style: auto;
-//           `}
-//         >
-//           <li>
-//             <FormattedMessage
-//               id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.login"
-//               defaultMessage="Log into your Google Cloud Console"
-//             />
-//           </li>
-//           <li>
-//             <FormattedMessage
-//               id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
-//               defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
-//             />
-//           </li>
-//           <li>
-//             <FormattedMessage
-//               id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.launch"
-//               defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
-//             />
-//           </li>
-//         </ol>
-//       </EuiText>
-//       <EuiSpacer size="l" />
-//       <EuiForm component="form">
-//       {projectIdFields && (
-//           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
-//             <EuiFieldText
-//               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
-//               id={projectIdFields.id}
-//               fullWidth
-//               value={projectIdFields.value || ''}
-//               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
-//             />
-//           </EuiFormRow>
-//         )}
-//       {organizationIdFields && (
-//           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
-//             <EuiFieldText
-//               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
-//               id={organizationIdFields.id}
-//               fullWidth
-//               value={organizationIdFields.value || ''}
-//               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
-//             />
-//           </EuiFormRow>
-//         )}
-//       </EuiForm>
-//       <EuiSpacer size="m" />
-//     </>
-//   );
-// };
 
 const credentialOptionsList = [
   {
@@ -289,15 +216,6 @@ export const gcpField: GcpInputFields = {
       ),
       type: 'text',
     },
-    'gcp.account_type': {
-      label: i18n.translate(
-        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
-        {
-          defaultMessage: 'Account Type',
-        }
-      ),
-      type: 'text',
-    },
   },
 };
 
@@ -324,17 +242,14 @@ const getSetupFormatOptions = (): Array<{
 
 interface GcpFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<
-    NewPackagePolicyPostureInput,
-    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
-  >;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   setIsValid: (isValid: boolean) => void;
   onChange: any;
 }
 
-const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
+export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
   Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
@@ -424,6 +339,10 @@ const useCloudShellUrl = ({
   }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
 };
 
+export const getGcpCredentialsType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
+): GcpCredentialsType | undefined => input.streams[0].vars?.setup_access.value;
+
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
@@ -432,17 +351,34 @@ export const GcpCredentialsForm = ({
   setIsValid,
   onChange,
 }: GcpFormProps) => {
+  /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
+  const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
+    'gcp.credentials.file': a,
+    ['gcp.credentials.json']: b,
+  }))(gcpField.fields);
+  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
   const fields = getInputVarsFields(input, gcpField.fields);
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   const fieldsSnapshot = useRef({});
   const lastSetupAccessType = useRef<string | undefined>(undefined);
-  const lastAccountType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
-  const getFieldById = (id: keyof GcpInputFields['fields']) => {
-    return fields.find((element) => element.id === id);
-  };
+
+  const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
+  const isOrganization = accountType === 'organization-account-gcp';
+  // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
+  useEffect(() => {
+    const isInvalidPolicy = isInvalid;
+
+    setIsValid(!isInvalidPolicy);
+
+    onChange({
+      isValid: !isInvalidPolicy,
+      updatedPolicy: newPolicy,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setupFormat, input.type]);
 
   useCloudShellUrl({
     packageInfo,
@@ -451,24 +387,23 @@ export const GcpCredentialsForm = ({
     setupFormat,
   });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
-    if (newSetupFormat === SETUP_ACCESS_CLOUD_SHELL) {
+    if (newSetupFormat === 'google_cloud_shell') {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
-        fields.map((field) => [field.id, { value: field.value }])
+        fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
-      lastSetupAccessType.current = input.streams[0].vars?.setup_access?.value;
-      lastAccountType.current = input.streams[0].vars?.['gcp.account_type'].value;
+      lastSetupAccessType.current = getGcpCredentialsType(input);
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: SETUP_ACCESS_CLOUD_SHELL,
+            value: 'google_cloud_shell',
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
-          // when switching from manual to cloud shell
-          ...Object.fromEntries(fields.map((field) => [field.id, { value: undefined }])),
+          // when switching from manual to cloud formation
+          ...Object.fromEntries(fieldsToHide.map((field) => [field.id, { value: undefined }])),
         })
       );
     } else {
@@ -485,35 +420,6 @@ export const GcpCredentialsForm = ({
       );
     }
   };
-  // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
-  useEffect(() => {
-    const isProjectIdEmpty =
-       !getFieldById('gcp.project_id')?.value;
-    const isInvalidPolicy = isInvalid || isProjectIdEmpty;
-
-    setIsValid(!isInvalidPolicy);
-
-    onChange({
-      isValid: !isInvalidPolicy,
-      updatedPolicy: newPolicy,
-    });
-
-    if(input.streams[0].vars?.['gcp.account_type'].value === undefined || input.streams[0].vars?.setup_access?.value === undefined){
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
-          'gcp.account_type': {
-            value: GCP_ORGANIZATION_ACCOUNT,
-            type: 'text',
-          },
-          setup_access: {
-            value: SETUP_ACCESS_CLOUD_SHELL,
-            type: 'text',
-          },
-        })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo, setupFormat]);
 
   if (isInvalid) {
     return (
@@ -536,23 +442,26 @@ export const GcpCredentialsForm = ({
         size="s"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={onSetupFormatChange}
+        onChange={(idSelected: SetupFormatGCP) =>
+          idSelected !== setupFormat && onSetupFormatChange(idSelected)
+        }
       />
       <EuiSpacer size="l" />
-      {setupFormat === SETUP_ACCESS_MANUAL ? (
+      {setupFormat === SETUP_ACCESS_CLOUD_SHELL ? (
+        <GoogleCloudShellSetup
+          fields={fields}
+          onChange={(key, value) =>
+            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+          }
+          input={input}
+        />
+      ) : (
         <GcpInputVarFields
           fields={fields}
           onChange={(key, value) =>
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
           }
-        />
-      ) : (
-        <GoogleCloudShellSetup          
-          fields={fields}
-          onChange={(key, value) =>
-            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
-        }
-          input={input}
+          isOrganization={isOrganization}
         />
       )}
 
@@ -566,15 +475,15 @@ export const GcpCredentialsForm = ({
 const GcpInputVarFields = ({
   fields,
   onChange,
+  isOrganization,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
+  isOrganization: boolean;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
-
-  const accountType = getFieldById('gcp.account_type');
 
   const organizationIdFields = getFieldById('gcp.organization_id');
 
@@ -591,7 +500,7 @@ const GcpInputVarFields = ({
   return (
     <div>
       <EuiForm component="form">
-        {organizationIdFields && (accountType?.value === GCP_ORGANIZATION_ACCOUNT) && (
+        {organizationIdFields && isOrganization && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}

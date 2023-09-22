@@ -10,6 +10,7 @@ import {
   CspPolicyTemplateForm,
   AWS_ORGANIZATION_ACCOUNT,
   AWS_SINGLE_ACCOUNT,
+  GCP_ORGANIZATION_ACCOUNT,
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
@@ -1004,7 +1005,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        credentials_type: { value: 'credentials-file' },
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
         setup_access: { value: 'google_cloud_shell' },
       });
 
@@ -1019,31 +1020,6 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(
         getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
       ).toBeInTheDocument();
-    });
-
-    it(`project ID is required for Manual users`, () => {
-      let policy = getMockPolicyGCP();
-      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.project_id': { value: undefined },
-        setup_access: { value: 'manual' },
-      });
-
-      const { rerender } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
-      );
-      expect(onChange).toHaveBeenCalledWith({
-        isValid: false,
-        updatedPolicy: policy,
-      });
-      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.project_id': { value: '' },
-        setup_access: { value: 'manual' },
-      });
-      rerender(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />);
-      expect(onChange).toHaveBeenCalledWith({
-        isValid: false,
-        updatedPolicy: policy,
-      });
     });
 
     it(`renders ${CLOUDBEAT_GCP} Credentials File fields`, () => {
@@ -1128,6 +1104,25 @@ describe('<CspPolicyTemplateForm />', () => {
         isValid: true,
         updatedPolicy: policy,
       });
+    });
+
+    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`, () => {
+      let policy = getMockPolicyGCP();
+      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
+        'gcp.credentials.type': { value: 'manual' },
+        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+      });
+
+      const { queryByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.6.0' } as PackageInfo} />
+      );
+
+      expect(
+        queryByText(
+          'GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration.'
+        )
+      ).not.toBeInTheDocument();
+      expect(getByLabelText('GCP Organization')).toBeEnabled();
     });
   });
 });

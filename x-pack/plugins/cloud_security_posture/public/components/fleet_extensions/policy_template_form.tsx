@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import {
@@ -53,6 +53,7 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { gcpField, getInputVarsFields } from './gcp_credential_form';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -107,12 +108,18 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
   },
 ];
 
-const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
     id: GCP_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
       defaultMessage: 'GCP Organization',
-    })
+    }),
+    disabled: isGcpOrgDisabled,
+    tooltip: isGcpOrgDisabled
+      ? i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip', {
+          defaultMessage: 'Supported from integration version 1.6.0 and above',
+        })
+      : undefined,
   },
   {
     id: GCP_SINGLE_ACCOUNT,
@@ -229,6 +236,8 @@ const getGcpAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
 ): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
 
+const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.5.9';
+
 const GcpAccountTypeSelect = ({
   input,
   newPolicy,
@@ -240,16 +249,57 @@ const GcpAccountTypeSelect = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
 }) => {
-  // This will disable the gcp org option for any version below 1.5.9 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
+  // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const isValidSemantic = semverValid(packageInfo.version);
   const isGcpOrgDisabled = isValidSemantic
-    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
+    ? semverCompare(packageInfo.version, GCP_ORG_MINIMUM_PACKAGE_VERSION) < 0
     : true;
 
   const gcpAccountTypeOptions = useMemo(
-    () => getGcpAccountTypeOptions(),
+    () => getGcpAccountTypeOptions(isGcpOrgDisabled),
     [isGcpOrgDisabled]
   );
+  /* Create a subset of properties from GcpField to use for hiding value of Organization ID when switching account type from Organization to Single */
+  const subsetOfGcpField = (({ ['gcp.organization_id']: a }) => ({ 'gcp.organization_id': a }))(
+    gcpField.fields
+  );
+  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
+  const fieldsSnapshot = useRef({});
+  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const onSetupFormatChange = (newSetupFormat: string) => {
+    if (newSetupFormat === 'single-account-gcp') {
+      // We need to store the current manual fields to restore them later
+      fieldsSnapshot.current = Object.fromEntries(
+        fieldsToHide.map((field) => [field.id, { value: field.value }])
+      );
+      // We need to store the last manual credentials type to restore it later
+      lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
+
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'gcp.account_type': {
+            value: 'single-account-gcp',
+            type: 'text',
+          },
+          // Clearing fields from previous setup format to prevent exposing credentials
+          // when switching from manual to cloud formation
+          ...Object.fromEntries(fieldsToHide.map((field) => [field.id, { value: undefined }])),
+        })
+      );
+    } else {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'gcp.account_type': {
+            // Restoring last manual credentials type
+            value: lastSetupAccessType.current || 'organization-account-gcp',
+            type: 'text',
+          },
+          // Restoring fields from manual setup format if any
+          ...fieldsSnapshot.current,
+        })
+      );
+    }
+  };
 
   useEffect(() => {
     if (!getGcpAccountType(input)) {
@@ -288,16 +338,9 @@ const GcpAccountTypeSelect = ({
       <RadioGroup
         idSelected={getGcpAccountType(input) || ''}
         options={gcpAccountTypeOptions}
-        onChange={(accountType) => {
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
-              'gcp.account_type': {
-                value: accountType,
-                type: 'text',
-              },
-            })
-          );
-        }}
+        onChange={(accountType) =>
+          accountType !== getGcpAccountType(input) && onSetupFormatChange(accountType)
+        }
         size="m"
       />
       {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
