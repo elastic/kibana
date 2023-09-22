@@ -13,7 +13,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
 import { createAgentPolicy, getLatestAvailableAgentVersion } from './utils';
-export const replaceLocalhostWithDockerInternal = (inputString) => {
+const replaceLocalhostWithDockerInternal = (inputString) => {
   if (typeof inputString === 'string') {
     return inputString.replace(/localhost/g, 'host.docker.internal');
   }

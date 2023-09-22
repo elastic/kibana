@@ -30,7 +30,6 @@ import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { isSkipped, parseTestFileConfig } from './utils';
 import { getFTRConfig } from './get_ftr_config';
-import { replaceLocalhostWithDockerInternal } from '../../../../test/osquery_cypress/runner';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -368,9 +367,7 @@ Cypress FTR setup for file: ${filePath}:
               ELASTICSEARCH_PASSWORD:
                 ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
 
-              FLEET_SERVER_URL: replaceLocalhostWithDockerInternal(
-                createUrlFromFtrConfig('fleetserver')
-              ),
+              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
 
               KIBANA_URL: baseUrl,
               KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
