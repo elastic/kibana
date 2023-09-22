@@ -25,7 +25,6 @@ export * from './rule/get_rule_actions';
 
 export * from './exception_list_and_item/exception_list/create_exception_list';
 export * from './exception_list_and_item/exception_list/delete_exception_list';
-export * from './exception_list_and_item/exception_item';
 
 // TODO rename signal to alert
 export * from './alert/create_alerts_index';

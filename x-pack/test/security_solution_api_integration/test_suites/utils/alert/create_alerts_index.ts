@@ -31,7 +31,7 @@ export const createAlertsIndex = async (
         passed: true,
       };
     },
-    'createSignalsIndex',
+    'createAlertsIndex',
     log
   );
 };
