@@ -34,6 +34,9 @@ const navigationNodeToEuiItem = (
     [`nav-item-isActive`]: isSelected,
   });
 
+  if (item.isActive) {
+    console.log('isActive', id);
+  }
   return {
     id,
     isGroupTitle: item.isGroupTitle,
