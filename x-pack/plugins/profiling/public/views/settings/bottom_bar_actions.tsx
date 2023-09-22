@@ -32,7 +32,7 @@ export function BottomBarActions({
   saveLabel,
 }: Props) {
   return (
-    <EuiBottomBar paddingSize="s">
+    <EuiBottomBar paddingSize="s" data-test-subj="profilingBottomBarActions">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem
           grow={false}
