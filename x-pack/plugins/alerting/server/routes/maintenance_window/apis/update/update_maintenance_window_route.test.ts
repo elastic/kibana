@@ -40,7 +40,7 @@ const updateParams: UpdateMaintenanceWindowRequestBody = {
     freq: 2 as const,
     count: 10,
   },
-  category_ids: ['observability']
+  category_ids: ['observability'],
 };
 
 describe('updateMaintenanceWindowRoute', () => {

@@ -164,7 +164,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
 
       // Create active maintenance window
       const maintenanceWindow = await createMaintenanceWindow({
-        category_ids: ['observability']
+        category_ids: ['observability'],
       });
       const activeMaintenanceWindows = await getActiveMaintenanceWindows();
       expect(activeMaintenanceWindows[0].id).eql(maintenanceWindow.id);

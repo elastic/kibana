@@ -1066,7 +1066,7 @@ export function defineAlertTypes(
           name: 'Default',
         },
       ],
-    category: 'kibana',
+      category: 'kibana',
       producer: 'alertsFixture',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',

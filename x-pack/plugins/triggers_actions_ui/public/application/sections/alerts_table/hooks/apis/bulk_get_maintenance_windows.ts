@@ -55,7 +55,7 @@ const rewriteMaintenanceWindowRes = ({
   updatedAt,
   eventStartTime,
   eventEndTime,
-  categoryIds
+  categoryIds,
 });
 
 const rewriteErrorRes = ({
