@@ -19,7 +19,7 @@ import {
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
-  useEsreBreadcrumbs,
+  useAiSearchBreadcrumbs,
   useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
@@ -34,7 +34,7 @@ import {
   appSearchTitle,
   workplaceSearchTitle,
   searchExperiencesTitle,
-  esreTitle,
+  aiSearchTitle,
   vectorSearchTitle,
 } from './generate_title';
 
@@ -125,14 +125,14 @@ export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => 
   return null;
 };
 
-export const SetEsreChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetAiSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = esreTitle(title);
+  const docTitle = aiSearchTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useEsreBreadcrumbs(crumbs);
+  const breadcrumbs = useAiSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
