@@ -47,7 +47,7 @@ const configSchema = schema.object({
       }),
     }),
     thresholdRule: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   customThresholdRule: schema.object({
