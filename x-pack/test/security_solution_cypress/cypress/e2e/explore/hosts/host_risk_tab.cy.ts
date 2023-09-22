@@ -21,7 +21,8 @@ import { login, visit } from '../../../tasks/login';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
-describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });

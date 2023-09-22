@@ -114,6 +114,7 @@ export class SyntheticsRunner {
         params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
         playwrightOptions: {
           headless,
+          testIdAttribute: 'data-test-subj',
           chromiumSandbox: false,
           timeout: 60 * 1000,
           viewport: {

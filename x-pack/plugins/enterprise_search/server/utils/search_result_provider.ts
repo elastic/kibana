@@ -18,7 +18,7 @@ import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
-  ESRE_PLUGIN,
+  AI_SEARCH_PLUGIN,
 } from '../../common/constants';
 
 type ServiceDefinition =
@@ -107,11 +107,11 @@ export function getSearchResultProvider(
               },
               {
                 keywords: ['esre', 'search'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
-                  defaultMessage: 'ESRE',
+                name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
+                  defaultMessage: 'Search AI',
                 }),
-                serviceType: 'esre',
-                url: ESRE_PLUGIN.URL,
+                serviceType: 'ai_search',
+                url: AI_SEARCH_PLUGIN.URL,
               },
             ]
           : []),
