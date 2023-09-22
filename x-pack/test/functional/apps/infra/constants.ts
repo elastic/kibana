@@ -29,6 +29,9 @@ export const DATES = {
       kubernetesSectionStartDate: '2023-09-19T07:20:00.000Z',
       kubernetesSectionEndDate: '2023-09-19T07:21:00.000Z',
     },
+    pods: {
+      withData: '01/20/2022 5:10:00 PM',
+    },
     stream: {
       startWithData: '2018-10-17T19:42:22.000Z',
       endWithData: '2018-10-17T19:57:21.000Z',
@@ -47,6 +50,7 @@ export const ML_JOB_IDS = [
 
 export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
+export const INVENTORY_PATH = 'metrics/inventory';
 export const NODE_DETAILS_PATH = 'detail/host';
 export const HOSTS_VIEW_PATH = 'metrics/hosts';
 

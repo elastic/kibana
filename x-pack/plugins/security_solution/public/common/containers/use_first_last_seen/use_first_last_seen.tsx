@@ -45,7 +45,6 @@ export const useFirstLastSeen = ({
   useEffect(() => {
     search({
       defaultIndex,
-      factoryQueryType: FirstLastSeenQuery,
       field,
       value,
       order,

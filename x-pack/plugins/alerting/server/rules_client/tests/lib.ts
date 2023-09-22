@@ -122,6 +122,7 @@ export function getBeforeSetup(
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()
