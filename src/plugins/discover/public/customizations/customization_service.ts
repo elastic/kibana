@@ -8,6 +8,7 @@
 
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
 import type {
+  FlyoutCustomization,
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,

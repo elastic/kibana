@@ -185,7 +185,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -374,14 +374,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -754,6 +746,14 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
               },
               {
                 "plugin": "inputControlVis",
@@ -8178,7 +8178,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -8367,14 +8367,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -8747,6 +8739,14 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
               },
               {
                 "plugin": "inputControlVis",
@@ -15232,7 +15232,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -15421,14 +15421,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -15801,6 +15793,14 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
               },
               {
                 "plugin": "inputControlVis",
