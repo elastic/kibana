@@ -7,8 +7,6 @@
 
 import { encode } from '@kbn/rison';
 
-import { API_VERSIONS } from '../../common';
-
 import type { ROLES } from './privileges';
 
 import { getUrlWithRoute } from './login';
