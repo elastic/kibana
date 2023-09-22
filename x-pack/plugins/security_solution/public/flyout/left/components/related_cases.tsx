@@ -11,6 +11,7 @@ import { EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../common/components/links';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
@@ -30,11 +31,12 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
         defaultMessage="Name"
       />
     ),
-    truncateText: true,
     render: (value: string, caseData: RelatedCase) => (
-      <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
-        {caseData.title}
-      </CaseDetailsLink>
+      <CellTooltipWrapper tooltip={caseData.title}>
+        <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
+          {caseData.title}
+        </CaseDetailsLink>
+      </CellTooltipWrapper>
     ),
   },
   {
@@ -46,6 +48,7 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
       />
     ),
     truncateText: true,
+    width: '25%',
   },
 ];
 
