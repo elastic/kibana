@@ -5,6 +5,10 @@ output:
     service_token: '${ELASTICSEARCH_SERVICE_TOKEN}'
     ssl.ca_trusted_fingerprint: '${ELASTICSEARCH_CA_TRUSTED_FINGERPRINT}'
 
+fleet:
+  agent:
+    id: '${FLEET_SERVER_AGENT_ID:dev-fleet-server}'
+
 inputs:
   - type: fleet-server
     server:
@@ -12,7 +16,6 @@ inputs:
         enabled: true
         certificate: /fleet-server.crt
         key: /fleet-server.key
-#        key_passphrase: /creds/key.pem
 
 logging:
   to_stderr: true # Force the logging output to stderr

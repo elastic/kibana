@@ -322,7 +322,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
       '--env',
       'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
       '--volume',
-      `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet_server.yml:ro`,
+      `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
       '--publish',
       `${fleetServerPort}:8220`,
       `docker.elastic.co/observability-ci/fleet-server:latest`,
