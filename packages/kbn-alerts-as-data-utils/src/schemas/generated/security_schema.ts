@@ -234,6 +234,7 @@ const SecurityAlertOptional = rt.partial({
       }),
       time_range: schemaDateRange,
       url: schemaString,
+      workflow_assignee_ids: schemaStringArray,
       workflow_reason: schemaString,
       workflow_status: schemaString,
       workflow_tags: schemaStringArray,

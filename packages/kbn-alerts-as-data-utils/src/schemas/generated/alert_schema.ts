@@ -116,6 +116,7 @@ const AlertOptional = rt.partial({
       start: schemaDate,
       time_range: schemaDateRange,
       url: schemaString,
+      workflow_assignee_ids: schemaStringArray,
       workflow_status: schemaString,
       workflow_tags: schemaStringArray,
     }),

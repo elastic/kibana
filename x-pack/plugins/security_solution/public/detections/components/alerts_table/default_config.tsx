@@ -177,6 +177,7 @@ export const requiredFieldsForActions = [
   '@timestamp',
   'kibana.alert.workflow_status',
   'kibana.alert.workflow_tags',
+  'kibana.alert.workflow_assignee_ids',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',
