@@ -21,7 +21,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import { throwIfDuplicatedCustomFieldKeysInRequest } from './utils';
+import { throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
 
 /**
  * Creates a new case.

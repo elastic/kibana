@@ -37,13 +37,12 @@ import {
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import { arraysDifference, getCaseToUpdate } from '../utils';
 import {
-  dedupAssignees,
-  getClosedInfoForUpdate,
-  getDurationForUpdate,
+  arraysDifference,
+  getCaseToUpdate,
   throwIfDuplicatedCustomFieldKeysInRequest,
-} from './utils';
+} from '../utils';
+import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';

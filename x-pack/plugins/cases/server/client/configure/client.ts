@@ -42,38 +42,15 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter } from '../utils';
+import {
+  combineAuthorizedAndOwnerFilter,
+  throwIfDuplicatedCustomFieldKeysInRequest,
+} from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
-
-/**
- * Throws an error if the requests has custom fields with duplicated keys.
- */
-function throwIfDuplicatedCustomFieldKeysInRequest({
-  customFieldsInRequest = [],
-}: {
-  customFieldsInRequest?: Array<{ key: string }>;
-}) {
-  const uniqueKeys = new Set();
-  const duplicatedKeys = new Set();
-
-  customFieldsInRequest.forEach((item) => {
-    if (uniqueKeys.has(item.key)) {
-      duplicatedKeys.add(item.key);
-    } else {
-      uniqueKeys.add(item.key);
-    }
-  });
-
-  if (duplicatedKeys.size) {
-    throw Boom.badRequest(
-      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
-    );
-  }
-}
 
 /**
  * Defines the internal helper functions.
