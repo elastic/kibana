@@ -260,10 +260,14 @@ For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.sla
 `xpack.actions.preconfigured.<connector-id>.config`::
 The configuration details, which are specific to the type of preconfigured connector.
 
+`xpack.actions.preconfigured.<connector-id>.config.apiProvider`::
+For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+
 `xpack.actions.preconfigured.<connector-id>.config.apiUrl`::
 A configuration URL that varies by connector:
 +
 --
+* For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
@@ -315,6 +319,9 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 
 `xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
+
+`xpack.actions.preconfigured.<connector-id>.config.defaultModel`::
+For a <<gen-ai-action-type,generative AI connector>>, specifies the default model to use for requests. It is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
 For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
@@ -437,6 +444,7 @@ TIP: Sensitive properties, such as passwords, should be stored in the <<creating
 An API key secret that varies by connector:
 +
 --
+* For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
 --
 
