@@ -241,10 +241,11 @@ export async function cloneJob(jobId) {
       return;
     }
 
+    const createdBy = originalJob?.custom_settings?.created_by;
     if (
       cloneableJob !== undefined &&
-      originalJob?.custom_settings?.created_by !== undefined &&
-      originalJob?.custom_settings?.created_by !== CREATED_BY_LABEL.ADVANCED
+      createdBy !== undefined &&
+      createdBy !== CREATED_BY_LABEL.ADVANCED
     ) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
