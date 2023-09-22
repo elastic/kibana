@@ -8,6 +8,10 @@
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
 import {
   testIndexEditableSettings,
@@ -41,6 +45,7 @@ describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
@@ -89,6 +94,13 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Stats tab', () => {
+    it('updates the breadcrumbs to index details stats', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsStats
+      );
+    });
+
     it('loads index stats from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
@@ -187,6 +199,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Overview tab', () => {
+    it('updates the breadcrumbs to index details overview', async () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsOverview
+      );
+    });
+
     it('renders index details', () => {
       expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
@@ -204,6 +222,51 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
     });
+
+    describe('extension service summary', () => {
+      it('renders all summaries added to the extension service', async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [() => <span>test</span>, () => <span>test2</span>],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(true);
+        expect(testBed.actions.overview.extensionSummaryExists(1)).toBe(true);
+      });
+
+      it(`doesn't render empty panels if the summary renders null`, async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [() => null],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+
+      it(`doesn't render anything when no summaries added to the extension service`, async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+    });
   });
 
   it('documents tab', async () => {
@@ -213,6 +276,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Mappings tab', () => {
+    it('updates the breadcrumbs to index details mappings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsMappings
+      );
+    });
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
@@ -268,6 +337,13 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Settings tab', () => {
+    it('updates the breadcrumbs to index details settings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsSettings
+      );
+    });
+
     it('loads settings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {

@@ -90,7 +90,15 @@ export const CorrelationsOverview: React.FC = () => {
             defaultMessage="Correlations"
           />
         ),
-        callback: goToCorrelationsTab,
+        link: {
+          callback: goToCorrelationsTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+              defaultMessage="Show all correlations"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
