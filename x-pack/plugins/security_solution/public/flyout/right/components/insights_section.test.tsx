@@ -10,7 +10,8 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 
@@ -40,6 +41,15 @@ jest.mock('react-router-dom', () => {
   alertIds: [],
 });
 
+const renderInsightsSection = (contextValue: RightPanelContext, expanded: boolean) =>
+  render(
+    <TestProviders>
+      <RightPanelContext.Provider value={contextValue}>
+        <InsightsSection expanded={expanded} />
+      </RightPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('<InsightsSection />', () => {
   it('should render insights component', () => {
     const contextValue = {
@@ -47,13 +57,7 @@ describe('<InsightsSection />', () => {
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <InsightsSection />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderInsightsSection(contextValue, false);
 
     expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'false');
@@ -67,13 +71,7 @@ describe('<InsightsSection />', () => {
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <InsightsSection expanded={true} />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderInsightsSection(contextValue, true);
 
     expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
