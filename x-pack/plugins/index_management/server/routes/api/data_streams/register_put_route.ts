@@ -15,7 +15,7 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
     name: schema.string(),
   });
   const bodySchema = schema.object({
-    dataRetention: schema.string(),
+    dataRetention: schema.maybe(schema.string()),
   });
 
   router.put(

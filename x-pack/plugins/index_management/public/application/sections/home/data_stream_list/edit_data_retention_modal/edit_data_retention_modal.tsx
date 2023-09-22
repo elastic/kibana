@@ -40,6 +40,8 @@ interface Props {
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
+const DEFAULT_DATA_RETENTION_PERIOD = '7d';
+
 export const timeUnits = [
   {
     value: 'd',
@@ -155,8 +157,6 @@ const configurationFormSchema: FormSchema = {
   infiniteRetentionPeriod: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    deserializer: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
-    serializer: (value: unknown) => (v: boolean) => v === value ? undefined : v,
     label: i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField', {
       defaultMessage: 'Never delete data',
     }),
@@ -184,13 +184,13 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
 }) => {
-  const { size, unit } = splitSizeAndUnits(dataRetention);
+  const { size, unit } = splitSizeAndUnits(dataRetention || DEFAULT_DATA_RETENTION_PERIOD);
   const {
     services: { notificationService },
   } = useAppContext();
 
   const { form } = useForm({
-    defaultValue: { dataRetention: size, timeUnit: unit, infiniteRetentionPeriod: false },
+    defaultValue: { dataRetention: size, timeUnit: unit, infiniteRetentionPeriod: !dataRetention },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
@@ -203,8 +203,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}`).then(
-      ({ data: responseData, error }) => {
+    return updateDataRetention(dataStreamName, data)
+      .then(({ data: responseData, error }) => {
         if (responseData) {
           const successMessage = i18n.translate(
             'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
