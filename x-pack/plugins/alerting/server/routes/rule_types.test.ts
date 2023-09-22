@@ -62,9 +62,12 @@ describe('ruleTypesRoute', () => {
         doesSetRecoveryContext: false,
         hasAlertsMappings: true,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
-    const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
+    const expectedResult: Array<
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+    > = [
       {
         id: '1',
         name: 'name',
@@ -172,6 +175,7 @@ describe('ruleTypesRoute', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -227,6 +231,7 @@ describe('ruleTypesRoute', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
