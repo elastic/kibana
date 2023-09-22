@@ -110,8 +110,8 @@ export interface RouteDependencies {
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private readonly logger: Logger;
   private readonly config: ConfigType;
+  private readonly logger: Logger;
   /**
    * Exposed services
    */
