@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
@@ -29,6 +29,8 @@ export interface PanelHeaderProps {
  * Displays the investigation and insights tabs (visualize is hidden for 8.9).
  */
 export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSelectedTabId }) => {
+  const { euiTheme } = useEuiTheme();
+
   const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
   const renderTabs = tabs
     .filter((tab) => tab.visible)
@@ -44,14 +46,15 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSele
     ));
 
   return (
-    <EuiFlyoutHeader hasBorder>
-      <EuiTabs
-        size="l"
-        expand
-        css={css`
-          margin-bottom: -25px;
-        `}
-      >
+    <EuiFlyoutHeader
+      hasBorder
+      css={css`
+        background-color: ${euiTheme.colors.lightestShade};
+        padding-bottom: 0 !important;
+        border-block-end: none !important;
+      `}
+    >
+      <EuiTabs size="l" expand>
         {renderTabs}
       </EuiTabs>
     </EuiFlyoutHeader>

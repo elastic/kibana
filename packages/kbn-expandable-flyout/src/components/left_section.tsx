@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { LEFT_SECTION } from './test_ids';
 
@@ -31,7 +31,7 @@ export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: Le
   );
   return (
     <EuiFlexItem grow data-test-subj={LEFT_SECTION} style={style}>
-      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
+      {component}
     </EuiFlexItem>
   );
 };

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
 import { tabs } from './tabs';
 
@@ -23,11 +24,21 @@ export interface PanelContentProps {
  * Displays the content of investigation and insights tabs (visualize is hidden for 8.9).
  */
 export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
+  const { euiTheme } = useEuiTheme();
+
   const selectedTabContent = useMemo(() => {
     return tabs.filter((tab) => tab.visible).find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId]);
 
-  return <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>;
+  return (
+    <EuiFlyoutBody
+      css={css`
+        background-color: ${euiTheme.colors.lightestShade};
+      `}
+    >
+      {selectedTabContent}
+    </EuiFlyoutBody>
+  );
 };
 
 PanelContent.displayName = 'PanelContent';
