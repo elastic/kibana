@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiIcon, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
+import { EuiLoadingChart } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -48,18 +48,11 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
 
   if (isRefetching) {
     return (
-      <LoadingPanel>
-        <LoadingContentPanel>
-          <EuiLoadingSpinner size="m" />
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.observability.sloEmbeddable.widget.reloading', {
-                defaultMessage: 'Reloading',
-              })}
-            </p>
-          </EuiText>
-        </LoadingContentPanel>
-      </LoadingPanel>
+      <LoadingContainer>
+        <LoadingContent>
+          <EuiLoadingChart />
+        </LoadingContent>
+      </LoadingContainer>
     );
   }
   if (isSloNotFound) {
@@ -116,7 +109,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   );
 }
 
-export const LoadingPanel = euiStyled.div`
+export const LoadingContainer = euiStyled.div`
   position: relative;
   overflow: hidden;
   display: flex;
@@ -126,7 +119,7 @@ export const LoadingPanel = euiStyled.div`
   height: 100%;
 `;
 
-export const LoadingContentPanel = euiStyled.div`
+export const LoadingContent = euiStyled.div`
   flex: 0 0 auto;
   align-self: center;
   text-align: center;
