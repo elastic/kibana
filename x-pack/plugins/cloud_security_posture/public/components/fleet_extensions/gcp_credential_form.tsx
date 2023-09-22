@@ -352,8 +352,11 @@ export const GcpCredentialsForm = ({
   onChange,
 }: GcpFormProps) => {
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
-  const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({ 'gcp.credentials.file': a, ['gcp.credentials.json']: b }))(gcpField.fields);
-  const fieldsToHide = getInputVarsFields(input,subsetOfGcpField)
+  const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
+    'gcp.credentials.file': a,
+    ['gcp.credentials.json']: b,
+  }))(gcpField.fields);
+  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
   const fields = getInputVarsFields(input, gcpField.fields);
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
