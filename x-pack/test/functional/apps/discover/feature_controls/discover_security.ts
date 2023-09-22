@@ -456,7 +456,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                discover: ['read'],
+                discover: ['all'],
                 savedQueryManagement: ['all'],
               },
               spaces: ['*'],
@@ -505,7 +505,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                discover: ['read'],
+                discover: ['all'],
                 savedQueryManagement: ['none'],
               },
               spaces: ['*'],
