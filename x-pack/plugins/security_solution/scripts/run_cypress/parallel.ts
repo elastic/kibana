@@ -400,6 +400,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               });
             } else {
               try {
+                console.log({ esPort, fleetServerPort });
                 result = await cypress.run({
                   browser: 'chrome',
                   spec: filePath,

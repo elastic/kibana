@@ -26,6 +26,7 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.log.info('Running agent preconfig');
+    this.log.info('FLEET SERVER PORT IN AGENT', this.fleetServerPort);
 
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);

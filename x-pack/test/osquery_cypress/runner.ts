@@ -44,6 +44,12 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
+  console.log(
+    'SERVERS FLEET SERVER PORT when creating agents',
+    config.get('servers.fleetserver.port'),
+    elasticUrl,
+    fleetServerUrl
+  );
   await new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
   await new AgentManager(
     policyEnrollmentKeyTwo,
