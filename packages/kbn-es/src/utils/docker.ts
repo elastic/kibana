@@ -24,17 +24,17 @@ import {
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
-  ESS_RESOURCES_PATHS,
-  ESS_SECRETS_PATH,
-  ESS_JWKS_PATH,
-  ESS_CONFIG_PATH,
-  ESS_FILES_PATH,
-  ESS_SECRETS_SSL_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_FILES_PATH,
+  SERVERLESS_SECRETS_SSL_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-} from './ess_file_realm';
+} from './serverless_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
@@ -167,13 +167,19 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.authc.realms.jwt.jwt1.order', '-98'],
 
-  ['xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path', `${ESS_CONFIG_PATH}secrets/jwks.json`],
+  [
+    'xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path',
+    `${SERVERLESS_CONFIG_PATH}secrets/jwks.json`,
+  ],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
-  ['xpack.security.transport.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+  [
+    'xpack.security.transport.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 ];
@@ -181,7 +187,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.http.ssl.enabled', 'true'],
 
-  ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+  ['xpack.security.http.ssl.keystore.path', `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`],
 
   ['xpack.security.http.ssl.verification_mode', 'certificate'],
 ];
@@ -193,7 +199,10 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
-  ['xpack.security.transport.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+  [
+    'xpack.security.transport.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
@@ -436,16 +445,16 @@ export function resolveEsArgs(
 }
 
 export function getESp12Volume() {
-  return ['--volume', `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12`];
+  return ['--volume', `${ES_P12_PATH}:${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`];
 }
 
 /**
  * Removes REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.
- * Returns the path where a file will be mounted inside the ES or ESS container.
+ * Returns the path where a file will be mounted inside the ES or ES serverless container.
  * /root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json
  */
 export function getDockerFileMountPath(hostPath: string) {
-  return join(ESS_FILES_PATH, hostPath.replace(REPO_ROOT, ''));
+  return join(SERVERLESS_FILES_PATH, hostPath.replace(REPO_ROOT, ''));
 }
 
 /**
@@ -491,21 +500,23 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
-  const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-    acc.push('--volume', `${path}:${ESS_CONFIG_PATH}${basename(path)}`);
+  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+    acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
 
     return acc;
   }, []);
 
   volumeCmds.push(
     ...getESp12Volume(),
-    ...essResources,
+    ...serverlessResources,
 
     '--volume',
-    `${ssl ? ESS_SECRETS_SSL_PATH : ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+    `${
+      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
 
     '--volume',
-    `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`
+    `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
   );
 
   return volumeCmds;
@@ -592,7 +603,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (options.ssl) {
     log.warning(`SSL has been enabled for ES. Kibana should be started with the SSL flag so that it can authenticate with ES.
-  See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.
+  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
     `);
   }
 
@@ -631,7 +642,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   }
 
   if (!options.background) {
-    // The ESS cluster has to be started detached, so we attach a logger afterwards for output
+    // The serverless cluster has to be started detached, so we attach a logger afterwards for output
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
