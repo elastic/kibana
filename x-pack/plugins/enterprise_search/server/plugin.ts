@@ -189,8 +189,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       return {
         navLinks: {
           enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
@@ -201,8 +201,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
