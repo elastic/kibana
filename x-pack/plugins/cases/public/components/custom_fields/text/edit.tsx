@@ -17,15 +17,20 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, UseField, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
-
 import type { CustomFieldType } from '../types';
 import { View } from './view';
-import { CANCEL, EDIT_CUSTOM_FIELDS_ARIA_LABEL, NO_CUSTOM_FIELD_SET, SAVE } from '../translations';
+import {
+  CANCEL,
+  EDIT_CUSTOM_FIELDS_ARIA_LABEL,
+  NO_CUSTOM_FIELD_SET,
+  SAVE,
+} from '../translations';
 import { getTextFieldConfig } from './config';
 
 interface FormState {
@@ -39,6 +44,8 @@ interface FormWrapper {
   customFieldConfiguration: CasesConfigurationUICustomField;
   onChange: (state: FormState) => void;
 }
+
+const { emptyField } = fieldValidators;
 
 const FormWrapperComponent: React.FC<FormWrapper> = ({
   initialValue,
@@ -72,7 +79,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
             fullWidth: true,
             disabled: isLoading,
             isLoading,
-            'data-test-subj': `case-toggle-custom-field-form-field-${customFieldConfiguration.key}`,
+            'data-test-subj': `case-text-custom-field-form-field-${customFieldConfiguration.key}`,
           },
         }}
       />
