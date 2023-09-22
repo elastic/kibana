@@ -269,7 +269,7 @@ describe('SQL search strategy', () => {
       esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps);
       // await next tick. esSearch.search will not resolve until `is_running: false`
       await new Promise((resolve) => process.nextTick(resolve));
-      
+
       expect(mockSqlClearCursor).not.toHaveBeenCalled();
     });
 
