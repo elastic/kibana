@@ -62,6 +62,7 @@ import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
@@ -750,8 +751,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               />
             ) : null}
 
-            <EuiPageTemplate
-              offset={0}
+            <KibanaPageTemplate
               className="eui-fullHeight"
               restrictWidth={1000}
             >
@@ -822,7 +822,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 >
                   <SaveChangesBottomBar/>
                 </EuiPageTemplate.BottomBar> : null)}
-            </EuiPageTemplate>
+            </KibanaPageTemplate>
           </Breadcrumb>
         </FormChangesProvider>
       </FormikProvider>
