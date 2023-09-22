@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardTypeEnum } from '../../../../plugins/apm/common/service_dashboards';
+import { DashboardTypeEnum } from '@kbn/apm-plugin/common/service_dashboards';
 import { ApmApiClient } from '../../common/config';
 
 export async function getServiceDashboardApi(apmApiClient: ApmApiClient, serviceName: string) {

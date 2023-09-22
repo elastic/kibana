@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { DashboardTypeEnum } from '../../../../plugins/apm/common/service_dashboards';
+import { DashboardTypeEnum } from '@kbn/apm-plugin/common/service_dashboards';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   getServiceDashboardApi,
