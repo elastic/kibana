@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 export interface ExpandablePanelPanelProps {
   header: {
@@ -92,7 +93,12 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
     () => (
       <EuiButtonIcon
         data-test-subj={`${dataTestSubj}ToggleIcon`}
-        aria-label={`entity-toggle`}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.shared.ExpandablePanelButtonIconAriaLabel',
+          {
+            defaultMessage: 'Expandable panel toggle',
+          }
+        )}
         color="text"
         display="empty"
         iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}

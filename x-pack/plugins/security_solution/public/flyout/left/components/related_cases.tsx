@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { CaseDetailsLink } from '../../../common/components/links';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
@@ -62,7 +63,19 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
 
   if (loading) {
-    return <EuiSkeletonText lines={1} size="m" isLoading={loading} contentAriaLabel="Loading" />;
+    return (
+      <EuiSkeletonText
+        lines={1}
+        size="m"
+        isLoading={loading}
+        contentAriaLabel={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.correlations.relatedCasesLoadingAriaLabel',
+          {
+            defaultMessage: 'Related cases is loading',
+          }
+        )}
+      />
+    );
   }
 
   if (error) {
