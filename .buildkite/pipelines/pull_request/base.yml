@@ -136,7 +136,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-# Temporarily replace with a flag-based check
+# TODO: Enable in #166813 after fixing types
 #  - command: .buildkite/scripts/steps/check_types.sh
 #    label: 'Check Types'
 #    agents:
