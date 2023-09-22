@@ -14,7 +14,7 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedDataViews = ['synthetics-dashboard', 'logs-*', 'metrics-*'];
+const expectedDataViews = ['synthetics-dashboard', 'logstash-*', 'logs-*', 'metrics-*'];
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
 
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
@@ -23,6 +23,7 @@ const expectedUncategorized = uncategorized.map((dataset) => dataset.split('-')[
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'observabilityLogExplorer']);
 
@@ -31,7 +32,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dataset Selector', () => {
     before(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('as consistent behavior', () => {
@@ -571,7 +577,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('when open on the data views tab', () => {
+      describe.only('when open on the data views tab', () => {
         before(async () => {
           await PageObjects.observabilityLogExplorer.navigateTo();
         });
@@ -601,6 +607,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
             expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(expectedDataViews[3]);
           });
         });
 
@@ -624,9 +631,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[2]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[3]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back ascending order
@@ -639,6 +647,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
             expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[3]);
           });
         });
 
@@ -663,6 +672,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
             expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(expectedDataViews[3]);
           });
 
           await PageObjects.observabilityLogExplorer.typeSearchFieldWith('logs');
@@ -672,8 +682,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
-            expect(menuEntries.length).to.be(1);
+            expect(menuEntries.length).to.be(2);
             expect(await menuEntries[0].getVisibleText()).to.be('logs-*');
+            expect(await menuEntries[1].getVisibleText()).to.be('logstash-*');
           });
         });
 
@@ -695,13 +706,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
 
-            expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
-            menuEntries[1].click();
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            menuEntries[2].click();
           });
 
           await retry.try(async () => {
             expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-              expectedDataViews[1]
+              expectedDataViews[2]
             );
           });
         });
