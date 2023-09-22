@@ -34,9 +34,7 @@ export function getFailures(clusterDetails: ClusterDetails) {
 }
 
 function printErrorCause(errorCause: ErrorCause) {
-  return errorCause.reason
-    ?  `${errorCause.type}: "${errorCause.reason}"`
-    : errorCause.type;
+  return errorCause.reason ? `${errorCause.type}: "${errorCause.reason}"` : errorCause.type;
 }
 
 interface Props {
@@ -68,11 +66,7 @@ export function ClusterView({ clusterDetails }: Props) {
           })}
           iconType="warning"
         >
-        {
-          clusterFailures[0]?.reason
-            ? printErrorCause(clusterFailures[0]?.reason)
-            : ''
-        }
+          {clusterFailures[0]?.reason ? printErrorCause(clusterFailures[0]?.reason) : ''}
         </EuiCallOut>
       ) : null}
 
