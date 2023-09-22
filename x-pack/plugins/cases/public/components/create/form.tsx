@@ -248,6 +248,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             connectors={empty}
             customFieldsConfiguration={[]}
             isLoadingConnectors={false}
+            isLoadingCaseConfiguration={false}
             withSteps={withSteps}
             owner={owner}
             draftStorageKey={draftStorageKey}
