@@ -10,7 +10,7 @@ import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../common/lib';
@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await createRule({
           supertest,
           tags: ['observability'],
-          consumer: 'alerts',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
