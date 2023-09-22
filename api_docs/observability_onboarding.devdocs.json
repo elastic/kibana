@@ -119,73 +119,10 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityOnboarding",
-        "id": "def-public.ObservabilityOnboardingLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "ObservabilityOnboardingLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observabilityOnboarding",
-            "scope": "public",
-            "docId": "kibObservabilityOnboardingPluginApi",
-            "section": "def-public.ObservabilityOnboardingLocatorParams",
-            "text": "ObservabilityOnboardingLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/plugins/observability_onboarding/public/locators/onboarding_locator/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityOnboarding",
-            "id": "def-public.ObservabilityOnboardingLocatorParams.source",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "source",
-            "description": [
-              "If given, it will load the given map else will load the create a new map page."
-            ],
-            "signature": [
-              "\"customLogs\" | \"systemLogs\" | undefined"
-            ],
-            "path": "x-pack/plugins/observability_onboarding/public/locators/onboarding_locator/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "observabilityOnboarding",
-        "id": "def-public.OBSERVABILITY_ONBOARDING_LOCATOR",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ONBOARDING_LOCATOR",
-        "description": [],
-        "signature": [
-          "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_onboarding/public/locators/onboarding_locator/locator_definition.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "observabilityOnboarding",
