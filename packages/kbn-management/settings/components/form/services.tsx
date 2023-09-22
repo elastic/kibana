@@ -49,7 +49,7 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
       value={{
         saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
           const arr = Object.entries(changes).map(([key, value]) =>
-            settings.client.set(key, value)
+            settings.client.set(key, value.unsavedValue)
           );
           return Promise.all(arr);
         },
