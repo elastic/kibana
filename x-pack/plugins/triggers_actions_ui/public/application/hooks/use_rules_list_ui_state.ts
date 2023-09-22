@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { RulesListFilters } from '../../types';
 
 interface UseUiProps {
-  authorizedToCreateAnyRules: boolean;
+  authorizedToReadAnyRules: boolean;
   filters: RulesListFilters;
   hasDefaultRuleTypesFiltersOn: boolean;
   isLoadingRuleTypes: boolean;
@@ -37,7 +37,7 @@ const getFilterApplied = ({ hasEmptyTypesFilter, filters }: GetFilterAppliedProp
 };
 
 export const useRulesListUiState = ({
-  authorizedToCreateAnyRules,
+  authorizedToReadAnyRules,
   filters,
   hasDefaultRuleTypesFiltersOn,
   isLoadingRuleTypes,
@@ -56,7 +56,7 @@ export const useRulesListUiState = ({
   const isInitialLoading = isInitialLoadingRuleTypes || isInitialLoadingRules;
   const isLoading = isLoadingRuleTypes || isLoadingRules;
 
-  const showNoAuthPrompt = !isInitialLoadingRuleTypes && !authorizedToCreateAnyRules;
+  const showNoAuthPrompt = !isInitialLoadingRuleTypes && !authorizedToReadAnyRules;
   const showCreateFirstRulePrompt = !isLoading && !hasData && !isFilterApplied;
   const showSpinner =
     isInitialLoading && (isLoadingRuleTypes || (!showNoAuthPrompt && isLoadingRules));

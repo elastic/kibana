@@ -21,7 +21,11 @@ import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType, useLoadRuleTypes } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasShowActionsCapability,
+} from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
@@ -60,6 +64,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
       values: { numberOfConditions },
     });
   };
+  const canReadActions = hasShowActionsCapability(capabilities);
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
     rule &&
@@ -209,11 +214,21 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <RuleActions
-                  ruleActions={rule.actions}
-                  actionTypeRegistry={actionTypeRegistry}
-                  legacyNotifyWhen={rule.notifyWhen}
-                />
+                {canReadActions ? (
+                  <RuleActions
+                    ruleActions={rule.actions}
+                    actionTypeRegistry={actionTypeRegistry}
+                    legacyNotifyWhen={rule.notifyWhen}
+                  />
+                ) : (
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
+                        defaultMessage: 'Connector feature privileges are required to view actions',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
