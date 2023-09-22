@@ -27,7 +27,7 @@ import { compareCustomFieldKeysAgainstConfiguration } from './utils';
 /**
  * Throws if any of the custom field keys in the request does not exist in the case configuration.
  */
-async function throwIfCustomFieldKeysInvalid({
+export async function throwIfCustomFieldKeysInvalid({
   casePostRequest,
   casesClient,
 }: {

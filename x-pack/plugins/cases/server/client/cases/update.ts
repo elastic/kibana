@@ -110,7 +110,7 @@ async function throwIfMaxUserActionsReached({
 /**
  * Throws if any of the custom field keys in the request does not exist in the case configuration.
  */
-async function throwIfCustomFieldKeysInvalid({
+export async function throwIfCustomFieldKeysInvalid({
   casesToUpdate,
   casesClient,
 }: {
@@ -338,7 +338,7 @@ function partitionPatchRequest(
   };
 }
 
-interface UpdateRequestWithOriginalCase {
+export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
 }
