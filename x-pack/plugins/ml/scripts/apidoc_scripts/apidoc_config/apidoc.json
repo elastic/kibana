@@ -180,6 +180,7 @@
     "InferTrainedModelDeployment",
     "CreateInferencePipeline",
     "GetIngestPipelines",
+    "GetTrainedModelDownloadList",
 
     "Alerting",
     "PreviewAlert",

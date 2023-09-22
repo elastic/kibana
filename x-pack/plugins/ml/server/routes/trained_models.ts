@@ -660,7 +660,7 @@ export function trainedModelsRoutes({
    *
    * @api {post} /internal/ml/trained_models/model_downloads Gets available models for download
    * @apiName GetTrainedModelDownloadList
-   * @apiDescription Gets available models for download.
+   * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
    */
   router.versioned
     .get({
