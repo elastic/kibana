@@ -751,11 +751,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             ) : null}
 
             <EuiPageTemplate
+              offset={0}
               className="eui-fullHeight"
               restrictWidth={1000}
             >
               <EuiPageTemplate.Header
-                paddingSize='m'
+                paddingSize='l'
                 pageTitle={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.title"
