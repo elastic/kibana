@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
