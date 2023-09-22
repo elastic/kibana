@@ -65,6 +65,7 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   const idx = useRef(0);
 
   const activeNodes = useObservable(activeNodes$, []);
+  console.log('top activeNodes', activeNodes[0]);
   const [navigationItems, setNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
