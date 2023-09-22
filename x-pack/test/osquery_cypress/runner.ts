@@ -57,12 +57,12 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
 
   await setupFleetAgent(context);
 
-  // // Give more time for agent to establish connection with ES
-  // await new Promise((resolve) => {
-  //   setTimeout(() => {
-  //     resolve('Promise resolved after one minute!');
-  //   }, 60000); // 60000 milliseconds = 1 minute
-  // });
+  // Give more time for agent to establish connection with ES
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('Promise resolved after one minute!');
+    }, 60000); // 60000 milliseconds = 1 minute
+  });
 
   return {
     FORCE_COLOR: '1',
