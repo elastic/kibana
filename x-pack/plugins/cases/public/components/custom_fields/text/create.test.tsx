@@ -36,6 +36,28 @@ describe('Create ', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders loading state correctly', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create isLoading={true} customFieldConfiguration={customFieldConfiguration} />
+      </FormTestComponent>
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('disables the text when loading', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create isLoading={true} customFieldConfiguration={customFieldConfiguration} />
+      </FormTestComponent>
+    );
+
+    expect(
+      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`)
+    ).toHaveAttribute('disabled');
+  });
+
   it('updates the value correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -87,7 +109,7 @@ describe('Create ', () => {
     });
   });
 
-  it('shows error when text empty and is required', async () => {
+  it('shows error when text is required but is empty', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
@@ -110,18 +132,5 @@ describe('Create ', () => {
       ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
-  });
-
-  it('disables the text when loading', async () => {
-    render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <Create isLoading={true} customFieldConfiguration={customFieldConfiguration} />
-      </FormTestComponent>
-    );
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    expect(
-      screen.getByTestId(`${customFieldConfiguration.label}-text-create-custom-field`)
-    ).toHaveAttribute('disabled');
   });
 });

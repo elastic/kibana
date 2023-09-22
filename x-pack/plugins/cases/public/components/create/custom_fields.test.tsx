@@ -50,6 +50,25 @@ describe('CustomFields', () => {
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 
+  it('should sort the custom fields correctly', async () => {
+    const reversedConfiguration = [...customFieldsConfigurationMock].reverse();
+
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields isLoading={false} customFieldsConfiguration={reversedConfiguration} />
+      </FormTestComponent>
+    );
+
+    const customFieldsWrapper = await screen.findByTestId('create-case-custom-fields');
+
+    const customFields = customFieldsWrapper.querySelectorAll('.euiFormRow');
+
+    expect(customFields).toHaveLength(2);
+
+    expect(customFields[0]).toHaveTextContent('My test label 1');
+    expect(customFields[1]).toHaveTextContent('My test label 2');
+  });
+
   it('should not show the custom fields when no permissions to create', async () => {
     appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
 

@@ -270,8 +270,13 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
     <AddFieldFlyout
-      isLoading={loadingCaseConfigure}
-      disabled={!permissions.create || !permissions.update}
+      isLoading={loadingCaseConfigure || isPersistingConfiguration}
+      disabled={
+        !permissions.create ||
+        !permissions.update ||
+        loadingCaseConfigure ||
+        isPersistingConfiguration
+      }
       onCloseFlyout={onCloseAddFieldFlyout}
       onSaveField={onCustomFieldCreated}
     />
@@ -333,8 +338,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <CustomFields
                 customFields={customFields}
-                isLoading={loadingCaseConfigure}
-                disabled={loadingCaseConfigure}
+                isLoading={loadingCaseConfigure || isPersistingConfiguration}
+                disabled={isPersistingConfiguration || loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}
               />
             </EuiFlexItem>

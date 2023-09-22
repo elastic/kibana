@@ -65,7 +65,7 @@ export const FormContext: React.FC<Props> = ({
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
   const {
-    data: { customFields: customFieldsConfiguration },
+    data: { customFields: customFieldsConfiguration }, isLoading: isLoadingCaseConfiguration
   } = useGetCaseConfiguration();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
@@ -95,7 +95,7 @@ export const FormContext: React.FC<Props> = ({
 
   const mapCustomFieldsData = useCallback(
     (userFormData: CaseUI & Record<string, string | boolean>) => {
-      if (!customFieldsConfiguration.length) {
+      if (!customFieldsConfiguration.length || isLoadingCaseConfiguration) {
         return [];
       }
       return customFieldsConfiguration.map((field) => {
@@ -108,7 +108,7 @@ export const FormContext: React.FC<Props> = ({
         };
       });
     },
-    [customFieldsConfiguration]
+    [customFieldsConfiguration, isLoadingCaseConfiguration]
   );
 
   const submitCase = useCallback(
@@ -209,10 +209,11 @@ export const FormContext: React.FC<Props> = ({
               connectors,
               isLoadingConnectors,
               customFieldsConfiguration,
+              isLoadingCaseConfiguration
             })
           )
         : null,
-    [children, connectors, isLoadingConnectors, customFieldsConfiguration]
+    [children, connectors, isLoadingConnectors, customFieldsConfiguration, isLoadingCaseConfiguration]
   );
   return (
     <Form

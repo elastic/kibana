@@ -92,6 +92,7 @@ const defaultPostCase = {
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
+  isLoadingCaseConfiguration: false,
   connectors: [],
   customFieldsConfiguration: [],
   withSteps: true,

@@ -67,6 +67,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   customFieldsConfiguration: CasesConfigurationUI['customFields'];
+  isLoadingCaseConfiguration: boolean;
   isLoadingConnectors: boolean;
   withSteps: boolean;
   owner: string[];
@@ -93,6 +94,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     owner,
     draftStorageKey,
     customFieldsConfiguration,
+    isLoadingCaseConfiguration,
   }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
@@ -132,7 +134,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             </Container>
             <Container>
               <CustomFields
-                isLoading={isSubmitting}
+                isLoading={isSubmitting || isLoadingCaseConfiguration}
                 customFieldsConfiguration={customFieldsConfiguration}
               />
             </Container>
