@@ -290,9 +290,7 @@ export class IndexTable extends Component {
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            {...reactRouterNavigate(history, {
-              pathname: getIndexDetailsLink(value),
-            })}
+            onClick={() => history.push(getIndexDetailsLink(value))}
           >
             {value}
           </EuiLink>

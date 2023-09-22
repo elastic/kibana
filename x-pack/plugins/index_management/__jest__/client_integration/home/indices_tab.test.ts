@@ -155,55 +155,17 @@ describe('<IndexManagementHome />', () => {
     expect(testBed.actions.findIndexDetailsPageTitle()).toContain('testIndex');
   });
 
-  describe('index detail panel with % character in index name', () => {
+  it('index page works with % character in index name', async () => {
     const indexName = 'test%';
+    httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+    testBed = await setup(httpSetup);
+    const { component, actions } = testBed;
 
-      testBed = await setup(httpSetup);
-      const { component, find } = testBed;
+    component.update();
 
-      component.update();
-
-      find('indexTableIndexNameLink').at(0).simulate('click');
-    });
-
-    test('should encode indexName when loading settings in detail panel', async () => {
-      const { actions } = testBed;
-      await actions.selectIndexDetailsTab('settings');
-
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
-      );
-    });
-
-    test('should encode indexName when loading mappings in detail panel', async () => {
-      const { actions } = testBed;
-      await actions.selectIndexDetailsTab('mappings');
-
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
-      );
-    });
-
-    test('should encode indexName when loading stats in detail panel', async () => {
-      const { actions } = testBed;
-      await actions.selectIndexDetailsTab('stats');
-
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
-      );
-    });
-
-    test('should encode indexName when editing settings in detail panel', async () => {
-      const { actions } = testBed;
-      await actions.selectIndexDetailsTab('edit_settings');
-
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
-      );
-    });
+    await actions.clickIndexNameAt(0);
+    expect(testBed.actions.findIndexDetailsPageTitle()).toContain(indexName);
   });
 
   describe('index actions', () => {
