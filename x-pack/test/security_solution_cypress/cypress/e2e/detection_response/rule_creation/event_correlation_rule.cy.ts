@@ -53,8 +53,7 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-
+import { goBackToRulesTableViaBreadcrumbs, visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -85,6 +84,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      goBackToRulesTableViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -162,6 +162,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      goBackToRulesTableViaBreadcrumbs();
       goToRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

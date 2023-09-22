@@ -7,6 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
+import { RULES_TABLE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
@@ -30,7 +31,6 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
-  BACK_TO_RULES_TABLE,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   RULE_NAME_HEADER,
@@ -152,7 +152,7 @@ export const waitForTheRuleToBeExecuted = () => {
 };
 
 export const goBackToRulesTable = () => {
-  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(RULES_TABLE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

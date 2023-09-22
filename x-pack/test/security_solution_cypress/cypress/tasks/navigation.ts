@@ -10,6 +10,7 @@ import { encode } from '@kbn/rison';
 import type { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import { hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
+import { LAST_BREADCRUMB, RULES_TABLE_BREADCRUMB } from '../screens/breadcrumbs';
 import { constructUrlWithUser, getUrlWithRoute, User } from './login';
 
 export const visit = (
@@ -90,6 +91,12 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
 export const visitUserDetailsPage = (userName = 'test') => {
   visitWithTimeRange(userDetailsUrl(userName));
 };
+
+export function goBackToRulesTableViaBreadcrumbs(): void {
+  cy.log('Navigate back to rules table via breadcrumbs');
+  cy.get(`${RULES_TABLE_BREADCRUMB}:not(${LAST_BREADCRUMB})`).click();
+  cy.get(`${RULES_TABLE_BREADCRUMB}${LAST_BREADCRUMB}`).should('exist');
+}
 
 /**
  * For all the new features tours we show in the app, this method disables them

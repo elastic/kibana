@@ -24,8 +24,7 @@ import {
   fillScheduleRuleAndContinue,
 } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-
+import { goBackToRulesTableViaBreadcrumbs, visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -60,6 +59,7 @@ describe(
       fillScheduleRuleAndContinue(rule);
       fillRuleAction(actions);
       createAndEnableRule();
+      goBackToRulesTableViaBreadcrumbs();
 
       goToRuleDetailsOf(rule.name);
 
