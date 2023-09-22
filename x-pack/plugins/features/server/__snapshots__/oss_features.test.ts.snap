@@ -688,15 +688,11 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
       },
@@ -747,18 +743,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "alerting": Object {
-        "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-        "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-      },
       "app": Array [
         "discover",
         "kibana",
@@ -1315,15 +1299,11 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
       },
@@ -1374,18 +1354,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "alerting": Object {
-        "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-        "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-      },
       "app": Array [
         "discover",
         "kibana",
