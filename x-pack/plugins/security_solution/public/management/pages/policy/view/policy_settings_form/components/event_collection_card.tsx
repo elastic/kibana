@@ -134,7 +134,7 @@ export const EventCollectionCard = memo(
 
         <div data-test-subj={getTestId('options')}>
           {options.map(({ name, protectionField }) => {
-            const keyPath = `${policyOs}.events.${protectionField}`;
+            const keyPath = `${policyOs}.events.${String(protectionField)}`;
 
             return (
               <EventCheckbox
@@ -165,7 +165,7 @@ export const EventCollectionCard = memo(
               indented,
               isDisabled,
             }) => {
-              const keyPath = `${policyOs}.events.${protectionField}`;
+              const keyPath = `${policyOs}.events.${String(protectionField)}`;
               const isChecked = get(policy, keyPath);
               const fieldString = protectionField as string;
 

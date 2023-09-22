@@ -7,7 +7,6 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import type {
   UseFetchRelatedAlertsByAncestryParams,
   UseFetchRelatedAlertsByAncestryResult,
@@ -17,7 +16,8 @@ import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/al
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const documentId = 'documentId';
+const indices = ['index1'];
 const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsByAncestry', () => {
@@ -34,7 +34,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(true);
@@ -51,7 +51,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(false);
@@ -68,7 +68,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
     });
 
     hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ dataFormattedForFieldBrowser, scopeId })
+      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
     );
 
     expect(hookResult.result.current.loading).toEqual(false);

@@ -17,11 +17,11 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { createEsClientForTesting } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
-} from '@kbn/apm-plugin/server/routes/settings/apm_indices/get_apm_indices';
-import { createEsClientForTesting } from '@kbn/test';
+} from '@kbn/apm-plugin/server/routes/settings/apm_indices/apm_system_index_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createAgentPolicy,

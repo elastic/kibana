@@ -11,12 +11,20 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
+
+import type { CaseCustomFields } from '../../../common/types/domain';
 
 describe('create', () => {
   const theCase = {
@@ -170,6 +178,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            customFields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -235,6 +244,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            customFields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -307,6 +317,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            customFields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -365,11 +376,129 @@ describe('create', () => {
             external_service: null,
             duration: null,
             status: CaseStatuses.open,
+            customFields: [],
           },
           id: expect.any(String),
           refresh: false,
         })
       );
+    });
+  });
+
+  describe('Custom Fields', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    const theCustomFields: CaseCustomFields = [
+      {
+        key: 'first_customField_key',
+        type: CustomFieldTypes.TEXT,
+        field: { value: ['this is a text field value', 'this is second'] },
+      },
+      {
+        key: 'second_customField_key',
+        type: CustomFieldTypes.TOGGLE,
+        field: { value: [true] },
+      },
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should create customFields correctly', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: theCustomFields,
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: null,
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            customFields: theCustomFields,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
+
+    it('should not throw an error and set default value when customFields are undefined', async () => {
+      await expect(create({ ...theCase }, clientArgs)).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: null,
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            customFields: [],
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
+
+    it('throws error when the customFields array is too long', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill(theCustomFields[0]),
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws with duplicated customFields keys', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: [
+              {
+                key: 'duplicated_key',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['this is a text field value', 'this is second'] },
+              },
+              {
+                key: 'duplicated_key',
+                type: CustomFieldTypes.TOGGLE,
+                field: { value: [true] },
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
     });
   });
 });

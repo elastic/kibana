@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -14,6 +15,7 @@ import {
   MAX_CASES_TO_UPDATE,
   MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -863,6 +865,138 @@ describe('update', () => {
           refresh: false,
         })
       );
+    });
+  });
+
+  describe('Custom Fields', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+    });
+
+    it('can update customFields', async () => {
+      const customFields = [
+        {
+          key: 'string_custom_field_1',
+          type: CustomFieldTypes.TEXT as const,
+          field: { value: ['this is a text field value', 'this is second'] },
+        },
+        {
+          key: 'string_custom_field_2',
+          type: CustomFieldTypes.TEXT as const,
+          field: { value: null },
+        },
+        {
+          key: 'boolean_custom_field_1',
+          type: CustomFieldTypes.TOGGLE as const,
+          field: { value: [true] },
+        },
+        {
+          key: 'boolean_custom_field_2',
+          type: CustomFieldTypes.TOGGLE as const,
+          field: { value: null },
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields,
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
+    it('throws error when the customFields array is too long', async () => {
+      const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+        key: 'first_custom_field_key',
+        type: 'text',
+        field: { value: ['this is a text field value', 'this is second'] },
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws with duplicated customFields keys', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'duplicated_key',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['this is a text field value', 'this is second'] },
+                  },
+                  {
+                    key: 'duplicated_key',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['this is a text field value', 'this is second'] },
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
     });
   });
 

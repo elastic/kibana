@@ -15,6 +15,7 @@ import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
+  CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -810,6 +811,37 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: postedCase.id,
                   version: postedCase.version,
                   tags: ['  '],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('customFields', async () => {
+        it('400s when trying to patch with duplicated custom field keys', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      field: { value: ['this is a text field value'] },
+                    },
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      field: { value: ['this is a text field value'] },
+                    },
+                  ],
                 },
               ],
             },

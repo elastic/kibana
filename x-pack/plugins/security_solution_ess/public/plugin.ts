@@ -45,6 +45,8 @@ export class SecuritySolutionEssPlugin
     });
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    securitySolution.setIsILMAvailable(true);
+
     subscribeBreadcrumbs(services);
 
     return {};

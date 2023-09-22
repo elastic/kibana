@@ -667,8 +667,7 @@
         "label": "makeColorWithAlpha",
         "description": [],
         "signature": [
-          "(color: string, newAlpha: number) => ",
-          "Color"
+          "(color: string, newAlpha: number) => chroma.Color"
         ],
         "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
         "deprecated": false,

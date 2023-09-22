@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { alertComment } from '../../../containers/mock';
-import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
+import { CustomFieldTypes } from '../../../../common/types/domain';
+import { alertComment, customFieldsMock } from '../../../containers/mock';
+import {
+  addOrReplaceCustomField,
+  getManualAlertIds,
+  getRegistrationContextFromAlerts,
+} from './helpers';
 
 const comment = {
   ...alertComment,
@@ -89,6 +94,45 @@ describe('Case view helpers', () => {
     it('returns the alerts id from multiple alerts in a comment', () => {
       const result = getManualAlertIds([comment, comment2, comment3]);
       expect(result).toEqual(['alert-id-1', 'alert-id-2', 'nested1', 'nested2', 'nested3']);
+    });
+  });
+
+  describe('addOrReplaceCustomField', () => {
+    it('appends a new custom field correctly', () => {
+      const customField = {
+        type: CustomFieldTypes.TEXT as const,
+        key: 'my_new_key',
+        field: { value: ['My new value'] },
+      };
+
+      expect(addOrReplaceCustomField(customFieldsMock, customField)).toEqual([
+        ...customFieldsMock,
+        customField,
+      ]);
+    });
+
+    it('replace an existing field correctly', () => {
+      const customField = {
+        type: CustomFieldTypes.TEXT as const,
+        key: 'test_key_1',
+        field: { value: ['My new value'] },
+      };
+
+      expect(addOrReplaceCustomField(customFieldsMock, customField)).toEqual([
+        // item 0 got replaces as they have the same key
+        customField,
+        customFieldsMock[1],
+      ]);
+    });
+
+    it('adds a custom field to an empty array', () => {
+      const customField = {
+        type: CustomFieldTypes.TEXT as const,
+        key: 'test_key_1',
+        field: { value: ['My new value'] },
+      };
+
+      expect(addOrReplaceCustomField([], customField)).toEqual([customField]);
     });
   });
 });

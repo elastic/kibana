@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -38,7 +36,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -60,9 +58,10 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add/edit exception from rule details',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
@@ -70,36 +69,26 @@ describe(
 
     before(() => {
       cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', 'exceptions');
-      login();
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     });
 
     after(() => {
       cy.task('esArchiverUnload', 'exceptions');
     });
 
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+
+      const exceptionList = getExceptionList();
+      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+    });
+
     describe('existing list and items', () => {
       const exceptionList = getExceptionList();
       beforeEach(() => {
-        deleteAlertsAndRules();
-        deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
         // create rule with exceptions
         createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-          createRule(
-            getNewRule({
-              query: 'agent.name:*',
-              index: ['exceptions*'],
-              exceptions_list: [
-                {
-                  id: response.body.id,
-                  list_id: exceptionList.list_id,
-                  type: exceptionList.type,
-                  namespace_type: exceptionList.namespace_type,
-                },
-              ],
-              rule_id: '2',
-            })
-          );
           createExceptionListItem(exceptionList.list_id, {
             list_id: exceptionList.list_id,
             item_id: 'simple_list_item',
@@ -117,12 +106,23 @@ describe(
               },
             ],
           });
-        });
 
-        login();
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-        goToRuleDetails();
-        goToExceptionsTab();
+          createRule(
+            getNewRule({
+              query: 'agent.name:*',
+              index: ['exceptions*'],
+              exceptions_list: [
+                {
+                  id: response.body.id,
+                  list_id: exceptionList.list_id,
+                  type: exceptionList.type,
+                  namespace_type: exceptionList.namespace_type,
+                },
+              ],
+              rule_id: '2',
+            })
+          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+        });
       });
 
       it('Edits an exception item', () => {
@@ -252,7 +252,6 @@ describe(
 
     describe('rule without existing exceptions', () => {
       beforeEach(() => {
-        deleteAlertsAndRules();
         createRule(
           getNewRule({
             query: 'agent.name:*',
@@ -260,11 +259,7 @@ describe(
             interval: '10s',
             rule_id: 'rule_testing',
           })
-        );
-        login();
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-        goToRuleDetails();
-        goToExceptionsTab();
+        ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
       });
 
       afterEach(() => {
@@ -326,7 +321,7 @@ describe(
         cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
         // load more docs
-        cy.task('esArchiverLoad', 'exceptions_2');
+        cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
 
         // now that there are no more exceptions, the docs should match and populate alerts
         goToAlertsTab();

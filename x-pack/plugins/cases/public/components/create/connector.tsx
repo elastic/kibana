@@ -14,7 +14,7 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { schema } from './schema';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
@@ -29,7 +29,11 @@ interface Props {
 const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const connector = getConnectorById(connectorId, connectors) ?? null;
-  const { connector: configurationConnector } = useCaseConfigure();
+
+  const {
+    data: { connector: configurationConnector },
+  } = useGetCaseConfiguration();
+
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;

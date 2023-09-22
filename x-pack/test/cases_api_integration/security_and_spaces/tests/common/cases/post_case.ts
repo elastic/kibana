@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CaseStatuses, CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseStatuses,
+  CaseSeverity,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -319,6 +323,29 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             getPostCaseRequest({
               category: '   ',
+            }),
+            400
+          );
+        });
+      });
+
+      describe('customFields', async () => {
+        it('400s when trying to patch with duplicated custom field keys', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'duplicated_key',
+                  type: CustomFieldTypes.TEXT,
+                  field: { value: ['this is a text field value'] },
+                },
+                {
+                  key: 'duplicated_key',
+                  type: CustomFieldTypes.TEXT,
+                  field: { value: ['this is a text field value'] },
+                },
+              ],
             }),
             400
           );

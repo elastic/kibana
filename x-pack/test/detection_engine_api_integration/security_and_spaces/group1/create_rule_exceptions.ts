@@ -67,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -122,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -195,6 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -231,6 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/4656dc92-5832-11ea-8e2d-0242ac130003/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })

@@ -23,6 +23,7 @@ export const getInstalledRules = async (
   const { body: rulesResponse } = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send()
     .expect(200);
 

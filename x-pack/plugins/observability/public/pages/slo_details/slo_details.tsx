@@ -25,9 +25,10 @@ import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
 import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
-import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
@@ -42,7 +43,8 @@ export function SloDetailsPage() {
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const sloInstanceId = useGetInstanceIdQueryParam();
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
+  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
   const { isLoading, slo } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
@@ -65,6 +67,7 @@ export function SloDetailsPage() {
 
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
+    storeAutoRefreshState(!isAutoRefreshing);
   };
 
   return (

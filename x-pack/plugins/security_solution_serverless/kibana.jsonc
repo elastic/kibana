@@ -14,7 +14,6 @@
     "requiredPlugins": [
       "kibanaReact",
       "management",
-      "ml",
       "security",
       "securitySolution",
       "serverless",
@@ -25,6 +24,9 @@
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "usageCollection"
+    ]
   }
 }

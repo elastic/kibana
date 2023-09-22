@@ -40,13 +40,10 @@
       {
         "parentPluginId": "filesManagement",
         "id": "def-common.PLUGIN_NAME",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/files_management/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { RulePreviewTitleProps } from './rule_preview_title';
 import { RulePreviewTitle } from './rule_preview_title';
 import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
@@ -16,23 +17,39 @@ import {
   RULE_PREVIEW_TITLE_TEST_ID,
   RULE_PREVIEW_RULE_CREATED_BY_TEST_ID,
   RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
+  RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID,
 } from './test_ids';
 
 const defaultProps = {
   rule: { id: 'id' } as Rule,
+  isSuppressed: false,
 };
+
+const renderRulePreviewTitle = (props: RulePreviewTitleProps) =>
+  render(
+    <TestProviders>
+      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+        <RulePreviewTitle {...props} />
+      </ExpandableFlyoutContext.Provider>
+    </TestProviders>
+  );
 
 describe('<RulePreviewTitle />', () => {
   it('should render title and its components', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-          <RulePreviewTitle {...defaultProps} />
-        </ExpandableFlyoutContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = renderRulePreviewTitle(defaultProps);
+
     expect(getByTestId(RULE_PREVIEW_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_RULE_CREATED_BY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render deleted rule badge', () => {
+    const props = {
+      ...defaultProps,
+      isSuppressed: true,
+    };
+    const { getByTestId } = renderRulePreviewTitle(props);
+    expect(getByTestId(RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID)).toBeInTheDocument();
   });
 });

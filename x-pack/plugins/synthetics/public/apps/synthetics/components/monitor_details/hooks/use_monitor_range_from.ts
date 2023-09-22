@@ -7,6 +7,9 @@
 
 import { useMemo } from 'react';
 import moment from 'moment';
+
+import { ConfigKey } from '../../../../../../common/constants/monitor_management';
+import { SourceType } from '../../../../../../common/runtime_types';
 import { useRefreshedRange } from '../../../hooks';
 import { useSelectedMonitor } from './use_selected_monitor';
 
@@ -17,11 +20,14 @@ export const useMonitorRangeFrom = () => {
 
   return useMemo(() => {
     if (monitor?.created_at) {
-      const diff = moment(monitor?.created_at).diff(moment().subtract(30, 'day'), 'days');
-      if (diff > 0) {
-        return { to, from: monitor?.created_at, loading };
+      const monitorCreatedDaysAgo = moment().diff(monitor.created_at, 'days');
+      const isProjectMonitor = monitor?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+
+      // Always look back at lest 3 days to account for reinstated project monitors.
+      if ((!isProjectMonitor || monitorCreatedDaysAgo > 3) && monitorCreatedDaysAgo < 30) {
+        return { to, from: monitor.created_at, loading };
       }
     }
     return { to, from, loading };
-  }, [monitor?.created_at, to, from, loading]);
+  }, [monitor, to, from, loading]);
 };

@@ -10,121 +10,280 @@ import { estypes } from '@elastic/elasticsearch';
 import { extractWarnings } from './extract_warnings';
 
 describe('extract search response warnings', () => {
-  it('should extract warnings from response with shard failures', () => {
-    const response = {
-      took: 25,
-      timed_out: false,
-      _shards: {
-        total: 4,
-        successful: 2,
-        skipped: 0,
-        failed: 2,
-        failures: [
-          {
-            shard: 0,
-            index: 'sample-01-rollup',
-            node: 'VFTFJxpHSdaoiGxJFLSExQ',
-            reason: {
-              type: 'illegal_argument_exception',
-              reason:
-                'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+  describe('single cluster', () => {
+    it('should extract incomplete warning from response with shard failures', () => {
+      const response = {
+        took: 25,
+        timed_out: false,
+        _shards: {
+          total: 4,
+          successful: 3,
+          skipped: 0,
+          failed: 1,
+          failures: [
+            {
+              shard: 0,
+              index: 'sample-01-rollup',
+              node: 'VFTFJxpHSdaoiGxJFLSExQ',
+              reason: {
+                type: 'illegal_argument_exception',
+                reason:
+                  'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+              },
+            },
+          ],
+        },
+        hits: { total: 18239, max_score: null, hits: [] },
+        aggregations: {},
+      };
+
+      expect(extractWarnings(response)).toEqual([
+        {
+          type: 'incomplete',
+          message: 'The data might be incomplete or wrong.',
+          clusters: {
+            '(local)': {
+              status: 'partial',
+              indices: '',
+              took: 25,
+              timed_out: false,
+              _shards: response._shards,
+              failures: response._shards.failures,
             },
           },
-        ],
-      },
-      hits: { total: 18239, max_score: null, hits: [] },
-      aggregations: {},
-    };
-
-    expect(extractWarnings(response)).toEqual([
-      {
-        type: 'shard_failure',
-        message: '2 of 4 shards failed',
-        reason: {
-          type: 'illegal_argument_exception',
-          reason:
-            'Field [kubernetes.container.memory.available.bytes] of type' +
-            ' [aggregate_metric_double] is not supported for aggregation [percentiles]',
         },
-        text: 'The data might be incomplete or wrong.',
-      },
-    ]);
+      ]);
+    });
+
+    it('should extract incomplete warning from response with time out', () => {
+      const response = {
+        took: 999,
+        timed_out: true,
+        _shards: {} as estypes.ShardStatistics,
+        hits: { hits: [] },
+      };
+      expect(extractWarnings(response)).toEqual([
+        {
+          type: 'incomplete',
+          message: 'The data might be incomplete or wrong.',
+          clusters: {
+            '(local)': {
+              status: 'partial',
+              indices: '',
+              took: 999,
+              timed_out: true,
+              _shards: response._shards,
+              failures: response._shards.failures,
+            },
+          },
+        },
+      ]);
+    });
+
+    it('should not include warnings when there are none', () => {
+      const warnings = extractWarnings({
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          total: 9000,
+        },
+      } as estypes.SearchResponse);
+
+      expect(warnings).toEqual([]);
+    });
   });
 
-  it('should extract timeout warning', () => {
-    const warnings = {
-      took: 999,
-      timed_out: true,
-      _shards: {} as estypes.ShardStatistics,
-      hits: { hits: [] },
-    };
-    expect(extractWarnings(warnings)).toEqual([
-      {
-        type: 'timed_out',
-        message: 'Data might be incomplete because your request timed out',
-      },
-    ]);
-  });
+  describe('remote clusters', () => {
+    it('should extract incomplete warning from response with shard failures', () => {
+      const response = {
+        took: 25,
+        timed_out: false,
+        _shards: {
+          total: 4,
+          successful: 3,
+          skipped: 0,
+          failed: 1,
+          failures: [
+            {
+              shard: 0,
+              index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+              node: 'NVzFRd6SS4qT9o0k2vIzlg',
+              reason: {
+                type: 'query_shard_exception',
+                reason:
+                  'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                index_uuid: 'z1sPO8E4TdWcijNgsL_BxQ',
+                index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                caused_by: {
+                  type: 'runtime_exception',
+                  reason:
+                    'runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                },
+              },
+            },
+          ],
+        },
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 1,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+            remote1: {
+              status: 'partial',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 5,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 1,
+                skipped: 0,
+                failed: 1,
+              },
+              failures: [
+                {
+                  shard: 0,
+                  index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                  node: 'NVzFRd6SS4qT9o0k2vIzlg',
+                  reason: {
+                    type: 'query_shard_exception',
+                    reason:
+                      'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    index_uuid: 'z1sPO8E4TdWcijNgsL_BxQ',
+                    index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                    caused_by: {
+                      type: 'runtime_exception',
+                      reason:
+                        'runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        hits: { total: 18239, max_score: null, hits: [] },
+        aggregations: {},
+      };
 
-  it('should extract shards failed warnings', () => {
-    const warnings = {
-      _shards: {
-        failed: 77,
-        total: 79,
-      },
-    } as estypes.SearchResponse;
-    expect(extractWarnings(warnings)).toEqual([
-      {
-        type: 'shard_failure',
-        message: '77 of 79 shards failed',
-        reason: { type: 'generic_shard_warning' },
-        text: 'The data might be incomplete or wrong.',
-      },
-    ]);
-  });
+      expect(extractWarnings(response)).toEqual([
+        {
+          type: 'incomplete',
+          message: 'The data might be incomplete or wrong.',
+          clusters: response._clusters.details,
+        },
+      ]);
+    });
 
-  it('should extract shards failed warning failure reason type', () => {
-    const warnings = extractWarnings({
-      _shards: {
-        failed: 77,
-        total: 79,
-      },
-    } as estypes.SearchResponse);
-    expect(warnings).toEqual([
-      {
-        type: 'shard_failure',
-        message: '77 of 79 shards failed',
-        reason: { type: 'generic_shard_warning' },
-        text: 'The data might be incomplete or wrong.',
-      },
-    ]);
-  });
+    it('should extract incomplete warning from response with time out', () => {
+      const response = {
+        took: 999,
+        timed_out: true,
+        _shards: {
+          total: 6,
+          successful: 6,
+          skipped: 0,
+          failed: 0,
+        },
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices:
+                'kibana_sample_data_ecommerce,kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 0,
+              timed_out: false,
+              _shards: {
+                total: 3,
+                successful: 3,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+            remote1: {
+              status: 'partial',
+              indices: 'kibana_sample_data*',
+              took: 10005,
+              timed_out: true,
+              _shards: {
+                total: 3,
+                successful: 3,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+          },
+        },
+        hits: { hits: [] },
+      };
+      expect(extractWarnings(response)).toEqual([
+        {
+          type: 'incomplete',
+          message: 'The data might be incomplete or wrong.',
+          clusters: response._clusters.details,
+        },
+      ]);
+    });
 
-  it('extracts multiple warnings', () => {
-    const warnings = extractWarnings({
-      timed_out: true,
-      _shards: {
-        failed: 77,
-        total: 79,
-      },
-    } as estypes.SearchResponse);
-    const [shardFailures, timedOut] = [
-      warnings.filter(({ type }) => type !== 'timed_out'),
-      warnings.filter(({ type }) => type === 'timed_out'),
-    ];
-    expect(shardFailures[0]!.message).toBeDefined();
-    expect(timedOut[0]!.message).toBeDefined();
-  });
+    it('should not include warnings when there are none', () => {
+      const warnings = extractWarnings({
+        took: 10,
+        timed_out: false,
+        _shards: {
+          total: 4,
+          successful: 4,
+          skipped: 0,
+          failed: 0,
+        },
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 0,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+            remote1: {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 1,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+          },
+        },
+        hits: { hits: [] },
+      } as estypes.SearchResponse);
 
-  it('should not include shardStats or types fields if there are no warnings', () => {
-    const warnings = extractWarnings({
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        total: 9000,
-      },
-    } as estypes.SearchResponse);
-
-    expect(warnings).toEqual([]);
+      expect(warnings).toEqual([]);
+    });
   });
 });

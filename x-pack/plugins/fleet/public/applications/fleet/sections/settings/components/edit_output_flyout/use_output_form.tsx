@@ -61,6 +61,7 @@ import {
   validateKafkaTopics,
   validateKafkaClientId,
   validateKafkaHosts,
+  validateKafkaPartitioningGroupEvents,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -342,8 +343,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaPartitionTypeRandomInput = useInput(
-    kafkaOutput?.random?.group_events ? `${kafkaOutput.random.group_events}` : undefined,
-    undefined,
+    kafkaOutput?.random?.group_events ? `${kafkaOutput.random.group_events}` : '1',
+    kafkaPartitionTypeInput.value === kafkaPartitionType.Random
+      ? validateKafkaPartitioningGroupEvents
+      : undefined,
     isDisabled('partition')
   );
   const kafkaPartitionTypeHashInput = useInput(
@@ -352,8 +355,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('partition')
   );
   const kafkaPartitionTypeRoundRobinInput = useInput(
-    kafkaOutput?.round_robin?.group_events ? `${kafkaOutput.round_robin.group_events}` : undefined,
-    undefined,
+    kafkaOutput?.round_robin?.group_events ? `${kafkaOutput.round_robin.group_events}` : '1',
+    kafkaPartitionTypeInput.value === kafkaPartitionType.RoundRobin
+      ? validateKafkaPartitioningGroupEvents
+      : undefined,
     isDisabled('partition')
   );
 
@@ -391,7 +396,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('compression_level')
   );
   const kafkaCompressionCodecInput = useInput(
-    kafkaOutput?.compression ?? kafkaCompressionType.None,
+    kafkaOutput?.compression && kafkaOutput.compression !== kafkaCompressionType.None
+      ? kafkaOutput.compression
+      : kafkaCompressionType.Gzip,
     undefined,
     isDisabled('compression')
   );
@@ -490,6 +497,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const diskQueuePathValid = diskQueuePathInput.validate();
+    const partitioningRandomGroupEventsValid = kafkaPartitionTypeRandomInput.validate();
+    const partitioningRoundRobinGroupEventsValid = kafkaPartitionTypeRoundRobinInput.validate();
 
     if (isLogstash) {
       // validate logstash
@@ -514,7 +523,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaDefaultTopicValid &&
         kafkaTopicsValid &&
         additionalYamlConfigValid &&
-        kafkaClientIDValid
+        kafkaClientIDValid &&
+        partitioningRandomGroupEventsValid &&
+        partitioningRoundRobinGroupEventsValid
       );
     } else {
       // validate ES
@@ -544,6 +555,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateInput,
     sslKeyInput,
     diskQueuePathInput,
+    kafkaPartitionTypeRandomInput,
+    kafkaPartitionTypeRoundRobinInput,
     isLogstash,
     isKafka,
   ]);
@@ -642,8 +655,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               client_id: kafkaClientIdInput.value || undefined,
               version: kafkaVersionInput.value,
               ...(kafkaKeyInput.value ? { key: kafkaKeyInput.value } : {}),
-              compression: kafkaCompressionCodecInput.value,
-              ...(kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
+              compression: kafkaCompressionInput.value
+                ? kafkaCompressionCodecInput.value
+                : kafkaCompressionType.None,
+              ...(kafkaCompressionInput.value &&
+              kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
                 ? {
                     compression_level: parseIntegerIfStringDefined(
                       kafkaCompressionLevelInput.value
@@ -669,7 +685,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 : {}),
 
               partition: kafkaPartitionTypeInput.value,
-              ...(kafkaPartitionTypeRandomInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Random &&
+              kafkaPartitionTypeRandomInput.value
                 ? {
                     random: {
                       group_events: parseIntegerIfStringDefined(
@@ -678,7 +695,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              ...(kafkaPartitionTypeRoundRobinInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.RoundRobin &&
+              kafkaPartitionTypeRoundRobinInput.value
                 ? {
                     round_robin: {
                       group_events: parseIntegerIfStringDefined(
@@ -687,7 +705,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              ...(kafkaPartitionTypeHashInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Hash &&
+              kafkaPartitionTypeHashInput.value
                 ? {
                     hash: {
                       hash: kafkaPartitionTypeHashInput.value,
@@ -785,6 +804,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     loadBalanceEnabledInput.value,
     typeInput.value,
     kafkaSslCertificateAuthoritiesInput.value,
+    kafkaCompressionInput.value,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
 import * as i18n from './translations';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
@@ -19,9 +20,27 @@ export const EnrichmentNoData: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }
   if (!type) return null;
   return (
     <InlineBlock data-test-subj="no-enrichments-found">
-      {type === ENRICHMENT_TYPES.IndicatorMatchRule
-        ? i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION
-        : i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
+      {type === ENRICHMENT_TYPES.IndicatorMatchRule ? (
+        i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION
+      ) : (
+        <FormattedMessage
+          id="xpack.securitySolution.enrichment.noInvestigationEnrichment"
+          defaultMessage="Additional threat intelligence wasn't found within the selected time frame. Try a different time frame, or {link} to collect threat intelligence for threat detection and matching."
+          values={{
+            link: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.enrichment.investigationEnrichmentDocumentationLink"
+                  defaultMessage="enable threat intelligence integrations"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      )}
     </InlineBlock>
   );
 };

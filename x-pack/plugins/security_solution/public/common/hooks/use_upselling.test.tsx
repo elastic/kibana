@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
-import { UpsellingService } from '../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { useUpsellingComponent, useUpsellingMessage, useUpsellingPage } from './use_upselling';
 import { UpsellingProvider } from '../components/upselling_provider';
 

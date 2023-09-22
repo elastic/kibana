@@ -805,6 +805,47 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getTimeOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeOptions",
+        "description": [],
+        "signature": [
+          "(unitSize: number) => { text: string; value: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TIME_UNITS",
+            "text": "TIME_UNITS"
+          },
+          "; }[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeOptions.$1",
+            "type": "number",
+            "tags": [],
+            "label": "unitSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.getTimeUnitLabel",
         "type": "Function",
         "tags": [],
@@ -819,7 +860,7 @@
             "section": "def-public.TIME_UNITS",
             "text": "TIME_UNITS"
           },
-          ", timeValue: string) => any"
+          ", timeValue: string) => string"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
         "deprecated": false,
@@ -1173,16 +1214,10 @@
         "label": "loadRuleAggregations",
         "description": [],
         "signature": [
-          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n}: ",
+          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}: ",
           "LoadRuleAggregationsProps",
           ") => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleAggregationFormattedResult",
-            "text": "RuleAggregationFormattedResult"
-          },
+          "AggregateRulesResponse",
           ">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
@@ -1194,7 +1229,7 @@
             "id": "def-public.loadRuleAggregations.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n}",
+            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}",
             "description": [],
             "signature": [
               "LoadRuleAggregationsProps"
@@ -5688,6 +5723,26 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.expressions",
+            "type": "Object",
+            "tags": [],
+            "label": "expressions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionsStart",
+                "text": "ExpressionsStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6086,13 +6141,10 @@
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.connectorDeprecatedMessage",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "connectorDeprecatedMessage",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/connectors_selection.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -6122,13 +6174,10 @@
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.deprecatedMessage",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "deprecatedMessage",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/connectors_selection.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -6183,6 +6232,21 @@
             "text": "SanitizedRule"
           },
           "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleCreationValidConsumer",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleCreationValidConsumer",
+        "description": [],
+        "signature": [
+          "\"logs\" | \"infrastructure\" | \"stackAlerts\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6704,13 +6768,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6762,13 +6823,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6820,13 +6878,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6878,13 +6933,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6936,13 +6988,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6994,13 +7043,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7066,13 +7112,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInGroupByTypes.all.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7132,13 +7175,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInGroupByTypes.top.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7201,13 +7241,10 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.firstFieldOption.text",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8222,6 +8259,42 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getGlobalRuleEventLogList",
+          "type": "Function",
+          "tags": [],
+          "label": "getGlobalRuleEventLogList",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "GlobalRuleEventLogListProps",
+            ") => React.ReactElement<",
+            "GlobalRuleEventLogListProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getGlobalRuleEventLogList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "GlobalRuleEventLogListProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -8874,7 +8947,7 @@
         "label": "getTooManyIntervalsErrorMessage",
         "description": [],
         "signature": [
-          "(intervals: number, maxIntervals: number) => any"
+          "(intervals: number, maxIntervals: number) => string"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
         "deprecated": false,
@@ -8955,7 +9028,7 @@
         "label": "isGroupAggregation",
         "description": [],
         "signature": [
-          "(termField?: string | undefined) => boolean"
+          "(termField?: string | string[] | undefined) => boolean"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
@@ -8964,12 +9037,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-common.isGroupAggregation.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "termField",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
@@ -9192,12 +9265,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-common.BuildAggregationOpts.termField",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "termField",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,

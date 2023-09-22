@@ -7,7 +7,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
   <div
     class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
     data-test-subj="emptyDashboardWidget"
-    style="min-block-size: 460px; padding-block-start: 0;"
+    style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
     <main
       class="emotion-euiPageInner"
@@ -132,7 +132,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
   <div
     class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
     data-test-subj="dashboardEmptyReadOnly"
-    style="min-block-size: 460px; padding-block-start: 0;"
+    style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
     <main
       class="emotion-euiPageInner"
@@ -206,7 +206,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
   <div
     class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
     data-test-subj="dashboardEmptyReadOnly"
-    style="min-block-size: 460px; padding-block-start: 0;"
+    style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
     <main
       class="emotion-euiPageInner"
@@ -280,7 +280,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
   <div
     class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
     data-test-subj="dashboardEmptyReadWrite"
-    style="min-block-size: 460px; padding-block-start: 0;"
+    style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
     <main
       class="emotion-euiPageInner"

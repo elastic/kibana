@@ -8,8 +8,8 @@
 import { AccessorOptions, OptionsWithInjectedValues } from '..';
 
 export interface GetHostsOptions extends AccessorOptions {
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }
 export type GetHostsOptionsInjected = OptionsWithInjectedValues<GetHostsOptions>;
 

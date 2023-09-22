@@ -185,5 +185,109 @@ describe('test helper methods', () => {
         shared_credential_file: { value: undefined, type: 'text' },
       });
     });
+
+    it('when aws credential type is undefined, return unchanged policy', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_eks',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'aws.credentials.type': { value: undefined },
+                access_key_id: { value: 'used', type: 'text' },
+                credential_profile_name: { value: 'unused', type: 'text' },
+                role_arn: { value: 'unused' },
+                secret_access_key: { value: 'used', type: 'text' },
+                session_token: { value: 'unused', type: 'text' },
+                shared_credential_file: { value: 'unused', type: 'text' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'aws.credentials.type': { value: undefined },
+        access_key_id: { value: 'used', type: 'text' },
+        credential_profile_name: { value: 'unused', type: 'text' },
+        role_arn: { value: 'unused' },
+        secret_access_key: { value: 'used', type: 'text' },
+        session_token: { value: 'unused', type: 'text' },
+        shared_credential_file: { value: 'unused', type: 'text' },
+      });
+    });
+
+    it('cleans unused gcp credential methods, when using credentials-file method ', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_gcp',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'gcp.credentials.type': { value: 'credentials-file' },
+                'gcp.credentials.file': { value: 'used' },
+                'gcp.credentials.json': { value: 'unused' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'gcp.credentials.type': { value: 'credentials-file' },
+        'gcp.credentials.file': { value: 'used' },
+        'gcp.credentials.json': { value: undefined },
+      });
+    });
+
+    it('when gcp credential type is undefined, return unchanged policy', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_gcp',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'gcp.credentials.type': { value: undefined },
+                'gcp.credentials.file': { value: 'used' },
+                'gcp.credentials.json': { value: 'unused' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'gcp.credentials.type': { value: undefined },
+        'gcp.credentials.file': { value: 'used' },
+        'gcp.credentials.json': { value: 'unused' },
+      });
+    });
   });
 });

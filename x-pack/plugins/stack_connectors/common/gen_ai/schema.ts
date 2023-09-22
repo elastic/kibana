@@ -35,26 +35,36 @@ export const GenAiStreamActionParamsSchema = schema.object({
 });
 
 export const GenAiStreamingResponseSchema = schema.any();
+
 export const GenAiRunActionResponseSchema = schema.object(
   {
-    id: schema.string(),
-    object: schema.string(),
-    created: schema.number(),
-    model: schema.string(),
-    usage: schema.object({
-      prompt_tokens: schema.number(),
-      completion_tokens: schema.number(),
-      total_tokens: schema.number(),
-    }),
+    id: schema.maybe(schema.string()),
+    object: schema.maybe(schema.string()),
+    created: schema.maybe(schema.number()),
+    model: schema.maybe(schema.string()),
+    usage: schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    ),
     choices: schema.arrayOf(
-      schema.object({
-        message: schema.object({
-          role: schema.string(),
-          content: schema.string(),
-        }),
-        finish_reason: schema.string(),
-        index: schema.number(),
-      })
+      schema.object(
+        {
+          message: schema.object(
+            {
+              role: schema.string(),
+              content: schema.string(),
+            },
+            { unknowns: 'ignore' }
+          ),
+          finish_reason: schema.maybe(schema.string()),
+          index: schema.maybe(schema.number()),
+        },
+        { unknowns: 'ignore' }
+      )
     ),
   },
   { unknowns: 'ignore' }

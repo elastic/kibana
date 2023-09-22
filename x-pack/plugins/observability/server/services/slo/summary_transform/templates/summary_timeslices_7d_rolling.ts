@@ -88,7 +88,7 @@ export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
             totalEvents: 'totalEvents',
           },
           script:
-            'if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }',
+            'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }',
         },
       },
       errorBudgetInitial: {

@@ -23,6 +23,7 @@ import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_as
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { getModelsManagementHref } from '../../utils/get_models_management_href';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 const containerClassName = css`
@@ -134,14 +135,6 @@ export function ConversationView() {
             loading={conversations.loading || isUpdatingList}
             error={conversations.error}
             conversations={displayedConversations}
-            onClickConversation={(nextConversationId) => {
-              observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
-                path: {
-                  conversationId: nextConversationId,
-                },
-                query: {},
-              });
-            }}
             onClickNewChat={() => {
               observabilityAIAssistantRouter.push('/conversations/new', {
                 path: {},
@@ -238,10 +231,12 @@ export function ConversationView() {
                 currentUser={currentUser}
                 connectors={connectors}
                 connectorsManagementHref={getConnectorsManagementHref(http)}
+                modelsManagementHref={getModelsManagementHref(http)}
                 conversationId={conversationId}
                 knowledgeBase={knowledgeBase}
                 messages={displayedMessages}
                 title={conversation.value.conversation.title}
+                startedFrom="conversationView"
                 onChatUpdate={(messages) => {
                   setDisplayedMessages(messages);
                 }}

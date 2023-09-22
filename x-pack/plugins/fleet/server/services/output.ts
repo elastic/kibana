@@ -764,6 +764,11 @@ class OutputService {
         ) {
           updateData.compression_level = 4;
         }
+        if (data.compression && data.compression !== kafkaCompressionType.Gzip) {
+          // Clear compression level if compression is not gzip
+          updateData.compression_level = null;
+        }
+
         if (!data.client_id) {
           updateData.client_id = 'Elastic';
         }

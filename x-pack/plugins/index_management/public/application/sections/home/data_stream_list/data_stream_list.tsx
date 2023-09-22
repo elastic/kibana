@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -34,6 +34,7 @@ import {
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
@@ -65,6 +66,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     type: 'application',
     page: 'indexManagementDataStreamsTab',
   });
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.dataStreams);
+  }, []);
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const {
@@ -270,7 +275,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else {
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
+      <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -285,7 +290,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

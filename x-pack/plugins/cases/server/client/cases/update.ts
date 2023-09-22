@@ -37,7 +37,11 @@ import {
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import { arraysDifference, getCaseToUpdate } from '../utils';
+import {
+  arraysDifference,
+  getCaseToUpdate,
+  throwIfDuplicatedCustomFieldKeysInRequest,
+} from '../utils';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -121,6 +125,19 @@ function throwIfUpdateAssigneesWithoutValidLicense(
       )}]`
     );
   }
+}
+
+/**
+ * Throws an error if the requests has custom fields with duplicated keys.
+ */
+function throwIfDuplicatedCustomFieldKeysInCasesToUpdate({
+  casesToUpdate,
+}: {
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+}) {
+  casesToUpdate.forEach(({ updateReq }) => {
+    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: updateReq.customFields });
+  });
 }
 
 function notifyPlatinumUsage(
@@ -301,7 +318,6 @@ export const update = async (
 
   try {
     const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -370,6 +386,7 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
+    throwIfDuplicatedCustomFieldKeysInCasesToUpdate({ casesToUpdate });
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
     const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });

@@ -26,9 +26,6 @@ class MockSource {
   getFieldByName(fieldName) {
     return new MockField({ fieldName });
   }
-  createField({ fieldName }) {
-    return new MockField({ fieldName });
-  }
 }
 
 describe('getDescriptorWithUpdatedStyleProps', () => {

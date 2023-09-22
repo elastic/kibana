@@ -5,219 +5,138 @@
  * 2.0.
  */
 
-import {
-  EXPANDABLE_PANEL_CONTENT_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
-  EXPANDABLE_PANEL_LOADING_TEST_ID,
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../shared/components/test_ids';
-import { RESPONSE_BASE_TEST_ID } from '../../left/components/test_ids';
+import { PREFIX } from '../../shared/test_ids';
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Header */
 
-export const FLYOUT_HEADER_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';
-export const EXPAND_DETAILS_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
+const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
+export const FLYOUT_HEADER_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Title` as const;
+export const EXPAND_DETAILS_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ExpandDetailButton` as const;
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
-export const FLYOUT_HEADER_STATUS_BUTTON_TEST_ID = 'rule-status-badge';
-export const FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID =
-  'securitySolutionAlertDetailsFlyoutHeaderSeverityTitle';
-export const FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID = 'severity';
-export const FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID =
-  'securitySolutionAlertDetailsFlyoutHeaderRiskScoreTitle';
-export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
-  'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
-export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
-  'securitySolutionAlertDetailsFlyoutHeaderShareButton';
-export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
+  `${FLYOUT_HEADER_TEST_ID}CollapseDetailButton` as const;
+export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
+export const SEVERITY_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}SeverityTitle` as const;
+export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
+export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
+export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
+export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
+export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
 
 /* About section */
 
-export const ABOUT_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAboutSection';
+export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
-export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRuleSummaryButton';
-export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
-export const DESCRIPTION_DETAILS_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
-export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
-export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutReasonDetailsPreviewButton';
-export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
-export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';
+export const RULE_SUMMARY_BUTTON_TEST_ID = `${PREFIX}RuleSummaryButton` as const;
+const DESCRIPTION_TEST_ID = `${PREFIX}Description` as const;
+export const DESCRIPTION_TITLE_TEST_ID = `${DESCRIPTION_TEST_ID}Title` as const;
+export const DESCRIPTION_DETAILS_TEST_ID = `${DESCRIPTION_TEST_ID}Details` as const;
+const REASON_TEST_ID = `${PREFIX}Reason` as const;
+export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
+export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
+export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
+const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
+export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
+export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
 
 /* Investigation section */
 
-export const INVESTIGATION_SECTION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInvestigationSection';
+export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
-export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
-export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_CELL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsCell';
+export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}NoData` as const;
+const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
+export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Details` as const;
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Cell` as const;
 export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsBasicCell';
+  `${HIGHLIGHTED_FIELDS_TEST_ID}BasicCell` as const;
 export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsLinkedCell';
+  `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
-
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
+  `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
 
 /* Insights section */
 
-export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
-export const INSIGHTS_HEADER_TEST_ID = `${INSIGHTS_TEST_ID}Header`;
+export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
+export const INSIGHTS_HEADER_TEST_ID = `${INSIGHTS_TEST_ID}Header` as const;
 
-/* Insights Entities */
+/* Summary row */
 
-export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
-export const INSIGHTS_ENTITIES_TOGGLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_TITLE_TEXT_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_TITLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_CONTENT_TEST_ID =
-  EXPANDABLE_PANEL_CONTENT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const ENTITIES_USER_OVERVIEW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
-export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
-export const ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Domain`;
-export const ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}LastSeen`;
-export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel`;
-export const ENTITIES_HOST_OVERVIEW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
-export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}Link`;
-export const ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}OsFamily`;
-export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen`;
-export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel`;
+export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
+export const SUMMARY_ROW_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
+export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 
-/* Insights Threat Intelligence */
+/* Entities */
 
-export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';
-export const INSIGHTS_THREAT_INTELLIGENCE_TOGGLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
-export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
-export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEXT_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
-export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
-export const INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
-);
-export const INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
-);
-export const INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`;
-export const INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Value`;
+export const INSIGHTS_ENTITIES_TEST_ID = `${PREFIX}InsightsEntities` as const;
+export const INSIGHTS_ENTITIES_NO_DATA_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}NoData` as const;
+export const ENTITIES_USER_OVERVIEW_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}UserOverview` as const;
+export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link` as const;
+export const ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID =
+  `${ENTITIES_USER_OVERVIEW_TEST_ID}Domain` as const;
+export const ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID =
+  `${ENTITIES_USER_OVERVIEW_TEST_ID}LastSeen` as const;
+export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
+  `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel` as const;
+export const ENTITIES_HOST_OVERVIEW_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}HostOverview` as const;
+export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}Link` as const;
+export const ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}OsFamily` as const;
+export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
+export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
+export const TECHNICAL_PREVIEW_ICON_TEST_ID =
+  `${INSIGHTS_ENTITIES_TEST_ID}TechnicalPreviewIcon` as const;
 
-/* Insights Correlations */
+/* Threat intelligence */
 
-export const INSIGHTS_CORRELATIONS_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
-export const INSIGHTS_CORRELATIONS_TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(
-  INSIGHTS_CORRELATIONS_TEST_ID
-);
-export const INSIGHTS_CORRELATIONS_VALUE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Value`;
+export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
+
+/* Correlations */
+
+export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
+export const CORRELATIONS_NO_DATA_TEST_ID = `${CORRELATIONS_TEST_ID}NoData` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}SuppressedAlerts` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  `${CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview` as const;
+export const CORRELATIONS_RELATED_CASES_TEST_ID = `${CORRELATIONS_TEST_ID}RelatedCases` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySession` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
 /* Insights Prevalence */
 
-export const INSIGHTS_PREVALENCE_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
-export const INSIGHTS_PREVALENCE_TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(
-  INSIGHTS_PREVALENCE_TEST_ID
-);
-export const INSIGHTS_PREVALENCE_VALUE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Value`;
-export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsPrevalenceRow';
+export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
+export const PREVALENCE_NO_DATA_TEST_ID = `${PREVALENCE_TEST_ID}NoData` as const;
 
 /* Visualizations section */
 
-export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
+const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
+export const VISUALIZATIONS_SECTION_TEST_ID = `${VISUALIZATIONS_TEST_ID}Title` as const;
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
-  'securitySolutionDocumentDetailsVisualizationsTitleHeader';
-
-/* Visualizations analyzer preview */
-
-export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
-export const ANALYZER_PREVIEW_TOGGLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-export const ANALYZER_PREVIEW_TITLE_LINK_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-export const ANALYZER_PREVIEW_TITLE_TEXT_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-export const ANALYZER_PREVIEW_TITLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-export const ANALYZER_PREVIEW_LOADING_TEST_ID =
-  EXPANDABLE_PANEL_LOADING_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-export const ANALYZER_PREVIEW_CONTENT_TEST_ID =
-  EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
-
-/* Visualizations session preview */
-
-export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
-export const SESSION_PREVIEW_TOGGLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
-export const SESSION_PREVIEW_TITLE_LINK_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID);
-export const SESSION_PREVIEW_TITLE_TEXT_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID);
-export const SESSION_PREVIEW_TITLE_ICON_TEST_ID =
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
-export const SESSION_PREVIEW_LOADING_TEST_ID =
-  EXPANDABLE_PANEL_LOADING_TEST_ID(SESSION_PREVIEW_TEST_ID);
-export const SESSION_PREVIEW_CONTENT_TEST_ID =
-  EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID);
+  `${VISUALIZATIONS_TEST_ID}TitleHeader` as const;
+export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
+export const ANALYZER_PREVIEW_NO_DATA_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}NoData` as const;
+export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
+export const SESSION_PREVIEW_UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell` as const;
+export const SESSION_PREVIEW_NO_DATA_TEST_ID = `${SESSION_PREVIEW_TEST_ID}NoData` as const;
 
 /* Response section */
 
-export const RESPONSE_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseSection';
+const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
+export const RESPONSE_SECTION_TEST_ID = `${RESPONSE_TEST_ID}Section` as const;
 export const RESPONSE_SECTION_HEADER_TEST_ID = RESPONSE_SECTION_TEST_ID + HEADER_TEST_ID;
 export const RESPONSE_SECTION_CONTENT_TEST_ID = RESPONSE_SECTION_TEST_ID + CONTENT_TEST_ID;
-export const RESPONSE_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseButton';
-export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
+export const RESPONSE_BUTTON_TEST_ID = `${RESPONSE_TEST_ID}Button` as const;
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_TEST_ID}Empty` as const;

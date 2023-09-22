@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 import { WatcherServerPlugin } from './plugin';
 
@@ -14,13 +14,10 @@ export const plugin = (ctx: PluginInitializerContext) => new WatcherServerPlugin
 
 export const config = {
   schema: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
+    enabled: offeringBasedSchema({
       // Watcher is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
-      schema.boolean({ defaultValue: true }),
-      schema.never()
-    ),
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   }),
 };

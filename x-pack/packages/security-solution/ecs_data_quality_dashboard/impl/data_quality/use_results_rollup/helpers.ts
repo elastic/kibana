@@ -90,6 +90,7 @@ export const updateResultOnCheckCompleted = ({
   formatBytes,
   formatNumber,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   pattern,
   patternRollups,
@@ -98,6 +99,7 @@ export const updateResultOnCheckCompleted = ({
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
+  isILMAvailable: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
   patternRollups: Record<string, PatternRollup>;
@@ -108,7 +110,7 @@ export const updateResultOnCheckCompleted = ({
     const ilmExplain = patternRollup.ilmExplain;
 
     const ilmPhase: IlmPhase | undefined =
-      ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined;
+      ilmExplain != null ? getIlmPhase(ilmExplain[indexName], isILMAvailable) : undefined;
 
     const docsCount = getIndexDocsCountFromRollup({
       indexName,
@@ -127,6 +129,7 @@ export const updateResultOnCheckCompleted = ({
             formatNumber,
             ilmPhase,
             indexName,
+            isILMAvailable,
             partitionedFieldMetadata,
             patternDocsCount,
             sizeInBytes,

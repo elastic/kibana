@@ -8,15 +8,18 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
 import { useKibana } from '../../common/lib/kibana';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
 import {
   connectors,
@@ -24,20 +27,24 @@ import {
   useCaseConfigureResponse,
   useConnectorsResponse,
   useActionTypesResponse,
+  usePersistConfigurationMockResponse,
 } from './__mock__';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const usePersistConfigurationMock = usePersistConfiguration as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
@@ -64,7 +71,8 @@ describe('ConfigureCases', () => {
   describe('rendering', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
       useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
@@ -100,25 +108,19 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        closureType: 'close-by-user',
-        connector: {
-          id: 'not-id',
-          name: 'unchanged',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        currentConfiguration: {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        data: {
+          ...useCaseConfigureResponse.data,
+          closureType: 'close-by-user',
           connector: {
             id: 'not-id',
             name: 'unchanged',
             type: ConnectorTypes.none,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
       }));
+
       useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
@@ -145,26 +147,21 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mappings: [],
-        closureType: 'close-by-user',
-        connector: {
-          id: 'servicenow-1',
-          name: 'unchanged',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
-        },
-        currentConfiguration: {
+        data: {
+          ...useCaseConfigureResponse.data,
+          mappings: [],
+          closureType: 'close-by-user',
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
             type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
       }));
+
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
@@ -226,24 +223,18 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: null,
-        closureType: 'close-by-user',
-        connector: {
-          id: 'resilient-2',
-          name: 'unchanged',
-          type: ConnectorTypes.resilient,
-          fields: null,
-        },
-        currentConfiguration: {
+        data: {
+          ...useCaseConfigureResponse.data,
+          mapping: null,
+          closureType: 'close-by-user',
           connector: {
-            id: 'servicenow-1',
+            id: 'resilient-2',
             name: 'unchanged',
-            type: ConnectorTypes.serviceNowITSM,
+            type: ConnectorTypes.resilient,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
       }));
 
@@ -302,15 +293,22 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'servicenow-1',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'servicenow-1',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
         },
-        persistLoading: true,
+      }));
+
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        isLoading: true,
       }));
 
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
@@ -350,13 +348,15 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        loading: true,
+        isLoading: true,
       }));
+
       useGetConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
       }));
+
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
@@ -373,32 +373,29 @@ describe('ConfigureCases', () => {
   });
 
   describe('connectors', () => {
+    const persistCaseConfigure = jest.fn();
     let wrapper: ReactWrapper;
-    let persistCaseConfigure: jest.Mock;
 
     beforeEach(() => {
-      persistCaseConfigure = jest.fn();
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: null,
-        closureType: 'close-by-user',
-        connector: {
-          id: 'resilient-2',
-          name: 'My connector',
-          type: ConnectorTypes.resilient,
-          fields: null,
-        },
-        currentConfiguration: {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        data: {
+          ...useCaseConfigureResponse.data,
+          mapping: null,
+          closureType: 'close-by-user',
           connector: {
-            id: 'My connector',
+            id: 'resilient-2',
             name: 'My connector',
-            type: ConnectorTypes.jira,
+            type: ConnectorTypes.resilient,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
-        persistCaseConfigure,
       }));
+
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
@@ -422,27 +419,36 @@ describe('ConfigureCases', () => {
           fields: null,
         },
         closureType: 'close-by-user',
+        customFields: [],
+        id: '',
+        version: '',
       });
     });
 
     test('the text of the update button is changed successfully', () => {
-      useCaseConfigureMock
+      useGetCaseConfigurationMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          connector: {
-            id: 'servicenow-1',
-            name: 'My connector',
-            type: ConnectorTypes.serviceNowITSM,
-            fields: null,
+          data: {
+            ...useCaseConfigureResponse.data,
+            connector: {
+              id: 'servicenow-1',
+              name: 'My connector',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
           },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          connector: {
-            id: 'resilient-2',
-            name: 'My Resilient connector',
-            type: ConnectorTypes.resilient,
-            fields: null,
+          data: {
+            ...useCaseConfigureResponse.data,
+            connector: {
+              id: 'resilient-2',
+              name: 'My Resilient connector',
+              type: ConnectorTypes.resilient,
+              fields: null,
+            },
           },
         }));
 
@@ -469,26 +475,24 @@ describe('ConfigureCases', () => {
 
     beforeEach(() => {
       persistCaseConfigure = jest.fn();
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: null,
-        closureType: 'close-by-user',
-        connector: {
-          id: 'servicenow-1',
-          name: 'My connector',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
-        },
-        currentConfiguration: {
+        data: {
+          ...useCaseConfigureResponse.data,
+          mapping: null,
+          closureType: 'close-by-user',
           connector: {
-            id: 'My connector',
+            id: 'servicenow-1',
             name: 'My connector',
-            type: ConnectorTypes.jira,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
-        persistCaseConfigure,
+      }));
+
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
       }));
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
@@ -511,32 +515,31 @@ describe('ConfigureCases', () => {
           fields: null,
         },
         closureType: 'close-by-pushing',
+        customFields: [],
+        id: '',
+        version: '',
       });
     });
   });
 
   describe('user interactions', () => {
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: null,
-        closureType: 'close-by-user',
-        connector: {
-          id: 'resilient-2',
-          name: 'unchanged',
-          type: ConnectorTypes.resilient,
-          fields: null,
-        },
-        currentConfiguration: {
+        data: {
+          ...useCaseConfigureResponse.data,
+
+          mapping: null,
+          closureType: 'close-by-user',
           connector: {
             id: 'resilient-2',
             name: 'unchanged',
-            type: ConnectorTypes.serviceNowITSM,
+            type: ConnectorTypes.resilient,
             fields: null,
           },
-          closureType: 'close-by-user',
         },
       }));
+
       useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
     });
@@ -595,6 +598,139 @@ describe('ConfigureCases', () => {
       expect(
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
+    });
+  });
+
+  describe('custom fields', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders custom field group when no custom fields available', () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    it('renders custom field when available', () => {
+      const customFieldsMock: CustomFieldsConfiguration = [
+        {
+          key: 'random_custom_key',
+          label: 'summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+      ];
+
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsMock,
+          currentConfiguration: {
+            connector: {
+              id: 'resilient-2',
+              name: 'unchanged',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+            closureType: 'close-by-user',
+          },
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const draggable = screen.getByTestId('draggable');
+
+      expect(
+        within(draggable).getByTestId(
+          `custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('renders multiple custom field when available', () => {
+      const customFieldsMock: CustomFieldsConfiguration = [
+        {
+          key: 'random_custom_key',
+          label: 'Summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'random_custom_key_2',
+          label: 'Maintenance',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
+
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsMock,
+          currentConfiguration: {
+            connector: {
+              id: 'resilient-2',
+              name: 'unchanged',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+            closureType: 'close-by-user',
+          },
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const droppable = screen.getByTestId('droppable');
+
+      for (const field of customFieldsMock) {
+        expect(
+          within(droppable).getByTestId(`custom-field-${field.label}-${field.type}`)
+        ).toBeInTheDocument();
+      }
+    });
+
+    it('opens fly out for when click on add field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
+
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+    });
+
+    it('closes fly out for when click on save field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+
+      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
     });
   });
 });

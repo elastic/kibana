@@ -15,6 +15,7 @@ import {
   CrawlerCustomScheduleServer,
 } from '../../../common/types/crawler';
 
+import { fetchCrawlerCustomSchedulingKeysByIndexName } from './fetch_crawler_multiple_schedules';
 import { fetchCrawlerDocumentIdByIndexName } from './fetch_crawlers';
 
 const convertCustomScheduleMappingClientToServer = (
@@ -64,12 +65,37 @@ export const postCrawlerCustomScheduling = async (
   customSchedules: CrawlerCustomScheduleMappingClient
 ) => {
   const connectorId = await fetchCrawlerDocumentIdByIndexName(client, indexName);
-  const convertCustomSchedulesServer = convertCustomScheduleMappingClientToServer(customSchedules);
+  const customSchedulingPayload = convertCustomScheduleMappingClientToServer(customSchedules);
+
+  const existingCustomScheduleKeys = await fetchCrawlerCustomSchedulingKeysByIndexName(
+    client,
+    indexName
+  );
+  const newCustomScheduleKeys = Array.from(customSchedulingPayload.keys());
+  const scheduleKeysToDelete = existingCustomScheduleKeys.filter(
+    (key) => !newCustomScheduleKeys.includes(key)
+  );
+
+  // Handle deleted schedules
+  if (scheduleKeysToDelete.length > 0) {
+    const scriptSource = scheduleKeysToDelete
+      .map((scheduleKey) => `ctx._source['custom_scheduling'].remove('${scheduleKey}');`)
+      .join(' ');
+
+    await client.asCurrentUser.update({
+      index: CONNECTORS_INDEX,
+      id: connectorId,
+      script: {
+        source: scriptSource,
+      },
+    });
+  }
+
   return await client.asCurrentUser.update({
     index: CONNECTORS_INDEX,
     id: connectorId,
     doc: {
-      custom_scheduling: Object.fromEntries(convertCustomSchedulesServer),
+      custom_scheduling: Object.fromEntries(customSchedulingPayload),
     },
   });
 };

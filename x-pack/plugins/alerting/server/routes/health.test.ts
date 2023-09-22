@@ -49,6 +49,9 @@ const ruleTypes = [
     enabledInLicense: true,
     minimumScheduleInterval: '1m',
     defaultScheduleInterval: '10m',
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   } as RegistryAlertTypeWithAuth,
 ];
 

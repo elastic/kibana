@@ -103,7 +103,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   );
 
   return (
-    <EuiFlyout onClose={onClose} className="mlTrainedModelsInferencePipelineFlyout" size="l">
+    <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h3>
@@ -159,13 +159,14 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
           <TestPipeline sourceIndex={sourceIndex} state={formState} />
         )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
+        {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && sourceIndex && (
           <ReviewAndCreatePipeline
             inferencePipeline={getPipelineConfig(formState)}
             modelType={modelType}
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}
             pipelineError={formState.pipelineError}
+            sourceIndex={sourceIndex}
           />
         )}
       </EuiFlyoutBody>

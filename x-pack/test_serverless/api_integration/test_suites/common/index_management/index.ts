@@ -10,5 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Index Management APIs', function () {
     loadTestFile(require.resolve('./index_templates'));
+    loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./create_enrich_policies'));
   });
 }

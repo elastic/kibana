@@ -582,10 +582,6 @@
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },
@@ -616,10 +612,6 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/hooks/slo/use_fetch_slo_definitions.ts"
               },
               {
                 "plugin": "dataVisualizer",
