@@ -15,7 +15,8 @@ import {
   fillAboutRuleMinimumAndContinue,
   fillDefineCustomRuleAndContinue,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { RULE_CREATION } from '../../../urls/navigation';
 
 describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
@@ -32,7 +33,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('Creates and enables a rule', function () {
-      visit(RULE_CREATION);
+      visitWithTimeRange(RULE_CREATION);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleMinimumAndContinue(rule);
       fillScheduleRuleAndContinue(rule);

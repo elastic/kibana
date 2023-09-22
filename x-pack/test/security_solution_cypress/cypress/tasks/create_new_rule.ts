@@ -309,11 +309,11 @@ export const fillCustomInvestigationFields = (
 };
 
 export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
-  cy.get(RULE_NAME_INPUT).clear({ force: true });
-  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
-  getAboutContinueButton().should('exist').click({ force: true });
+  cy.get(RULE_NAME_INPUT).clear();
+  cy.get(RULE_NAME_INPUT).type(rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).clear();
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  getAboutContinueButton().should('exist').click();
 };
 
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
