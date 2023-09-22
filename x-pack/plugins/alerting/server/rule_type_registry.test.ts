@@ -590,40 +590,41 @@ describe('Create Lifecycle', () => {
       });
       const ruleType = registry.get('test');
       expect(ruleType).toMatchInlineSnapshot(`
-              Object {
-                "actionGroups": Array [
-                  Object {
-                    "id": "default",
-                    "name": "Default",
-                  },
-                  Object {
-                    "id": "recovered",
-                    "name": "Recovered",
-                  },
-                ],
-                "actionVariables": Object {
-                  "context": Array [],
-                  "params": Array [],
-                  "state": Array [],
-                },
-                "defaultActionGroupId": "default",
-                "executor": [MockFunction],
-                "id": "test",
-                "isExportable": true,
-                "minimumLicenseRequired": "basic",
-                "name": "Test",
-                "producer": "alerts",
-                "recoveryActionGroup": Object {
-                  "id": "recovered",
-                  "name": "Recovered",
-                },
-                "validate": Object {
-                  "params": Object {
-                    "validate": [Function],
-                  },
-                },
-              }
-          `);
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "default",
+              "name": "Default",
+            },
+            Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          ],
+          "actionVariables": Object {
+            "context": Array [],
+            "params": Array [],
+            "state": Array [],
+          },
+          "defaultActionGroupId": "default",
+          "executor": [MockFunction],
+          "id": "test",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "Test",
+          "producer": "alerts",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+          "validate": Object {
+            "params": Object {
+              "validate": [Function],
+            },
+          },
+        }
+      `);
     });
 
     test(`should throw an error if type isn't registered`, () => {
@@ -713,6 +714,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "validLegacyConsumers": Array [],
           },
         }
       `);
