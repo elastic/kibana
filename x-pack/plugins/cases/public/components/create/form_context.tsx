@@ -65,7 +65,8 @@ export const FormContext: React.FC<Props> = ({
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
   const {
-    data: { customFields: customFieldsConfiguration }, isLoading: isLoadingCaseConfiguration
+    data: { customFields: customFieldsConfiguration },
+    isLoading: isLoadingCaseConfiguration,
   } = useGetCaseConfiguration();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
@@ -209,11 +210,17 @@ export const FormContext: React.FC<Props> = ({
               connectors,
               isLoadingConnectors,
               customFieldsConfiguration,
-              isLoadingCaseConfiguration
+              isLoadingCaseConfiguration,
             })
           )
         : null,
-    [children, connectors, isLoadingConnectors, customFieldsConfiguration, isLoadingCaseConfiguration]
+    [
+      children,
+      connectors,
+      isLoadingConnectors,
+      customFieldsConfiguration,
+      isLoadingCaseConfiguration,
+    ]
   );
   return (
     <Form
