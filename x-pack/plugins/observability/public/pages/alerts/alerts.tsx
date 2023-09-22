@@ -220,7 +220,6 @@ function InternalAlertsPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
                 showExpandToDetails={false}

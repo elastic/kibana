@@ -108,7 +108,6 @@ export function RuleDetailsTabs({
                   configurationId={observabilityFeatureId}
                   id={RULE_DETAILS_PAGE_ID}
                   featureIds={featureIds}
-                  flyoutSize="s"
                   query={esQuery}
                   showAlertStatusWithFlapping
                   showExpandToDetails={false}
