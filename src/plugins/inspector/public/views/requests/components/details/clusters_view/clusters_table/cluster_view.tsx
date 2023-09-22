@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import { EuiCallOut, EuiText } from '@elastic/eui';
@@ -19,13 +18,13 @@ interface Props {
 }
 
 export function ClusterView({ clusterDetails }: Props) {
-  const clusterFailure = (clusterDetails.failures ?? []).find(failure => {
+  const clusterFailure = (clusterDetails.failures ?? []).find((failure) => {
     return failure.shard < 0;
   });
-  const shardFailures = (clusterDetails.failures ?? []).filter(failure => {
+  const shardFailures = (clusterDetails.failures ?? []).filter((failure) => {
     return failure.shard >= 0;
   });
-  
+
   return (
     <EuiText style={{ width: '100%' }} size="xs">
       {clusterDetails.timed_out ? (
@@ -50,9 +49,13 @@ export function ClusterView({ clusterDetails }: Props) {
           iconType="warning"
         >
           <p>
-            {clusterFailure.reason.reason ? `${clusterFailure.reason.type}: "${clusterFailure.reason.reason}"` : clusterFailure.reason.type}
+            {clusterFailure.reason.reason
+              ? `${clusterFailure.reason.type}: "${clusterFailure.reason.reason}"`
+              : clusterFailure.reason.type}
           </p>
-          {clusterFailure.reason.failed_shards ? <OpenShardFailureFlyoutButton failures={clusterFailure.reason.failed_shards} /> : null}
+          {clusterFailure.reason.failed_shards ? (
+            <OpenShardFailureFlyoutButton failures={clusterFailure.reason.failed_shards} />
+          ) : null}
         </EuiCallOut>
       ) : null}
 

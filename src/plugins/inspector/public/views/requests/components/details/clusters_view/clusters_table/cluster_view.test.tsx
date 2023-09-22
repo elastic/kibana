@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { ClusterDetails } from '@kbn/es-types';
-import { ClusterView, getFailures } from './cluster_view';
+import { ClusterView } from './cluster_view';
 
 describe('render', () => {
   test('should display success', () => {
@@ -102,9 +102,7 @@ describe('render', () => {
           },
         ],
       } as unknown as ClusterDetails;
-      const wrapper = shallow(
-        <ClusterView clusterDetails={clusterDetails} />
-      );
+      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
     });
 
@@ -157,9 +155,7 @@ describe('render', () => {
           },
         ],
       } as unknown as ClusterDetails;
-      const wrapper = shallow(
-        <ClusterView clusterDetails={clusterDetails} />
-      );
+      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
       expect(wrapper).toMatchSnapshot();
     });
   });
