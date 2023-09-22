@@ -33,6 +33,7 @@ export type {
   ChromeProjectNavigationNode,
   AppDeepLinkId,
   AppId,
+  BadgeType,
   CloudLinkId,
   SideNavCompProps,
   SideNavComponent,

@@ -6,6 +6,7 @@
  */
 
 import {
+  AppDeepLink,
   AppMountParameters,
   AppNavLinkStatus,
   AppUpdater,
@@ -248,13 +249,14 @@ export class Plugin implements InfraClientPluginClass {
     }
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-    const infraDeepLinks = [
+    const infraDeepLinks: AppDeepLink[] = [
       {
         id: 'inventory',
         title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
           defaultMessage: 'Inventory',
         }),
         path: '/inventory',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
       {
         id: 'metrics-hosts',
@@ -262,6 +264,7 @@ export class Plugin implements InfraClientPluginClass {
           defaultMessage: 'Hosts',
         }),
         path: '/hosts',
+        navLinkStatus: AppNavLinkStatus.visible,
       },
       {
         id: 'metrics-explorer',
@@ -278,6 +281,7 @@ export class Plugin implements InfraClientPluginClass {
         path: '/settings',
       },
     ];
+
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
