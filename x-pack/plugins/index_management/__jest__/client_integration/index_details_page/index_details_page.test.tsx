@@ -8,11 +8,14 @@
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
+
+import React from 'react';
+import { IndexDetailsSection } from '../../../common/constants';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
 import {
   testIndexEditableSettings,
   testIndexMappings,
@@ -21,8 +24,6 @@ import {
   testIndexSettings,
   testIndexStats,
 } from './mocks';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
-import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -57,10 +58,13 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
 
     await act(async () => {
-      testBed = await setup(httpSetup, {
-        url: {
-          locators: {
-            get: () => ({ navigate: jest.fn() }),
+      testBed = await setup({
+        httpSetup,
+        dependencies: {
+          url: {
+            locators: {
+              get: () => ({ navigate: jest.fn() }),
+            },
           },
         },
       });
@@ -75,7 +79,7 @@ describe('<IndexDetailsPage />', () => {
         message: `Data for index ${testIndexName} was not found`,
       });
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
 
       testBed.component.update();
@@ -90,6 +94,19 @@ describe('<IndexDetailsPage />', () => {
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('renders an error section when no index name is provided', async () => {
+      // already sent 2 requests while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+      await act(async () => {
+        testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
+      });
+      testBed.component.update();
+      expect(testBed.actions.errorSection.noIndexNameMessageIsDisplayed()).toBe(true);
+      // no extra http request was sent
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
     });
   });
 
@@ -138,7 +155,7 @@ describe('<IndexDetailsPage />', () => {
       );
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -148,8 +165,11 @@ describe('<IndexDetailsPage />', () => {
 
     it('hides index stats tab if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
@@ -164,7 +184,7 @@ describe('<IndexDetailsPage />', () => {
           message: 'Error',
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -213,8 +233,11 @@ describe('<IndexDetailsPage />', () => {
 
     it('hides index stats from detail panels if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
@@ -222,12 +245,60 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
     });
-  });
 
-  it('documents tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Documents);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Documents');
+    describe('extension service summary', () => {
+      it('renders all summaries added to the extension service', async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [() => <span>test</span>, () => <span>test2</span>],
+                },
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(true);
+        expect(testBed.actions.overview.extensionSummaryExists(1)).toBe(true);
+      });
+
+      it(`doesn't render empty panels if the summary renders null`, async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [() => null],
+                },
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+
+      it(`doesn't render anything when no summaries added to the extension service`, async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [],
+                },
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+    });
   });
 
   describe('Mappings tab', () => {
@@ -270,7 +341,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load mappings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -332,7 +403,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load settings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -406,12 +477,6 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('pipelines tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Pipelines);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Pipelines');
-  });
-
   it('navigates back to indices', async () => {
     jest.spyOn(testBed.routerMock.history, 'push');
     await testBed.actions.clickBackToIndicesButton();
@@ -451,7 +516,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -544,7 +609,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
