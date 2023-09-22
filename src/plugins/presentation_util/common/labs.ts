@@ -9,16 +9,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
-export const LINKS_PANEL = `${LABS_PROJECT_PREFIX}dashboard:linksPanel` as const;
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
+export const DASHBOARD_LINKS_PANEL = `${LABS_PROJECT_PREFIX}dashboard:linksPanel` as const;
 export const DASHBOARD_CONTROLS = `${LABS_PROJECT_PREFIX}dashboard:dashboardControls` as const;
 export const BY_VALUE_EMBEDDABLE = `${LABS_PROJECT_PREFIX}canvas:byValueEmbeddable` as const;
 
 export const projectIDs = [
-  LINKS_PANEL,
   DEFER_BELOW_FOLD,
   DASHBOARD_CONTROLS,
   BY_VALUE_EMBEDDABLE,
+  DASHBOARD_LINKS_PANEL,
 ] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
@@ -60,8 +60,8 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     solutions: ['dashboard'],
   },
-  [LINKS_PANEL]: {
-    id: LINKS_PANEL,
+  [DASHBOARD_LINKS_PANEL]: {
+    id: DASHBOARD_LINKS_PANEL,
     isActive: true,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
@@ -70,7 +70,7 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     description: i18n.translate('presentationUtil.labs.enableLinksPanelProjectDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enables the links panel for dashboard, which allows dashboard authors to more easily link dashboards together.',
+        '{technicalPreviewLabel} Enables the links panel for dashboard, which allows dashboard authors to easily link dashboards together.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
