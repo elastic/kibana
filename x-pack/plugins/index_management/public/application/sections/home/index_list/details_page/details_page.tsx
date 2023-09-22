@@ -68,7 +68,7 @@ const getSelectedTabContent = ({
   index?: Index | null;
   indexName: string;
 }) => {
-  // if there is no index data, the tab content won't be rendered, to it's safe to return null here
+  // if there is no index data, the tab content won't be rendered, so it's safe to return null here
   if (!index) {
     return null;
   }
