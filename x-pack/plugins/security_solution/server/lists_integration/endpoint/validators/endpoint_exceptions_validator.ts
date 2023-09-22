@@ -18,11 +18,11 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    return this.validateHasEndpointExceptionsPrivileges('canReadEndpointExceptions');
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canReadEndpointExceptions');
+    return this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
