@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
