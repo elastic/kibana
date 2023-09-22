@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { findConnectorsSo } from './find_connectors_so';
-export { searchConnectorsSo } from './search_connectors_so';
-export { getConnectorSo } from './get_connector_so';
+import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { RawAction } from '../../../types';
+
+export type GetConnectorSoResult = SavedObject<RawAction>;

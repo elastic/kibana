@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
+import { getConnectorSo } from '../../../../data/connector';
 import { connectorSchema } from '../../schemas';
 import { Connector } from '../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { isConnectorDeprecated } from '../../lib';
-import { RawAction } from '../../../../types';
 import { GetParams } from './types';
 
 export async function get({
@@ -67,7 +67,10 @@ export async function get({
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
     };
   } else {
-    const result = await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const result = await getConnectorSo({
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+      id,
+    });
 
     context.auditLogger?.log(
       connectorAuditEvent({
