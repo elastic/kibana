@@ -403,7 +403,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load settings`,
         });
         await act(async () => {
-          testBed = await setup( { httpSetup });
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
