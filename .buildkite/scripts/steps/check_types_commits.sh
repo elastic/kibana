@@ -87,7 +87,11 @@ fi
 for file in "${files[@]}"
 do
   dir=$(dirname -- "$file")
-  add_dir $dir
+
+  # Ignore buildkite dir because it traverses many kbn packages and emits incorrect results
+  if [[ "$dir" != .buildkite* ]]; then
+    add_dir $dir
+  fi
 done
 
 echo "Looking for related tsconfig.json files..."
