@@ -10,14 +10,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
-import { configureToggleCustomFieldBuilder } from './configure_toggle_field';
 import * as i18n from '../translations';
+import { Configure } from './configure';
 
-describe('configureToggleCustomFieldBuilder ', () => {
+describe('Configure ', () => {
   const onSubmit = jest.fn();
-  const builder = configureToggleCustomFieldBuilder();
-
-  const BuiltCustomField = builder.build().ConfigurePage;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,17 +23,39 @@ describe('configureToggleCustomFieldBuilder ', () => {
   it('renders correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
-        <BuiltCustomField />
+        <Configure />
       </FormTestComponent>
     );
 
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
+  it('sets the defaults correctly', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          options: {
+            required: false,
+          },
+        },
+        true
+      );
+    });
+  });
+
   it('updates field options correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
-        <BuiltCustomField />
+        <Configure />
       </FormTestComponent>
     );
 

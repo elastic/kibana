@@ -7,7 +7,6 @@
 
 import type {
   ClosureType,
-  ConfigurationAttributes,
   ActionConnector,
   ActionTypeConnector,
   CaseConnector,
@@ -16,7 +15,6 @@ import type {
   ConnectorMappingActionType,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import type { CaseUser } from '../types';
 
 export type {
   ActionConnector,
@@ -33,19 +31,4 @@ export interface CaseConnectorMapping {
   actionType: ConnectorMappingActionType;
   source: ConnectorMappingSource;
   target: string;
-}
-
-export interface CaseConfigure {
-  id: string;
-  closureType: ClosureType;
-  connector: ConfigurationAttributes['connector'];
-  createdAt: string;
-  createdBy: CaseUser;
-  error: string | null;
-  mappings: CaseConnectorMapping[];
-  updatedAt: string;
-  updatedBy: CaseUser;
-  version: string;
-  owner: string;
-  customFields: CustomFieldsConfiguration;
 }

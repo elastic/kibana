@@ -15,7 +15,7 @@ export const ClosureTypeRt = rt.union([
   rt.literal('close-by-pushing'),
 ]);
 
-export const CustomFieldConfigurationRt = rt.strict({
+export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
    * key of custom field
    */
@@ -32,17 +32,20 @@ export const CustomFieldConfigurationRt = rt.strict({
 
 export const TextCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldTextTypeRt }),
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
 ]);
 
 export const ToggleCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldToggleTypeRt }),
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
 ]);
 
-export const CustomFieldsConfigurationRt = rt.array(
-  rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt])
-);
+export const CustomFieldConfigurationRt = rt.union([
+  TextCustomFieldConfigurationRt,
+  ToggleCustomFieldConfigurationRt,
+]);
+
+export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
 export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**
@@ -95,6 +98,7 @@ export const ConfigurationRt = rt.intersection([
 export const ConfigurationsRt = rt.array(ConfigurationRt);
 
 export type CustomFieldsConfiguration = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
+export type CustomFieldConfiguration = rt.TypeOf<typeof CustomFieldConfigurationRt>;
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;

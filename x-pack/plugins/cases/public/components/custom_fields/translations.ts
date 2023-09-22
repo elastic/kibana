@@ -65,3 +65,15 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
     values: { fieldName },
     defaultMessage: '{fieldName} is required.',
   });
+
+export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
+  i18n.translate('xpack.cases.caseView.editCustomFieldsAriaLabel', {
+    values: { customFieldLabel },
+    defaultMessage: 'click to edit {customFieldLabel}',
+  });
+
+export const NO_CUSTOM_FIELD_SET = (customFieldLabel: string) =>
+  i18n.translate('xpack.cases.caseView.noCustomFieldSet', {
+    values: { customFieldLabel },
+    defaultMessage: 'No "{customFieldLabel}" added',
+  });

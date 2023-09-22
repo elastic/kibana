@@ -6,11 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  TextField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { CustomFieldBuildType } from './types';
+import type { CustomFieldType } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 
@@ -39,7 +42,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     [setSelectedType]
   );
 
-  const builtCustomField: CustomFieldBuildType | null = useMemo(() => {
+  const builtCustomField: CustomFieldType | null = useMemo(() => {
     const builder = builderMap[selectedType];
 
     if (builder == null) {
@@ -51,11 +54,12 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     return customFieldBuilder.build();
   }, [selectedType]);
 
-  const ConfigurePage = builtCustomField?.ConfigurePage;
+  const Configure = builtCustomField?.Configure;
   const options = fieldTypeSelectOptions();
 
   return (
     <>
+      <UseField path="key" component={HiddenField} />
       <UseField
         path="label"
         component={TextField}
@@ -75,13 +79,12 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
           euiFieldProps: {
             options,
             'data-test-subj': 'custom-field-type-selector',
+            isLoading: isSubmitting,
           },
-          selectedType,
-          isLoading: isSubmitting,
           onChange: handleTypeChange,
         }}
       />
-      {ConfigurePage ? <ConfigurePage /> : null}
+      {Configure ? <Configure /> : null}
     </>
   );
 };
