@@ -22,7 +22,6 @@ import {
   EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiPageTemplate,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -752,8 +751,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             ) : null}
 
             <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
-              <EuiPageTemplate.Header
-                paddingSize="l"
+              <KibanaPageTemplate.Header
                 pageTitle={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.title"
@@ -794,7 +792,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   />
                 ))}
               />
-              <EuiPageTemplate.Section>
+              <KibanaPageTemplate.Section>
                 <Form aria-labelledby={titleId}>
                   <UserDetailsEditor user={user} />
                   {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
@@ -810,11 +808,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     />
                   )}
                 </Form>
-              </EuiPageTemplate.Section>
+              </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
-                <EuiPageTemplate.BottomBar paddingSize="m" position="fixed">
+                <KibanaPageTemplate.BottomBar paddingSize="m" position="fixed">
                   <SaveChangesBottomBar />
-                </EuiPageTemplate.BottomBar>
+                </KibanaPageTemplate.BottomBar>
               ) : null}
             </KibanaPageTemplate>
           </Breadcrumb>
