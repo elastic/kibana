@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ShardFailureDetails } from './shard_failure_details';
 
-interface ShardColumn {
+function getRowId(failure: estypes.ShardFailure) {
+  return `${failure.shard}${failure.index}`;
+}
+
+interface ShardRow {
+  rowId: string;
   shard: number;
   index?: string;
   failureType: string;
@@ -23,34 +28,34 @@ interface Props {
 }
 
 export function ShardFailureTable({ failures }: Props) {
-  const [expandedRows, setExpandedRows] = useState<Record<number, ReactNode>>({});
+  const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>({});
 
-  const toggleDetails = (shard: number) => {
+  const toggleDetails = (rowId: string) => {
     const nextExpandedRows = { ...expandedRows };
-    if (shard in nextExpandedRows) {
-      delete nextExpandedRows[shard];
+    if (rowId in nextExpandedRows) {
+      delete nextExpandedRows[rowId];
     } else {
-      const shardFailure = failures.find((failure) => shard === failure.shard);
-      nextExpandedRows[shard] = shardFailure ? (
+      const shardFailure = failures.find((failure) => rowId === getRowId(failure));
+      nextExpandedRows[rowId] = shardFailure ? (
         <ShardFailureDetails failure={shardFailure} />
       ) : null;
     }
     setExpandedRows(nextExpandedRows);
   };
 
-  const columns: Array<EuiBasicTableColumn<ShardColumn>> = [
+  const columns: Array<EuiBasicTableColumn<ShardRow>> = [
     {
       field: 'shard',
       name: i18n.translate('inspector.requests.clusters.shards.table.shardLabel', {
         defaultMessage: 'Shard',
       }),
-      render: (shard: number) => {
+      render: (shard: number, item: ShardRow) => {
         return (
           <>
             <EuiButtonIcon
-              onClick={() => toggleDetails(shard)}
+              onClick={() => toggleDetails(item.rowId)}
               aria-label={
-                shard in expandedRows
+                item.rowId in expandedRows
                   ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
                       defaultMessage: 'Collapse table row to hide shard details',
                     })
@@ -58,7 +63,7 @@ export function ShardFailureTable({ failures }: Props) {
                       defaultMessage: 'Expand table row to view shard details',
                     })
               }
-              iconType={shard in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={item.rowId in expandedRows ? 'arrowDown' : 'arrowRight'}
             />
             <EuiText size="xs" color="subdued">
               {shard}
@@ -95,16 +100,17 @@ export function ShardFailureTable({ failures }: Props) {
 
   return (
     <EuiBasicTable
-      items={failures.map(({ shard, index, reason }) => {
+      items={failures.map((failure) => {
         return {
-          shard,
-          index,
-          failureType: reason.type,
+          rowId: getRowId(failure), 
+          shard: failure.shard,
+          index: failure.index,
+          failureType: failure.reason.type,
         };
       })}
       isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
-      itemId="shard"
+      itemId="rowId"
       columns={columns}
     />
   );
