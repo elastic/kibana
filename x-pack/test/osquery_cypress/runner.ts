@@ -70,28 +70,22 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
     }, 60000); // 60000 milliseconds = 1 minute
   });
 
-  const replaceLocalhostWithDockerInternal = (inputString) => {
-    return inputString.replace(/localhost/g, 'host.docker.internal');
-  };
-
   return {
     FORCE_COLOR: '1',
     baseUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
-      hostname: replaceLocalhostWithDockerInternal(config.get('servers.kibana.hostname')),
+      hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
     protocol: config.get('servers.kibana.protocol'),
-    hostname: replaceLocalhostWithDockerInternal(config.get('servers.kibana.hostname')),
+    hostname: config.get('servers.kibana.hostname'),
     configport: config.get('servers.kibana.port'),
-    ELASTICSEARCH_URL: replaceLocalhostWithDockerInternal(
-      Url.format(config.get('servers.elasticsearch'))
-    ),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
     KIBANA_URL: Url.format({
       protocol: config.get('servers.kibana.protocol'),
-      hostname: replaceLocalhostWithDockerInternal(config.get('servers.kibana.hostname')),
+      hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
   };
