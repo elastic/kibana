@@ -11,7 +11,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['canvas']);
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const archive = {
@@ -31,7 +31,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         await kibanaServer.importExport.load(archive.local);
       }
 
-      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.goToListingPage();
     });
 
     after(async () => {

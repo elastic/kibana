@@ -163,3 +163,44 @@ describe('AgentDetailsActionMenu', () => {
     });
   });
 });
+
+describe('Restart upgrade action', () => {
+  function renderAndGetRestartUpgradeButton({
+    agent,
+    agentPolicy,
+  }: {
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }) {
+    const { utils } = renderActions({
+      agent,
+      agentPolicy,
+    });
+
+    return utils.queryByTestId('restartUpgradeBtn');
+  }
+
+  it('should render an active button', async () => {
+    const res = renderAndGetRestartUpgradeButton({
+      agent: {
+        status: 'updating',
+        upgrade_started_at: '2022-11-21T12:27:24Z',
+      } as any,
+      agentPolicy: {} as AgentPolicy,
+    });
+
+    expect(res).not.toBe(null);
+    expect(res).toBeEnabled();
+  });
+
+  it('should not render action if agent is not stuck in updating', async () => {
+    const res = renderAndGetRestartUpgradeButton({
+      agent: {
+        status: 'updating',
+        upgrade_started_at: new Date().toISOString(),
+      } as any,
+      agentPolicy: {} as AgentPolicy,
+    });
+    expect(res).toBe(null);
+  });
+});
