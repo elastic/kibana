@@ -134,7 +134,7 @@ const configurationFormSchema: FormSchema = {
           if (value < 0) {
             return {
               message: i18n.translate(
-                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
+                'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
                 {
                   defaultMessage: `Data retention value can't be negative.`,
                 }
