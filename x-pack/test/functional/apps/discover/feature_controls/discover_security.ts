@@ -379,16 +379,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await globalNav.badgeExistsOrFail('Read only');
       });
 
@@ -425,16 +428,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await globalNav.badgeExistsOrFail('Read only');
       });
 
@@ -471,16 +477,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
 
       it(`doesn't show read-only badge`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await globalNav.badgeMissingOrFail();
       });
 
@@ -517,16 +526,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
 
       it(`doesn't show read-only badge`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await globalNav.badgeMissingOrFail();
       });
 
