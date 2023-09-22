@@ -19,6 +19,7 @@ const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 describe('Input package create and edit package policy', () => {
   beforeEach(() => {
