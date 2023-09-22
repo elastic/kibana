@@ -19,7 +19,6 @@ import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
 import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
 export type ProfilingPluginSetup = void;
