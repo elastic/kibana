@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_DOWNLOAD_SOURCE_ID, DEFAULT_DOWNLOAD_SOURCE_URI } from '../../common/constants';
+
 import { request } from './common';
 
 export function cleanupAgentPolicies() {
@@ -36,16 +38,27 @@ export function unenrollAgent() {
 }
 
 export function cleanupDownloadSources() {
-  request({ url: '/api/fleet/agent_download_sources' }).then((response: any) => {
-    response.body.items
-      .filter((ds: any) => !ds.is_default)
-      .forEach((ds: any) => {
-        request({
-          method: 'DELETE',
-          url: `/api/fleet/agent_download_sources/${ds.id}`,
+  request({ url: '/api/fleet/agent_download_sources' })
+    .then((response: any) => {
+      response.body.items
+        .filter((ds: any) => !ds.is_default)
+        .forEach((ds: any) => {
+          request({
+            method: 'DELETE',
+            url: `/api/fleet/agent_download_sources/${ds.id}`,
+          });
         });
-      });
-  });
+    })
+    .then(() =>
+      request({
+        url: `/api/fleet/agent_download_sources/${DEFAULT_DOWNLOAD_SOURCE_ID}`,
+        method: 'PUT',
+        body: {
+          name: 'Elastic Artifacts',
+          host: DEFAULT_DOWNLOAD_SOURCE_URI,
+        },
+      })
+    );
 }
 
 export function deleteFleetServerDocs(ignoreUnavailable: boolean = false) {
