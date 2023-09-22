@@ -28,7 +28,7 @@ export const OsqueryResponseActionsUpsellingSectionLazy = withSuspenseUpsell(
 );
 
 export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
-  lazy(() => import('./pages/endpoint_exceptions_details'))
+  lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
 );
 
 export const EntityAnalyticsUpsellingLazy = withSuspenseUpsell(

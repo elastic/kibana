@@ -17,8 +17,10 @@ import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
-import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
-import { RuleDetailsEndpointExceptionsLazy } from './sections/rule_details_endpoint_exceptions';
+import {
+  EndpointPolicyProtectionsLazy,
+  RuleDetailsEndpointExceptionsLazy,
+} from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
