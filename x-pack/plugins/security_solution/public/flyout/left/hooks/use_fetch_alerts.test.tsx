@@ -17,7 +17,7 @@ jest.mock('../services/find_alerts');
 
 describe('useFetchAlerts', () => {
   beforeEach(() => {
-    jest.mocked(useKibana).mockReturnValue({
+    (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
           search: {
@@ -25,8 +25,7 @@ describe('useFetchAlerts', () => {
           },
         },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
   });
 
   it('fetches alerts and handles loading state', async () => {
@@ -65,6 +64,9 @@ describe('useFetchAlerts', () => {
     const wrapper = ({ children }: { children: React.ReactChild }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
+
+    // hide console error due to the line after
+    jest.spyOn(console, 'error').mockImplementation(() => {});
 
     jest
       .mocked(createFindAlerts)

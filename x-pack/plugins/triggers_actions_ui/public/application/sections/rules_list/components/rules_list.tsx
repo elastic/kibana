@@ -107,6 +107,7 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
+  filterConsumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -146,6 +147,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
+  filterConsumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -264,6 +266,7 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
+    filterConsumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -276,6 +279,7 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
+      filterConsumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
