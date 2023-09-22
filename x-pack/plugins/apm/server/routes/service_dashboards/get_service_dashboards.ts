@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   SavedServiceDashboard,
   ServiceDashboard,
 } from '../../../common/service_dashboards';
@@ -22,7 +22,7 @@ export async function getServiceDashboards({
   filter,
 }: Props): Promise<SavedServiceDashboard[]> {
   const result = await savedObjectsClient.find<ServiceDashboard>({
-    type: APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+    type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
     page: 1,
     perPage: 100,
     filter,

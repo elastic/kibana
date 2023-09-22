@@ -8,10 +8,10 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/service_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../common/service_dashboards';
 
 export const apmServiceDashboards: SavedObjectsType = {
-  name: APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+  name: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'multiple',
   mappings: {

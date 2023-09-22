@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE = 'apm-service-dashboard';
+export const APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'apm-custom-dashboards';
 
 // Define if the dashboard is linked to single or multiple services
 export enum DashboardTypeEnum {

@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   SavedServiceDashboard,
   ServiceDashboard,
 } from '../../../common/service_dashboards';
@@ -28,12 +28,12 @@ export async function saveServiceDashbord({
     updated_at: updatedAt,
   } = await (serviceDashboardId
     ? savedObjectsClient.update(
-        APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+        APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
         serviceDashboardId,
         serviceDashboard
       )
     : savedObjectsClient.create(
-        APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+        APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
         serviceDashboard
       ));
   return {

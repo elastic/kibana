@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
 import {
-  APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   DashboardTypeEnum,
   SavedServiceDashboard,
 } from '../../../common/service_dashboards';
@@ -71,8 +71,8 @@ const serviceDashboardsRoute = createApmServerRoute({
     const { context, params } = resources;
     const { serviceName } = params.path;
 
-    const soPrefixServiceName = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes.serviceName`;
-    const soPrefixLinkTo = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes.linkTo`;
+    const soPrefixServiceName = `${APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE}.attributes.serviceName`;
+    const soPrefixLinkTo = `${APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE}.attributes.linkTo`;
 
     const {
       savedObjects: { client: savedObjectsClient },
