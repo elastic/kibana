@@ -40,6 +40,83 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
+  function shouldAllowSavingQueries() {
+    it('allows saving via the saved query management component popover with no saved query loaded', async () => {
+      await queryBar.setQuery('response:200');
+      await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
+      await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+      await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+
+      await savedQueryManagementComponent.deleteSavedQuery('foo');
+      await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
+    });
+
+    it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      await queryBar.setQuery('response:404');
+      await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+        'new description',
+        true,
+        false
+      );
+      await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql('response:404');
+
+      // Reset after changing
+      await queryBar.setQuery('response:200');
+      await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+        'Ok responses for jpg files',
+        true,
+        false
+      );
+    });
+
+    it('allow saving currently loaded query as a copy', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      await queryBar.setQuery('response:404');
+      await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+        'ok2',
+        'description',
+        true,
+        false
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+      await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+      await testSubjects.click('showQueryBarMenu');
+      await savedQueryManagementComponent.deleteSavedQuery('ok2');
+    });
+  }
+
+  function shouldAllowLoadingQueriesButNotSavingQueries() {
+    it('allows loading a saved query via the saved query management component', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql('response:200');
+    });
+
+    it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+      await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+    });
+
+    it('does not allow saving changes to saved query from the saved query management component', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      await queryBar.setQuery('response:404');
+      await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+    });
+
+    it('does not allow deleting a saved query from the saved query management component', async () => {
+      await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+    });
+
+    it('allows clearing the currently loaded saved query', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+      await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+    });
+  }
+
   describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
@@ -129,53 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-
-        await savedQueryManagementComponent.deleteSavedQuery('foo');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
-      });
-
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'new description',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-
-        // Reset after changing
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'Ok responses for jpg files',
-          true,
-          false
-        );
-      });
-
-      it('allow saving currently loaded query as a copy', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'ok2',
-          'description',
-          true,
-          false
-        );
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-        await testSubjects.click('showQueryBarMenu');
-        await savedQueryManagementComponent.deleteSavedQuery('ok2');
-      });
+      shouldAllowSavingQueries();
     });
 
     describe('global discover read-only privileges', () => {
@@ -245,33 +276,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
-      });
-
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
-      });
-
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
-      });
-
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
-      });
-
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
+      shouldAllowLoadingQueriesButNotSavingQueries();
     });
 
-    describe('global discover read-only privileges with url_create', () => {
+    describe('discover read-only privileges with url_create', () => {
       before(async () => {
         await security.role.create('global_discover_read_url_create_role', {
           elasticsearch: {
@@ -338,30 +346,191 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
+      shouldAllowLoadingQueriesButNotSavingQueries();
+    });
+
+    describe('discover read-only privileges with enabled savedQueryManagement.saveQuery permission', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                savedQueryManagement: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_read_user', {
+          password: 'global_discover_read_user-password',
+          roles: ['global_discover_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_read_user',
+          'global_discover_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+      after(async () => {
+        await security.role.delete('global_discover_read_role');
+        await security.user.delete('global_discover_read_user');
       });
 
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+      it(`shows read-only badge`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+      shouldAllowSavingQueries();
+    });
+
+    describe('discover read-only privileges with disabled savedQueryManagement.saveQuery permission', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                savedQueryManagement: ['none'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_read_user', {
+          password: 'global_discover_read_user-password',
+          roles: ['global_discover_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_read_user',
+          'global_discover_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      after(async () => {
+        await security.role.delete('global_discover_read_role');
+        await security.user.delete('global_discover_read_user');
       });
+
+      it(`shows read-only badge`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
+        await globalNav.badgeExistsOrFail('Read only');
+      });
+
+      shouldAllowLoadingQueriesButNotSavingQueries();
+    });
+
+    describe('discover all privileges with enabled savedQueryManagement.saveQuery permission', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                savedQueryManagement: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_read_user', {
+          password: 'global_discover_read_user-password',
+          roles: ['global_discover_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_read_user',
+          'global_discover_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await security.role.delete('global_discover_read_role');
+        await security.user.delete('global_discover_read_user');
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
+        await globalNav.badgeMissingOrFail();
+      });
+
+      shouldAllowSavingQueries();
+    });
+
+    describe('discover all privileges with disabled savedQueryManagement.saveQuery permission', () => {
+      before(async () => {
+        await security.role.create('global_discover_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                savedQueryManagement: ['none'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_read_user', {
+          password: 'global_discover_read_user-password',
+          roles: ['global_discover_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_read_user',
+          'global_discover_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await security.role.delete('global_discover_read_role');
+        await security.user.delete('global_discover_read_user');
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
+        await globalNav.badgeMissingOrFail();
+      });
+
+      shouldAllowSavingQueries();
     });
 
     describe('discover and visualize privileges', () => {
