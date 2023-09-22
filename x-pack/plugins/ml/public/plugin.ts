@@ -59,6 +59,7 @@ import {
   ML_APP_ROUTE,
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
+  type ConfigSchema,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 
@@ -116,7 +117,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     nlp: true,
   };
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
   }
