@@ -288,7 +288,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {

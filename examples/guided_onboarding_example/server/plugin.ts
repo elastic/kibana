@@ -23,7 +23,7 @@ export class GuidedOnboardingExamplePlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, { guidedOnboarding }: PluginsSetup) {
     this.logger.debug('guidedOnboardingExample: Setup');
-    guidedOnboarding.registerGuideConfig(testGuideId, testGuideConfig);
+    guidedOnboarding?.registerGuideConfig(testGuideId, testGuideConfig);
     return {};
   }
 

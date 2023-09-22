@@ -108,7 +108,7 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
+          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
           cloudChat: cloudChatProvider,
         });

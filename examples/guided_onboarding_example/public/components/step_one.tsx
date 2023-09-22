@@ -23,8 +23,6 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import useObservable from 'react-use/lib/useObservable';
-
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 interface GuidedOnboardingExampleAppDeps {
@@ -37,13 +35,15 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
   const [indexName, setIndexName] = useState('test1234');
 
-  const isTourActive = useObservable(
-    guidedOnboardingApi!.isGuideStepActive$('testGuide', 'step1'),
-    false
-  );
   useEffect(() => {
-    setIsTourStepOpen(isTourActive);
-  }, [isTourActive]);
+    const subscription = guidedOnboardingApi
+      ?.isGuideStepActive$('testGuide', 'step1')
+      .subscribe((isStepActive) => {
+        setIsTourStepOpen(isStepActive);
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboardingApi]);
+
   return (
     <>
       <EuiPageHeader>

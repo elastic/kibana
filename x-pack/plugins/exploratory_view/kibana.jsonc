@@ -15,7 +15,6 @@
       "dataViews",
       "features",
       "files",
-      "guidedOnboarding",
       "inspector",
       "lens",
       "observabilityShared",
@@ -25,7 +24,7 @@
       "unifiedSearch",
       "observabilityAIAssistant"
     ],
-    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
+    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection", "guidedOnboarding"],
     "requiredBundles": [
       "dataViews",
       "embeddable",

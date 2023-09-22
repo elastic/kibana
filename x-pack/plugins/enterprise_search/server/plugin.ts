@@ -294,13 +294,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register a config for the search guide
      */
     if (config.canDeployEntSearch) {
-      guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     }
     if (config.hasWebCrawler) {
-      guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
-      guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 
     /**

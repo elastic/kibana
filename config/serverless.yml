@@ -9,7 +9,7 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 
 # Cloud links
-xpack.cloud.base_url: "https://cloud.elastic.co"
+xpack.cloud.base_url: 'https://cloud.elastic.co'
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -46,9 +46,12 @@ xpack.index_management.enableIndexStats: false
 dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
 
+# Onboarding team UI configurations
+xpack.cloud_integrations.data_migration.enabled: false
+guided_onboarding.enabled: false
+
 # Other disabled plugins
 xpack.canvas.enabled: false
-xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
 
@@ -86,7 +89,7 @@ xpack.spaces.allowFeatureVisibility: false
 console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
-elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+elasticsearch.requestHeadersWhitelist: ['authorization', 'es-client-authentication']
 
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
