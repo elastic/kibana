@@ -19,6 +19,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
@@ -33,7 +34,6 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -130,6 +130,7 @@ function InternalAlertsPage() {
       const response = await loadRuleAggregations({
         http,
         typesFilter: filteredRuleTypes,
+        filterConsumers: observabilityAlertFeatureIds,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;

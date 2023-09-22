@@ -363,6 +363,7 @@ export const PrevalenceDetails: React.FC = () => {
           end={end}
           onTimeChange={onTimeChange}
           data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
+          width="full"
         />
         <EuiSpacer size="m" />
         {data.length > 0 ? (
