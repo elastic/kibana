@@ -17,7 +17,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { useEditTimelineModal } from './use_edit_timeline_modal';
 import * as timelineTranslations from './translations';
 
-interface SaveTimelineButtonProps {
+export interface SaveTimelineButtonProps {
   timelineId: string;
 }
 
