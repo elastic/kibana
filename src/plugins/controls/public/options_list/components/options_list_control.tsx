@@ -162,8 +162,8 @@ export const OptionsListControl = ({
         className="optionsList__inputButtonOverride"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
         panelClassName="optionsList__popoverOverride"
+        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
       >
         <OptionsListPopover
           isLoading={debouncedLoading}

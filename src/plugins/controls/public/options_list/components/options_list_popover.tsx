@@ -9,7 +9,6 @@
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 
-import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
@@ -34,7 +33,6 @@ export const OptionsListPopover = ({
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
   const id = optionsList.select((state) => state.explicitInput.id);
-  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const hideExclude = optionsList.select((state) => state.explicitInput.hideExclude);
   const hideActionBar = optionsList.select((state) => state.explicitInput.hideActionBar);
 
@@ -45,7 +43,6 @@ export const OptionsListPopover = ({
       id={`control-popover-${id}`}
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
-      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
     >
       {field?.type !== 'boolean' && !hideActionBar && (
         <OptionsListPopoverActionBar
