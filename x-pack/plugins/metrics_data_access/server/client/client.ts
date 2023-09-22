@@ -16,7 +16,7 @@ import {
   metricsDataSourceSavedObjectName,
 } from '../saved_objects/metrics_data_source';
 
-const defaultMetricIndices = 'metrics-*,metricbeat-*';
+export const DEFAULT_METRIC_INDICES = 'metrics-*,metricbeat-*';
 
 export class MetricsDataClient {
   private readonly defaultSavedObjectId = 'default';
@@ -28,7 +28,7 @@ export class MetricsDataClient {
       .then(({ attributes }) => attributes.metricIndices)
       .catch((err) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          return this.getDefaultMetricIndices?.(options) ?? defaultMetricIndices;
+          return this.getDefaultMetricIndices?.(options) ?? DEFAULT_METRIC_INDICES;
         }
 
         throw err;
