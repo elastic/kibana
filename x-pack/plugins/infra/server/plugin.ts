@@ -97,6 +97,14 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         ),
       })
     ),
+    featureFlags: offeringBasedSchema({
+      traditional: schema.object({
+        metricsExplorerEnabled: schema.boolean({ defaultValue: true }),
+      }),
+      serverless: schema.object({
+        metricsExplorerEnabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
   deprecations: configDeprecations,
   exposeToBrowser: publicConfigKeys,
@@ -128,7 +136,7 @@ export class InfraServerPlugin
   private logsRules: RulesService;
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
-  private metricsExplorerViews: MetricsExplorerViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
@@ -146,9 +154,9 @@ export class InfraServerPlugin
     );
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
-    this.metricsExplorerViews = new MetricsExplorerViewsService(
-      this.logger.get('metricsExplorerViews')
-    );
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService(this.logger.get('metricsExplorerViews'))
+      : undefined;
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -172,12 +180,14 @@ export class InfraServerPlugin
 
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
-    const metricsExplorerViews = this.metricsExplorerViews.setup();
+    const metricsExplorerViews = this.metricsExplorerViews?.setup();
 
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
-    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    if (this.config.featureFlags.metricsExplorerEnabled) {
+      core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    }
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     // and make them available via the request context so we can do away with
@@ -272,7 +282,7 @@ export class InfraServerPlugin
       savedObjects: core.savedObjects,
     });
 
-    const metricsExplorerViews = this.metricsExplorerViews.start({
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
     });

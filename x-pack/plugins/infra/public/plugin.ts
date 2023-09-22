@@ -54,7 +54,7 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
-  private metricsExplorerViews: MetricsExplorerViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private appTarget: string;
@@ -65,7 +65,9 @@ export class Plugin implements InfraClientPluginClass {
     this.config = context.config.get();
 
     this.inventoryViews = new InventoryViewsService();
-    this.metricsExplorerViews = new MetricsExplorerViewsService();
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService()
+      : undefined;
     this.telemetry = new TelemetryService();
     this.appTarget = this.config.logs.app_target;
     this.kibanaVersion = context.env.packageInfo.version;
@@ -298,6 +300,7 @@ export class Plugin implements InfraClientPluginClass {
           coreStart,
           { ...plugins, kibanaVersion: this.kibanaVersion },
           pluginStart,
+          this.config,
           params
         );
       },
@@ -345,7 +348,7 @@ export class Plugin implements InfraClientPluginClass {
       http: core.http,
     });
 
-    const metricsExplorerViews = this.metricsExplorerViews.start({
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
       http: core.http,
     });
 
