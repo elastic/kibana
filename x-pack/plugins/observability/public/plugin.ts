@@ -78,7 +78,6 @@ import {
   RULES_PATH,
   SLOS_PATH,
 } from '../common/locators/paths';
-import { SloListFactoryDefinition } from './embeddable/slo/slo_embeddable_factory';
 
 export interface ConfigSchema {
   unsafe: {
@@ -289,9 +288,12 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
-
-    const factory = new SloListFactoryDefinition(coreSetup.getStartServices);
-    pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    const registerSloEmbeddableFactory = async () => {
+      const { SloListFactoryDefinition } = await import('./embeddable/slo/slo_embeddable_factory');
+      const factory = new SloListFactoryDefinition(coreSetup.getStartServices);
+      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    };
+    registerSloEmbeddableFactory();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
