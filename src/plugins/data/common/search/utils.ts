@@ -16,7 +16,7 @@ import type { IKibanaSearchResponse } from './types';
 /**
  * @returns true if response is abort
  */
-export const isAbortedResponse = (response?: IKibanaSearchResponse) => {
+export const isAbortResponse = (response?: IKibanaSearchResponse) => {
   return !response || !response.rawResponse;
 };
 
