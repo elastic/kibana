@@ -33,6 +33,11 @@ import { EditDashboard } from './actions/edit_dashboard';
 import { DashboardSelector } from './dashboard_selector';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
+import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
+
+export interface MergedServiceDashboard extends SavedServiceDashboard {
+  title: string;
+}
 
 export function ServiceDashboards() {
   const {
@@ -40,8 +45,15 @@ export function ServiceDashboards() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/dashboards');
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [serviceDashboards, setServiceDashboards] =
+    useState<MergedServiceDashboard[]>();
   const [currentDashboard, setCurrentDashboard] =
-    useState<SavedServiceDashboard>();
+    useState<MergedServiceDashboard>();
+  const { data: allAvailableDashboards, status: dashboardsFetcherStatus } =
+    useDashboardFetcher();
+
+  console.log('allAvailableDashboards', allAvailableDashboards);
+
   const { dataView } = useApmDataView();
 
   const { data, status, refetch } = useFetcher(
@@ -60,12 +72,23 @@ export function ServiceDashboards() {
     [serviceName]
   );
 
-  const serviceDashboards = data?.serviceDashboards ?? [];
+  console.log('serviceDashboards', serviceDashboards);
 
   useEffect(() => {
+    const serviceDashboards = data?.serviceDashboards.map((dashboard) => ({
+      title:
+        allAvailableDashboards.find(
+          ({ id }) => id === dashboard.dashboardSavedObjectId
+        )?.attributes.title ?? dashboard.id,
+      ...dashboard,
+    }));
+
+    setServiceDashboards(serviceDashboards ?? []);
     // preselect dashboard
-    setCurrentDashboard(data?.serviceDashboards[0]);
-  }, [serviceDashboards]);
+    setCurrentDashboard(serviceDashboards[0]);
+  }, [allAvailableDashboards, data]);
+
+  console.log('current', currentDashboard);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -98,7 +121,7 @@ export function ServiceDashboards() {
 
   const handleOnChange = (selectedId?: string) => {
     setCurrentDashboard(
-      serviceDashboards.find(
+      serviceDashboards?.find(
         ({ dashboardSavedObjectId }) => dashboardSavedObjectId === selectedId
       )
     );
@@ -120,7 +143,7 @@ export function ServiceDashboards() {
             </h4>
           }
         />
-      ) : status === FETCH_STATUS.SUCCESS && serviceDashboards.length > 0 ? (
+      ) : status === FETCH_STATUS.SUCCESS && serviceDashboards?.length > 0 ? (
         <>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -129,7 +152,7 @@ export function ServiceDashboards() {
           >
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
-                <h3>{currentDashboard?.dashboardTitle}</h3>
+                <h3>{currentDashboard?.title}</h3>
               </EuiTitle>
             </EuiFlexItem>
 

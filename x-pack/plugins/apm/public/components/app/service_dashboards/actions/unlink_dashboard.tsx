@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
+import { MergedServiceDashboard } from '..';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
@@ -15,7 +15,7 @@ export function UnlinkDashboard({
   currentDashboard,
   onRefresh,
 }: {
-  currentDashboard: SavedServiceDashboard;
+  currentDashboard: MergedServiceDashboard;
   onRefresh: () => void;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -36,7 +36,7 @@ export function UnlinkDashboard({
             'xpack.apm.serviceDashboards.unlinkSuccess.toast.title',
             {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-              values: { dashboardName: currentDashboard.dashboardTitle },
+              values: { dashboardName: currentDashboard?.title },
             }
           ),
         });
@@ -49,7 +49,7 @@ export function UnlinkDashboard({
             {
               defaultMessage:
                 'Error while unlinking "{dashboardName}" dashboard',
-              values: { dashboardName: currentDashboard?.dashboardTitle },
+              values: { dashboardName: currentDashboard?.title },
             }
           ),
           text: error.body.message,

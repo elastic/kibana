@@ -27,15 +27,15 @@ import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
 import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { MergedServiceDashboard } from '..';
 
 interface Props {
   onClose: () => void;
   onRefresh: () => void;
-  currentDashboard?: SavedServiceDashboard;
-  serviceDashboards?: SavedServiceDashboard[];
+  currentDashboard?: MergedServiceDashboard;
+  serviceDashboards?: MergedServiceDashboard[];
 }
 
 export function SaveDashboardModal({
@@ -55,8 +55,8 @@ export function SaveDashboardModal({
   );
 
   if (currentDashboard) {
-    const { dashboardTitle, dashboardSavedObjectId } = currentDashboard;
-    defaultOption = { label: dashboardTitle, value: dashboardSavedObjectId };
+    const { title, dashboardSavedObjectId } = currentDashboard;
+    defaultOption = { label: title, value: dashboardSavedObjectId };
   }
 
   const [selectedDashboard, setSelectedDashboard] = useState(

@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedServiceDashboard } from '../../../../common/service_dashboards';
+import { MergedServiceDashboard } from '.';
 
 interface Props {
-  serviceDashboards: SavedServiceDashboard[];
-  currentDashboard?: SavedServiceDashboard;
+  serviceDashboards: MergedServiceDashboard[];
+  currentDashboard?: MergedServiceDashboard;
   handleOnChange: (selectedId?: string) => void;
 }
 
@@ -38,17 +39,18 @@ export function DashboardSelector({
         }
       )}
       singleSelection={{ asPlainText: true }}
-      options={serviceDashboards.map(
-        ({ dashboardSavedObjectId, dashboardTitle }) => {
-          return { label: dashboardTitle, value: dashboardSavedObjectId };
-        }
-      )}
+      options={serviceDashboards.map(({ dashboardSavedObjectId, title }) => {
+        return {
+          label: title,
+          value: dashboardSavedObjectId,
+        };
+      })}
       selectedOptions={
         currentDashboard
           ? [
               {
                 value: currentDashboard?.dashboardSavedObjectId,
-                label: currentDashboard?.dashboardTitle,
+                label: currentDashboard?.title,
               },
             ]
           : []
