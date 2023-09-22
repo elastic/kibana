@@ -14,6 +14,7 @@ export interface DocLinksMeta {
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
+  searchLabsUrl: string;
 }
 
 /**
@@ -110,6 +111,8 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly aiSearchDoc: string;
+    readonly aiSearchHelp: string;
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
     readonly behavioralAnalyticsCORS: string;
@@ -150,10 +153,6 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
-    readonly esre: string;
-    readonly esreFaq: string;
-    readonly esreHelp: string;
-    readonly esreLearn: string;
     readonly indexApi: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
@@ -170,6 +169,8 @@ export interface DocLinks {
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
     readonly searchApplicationsSearch: string;
+    readonly searchLabs: string;
+    readonly searchLabsRepo: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
@@ -389,6 +390,7 @@ export interface DocLinks {
     searchPreference: string;
     securityApis: string;
     simulatePipeline: string;
+    tasks: string;
     timeUnits: string;
     unfreezeIndex: string;
     updateTransform: string;
@@ -489,6 +491,7 @@ export interface DocLinks {
     guide: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
+    esSettings: string;
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;

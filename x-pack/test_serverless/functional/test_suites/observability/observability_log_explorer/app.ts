@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonNavigation']);
 
-  describe('Application', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165943
+  describe.skip('Application', () => {
     it('is shown in the global search', async () => {
       await PageObjects.observabilityLogExplorer.navigateTo();
       await PageObjects.svlCommonNavigation.search.showSearch();

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
+  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -24,7 +24,8 @@
     "@kbn/es-query",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": ["target/**/*"]
 }

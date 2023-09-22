@@ -96,7 +96,8 @@ export interface IContainer<
     E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
   >(
     type: string,
-    explicitInput: Partial<EEI>
+    explicitInput: Partial<EEI>,
+    attributes?: unknown
   ): Promise<E | ErrorEmbeddable>;
 
   replaceEmbeddable<

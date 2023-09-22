@@ -8,9 +8,10 @@
 import { IconType } from '@elastic/eui';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { IndexPattern } from '@kbn/io-ts-utils';
+import { TIMESTAMP_FIELD } from '../../constants';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
-type IntegrationBase = Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>;
+type IntegrationBase = Partial<Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>>;
 
 interface DatasetDeps extends DatasetType {
   iconType?: IconType;
@@ -30,7 +31,7 @@ export class Dataset {
     this.title = dataset.title ?? dataset.name;
     this.parentIntegration = parentIntegration && {
       name: parentIntegration.name,
-      title: parentIntegration.title,
+      title: parentIntegration.title ?? parentIntegration.name,
       icons: parentIntegration.icons,
       version: parentIntegration.version,
     };
@@ -53,6 +54,7 @@ export class Dataset {
     return {
       id: this.id,
       name: this.getFullTitle(),
+      timeFieldName: TIMESTAMP_FIELD,
       title: this.name as string,
     };
   }
@@ -65,14 +67,16 @@ export class Dataset {
   }
 
   public static create(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
-    return new Dataset(dataset, parentIntegration);
+    const datasetTitle = dataset.title || dataset.name.split('-')[1];
+
+    return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 
   public static createAllLogsDataset() {
     return new Dataset({
       name: 'logs-*-*' as IndexPattern,
-      title: 'All log datasets',
-      iconType: 'editorChecklist',
+      title: 'All logs',
+      iconType: 'pagesSelect',
     });
   }
 

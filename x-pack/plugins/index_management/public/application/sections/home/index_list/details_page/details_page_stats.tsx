@@ -25,8 +25,9 @@ import {
 
 import { css } from '@emotion/react';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SectionLoading } from '../../../../../shared_imports';
+import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
 interface Props {
   isIndexOpen: boolean;
@@ -41,8 +42,12 @@ export const DetailsPageStats: FunctionComponent<
   isIndexOpen,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>();
   const [indexStats, setIndexStats] = useState<IndicesStatsResponse | null>();
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsStats);
+  }, []);
 
   const fetchIndexStats = useCallback(async () => {
     setIsLoading(true);

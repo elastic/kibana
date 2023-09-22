@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { type FC } from 'react';
 
 import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_guards';
-
-import { useApi } from '../../../../hooks/use_api';
+import { useGetEsIngestPipelines } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { useEditTransformFlyout } from './use_edit_transform_flyout';
@@ -30,35 +28,8 @@ export const EditTransformIngestPipeline: FC = () => {
   const { errorMessages, value } = useEditTransformFlyout('destinationIngestPipeline');
   const { formField } = useEditTransformFlyout('actions');
 
-  const api = useApi();
-
-  const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(function fetchPipelinesOnMount() {
-    let unmounted = false;
-
-    async function getIngestPipelineNames() {
-      try {
-        const ingestPipelines = await api.getEsIngestPipelines();
-
-        if (!unmounted && isEsIngestPipelines(ingestPipelines)) {
-          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
-        }
-      } finally {
-        if (!unmounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    getIngestPipelineNames();
-
-    return () => {
-      unmounted = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
+  const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
 
   return (
     <>

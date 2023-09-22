@@ -155,7 +155,11 @@ export const DashboardLinkComponent = ({
 
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
-      <EuiButtonEmpty size="s" isLoading={true}>
+      <EuiButtonEmpty
+        size="s"
+        isLoading={true}
+        data-test-subj={`dashboardLink--${link.id}--loading`}
+      >
         {DashboardLinkStrings.getLoadingDashboardLabel()}
       </EuiButtonEmpty>
     </li>
@@ -172,6 +176,7 @@ export const DashboardLinkComponent = ({
         position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
+        'data-test-subj': `dashboardLink--${link.id}--tooltip`,
       }}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -182,6 +187,7 @@ export const DashboardLinkComponent = ({
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
+      data-test-subj={error ? `dashboardLink--${link.id}--error` : `dashboardLink--${link.id}`}
     />
   );
 };

@@ -49,7 +49,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
 
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
     if (!link.destination) {
-      setDestinationError(DashboardLinkStrings.getDashboardErrorLabel());
+      setDestinationError(new Error(DashboardLinkStrings.getDashboardErrorLabel()));
       return;
     }
 
@@ -134,6 +134,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
       hasShadow={false}
       color={destinationError ? 'warning' : 'plain'}
       className={`navEmbeddableLinkPanel ${destinationError ? 'linkError' : ''}`}
+      data-test-subj={`panelEditorLink${linkLabelLoading ? '--loading' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>

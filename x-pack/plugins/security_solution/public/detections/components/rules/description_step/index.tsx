@@ -60,11 +60,7 @@ import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
-  &.euiDescriptionList--column .euiDescriptionList__title {
-    width: 30%;
-  }
-  &.euiDescriptionList--column .euiDescriptionList__description {
-    width: 70%;
+  .euiDescriptionList__description {
     overflow-wrap: anywhere;
   }
 `;
@@ -75,6 +71,8 @@ const panelViewStyle = css`
   }
   text-overflow: ellipsis;
 `;
+
+const DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
 
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
@@ -155,6 +153,8 @@ export const StepRuleDescriptionComponent = <T,>({
           <DescriptionListContainer
             data-test-subj="singleSplitStepRuleDescriptionList"
             type="column"
+            columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+            rowGutterSize="m"
             listItems={listItems}
           />
         )}

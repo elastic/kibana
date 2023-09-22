@@ -130,6 +130,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           values={{
                             dataRetentionLink: (
                               <EuiLink
+                                data-test-subj="profilingCheckSetupControllingDataRetentionLink"
                                 href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
                                 target="_blank"
                               >
@@ -152,6 +153,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
               },
               button: (
                 <EuiButton
+                  data-test-subj="profilingCheckSetupButton"
                   disabled={postSetupLoading}
                   onClick={(event) => {
                     event.preventDefault();

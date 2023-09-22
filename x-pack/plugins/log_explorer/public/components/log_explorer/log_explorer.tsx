@@ -5,22 +5,32 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { ScopedHistory } from '@kbn/core-application-browser';
-import { DataPublicPluginStart, ISearchStart, ISessionService } from '@kbn/data-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import React from 'react';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
 } from '../../customizations/log_explorer_profile';
 import { createPropertyGetProxy } from '../../utils/proxies';
+import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
 
 export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
   discover: DiscoverStart;
 }
 
+export interface LogExplorerStateContainer {
+  appState?: DiscoverAppState;
+  logExplorerState?: Partial<LogExplorerProfileContext>;
+}
+
 export interface LogExplorerProps {
   scopedHistory: ScopedHistory;
+  state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
 export const createLogExplorer = ({
@@ -28,13 +38,17 @@ export const createLogExplorer = ({
   data,
   discover: { DiscoverContainer },
 }: CreateLogExplorerArgs) => {
-  const logExplorerCustomizations = [createLogExplorerProfileCustomizations({ core, data })];
-
   const overrideServices = {
     data: createDataServiceProxy(data),
+    uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
-  return ({ scopedHistory }: LogExplorerProps) => {
+  return ({ scopedHistory, state$ }: LogExplorerProps) => {
+    const logExplorerCustomizations = useMemo(
+      () => [createLogExplorerProfileCustomizations({ core, data, state$ })],
+      [state$]
+    );
+
     return (
       <DiscoverContainer
         customizationCallbacks={logExplorerCustomizations}
@@ -50,13 +64,38 @@ export const createLogExplorer = ({
  * are no-ops.
  */
 const createDataServiceProxy = (data: DataPublicPluginStart) => {
+  const noOpEnableStorage = () => {};
+
+  const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
+    enableStorage: () => noOpEnableStorage,
+  });
+
+  const searchServiceProxy = createPropertyGetProxy(data.search, {
+    session: () => sessionServiceProxy,
+  });
+
   return createPropertyGetProxy(data, {
-    search: (searchService: ISearchStart) =>
-      createPropertyGetProxy(searchService, {
-        session: (sessionService: ISessionService) =>
-          createPropertyGetProxy(sessionService, {
-            enableStorage: () => () => {},
-          }),
-      }),
+    search: () => searchServiceProxy,
+  });
+};
+/**
+ * Create proxy for the uiSettings service, in which settings preferences are overwritten
+ * with custom values
+ */
+const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
+  const overrides: Record<string, any> = {
+    [HIDE_ANNOUNCEMENTS]: true,
+  };
+
+  return createPropertyGetProxy(uiSettings, {
+    get:
+      () =>
+      (key, ...args) => {
+        if (key in overrides) {
+          return overrides[key];
+        }
+
+        return uiSettings.get(key, ...args);
+      },
   });
 };

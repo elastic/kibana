@@ -17,6 +17,12 @@ export const isSearchSourceRule = (
   return ruleParams.searchType === 'searchSource';
 };
 
+export const isEsqlQueryRule = (
+  ruleParams: EsQueryRuleParams
+): ruleParams is EsQueryRuleParams<SearchType.esqlQuery> => {
+  return ruleParams.searchType === 'esqlQuery';
+};
+
 export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
   return (fieldSpec ?? [])
     .filter((spec: FieldSpec) => spec.isMapped || spec.runtimeField)

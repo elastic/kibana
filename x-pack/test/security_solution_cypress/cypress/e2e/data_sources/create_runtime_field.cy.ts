@@ -25,6 +25,7 @@ import { GET_TIMELINE_HEADER } from '../../screens/timeline';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Create DataView runtime field',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },

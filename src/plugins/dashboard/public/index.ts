@@ -13,6 +13,7 @@ export {
   createDashboardEditUrl,
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
+  DASHBOARD_GRID_COLUMN_COUNT,
 } from './dashboard_constants';
 export {
   type DashboardAPI,

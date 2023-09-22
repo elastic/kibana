@@ -124,13 +124,16 @@ const NavigationEmbeddablePanelEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order };
+                return { ...newLink, order: linkToEdit.order } as NavigationEmbeddableLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
+          setOrderedLinks([
+            ...orderedLinks,
+            { ...newLink, order: orderedLinks.length } as NavigationEmbeddableLink,
+          ]);
         }
       }
     },
@@ -156,7 +159,7 @@ const NavigationEmbeddablePanelEditor = ({
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="navEmbeddable--panelEditor--title">
           <h2>
             {isEditingExisting
               ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
@@ -166,25 +169,25 @@ const NavigationEmbeddablePanelEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
-          {hasZeroLinks ? (
-            <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
-          ) : (
-            <>
-              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
-                <EuiButtonGroup
-                  options={layoutOptions}
-                  buttonSize="compressed"
-                  idSelected={currentLayout}
-                  onChange={(id) => {
-                    setCurrentLayout(id as NavigationLayoutType);
-                  }}
-                  legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
-                />
-              </EuiFormRow>
-              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
-                {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
-                    to the focus of the inner elements */}
-                <div>
+          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
+            <EuiButtonGroup
+              options={layoutOptions}
+              buttonSize="compressed"
+              idSelected={currentLayout}
+              onChange={(id) => {
+                setCurrentLayout(id as NavigationLayoutType);
+              }}
+              legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
+            {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
+                to the focus of the inner elements */}
+            <div>
+              {hasZeroLinks ? (
+                <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
+              ) : (
+                <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
                       className="navEmbeddableDroppableLinksArea"
@@ -198,6 +201,7 @@ const NavigationEmbeddablePanelEditor = ({
                           draggableId={link.id}
                           customDragHandle={true}
                           hasInteractiveChildren={true}
+                          data-test-subj={`navEmbeddable--panelEditor--draggableLink`}
                         >
                           {(provided) => (
                             <NavigationEmbeddablePanelEditorLink
@@ -220,16 +224,21 @@ const NavigationEmbeddablePanelEditor = ({
                   >
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
-                </div>
-              </EuiFormRow>
-            </>
-          )}
+                </>
+              )}
+            </div>
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} iconType="cross" flush="left">
+            <EuiButtonEmpty
+              onClick={onClose}
+              iconType="cross"
+              flush="left"
+              data-test-subj="navEmbeddable--panelEditor--closeBtn"
+            >
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -240,12 +249,14 @@ const NavigationEmbeddablePanelEditor = ({
                   <TooltipWrapper
                     condition={!hasZeroLinks}
                     tooltipContent={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
+                    data-test-subj="navEmbeddable--panelEditor--saveByReferenceTooltip"
                   >
                     <EuiSwitch
                       label={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
                       checked={saveByReference}
                       disabled={hasZeroLinks}
                       onChange={() => setSaveByReference(!saveByReference)}
+                      data-test-subj="navEmbeddable--panelEditor--saveByReferenceSwitch"
                     />
                   </TooltipWrapper>
                 </EuiFlexItem>
@@ -254,11 +265,13 @@ const NavigationEmbeddablePanelEditor = ({
                 <TooltipWrapper
                   condition={hasZeroLinks}
                   tooltipContent={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}
+                  data-test-id={'navEmbeddable--panelEditor--saveBtnTooltip'}
                 >
                   <EuiButton
                     fill
                     isLoading={isSaving}
                     disabled={hasZeroLinks}
+                    data-test-subj={'navEmbeddable--panelEditor--saveBtn'}
                     onClick={async () => {
                       if (saveByReference) {
                         setIsSaving(true);

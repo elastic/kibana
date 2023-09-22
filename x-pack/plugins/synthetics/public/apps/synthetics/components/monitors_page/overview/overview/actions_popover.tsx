@@ -14,10 +14,13 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
+import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import {
   manualTestMonitorAction,
@@ -101,8 +104,7 @@ export function ActionsPopover({
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const location = useLocationName({ locationId });
-  const locationName = location?.label || monitor.location.id;
+  const locationName = useLocationName(monitor);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
@@ -111,6 +113,8 @@ export function ActionsPopover({
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
   const canEditSynthetics = useCanEditSynthetics();
+
+  const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
   const labels = useMemo(
     () => ({
@@ -163,7 +167,6 @@ export function ActionsPopover({
   };
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
-
   let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
@@ -172,9 +175,17 @@ export function ActionsPopover({
     },
     quickInspectPopoverItem,
     {
-      name: runTestManually,
+      name: testInProgress ? (
+        <EuiToolTip content={TEST_SCHEDULED_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        <NoPermissionsTooltip canUsePublicLocations={canUsePublicLocations}>
+          {runTestManually}
+        </NoPermissionsTooltip>
+      ),
       icon: 'beaker',
-      disabled: testInProgress,
+      disabled: testInProgress || !canUsePublicLocations,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
@@ -193,12 +204,15 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
           {enableLabel}
         </NoPermissionsTooltip>
       ),
       icon: 'invert',
-      disabled: !canEditSynthetics,
+      disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
@@ -207,11 +221,14 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
           {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
         </NoPermissionsTooltip>
       ),
-      disabled: !canEditSynthetics,
+      disabled: !canEditSynthetics || !canUsePublicLocations,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
@@ -244,6 +261,7 @@ export function ActionsPopover({
         button={
           <IconPanel hasPanel={iconHasPanel}>
             <EuiButtonIcon
+              data-test-subj="syntheticsActionsPopoverButton"
               aria-label={openActionsMenuAria}
               iconType="boxesHorizontal"
               color="primary"

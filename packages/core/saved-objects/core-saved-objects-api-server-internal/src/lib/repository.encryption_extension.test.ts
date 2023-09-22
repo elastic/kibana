@@ -350,7 +350,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           namespace,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
@@ -382,7 +382,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           references: encryptedSO.references,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);

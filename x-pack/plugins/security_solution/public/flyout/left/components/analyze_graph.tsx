@@ -7,14 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { ANALYZER_ERROR_MESSAGE } from './translations';
 import { useLeftPanelContext } from '../context';
-import { ANALYZE_GRAPH_ERROR_TEST_ID, ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
-import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
 import { isActiveTimeline } from '../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
@@ -30,17 +27,8 @@ export const AnalyzeGraph: FC = () => {
   );
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!eventId) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE(ANALYZER_ERROR_MESSAGE)}</h2>}
-        body={<p>{ERROR_MESSAGE(ANALYZER_ERROR_MESSAGE)}</p>}
-        data-test-subj={ANALYZE_GRAPH_ERROR_TEST_ID}
-      />
-    );
-  }
+  // TODO as part of https://github.com/elastic/security-team/issues/7032
+  //  bring back no data message if needed
 
   return (
     <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>

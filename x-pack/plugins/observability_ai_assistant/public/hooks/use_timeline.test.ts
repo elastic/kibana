@@ -434,11 +434,20 @@ describe('useTimeline', () => {
 
           expect(props.onChatComplete).not.toHaveBeenCalled();
 
-          expect(props.chatService.executeFunction).toHaveBeenCalledWith(
-            'my_function',
-            '{}',
-            expect.any(Object)
-          );
+          expect(props.chatService.executeFunction).toHaveBeenCalledWith({
+            name: 'my_function',
+            args: '{}',
+            messages: [
+              {
+                '@timestamp': expect.any(String),
+                message: {
+                  content: 'Hello',
+                  role: 'user',
+                },
+              },
+            ],
+            signal: expect.any(Object),
+          });
 
           act(() => {
             subject.next({

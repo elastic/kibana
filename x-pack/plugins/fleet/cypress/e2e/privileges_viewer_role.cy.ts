@@ -7,7 +7,7 @@
 
 import { FLEET, INTEGRATIONS } from '../tasks/navigation';
 import { createUsers, BuiltInViewerUser, deleteUsers } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 
@@ -21,6 +21,10 @@ const usersToCreate = [BuiltInViewerUser];
 describe('When the user has Viewer built-in role', () => {
   before(() => {
     createUsers(usersToCreate);
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   afterEach(() => {

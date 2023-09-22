@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pluginServices } from './public/services/plugin_services';
-import { registry } from './public/services/plugin_services.stub';
+import { setStubDashboardServices } from './public/mocks';
 
-pluginServices.setRegistry(registry.start({}));
+setStubDashboardServices();

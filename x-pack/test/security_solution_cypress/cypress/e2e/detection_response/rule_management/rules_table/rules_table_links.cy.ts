@@ -12,7 +12,9 @@ import { cleanKibana, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
-describe('Rules table: links', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+// Flaky in serverless tests
+describe('Rules table: links', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

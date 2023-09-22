@@ -18,6 +18,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import {
   NavigationEmbeddableInput,
   NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableEditorFlyoutReturn,
 } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
 import { runSaveToLibrary } from '../content_management/save_to_library';
@@ -41,7 +42,7 @@ const NavigationEmbeddablePanelEditor = withSuspense(
 export async function openEditorFlyout(
   initialInput: NavigationEmbeddableInput,
   parentDashboard?: DashboardContainer
-): Promise<Partial<NavigationEmbeddableInput>> {
+): Promise<NavigationEmbeddableEditorFlyoutReturn> {
   const attributeService = getNavigationEmbeddableAttributeService();
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
@@ -64,7 +65,12 @@ export async function openEditorFlyout(
       if (!updatedInput) {
         return;
       }
-      resolve(updatedInput);
+      resolve({
+        newInput: updatedInput,
+
+        // pass attributes via attributes so that the Dashboard can choose the right panel size.
+        attributes: newAttributes,
+      });
       parentDashboard?.reload();
       editorFlyout.close();
     };
@@ -73,15 +79,21 @@ export async function openEditorFlyout(
       newLinks: NavigationEmbeddableLink[],
       newLayout: NavigationLayoutType
     ) => {
+      const newAttributes = {
+        ...attributes,
+        links: newLinks,
+        layout: newLayout,
+      };
       const newInput: NavigationEmbeddableInput = {
         ...initialInput,
-        attributes: {
-          ...attributes,
-          links: newLinks,
-          layout: newLayout,
-        },
+        attributes: newAttributes,
       };
-      resolve(newInput);
+      resolve({
+        newInput,
+
+        // pass attributes so that the Dashboard can choose the right panel size.
+        attributes: newAttributes,
+      });
       parentDashboard?.reload();
       editorFlyout.close();
     };

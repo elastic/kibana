@@ -41,18 +41,6 @@ export function timeRangeFromRequest(request: any): [number, number] {
   return [timeFrom, timeTo];
 }
 
-// Converts from a Map object to a Record object since Map objects are not
-// serializable to JSON by default
-export function fromMapToRecord<K extends string, V>(m: Map<K, V>): Record<string, V> {
-  const output: Record<string, V> = {};
-
-  for (const [key, value] of m) {
-    output[key] = value;
-  }
-
-  return output;
-}
-
 export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableLabel', {
   defaultMessage: 'N/A',
 });
