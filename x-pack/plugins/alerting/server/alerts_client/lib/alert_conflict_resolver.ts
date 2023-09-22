@@ -41,32 +41,31 @@ interface NormalizedBulkRequest {
 
 export async function resolveAlertConflicts(params: ResolveAlertConflictsParams): Promise<void> {
   const { logger, esClient, bulkRequest, bulkResponse } = params;
+  if (bulkRequest.operations && bulkRequest.operations?.length === 0) return;
+  if (bulkResponse.items && bulkResponse.items?.length === 0) return;
 
-  const errorsInResponse = (bulkResponse.items ?? [])
-    .map((item) => item?.index?.error || item?.create?.error)
-    .filter((item) => item != null);
+  const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
+  if (conflicts === 0 && errors === 0) return;
 
-  if (errorsInResponse.length === 0) return;
-
-  const normalizedRequest = getConflictRequest(bulkRequest, bulkResponse);
-
+  const allMessages = messages.join('; ');
   logger.error(
-    `Error writing ${errorsInResponse.length} out of ${
-      bulkResponse.items.length
-    } alerts - ${JSON.stringify(errorsInResponse)}`
+    `Error writing alerts: ${success} successful, ${conflicts} conflicts, ${errors} errors: ${allMessages}`
   );
 
-  const freshDocs = await getFreshDocs(esClient, normalizedRequest);
-  await updateOCC(normalizedRequest, freshDocs);
-  await refreshFieldsInDocs(normalizedRequest, freshDocs);
+  const conflictRequest = getConflictRequest(bulkRequest, bulkResponse);
+  if (conflictRequest.length === 0) return;
 
-  logger.info(`Retrying bulk update of ${normalizedRequest.length} conflicted alerts`);
+  const freshDocs = await getFreshDocs(esClient, conflictRequest);
+  await updateOCC(conflictRequest, freshDocs);
+  await refreshFieldsInDocs(conflictRequest, freshDocs);
 
-  const mbrResponse = await makeBulkRequest(params.esClient, params.bulkRequest, normalizedRequest);
+  logger.info(`Retrying bulk update of ${conflictRequest.length} conflicted alerts`);
 
-  if (mbrResponse.bulkResponse?.items.length !== normalizedRequest.length) {
+  const mbrResponse = await makeBulkRequest(params.esClient, params.bulkRequest, conflictRequest);
+
+  if (mbrResponse.bulkResponse?.items.length !== conflictRequest.length) {
     const actual = mbrResponse.bulkResponse?.items.length;
-    const expected = normalizedRequest.length;
+    const expected = conflictRequest.length;
     logger.error(
       `Unexpected number of bulk response items retried; expecting ${expected}, retried ${actual}`
     );
@@ -76,16 +75,16 @@ export async function resolveAlertConflicts(params: ResolveAlertConflictsParams)
   if (mbrResponse.error) {
     const index = bulkRequest.index || 'unknown index';
     logger.error(
-      `Error writing ${normalizedRequest.length} alerts to ${index} - ${mbrResponse.error.message}`
+      `Error writing ${conflictRequest.length} alerts to ${index} - ${mbrResponse.error.message}`
     );
     return;
   }
 
   if (mbrResponse.errors === 0) {
-    logger.info(`Retried bulk update of ${normalizedRequest.length} conflicted alerts succeeded`);
+    logger.info(`Retried bulk update of ${conflictRequest.length} conflicted alerts succeeded`);
   } else {
     logger.error(
-      `Retried bulk update of ${normalizedRequest.length} conflicted alerts still had ${mbrResponse.errors} conflicts`
+      `Retried bulk update of ${conflictRequest.length} conflicted alerts still had ${mbrResponse.errors} conflicts`
     );
   }
 }
@@ -226,10 +225,8 @@ function normalizeRequest(bulkRequest: BulkRequest) {
 
     if (op.create || op.index || op.update) {
       index++;
-      if (op.index) {
-        const doc = bulkRequest.operations[index];
-        result.push({ op, doc });
-      }
+      const doc = bulkRequest.operations[index];
+      result.push({ op, doc });
     } else if (op.delete) {
       // no doc for delete op
     } else {
@@ -240,4 +237,29 @@ function normalizeRequest(bulkRequest: BulkRequest) {
   }
 
   return result;
+}
+
+interface ResponseStatsResult {
+  success: number;
+  conflicts: number;
+  errors: number;
+  messages: string[];
+}
+
+function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
+  const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
+  for (const item of bulkResponse.items) {
+    const op = item.create || item.index || item.update || item.delete;
+    if (op?.error) {
+      if (op?.status === 409 && op === item.index) {
+        stats.conflicts++;
+      } else {
+        stats.errors++;
+        stats.messages.push(op?.error?.reason || 'no bulk reason provided');
+      }
+    } else {
+      stats.success++;
+    }
+  }
+  return stats;
 }

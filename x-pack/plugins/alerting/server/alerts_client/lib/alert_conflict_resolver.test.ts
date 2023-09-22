@@ -66,7 +66,7 @@ describe('alert_conflict_resolver', () => {
 
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Error writing 1 out of 1 alerts - [{"message":"hallo"}]`
+        `Error writing alerts: 0 successful, 1 conflicts, 0 errors: `
       );
       expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 1 conflicted alerts`);
       expect(logger.info).toHaveBeenNthCalledWith(
@@ -201,7 +201,7 @@ function getResponseItem(
       [type]: {
         _index: `index-${id}`,
         _id: `id-${id}`,
-        error: { message: 'hallo' },
+        error: { reason: 'hallo' },
         status,
       },
     };
