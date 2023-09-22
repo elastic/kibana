@@ -153,6 +153,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   monaco.editor.registerCommand('esql.policies.create', (...args) => {
     application?.navigateToApp('management', {
       path: 'data/index_management/enrich_policies/create',
+      openInNewTab: true,
     });
   });
 
