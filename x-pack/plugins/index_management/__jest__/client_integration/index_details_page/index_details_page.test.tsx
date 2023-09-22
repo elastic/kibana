@@ -58,10 +58,13 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
 
     await act(async () => {
-      testBed = await setup(httpSetup, {
-        url: {
-          locators: {
-            get: () => ({ navigate: jest.fn() }),
+      testBed = await setup({
+        httpSetup,
+        dependencies: {
+          url: {
+            locators: {
+              get: () => ({ navigate: jest.fn() }),
+            },
           },
         },
       });
@@ -76,7 +79,7 @@ describe('<IndexDetailsPage />', () => {
         message: `Data for index ${testIndexName} was not found`,
       });
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
 
       testBed.component.update();
@@ -91,6 +94,19 @@ describe('<IndexDetailsPage />', () => {
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('renders an error section when no index name is provided', async () => {
+      // already sent 2 requests while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+      await act(async () => {
+        testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
+      });
+      testBed.component.update();
+      expect(testBed.actions.errorSection.noIndexNameMessageIsDisplayed()).toBe(true);
+      // no extra http request was sent
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
     });
   });
 
@@ -139,7 +155,7 @@ describe('<IndexDetailsPage />', () => {
       );
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -149,8 +165,11 @@ describe('<IndexDetailsPage />', () => {
 
     it('hides index stats tab if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
@@ -165,7 +184,7 @@ describe('<IndexDetailsPage />', () => {
           message: 'Error',
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -214,8 +233,11 @@ describe('<IndexDetailsPage />', () => {
 
     it('hides index stats from detail panels if enableIndexStats===false', async () => {
       await act(async () => {
-        testBed = await setup(httpSetup, {
-          config: { enableIndexStats: false },
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            config: { enableIndexStats: false },
+          },
         });
       });
       testBed.component.update();
@@ -227,10 +249,13 @@ describe('<IndexDetailsPage />', () => {
     describe('extension service summary', () => {
       it('renders all summaries added to the extension service', async () => {
         await act(async () => {
-          testBed = await setup(httpSetup, {
-            services: {
-              extensionsService: {
-                summaries: [() => <span>test</span>, () => <span>test2</span>],
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [() => <span>test</span>, () => <span>test2</span>],
+                },
               },
             },
           });
@@ -242,10 +267,13 @@ describe('<IndexDetailsPage />', () => {
 
       it(`doesn't render empty panels if the summary renders null`, async () => {
         await act(async () => {
-          testBed = await setup(httpSetup, {
-            services: {
-              extensionsService: {
-                summaries: [() => null],
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [() => null],
+                },
               },
             },
           });
@@ -256,10 +284,13 @@ describe('<IndexDetailsPage />', () => {
 
       it(`doesn't render anything when no summaries added to the extension service`, async () => {
         await act(async () => {
-          testBed = await setup(httpSetup, {
-            services: {
-              extensionsService: {
-                summaries: [],
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              services: {
+                extensionsService: {
+                  summaries: [],
+                },
               },
             },
           });
@@ -310,7 +341,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load mappings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup({ httpSetup });
         });
 
         testBed.component.update();
@@ -372,7 +403,7 @@ describe('<IndexDetailsPage />', () => {
           message: `Was not able to load settings`,
         });
         await act(async () => {
-          testBed = await setup(httpSetup);
+          testBed = await setup( { httpSetup });
         });
 
         testBed.component.update();
@@ -485,7 +516,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 
@@ -578,7 +609,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup({ httpSetup });
       });
       testBed.component.update();
 

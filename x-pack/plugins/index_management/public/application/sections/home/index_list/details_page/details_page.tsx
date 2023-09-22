@@ -15,6 +15,9 @@ import {
   EuiPageHeaderProps,
   EuiPageSection,
   EuiButton,
+  EuiPageTemplate,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
@@ -106,15 +109,17 @@ export const DetailsPage: FunctionComponent<
     return getSelectedTabContent({ tab: indexDetailsSection, index, indexName });
   }, [index, indexDetailsSection, indexName]);
   const fetchIndexDetails = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data, error: loadingError } = await loadIndex(indexName);
-      setIsLoading(false);
-      setError(loadingError);
-      setIndex(data);
-    } catch (e) {
-      setIsLoading(false);
-      setError(e);
+    if (indexName) {
+      setIsLoading(true);
+      try {
+        const { data, error: loadingError } = await loadIndex(indexName);
+        setIsLoading(false);
+        setError(loadingError);
+        setIndex(data);
+      } catch (e) {
+        setIsLoading(false);
+        setError(e);
+      }
     }
   }, [indexName]);
 
@@ -145,6 +150,34 @@ export const DetailsPage: FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange, config]);
 
+  if (!indexName) {
+    return (
+      <EuiPageTemplate.EmptyPrompt
+        data-test-subj="indexDetailsNoIndexNameError"
+        color="danger"
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.noIndexNameErrorTitle"
+              defaultMessage="Unable to load index details"
+            />
+          </h2>
+        }
+        body={
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.noIndexNameErrorDescription"
+              defaultMessage="An index name is required for this page. Add a query parameter {queryParam} followed by an index name to the url."
+              values={{
+                queryParam: <EuiCode>indexName</EuiCode>,
+              }}
+            />
+          </EuiText>
+        }
+      />
+    );
+  }
   if (isLoading && !index) {
     return (
       <SectionLoading>

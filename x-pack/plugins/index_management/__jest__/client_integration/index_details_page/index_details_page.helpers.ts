@@ -20,16 +20,16 @@ import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
-const testBedConfig: AsyncTestBedConfig = {
+const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
   memoryRouter: {
-    initialEntries: [`/indices/index_details?indexName=${testIndexName}`],
+    initialEntries: [initialEntry ?? `/indices/index_details?indexName=${testIndexName}`],
     componentRoutePath: `/indices/index_details`,
     onRouter: (router) => {
       routerMock = router;
     },
   },
   doMountAsync: true,
-};
+});
 
 export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
@@ -66,6 +66,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     errorSection: {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
+      noIndexNameMessageIsDisplayed: () => boolean;
     };
     stats: {
       getCodeBlockContent: () => string;
@@ -84,13 +85,18 @@ export interface IndexDetailsPageTestBed extends TestBed {
   };
 }
 
-export const setup = async (
-  httpSetup: HttpSetup,
-  overridingDependencies: any = {}
-): Promise<IndexDetailsPageTestBed> => {
+export const setup = async ({
+  httpSetup,
+  dependencies = {},
+  initialEntry,
+}: {
+  httpSetup: HttpSetup;
+  dependencies?: any;
+  initialEntry?: string;
+}): Promise<IndexDetailsPageTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexDetailsPage, httpSetup, overridingDependencies),
-    testBedConfig
+    WithAppDependencies(IndexDetailsPage, httpSetup, dependencies),
+    getTestBedConfig(initialEntry)
   );
   const testBed = await initTestBed();
   const { find, component, exists } = testBed;
@@ -104,6 +110,9 @@ export const setup = async (
         find('indexDetailsReloadDetailsButton').simulate('click');
       });
       component.update();
+    },
+    noIndexNameMessageIsDisplayed: () => {
+      return exists('indexDetailsNoIndexNameError');
     },
   };
   const getHeader = () => {
