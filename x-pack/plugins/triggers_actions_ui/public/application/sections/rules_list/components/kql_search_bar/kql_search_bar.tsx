@@ -88,7 +88,7 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : dataView}
       showAutoRefreshOnly={false}
       showDatePicker={false}
-      showSaveQuery={false}
+      saveQueryMenuVisibility="hidden"
       showQueryInput={true}
       showQueryMenu={false}
       showFilterBar={true}

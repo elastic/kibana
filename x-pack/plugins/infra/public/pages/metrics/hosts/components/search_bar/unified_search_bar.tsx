@@ -57,7 +57,11 @@ export const UnifiedSearchBar = () => {
               defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
             })}
             onQuerySubmit={handleRefresh}
-            showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+            saveQueryMenuVisibility={
+              application?.capabilities?.visualize?.saveQuery
+                ? 'allowed_by_additional_privilege'
+                : 'globally_managed'
+            }
             showDatePicker
             showFilterBar
             showQueryInput

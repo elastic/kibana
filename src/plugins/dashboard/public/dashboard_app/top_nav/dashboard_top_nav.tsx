@@ -68,7 +68,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: showSaveQuery, showWriteControls },
+    dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -297,7 +297,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}
-        showSaveQuery={showSaveQuery}
+        saveQueryMenuVisibility={
+          allowSaveQuery ? 'allowed_by_additional_privilege' : 'globally_managed'
+        }
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
         setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}

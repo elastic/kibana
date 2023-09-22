@@ -88,7 +88,7 @@ describe('ContextApp test', () => {
     showSearchBar: true,
     showQueryInput: false,
     showFilterBar: true,
-    showSaveQuery: false,
+    saveQueryMenuVisibility: 'hidden',
     showDatePicker: false,
     indexPatterns: [dataViewMock],
     useDefaultBehaviors: true,

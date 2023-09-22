@@ -97,7 +97,7 @@ export const App = ({
             showSearchBar={true}
             indexPatterns={[dataView]}
             useDefaultBehaviors={true}
-            showSaveQuery={true}
+            saveQueryMenuVisibility="allowed_by_additional_privilege" // allowed only for this example app
           />
           <EuiPageTemplate.Section>
             <EuiText>

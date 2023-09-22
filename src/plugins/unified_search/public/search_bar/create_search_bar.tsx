@@ -15,13 +15,13 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { type SavedQueryMenuVisibility, canShowSavedQuery } from './lib/can_show_saved_query';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
@@ -33,14 +33,17 @@ export interface StatefulSearchBarDeps {
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
-export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
-  SearchBarOwnProps<QT> & {
-    appName: string;
-    useDefaultBehaviors?: boolean;
-    savedQueryId?: string;
-    onSavedQueryIdChange?: (savedQueryId?: string) => void;
-    onFiltersUpdated?: (filters: Filter[]) => void;
-  };
+export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
+  SearchBarOwnProps<QT>,
+  'showSaveQuery'
+> & {
+  appName: string;
+  useDefaultBehaviors?: boolean;
+  savedQueryId?: string;
+  saveQueryMenuVisibility?: SavedQueryMenuVisibility;
+  onSavedQueryIdChange?: (savedQueryId?: string) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
+};
 
 // Respond to user changing the filters
 const defaultFiltersUpdated = (
@@ -195,11 +198,11 @@ export function createSearchBar({
       );
     }, [query, timeRange, useDefaultBehaviors]);
 
-    const showSaveQuery = isOfAggregateQueryType(query)
-      ? false // Saved Queries are not supported for text-based languages (only Saved Searches)
-      : // users can enable it globally or configure individually per app
-        Boolean(core.application.capabilities.savedQueryManagement?.saveQuery) ||
-        props.showSaveQuery;
+    const showSaveQuery = canShowSavedQuery({
+      saveQueryMenuVisibility: props.saveQueryMenuVisibility,
+      query,
+      core,
+    });
 
     // console.log(
     //   'savedQueryManagement',

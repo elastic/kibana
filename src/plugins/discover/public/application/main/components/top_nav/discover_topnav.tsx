@@ -220,7 +220,11 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={Boolean(services.capabilities.discover.saveQuery)}
+      saveQueryMenuVisibility={
+        services.capabilities.discover.saveQuery
+          ? 'allowed_by_additional_privilege'
+          : 'globally_managed'
+      }
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerOverride={

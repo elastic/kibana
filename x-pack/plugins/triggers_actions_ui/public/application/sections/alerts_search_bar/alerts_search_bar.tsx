@@ -101,7 +101,7 @@ export function AlertsSearchBar({
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}
-      showSaveQuery={true}
+      showSaveQuery={true} // TODO: check why is it always `true`. Should be based on "Save Query Management" privilege.
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}
