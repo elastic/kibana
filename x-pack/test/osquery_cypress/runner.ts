@@ -13,17 +13,27 @@ import { FtrProviderContext } from './ftr_provider_context';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
 import { createAgentPolicy, getLatestAvailableAgentVersion } from './utils';
-
+const replaceLocalhostWithDockerInternal = (inputString) => {
+  if (typeof inputString === 'string') {
+    return inputString.replace(/localhost/g, 'host.docker.internal');
+  }
+  return inputString;
+};
 async function setupFleetAgent({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
+  console.log('1111', config.get('servers.elasticsearch'));
+  const elasticUrl = Url.format({
+    ...config.get('servers.elasticsearch'),
+    hostname: 'host.docker.internal',
+  });
+  console.log({ elasticUrl });
   const kibanaUrl = Url.format(config.get('servers.kibana'));
   const fleetServerUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
-    hostname: config.get('servers.kibana.hostname'),
+    hostname: replaceLocalhostWithDockerInternal(config.get('servers.kibana.hostname')),
     port: config.get('servers.fleetserver.port'),
   });
   const username = config.get('servers.elasticsearch.username');
@@ -69,10 +79,6 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
       resolve('Promise resolved after one minute!');
     }, 60000); // 60000 milliseconds = 1 minute
   });
-
-  const replaceLocalhostWithDockerInternal = (inputString) => {
-    return inputString.replace(/localhost/g, 'host.docker.internal');
-  };
 
   return {
     FORCE_COLOR: '1',
