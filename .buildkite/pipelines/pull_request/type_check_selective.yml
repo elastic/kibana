@@ -1,6 +1,6 @@
 steps:
-- command: # TODO
-  label: 'Typecheck changed projects'
+- command: .buildkite/scripts/steps/check_types_commits.sh
+  label: 'Check Types Commit Diff'
   agents:
     queue: n2-16-spot
   timeout_in_minutes: 60
