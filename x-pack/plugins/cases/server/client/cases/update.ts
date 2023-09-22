@@ -124,7 +124,7 @@ async function throwIfCustomFieldKeysInvalid({
   const configurationMap: Record<string, ConfigurationTransformedAttributes> = {};
   const invalidCustomFieldKeys: string[] = [];
 
-  configurations.saved_objects.forEach((e) => {
+  configurations?.saved_objects.forEach((e) => {
     if (!(e.attributes.owner in configurationMap)) {
       configurationMap[e.attributes.owner] = e.attributes;
     }
@@ -137,7 +137,7 @@ async function throwIfCustomFieldKeysInvalid({
       if (owner in configurationMap) {
         let validKey = false;
 
-        configurationMap[owner].customFields.every(({ key }) => {
+        configurationMap[owner]?.customFields?.every(({ key }) => {
           if (key === customField.key) {
             validKey = true;
           }

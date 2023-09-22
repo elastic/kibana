@@ -388,15 +388,38 @@ describe('create', () => {
   describe('Custom Fields', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseConfigureService.find.mockResolvedValue({
+      saved_objects: [
+        {
+          attributes: {
+            owner: theCase.owner,
+            customFields: [
+              {
+                key: 'first_key',
+                type: CustomFieldTypes.TEXT,
+                label: 'foo',
+                required: false,
+              },
+              {
+                key: 'second_key',
+                type: CustomFieldTypes.TOGGLE,
+                label: 'foo',
+                required: false,
+              },
+            ],
+          },
+        },
+      ],
+    });
 
     const theCustomFields: CaseCustomFields = [
       {
-        key: 'first_customField_key',
+        key: 'first_key',
         type: CustomFieldTypes.TEXT,
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
-        key: 'second_customField_key',
+        key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
         field: { value: [true] },
       },

@@ -57,10 +57,14 @@ async function throwIfCustomFieldKeysInvalid({
     options: { filter: ownerFilter },
   });
 
+  if (configuration.saved_objects.length === 0) {
+    throw Boom.badRequest('Invalid custom fields passed in request.');
+  }
+
   customFields.forEach((customField) => {
     let validKey = false;
 
-    configuration.saved_objects[0].attributes.customFields.every(({ key }) => {
+    configuration.saved_objects[0].attributes.customFields?.every(({ key }) => {
       if (key === customField.key) {
         validKey = true;
       }
