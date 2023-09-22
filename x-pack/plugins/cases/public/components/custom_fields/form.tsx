@@ -7,46 +7,63 @@
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { FormProps } from './schema';
+import type { CustomFieldsConfigurationFormProps } from './schema';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
-  submit: FormHook['submit'];
+  submit: FormHook<CustomFieldConfiguration>['submit'];
 }
 
 interface Props {
   onChange: (state: CustomFieldFormState) => void;
 }
 
-const FormComponent: React.FC<Props> = ({ onChange }) => {
-  const formSerializer = ({ key, label, type, options }: FormProps) => {
-    const customFieldKey = key ? key : uuidv4();
-
-    const serializedData = [
-      {
-        key: customFieldKey,
-        label,
-        type,
-        required: options?.required ? options.required : false,
-      },
-    ] as CustomFieldsConfiguration;
-
-    return serializedData;
+// Form -> API
+const formSerializer = ({
+  key,
+  label,
+  type,
+  options,
+}: CustomFieldsConfigurationFormProps): CustomFieldConfiguration => {
+  return {
+    key,
+    label,
+    type,
+    required: options?.required ? options.required : false,
   };
+};
 
-  const { form } = useForm<FormProps>({
-    defaultValue: { type: CustomFieldTypes.TEXT, options: { required: false } },
+// API -> Form
+const formDeserializer = ({
+  key,
+  label,
+  type,
+  required,
+}: CustomFieldConfiguration): CustomFieldsConfigurationFormProps => {
+  return {
+    key,
+    label,
+    type,
+    options: { required: Boolean(required) },
+  };
+};
+
+const FormComponent: React.FC<Props> = ({ onChange }) => {
+  const keyDefaultValue = useMemo(() => uuidv4(), []);
+
+  const { form } = useForm({
+    defaultValue: { key: keyDefaultValue, label: '', type: CustomFieldTypes.TEXT, required: false },
     options: { stripEmptyFields: false },
     schema,
-    // @ts-ignore
     serializer: formSerializer,
+    deserializer: formDeserializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

@@ -12,16 +12,23 @@ import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
 
-export interface FormProps {
-  key?: string;
+export interface CustomFieldsConfigurationFormProps {
+  key: string;
   label: string;
   type: CustomFieldTypes;
-  options: {
-    required?: boolean | string;
+  options?: {
+    required?: boolean;
   };
 }
 
 export const schema = {
+  key: {
+    validations: [
+      {
+        validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),
+      },
+    ],
+  },
   label: {
     label: i18n.FIELD_LABEL,
     validations: [

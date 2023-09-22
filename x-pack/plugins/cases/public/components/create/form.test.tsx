@@ -19,7 +19,7 @@ import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { CreateCaseFormProps } from './form';
 import { CreateCaseForm } from './form';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -28,13 +28,13 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -81,7 +81,7 @@ describe('CreateCaseForm', () => {
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   afterEach(() => {

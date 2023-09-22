@@ -10,6 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -38,6 +39,8 @@ import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
+import { CustomFields } from './custom_fields';
+import { addOrReplaceCustomField } from './helpers';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -71,6 +74,10 @@ export const CaseViewActivity = ({
     useGetCaseUserActionsStats(caseData.id);
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
+
+  const {
+    data: { customFields: customFieldsConfiguration },
+  } = useGetCaseConfiguration();
 
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
@@ -146,6 +153,18 @@ export const CaseViewActivity = ({
       });
     },
     [onUpdateField]
+  );
+
+  const onSubmitCustomFields = useCallback(
+    (customFieldToAdd) => {
+      const updatedCustomFields = addOrReplaceCustomField(caseData.customFields, customFieldToAdd);
+
+      onUpdateField({
+        key: 'customFields',
+        value: updatedCustomFields,
+      });
+    },
+    [caseData.customFields, onUpdateField]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -283,6 +302,12 @@ export const CaseViewActivity = ({
               key={caseData.connector.id}
             />
           ) : null}
+          <CustomFields
+            isLoading={isLoading && loadingKey === 'customFields'}
+            customFields={caseData.customFields}
+            customFieldsConfiguration={customFieldsConfiguration}
+            onSubmit={onSubmitCustomFields}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

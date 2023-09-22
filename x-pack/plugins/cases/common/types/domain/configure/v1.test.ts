@@ -10,7 +10,7 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesRt,
   ConfigurationRt,
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
 } from './v1';
@@ -161,7 +161,7 @@ describe('configure', () => {
     });
   });
 
-  describe('CustomFieldConfigurationRt', () => {
+  describe('CustomFieldConfigurationWithoutTypeRt', () => {
     const defaultRequest = {
       key: 'custom_field_key',
       label: 'Custom field label',
@@ -169,7 +169,7 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldConfigurationRt.decode(defaultRequest);
+      const query = CustomFieldConfigurationWithoutTypeRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -178,7 +178,7 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

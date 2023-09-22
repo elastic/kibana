@@ -13,9 +13,10 @@ import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 import type { ClosureType } from '../../containers/configure/types';
 
@@ -32,7 +33,7 @@ import { CasesDeepLinkId } from '../../common/navigation';
 import { CustomFields } from '../custom_fields';
 import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -66,18 +67,23 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
 
   const {
-    connector,
-    customFields,
-    closureType,
-    loading: loadingCaseConfigure,
-    mappings,
-    persistLoading,
-    persistCaseConfigure,
-    refetchCaseConfigure,
-    setConnector,
-    setClosureType,
-    setCustomFields,
-  } = useCaseConfigure();
+    data: {
+      id: configurationId,
+      version: configurationVersion,
+      closureType,
+      connector,
+      mappings,
+      customFields,
+    },
+    isLoading: loadingCaseConfigure,
+    refetch: refetchCaseConfigure,
+  } = useGetCaseConfiguration();
+
+  const {
+    mutate: persistCaseConfigure,
+    mutateAsync: persistCaseConfigureAsync,
+    isLoading: isPersistingConfiguration,
+  } = usePersistConfiguration();
 
   const {
     isLoading: isLoadingConnectors,
@@ -104,19 +110,31 @@ export const ConfigureCases: React.FC = React.memo(() => {
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
-      await persistCaseConfigure({
+      await persistCaseConfigureAsync({
         connector: caseConnector,
         closureType,
         customFields,
+        id: configurationId,
+        version: configurationVersion,
       });
+
       onConnectorUpdated(createdConnector);
-      setConnector(caseConnector);
     },
-    [onConnectorUpdated, closureType, setConnector, customFields, persistCaseConfigure]
+    [
+      persistCaseConfigureAsync,
+      closureType,
+      customFields,
+      configurationId,
+      configurationVersion,
+      onConnectorUpdated,
+    ]
   );
 
   const isLoadingAny =
-    isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
+    isLoadingConnectors ||
+    isPersistingConfiguration ||
+    loadingCaseConfigure ||
+    isLoadingActionTypes;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
@@ -140,26 +158,35 @@ export const ConfigureCases: React.FC = React.memo(() => {
       const caseConnector =
         actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
 
-      setConnector(caseConnector);
       persistCaseConfigure({
         connector: caseConnector,
         closureType,
         customFields,
+        id: configurationId,
+        version: configurationVersion,
       });
     },
-    [connectors, closureType, customFields, persistCaseConfigure, setConnector]
+    [
+      connectors,
+      persistCaseConfigure,
+      closureType,
+      customFields,
+      configurationId,
+      configurationVersion,
+    ]
   );
 
   const onChangeClosureType = useCallback(
     (type: ClosureType) => {
-      setClosureType(type);
       persistCaseConfigure({
         connector,
-        closureType: type,
         customFields,
+        id: configurationId,
+        version: configurationVersion,
+        closureType: type,
       });
     },
-    [connector, customFields, persistCaseConfigure, setClosureType]
+    [configurationId, configurationVersion, connector, customFields, persistCaseConfigure]
   );
 
   useEffect(() => {
@@ -220,24 +247,24 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setAddFieldFlyoutVisibility]);
 
   const onCustomFieldCreated = useCallback(
-    (customFieldData: CustomFieldsConfiguration) => {
-      const data = customFields.length ? [...customFields, ...customFieldData] : customFieldData;
-      setCustomFields(data);
+    (customFieldData: CustomFieldConfiguration) => {
       persistCaseConfigure({
         connector,
+        customFields: [...customFields, customFieldData],
+        id: configurationId,
+        version: configurationVersion,
         closureType,
-        customFields: [...customFields, ...customFieldData],
       });
 
       setAddFieldFlyoutVisibility(false);
     },
     [
-      setAddFieldFlyoutVisibility,
-      customFields,
-      setCustomFields,
-      persistCaseConfigure,
-      connector,
       closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      persistCaseConfigure,
     ]
   );
 
@@ -285,7 +312,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           <SectionWrapper>
             <ClosureOptions
               closureTypeSelected={closureType}
-              disabled={persistLoading || isLoadingConnectors || !permissions.update}
+              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
               onChangeClosureType={onChangeClosureType}
             />
           </SectionWrapper>
@@ -293,7 +320,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <Connectors
               actionTypes={actionTypes}
               connectors={connectors ?? []}
-              disabled={persistLoading || isLoadingConnectors || !permissions.update}
+              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
               handleShowEditFlyout={onClickUpdateConnector}
               isLoading={isLoadingAny}
               mappings={mappings}

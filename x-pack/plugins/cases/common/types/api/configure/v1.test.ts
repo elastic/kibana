@@ -14,7 +14,7 @@ import {
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
 } from './v1';
@@ -153,7 +153,7 @@ describe('configure', () => {
     });
   });
 
-  describe('CustomFieldConfigurationRt', () => {
+  describe('CustomFieldConfigurationWithoutTypeRt', () => {
     const defaultRequest = {
       key: 'custom_field_key',
       label: 'Custom field label',
@@ -161,7 +161,7 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldConfigurationRt.decode(defaultRequest);
+      const query = CustomFieldConfigurationWithoutTypeRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -170,7 +170,7 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -182,7 +182,9 @@ describe('configure', () => {
       const longKey = 'x'.repeat(MAX_CUSTOM_FIELD_KEY_LENGTH + 1);
 
       expect(
-        PathReporter.report(CustomFieldConfigurationRt.decode({ ...defaultRequest, key: longKey }))
+        PathReporter.report(
+          CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, key: longKey })
+        )
       ).toContain('The length of the key is too long. The maximum length is 36.');
     });
 
@@ -191,7 +193,7 @@ describe('configure', () => {
 
       expect(
         PathReporter.report(
-          CustomFieldConfigurationRt.decode({ ...defaultRequest, label: longLabel })
+          CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, label: longLabel })
         )
       ).toContain('The length of the label is too long. The maximum length is 50.');
     });

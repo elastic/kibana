@@ -25,6 +25,7 @@ import {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
 
@@ -42,6 +43,8 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  CaseUICustomField,
+  CasesConfigurationUICustomField,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -1134,3 +1137,13 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
     ],
   };
 };
+
+export const customFieldsMock: CaseUICustomField[] = [
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', field: { value: ['My text test value 1'] } },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', field: { value: [true] } },
+];
+
+export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', label: 'My test label 1', required: true },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', label: 'My test label 2', required: false },
+];

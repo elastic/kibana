@@ -13,7 +13,7 @@ import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 
-export const CustomFieldConfigurationRt = rt.strict({
+export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
    * key of custom field
    */
@@ -30,12 +30,12 @@ export const CustomFieldConfigurationRt = rt.strict({
 
 export const TextCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldTextTypeRt }),
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
 ]);
 
 export const ToggleCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldToggleTypeRt }),
-  CustomFieldConfigurationRt,
+  CustomFieldConfigurationWithoutTypeRt,
 ]);
 
 export const CustomFieldsConfigurationRt = rt.array(
