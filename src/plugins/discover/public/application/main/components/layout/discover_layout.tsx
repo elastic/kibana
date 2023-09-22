@@ -64,6 +64,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 
+const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
@@ -193,7 +194,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isPlainRecord]);
 
-  const mainResizeRef = useRef<HTMLDivElement>(null);
+  const sidebarResizeRef = useRef<HTMLDivElement>(null);
   const histogramLayoutResizeRef = useRef<HTMLDivElement>(null);
 
   const [{ dragging }] = useDragDropContext();
@@ -253,16 +254,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const minSidebarWidth = euiTheme.base * 13;
   const defaultSidebarWidth = euiTheme.base * 19;
   const minMainPanelWidth = euiTheme.base * 30;
-  const [sidebarWidth, setSidebarWidth] = useLocalStorage(
-    'discover:sidebarWidth',
-    defaultSidebarWidth
-  );
+  const [sidebarWidth, setSidebarWidth] = useLocalStorage(SIDEBAR_WIDTH_KEY, defaultSidebarWidth);
   const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.isSidebarCollapsed$ ?? of(true),
     true
   );
+  const layoutMode =
+    isMobile || isSidebarCollapsed ? ResizableLayoutMode.Static : ResizableLayoutMode.Resizable;
+  const layoutDirection = isMobile
+    ? ResizableLayoutDirection.Vertical
+    : ResizableLayoutDirection.Horizontal;
 
   return (
     <EuiPage
@@ -301,7 +304,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
-          ref={mainResizeRef}
+          ref={sidebarResizeRef}
           css={css`
             width: 100%;
             height: 100%;
@@ -387,15 +390,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           </InPortal>
           <ResizableLayout
             className="dscPageBody__contents"
-            mode={
-              isMobile || isSidebarCollapsed
-                ? ResizableLayoutMode.Static
-                : ResizableLayoutMode.Resizable
-            }
-            direction={
-              isMobile ? ResizableLayoutDirection.Vertical : ResizableLayoutDirection.Horizontal
-            }
-            resizeRef={mainResizeRef}
+            mode={layoutMode}
+            direction={layoutDirection}
+            resizeRef={sidebarResizeRef}
             fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
             minFixedPanelSize={minSidebarWidth}
             minFlexPanelSize={minMainPanelWidth}
