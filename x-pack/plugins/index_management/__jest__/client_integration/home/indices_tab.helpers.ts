@@ -109,12 +109,12 @@ export const setup = async (
   };
 
   const clickIndexNameAt = async (index: number) => {
-    const { component, table, router } = testBed;
+    const { component, table } = testBed;
     const { rows } = table.getMetaData('indexTable');
     const indexNameLink = findTestSubject(rows[index].reactWrapper, 'indexTableIndexNameLink');
 
     await act(async () => {
-      router.navigateTo(indexNameLink.props().href!);
+      indexNameLink.simulate('click');
     });
 
     component.update();
