@@ -7,8 +7,6 @@
 
 import { encode } from '@kbn/rison';
 
-import { API_VERSIONS } from '../../common';
-
 import type { ROLES } from './privileges';
 
 import { getUrlWithRoute } from './login';
@@ -25,7 +23,6 @@ export const API_AUTH = Object.freeze({
 export const COMMON_API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress',
   'x-elastic-internal-origin': 'fleet',
-  'Elastic-Api-Version': API_VERSIONS.public.v1,
 });
 
 // Replaces request - adds baseline authentication + global headers
