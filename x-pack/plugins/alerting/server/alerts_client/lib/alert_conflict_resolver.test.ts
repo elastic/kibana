@@ -36,6 +36,37 @@ describe('alert_conflict_resolver', () => {
     jest.resetAllMocks();
   });
 
+  describe('handles errors gracefully', () => {
+    test('when mget fails', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ic');
+
+      esClient.mget.mockRejectedValueOnce(new Error('mget failed'));
+
+      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+
+      expect(logger.error).toHaveBeenNthCalledWith(
+        2,
+        'Error resolving alert conflicts: mget failed'
+      );
+    });
+
+    test('when bulk fails', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ic');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getMGetResDoc(0, alertDoc)],
+      });
+      esClient.bulk.mockRejectedValueOnce(new Error('bulk failed'));
+
+      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+
+      expect(logger.error).toHaveBeenNthCalledWith(
+        2,
+        'Error resolving alert conflicts: bulk failed'
+      );
+    });
+  });
+
   describe('is successful with', () => {
     test('no bulk results', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('');
@@ -72,6 +103,58 @@ describe('alert_conflict_resolver', () => {
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
         `Retried bulk update of 1 conflicted alerts succeeded`
+      );
+    });
+
+    test('one conflicted doc amonst other successes and errors', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('is c ic ie');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getMGetResDoc(2, alertDoc)],
+      });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getBulkResItem(2)],
+      });
+
+      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        `Error writing alerts: 2 successful, 1 conflicts, 1 errors: hallo`
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 1 conflicted alerts`);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        `Retried bulk update of 1 conflicted alerts succeeded`
+      );
+    });
+
+    test('multiple conflicted doc amonst other successes and errors', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('is c ic ic ie ic');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getMGetResDoc(2, alertDoc), getMGetResDoc(3, alertDoc), getMGetResDoc(5, alertDoc)],
+      });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getBulkResItem(2), getBulkResItem(3), getBulkResItem(5)],
+      });
+
+      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        `Error writing alerts: 2 successful, 3 conflicts, 1 errors: hallo`
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 3 conflicted alerts`);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        `Retried bulk update of 3 conflicted alerts succeeded`
       );
     });
   });

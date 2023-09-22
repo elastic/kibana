@@ -13,19 +13,21 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
+  ALERT_CASE_IDS,
+} from '@kbn/rule-data-utils';
 
 import { set } from '@kbn/safer-lodash-set';
 import { zip, get } from 'lodash';
 
-const REFRESH_FIELDS_ALWAYS = [
-  'kibana.alert.workflow_status',
-  'kibana.alert.workflow_tags',
-  'kibana.alert.case_ids',
-];
-const REFRESH_FIELDS_CONDITIONAL = ['kibana.alert.status'];
-
-const REFRESH_FIELDS = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
+const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
+const REFRESH_FIELDS_CONDITIONAL = [ALERT_STATUS];
+const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
 
 export interface ResolveAlertConflictsParams {
   esClient: ElasticsearchClient;
@@ -40,6 +42,15 @@ interface NormalizedBulkRequest {
 }
 
 export async function resolveAlertConflicts(params: ResolveAlertConflictsParams): Promise<void> {
+  const { logger } = params;
+  try {
+    await resolveAlertConflicts_(params);
+  } catch (err) {
+    logger.error(`Error resolving alert conflicts: ${err.message}`);
+  }
+}
+
+async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Promise<void> {
   const { logger, esClient, bulkRequest, bulkResponse } = params;
   if (bulkRequest.operations && bulkRequest.operations?.length === 0) return;
   if (bulkResponse.items && bulkResponse.items?.length === 0) return;
@@ -104,12 +115,7 @@ async function makeBulkRequest(
   const operations = conflictRequest.map((req) => [req.op, req.doc]).flat();
   const updatedBulkRequest = { ...bulkRequest, operations };
 
-  let bulkResponse: Awaited<ReturnType<typeof esClient.bulk>>;
-  try {
-    bulkResponse = await esClient.bulk(updatedBulkRequest);
-  } catch (error) {
-    return { bulkRequest, errors: 0, error };
-  }
+  const bulkResponse = await esClient.bulk(updatedBulkRequest);
 
   const errors = bulkResponse.items.filter((item) => item.index?.error).length;
   return { bulkRequest, bulkResponse, errors };
@@ -184,7 +190,7 @@ async function getFreshDocs(
     docs.push({ _id: id, _index: index });
   });
 
-  const mgetRes = await esClient.mget<unknown>({ docs, _source_includes: REFRESH_FIELDS });
+  const mgetRes = await esClient.mget<unknown>({ docs, _source_includes: REFRESH_FIELDS_ALL });
 
   if (mgetRes.docs.length !== docs.length) {
     throw new Error(
