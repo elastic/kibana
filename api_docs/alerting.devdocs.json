@@ -24,7 +24,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>) => string"
+          "<never>) => string | undefined"
         ],
         "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
@@ -111,6 +111,18 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
             },
             {
               "plugin": "stackAlerts",
@@ -479,7 +491,7 @@
             "label": "ensureAuthorized",
             "description": [],
             "signature": [
-              "({ ruleTypeId, consumer, operation, entity }: ",
+              "({ ruleTypeId, consumer: legacyConsumer, operation, entity, }: ",
               "EnsureAuthorizedOpts",
               ") => Promise<void>"
             ],
@@ -492,7 +504,7 @@
                 "id": "def-server.AlertingAuthorization.ensureAuthorized.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ ruleTypeId, consumer, operation, entity }",
+                "label": "{\n    ruleTypeId,\n    consumer: legacyConsumer,\n    operation,\n    entity,\n  }",
                 "description": [],
                 "signature": [
                   "EnsureAuthorizedOpts"
@@ -523,7 +535,7 @@
               },
               ", filterOpts: ",
               "AlertingAuthorizationFilterOpts",
-              ") => Promise<{ filter?: ",
+              ", featuresIds?: Set<string> | undefined) => Promise<{ filter?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -580,6 +592,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getFindAuthorizationFilter.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "featuresIds",
+                "description": [],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -681,7 +708,7 @@
                 "section": "def-server.WriteOperations",
                 "text": "WriteOperations"
               },
-              ") => Promise<{ filter?: ",
+              ", featuresIds?: Set<string> | undefined) => Promise<{ filter?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -767,6 +794,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizationFilter.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "featuresIds",
+                "description": [],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1233,6 +1275,39 @@
               "RuleSnoozeProps"
             ],
             "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.isValidAlertIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidAlertIndexName",
+        "description": [],
+        "signature": [
+          "(indexName: string) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/is_valid_alert_index_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.isValidAlertIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/is_valid_alert_index_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4947,6 +5022,21 @@
           "2500"
         ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.VALID_ALERT_INDEX_PREFIXES",
+        "type": "Array",
+        "tags": [],
+        "label": "VALID_ALERT_INDEX_PREFIXES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/resource_installer_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
