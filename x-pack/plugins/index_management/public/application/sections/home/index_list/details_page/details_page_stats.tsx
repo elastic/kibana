@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -29,16 +28,8 @@ import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
-interface Props {
-  isIndexOpen: boolean;
-}
-
-export const DetailsPageStats: FunctionComponent<
-  RouteComponentProps<{ indexName: string }> & Props
-> = ({
-  match: {
-    params: { indexName },
-  },
+export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({
+  indexName,
   isIndexOpen,
 }) => {
   const [isLoading, setIsLoading] = useState(false);

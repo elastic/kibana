@@ -184,7 +184,7 @@ export const MetricVis = ({
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: (
