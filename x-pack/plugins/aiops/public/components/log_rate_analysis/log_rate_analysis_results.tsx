@@ -113,7 +113,7 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
-  /** Optional identifyer to indicate the plugin utilizing the component */
+  /** Optional identifier to indicate the plugin utilizing the component */
   source?: string;
 }
 

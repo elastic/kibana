@@ -59,7 +59,7 @@ export interface LogRateAnalysisContentWrapperProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional flag to indicate whether kibana is running in serverless */
   isServerless?: boolean;
-  /** Optional identifyer to indicate the plugin utilizing the component */
+  /** Optional identifier to indicate the plugin utilizing the component */
   source?: string;
 }
 
