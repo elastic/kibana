@@ -10,14 +10,16 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { NavigationEmbeddableStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
+export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
 
 const servicesReady$ = new BehaviorSubject(false);
@@ -41,6 +43,7 @@ export const setKibanaServices = (
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;
+  presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
 
   servicesReady$.next(true);

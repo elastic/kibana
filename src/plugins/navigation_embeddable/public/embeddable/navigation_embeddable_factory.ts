@@ -33,7 +33,11 @@ import type { NavigationEmbeddable } from './navigation_embeddable';
 import { NavigationEmbeddableAttributes } from '../../common/content_management';
 import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
-import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import {
+  coreServices,
+  presentationUtil,
+  untilPluginStartServicesReady,
+} from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -97,7 +101,7 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public canCreateNew() {
-    return true;
+    return presentationUtil.labsService.isProjectEnabled('labs:dashboard:linksPanel');
   }
 
   public getDefaultInput(): Partial<NavigationEmbeddableInput> {

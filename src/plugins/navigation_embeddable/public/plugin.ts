@@ -13,10 +13,12 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddableFactoryDefinition } from './embeddable';
-import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+
 import { APP_NAME } from '../common';
+import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { setKibanaServices } from './services/kibana_services';
+import { NavigationEmbeddableFactoryDefinition } from './embeddable';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -25,8 +27,9 @@ export interface NavigationEmbeddableSetupDependencies {
 
 export interface NavigationEmbeddableStartDependencies {
   embeddable: EmbeddableStart;
-  contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
+  presentationUtil: PresentationUtilPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class NavigationEmbeddablePlugin
@@ -47,7 +50,7 @@ export class NavigationEmbeddablePlugin
     core.getStartServices().then(([_, deps]) => {
       plugins.embeddable.registerEmbeddableFactory(
         CONTENT_ID,
-        new NavigationEmbeddableFactoryDefinition(deps.embeddable)
+        new NavigationEmbeddableFactoryDefinition()
       );
 
       plugins.contentManagement.registry.register({
