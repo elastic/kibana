@@ -29,6 +29,7 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { isResponseError } from '@kbn/es-errors';
 
 interface Properties {
   [key: string]: any;
@@ -795,10 +796,15 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
-    logger.info(`Triggering a rollover for ${dataStreamName}`);
-    await rolloverDataStream(dataStreamName, esClient);
-    return;
+    if (isResponseError(err) && err.statusCode === 400 && err.message.toLowerCase().includes('mapper')) {
+      console.log(err.message)
+      logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+      logger.info(`Triggering a rollover for ${dataStreamName}`);
+      await rolloverDataStream(dataStreamName, esClient);
+      return;
+    }
+    logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
+    throw err;
   }
 
   // Trigger a rollover if the index mode or source type has changed
