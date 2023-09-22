@@ -10,10 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-export function registerPutDataRetention({
-  router,
-  lib: { handleEsError },
-}: RouteDependencies) {
+export function registerPutDataRetention({ router, lib: { handleEsError } }: RouteDependencies) {
   const paramsSchema = schema.object({
     name: schema.string(),
   });
@@ -33,7 +30,10 @@ export function registerPutDataRetention({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        await client.asCurrentUser.indices.putDataLifecycle({ name, data_retention: dataRetention });
+        await client.asCurrentUser.indices.putDataLifecycle({
+          name,
+          data_retention: dataRetention,
+        });
 
         return response.ok({ body: { success: true } });
       } catch (error) {

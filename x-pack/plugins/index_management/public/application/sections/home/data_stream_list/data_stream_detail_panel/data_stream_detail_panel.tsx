@@ -359,7 +359,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             if (data && data?.hasUpdatedDataRetention) {
               onClose(true);
             } else {
-              setIsEditingDataRetention(false)
+              setIsEditingDataRetention(false);
             }
           }}
           dataStreamName={dataStreamName}

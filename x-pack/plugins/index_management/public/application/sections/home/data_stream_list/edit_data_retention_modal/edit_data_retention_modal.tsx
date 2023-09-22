@@ -124,16 +124,17 @@ const configurationFormSchema: FormSchema = {
                 {
                   defaultMessage: 'A data retention value is required.',
                 }
-              )
+              ),
             };
-          } if (value < 0) {
+          }
+          if (value < 0) {
             return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
                 {
                   defaultMessage: `Data retention value can't be negative.`,
                 }
-              )
+              ),
             };
           }
         },
@@ -190,8 +191,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}`)
-      .then(({ data: responseData, error }) => {
+    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}`).then(
+      ({ data: responseData, error }) => {
         if (responseData) {
           const successMessage = i18n.translate(
             'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
@@ -205,13 +206,17 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         if (error) {
           const errorMessage = i18n.translate(
             'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
-            { defaultMessage: "Error updating data retention: '{error}'", values: { error: error.message }}
+            {
+              defaultMessage: "Error updating data retention: '{error}'",
+              values: { error: error.message },
+            }
           );
           notificationService.showDangerToast(errorMessage);
         }
 
         onClose();
-      });
+      }
+    );
   };
 
   return (
