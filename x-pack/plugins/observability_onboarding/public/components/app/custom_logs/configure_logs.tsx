@@ -431,7 +431,7 @@ export function ConfigureLogsContent() {
                             external
                             target="_blank"
                             href={
-                              'https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html'
+                              'https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html'
                             }
                           >
                             {i18n.translate(
