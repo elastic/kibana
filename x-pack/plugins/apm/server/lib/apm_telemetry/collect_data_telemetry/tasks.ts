@@ -26,6 +26,8 @@ import {
   HOST_NAME,
   HOST_OS_PLATFORM,
   KUBERNETES_POD_NAME,
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
   OBSERVER_HOSTNAME,
   PARENT_ID,
   PROCESSOR_EVENT,
@@ -61,15 +63,13 @@ import {
   APMDataTelemetry,
   APMPerService,
   APMTelemetry,
-  DataStreamWithoutRollup,
-  DataStreamWithRollup,
+  DataStreamStats,
   MetricNotSupportingRollup,
   MetricRollupIntervals,
   MetricSupportingRollUp,
-  MetricTypes,
 } from '../types';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
-import { TelemetryClient } from '../telemetry_client';
+import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
@@ -1093,21 +1093,18 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'indices_stats',
     executor: async ({ indices, telemetryClient }) => {
-      const dsRollupDictionary: DataStreamWithRollup =
-        {} as DataStreamWithRollup;
-      const dsWithoutRollupDictionary: DataStreamWithoutRollup =
-        {} as DataStreamWithoutRollup;
+      const dataStreamStatsDictionary = {} as DataStreamStats;
 
       const metricSetsSupportingRollUps: MetricSupportingRollUp[] = [
-        MetricTypes.service_destination,
-        MetricTypes.transaction,
-        MetricTypes.service_summary,
-        MetricTypes.service_transaction,
-        MetricTypes.span_breakdown,
+        'service_destination',
+        'service_transaction',
+        'service_summary',
+        'transaction',
+        'span_breakdown',
       ];
 
       const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = [
-        MetricTypes.app,
+        'app',
       ];
 
       const rollUpIntervals: MetricRollupIntervals[] = [
@@ -1115,6 +1112,28 @@ export const tasks: TelemetryTask[] = [
         RollupInterval.TenMinutes,
         RollupInterval.SixtyMinutes,
       ];
+
+      const populateDataStreamStatsDict = (
+        ds: DataStreamStats,
+        key: string,
+        response: IndicesStatsResponse
+      ) => {
+        ds[key] = ds[key] || {};
+        ds[key].all = {
+          total: {
+            shards: response?._shards?.total ?? 0,
+            docs: {
+              count: response?._all?.primaries?.docs?.count ?? 0,
+            },
+            store: {
+              size_in_bytes:
+                response?._all?.primaries?.store?.size_in_bytes ?? 0,
+            },
+          },
+        };
+
+        return ds;
+      };
 
       // The API calls must be done in series rather than in parallel due to the nature
       // of how tasks are executed. We don't want to burden the customers instances
@@ -1132,19 +1151,11 @@ export const tasks: TelemetryTask[] = [
                 '_shards',
               ],
             });
-            dsRollupDictionary[metricSet] = dsRollupDictionary[metricSet] || {};
-            dsRollupDictionary[metricSet][bucketSize] = {
-              total: {
-                shards: response?._shards?.total ?? 0,
-                docs: {
-                  count: response?._all?.primaries?.docs?.count ?? 0,
-                },
-                store: {
-                  size_in_bytes:
-                    response?._all?.primaries?.store?.size_in_bytes ?? 0,
-                },
-              },
-            };
+            populateDataStreamStatsDict(
+              dataStreamStatsDictionary,
+              `${metricSet}-${bucketSize}`,
+              response
+            );
           }
         }
       };
@@ -1161,21 +1172,83 @@ export const tasks: TelemetryTask[] = [
               '_shards',
             ],
           });
-          dsWithoutRollupDictionary[metricSet] = {
-            total: {
-              shards: response?._shards?.total ?? 0,
-              docs: { count: response?._all?.primaries?.docs?.count ?? 0 },
-              store: {
-                size_in_bytes:
-                  response?._all?.primaries?.store?.size_in_bytes ?? 0,
-              },
-            },
-          };
+          populateDataStreamStatsDict(
+            dataStreamStatsDictionary,
+            metricSet,
+            response
+          );
         }
       };
 
       await fetchRollupMetrics();
       await fetchMetricWithoutRollup();
+
+      const lastDayStatsResponse = await telemetryClient.search({
+        index: [indices.metric],
+        expand_wildcards: 'all',
+        body: {
+          track_total_hits: false,
+          size: 0,
+          timeout,
+          query: range1d,
+          aggs: {
+            metricsets: {
+              terms: {
+                field: METRICSET_NAME,
+              },
+              aggs: {
+                rollup_interval: {
+                  terms: {
+                    field: METRICSET_INTERVAL,
+                  },
+                  aggs: {
+                    metrics_value_count: {
+                      value_count: {
+                        field: METRICSET_INTERVAL,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      for (const metricSet of metricSetsSupportingRollUps) {
+        const metricSetData =
+          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+            (bucket) => bucket.key === metricSet
+          );
+
+        rollUpIntervals.forEach((interval) => {
+          const key = `${metricSet}-${interval}`;
+          dataStreamStatsDictionary[key]['1d'] = {
+            doc_count: 0,
+          };
+        });
+
+        if (metricSetData?.rollup_interval?.buckets) {
+          for (const intervalBucket of metricSetData.rollup_interval.buckets) {
+            const intervalKey = intervalBucket.key as MetricRollupIntervals;
+            const intervalDocCount = intervalBucket.metrics_value_count.value;
+            dataStreamStatsDictionary[`${metricSet}-${intervalKey}`]['1d'] = {
+              doc_count: intervalDocCount,
+            };
+          }
+        }
+      }
+
+      for (const metricSet of metricSetsNotSupportingRollUps) {
+        const metricSetData =
+          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+            (bucket) => bucket.key === metricSet
+          );
+
+        dataStreamStatsDictionary[metricSet]['1d'] = {
+          doc_count: metricSetData?.doc_count || 0,
+        };
+      }
 
       const response = await telemetryClient.indicesStats({
         index: [
@@ -1215,8 +1288,7 @@ export const tasks: TelemetryTask[] = [
               },
             },
             metricset: {
-              withRollUp: { ...dsRollupDictionary },
-              withoutRollUp: { ...dsWithoutRollupDictionary },
+              ...dataStreamStatsDictionary,
             },
           },
           traces: {

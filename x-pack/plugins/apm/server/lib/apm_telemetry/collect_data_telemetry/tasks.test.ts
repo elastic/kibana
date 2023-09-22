@@ -12,31 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/es_fields/apm';
-import {
-  DataStreamWithoutRollup,
-  DataStreamWithRollup,
-  MetricNotSupportingRollup,
-  MetricRollupIntervals,
-  MetricSupportingRollUp,
-  MetricTypes,
-} from '../types';
-import { RollupInterval } from '../../../../common/rollup';
-
-interface IndicesStatsResponse {
-  shards: {
-    total: number;
-  };
-  all: {
-    total: {
-      docs: {
-        count: number;
-      };
-      store: {
-        size_in_bytes: number;
-      };
-    };
-  };
-}
+import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -400,159 +376,224 @@ describe('data telemetry collection tasks', () => {
   describe('indices_stats', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
-    const metricSetsSupportingRollUps: MetricSupportingRollUp[] = [
-      MetricTypes.service_destination,
-      MetricTypes.transaction,
-      MetricTypes.service_summary,
-      MetricTypes.service_transaction,
-      MetricTypes.span_breakdown,
-    ];
-
-    const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = [
-      MetricTypes.app,
-    ];
-
-    const rollUpIntervals: MetricRollupIntervals[] = [
-      RollupInterval.OneMinute,
-      RollupInterval.TenMinutes,
-      RollupInterval.SixtyMinutes,
-    ];
-
-    const generateMetricStatsResponse = (
-      stats: IndicesStatsResponse
-    ): {
-      dsRollupDictionary: DataStreamWithRollup;
-      dsWithoutRollupDictionary: DataStreamWithoutRollup;
-    } => {
-      const dsRollupDictionary: DataStreamWithRollup =
-        {} as DataStreamWithRollup;
-      const dsWithoutRollupDictionary: DataStreamWithoutRollup =
-        {} as DataStreamWithoutRollup;
-
-      for (const metricSet of metricSetsSupportingRollUps) {
-        for (const bucketSize of rollUpIntervals) {
-          dsRollupDictionary[metricSet] = dsRollupDictionary[metricSet] || {};
-          dsRollupDictionary[metricSet][bucketSize] = {
-            total: {
-              shards: stats.shards.total,
-              docs: { count: stats.all.total.docs.count },
-              store: {
-                size_in_bytes: stats.all.total.store.size_in_bytes,
-              },
-            },
-          };
-        }
-      }
-
-      for (const metricSet of metricSetsNotSupportingRollUps) {
-        dsWithoutRollupDictionary[metricSet] = {
+    it('returns a map of index stats', async () => {
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 2,
+        },
+        _all: {
           total: {
-            shards: stats.shards.total,
-            docs: { count: stats.all.total.docs.count },
             store: {
-              size_in_bytes: stats.all.total.store.size_in_bytes,
+              size_in_bytes: 100,
+            },
+            docs: {
+              count: 2,
             },
           },
-        };
-      }
-
-      return {
-        dsRollupDictionary,
-        dsWithoutRollupDictionary,
-      };
-    };
-
-    it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValue({
-        _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
-        _shards: { total: 1 },
-      });
-
-      const statsResponse = {
-        shards: {
-          total: 1,
-        },
-        all: {
-          total: {
+          primaries: {
             docs: {
               count: 1,
             },
             store: {
-              size_in_bytes: 1,
+              size_in_bytes: 50,
+              total_data_set_size_in_bytes: 50,
             },
           },
         },
       };
 
-      const { dsRollupDictionary, dsWithoutRollupDictionary } =
-        generateMetricStatsResponse(statsResponse);
-
-      const metricStatsResponse = {
-        ...statsResponse,
-        metricset: {
-          withRollUp: { ...dsRollupDictionary },
-          withoutRollUp: { ...dsWithoutRollupDictionary },
+      const searchResponse = {
+        aggregations: {
+          metricsets: {
+            buckets: [
+              {
+                key: 'service_transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_destination',
+                doc_count: 1620,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_summary',
+                doc_count: 30,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '1m',
+                      doc_count: 12,
+                      metrics_value_count: {
+                        value: 12,
+                      },
+                    },
+                    {
+                      key: '10m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'span_breakdown',
+                doc_count: 12,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+              {
+                key: 'app',
+                doc_count: 6,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+            ],
+          },
         },
       };
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
 
       expect(
         await task?.executor({
           indices,
-          telemetryClient: { indicesStats },
-        } as any)
-      ).toEqual({
-        indices: {
-          ...statsResponse,
-          metric: metricStatsResponse,
-          traces: statsResponse,
-        },
-      });
-    });
-
-    describe('with no results', () => {
-      it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValue({});
-
-        const statsResponse = {
-          shards: {
-            total: 0,
+          telemetryClient: {
+            indicesStats,
+            search,
           },
-          all: {
-            total: {
-              docs: {
-                count: 0,
-              },
-              store: {
-                size_in_bytes: 0,
-              },
+        } as any)
+      ).toMatchSnapshot();
+    });
+    it('with no results', async () => {
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 0,
+        },
+        _all: {
+          total: {
+            store: {
+              size_in_bytes: 0,
+            },
+            docs: {
+              count: 0,
             },
           },
-        };
-
-        const { dsRollupDictionary, dsWithoutRollupDictionary } =
-          generateMetricStatsResponse(statsResponse);
-
-        const metricStatsResponse = {
-          ...statsResponse,
-          metricset: {
-            withRollUp: { ...dsRollupDictionary },
-            withoutRollUp: { ...dsWithoutRollupDictionary },
+          primaries: {
+            docs: {
+              count: 0,
+            },
+            store: {
+              size_in_bytes: 0,
+              total_data_set_size_in_bytes: 0,
+            },
           },
-        };
+        },
+      };
 
-        expect(
-          await task?.executor({
-            indices,
-            telemetryClient: { indicesStats },
-          } as any)
-        ).toEqual({
-          indices: {
-            ...statsResponse,
-            metric: metricStatsResponse,
-            traces: statsResponse,
+      const searchResponse = {};
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: {
+            indicesStats,
+            search,
           },
-        });
-      });
+        } as any)
+      ).toMatchSnapshot();
     });
   });
 

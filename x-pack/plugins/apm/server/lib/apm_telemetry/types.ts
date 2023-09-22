@@ -192,10 +192,7 @@ export interface APMUsage {
           };
         };
       };
-      metricset: {
-        withRollUp: DataStreamWithRollup;
-        withoutRollUp: DataStreamWithoutRollup;
-      };
+      metricset: DataStreamStats;
     };
     shards: {
       total: number;
@@ -241,28 +238,21 @@ export interface APMUsage {
   >;
 }
 
-export enum MetricTypes {
-  'service_destination' = 'service_destination',
-  'transaction' = 'transaction',
-  'service_summary' = 'service_summary',
-  'service_transaction' = 'service_transaction',
-  'span_breakdown' = 'span_breakdown',
-  'app' = 'app',
-}
-
 export type MetricRollupIntervals =
   | RollupInterval.OneMinute
   | RollupInterval.TenMinutes
   | RollupInterval.SixtyMinutes;
 
 export type MetricSupportingRollUp =
-  | MetricTypes.transaction
-  | MetricTypes.service_transaction
-  | MetricTypes.service_destination
-  | MetricTypes.service_summary
-  | MetricTypes.span_breakdown;
+  | 'service_destination'
+  | 'transaction'
+  | 'service_summary'
+  | 'service_transaction'
+  | 'span_breakdown';
 
-export type MetricNotSupportingRollup = MetricTypes.app;
+export type MetricNotSupportingRollup = 'app';
+
+export type MetricTypes = MetricSupportingRollUp | MetricNotSupportingRollup;
 
 export interface CapturedMetricStats {
   total: {
@@ -276,17 +266,16 @@ export interface CapturedMetricStats {
   };
 }
 
-export type RollUpData = {
-  [bucketSize in MetricRollupIntervals]: CapturedMetricStats;
-};
+export interface LastDayCount {
+  doc_count: number;
+}
 
-export type DataStreamWithRollup = {
-  [key in MetricSupportingRollUp]: RollUpData;
-};
+export interface DataStreamCombined {
+  all: CapturedMetricStats;
+  '1d': LastDayCount;
+}
 
-export type DataStreamWithoutRollup = {
-  [key in MetricNotSupportingRollup]: CapturedMetricStats;
-};
+export type DataStreamStats = Record<string, DataStreamCombined>;
 
 export type APMDataTelemetry = DeepPartial<APMUsage>;
 

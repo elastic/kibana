@@ -10,8 +10,7 @@ import {
   AggregatedTransactionsCounts,
   APMUsage,
   APMPerService,
-  CapturedMetricStats,
-  RollUpData,
+  DataStreamCombined,
 } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
@@ -33,41 +32,45 @@ const aggregatedTransactionCountSchema: MakeSchemaFrom<
   },
 };
 
-const capturedMetricStatsSchema: MakeSchemaFrom<CapturedMetricStats, true> = {
-  total: {
-    shards: {
-      type: 'long',
-      _meta: {
-        description:
-          'Total number of shards for the given metricset per rollup interval.',
-      },
-    },
-    docs: {
-      count: {
+const dataStreamCombinedSchema: MakeSchemaFrom<DataStreamCombined, true> = {
+  all: {
+    total: {
+      shards: {
         type: 'long',
         _meta: {
           description:
-            'Total number of metric documents in the primary shard for the given metricset per rollup interval',
+            'Total number of shards for the given metricset per rollup interval.',
         },
       },
-    },
-    store: {
-      size_in_bytes: {
-        type: 'long',
-        _meta: {
-          description:
-            'Size of the metric index in the primary shard for the given metricset per rollup interval',
+      docs: {
+        count: {
+          type: 'long',
+          _meta: {
+            description:
+              'Total number of metric documents in the primary shard for the given metricset per rollup interval',
+          },
+        },
+      },
+      store: {
+        size_in_bytes: {
+          type: 'long',
+          _meta: {
+            description:
+              'Size of the metric index in the primary shard for the given metricset per rollup interval',
+          },
         },
       },
     },
   },
-};
-
-// Unfortunately, key does not support ENUMs here like [RollupInterval.OneMinute]
-const rollUpMetricStatsSchema: MakeSchemaFrom<RollUpData, true> = {
-  '1m': capturedMetricStatsSchema,
-  '10m': capturedMetricStatsSchema,
-  '60m': capturedMetricStatsSchema,
+  '1d': {
+    doc_count: {
+      type: 'long',
+      _meta: {
+        description:
+          'Document count for the last day for a given metricset and rollup interval',
+      },
+    },
+  },
 };
 
 const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
@@ -968,16 +971,27 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
       },
       metricset: {
-        withRollUp: {
-          service_destination: rollUpMetricStatsSchema,
-          transaction: rollUpMetricStatsSchema,
-          service_summary: rollUpMetricStatsSchema,
-          service_transaction: rollUpMetricStatsSchema,
-          span_breakdown: rollUpMetricStatsSchema,
-        },
-        withoutRollUp: {
-          app: capturedMetricStatsSchema,
-        },
+        'service_destination-1m': dataStreamCombinedSchema,
+        'service_destination-10m': dataStreamCombinedSchema,
+        'service_destination-60m': dataStreamCombinedSchema,
+
+        'transaction-1m': dataStreamCombinedSchema,
+        'transaction-10m': dataStreamCombinedSchema,
+        'transaction-60m': dataStreamCombinedSchema,
+
+        'service_summary-1m': dataStreamCombinedSchema,
+        'service_summary-10m': dataStreamCombinedSchema,
+        'service_summary-60m': dataStreamCombinedSchema,
+
+        'service_transaction-1m': dataStreamCombinedSchema,
+        'service_transaction-10m': dataStreamCombinedSchema,
+        'service_transaction-60m': dataStreamCombinedSchema,
+
+        'span_breakdown-1m': dataStreamCombinedSchema,
+        'span_breakdown-10m': dataStreamCombinedSchema,
+        'span_breakdown-60m': dataStreamCombinedSchema,
+
+        app: dataStreamCombinedSchema,
       },
     },
     traces: {

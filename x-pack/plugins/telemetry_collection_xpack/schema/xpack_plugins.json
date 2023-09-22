@@ -4789,543 +4789,9 @@
                 },
                 "metricset": {
                   "properties": {
-                    "withRollUp": {
+                    "service_destination-1m": {
                       "properties": {
-                        "service_destination": {
-                          "properties": {
-                            "1m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "10m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "60m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "transaction": {
-                          "properties": {
-                            "1m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "10m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "60m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "service_summary": {
-                          "properties": {
-                            "1m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "10m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "60m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "service_transaction": {
-                          "properties": {
-                            "1m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "10m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "60m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "span_breakdown": {
-                          "properties": {
-                            "1m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "10m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "60m": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "shards": {
-                                      "type": "long",
-                                      "_meta": {
-                                        "description": "Total number of shards for the given metricset per rollup interval."
-                                      }
-                                    },
-                                    "docs": {
-                                      "properties": {
-                                        "count": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Total number of metric documents for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "store": {
-                                      "properties": {
-                                        "size_in_bytes": {
-                                          "type": "long",
-                                          "_meta": {
-                                            "description": "Size of the metric index for the given metricset per rollup interval"
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "withoutRollUp": {
-                      "properties": {
-                        "app": {
+                        "all": {
                           "properties": {
                             "total": {
                               "properties": {
@@ -5340,7 +4806,7 @@
                                     "count": {
                                       "type": "long",
                                       "_meta": {
-                                        "description": "Total number of metric documents for the given metricset per rollup interval"
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
                                       }
                                     }
                                   }
@@ -5350,11 +4816,741 @@
                                     "size_in_bytes": {
                                       "type": "long",
                                       "_meta": {
-                                        "description": "Size of the metric index for the given metricset per rollup interval"
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
                                       }
                                     }
                                   }
                                 }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_destination-10m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_destination-60m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "transaction-1m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "transaction-10m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "transaction-60m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_summary-1m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_summary-10m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_summary-60m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_transaction-1m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_transaction-10m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service_transaction-60m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "span_breakdown-1m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "span_breakdown-10m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "span_breakdown-60m": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "app": {
+                      "properties": {
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "shards": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for the given metricset per rollup interval."
+                                  }
+                                },
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of metric documents in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the metric index in the primary shard for the given metricset per rollup interval"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "1d": {
+                          "properties": {
+                            "doc_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Document count for the last day for a given metricset and rollup interval"
                               }
                             }
                           }
