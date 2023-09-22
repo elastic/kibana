@@ -18,10 +18,8 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
-import { configureNavigation } from './navigation';
+import { setupNavigation, startNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
-import { projectAppLinksSwitcher } from './navigation/links/app_links';
-
 export class SecuritySolutionServerlessPlugin
   implements
     Plugin<
@@ -38,11 +36,10 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
-
+    setupNavigation(core, setupDeps, this.config);
     return {};
   }
 
@@ -53,15 +50,15 @@ export class SecuritySolutionServerlessPlugin
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
-    const services = createServices(core, startDeps);
+    const services = createServices(core, startDeps, this.config);
 
-    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
+    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
     securitySolution.setDashboardsLandingCallout(getDashboardsLandingCallout(services));
     securitySolution.setIsILMAvailable(false);
 
-    configureNavigation(services, this.config);
+    startNavigation(services, this.config);
     setRoutes(services);
 
     return {};

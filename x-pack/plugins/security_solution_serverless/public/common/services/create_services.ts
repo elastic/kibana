@@ -7,7 +7,10 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { createProjectNavLinks$ } from '../../navigation/links/nav_links';
-import type { SecuritySolutionServerlessPluginStartDeps } from '../../types';
+import type {
+  SecuritySolutionServerlessPluginStartDeps,
+  ServerlessSecurityPublicConfig,
+} from '../../types';
 import type { Services } from './types';
 
 /**
@@ -16,9 +19,15 @@ import type { Services } from './types';
  * */
 export const createServices = (
   core: CoreStart,
-  pluginsStart: SecuritySolutionServerlessPluginStartDeps
+  pluginsStart: SecuritySolutionServerlessPluginStartDeps,
+  config: ServerlessSecurityPublicConfig
 ): Services => {
   const { securitySolution, cloud } = pluginsStart;
-  const projectNavLinks$ = createProjectNavLinks$(securitySolution.getNavLinks$(), core, cloud);
+  const projectNavLinks$ = createProjectNavLinks$(
+    securitySolution.getNavLinks$(),
+    core,
+    cloud,
+    config
+  );
   return { ...core, ...pluginsStart, getProjectNavLinks$: () => projectNavLinks$ };
 };

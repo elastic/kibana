@@ -77,6 +77,7 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { DeepLinksFormatter } from './common/links/deep_links';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -171,6 +172,7 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {

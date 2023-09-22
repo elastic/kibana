@@ -39,4 +39,5 @@ export interface SecuritySolutionServerlessPluginStartDeps {
 export interface ServerlessSecurityPublicConfig {
   productTypes: SecurityProductTypes;
   developer: DeveloperConfig;
+  platformNavEnabled: boolean;
 }

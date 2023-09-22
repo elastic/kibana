@@ -7,10 +7,10 @@
 import type { ChromeNavLink } from '@kbn/core/public';
 import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { subscribeNavigationTree } from './navigation_tree';
-import { mockServices, mockProjectNavLinks } from '../common/services/__mocks__/services.mock';
-import type { ProjectNavigationLink } from './links/types';
-import type { ExternalPageName } from './links/constants';
+import { ProjectNavigationTree } from '.';
+import { mockServices, mockProjectNavLinks } from '../../common/services/__mocks__/services.mock';
+import type { ProjectNavigationLink } from '../links/types';
+import type { ExternalPageName } from '../links/constants';
 import * as ml from '@kbn/default-nav-ml';
 
 jest.mock('@kbn/default-nav-ml');
@@ -106,15 +106,21 @@ const testServices = {
 };
 
 describe('subscribeNavigationTree', () => {
+  let projectNavigationTree = new ProjectNavigationTree(testServices);
+
   beforeEach(() => {
     jest.clearAllMocks();
     chromeNavLinks = [chromeNavLink1, chromeNavLink2, chromeNavLink3];
   });
 
+  afterEach(() => {
+    projectNavigationTree = new ProjectNavigationTree(testServices);
+  });
+
   it('should call serverless setNavigation', async () => {
     mockProjectNavLinks.mockReturnValueOnce([link1]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -131,7 +137,7 @@ describe('subscribeNavigationTree', () => {
   it('should call serverless setNavigation with external link', async () => {
     mockProjectNavLinks.mockReturnValueOnce([link3]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -148,7 +154,7 @@ describe('subscribeNavigationTree', () => {
   it('should call serverless setNavigation with nested children', async () => {
     mockProjectNavLinks.mockReturnValueOnce([{ ...link1, links: [link2] }]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -178,7 +184,7 @@ describe('subscribeNavigationTree', () => {
     chromeNavLinks = [chromeNavLinkTest, chromeNavLinkMl1, chromeNavLinkMl2];
     mockProjectNavLinks.mockReturnValueOnce([{ ...link1, id: SecurityPageName.mlLanding }]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -217,7 +223,7 @@ describe('subscribeNavigationTree', () => {
     chromeNavLinks = [chromeNavLink2];
     mockProjectNavLinks.mockReturnValueOnce([link1, link2]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -242,7 +248,7 @@ describe('subscribeNavigationTree', () => {
       link2,
     ]);
 
-    subscribeNavigationTree(testServices);
+    projectNavigationTree.subscribeChromeNavigationTree();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [

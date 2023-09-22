@@ -15,6 +15,7 @@ xpack.securitySolutionServerless.productTypes:
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
   ]
+xpack.securitySolutionServerless.platformNavEnabled: false
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started

@@ -10,6 +10,7 @@ import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
+import type { DeepLinksFormatter } from './common/links/deep_links';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 
@@ -21,6 +22,7 @@ export class PluginContract {
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
+  public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor() {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
@@ -49,6 +51,9 @@ export class PluginContract {
       resolver: lazyResolver,
       setAppLinksSwitcher: (appLinksSwitcher) => {
         this.appLinksSwitcher = appLinksSwitcher;
+      },
+      setDeepLinksFormatter: (deepLinksFormatter) => {
+        this.deepLinksFormatter = deepLinksFormatter;
       },
     };
   }

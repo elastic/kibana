@@ -13,6 +13,7 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   developer: developerConfigSchema,
   productTypes,
+  platformNavEnabled: schema.boolean({ defaultValue: false }),
 });
 export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
 
@@ -20,6 +21,7 @@ export const config: PluginConfigDescriptor<ServerlessSecurityConfig> = {
   exposeToBrowser: {
     productTypes: true,
     developer: true,
+    platformNavEnabled: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [

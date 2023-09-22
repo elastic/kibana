@@ -11,7 +11,9 @@ import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 
-const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
+export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
+
+const formatDeepLinks: DeepLinksFormatter = (appLinks) =>
   appLinks.map((appLink) => ({
     id: appLink.id,
     path: appLink.path,
@@ -31,11 +33,14 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
 /**
  * Registers any change in appLinks to be updated in app deepLinks
  */
-export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
+export const registerDeepLinksUpdater = (
+  appUpdater$: Subject<AppUpdater>,
+  formatter?: DeepLinksFormatter
+): Subscription => {
   return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
-      deepLinks: formatDeepLinks(appLinks),
+      deepLinks: formatter ? formatter(appLinks) : formatDeepLinks(appLinks),
     }));
   });
 };
