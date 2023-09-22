@@ -175,38 +175,43 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
-        const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (esPorts.includes(esPort)) {
-          return getEsPort();
-        }
-        esPorts.push(esPort);
-        return esPort;
+        return 9220;
+        // const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
+        // if (esPorts.includes(esPort)) {
+        //   return getEsPort();
+        // }
+        // esPorts.push(esPort);
+        // return esPort;
       };
 
       const getKibanaPort = <T>(): T | number => {
-        if (isOpen) {
-          return 5620;
-        }
+        return 5620;
 
-        const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (kibanaPorts.includes(kibanaPort)) {
-          return getKibanaPort();
-        }
-        kibanaPorts.push(kibanaPort);
-        return kibanaPort;
+        // if (isOpen) {
+        //   return 5620;
+        // }
+
+        // const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
+        // if (kibanaPorts.includes(kibanaPort)) {
+        //   return getKibanaPort();
+        // }
+        // kibanaPorts.push(kibanaPort);
+        // return kibanaPort;
       };
 
       const getFleetServerPort = <T>(): T | number => {
-        if (isOpen) {
-          return 8220;
-        }
+        return 8220;
 
-        const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (fleetServerPorts.includes(fleetServerPort)) {
-          return getFleetServerPort();
-        }
-        fleetServerPorts.push(fleetServerPort);
-        return fleetServerPort;
+        // if (isOpen) {
+        //   return 8220;
+        // }
+
+        // const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
+        // if (fleetServerPorts.includes(fleetServerPort)) {
+        //   return getFleetServerPort();
+        // }
+        // fleetServerPorts.push(fleetServerPort);
+        // return fleetServerPort;
       };
 
       const cleanupServerPorts = ({
