@@ -34,14 +34,14 @@ export const getMockResponse = () =>
     },
     {
       version: 2,
-      os: 'linux',
-      arch: 'x86_64',
+      os: 'Linux',
+      arch: 'amd64',
       config: {
         input: {
           field_names: ['text_field'],
         },
       },
-      description: 'Elastic Learned Sparse EncodeR v2, x86-64 (Tech Preview)',
+      description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
       name: '.elser_model_2_linux-x86_64',
       recommended: true,
     },

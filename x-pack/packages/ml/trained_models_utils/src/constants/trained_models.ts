@@ -72,15 +72,16 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
   },
   '.elser_model_2_linux-x86_64': {
     version: 2,
-    os: 'linux',
-    arch: 'x86_64',
+    os: 'Linux',
+    arch: 'amd64',
     config: {
       input: {
         field_names: ['text_field'],
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2x86Description', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR v2, x86-64 (Tech Preview)',
+      defaultMessage:
+        'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
     }),
   },
 } as const);
