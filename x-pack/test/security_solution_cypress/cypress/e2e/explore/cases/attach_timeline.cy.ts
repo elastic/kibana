@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitTimeline } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitTimeline } from '../../../tasks/navigation';
 import {
   attachTimelineToNewCase,
   attachTimelineToExistingCase,

@@ -438,7 +438,12 @@ describe('createLifecycleRuleTypeFactory', () => {
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
             hits: [
-              { _source: lastOpbeansNodeDoc, _index: 'a', _primary_term: 4, _seq_no: 2 } as any,
+              {
+                _source: lastOpbeansNodeDoc,
+                _index: '.alerts-a',
+                _primary_term: 4,
+                _seq_no: 2,
+              } as any,
             ],
             total: {
               value: 1,
