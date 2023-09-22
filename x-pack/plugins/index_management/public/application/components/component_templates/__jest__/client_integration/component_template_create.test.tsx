@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import '../../../../../../test/global_mocks';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
@@ -53,6 +54,7 @@ describe('<ComponentTemplateCreate />', () => {
   let testBed: ComponentTemplateCreateTestBed;
 
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('On component mount', () => {
     beforeEach(async () => {
@@ -61,6 +63,12 @@ describe('<ComponentTemplateCreate />', () => {
       });
 
       testBed.component.update();
+    });
+
+    test('updates the breadcrumbs to component templates', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.componentTemplateCreate
+      );
     });
 
     test('should set the correct page header', async () => {

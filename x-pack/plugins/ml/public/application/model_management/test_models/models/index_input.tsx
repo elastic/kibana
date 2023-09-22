@@ -111,15 +111,34 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
   );
   useEffect(
     function loadDataViewListItems() {
-      dataViews.getIdsWithTitle().then((items) => {
+      async function getFilteredDataViewListItems() {
+        const dataViewIds = await dataViews.getIdsWithTitle();
+        const supportedFieldTypes = inferrer.getSupportedFieldTypes();
+
+        const hasTextField = async ({ id }: { id: string }) => {
+          const dataView = await dataViews.get(id);
+
+          return dataView.fields
+            .getAll()
+            .some((dvField) =>
+              supportedFieldTypes.some((esType) => dvField.esTypes?.includes(esType))
+            );
+        };
+
+        const allPromises = dataViewIds.map(hasTextField);
+        const resolvedPromises = await Promise.all(allPromises);
+        const filteredDataViews = dataViewIds.filter((value, index) => resolvedPromises[index]);
+
         setDataViewListItems(
-          items
+          filteredDataViews
             .sort((a, b) => a.title.localeCompare(b.title))
             .map(({ id, title }) => ({ text: title, value: id }))
         );
-      });
+      }
+
+      getFilteredDataViewListItems();
     },
-    [dataViews]
+    [dataViews, inferrer]
   );
 
   useEffect(
