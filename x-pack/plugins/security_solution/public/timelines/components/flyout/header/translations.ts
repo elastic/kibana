@@ -19,12 +19,9 @@ export const UNSAVED = i18n.translate('xpack.securitySolution.timeline.propertie
   defaultMessage: 'Unsaved',
 });
 
-export const AUTOSAVED = i18n.translate(
-  'xpack.securitySolution.timeline.properties.autosavedLabel',
-  {
-    defaultMessage: 'Autosaved',
-  }
-);
+export const SAVED = i18n.translate('xpack.securitySolution.timeline.properties.savedLabel', {
+  defaultMessage: 'Saved',
+});
 
 export const INSPECT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.inspectTimelineTitle',

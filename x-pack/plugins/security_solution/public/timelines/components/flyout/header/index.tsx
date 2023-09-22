@@ -331,7 +331,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
   return (
     <EuiText size="xs">
       <EuiTextColor color="default">
-        {i18n.AUTOSAVED}{' '}
+        {i18n.SAVED}{' '}
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
