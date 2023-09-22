@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { setStubDashboardServices } from './public/mocks';
+import { setStubDashboardServices } from './public/services/mocks';
 
+/**
+ * CAUTION: Be very mindful of the things you import in to this `jest_setup` file - anything that is imported
+ * here (either directly or implicitly through dependencies) will be **unable** to be mocked elsewhere!
+ *
+ * Refer to the "Caution" section here:
+ *   https://jestjs.io/docs/jest-object#jestmockmodulename-factory-options
+ */
 setStubDashboardServices();

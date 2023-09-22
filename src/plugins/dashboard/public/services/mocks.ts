@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { setStubDashboardServices } from '@kbn/dashboard-plugin/public/services/mocks';
-import { setStubKibanaServices } from './public/mocks';
+import { pluginServices } from './plugin_services';
+import { registry } from './plugin_services.stub';
 
-setStubKibanaServices();
+export function setStubDashboardServices() {
+  pluginServices.setRegistry(registry.start({}));
+}
+
 setStubDashboardServices();
