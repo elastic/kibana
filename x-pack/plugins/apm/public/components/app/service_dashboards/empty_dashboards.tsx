@@ -63,9 +63,12 @@ export function EmptyDashboards({ actions }: Props) {
               </li>
             </ul>
             <p>
-              {i18n.translate('xpack.apm.serviceDashboards.emptyTitle', {
-                defaultMessage: 'To get started, add your dashaboard',
-              })}
+              {i18n.translate(
+                'xpack.apm.serviceDashboards.emptyBody.getStarted',
+                {
+                  defaultMessage: 'To get started, add your dashaboard',
+                }
+              )}
             </p>
           </>
         }

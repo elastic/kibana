@@ -253,13 +253,13 @@ function getLinkSuccessToastLabels(dashboardName: string) {
 function getEditSuccessToastLabels(dashboardName: string) {
   return {
     title: i18n.translate(
-      'xpack.apm.serviceDashboards.linkSuccess.toast.title',
+      'xpack.apm.serviceDashboards.editSuccess.toast.title',
       {
         defaultMessage: 'Edited "{dashboardName}" dashboard',
         values: { dashboardName },
       }
     ),
-    text: i18n.translate('xpack.apm.serviceDashboards.linkSuccess.toast.text', {
+    text: i18n.translate('xpack.apm.serviceDashboards.editSuccess.toast.text', {
       defaultMessage: 'Your dashboard link have been updated',
     }),
   };
