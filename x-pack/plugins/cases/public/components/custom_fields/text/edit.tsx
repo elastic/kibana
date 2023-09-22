@@ -81,7 +81,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
             fullWidth: true,
             disabled: isLoading,
             isLoading,
-            'data-test-subj': `case-toggle-custom-field-form-field-${customFieldConfiguration.key}`,
+            'data-test-subj': `case-text-custom-field-form-field-${customFieldConfiguration.key}`,
           },
         }}
       />
