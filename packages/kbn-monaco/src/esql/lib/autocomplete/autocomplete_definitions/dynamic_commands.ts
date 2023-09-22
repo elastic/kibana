@@ -50,7 +50,7 @@ export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinit
     sortText: 'D',
     command: {
       id: 'esql.policies.create',
-      title: i18n.translate('monaco.esql.autocomplete.noPoliciesLabelsFound', {
+      title: i18n.translate('monaco.esql.autocomplete.createNewPolicy', {
         defaultMessage: 'Click to create',
       }),
     },
