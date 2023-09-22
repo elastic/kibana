@@ -15,10 +15,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index Templates', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
+      await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
+
       // Navigate to the index templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();

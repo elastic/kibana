@@ -63,8 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       } catch (e) {
         log.debug('[Teardown error] Error deleting test policy');
         throw e;
-      } finally {
-        await pageObjects.svlCommonPage.forceLogout();
       }
     });
 
