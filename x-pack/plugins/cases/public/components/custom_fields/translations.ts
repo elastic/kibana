@@ -25,6 +25,12 @@ export const ADD_CUSTOM_FIELD = i18n.translate('xpack.cases.customFields.addCust
   defaultMessage: 'Add field',
 });
 
+export const MAX_CUSTOM_FIELD_LIMIT = (maxCustomFields: number) =>
+  i18n.translate('xpack.cases.customFields.maxCustomFieldLimit', {
+    values: { maxCustomFields },
+    defaultMessage: 'Maximum limit of custom fields is {maxCustomFields} per case.',
+  });
+
 export const SAVE_FIELD = i18n.translate('xpack.cases.customFields.saveField', {
   defaultMessage: 'Save field',
 });
