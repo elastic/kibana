@@ -98,7 +98,9 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
         const section = await testSubjects.find(`~nav-bucket-${sectionId}`);
-        const collapseBtn = await section.findByCssSelector(`[aria-controls="${sectionId}"]`);
+        const collapseBtn = await section.findByCssSelector(
+          `[aria-controls="${sectionId}"][aria-expanded]`
+        );
         const isExpanded = await collapseBtn.getAttribute('aria-expanded');
         return isExpanded === 'true';
       },
