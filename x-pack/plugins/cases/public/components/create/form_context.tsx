@@ -55,10 +55,6 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-interface FormPropsWithCustomFields extends FormProps {
-  [x: `customFields.${string}`]: string | boolean;
-}
-
 export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   children,
@@ -202,7 +198,7 @@ export const FormContext: React.FC<Props> = ({
     ]
   );
 
-  const { form } = useForm<FormPropsWithCustomFields>({
+  const { form } = useForm<FormProps>({
     defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
