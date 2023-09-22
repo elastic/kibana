@@ -33,6 +33,12 @@ export function getFailures(clusterDetails: ClusterDetails) {
   };
 }
 
+function printErrorCause(errorCause: ErrorCause) {
+  return errorCause.reason
+    ?  `${errorCause.type}: "${errorCause.reason}"`
+    : errorCause.type;
+}
+
 interface Props {
   clusterDetails: ClusterDetails;
 }
@@ -58,15 +64,16 @@ export function ClusterView({ clusterDetails }: Props) {
           size="s"
           color="warning"
           title={i18n.translate('inspector.requests.clusters.skippedClusterMessage', {
-            defaultMessage: 'Search failed{reason}',
-            values: {
-              reason: clusterFailures[0]?.reason?.reason
-                ? `, ${clusterFailures[0].reason.reason}`
-                : '.',
-            },
+            defaultMessage: 'Search failed',
           })}
           iconType="warning"
-        />
+        >
+        {
+          clusterFailures[0]?.reason
+            ? printErrorCause(clusterFailures[0]?.reason)
+            : ''
+        }
+        </EuiCallOut>
       ) : null}
 
       <ShardsView failures={shardFailures} shardStats={clusterDetails._shards} />
