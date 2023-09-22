@@ -41,7 +41,7 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
   const {
     datasets,
     error: datasetsError,
-    isLoading: isLoadingStreams,
+    isLoading: isLoadingUncategorized,
     loadDatasets,
     reloadDatasets,
     searchDatasets,
@@ -70,7 +70,7 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
       integrationsError={integrationsError}
       isLoadingDataViews={isLoadingDataViews}
       isLoadingIntegrations={isLoadingIntegrations}
-      isLoadingStreams={isLoadingStreams}
+      isLoadingUncategorized={isLoadingUncategorized}
       isSearchingIntegrations={isSearchingIntegrations}
       onDataViewsReload={reloadDataViews}
       onDataViewsSearch={searchDataViews}

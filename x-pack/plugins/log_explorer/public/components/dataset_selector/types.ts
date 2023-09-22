@@ -46,7 +46,7 @@ export interface DatasetSelectorProps {
   /* Flags for loading/searching integrations, data streams or data views*/
   isLoadingDataViews: boolean;
   isLoadingIntegrations: boolean;
-  isLoadingStreams: boolean;
+  isLoadingUncategorized: boolean;
   isSearchingIntegrations: boolean;
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;

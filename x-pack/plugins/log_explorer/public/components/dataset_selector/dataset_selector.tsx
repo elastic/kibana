@@ -53,7 +53,7 @@ export function DatasetSelector({
   integrationsError,
   isLoadingDataViews,
   isLoadingIntegrations,
-  isLoadingStreams,
+  isLoadingUncategorized,
   isSearchingIntegrations,
   onDataViewSelection,
   onDataViewsReload,
@@ -144,7 +144,7 @@ export function DatasetSelector({
         createUncategorizedStatusItem({
           data: datasets,
           error: datasetsError,
-          isLoading: isLoadingStreams,
+          isLoading: isLoadingUncategorized,
           onRetry: onUncategorizedReload,
         }),
       ];
@@ -154,7 +154,7 @@ export function DatasetSelector({
       name: dataset.title,
       onClick: () => selectDataset(dataset),
     }));
-  }, [datasets, datasetsError, isLoadingStreams, selectDataset, onUncategorizedReload]);
+  }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
 
   const dataViewsItems = useMemo(() => {
     if (!dataViews || dataViews.length === 0) {
@@ -230,7 +230,7 @@ export function DatasetSelector({
         search={search}
         onSearch={searchByName}
         onSort={sortByOrder}
-        isLoading={isSearchingIntegrations || isLoadingStreams}
+        isLoading={isSearchingIntegrations || isLoadingUncategorized}
       />
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
