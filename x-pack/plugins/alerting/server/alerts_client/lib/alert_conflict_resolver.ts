@@ -25,6 +25,7 @@ import {
 import { set } from '@kbn/safer-lodash-set';
 import { zip, get } from 'lodash';
 
+// these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
 const REFRESH_FIELDS_CONDITIONAL = [ALERT_STATUS];
 const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
@@ -41,6 +42,9 @@ interface NormalizedBulkRequest {
   doc: unknown;
 }
 
+// wrapper to catch anything thrown; current usage of this function is
+// to replace just logging that the error occurred, so we don't want
+// to cause _more_ errors ...
 export async function resolveAlertConflicts(params: ResolveAlertConflictsParams): Promise<void> {
   const { logger } = params;
   try {
@@ -55,6 +59,7 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   if (bulkRequest.operations && bulkRequest.operations?.length === 0) return;
   if (bulkResponse.items && bulkResponse.items?.length === 0) return;
 
+  // get numbers for a summary log message
   const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
   if (conflicts === 0 && errors === 0) return;
 
@@ -63,15 +68,18 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
     `Error writing alerts: ${success} successful, ${conflicts} conflicts, ${errors} errors: ${allMessages}`
   );
 
+  // get a new bulk request for just conflicted docs
   const conflictRequest = getConflictRequest(bulkRequest, bulkResponse);
   if (conflictRequest.length === 0) return;
 
+  // get the fresh versions of those docs
   const freshDocs = await getFreshDocs(esClient, conflictRequest);
+
+  // update the OCC and refresh-able fields
   await updateOCC(conflictRequest, freshDocs);
   await refreshFieldsInDocs(conflictRequest, freshDocs);
 
   logger.info(`Retrying bulk update of ${conflictRequest.length} conflicted alerts`);
-
   const mbrResponse = await makeBulkRequest(params.esClient, params.bulkRequest, conflictRequest);
 
   if (mbrResponse.bulkResponse?.items.length !== conflictRequest.length) {
@@ -107,12 +115,14 @@ interface MakeBulkRequestResponse {
   error?: Error;
 }
 
+// make the bulk request to fix conflicts
 async function makeBulkRequest(
   esClient: ElasticsearchClient,
   bulkRequest: BulkRequest,
   conflictRequest: NormalizedBulkRequest[]
 ): Promise<MakeBulkRequestResponse> {
   const operations = conflictRequest.map((req) => [req.op, req.doc]).flat();
+  // just replace the operations from the original request
   const updatedBulkRequest = { ...bulkRequest, operations };
 
   const bulkResponse = await esClient.bulk(updatedBulkRequest);
@@ -121,7 +131,7 @@ async function makeBulkRequest(
   return { bulkRequest, bulkResponse, errors };
 }
 
-/** Update the certain fields in the conflict requests with fresh data. */
+/** Update refreshable fields in the conflict requests. */
 async function refreshFieldsInDocs(
   conflictRequests: NormalizedBulkRequest[],
   freshResponses: MgetResponseItem[]
@@ -129,7 +139,7 @@ async function refreshFieldsInDocs(
   for (const [conflictRequest, freshResponse] of zip(conflictRequests, freshResponses)) {
     if (!conflictRequest?.op.index || !freshResponse) continue;
 
-    // @ts-expect-error @elastic/elasticsearch _seq_no is not in the type!
+    // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conflictDoc = conflictRequest.doc as Record<string, any>;
@@ -206,13 +216,17 @@ function getConflictRequest(
   bulkRequest: BulkRequest,
   bulkResponse: BulkResponse
 ): NormalizedBulkRequest[] {
+  // first "normalize" the request from it's non-linear form
   const request = normalizeRequest(bulkRequest);
 
+  // maybe we didn't unwind it right ...
   if (request.length !== bulkResponse.items.length) {
     throw new Error('Unexpected number of bulk response items');
   }
+
   if (request.length === 0) return [];
 
+  // we only want op: index where the status was 409 / conflict
   const conflictRequest = zip(request, bulkResponse.items)
     .filter(([_, res]) => res?.index?.status === 409)
     .map(([req, _]) => req!);
@@ -220,15 +234,17 @@ function getConflictRequest(
   return conflictRequest;
 }
 
-/** Convert a bulk request (op | doc)[] to an array of { op, doc }[] for index op */
+/** Convert a bulk request (op | doc)[] to an array of { op, doc }[]  */
 function normalizeRequest(bulkRequest: BulkRequest) {
   if (!bulkRequest.operations) return [];
   const result: NormalizedBulkRequest[] = [];
 
   let index = 0;
   while (index < bulkRequest.operations.length) {
+    // the "op" data
     const op = bulkRequest.operations[index] as BulkOperationContainer;
 
+    // now the "doc" data, if there is any (none for delete)
     if (op.create || op.index || op.update) {
       index++;
       const doc = bulkRequest.operations[index];
@@ -252,6 +268,7 @@ interface ResponseStatsResult {
   messages: string[];
 }
 
+// generate a summary of the original bulk request attempt, for logging
 function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
   const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
   for (const item of bulkResponse.items) {

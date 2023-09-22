@@ -19,6 +19,7 @@ import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../com
 
 type AlertDoc = Alert & { runCount: number };
 
+// sort results of a search of alert docs by alert instance id
 function sortAlertDocsByInstanceId(a: SearchHit<AlertDoc>, b: SearchHit<AlertDoc>) {
   return a._source!.kibana.alert.instance.id.localeCompare(b._source!.kibana.alert.instance.id);
 }
@@ -72,6 +73,12 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const ruleId = createdRule.body.id;
         objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
+        // this rule type uses esTextIndexTool documents to communicate
+        // with the rule executor.  Once the rule starts executing, it
+        // "sends" `rule-starting-<n>`, which this code waits for.  It
+        // then updates the alert doc, and "sends" `rule-complete-<n>`.
+        // which the rule executor is waiting on, to complete the rule
+        // execution.
         log(`signal the rule to finish the first run`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-1');
 
@@ -169,6 +176,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     });
   });
 
+  // waits for a specified number of alert documents
   async function waitForAlertDocs(
     index: string,
     ruleId: string,
@@ -195,6 +203,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   }
 }
 
+// general comparator for initial / updated alert documents
 function compareAlertDocs(
   initialDoc: SearchHit<AlertDoc>,
   updatedDoc: SearchHit<AlertDoc>,

@@ -190,7 +190,11 @@ interface GetReqResResult {
 
 /**
  * takes as input a string of c, is, ic, ie tokens and builds appropriate
- * bulk request and response objects
+ * bulk request and response objects to use in the tests:
+ * - c: create, ignored by the resolve logic
+ * - is: index with success
+ * - ic: index with conflict
+ * - ie: index with error but not conflict
  */
 function getReqRes(bulkOps: string): GetReqResResult {
   const ops = bulkOps.trim().split(/\s+/g);
@@ -210,7 +214,7 @@ function getReqRes(bulkOps: string): GetReqResResult {
   for (const op of ops) {
     id++;
     switch (op) {
-      // create, ignored
+      // create, ignored by the resolve logic
       case 'c':
         bulkRequest.operations.push(createOp, alertDoc);
         bulkResponse.items.push(getResponseItem('create', id, false, 200));
@@ -236,6 +240,7 @@ function getReqRes(bulkOps: string): GetReqResResult {
         bulkResponse.items.push(getResponseItem('index', id, true, 418)); // I'm a teapot
         break;
 
+      // developer error
       default:
         throw new Error('bad input');
     }
