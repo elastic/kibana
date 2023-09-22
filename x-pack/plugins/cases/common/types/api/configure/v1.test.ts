@@ -6,7 +6,11 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_CUSTOM_FIELD_KEY_LENGTH, MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
+import {
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_KEY_LENGTH,
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+} from '../../../constants';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
@@ -69,6 +73,21 @@ describe('configure', () => {
       });
     });
 
+    it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
+      const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+        key: 'text_custom_field',
+        label: 'Text custom field',
+        type: CustomFieldTypes.TEXT,
+        required: false,
+      });
+
+      expect(
+        PathReporter.report(ConfigurationRequestRt.decode({ ...defaultRequest, customFields }))[0]
+      ).toContain(
+        `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}`
+      );
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = ConfigurationRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -93,6 +112,49 @@ describe('configure', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('has expected attributes in request with customFields', () => {
+      const request = {
+        ...defaultRequest,
+        customFields: [
+          {
+            key: 'text_custom_field',
+            label: 'Text custom field',
+            type: CustomFieldTypes.TEXT,
+            required: false,
+          },
+          {
+            key: 'toggle_custom_field',
+            label: 'Toggle custom field',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+          },
+        ],
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
+      const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+        key: 'text_custom_field',
+        label: 'Text custom field',
+        type: CustomFieldTypes.TEXT,
+        required: false,
+      });
+
+      expect(
+        PathReporter.report(
+          ConfigurationPatchRequestRt.decode({ ...defaultRequest, customFields })
+        )[0]
+      ).toContain(
+        `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}`
+      );
     });
 
     it('removes foo:bar attributes from request', () => {

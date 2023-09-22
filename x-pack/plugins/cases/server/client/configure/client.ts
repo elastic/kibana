@@ -42,7 +42,10 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter } from '../utils';
+import {
+  combineAuthorizedAndOwnerFilter,
+  throwIfDuplicatedCustomFieldKeysInRequest,
+} from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
@@ -250,6 +253,8 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
+    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: request.customFields });
+
     const { version, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -339,7 +344,7 @@ export async function update(
   }
 }
 
-async function create(
+export async function create(
   configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -355,6 +360,10 @@ async function create(
   try {
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
+    throwIfDuplicatedCustomFieldKeysInRequest({
+      customFieldsInRequest: validatedConfigurationRequest.customFields,
+    });
 
     let error = null;
 

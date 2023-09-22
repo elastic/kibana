@@ -119,6 +119,7 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to POST a new case configuration`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
+
       const esConfigInfo = transformAttributesToESModel(decodedAttributes);
 
       const createdConfig =
@@ -148,6 +149,7 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(updatedAttributes);
+
       const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
       const updatedConfiguration =

@@ -367,20 +367,20 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it.skip('should not create a configuration with duplicated keys', async () => {
+      it('should not create a configuration with duplicated keys', async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({
             overrides: {
               customFields: [
                 {
-                  key: 'hello',
+                  key: 'duplicated_key',
                   label: '#1',
                   type: CustomFieldTypes.TEXT,
                   required: false,
                 },
                 {
-                  key: 'hello',
+                  key: 'duplicated_key',
                   label: '#2',
                   type: CustomFieldTypes.TEXT,
                   required: false,
