@@ -84,6 +84,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.settings).to.eql(postCaseReq.settings);
       expect(createCaseUserAction.payload.owner).to.eql(postCaseReq.owner);
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
+      expect(createCaseUserAction.payload.assignees).to.eql(postCaseReq.assignees);
+      expect(createCaseUserAction.payload.severity).to.eql(postCaseReq.severity);
+      expect(createCaseUserAction.payload.category).to.eql(null);
+      expect(createCaseUserAction.payload.customFields).to.eql([]);
     });
 
     it('deletes all user actions when a case is deleted', async () => {

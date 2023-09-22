@@ -155,6 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
             severity: CaseSeverity.LOW,
             assignees: [],
             category: null,
+            customFields: [],
           },
         });
       });
