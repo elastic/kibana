@@ -36,6 +36,7 @@ import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
+import { DataViewAsync } from './data_view_async';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -192,6 +193,12 @@ export interface DataViewsServicePublicMethods {
    * @param size - Number of results to return
    */
   find: (search: string, size?: number) => Promise<DataView[]>;
+  /**
+   * Search for data views based on title, returning Async Data views
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
+  findAsync: (search: string, size?: number) => Promise<DataView[]>;
   /**
    * Get data view by id.
    * @param id - Id of the data view to get.
@@ -412,6 +419,18 @@ export class DataViewsService {
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
       return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+  findAsync = async (search: string, size: number = 10): Promise<DataViewAsync[]> => {
+    const savedObjects = await this.savedObjectsClient.find({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.initFromSavedObjectAsync(savedObject);
     });
     return await Promise.all(getIndexPatternPromises);
   };
@@ -869,6 +888,20 @@ export class DataViewsService {
     return indexPattern;
   };
 
+  private initFromSavedObjectAsync = async (
+    savedObject: SavedObject<DataViewAttributes>,
+    displayErrors: boolean = true
+  ): Promise<DataViewAsync> => {
+    const spec = this.savedObjectToSpec(savedObject);
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
+      : {};
+
+    const indexPattern = await this.createFromSpecAsync(spec);
+    indexPattern.resetOriginalSavedObjectBody();
+    return indexPattern;
+  };
+
   private getRuntimeFields = (
     runtimeFieldMap: Record<string, RuntimeFieldSpec> | undefined = {},
     fieldAttrs: FieldAttrs | undefined = {}
@@ -977,6 +1010,30 @@ export class DataViewsService {
     }
 
     return dataView;
+  }
+
+  private async createFromSpecAsync({
+    id,
+    name,
+    title,
+    ...restOfSpec
+  }: DataViewSpec): Promise<DataViewAsync> {
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+    const spec = {
+      id: id ?? uuidv4(),
+      title,
+      name: name || title,
+      ...restOfSpec,
+    };
+
+    return new DataViewAsync({
+      spec,
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+    });
   }
 
   /**

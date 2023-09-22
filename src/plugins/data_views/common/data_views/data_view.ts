@@ -27,7 +27,7 @@ import { removeFieldAttrs } from './utils';
 import { AbstractDataView } from './abstract_data_views';
 import { flattenHitWrapper } from './flatten_hit';
 
-interface DataViewDeps {
+export interface DataViewDeps {
   spec?: DataViewSpec;
   fieldFormats: FieldFormatsStartCommon;
   shortDotsEnable?: boolean;
