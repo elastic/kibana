@@ -14,7 +14,7 @@ import {
   ObjectRemover,
   getTestRuleData,
   getEventLog,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -101,7 +101,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.cumulative-firing',
                   'alertsFixture'
