@@ -39,6 +39,7 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
@@ -62,7 +63,6 @@ import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
@@ -751,12 +751,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               />
             ) : null}
 
-            <KibanaPageTemplate
-              className="eui-fullHeight"
-              restrictWidth={1000}
-            >
+            <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
               <EuiPageTemplate.Header
-                paddingSize='l'
+                paddingSize="l"
                 pageTitle={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.title"
@@ -764,39 +761,38 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   />
                 }
                 id={titleId}
-                rightSideItems={
-                  rightSideItems.reverse().map((item) => (
-                    <EuiDescriptionList
-                      textStyle="reverse"
-                      listItems={[
-                        {
-                          title: (
-                            <EuiText color={euiTheme.colors.darkestShade} size="s">
-                              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                                <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                                <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                                  <EuiIconTip type="questionInCircle" content={item.helpText} />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiText>
-                          ),
-                          description: (
-                            <span data-test-subj={item.testSubj}>
-                              {item.description || (
-                                <EuiText color={euiTheme.colors.disabledText} size="s">
-                                  <FormattedMessage
-                                    id="xpack.security.accountManagement.userProfile.noneProvided"
-                                    defaultMessage="None provided"
-                                  />
-                                </EuiText>
-                              )}
-                            </span>
-                          ),
-                        },
-                      ]}
-                      compressed
-                    />
-                  ))}
+                rightSideItems={rightSideItems.reverse().map((item) => (
+                  <EuiDescriptionList
+                    textStyle="reverse"
+                    listItems={[
+                      {
+                        title: (
+                          <EuiText color={euiTheme.colors.darkestShade} size="s">
+                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                <EuiIconTip type="questionInCircle" content={item.helpText} />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiText>
+                        ),
+                        description: (
+                          <span data-test-subj={item.testSubj}>
+                            {item.description || (
+                              <EuiText color={euiTheme.colors.disabledText} size="s">
+                                <FormattedMessage
+                                  id="xpack.security.accountManagement.userProfile.noneProvided"
+                                  defaultMessage="None provided"
+                                />
+                              </EuiText>
+                            )}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    compressed
+                  />
+                ))}
               />
               <EuiPageTemplate.Section>
                 <Form aria-labelledby={titleId}>
@@ -815,13 +811,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                 </Form>
               </EuiPageTemplate.Section>
-              {(formChanges.count > 0 ?
-                <EuiPageTemplate.BottomBar
-                  paddingSize='m'
-                  position='fixed'
-                >
-                  <SaveChangesBottomBar/>
-                </EuiPageTemplate.BottomBar> : null)}
+              {formChanges.count > 0 ? (
+                <EuiPageTemplate.BottomBar paddingSize="m" position="fixed">
+                  <SaveChangesBottomBar />
+                </EuiPageTemplate.BottomBar>
+              ) : null}
             </KibanaPageTemplate>
           </Breadcrumb>
         </FormChangesProvider>
