@@ -45,8 +45,9 @@ export function ServiceDashboards() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/dashboards');
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  const [serviceDashboards, setServiceDashboards] =
-    useState<MergedServiceDashboard[]>();
+  const [serviceDashboards, setServiceDashboards] = useState<
+    MergedServiceDashboard[]
+  >([]);
   const [currentDashboard, setCurrentDashboard] =
     useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards, status: dashboardsFetcherStatus } =
@@ -75,17 +76,27 @@ export function ServiceDashboards() {
   console.log('serviceDashboards', serviceDashboards);
 
   useEffect(() => {
-    const serviceDashboards = data?.serviceDashboards.map((dashboard) => ({
-      title:
-        allAvailableDashboards.find(
+    const serviceDashboards = (data?.serviceDashboards ?? []).reduce(
+      (result, dashboard) => {
+        const matchedDashboard = allAvailableDashboards.find(
           ({ id }) => id === dashboard.dashboardSavedObjectId
-        )?.attributes.title ?? dashboard.id,
-      ...dashboard,
-    }));
+        );
+        if (matchedDashboard) {
+          result.push({
+            title: matchedDashboard.attributes.title ?? dashboard.id,
+            ...dashboard,
+          });
+        }
+        return result;
+      },
+      []
+    );
 
-    setServiceDashboards(serviceDashboards ?? []);
+    setServiceDashboards(serviceDashboards);
     // preselect dashboard
-    setCurrentDashboard(serviceDashboards[0]);
+    setCurrentDashboard(
+      serviceDashboards?.length > 0 ? serviceDashboards[0] : undefined
+    );
   }, [allAvailableDashboards, data]);
 
   console.log('current', currentDashboard);
