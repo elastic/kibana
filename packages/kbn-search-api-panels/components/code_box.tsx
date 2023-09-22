@@ -106,7 +106,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               {(copy) => (
                 <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
                   {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
-                    defaultMessage: 'Copy to clipboard',
+                    defaultMessage: 'Copy',
                   })}
                 </EuiButtonEmpty>
               )}

@@ -83,7 +83,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
       <EuiFlexItem grow={1}>
         <EuiImage
           alt=""
-          src={image ? image : `${assetBasePath}serverless_header.png`}
+          src={image ? image : `${assetBasePath}/serverless_header.png`}
           size="original"
         />
       </EuiFlexItem>
