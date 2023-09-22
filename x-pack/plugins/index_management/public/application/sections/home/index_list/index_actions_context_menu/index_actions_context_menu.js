@@ -22,9 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
-import { INDEX_OPEN } from '../../../../../../common/constants';
+import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
-import { IndexDetailsSection } from '../details_page';
 import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
