@@ -50,6 +50,32 @@ import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 
 /**
+ * Throws an error if the requests has custom fields with duplicated keys.
+ */
+function throwIfDuplicatedCustomFieldKeysInRequest({
+  customFieldsInRequest = [],
+}: {
+  customFieldsInRequest?: Array<{ key: string }>;
+}) {
+  const uniqueKeys = new Set();
+  const duplicatedKeys = new Set();
+
+  customFieldsInRequest.forEach((item) => {
+    if (uniqueKeys.has(item.key)) {
+      duplicatedKeys.add(item.key);
+    } else {
+      uniqueKeys.add(item.key);
+    }
+  });
+
+  if (duplicatedKeys.size) {
+    throw Boom.badRequest(
+      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
+    );
+  }
+}
+
+/**
  * Defines the internal helper functions.
  *
  * @ignore
@@ -250,6 +276,8 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
+    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: request.customFields });
+
     const { version, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -355,6 +383,10 @@ export async function create(
   try {
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
+    throwIfDuplicatedCustomFieldKeysInRequest({
+      customFieldsInRequest: validatedConfigurationRequest.customFields,
+    });
 
     let error = null;
 

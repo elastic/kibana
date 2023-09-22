@@ -280,29 +280,94 @@ describe('client', () => {
         `Failed to get patch configure in route: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
       );
     });
+
+    it('throws when there are duplicated custom field keys in the request', async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: Invalid duplicated custom field keys in request: duplicated_key'
+      );
+    });
   });
 
   describe('create', () => {
-    it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
-      const request = {
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        closure_type: 'close-by-user',
-        owner: 'securitySolutionFixture',
-        customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
-          key: 'foobar',
-          label: 'text',
-          type: CustomFieldTypes.TEXT,
-          required: false,
-        }),
-      } as ConfigurationRequest;
+    const baseRequest = {
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      closure_type: 'close-by-user',
+      owner: 'securitySolutionFixture',
+    } as ConfigurationRequest;
 
-      await expect(create(request, clientArgs, casesClientInternal)).rejects.toThrow(
+    it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+              key: 'foobar',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            }),
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
         `Failed to create case configuration: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws when there are duplicated keys in the request', async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: [
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: Invalid duplicated custom field keys in request: duplicated_key'
       );
     });
   });

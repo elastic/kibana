@@ -6,7 +6,7 @@
  */
 
 import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
-import { CustomFieldTypes, ConnectorTypes } from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -832,52 +832,6 @@ describe('CaseConfigureService', () => {
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
         expect(persistedAttributes).not.toHaveProperty('foo');
-      });
-    });
-  });
-
-  describe('Validation', () => {
-    describe('post', () => {
-      it('throws when there are duplicates custom field keys in request', async () => {
-        const attributes = {
-          ...createConfigPostParams(createJiraConnector()),
-          customFields: [
-            { key: 'foo', label: 'text', type: CustomFieldTypes.TEXT, required: false },
-            { key: 'foo', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
-            { key: 'foo', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
-            { key: 'bar', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
-            { key: 'bar', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
-          ],
-        };
-
-        await expect(
-          service.post({
-            unsecuredSavedObjectsClient,
-            attributes,
-            id: '1',
-          })
-        ).rejects.toThrow(`Invalid duplicated custom field keys in request: foo,bar`);
-      });
-    });
-
-    describe('patch', () => {
-      it('throws when there are duplicates custom field keys in request', async () => {
-        const updatedAttributes = {
-          ...createConfigPostParams(createJiraConnector()),
-          customFields: [
-            { key: 'foobar', label: 'text', type: CustomFieldTypes.TEXT, required: false },
-            { key: 'foobar', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
-          ],
-        };
-
-        await expect(
-          service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes,
-            originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
-          })
-        ).rejects.toThrow(`Invalid duplicated custom field keys in request: foobar`);
       });
     });
   });
