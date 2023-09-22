@@ -1425,6 +1425,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ES_QUERY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ES_QUERY_ID",
+        "description": [],
+        "signature": [
+          "\".es-query\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.EVENT_ACTION",
         "type": "string",
         "tags": [],
@@ -1500,6 +1515,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.OBSERVABILITY_THRESHOLD_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_THRESHOLD_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.rules.custom_threshold\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ruleDetailsRoute",
         "type": "string",
         "tags": [],
@@ -1524,6 +1554,21 @@
           "\"kibana.space_ids\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.STACK_ALERTS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STACK_ALERTS_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"stackAlerts\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
