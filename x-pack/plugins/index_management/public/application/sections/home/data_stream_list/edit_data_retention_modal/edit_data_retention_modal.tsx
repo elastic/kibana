@@ -33,8 +33,9 @@ import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
+  dataRetention: string;
   dataStreamName: string;
-  onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
+  onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
 export const timeUnits = [
@@ -123,17 +124,16 @@ const configurationFormSchema: FormSchema = {
                 {
                   defaultMessage: 'A data retention value is required.',
                 }
-              ),
+              )
             };
-          }
-          if (value < 0) {
+          } if (value < 0) {
             return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
                 {
                   defaultMessage: `Data retention value can't be negative.`,
                 }
-              ),
+              )
             };
           }
         },
@@ -151,16 +151,34 @@ const configurationFormSchema: FormSchema = {
   },
 };
 
+const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
+  let size = '';
+  let unit = '';
+
+  const result = /(\d+)(\w+)/.exec(field);
+  if (result) {
+    size = result[1];
+    unit = result[2];
+  }
+
+  return {
+    size,
+    unit,
+  };
+};
+
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
+  dataRetention,
   dataStreamName,
   onClose,
 }) => {
+  const { size, unit } = splitSizeAndUnits(dataRetention);
   const {
     services: { notificationService },
   } = useAppContext();
 
   const { form } = useForm({
-    defaultValue: { dataRetention: '', timeUnit: 'd' },
+    defaultValue: { dataRetention: size, timeUnit: unit },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
@@ -172,30 +190,28 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}}`).then(
-      ({ data: responseData, error }) => {
+    return updateDataRetention(dataStreamName, `${data.dataRetention}${data.timeUnit}`)
+      .then(({ data: responseData, error }) => {
         if (responseData) {
           const successMessage = i18n.translate(
             'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
             { defaultMessage: 'Data retention updated' }
           );
           notificationService.showSuccessToast(successMessage);
+
+          return onClose({ hasUpdatedDataRetention: true });
         }
 
         if (error) {
           const errorMessage = i18n.translate(
             'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
-            {
-              defaultMessage: "Error updating data retention: '{error}'",
-              values: { error: error.message },
-            }
+            { defaultMessage: "Error updating data retention: '{error}'", values: { error: error.message }}
           );
           notificationService.showDangerToast(errorMessage);
         }
 
         onClose();
-      }
-    );
+      });
   };
 
   return (
