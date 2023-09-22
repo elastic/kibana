@@ -102,7 +102,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
   useEffect(() => {
     setDashboardOptions(
       dashboardHits
-        .filter((d) => !idsToOmit || !idsToOmit.includes(d.id))
+        .filter((d) => !d.managed && !(idsToOmit ?? []).includes(d.id))
         .map((d) => ({
           value: d.id,
           label: d.attributes.title,
