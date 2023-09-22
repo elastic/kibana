@@ -155,8 +155,7 @@ describe('<IndexManagementHome />', () => {
     expect(testBed.actions.findIndexDetailsPageTitle()).toContain('testIndex');
   });
 
-  // TODO fix the % in the new index details page
-  describe.skip('index detail panel with % character in index name', () => {
+  describe('index detail panel with % character in index name', () => {
     const indexName = 'test%';
 
     beforeEach(async () => {
