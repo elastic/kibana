@@ -243,6 +243,7 @@ describe('bulkEdit()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -745,6 +746,7 @@ describe('bulkEdit()', () => {
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
           shouldWrite: true,
         },
+        validLegacyConsumers: [],
       });
       const existingAction = {
         frequency: {
@@ -2351,6 +2353,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2395,6 +2398,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({

@@ -26,6 +26,7 @@ import {
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [
