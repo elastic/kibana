@@ -185,9 +185,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       };
 
       const getKibanaPort = <T>(): T | number => {
-        if (isOpen) {
-          return 5620;
-        }
+        // if (isOpen) {
+        //   return 5620;
+        // }
 
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
@@ -198,9 +198,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       };
 
       const getFleetServerPort = <T>(): T | number => {
-        if (isOpen) {
-          return 8220;
-        }
+        // if (isOpen) {
+        //   return 8220;
+        // }
 
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
@@ -263,7 +263,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
 
-${JSON.stringify(config.getAll(), null, 2)}
 
 ----------------------------------------------
 `);

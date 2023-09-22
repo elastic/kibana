@@ -106,6 +106,7 @@ export const loadRuleAlerts = (ruleName: string) => {
   const isServerless = Cypress.env().IS_SERVERLESS;
   if (isServerless) {
     toggleRuleOffAndOn(ruleName);
+    cy.wait(10000);
   }
 
   cy.visit('/app/security/rules');
