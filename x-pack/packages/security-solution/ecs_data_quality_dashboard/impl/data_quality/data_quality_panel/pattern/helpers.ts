@@ -20,6 +20,7 @@ import type {
   SortConfig,
 } from '../../types';
 import { getDocsCount, getSizeInBytes } from '../../helpers';
+import { checkIsSkippedIndex } from '../data_quality_summary/summary_actions/check_all/helpers';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined
@@ -161,18 +162,25 @@ export const getSummaryTableItems = ({
   sortByDirection: 'desc' | 'asc';
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): IndexSummaryTableItem[] => {
-  const summaryTableItems = indexNames.map((indexName) => ({
-    docsCount: getDocsCount({ stats, indexName }),
-    incompatible: getIndexIncompatible({ indexName, results }),
-    indexName,
-    ilmPhase:
-      isILMAvailable && ilmExplain != null
-        ? getIlmPhase(ilmExplain[indexName], isILMAvailable)
-        : undefined,
-    pattern,
-    patternDocsCount,
-    sizeInBytes: getSizeInBytes({ stats, indexName }),
-  }));
+  const summaryTableItems = indexNames.reduce<IndexSummaryTableItem[]>((acc, indexName) => {
+    if (checkIsSkippedIndex(indexName)) {
+      return acc;
+    }
+
+    acc.push({
+      docsCount: getDocsCount({ stats, indexName }),
+      incompatible: getIndexIncompatible({ indexName, results }),
+      indexName,
+      ilmPhase:
+        isILMAvailable && ilmExplain != null
+          ? getIlmPhase(ilmExplain[indexName], isILMAvailable)
+          : undefined,
+      pattern,
+      patternDocsCount,
+      sizeInBytes: getSizeInBytes({ stats, indexName }),
+    });
+    return acc;
+  }, []);
 
   return orderBy([sortByColumn], [sortByDirection], summaryTableItems);
 };

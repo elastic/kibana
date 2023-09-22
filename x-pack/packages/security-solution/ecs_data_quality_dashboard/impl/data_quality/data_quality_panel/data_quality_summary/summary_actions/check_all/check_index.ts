@@ -15,6 +15,7 @@ import * as i18n from './translations';
 import type { EcsMetadata, OnCheckCompleted, PartitionedFieldMetadata } from '../../../../types';
 import { fetchMappings } from '../../../../use_mappings/helpers';
 import { fetchUnallowedValues, getUnallowedValues } from '../../../../use_unallowed_values/helpers';
+import { getIndexToCheck } from './helpers';
 
 export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   all: [],
@@ -50,6 +51,23 @@ export async function checkIndex({
   pattern: string;
   version: string;
 }) {
+  const { isHiddenPattern, isSkippedIndex } = getIndexToCheck({ indexName, pattern });
+  if (isHiddenPattern || isSkippedIndex) {
+    onCheckCompleted({
+      checkAllStartTime,
+      batchId,
+      error: null,
+      formatBytes,
+      formatNumber,
+      indexName,
+      partitionedFieldMetadata: null,
+      pattern,
+      version,
+      isLastCheck,
+    });
+    return;
+  }
+
   try {
     const startTime = Date.now();
     const indexes = await fetchMappings({

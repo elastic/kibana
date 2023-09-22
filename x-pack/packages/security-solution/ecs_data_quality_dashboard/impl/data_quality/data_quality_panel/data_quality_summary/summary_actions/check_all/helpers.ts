@@ -11,6 +11,12 @@ import { orderBy } from 'lodash/fp';
 import { getDocsCount } from '../../../../helpers';
 import type { IndexToCheck, PatternRollup } from '../../../../types';
 
+export const checkIsHiddenPattern = (pattern: string): boolean => pattern.startsWith('.');
+
+const SKIPPED_INDICES = ['kibana_sample_data_', '.internal'];
+export const checkIsSkippedIndex = (indexName: string): boolean =>
+  SKIPPED_INDICES.some((skipped) => indexName.startsWith(skipped));
+
 export const getIndexToCheck = ({
   indexName,
   pattern,
@@ -18,9 +24,13 @@ export const getIndexToCheck = ({
   indexName: string;
   pattern: string;
 }): IndexToCheck => {
+  const isHiddenPattern = checkIsHiddenPattern(pattern);
+  const isSkippedIndex = checkIsSkippedIndex(indexName);
   return {
     pattern,
     indexName,
+    isHiddenPattern,
+    isSkippedIndex,
   };
 };
 

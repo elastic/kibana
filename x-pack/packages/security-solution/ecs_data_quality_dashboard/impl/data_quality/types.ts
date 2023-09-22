@@ -137,6 +137,8 @@ export interface RequestQueueResponse<T, U> {
 export interface IndexToCheck {
   pattern: string;
   indexName: string;
+  isHiddenPattern: boolean;
+  isSkippedIndex: boolean;
 }
 
 export type OnCheckCompleted = ({

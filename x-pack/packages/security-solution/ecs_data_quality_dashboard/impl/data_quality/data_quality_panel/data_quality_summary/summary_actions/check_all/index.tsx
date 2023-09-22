@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { checkIndex } from './check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
-import { getAllIndicesToCheck } from './helpers';
+import { checkIsHiddenPattern, checkIsSkippedIndex, getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
 import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
 
@@ -82,15 +82,21 @@ const CheckAllComponent: React.FC<Props> = ({
       const startTime = Date.now();
       const batchId = uuidv4();
       let checked = 0;
+      let isHiddenPattern;
+      let isSkippedIndex;
 
       setCheckAllIndiciesChecked(0);
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
       for (const { indexName, pattern } of allIndicesToCheck) {
+        isHiddenPattern = checkIsHiddenPattern(pattern);
+        isSkippedIndex = checkIsSkippedIndex(indexName);
         if (!abortController.current.signal.aborted) {
           setIndexToCheck({
             indexName,
             pattern,
+            isHiddenPattern,
+            isSkippedIndex,
           });
 
           await checkIndex({
@@ -110,8 +116,10 @@ const CheckAllComponent: React.FC<Props> = ({
           });
 
           if (!abortController.current.signal.aborted) {
-            await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
             incrementCheckAllIndiciesChecked();
+
+            await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
+
             checked++;
           }
         }

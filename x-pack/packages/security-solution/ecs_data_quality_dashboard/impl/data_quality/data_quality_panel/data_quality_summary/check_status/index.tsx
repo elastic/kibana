@@ -14,6 +14,7 @@ import * as i18n from '../../../translations';
 import type { ErrorSummary, IndexToCheck } from '../../../types';
 
 export const EMPTY_LAST_CHECKED_DATE = '--';
+export const SKIPPED_INDEX_PLACEHOLDER = '...';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -65,7 +66,13 @@ const CheckStatusComponent: React.FC<Props> = ({
         <>
           <EuiFlexItem grow={true}>
             <EuiText size="s">
-              <span data-test-subj="checking">{i18n.CHECKING(indexToCheck.indexName)}</span>
+              <span data-test-subj="checking">
+                {i18n.CHECKING(
+                  indexToCheck.isHiddenPattern || indexToCheck.isSkippedIndex
+                    ? SKIPPED_INDEX_PLACEHOLDER
+                    : indexToCheck.indexName
+                )}
+              </span>
             </EuiText>
           </EuiFlexItem>
 

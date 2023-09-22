@@ -10,6 +10,7 @@ import type {
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
+import { getIndexToCheck } from './data_quality_panel/data_quality_summary/summary_actions/check_all/helpers';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
@@ -361,7 +362,10 @@ export const getTotalPatternIncompatible = (
 export const getTotalPatternIndicesChecked = (patternRollup: PatternRollup | undefined): number => {
   if (patternRollup != null && patternRollup.results != null) {
     const allResults = Object.values(patternRollup.results);
-    const nonErrorResults = allResults.filter(({ error }) => error == null);
+    const nonErrorResults = allResults.filter(({ error, pattern, indexName }) => {
+      const { isHiddenPattern, isSkippedIndex } = getIndexToCheck({ pattern, indexName });
+      return error == null && !isHiddenPattern && !isSkippedIndex;
+    });
 
     return nonErrorResults.length;
   } else {

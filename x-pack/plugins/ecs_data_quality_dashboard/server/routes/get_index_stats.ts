@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
@@ -15,7 +15,7 @@ import { GET_INDEX_STATS } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
 
-export const getIndexStatsRoute = (router: IRouter) => {
+export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
       path: GET_INDEX_STATS,
@@ -47,8 +47,22 @@ export const getIndexStatsRoute = (router: IRouter) => {
          * `fetchAvailableIndices` returns indices that have data in the given date range.
          */
         if (startDate && endDate) {
-          const decodedStartDate = decodeURIComponent(startDate);
-          const decodedEndDate = decodeURIComponent(endDate);
+          let decodedStartDate;
+          let decodedEndDate;
+
+          try {
+            decodedStartDate = decodeURIComponent(startDate);
+          } catch (err) {
+            decodedStartDate = startDate;
+            logger.error('decode startDate error', err);
+          }
+
+          try {
+            decodedEndDate = decodeURIComponent(endDate);
+          } catch (err) {
+            decodedEndDate = endDate;
+            logger.error('decode endDate error', err);
+          }
 
           const indices = await fetchAvailableIndices(esClient, {
             indexPattern: decodedIndexName,

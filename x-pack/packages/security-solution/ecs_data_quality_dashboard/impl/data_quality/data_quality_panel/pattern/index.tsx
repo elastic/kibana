@@ -51,6 +51,7 @@ import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 import { useDataQualityContext } from '../data_quality_context';
+import { checkIsHiddenPattern } from '../data_quality_summary/summary_actions/check_all/helpers';
 
 const IndexPropertiesContainer = styled.div`
   margin-bottom: ${euiThemeVars.euiSizeS};
@@ -131,6 +132,7 @@ const PatternComponent: React.FC<Props> = ({
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
+  const isHiddenPattern = checkIsHiddenPattern(pattern);
 
   const {
     error: statsError,
@@ -322,7 +324,7 @@ const PatternComponent: React.FC<Props> = ({
     toggleExpanded,
   ]);
 
-  return (
+  return isHiddenPattern || items.length === 0 ? null : (
     <EuiPanel data-test-subj={`${pattern}PatternPanel`} hasBorder={false} hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>

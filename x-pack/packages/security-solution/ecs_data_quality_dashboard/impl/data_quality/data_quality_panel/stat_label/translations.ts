@@ -155,7 +155,8 @@ export const TOTAL_INCOMPATIBLE_TOOL_TIP = i18n.translate(
 export const TOTAL_INDICES_CHECKED_TOOL_TIP = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.statLabels.totalIndicesCheckedToolTip',
   {
-    defaultMessage: 'The total count of all indices checked',
+    defaultMessage:
+      'The total count of all indices checked (internal indices, patterns and kibana sample data are skipped)',
   }
 );
 
