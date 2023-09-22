@@ -71,9 +71,12 @@ describe('Create ', () => {
     userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        [customFieldConfiguration.key]: false,
-      }, true);
+      expect(onSubmit).toHaveBeenCalledWith(
+        {
+          [customFieldConfiguration.key]: false,
+        },
+        true
+      );
     });
   });
 
