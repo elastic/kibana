@@ -29,6 +29,7 @@ export const PanelsResizable = ({
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
+  ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
 }: {
   className?: string;
@@ -40,6 +41,7 @@ export const PanelsResizable = ({
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
   resizeButtonClassName?: string;
+  ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }) => {
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
@@ -169,7 +171,7 @@ export const PanelsResizable = ({
       onPanelWidthChange={onPanelSizeChange}
       onResizeStart={onResizeStart}
       onResizeEnd={onResizeEnd}
-      data-test-subj="unifiedHistogramResizableContainer"
+      data-test-subj={`${dataTestSubj}ResizableContainer`}
     >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
@@ -178,20 +180,20 @@ export const PanelsResizable = ({
             minSize={`${minFixedPanelSize}px`}
             size={panelSizes.fixedPanelSizePct}
             paddingSize="none"
-            data-test-subj="unifiedHistogramResizablePanelTop"
+            data-test-subj={`${dataTestSubj}ResizablePanelFixed`}
           >
             {fixedPanel}
           </EuiResizablePanel>
           <EuiResizableButton
             className={resizeButtonClassName}
             css={resizeWithPortalsHackButtonCss}
-            data-test-subj="unifiedHistogramResizableButton"
+            data-test-subj={`${dataTestSubj}ResizableButton`}
           />
           <EuiResizablePanel
             minSize={`${minFlexPanelSize}px`}
             size={panelSizes.flexPanelSizePct}
             paddingSize="none"
-            data-test-subj="unifiedHistogramResizablePanelMain"
+            data-test-subj={`${dataTestSubj}ResizablePanelFlex`}
           >
             {flexPanel}
           </EuiResizablePanel>

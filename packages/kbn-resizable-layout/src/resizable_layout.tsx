@@ -23,6 +23,7 @@ export interface ResizableLayoutProps {
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
   resizeButtonClassName?: string;
+  ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }
 
@@ -39,6 +40,7 @@ const ResizableLayout = ({
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
+  ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
   const panelsProps = { className, fixedPanel, flexPanel };
@@ -57,6 +59,7 @@ const ResizableLayout = ({
       minFixedPanelSize={minFixedPanelSize}
       minFlexPanelSize={minFlexPanelSize}
       resizeButtonClassName={resizeButtonClassName}
+      data-test-subj={dataTestSubj}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
       {...panelsProps}
     />

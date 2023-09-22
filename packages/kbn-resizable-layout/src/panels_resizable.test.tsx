@@ -74,10 +74,10 @@ describe('Panels resizable', () => {
   ) => {
     const fixedPanelSizePct = (fixedPanelSize / currentContainerSize) * 100;
     expect(
-      component.find('[data-test-subj="unifiedHistogramResizablePanelTop"]').at(0).prop('size')
+      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
     ).toBe(fixedPanelSizePct);
     expect(
-      component.find('[data-test-subj="unifiedHistogramResizablePanelMain"]').at(0).prop('size')
+      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
     ).toBe(100 - fixedPanelSizePct);
   };
 
@@ -114,7 +114,7 @@ describe('Panels resizable', () => {
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newFixedPanelSizePct = 30;
     const onPanelSizeChange = component
-      .find('[data-test-subj="unifiedHistogramResizableContainer"]')
+      .find('[data-test-subj="resizableLayoutResizableContainer"]')
       .at(0)
       .prop('onPanelWidthChange') as Function;
     act(() => {
@@ -169,10 +169,10 @@ describe('Panels resizable', () => {
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
     forceRender(component);
     expect(
-      component.find('[data-test-subj="unifiedHistogramResizablePanelTop"]').at(0).prop('size')
+      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
     ).toBe((minFixedPanelSize / newContainerSize) * 100);
     expect(
-      component.find('[data-test-subj="unifiedHistogramResizablePanelMain"]').at(0).prop('size')
+      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
     ).toBe((minFlexPanelSize / newContainerSize) * 100);
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
     forceRender(component);
@@ -184,8 +184,8 @@ describe('Panels resizable', () => {
     document.body.appendChild(attachTo);
     const component = mountComponent({ attachTo });
     const getContainer = () =>
-      component.find('[data-test-subj="unifiedHistogramResizableContainer"]').at(0);
-    const resizeButton = component.find('button[data-test-subj="unifiedHistogramResizableButton"]');
+      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0);
+    const resizeButton = component.find('button[data-test-subj="resizableLayoutResizableButton"]');
     act(() => {
       const onResizeStart = getContainer().prop('onResizeStart') as Function;
       onResizeStart('pointer');
@@ -205,20 +205,14 @@ describe('Panels resizable', () => {
   it('should pass direction "vertical" to EuiResizableContainer when direction is ResizableLayoutDirection.Vertical', () => {
     const component = mountComponent({ direction: ResizableLayoutDirection.Vertical });
     expect(
-      component
-        .find('[data-test-subj="unifiedHistogramResizableContainer"]')
-        .at(0)
-        .prop('direction')
+      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0).prop('direction')
     ).toBe('vertical');
   });
 
   it('should pass direction "horizontal" to EuiResizableContainer when direction is ResizableLayoutDirection.Horizontal', () => {
     const component = mountComponent({ direction: ResizableLayoutDirection.Horizontal });
     expect(
-      component
-        .find('[data-test-subj="unifiedHistogramResizableContainer"]')
-        .at(0)
-        .prop('direction')
+      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0).prop('direction')
     ).toBe('horizontal');
   });
 

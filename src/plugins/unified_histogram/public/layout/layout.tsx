@@ -311,6 +311,7 @@ export const UnifiedHistogramLayout = ({
         minFlexPanelSize={minMainPanelHeight}
         fixedPanel={<OutPortal node={topPanelNode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
+        data-test-subj="unifiedHistogram"
         onFixedPanelSizeChange={onTopPanelHeightChange}
       />
     </>

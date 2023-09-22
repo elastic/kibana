@@ -125,10 +125,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
   const [isSidebarCollapsed$] = useState(() => new BehaviorSubject(isSidebarCollapsed));
 
-  useEffect(() => {
-    isSidebarCollapsed$.next(isSidebarCollapsed);
-  }, [isSidebarCollapsed, isSidebarCollapsed$]);
-
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
     Boolean(dataView && !dataView.isPersisted());
@@ -228,6 +224,10 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       cleanup();
     };
   }, []);
+
+  useEffect(() => {
+    isSidebarCollapsed$.next(isSidebarCollapsed);
+  }, [isSidebarCollapsed, isSidebarCollapsed$]);
 
   useImperativeHandle(
     componentRef,

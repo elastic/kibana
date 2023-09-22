@@ -19,7 +19,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 
-const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
+export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
 export const DiscoverResizableLayout = ({
   sidebarResizeRef,
@@ -72,6 +72,7 @@ export const DiscoverResizableLayout = ({
         fixedPanel={<OutPortal node={sidebarPanelMode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
         resizeButtonClassName="dscSidebarResizeButton"
+        data-test-subj="discoverLayout"
         onFixedPanelSizeChange={setSidebarWidth}
       />
     </>
