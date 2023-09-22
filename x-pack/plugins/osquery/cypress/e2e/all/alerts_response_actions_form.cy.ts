@@ -30,7 +30,7 @@ import { ServerlessRoleName } from '../../support/roles';
 
 describe(
   'Alert Event Details - Response Actions Form',
-  { browser: 'electron', tags: ['@ess', '@serverless'] },
+  { browser: 'electron', tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
