@@ -6,10 +6,11 @@
  */
 
 import { DISCOVER_CONTAINER } from '../../../../screens/discover';
+import { PAGE_TITLE } from '../../../../screens/common/page';
 import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login, visit } from '../../../../tasks/login';
-import { ALERTS_URL, DISCOVER_URL } from '../../../../urls/navigation';
+import { ALERTS_URL, DISCOVER_URL, DASHBOARDS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
@@ -27,9 +28,17 @@ describe(
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverGridToLoad();
     });
-    it('should load the discover components in timeline via the ', () => {
+    it('should load the discover components in timeline via a redirect', () => {
       cy.get(DISCOVER_CONTAINER).should('exist');
       cy.url().should('include', ALERTS_URL);
+    });
+    it('should support the native back button by redirecting via replace and not push', () => {
+      visit(DASHBOARDS_URL);
+      cy.get(PAGE_TITLE).should('contain.text', 'Dashboards');
+      visit(DISCOVER_URL);
+      cy.get(DISCOVER_CONTAINER).should('exist');
+      cy.go('back');
+      cy.get(PAGE_TITLE).should('contain.text', 'Dashboards');
     });
   }
 );
