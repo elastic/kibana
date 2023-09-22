@@ -188,28 +188,28 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       return {
         navLinks: {
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
         },
         catalogue: {
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
         },
       };
     });
