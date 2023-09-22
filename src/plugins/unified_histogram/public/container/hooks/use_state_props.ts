@@ -14,7 +14,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
