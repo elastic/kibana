@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { ShardFailureFlyout } from './shard_failure_flyout';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { OpenShardFailureFlyoutButton } from './open_shard_failure_flyout_button';
 
 interface Props {
   failures: estypes.ShardFailure[];
@@ -18,8 +18,6 @@ interface Props {
 }
 
 export function ShardsView({ failures, shardStats }: Props) {
-  const [showFailures, setShowFailures] = useState(false);
-
   return !shardStats && failures.length === 0 ? null : (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -33,23 +31,9 @@ export function ShardsView({ failures, shardStats }: Props) {
           </EuiTitle>
         </EuiFlexItem>
 
-        {failures.length ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              flush="left"
-              onClick={() => {
-                setShowFailures(!showFailures);
-              }}
-              size="xs"
-            >
-              {i18n.translate('inspector.requests.clusters.shards.hideFailuresLabel', {
-                defaultMessage:
-                  'View {failedShardCount} failed {failedShardCount, plural, one {shard} other {shards}}',
-                values: { failedShardCount: failures.length },
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <OpenShardFailureFlyoutButton failures={failures} />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       {shardStats ? (
@@ -70,15 +54,6 @@ export function ShardsView({ failures, shardStats }: Props) {
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : null}
-
-      {showFailures ? (
-        <ShardFailureFlyout
-          failures={failures}
-          onClose={() => {
-            setShowFailures(false);
-          }}
-        />
       ) : null}
     </>
   );

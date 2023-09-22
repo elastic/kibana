@@ -21,13 +21,13 @@ exports[`render should render with failures 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        View 1 failed shard
-      </EuiButtonEmpty>
+      <OpenShardFailureFlyoutButton
+        failures={
+          Array [
+            Object {},
+          ]
+        }
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
@@ -62,6 +62,13 @@ exports[`render should render with no failures 1`] = `
           Shards
         </h4>
       </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <OpenShardFailureFlyoutButton
+        failures={Array []}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
