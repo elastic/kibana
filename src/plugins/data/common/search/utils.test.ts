@@ -7,17 +7,17 @@
  */
 
 import type { IKibanaSearchResponse } from './types';
-import { isMalformedResponse, isRunningResponse } from './utils';
+import { isAbortedResponse, isRunningResponse } from './utils';
 
 describe('utils', () => {
-  describe('isMalformedResponse', () => {
+  describe('isAbortedResponse', () => {
     it('returns `true` if the response is undefined', () => {
-      const isError = isMalformedResponse();
+      const isError = isAbortedResponse();
       expect(isError).toBe(true);
     });
 
     it('returns `true` if rawResponse is undefined', () => {
-      const isError = isMalformedResponse({} as unknown as IKibanaSearchResponse);
+      const isError = isAbortedResponse({} as unknown as IKibanaSearchResponse);
       expect(isError).toBe(true);
     });
   });

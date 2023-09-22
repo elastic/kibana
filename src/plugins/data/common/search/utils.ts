@@ -10,15 +10,18 @@ import moment from 'moment-timezone';
 import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
+// TODO - investigate if this check is still needed
+// There are no documented work flows where response or rawResponse is not returned
+// Leaving check to prevent breaking changes until full investigation can be completed.
 /**
- * @returns true if response is malformed
+ * @returns true if response is abort
  */
-export const isMalformedResponse = (response?: IKibanaSearchResponse) => {
+export const isAbortedResponse = (response?: IKibanaSearchResponse) => {
   return !response || !response.rawResponse;
 };
 
 /**
- * @returns true when async search is running
+ * @returns true if request is still running
  */
 export const isRunningResponse = (response?: IKibanaSearchResponse) => response?.isRunning ?? false;
 
