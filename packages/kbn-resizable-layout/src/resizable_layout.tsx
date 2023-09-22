@@ -9,7 +9,7 @@
 import type { ReactElement, RefObject } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
-import { PanelsFixed } from './panels_fixed';
+import { PanelsStatic } from './panels_static';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
 export interface ResizableLayoutProps {
@@ -44,7 +44,7 @@ const ResizableLayout = ({
   const panelsProps = { className, fixedPanel, flexPanel };
 
   return staticModes.includes(mode) ? (
-    <PanelsFixed
+    <PanelsStatic
       direction={direction}
       hideFixedPanel={mode === ResizableLayoutMode.Single}
       {...panelsProps}

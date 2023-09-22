@@ -11,9 +11,9 @@ import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { ResizableLayoutDirection } from '../types';
-import { PanelsFixed } from './panels_fixed';
+import { PanelsStatic } from './panels_static';
 
-describe('Panels fixed', () => {
+describe('Panels static', () => {
   const mountComponent = ({
     direction = ResizableLayoutDirection.Vertical,
     hideFixedPanel = false,
@@ -26,7 +26,7 @@ describe('Panels fixed', () => {
     flexPanel: ReactElement;
   }) => {
     return mount(
-      <PanelsFixed
+      <PanelsStatic
         direction={direction}
         hideFixedPanel={hideFixedPanel}
         fixedPanel={fixedPanel}

@@ -12,7 +12,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { ResizableLayoutDirection } from '../types';
 
-export const PanelsFixed = ({
+export const PanelsStatic = ({
   className,
   direction,
   hideFixedPanel,
