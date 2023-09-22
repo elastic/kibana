@@ -19,7 +19,7 @@ export function getFailures(clusterDetails: ClusterDetails) {
   (clusterDetails.failures ?? []).forEach((failure) => {
     if (failure.shard < 0) {
       clusterFailures.push(failure);
-      (failure?.reason?.failed_shards ?? []).forEach((reasonFailure) => {
+      (failure?.reason?.failed_shards ?? []).forEach((reasonFailure: estypes.ShardFailure) => {
         shardFailures.push(reasonFailure);
       });
     } else {

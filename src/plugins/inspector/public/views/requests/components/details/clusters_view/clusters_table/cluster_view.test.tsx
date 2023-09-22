@@ -57,7 +57,7 @@ const clusterDetailsWhenClusterIsNotAvailable = {
       },
     },
   ],
-} as ClusterDetails;
+} as unknown as ClusterDetails;
 
 describe('getFailures', () => {
   test('should get failures from response with shard failures', () => {
@@ -69,7 +69,7 @@ describe('getFailures', () => {
 
   test('should get failures from response when cluster is not accessable', () => {
     expect(getFailures(clusterDetailsWhenClusterIsNotAvailable)).toEqual({
-      clusterFailures: [clusterDetailsWhenClusterIsNotAvailable.failures[0]],
+      clusterFailures: [clusterDetailsWhenClusterIsNotAvailable.failures![0]],
       shardFailures: [],
     });
   });
@@ -122,10 +122,10 @@ describe('getFailures', () => {
           },
         },
       ],
-    };
+    } as unknown as ClusterDetails;
     expect(getFailures(clusterDetails)).toEqual({
-      clusterFailures: [clusterDetails.failures[0]],
-      shardFailures: clusterDetails.failures[0].reason.failed_shards,
+      clusterFailures: [clusterDetails.failures![0]],
+      shardFailures: clusterDetails.failures![0].reason.failed_shards,
     });
   });
 });
