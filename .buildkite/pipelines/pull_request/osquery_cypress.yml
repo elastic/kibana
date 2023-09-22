@@ -28,7 +28,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Serverless Osquery Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     depends_on: build
     timeout_in_minutes: 50
     parallelism: 6

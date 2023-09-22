@@ -59,6 +59,8 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   await agentOne.setup();
   await agentTwo.setup();
 
+  await new Promise((resolve) => setTimeout(resolve, 60000));
+
   return () => {
     fleetServer.cleanup();
     agentOne.cleanup();
