@@ -1551,6 +1551,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1738,6 +1739,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -2557,6 +2559,7 @@ describe('create()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -3031,6 +3034,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const createdAttributes = {
       ...data,
@@ -3103,6 +3107,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({ schedule: { interval: '1s' } });
@@ -3140,6 +3145,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3232,6 +3238,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3281,6 +3288,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3343,6 +3351,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3423,6 +3432,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3627,6 +3637,7 @@ describe('create()', () => {
         mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         shouldWrite: true,
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3679,6 +3690,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({

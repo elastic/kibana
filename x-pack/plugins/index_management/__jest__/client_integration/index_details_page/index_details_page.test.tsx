@@ -222,6 +222,51 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
     });
+
+    describe('extension service summary', () => {
+      it('renders all summaries added to the extension service', async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [() => <span>test</span>, () => <span>test2</span>],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(true);
+        expect(testBed.actions.overview.extensionSummaryExists(1)).toBe(true);
+      });
+
+      it(`doesn't render empty panels if the summary renders null`, async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [() => null],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+
+      it(`doesn't render anything when no summaries added to the extension service`, async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            services: {
+              extensionsService: {
+                summaries: [],
+              },
+            },
+          });
+        });
+        testBed.component.update();
+        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+      });
+    });
   });
 
   it('documents tab', async () => {
