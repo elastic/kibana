@@ -924,7 +924,21 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s when trying to patch with a non existent custom field key', async () => {
-        await createConfiguration(supertest);
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
         const postedCase = await createCase(supertest, postCaseReq);
 
         await updateCase({

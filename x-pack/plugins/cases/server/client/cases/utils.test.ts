@@ -27,7 +27,7 @@ import {
   mapCaseFieldsToExternalSystemFields,
   formatComments,
   addKibanaInformationToDescription,
-  validateCustomFieldKeysAgainstConfiguration,
+  compareCustomFieldKeysAgainstConfiguration,
 } from './utils';
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { CaseStatuses, CustomFieldTypes, UserActionActions } from '../../../common/types/domain';
@@ -1344,7 +1344,7 @@ describe('utils', () => {
     });
   });
 
-  describe('validateCustomFieldKeysAgainstConfiguration', () => {
+  describe('compareCustomFieldKeysAgainstConfiguration', () => {
     const requestCustomFields: CaseCustomFields = [
       {
         key: 'first_key',
@@ -1374,16 +1374,16 @@ describe('utils', () => {
 
     it('returns empty array when no key is missing', () => {
       expect(
-        validateCustomFieldKeysAgainstConfiguration({
+        compareCustomFieldKeysAgainstConfiguration({
           requestCustomFields,
           configurationCustomFields,
         })
       ).toEqual([]);
     });
 
-    it('does not throw when requestCustomFields is empty', () => {
+    it('returns an empty array if request has no custom fields', () => {
       expect(
-        validateCustomFieldKeysAgainstConfiguration({
+        compareCustomFieldKeysAgainstConfiguration({
           requestCustomFields: [],
           configurationCustomFields,
         })
@@ -1392,7 +1392,7 @@ describe('utils', () => {
 
     it('returns missing keys', () => {
       expect(
-        validateCustomFieldKeysAgainstConfiguration({
+        compareCustomFieldKeysAgainstConfiguration({
           requestCustomFields: [
             ...requestCustomFields,
             {
@@ -1408,7 +1408,7 @@ describe('utils', () => {
 
     it('returns every key if no configurationCustomFields', () => {
       expect(
-        validateCustomFieldKeysAgainstConfiguration({
+        compareCustomFieldKeysAgainstConfiguration({
           requestCustomFields,
           configurationCustomFields: [],
         })

@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import type {
   SavedObject,
   SavedObjectsBulkUpdateResponse,
-  SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
@@ -18,14 +17,9 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
-import type {
-  AlertService,
-  CaseConfigureService,
-  CasesService,
-  CaseUserActionService,
-} from '../../services';
+import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
@@ -52,7 +46,7 @@ import {
   dedupAssignees,
   getClosedInfoForUpdate,
   getDurationForUpdate,
-  validateCustomFieldKeysAgainstConfiguration,
+  compareCustomFieldKeysAgainstConfiguration,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -65,11 +59,11 @@ import type {
   User,
   CaseAssignees,
   AttachmentAttributes,
+  CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
-import type { ConfigurationTransformedAttributes } from '../../common/types/configure';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -118,41 +112,42 @@ async function throwIfMaxUserActionsReached({
  */
 async function throwIfCustomFieldKeysInvalid({
   casesToUpdate,
-  caseConfigureService,
-  unsecuredSavedObjectsClient,
+  casesClient,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
-  caseConfigureService: CaseConfigureService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  casesClient: CasesClient;
 }) {
-  const configurations = await caseConfigureService.find({ unsecuredSavedObjectsClient });
-  const configurationMap: Record<string, ConfigurationTransformedAttributes> = {};
-  let invalidCustomFieldKeys: string[] = [];
+  // const configurations = await caseConfigureService.find({ unsecuredSavedObjectsClient });
+  const configurations = await casesClient.configure.get({});
 
-  configurations?.saved_objects.forEach((e) => {
-    if (!(e.attributes.owner in configurationMap)) {
-      configurationMap[e.attributes.owner] = e.attributes;
+  const configurationMap: Record<string, CustomFieldsConfiguration> = {};
+  const invalidKeysPerCase: Record<string, string[]> = {};
+
+  configurations.forEach((conf) => {
+    if (!(conf.owner in configurationMap)) {
+      configurationMap[conf.owner] = conf.customFields;
     }
   });
 
   casesToUpdate.forEach(({ updateReq, originalCase }) => {
     if (updateReq.customFields) {
       const owner = originalCase.attributes.owner;
-      const configurationCustomFields =
-        owner in configurationMap ? configurationMap[owner].customFields : [];
+      const configurationCustomFields = configurationMap[owner] ?? [];
 
-      invalidCustomFieldKeys = invalidCustomFieldKeys.concat(
-        validateCustomFieldKeysAgainstConfiguration({
-          requestCustomFields: updateReq.customFields,
-          configurationCustomFields,
-        })
-      );
+      invalidKeysPerCase[originalCase.id] = compareCustomFieldKeysAgainstConfiguration({
+        requestCustomFields: updateReq.customFields,
+        configurationCustomFields,
+      });
     }
   });
 
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
-  }
+  Object.keys(invalidKeysPerCase).forEach((caseId) => {
+    if (invalidKeysPerCase[caseId].length) {
+      throw Boom.badRequest(
+        `The case with case id ${caseId} has the following invalid custom field keys: ${invalidKeysPerCase[caseId]}`
+      );
+    }
+  });
 }
 
 /**
@@ -355,17 +350,16 @@ interface UpdateRequestWithOriginalCase {
  */
 export const update = async (
   cases: CasesPatchRequest,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<Cases> => {
   const {
-    unsecuredSavedObjectsClient,
     services: {
       caseService,
       userActionService,
       alertsService,
       licensingService,
       notificationService,
-      caseConfigureService,
     },
     user,
     logger,
@@ -443,11 +437,7 @@ export const update = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfDuplicatedCustomFieldKeysInCasesToUpdate({ casesToUpdate });
-    await throwIfCustomFieldKeysInvalid({
-      casesToUpdate,
-      caseConfigureService,
-      unsecuredSavedObjectsClient,
-    });
+    await throwIfCustomFieldKeysInvalid({ casesToUpdate, casesClient });
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
     const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy, isEmpty } from 'lodash';
+import { uniqBy, isEmpty, differenceWith } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -458,29 +458,16 @@ export const getUserProfiles = async (
   }, new Map());
 };
 
-export const validateCustomFieldKeysAgainstConfiguration = ({
+export const compareCustomFieldKeysAgainstConfiguration = ({
   requestCustomFields,
   configurationCustomFields = [],
 }: {
   requestCustomFields: CaseRequestCustomFields;
   configurationCustomFields?: CustomFieldsConfiguration;
 }): string[] => {
-  const invalidCustomFieldKeys: string[] = [];
-
-  requestCustomFields.forEach((customField) => {
-    let validKey = false;
-    configurationCustomFields.every(({ key: keyInConfiguration }) => {
-      if (keyInConfiguration === customField.key) {
-        validKey = true;
-      }
-
-      return !validKey;
-    });
-
-    if (!validKey) {
-      invalidCustomFieldKeys.push(customField.key);
-    }
-  });
-
-  return invalidCustomFieldKeys;
+  return differenceWith(
+    requestCustomFields,
+    configurationCustomFields,
+    (requestVal, configurationVal) => requestVal.key === configurationVal.key
+  ).map((e) => e.key);
 };
