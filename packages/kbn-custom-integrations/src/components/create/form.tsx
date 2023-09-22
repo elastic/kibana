@@ -186,7 +186,7 @@ export const CreateCustomIntegrationForm = ({
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   content={i18n.translate('customIntegrationsPackage.create.dataset.name.tooltip', {
-                    defaultMessage: 'The name of the dataset associated with this integration. ',
+                    defaultMessage: 'The name of the dataset associated with this integration. This will be part of the of the Elasticsearch data stream name ',
                   })}
                   position="right"
                 />
