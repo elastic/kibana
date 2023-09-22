@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
@@ -29,7 +30,6 @@ import { login } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
-import { visitRulesManagementTable } from 'x-pack/test/security_solution_cypress/cypress/tasks/rules_management';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
