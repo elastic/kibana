@@ -52,7 +52,9 @@ const NavigationWrapper: FC<
       <EuiPageTemplate>
         <EuiPageTemplate.Section>
           {props.clickAction ? (
-            <button onClick={props.clickAction}>{props.clickActionText ?? 'Click me'}</button>
+            <EuiButton color="text" onClick={props.clickAction}>
+              {props.clickActionText ?? 'Click me'}
+            </EuiButton>
           ) : (
             <p>Hello world</p>
           )}
@@ -158,121 +160,6 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
     <NavigationWrapper>
       <NavigationProvider {...services}>
         <DefaultNavigation {...simpleNavigationDefinition} />
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
-export const UpdatingState = (args: NavigationServices) => {
-  const simpleGroupDef: GroupDefinition = {
-    type: 'navGroup',
-    id: 'observability_project_nav',
-    title: 'Observability',
-    icon: 'logoObservability',
-    children: [
-      {
-        id: 'aiops',
-        title: 'AIOps',
-        icon: 'branch',
-        children: [
-          {
-            title: 'Anomaly detection',
-            id: 'ml:anomalyDetection',
-            link: 'ml:anomalyDetection',
-          },
-          {
-            title: 'Log Rate Analysis',
-            id: 'ml:logRateAnalysis',
-            link: 'ml:logRateAnalysis',
-          },
-          {
-            title: 'Change Point Detections',
-            link: 'ml:changePointDetections',
-            id: 'ml:changePointDetections',
-          },
-          {
-            title: 'Job Notifications',
-            link: 'ml:notifications',
-            id: 'ml:notifications',
-          },
-        ],
-      },
-      {
-        id: 'project_settings_project_nav',
-        title: 'Project settings',
-        icon: 'gear',
-        children: [
-          { id: 'management', link: 'management' },
-          { id: 'integrations', link: 'integrations' },
-          { id: 'fleet', link: 'fleet' },
-        ],
-      },
-    ],
-  };
-  const firstSection = simpleGroupDef.children![0];
-  const firstSectionFirstChild = firstSection.children![0];
-  const secondSection = simpleGroupDef.children![1];
-  const secondSectionFirstChild = secondSection.children![0];
-
-  const activeNodeSets: ChromeProjectNavigationNode[][][] = [
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSection,
-          path: [simpleGroupDef.id, firstSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSectionFirstChild,
-          path: [simpleGroupDef.id, firstSection.id, firstSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSection,
-          path: [simpleGroupDef.id, secondSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSectionFirstChild,
-          path: [simpleGroupDef.id, secondSection.id, secondSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-  ];
-  const [activeNodeIndex, setActiveNodeIndex] = useState<number>(1);
-  const toggleActiveNode = () => {
-    const value = (activeNodeIndex + 1) % 2;
-    setActiveNodeIndex(value);
-  };
-  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-  activeNodes$.next(activeNodeSets[activeNodeIndex]);
-
-  const services = storybookMock.getServices({
-    ...args,
-    activeNodes$,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-  });
-
-  return (
-    <NavigationWrapper clickAction={toggleActiveNode} clickActionText="Toggle active node">
-      <NavigationProvider {...services}>
-        <DefaultNavigation
-          navigationTree={{
-            body: [simpleGroupDef],
-          }}
-        />
       </NavigationProvider>
     </NavigationWrapper>
   );
@@ -623,6 +510,124 @@ export const CreativeUI = (args: NavigationServices) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </Navigation>
+      </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+
+export const UpdatingState = (args: NavigationServices) => {
+  const simpleGroupDef: GroupDefinition = {
+    type: 'navGroup',
+    id: 'observability_project_nav',
+    title: 'Observability',
+    icon: 'logoObservability',
+    children: [
+      {
+        id: 'aiops',
+        title: 'AIOps',
+        icon: 'branch',
+        children: [
+          {
+            title: 'Anomaly detection',
+            id: 'ml:anomalyDetection',
+            link: 'ml:anomalyDetection',
+          },
+          {
+            title: 'Log Rate Analysis',
+            id: 'ml:logRateAnalysis',
+            link: 'ml:logRateAnalysis',
+          },
+          {
+            title: 'Change Point Detections',
+            link: 'ml:changePointDetections',
+            id: 'ml:changePointDetections',
+          },
+          {
+            title: 'Job Notifications',
+            link: 'ml:notifications',
+            id: 'ml:notifications',
+          },
+        ],
+      },
+      {
+        id: 'project_settings_project_nav',
+        title: 'Project settings',
+        icon: 'gear',
+        children: [
+          { id: 'management', link: 'management' },
+          { id: 'integrations', link: 'integrations' },
+          { id: 'fleet', link: 'fleet' },
+        ],
+      },
+    ],
+  };
+  const firstSection = simpleGroupDef.children![0];
+  const firstSectionFirstChild = firstSection.children![0];
+  const secondSection = simpleGroupDef.children![1];
+  const secondSectionFirstChild = secondSection.children![0];
+
+  const activeNodeSets: ChromeProjectNavigationNode[][][] = [
+    [
+      [
+        {
+          ...simpleGroupDef,
+          path: [simpleGroupDef.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...firstSection,
+          path: [simpleGroupDef.id, firstSection.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...firstSectionFirstChild,
+          path: [simpleGroupDef.id, firstSection.id, firstSectionFirstChild.id],
+        } as unknown as ChromeProjectNavigationNode,
+      ],
+    ],
+    [
+      [
+        {
+          ...simpleGroupDef,
+          path: [simpleGroupDef.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...secondSection,
+          path: [simpleGroupDef.id, secondSection.id],
+        } as unknown as ChromeProjectNavigationNode,
+        {
+          ...secondSectionFirstChild,
+          path: [simpleGroupDef.id, secondSection.id, secondSectionFirstChild.id],
+        } as unknown as ChromeProjectNavigationNode,
+      ],
+    ],
+  ];
+
+  // use state to track which element of activeNodeSets is active
+  const [activeNodeIndex, setActiveNodeIndex] = useState<number>(0);
+  const changeActiveNode = () => {
+    const value = (activeNodeIndex + 1) % 2; // toggle between 0 and 1
+    setActiveNodeIndex(value);
+  };
+
+  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  activeNodes$.next(activeNodeSets[activeNodeIndex]);
+
+  const services = storybookMock.getServices({
+    ...args,
+    activeNodes$,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+  });
+
+  return (
+    <NavigationWrapper clickAction={changeActiveNode} clickActionText="Change active node">
+      <NavigationProvider {...services}>
+        <DefaultNavigation
+          navigationTree={{
+            body: [simpleGroupDef],
+          }}
+        />
       </NavigationProvider>
     </NavigationWrapper>
   );

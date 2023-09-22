@@ -34,16 +34,16 @@ const navigationNodeToEuiItem = (
     [`nav-item-isActive`]: isSelected,
   });
 
-  if (item.isActive) {
-    console.log('isActive', id);
-  }
+  // DEBUG isActive state updates
+  // console.log('isActive?', id, item.isActive);
+
   return {
     id,
     isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
     accordionProps: {
-      initialIsOpen: item.isActive, // FIXME dynamic is not working
+      initialIsOpen: true, // FIXME open state is controlled on component mount
     },
     linkProps: { external: isExternal },
     onClick:
