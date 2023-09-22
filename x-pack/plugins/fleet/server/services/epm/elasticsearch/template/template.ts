@@ -11,6 +11,8 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isResponseError } from '@kbn/es-errors';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -29,7 +31,6 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
-import { isResponseError } from '@kbn/es-errors';
 
 interface Properties {
   [key: string]: any;
@@ -796,7 +797,11 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    if (isResponseError(err) && err.statusCode === 400 && err.body?.error?.type === 'illegal_argument_exception') {
+    if (
+      isResponseError(err) &&
+      err.statusCode === 400 &&
+      err.body?.error?.type === 'illegal_argument_exception'
+    ) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       logger.info(`Triggering a rollover for ${dataStreamName}`);
       await rolloverDataStream(dataStreamName, esClient);
