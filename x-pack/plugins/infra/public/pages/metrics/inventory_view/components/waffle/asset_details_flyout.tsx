@@ -18,12 +18,15 @@ interface Props {
   setIsAlertFlyoutVisible: Dispatch<SetStateAction<boolean>>;
 }
 
+const ONE_HOUR = 60 * 60 * 1000;
+
 export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVisible }: Props) => {
   const { source } = useSourceContext();
-  const { currentTimeRange } = useWaffleTimeContext();
+  const { currentTime } = useWaffleTimeContext();
+
   const currentDateRange = {
-    from: new Date(currentTimeRange.from).toISOString(),
-    to: new Date(currentTimeRange.to).toISOString(),
+    from: new Date(currentTime - ONE_HOUR).toISOString(),
+    to: new Date(currentTime).toISOString(),
   };
 
   return source ? (
