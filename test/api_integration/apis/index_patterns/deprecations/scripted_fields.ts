@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest.get('/api/deprecations/');
 
       const { deprecations } = body as DeprecationsGetResponse;
+      console.log('DeBug: ', JSON.stringify(deprecations));
       const dataPluginDeprecations = deprecations.filter(
         ({ domainId }) => domainId === 'dataViews'
       );
