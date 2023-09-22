@@ -9,11 +9,9 @@ import React, { useState } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CustomFieldType } from '../types';
-import { getToggleFieldConfig } from './config';
 
 const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, isLoading }) => {
-  const { key, label, type, required } = customFieldConfiguration;
-  const config = { ...getToggleFieldConfig({ required, label }) };
+  const { key, label, type } = customFieldConfiguration;
   const [toggleValue, setToggleValue] = useState<boolean>(false);
 
   const handleChange = (value: string) => {
@@ -23,8 +21,8 @@ const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, 
   return (
     <UseField
       path={key}
-      config={config}
       component={ToggleField}
+      defaultValue={false}
       type={type}
       key={key}
       onChange={handleChange}

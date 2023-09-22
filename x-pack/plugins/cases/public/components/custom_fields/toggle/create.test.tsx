@@ -58,7 +58,7 @@ describe('Create ', () => {
     });
   });
 
-  it('shows error when text is not set is required', async () => {
+  it('sets value to false by default', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
@@ -71,10 +71,9 @@ describe('Create ', () => {
     userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(`${customFieldConfiguration.label} is required.`)
-      ).toBeInTheDocument();
-      expect(onSubmit).toHaveBeenCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({
+        [customFieldConfiguration.key]: false,
+      }, true);
     });
   });
 
