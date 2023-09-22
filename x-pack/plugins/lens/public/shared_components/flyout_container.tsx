@@ -8,6 +8,7 @@
 import './flyout_container.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -101,6 +102,9 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           className="lnsDimensionContainer"
+          css={css`
+            box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
+          `}
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
