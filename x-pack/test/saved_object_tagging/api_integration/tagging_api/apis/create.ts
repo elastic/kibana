@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       const createResponse = await supertest
         .post(`/api/saved_objects_tagging/tags/create`)
         .send({
-          name: 'my new tag',
+          name: 'my new tag 123456',
           description: 'some desc',
           color: '#772299',
         })
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(createResponse.body).to.eql({
         tag: {
           id: newTagId,
-          name: 'my new tag',
+          name: 'my new tag 123456',
           description: 'some desc',
           color: '#772299',
         },
@@ -53,12 +53,15 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             tag: {
               id: newTagId,
-              name: 'my new tag',
+              name: 'my new tag 123456',
               description: 'some desc',
               color: '#772299',
             },
           });
         });
+
+      await supertest
+        .delete(`/api/saved_objects_tagging/tags/${newTagId}`);
     });
 
     it('should return an error with details when validation failed', async () => {
