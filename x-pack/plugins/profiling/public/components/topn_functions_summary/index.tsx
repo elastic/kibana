@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { TopNFunctions } from '../../../common/functions';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';

@@ -45,6 +45,7 @@ export class UpdateSLO {
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
       id: `slo-${updatedSlo.id}`,
       document: createTempSummaryDocument(updatedSlo),
+      refresh: true,
     });
 
     return this.toResponse(updatedSlo);
@@ -73,7 +74,7 @@ export class UpdateSLO {
   private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
+      refresh: true,
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],

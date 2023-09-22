@@ -21,6 +21,8 @@ export interface ProfilingEmbeddablesDependencies {
   profilingFetchServices: Services;
 }
 
+export type GetProfilingEmbeddableDependencies = () => Promise<ProfilingEmbeddablesDependencies>;
+
 interface Props {
   deps: ProfilingEmbeddablesDependencies;
   children: ReactChild;

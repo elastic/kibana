@@ -11,7 +11,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import type { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
 interface EmbeddableFlamegraphInput {
   data?: BaseFlameGraph;
@@ -25,9 +25,7 @@ export class EmbeddableFlamegraphFactory
 {
   readonly type = EMBEDDABLE_FLAMEGRAPH;
 
-  constructor(
-    private getProfilingEmbeddableDependencies: () => Promise<ProfilingEmbeddablesDependencies>
-  ) {}
+  constructor(private getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies) {}
 
   async isEditable() {
     return false;

@@ -16,16 +16,13 @@ import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
-import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
-import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
-import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
-import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locator';
+import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
 import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
-export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;
+export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
 
 export class ProfilingPlugin implements Plugin {
@@ -150,31 +147,9 @@ export class ProfilingPlugin implements Plugin {
         };
       };
 
-    pluginsSetup.embeddable.registerEmbeddableFactory(
-      EMBEDDABLE_FLAMEGRAPH,
-      new EmbeddableFlamegraphFactory(getProfilingEmbeddableDependencies)
-    );
+    registerEmbeddables(pluginsSetup.embeddable, getProfilingEmbeddableDependencies);
 
-    return {
-      locators: {
-        flamegraphLocator: pluginsSetup.share.url.locators.create(
-          new FlamegraphLocatorDefinition()
-        ),
-        topNFunctionsLocator: pluginsSetup.share.url.locators.create(
-          new TopNFunctionsLocatorDefinition()
-        ),
-        stacktracesLocator: pluginsSetup.share.url.locators.create(
-          new StacktracesLocatorDefinition()
-        ),
-      },
-      hasSetup: async () => {
-        const response = (await coreSetup.http.get('/internal/profiling/setup/es_resources')) as {
-          has_setup: boolean;
-          has_data: boolean;
-        };
-        return response.has_setup;
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart) {

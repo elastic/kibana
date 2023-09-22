@@ -79,5 +79,9 @@ export {
   sloFeatureId,
 } from '../common';
 
-export { EMBEDDABLE_FLAMEGRAPH } from './components/profiling/embeddables';
-export { EmbeddableFlamegraph } from './components/profiling/embeddables/embeddable_flamegraph';
+export {
+  EMBEDDABLE_FLAMEGRAPH,
+  EMBEDDABLE_FUNCTIONS,
+  EmbeddableFlamegraph,
+  EmbeddableFunctions,
+} from './components/profiling/embeddables';
