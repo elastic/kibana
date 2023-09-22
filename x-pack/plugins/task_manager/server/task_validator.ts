@@ -66,7 +66,7 @@ export class TaskValidator {
 
     let state = task.state;
 
-    // Skip validating tasks who don't use state
+    // Skip validating tasks that don't use state
     if (!latestStateSchema && isEmpty(state)) {
       return task;
     }
@@ -110,7 +110,7 @@ export class TaskValidator {
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
-    // Skip validating tasks who don't use state
+    // Skip validating tasks that don't use state
     if (!latestStateSchema && isEmpty(task.state)) {
       return task;
     }
