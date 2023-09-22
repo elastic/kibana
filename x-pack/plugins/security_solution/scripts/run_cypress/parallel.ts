@@ -344,9 +344,12 @@ ${JSON.stringify(config.getAll(), null, 2)}
 
             const baseUrl = createUrlFromFtrConfig('kibana');
 
-            const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
-              retries: 1,
-            });
+            const { env: ftrEnv, cleanup: ftrCleanup } = await pRetry(
+              () => functionalTestRunner.run(abortCtrl.signal),
+              {
+                retries: 1,
+              }
+            );
 
             log.debug(
               `Env. variables returned by [functionalTestRunner.run()]:\n`,
@@ -419,6 +422,14 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                 });
               } catch (error) {
                 result = error;
+              }
+            }
+
+            if (ftrCleanup) {
+              try {
+                await ftrCleanup();
+              } catch (e) {
+                /* empty */
               }
             }
 
