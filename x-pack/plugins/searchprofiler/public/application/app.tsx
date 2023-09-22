@@ -87,7 +87,7 @@ export const App = () => {
       <EuiPage className="prfDevTool__page appRoot">
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
-          <EuiPanel>
+          <EuiPanel className="prfDevTool__page__pageBodyContent">
             <EuiFlexGroup
               responsive={false}
               gutterSize="s"
