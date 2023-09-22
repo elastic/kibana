@@ -577,7 +577,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.only('when open on the data views tab', () => {
+      describe('when open on the data views tab', () => {
         before(async () => {
           await PageObjects.observabilityLogExplorer.navigateTo();
         });
