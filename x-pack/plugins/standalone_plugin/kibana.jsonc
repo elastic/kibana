@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/standalone-plugin",
+  "owner": "@elastic/security-solution",
+  "description": "A plugin which registers a very simple hello world application built with external pipeline and published to npm",
+  "plugin": {
+    "id": "standalonePlugin",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"],
+    "requiredBundles": []
+  }
+}

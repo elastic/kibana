@@ -5803,6 +5803,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/standalone-plugin@link:x-pack/plugins/standalone_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/state-containers-examples-plugin@link:examples/state_containers_examples":
   version "0.0.0"
   uid ""

@@ -1430,6 +1430,8 @@
       "@kbn/stack-connectors-plugin/*": ["x-pack/plugins/stack_connectors/*"],
       "@kbn/stack-management-usage-test-plugin": ["x-pack/test/usage_collection/plugins/stack_management_usage_test"],
       "@kbn/stack-management-usage-test-plugin/*": ["x-pack/test/usage_collection/plugins/stack_management_usage_test/*"],
+      "@kbn/standalone-plugin": ["x-pack/plugins/standalone_plugin"],
+      "@kbn/standalone-plugin/*": ["x-pack/plugins/standalone_plugin/*"],
       "@kbn/state-containers-examples-plugin": ["examples/state_containers_examples"],
       "@kbn/state-containers-examples-plugin/*": ["examples/state_containers_examples/*"],
       "@kbn/status-plugin-a-plugin": ["test/server_integration/plugins/status_plugin_a"],
