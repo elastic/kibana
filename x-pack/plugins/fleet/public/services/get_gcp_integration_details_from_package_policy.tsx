@@ -46,8 +46,8 @@ export const getGcpIntegrationDetailsFromPackagePolicy = (packagePolicy?: Packag
   gcpAccountType = gcpAccountType !== '' ? gcpAccountType : undefined;
 
   return {
-    gcpProjectId: gcpProjectId,
-    gcpOrganizationId: gcpOrganizationId,
-    gcpAccountType: gcpAccountType,
-  }
+    gcpProjectId,
+    gcpOrganizationId,
+    gcpAccountType,
+  };
 };
