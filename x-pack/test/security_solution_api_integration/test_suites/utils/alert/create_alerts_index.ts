@@ -12,17 +12,21 @@ import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common
 import { countDownTest } from '../count_down_test';
 
 /**
- * Creates the signals index for use inside of beforeEach blocks of tests
+ * Creates the alerts index for use inside of beforeEach blocks of tests
  * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
-export const createSignalsIndex = async (
+export const createAlertsIndex = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await supertest
+        .post(DETECTION_ENGINE_INDEX_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .send();
       return {
         passed: true,
       };

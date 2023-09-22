@@ -27,11 +27,13 @@ export const deleteAllRules = async (
       await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)
         .send({ action: 'delete', query: '' })
-        .set('kbn-xsrf', 'true');
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31');
 
       const { body: finalCheck } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send();
       return {
         passed: finalCheck.data.length === 0,

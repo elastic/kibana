@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Security solution API', function () {
-    loadTestFile(require.resolve('./detections_response'));
+  describe('Rule creation API', function () {
+    this.tags(['@serverless']);
+    this.tags(['@ess']);
+    loadTestFile(require.resolve('./create_rules'));
   });
 }

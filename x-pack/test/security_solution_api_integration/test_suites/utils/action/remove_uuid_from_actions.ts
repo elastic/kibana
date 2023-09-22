@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless security API', function () {
-    loadTestFile(require.resolve('./exception'));
-  });
-}
+export const removeUUIDFromActions = (actions: RuleActionArray): RuleActionArray => {
+  return actions.map(({ uuid, ...restOfAction }) => ({
+    ...restOfAction,
+  }));
+};

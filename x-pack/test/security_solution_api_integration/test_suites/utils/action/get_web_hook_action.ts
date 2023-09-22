@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Security solution API', function () {
-    loadTestFile(require.resolve('./detections_response'));
-  });
-}
+export const getWebHookAction = () => ({
+  actionTypeId: '.webhook',
+  config: {
+    method: 'post',
+    url: 'http://localhost',
+  },
+  secrets: {
+    user: 'example',
+    password: 'example',
+  },
+  name: 'Some connector',
+});

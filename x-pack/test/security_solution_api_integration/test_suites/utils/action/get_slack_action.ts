@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Security solution API', function () {
-    loadTestFile(require.resolve('./detections_response'));
-  });
-}
+export const getSlackAction = () => ({
+  actionTypeId: '.slack',
+  secrets: {
+    webhookUrl: 'http://localhost:123',
+  },
+  name: 'Slack connector',
+});
