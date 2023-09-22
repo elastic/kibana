@@ -33,7 +33,6 @@ jest.mock('../../../../common/components/user_privileges');
 const props = {
   initialFocus: 'title' as const,
   timelineId: 'timeline-1',
-  toolTip: 'tooltip message',
 };
 
 const TestEditTimelineButton = (_props: EditTimelineComponentProps) => (
