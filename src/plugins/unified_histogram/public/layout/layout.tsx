@@ -7,8 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import { PropsWithChildren, ReactElement, RefObject } from 'react';
-import React, { useMemo } from 'react';
+import React, { PropsWithChildren, ReactElement, RefObject, useMemo, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -19,7 +18,7 @@ import type {
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutMode,
@@ -226,14 +225,11 @@ export const UnifiedHistogramLayout = ({
     });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
-  const topPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [topPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
-
-  const mainPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [mainPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);

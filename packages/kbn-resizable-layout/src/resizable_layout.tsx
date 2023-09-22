@@ -16,7 +16,7 @@ export interface ResizableLayoutProps {
   className?: string;
   mode: ResizableLayoutMode;
   direction: ResizableLayoutDirection;
-  resizeRef: RefObject<HTMLDivElement>;
+  resizeRef: RefObject<HTMLElement>;
   fixedPanelSize: number;
   minFixedPanelSize: number;
   minFlexPanelSize: number;
