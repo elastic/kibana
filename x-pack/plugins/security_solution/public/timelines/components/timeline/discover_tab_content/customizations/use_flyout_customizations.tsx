@@ -11,7 +11,12 @@ export const useFlyoutCustomizations = () => {
   const setFlyoutCutomizations: CustomizationCallback = ({ customizations }) => {
     customizations.set({
       id: 'flyout',
-      docLinksDisabled: true,
+      actions: {
+        defaultActions: {
+          viewSingleDocument: { disabled: true },
+          viewSurroundingDocument: { disabled: true },
+        },
+      },
     });
   };
 

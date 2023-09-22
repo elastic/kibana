@@ -12,7 +12,6 @@ import type {
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,
-  FlyoutCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =

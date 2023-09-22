@@ -10,4 +10,3 @@ export * from './flyout_customization';
 export * from './search_bar_customization';
 export * from './top_nav_customization';
 export * from './histogram_customization';
-export * from './flyout_customization';
