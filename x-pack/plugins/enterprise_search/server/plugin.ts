@@ -110,8 +110,8 @@ export interface RouteDependencies {
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly config: ConfigType;
   /**
    * Exposed services
    */
@@ -194,8 +194,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           searchExperiences: showEnterpriseSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
         },
@@ -206,8 +206,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchApplications: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchEsre: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           searchExperiences: showEnterpriseSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
         },
