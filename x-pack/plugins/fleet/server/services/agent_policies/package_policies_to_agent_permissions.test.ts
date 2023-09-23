@@ -287,20 +287,18 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toBeUndefined();
   });
 
-  it('Throw an error if package policies is not an array', async () => {
-    await expect(() =>
-      storedPackagePoliciesToAgentPermissions(packageInfoCache, undefined)
-    ).rejects.toThrow(
+  it('Throw an error if package policies is not an array', () => {
+    expect(() => storedPackagePoliciesToAgentPermissions(packageInfoCache, undefined)).toThrow(
       /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
     );
   });
 
-  it('Returns the default permissions if a package policy does not have a package', async () => {
-    await expect(() =>
+  it('Returns the default permissions if a package policy does not have a package', () => {
+    expect(() =>
       storedPackagePoliciesToAgentPermissions(packageInfoCache, [
         { name: 'foo', package: undefined } as PackagePolicy,
       ])
-    ).rejects.toThrow(/No package for package policy foo/);
+    ).toThrow(/No package for package policy foo/);
   });
 
   it('Returns the permissions for the enabled inputs', async () => {

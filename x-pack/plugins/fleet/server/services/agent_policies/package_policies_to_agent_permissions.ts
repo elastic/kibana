@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SecurityIndicesPrivileges,
+  SecurityRoleDescriptor,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   FLEET_APM_PACKAGE,
@@ -37,10 +40,10 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'view_index_metadata',
 ];
 
-export async function storedPackagePoliciesToAgentPermissions(
+export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   packagePolicies?: PackagePolicy[]
-): Promise<FullAgentPolicyOutputPermissions | undefined> {
+): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
     throw new Error(
@@ -52,7 +55,7 @@ export async function storedPackagePoliciesToAgentPermissions(
     return;
   }
 
-  const permissionEntries = (packagePolicies as PackagePolicy[]).map(async (packagePolicy) => {
+  const permissionEntries = packagePolicies.map((packagePolicy) => {
     if (!packagePolicy.package) {
       throw new Error(`No package for package policy ${packagePolicy.name ?? packagePolicy.id}`);
     }
@@ -161,7 +164,7 @@ export async function storedPackagePoliciesToAgentPermissions(
     ];
   });
 
-  return Object.fromEntries(await Promise.all(permissionEntries));
+  return Object.fromEntries(permissionEntries);
 }
 
 export interface DataStreamMeta {
@@ -176,7 +179,10 @@ export interface DataStreamMeta {
   };
 }
 
-export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
+export function getDataStreamPrivileges(
+  dataStream: DataStreamMeta,
+  namespace: string = '*'
+): SecurityIndicesPrivileges {
   let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
   // Determine dataset
