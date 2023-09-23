@@ -213,6 +213,8 @@ export const startFleetServerWithDocker = async ({
       'run',
       '--restart',
       'no',
+      '--net',
+      'elastic',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--rm',

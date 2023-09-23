@@ -13,5 +13,7 @@ export {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   getDockerFileMountPath,
+  verifyDockerInstalled,
+  maybeCreateDockerNetwork,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
