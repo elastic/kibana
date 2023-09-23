@@ -13,17 +13,53 @@ import { PanelsStatic } from './panels_static';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
 export interface ResizableLayoutProps {
+  /**
+   * Class name for the layout container
+   */
   className?: string;
+  /**
+   * The current layout mode
+   */
   mode: ResizableLayoutMode;
+  /**
+   * The current layout direction
+   */
   direction: ResizableLayoutDirection;
+  /**
+   * Ref to the parent container, used to calculate the layout size
+   */
   resizeRef: RefObject<HTMLElement>;
+  /**
+   * Current size of the fixed panel in pixels
+   */
   fixedPanelSize: number;
+  /**
+   * Minimum size of the fixed panel in pixels
+   */
   minFixedPanelSize: number;
+  /**
+   * Minimum size of the flex panel in pixels
+   */
   minFlexPanelSize: number;
+  /**
+   * The fixed panel
+   */
   fixedPanel: ReactElement;
+  /**
+   * The flex panel
+   */
   flexPanel: ReactElement;
+  /**
+   * Class name for the resize button
+   */
   resizeButtonClassName?: string;
+  /**
+   * Test subject for the layout container
+   */
   ['data-test-subj']?: string;
+  /**
+   * Callback when the fixed panel size changes, receives the new size in pixels
+   */
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }
 
