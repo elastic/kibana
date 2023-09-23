@@ -14,6 +14,11 @@ import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+}));
+
 describe('ResizableLayout component', () => {
   const mountComponent = ({
     mode = ResizableLayoutMode.Resizable,

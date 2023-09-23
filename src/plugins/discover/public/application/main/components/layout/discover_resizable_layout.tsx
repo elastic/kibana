@@ -32,7 +32,7 @@ export const DiscoverResizableLayout = ({
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
 }) => {
-  const [sidebarPanelMode] = useState(() =>
+  const [sidebarPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
   const [mainPanelNode] = useState(() =>
@@ -59,7 +59,7 @@ export const DiscoverResizableLayout = ({
 
   return (
     <>
-      <InPortal node={sidebarPanelMode}>{sidebarPanel}</InPortal>
+      <InPortal node={sidebarPanelNode}>{sidebarPanel}</InPortal>
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <ResizableLayout
         className="dscPageBody__contents"
@@ -69,7 +69,7 @@ export const DiscoverResizableLayout = ({
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}
-        fixedPanel={<OutPortal node={sidebarPanelMode} />}
+        fixedPanel={<OutPortal node={sidebarPanelNode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
         resizeButtonClassName="dscSidebarResizeButton"
         data-test-subj="discoverLayout"

@@ -587,6 +587,7 @@
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resizable-layout": "link:packages/kbn-resizable-layout",
+    "@kbn/resizable-layout-examples-plugin": "link:examples/resizable_layout_examples",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:packages/kbn-rison",

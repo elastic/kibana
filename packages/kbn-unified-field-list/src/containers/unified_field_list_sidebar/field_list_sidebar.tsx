@@ -314,7 +314,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
       ['unifiedFieldListSidebar--fullWidth']: fullWidth,
     }),
-    minWidth: 0,
     'aria-label': i18n.translate(
       'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',
       {

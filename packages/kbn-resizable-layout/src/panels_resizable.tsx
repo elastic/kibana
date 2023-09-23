@@ -164,6 +164,13 @@ export const PanelsResizable = ({
     disableResizeWithPortalsHack();
   }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
 
+  // Don't render EuiResizableContainer until we have
+  // a container size or our panel sizes will be invalid,
+  // which can cause the resize functionality to break.
+  if (!containerSize) {
+    return null;
+  }
+
   return (
     <EuiResizableContainer
       className={className}
@@ -172,6 +179,9 @@ export const PanelsResizable = ({
       onResizeStart={onResizeStart}
       onResizeEnd={onResizeEnd}
       data-test-subj={`${dataTestSubj}ResizableContainer`}
+      css={css`
+        height: 100%;
+      `}
     >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>

@@ -41,6 +41,9 @@ export const PanelsStatic = ({
       alignItems="stretch"
       gutterSize="none"
       responsive={false}
+      css={css`
+        height: 100%;
+      `}
     >
       {!hideFixedPanel && <EuiFlexItem grow={false}>{fixedPanel}</EuiFlexItem>}
       <EuiFlexItem css={flexPanelCss}>{flexPanel}</EuiFlexItem>
