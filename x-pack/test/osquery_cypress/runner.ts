@@ -19,7 +19,10 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
+  const elasticUrl = Url.format({
+    ...config.get('servers.elasticsearch'),
+    hostname: 'host.docker.internal',
+  });
   const kibanaUrl = Url.format(config.get('servers.kibana'));
   const fleetServerUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
