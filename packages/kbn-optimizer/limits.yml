@@ -86,6 +86,7 @@ pageLoadAssetSize:
   lens: 38000
   licenseManagement: 41817
   licensing: 29004
+  links: 44490
   lists: 22900
   logExplorer: 39045
   logsShared: 281060
@@ -96,7 +97,6 @@ pageLoadAssetSize:
   ml: 82187
   monitoring: 80000
   navigation: 37269
-  navigationEmbeddable: 44490
   newsfeed: 42228
   noDataPage: 5000
   observability: 115443

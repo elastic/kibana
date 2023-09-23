@@ -238,6 +238,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
+
+
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual management section into it. This plugin does not contain any individual
@@ -251,10 +255,6 @@ management section itself.
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
 |The navigation plugins exports the TopNavMenu component.
 It also provides a stateful version of it on the start contract.
-
-
-|{kib-repo}blob/{branch}/src/plugins/navigation_embeddable/README.md[navigationEmbeddable]
-|This plugin adds the Navigation Embeddable which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
 |{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]

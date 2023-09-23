@@ -4803,6 +4803,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/links-plugin@link:src/plugins/links":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lint-packages-cli@link:packages/kbn-lint-packages-cli":
   version "0.0.0"
   uid ""
@@ -5024,10 +5028,6 @@
   uid ""
 
 "@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
-  version "0.0.0"
-  uid ""
-
-"@kbn/navigation-embeddable-plugin@link:src/plugins/navigation_embeddable":
   version "0.0.0"
   uid ""
 
