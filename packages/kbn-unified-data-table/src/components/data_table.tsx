@@ -723,13 +723,7 @@ export const UnifiedDataTable = ({
   );
 
   const gridStyleOverride = useMemo(() => {
-    if (gridStyle) {
-      return {
-        ...GRID_STYLE,
-        ...gridStyle,
-      };
-    }
-    return GRID_STYLE;
+    return gridStyle ?? GRID_STYLE;
   }, [gridStyle]);
 
   const rowHeightsOptions = useRowHeightsOptions({
