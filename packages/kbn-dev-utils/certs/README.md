@@ -37,13 +37,13 @@ __IMPORTANT:__ CA keystore (ca.p12) is not checked in intentionally, talk to @el
 bin/elasticsearch-certutil ca --out ca.p12 -days 18250 --pass castorepass
 
 # Generate the PKCS #12 keystore for Elasticsearch and sign it with the CA
-bin/elasticsearch-certutil cert --out elasticsearch.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name elasticsearch --dns localhost,host.docker.internal --pass storepass
+bin/elasticsearch-certutil cert --out elasticsearch.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name elasticsearch --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
 
 # Generate the PKCS #12 keystore for Kibana and sign it with the CA
-bin/elasticsearch-certutil cert --out kibana.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name kibana --dns localhost,host.docker.internal --pass storepass
+bin/elasticsearch-certutil cert --out kibana.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name kibana --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
 
 # Generate the PKCS #12 keystore for Fleet Server and sign it with the CA
-bin/elasticsearch-certutil cert --out fleet_server.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name fleet_server --dns localhost,host.docker.internal --pass storepass
+bin/elasticsearch-certutil cert --out fleet_server.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name fleet_server --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
 
 # Copy the PKCS #12 keystore for Elasticsearch with an empty password
 openssl pkcs12 -in elasticsearch.p12 -nodes -passin pass:"storepass" -passout pass:"" | openssl pkcs12 -export -legacy -out elasticsearch_emptypassword.p12 -passout pass:""
