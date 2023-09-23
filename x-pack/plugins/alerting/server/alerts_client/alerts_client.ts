@@ -408,22 +408,25 @@ export class AlertsClient<
         ])
       );
 
-      const bulkRequest: BulkRequest = {
-        refresh: 'wait_for',
-        index: this.indexTemplateAndPattern.alias,
-        require_alias: !this.isUsingDataStreams(),
-        operations: bulkBody,
-      };
-
       try {
-        const response = await esClient.bulk(bulkRequest);
+        const response = await esClient.bulk({
+          refresh: 'wait_for',
+          index: this.indexTemplateAndPattern.alias,
+          require_alias: !this.isUsingDataStreams(),
+          body: bulkBody,
+        });
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
           await resolveAlertConflicts({
             logger: this.options.logger,
             esClient,
-            bulkRequest,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
             bulkResponse: response,
           });
         }
