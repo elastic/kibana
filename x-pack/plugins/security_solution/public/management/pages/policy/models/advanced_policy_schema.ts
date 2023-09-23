@@ -1255,10 +1255,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api.credential_access',
+    key: 'windows.advanced.events.api_call.credential_access',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.credential_access',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.credential_access',
       {
         defaultMessage:
           'Controls whether Credential Access API events are enabled. Default: true',
@@ -1266,10 +1266,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api.etw_threat_intelligence',
+    key: 'windows.advanced.events.api_call.etw_threat_intelligence',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.etw_threat_intelligence',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.etw_threat_intelligence',
       {
         defaultMessage:
           'Controls whether Microsoft-Windows-Threat-Intelligence API events are enabled. Default: true',
@@ -1277,10 +1277,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api.etw_win32k',
+    key: 'windows.advanced.events.api_call.etw_win32k',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.etw_win32k',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.etw_win32k',
       {
         defaultMessage:
           'Controls whether Microsoft-Windows-Win32k API events are enabled. Default: true',
@@ -1288,10 +1288,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api.disabled',
+    key: 'windows.advanced.events.api_call.disabled',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.disbaled',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.disbaled',
       {
         defaultMessage:
           'A comma separated list of API names to selectively disable.',
@@ -1299,10 +1299,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api.verbose',
+    key: 'windows.advanced.events.api_call.verbose',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api.verbose',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.verbose',
       {
         defaultMessage:
           'Controls whether high volume API events are forwarded. Event filtering is recommended if enabled. Default: false',
