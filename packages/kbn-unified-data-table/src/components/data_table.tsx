@@ -286,7 +286,7 @@ export interface UnifiedDataTableProps {
   /**
    * Optional gridStyle override.
    */
-  gridStyle?: EuiDataGridStyle;
+  gridStyleOverride?: EuiDataGridStyle;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -722,9 +722,9 @@ export const UnifiedDataTable = ({
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
-  const gridStyleOverride = useMemo(() => {
-    return gridStyle ?? GRID_STYLE;
-  }, [gridStyle]);
+  const gridStyle = useMemo(() => {
+    return gridStyleOverride ?? GRID_STYLE;
+  }, [gridStyleOverride]);
 
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightState,
@@ -799,7 +799,7 @@ export const UnifiedDataTable = ({
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
             inMemory={inMemory}
-            gridStyle={gridStyleOverride}
+            gridStyle={gridStyle}
             renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
           />
