@@ -288,7 +288,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
   log.indent(4);
   const esURL = new URL(elasticUrl);
 
-  esURL.hostname = 'host.docker.internal';
+  esURL.hostname = 'es01';
 
   const esUrlWithRealIp = esURL.toString();
 
@@ -298,6 +298,8 @@ export const startFleetServerStandAloneWithDocker = async () => {
       'run',
       '--restart',
       'no',
+      '--net',
+      'elastic',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--rm',
