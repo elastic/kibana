@@ -41,7 +41,7 @@ export class AgentManager extends Manager {
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=https://host.docker.internal:${this.fleetServerPort}`,
+      `FLEET_URL=https://dev-fleet-server.${this.fleetServerPort}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
       '--env',

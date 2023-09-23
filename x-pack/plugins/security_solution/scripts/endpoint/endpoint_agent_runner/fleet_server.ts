@@ -305,6 +305,8 @@ export const startFleetServerStandAloneWithDocker = async () => {
       '--detach',
       '--name',
       containerName,
+      '--node.name',
+      containerName,
       // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
