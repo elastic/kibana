@@ -353,6 +353,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
     log.info(`Done. Fleet Server Stand Alone is running and connected to Fleet.
   Container Name: ${containerName}
   Container Id:   ${containerId}
+  ES: ${esUrlWithRealIp}
 
   View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
