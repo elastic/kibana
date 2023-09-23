@@ -48,18 +48,18 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const agentOne = new AgentManager(
     policyEnrollmentKey,
     config.get('servers.fleetserver.port'),
-    log
+    log,
+    config.get('serverless')
   );
   const agentTwo = new AgentManager(
     policyEnrollmentKeyTwo,
     config.get('servers.fleetserver.port'),
-    log
+    log,
+    config.get('serverless')
   );
 
   await agentOne.setup();
   await agentTwo.setup();
-
-  await new Promise((resolve) => setTimeout(resolve, 60000));
 
   return () => {
     fleetServer.cleanup();

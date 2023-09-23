@@ -17,31 +17,36 @@ export class AgentManager extends Manager {
   private fleetServerPort: string;
   private agentContainerId?: string;
 
-  constructor(policyEnrollmentKey: string, fleetServerPort: string, log: ToolingLog) {
+  constructor(
+    policyEnrollmentKey: string,
+    fleetServerPort: string,
+    log: ToolingLog,
+    isServerless: boolean
+  ) {
     super();
     this.log = log;
     this.fleetServerPort = fleetServerPort;
     this.policyEnrollmentKey = policyEnrollmentKey;
+    this.isServerless = isServerless;
   }
 
   public async setup() {
     this.log.info('Running agent preconfig');
-    this.log.info('FLEET SERVER PORT IN AGENT', this.fleetServerPort);
 
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
 
+    const network = this.isServerless ? ['--net', 'elastic'] : [];
     const dockerArgs = [
       'run',
       '--detach',
-      '--net',
-      'elastic',
+      ...network,
       '--add-host',
       'host.docker.internal:host-gateway',
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=https://dev-fleet-server.${this.fleetServerPort}`,
+      `FLEET_URL=https://host.docker.internal.${this.fleetServerPort}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
       '--env',
