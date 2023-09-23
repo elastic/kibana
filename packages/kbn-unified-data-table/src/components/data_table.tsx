@@ -340,7 +340,7 @@ export const UnifiedDataTable = ({
   externalCustomRenderers,
   consumer = 'discover',
   componentsTourSteps,
-  gridStyle,
+  gridStyleOverride,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
