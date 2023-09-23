@@ -34,6 +34,8 @@ export class AgentManager extends Manager {
     const dockerArgs = [
       'run',
       '--detach',
+      '--net',
+      'elastic',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--env',
