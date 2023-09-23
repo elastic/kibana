@@ -11,7 +11,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
-import { mockLinks } from '../../../common/mocks';
+import { mockLinksPanel } from '../../../common/mocks';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
@@ -28,7 +28,7 @@ describe('external link component', () => {
   let links: LinksEmbeddable;
   beforeEach(async () => {
     window.open = jest.fn();
-    links = await mockLinks({});
+    links = await mockLinksPanel({});
   });
 
   afterEach(() => {

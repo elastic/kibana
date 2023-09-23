@@ -52,7 +52,7 @@ export const ExternalLinkComponent = ({
       size="s"
       color="text"
       isDisabled={!link.destination || !isValidUrl}
-      className={'linkLink'}
+      className={'linksPanelLink'}
       showToolTip={!isValidUrl}
       toolTipProps={{
         content: error,

@@ -58,7 +58,7 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
   },
 ];
 
-const LinksPanelEditor = ({
+const LinksEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
   onClose,
@@ -297,4 +297,4 @@ const LinksPanelEditor = ({
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default LinksPanelEditor;
+export default LinksEditor;

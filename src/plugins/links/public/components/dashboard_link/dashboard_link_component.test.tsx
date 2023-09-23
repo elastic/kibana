@@ -13,7 +13,7 @@ import { createEvent, fireEvent, render, screen, waitFor } from '@testing-librar
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
-import { mockLinks } from '../../../common/mocks';
+import { mockLinksPanel } from '../../../common/mocks';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
@@ -64,7 +64,7 @@ describe('Dashboard link component', () => {
       state: {},
     });
     (getDashboardHref as jest.Mock).mockReturnValue('https://my-kibana.com/dashboard/123');
-    linksEmbeddable = await mockLinks({
+    linksEmbeddable = await mockLinksPanel({
       dashboardExplicitInput: mockDashboards[1].attributes,
     });
   });

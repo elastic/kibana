@@ -161,8 +161,8 @@ export const DashboardLinkComponent = ({
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
       isDisabled={Boolean(error) || loadingOnClickProps}
-      className={classNames('linkLink', {
-        linkLinkCurrent: link.destination === parentDashboardId,
+      className={classNames('linksPanelLink', {
+        linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}

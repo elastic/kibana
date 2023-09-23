@@ -106,7 +106,7 @@ export const DashboardLinkDestinationPicker = ({
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className={'linksLinkText'}>
+          <EuiFlexItem className={'linksPanelLinkText'}>
             <EuiHighlight search={searchValue} className={'wrapText'}>
               {label}
             </EuiHighlight>

@@ -34,7 +34,7 @@ export const mockLinksInput = (partial?: Partial<LinksByValueInput>): LinksByVal
   ...(partial ?? {}),
 });
 
-export const mockLinks = async ({
+export const mockLinksPanel = async ({
   explicitInput,
   dashboardExplicitInput,
 }: {

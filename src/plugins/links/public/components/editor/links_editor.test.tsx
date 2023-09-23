@@ -9,7 +9,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
-import LinksPanelEditor from './links_panel_editor';
+import LinksEditor from './links_editor';
 import { LinksStrings } from '../links_strings';
 import { Link, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
@@ -33,7 +33,7 @@ jest.mock('../dashboard_link/dashboard_link_tools', () => {
   };
 });
 
-describe('LinksPanelEditor', () => {
+describe('LinksEditor', () => {
   const defaultProps = {
     onSaveToLibrary: jest.fn().mockImplementation(() => Promise.resolve()),
     onAddToDashboard: jest.fn(),
@@ -73,7 +73,7 @@ describe('LinksPanelEditor', () => {
   });
 
   test('shows empty state with no links', async () => {
-    render(<LinksPanelEditor {...defaultProps} />);
+    render(<LinksEditor {...defaultProps} />);
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getCreateFlyoutTitle()
     );
@@ -86,7 +86,7 @@ describe('LinksPanelEditor', () => {
 
   test('shows links in order', async () => {
     const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
-    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} />);
+    render(<LinksEditor {...defaultProps} initialLinks={someLinks} />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
       LinksStrings.editor.panelEditor.getEditFlyoutTitle()
@@ -101,7 +101,7 @@ describe('LinksPanelEditor', () => {
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} isByReference />);
+    render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
@@ -111,7 +111,7 @@ describe('LinksPanelEditor', () => {
 
   test('saving by value panel calls onAddToDashboard', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
-    render(<LinksPanelEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
+    render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);

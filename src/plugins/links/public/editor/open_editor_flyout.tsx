@@ -21,9 +21,9 @@ import { runSaveToLibrary } from '../content_management/save_to_library';
 import { Link, LinksLayoutType } from '../../common/content_management';
 import { getLinksAttributeService } from '../services/attribute_service';
 
-const LazyLinksEditor = React.lazy(() => import('../components/editor/links_panel_editor'));
+const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
-const LinksPanelEditor = withSuspense(
+const LinksEditor = withSuspense(
   LazyLinksEditor,
   <EuiPanel className="eui-textCenter">
     <EuiLoadingSpinner size="l" />
@@ -102,7 +102,7 @@ export async function openEditorFlyout(
 
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
-        <LinksPanelEditor
+        <LinksEditor
           initialLinks={attributes?.links}
           initialLayout={attributes?.layout}
           onClose={onCancel}

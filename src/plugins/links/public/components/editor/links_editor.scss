@@ -32,18 +32,18 @@
     text-decoration: none;
   }
 
-  .linksLinkText {
+  .linksPanelLinkText {
     &:hover {
       text-decoration: underline !important;
     }
   }
 }
 
-.linksLinkPanel {
+.linksPanelLink {
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
 
-  .linksLinkText {
+  .linksPanelLinkText {
     flex: 1;
     min-width: 0;
   }
@@ -51,11 +51,11 @@
   &.linkError {
     border: 1px solid transparentize($euiColorWarningText, .7);
 
-    .linksLinkText {
+    .linksPanelLinkText {
       color: $euiColorWarningText;
     }
 
-    .linksLinkText--noLabel {
+    .linksPanelLinkText--noLabel {
       font-style: italic;
     }
   }
