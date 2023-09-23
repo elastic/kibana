@@ -32,6 +32,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...securitySolutionCypressConfig.get('kbnTestServer.serverArgs'),
         `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
+        `--xpack.fleet.agents.elasticsearch.host=http://es01:${securitySolutionCypressConfig.get(
+          'servers.elasticsearch.port'
+        )}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
         `--xpack.fleet.packages.0.version=latest`,
       ],

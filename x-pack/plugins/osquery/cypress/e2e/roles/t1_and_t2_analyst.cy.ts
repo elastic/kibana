@@ -25,7 +25,7 @@ import type { ServerlessRoleName } from '../../support/roles';
 
 describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {
-    describe(`${role}- READ + runSavedQueries `, () => {
+    describe(`${role}- READ + runSavedQueries `, { tags: ['@ess', '@serverless'] }, () => {
       let savedQueryName: string;
       let savedQueryId: string;
       let packName: string;

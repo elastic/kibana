@@ -39,60 +39,41 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  const fleetServer = new FleetManager(log);
-  await fleetServer.setup();
+  await new FleetManager(log).setup();
 
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
-  const agentOne = new AgentManager(
-    policyEnrollmentKey,
-    config.get('servers.fleetserver.port'),
-    log
-  );
-  const agentTwo = new AgentManager(
+  await new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
+  await new AgentManager(
     policyEnrollmentKeyTwo,
     config.get('servers.fleetserver.port'),
     log
-  );
-
-  await agentOne.setup();
-  await agentTwo.setup();
-
-  await new Promise((resolve) => setTimeout(resolve, 60000));
-
-  return () => {
-    fleetServer.cleanup();
-    agentOne.cleanup();
-    agentTwo.cleanup();
-  };
+  ).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {
   const config = context.getService('config');
 
-  const cleanup = await setupFleetAgent(context);
+  await setupFleetAgent(context);
 
   return {
-    env: {
-      FORCE_COLOR: '1',
-      baseUrl: Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-      }),
+    FORCE_COLOR: '1',
+    baseUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),
-      configport: config.get('servers.kibana.port'),
-      ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-      ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
-      ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-      KIBANA_URL: Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-      }),
-    },
-    cleanup,
+      port: config.get('servers.kibana.port'),
+    }),
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    configport: config.get('servers.kibana.port'),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+    KIBANA_URL: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
   };
 }

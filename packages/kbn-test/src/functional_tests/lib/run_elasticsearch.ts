@@ -21,7 +21,6 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
-  esPort?: number;
 }
 
 interface CcsConfig {
@@ -32,7 +31,6 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 
 function getEsConfig({
   config,
-  esPort,
   esFrom = config.get('esTestCluster.from'),
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
@@ -41,7 +39,7 @@ function getEsConfig({
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
-  const port: number | undefined = esPort || config.get('servers.elasticsearch.port');
+  const port: number | undefined = config.get('servers.elasticsearch.port');
   const ccsConfig: CcsConfig | undefined = config.get('esTestCluster.ccs');
 
   const password: string | undefined = isSecurityEnabled
