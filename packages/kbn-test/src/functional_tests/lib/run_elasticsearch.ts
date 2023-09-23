@@ -72,7 +72,6 @@ export async function runElasticsearch(
   const { log, logsDir, name } = options;
   const config = getEsConfig(options);
 
-  console.log('CONFIGPORT IN ES', config.port);
   if (!config.ccsConfig) {
     const node = await startEsNode({
       log,

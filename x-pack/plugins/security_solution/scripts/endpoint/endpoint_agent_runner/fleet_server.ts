@@ -280,7 +280,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
   let containerId;
   const {
     log,
-    elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
+    elastic: { url: elasticUrl },
     fleetServer: { port: fleetServerPort },
   } = getRuntimeServices();
 
@@ -288,15 +288,8 @@ export const startFleetServerStandAloneWithDocker = async () => {
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  let esUrlWithRealIp: string = elasticUrl;
-
-  if (isElasticOnLocalhost) {
-    esURL.hostname = 'host.docker.internal';
-    esUrlWithRealIp = esURL.toString();
-  }
-
-  console.log({ elasticUrl });
-  console.log({ esUrlWithRealIp });
+  esURL.hostname = 'es01';
+  const esUrlWithRealIp = esURL.toString();
 
   const containerName = `dev-fleet-server.${fleetServerPort}`;
   try {
@@ -304,6 +297,8 @@ export const startFleetServerStandAloneWithDocker = async () => {
       'run',
       '--restart',
       'no',
+      '--net',
+      'elastic',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--rm',

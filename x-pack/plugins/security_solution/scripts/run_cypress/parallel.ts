@@ -421,7 +421,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               }
             }
 
-            process.emit('shutdownCypressFleetServerAndAgents');
             await procs.stop('kibana');
             await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
