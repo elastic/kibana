@@ -9,7 +9,7 @@
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { ReactNode, useRef, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -40,7 +40,7 @@ const ResizableSection = ({
   flexPanelContent: ReactNode;
 }) => {
   const [fixedPanelSize, setFixedPanelSize] = useState(initialFixedPanelSize);
-  const resizeRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [fixedPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -75,7 +75,7 @@ const ResizableSection = ({
   `;
 
   return (
-    <div ref={resizeRef} css={fullWidthAndHeightCss}>
+    <div ref={setContainer} css={fullWidthAndHeightCss}>
       <InPortal node={fixedPanelNode}>
         <div css={fixedPanelCss}>{fixedPanelContent}</div>
       </InPortal>
@@ -85,7 +85,7 @@ const ResizableSection = ({
       <ResizableLayout
         mode={layoutMode}
         direction={layoutDirection}
-        resizeRef={resizeRef}
+        container={container}
         fixedPanelSize={fixedPanelSize}
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}

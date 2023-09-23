@@ -10,44 +10,46 @@ import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@e
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
-import type { ReactElement, RefObject } from 'react';
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ResizableLayoutDirection } from '../types';
-
-const percentToPixels = (containerSize: number, percentage: number) =>
-  Math.round(containerSize * (percentage / 100));
-
-const pixelsToPercent = (containerSize: number, pixels: number) => (pixels / containerSize) * 100;
+import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({
   className,
   direction,
-  resizeRef,
+  container,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
+  panelSizes,
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
+  setPanelSizes,
 }: {
   className?: string;
   direction: ResizableLayoutDirection;
-  resizeRef: RefObject<HTMLElement>;
+  container: HTMLElement | null;
   fixedPanelSize: number;
   minFixedPanelSize: number;
   minFlexPanelSize: number;
+  panelSizes: {
+    fixedPanelSizePct: number;
+    flexPanelSizePct: number;
+  };
   fixedPanel: ReactElement;
   flexPanel: ReactElement;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
+  setPanelSizes: (panelSizes: { fixedPanelSizePct: number; flexPanelSizePct: number }) => void;
 }) => {
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(resizeRef.current);
-  const containerSize = direction === 'vertical' ? containerHeight : containerWidth;
-  const [panelSizes, setPanelSizes] = useState({ fixedPanelSizePct: 0, flexPanelSizePct: 0 });
+  const { height: containerHeight, width: containerWidth } = useResizeObserver(container);
+  const containerSize = getContainerSize(direction, containerWidth, containerHeight);
 
   // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
   // will cancel the resize. To work around this we keep track of when resizes start and
@@ -90,7 +92,7 @@ export const PanelsResizable = ({
 
       onFixedPanelSizeChange?.(newFixedPanelSizePx);
     },
-    [containerSize, onFixedPanelSizeChange, fixedPanelId]
+    [fixedPanelId, containerSize, setPanelSizes, onFixedPanelSizeChange]
   );
 
   // This effect will update the panel sizes based on the top panel size whenever
@@ -133,7 +135,14 @@ export const PanelsResizable = ({
     if (!isEqual(panelSizes, newPanelSizes)) {
       setPanelSizes(newPanelSizes);
     }
-  }, [containerSize, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, panelSizes]);
+  }, [
+    containerSize,
+    fixedPanelSize,
+    minFixedPanelSize,
+    minFlexPanelSize,
+    panelSizes,
+    setPanelSizes,
+  ]);
 
   const onResizeStart = useCallback(
     (trigger: ResizeTrigger) => {
@@ -164,10 +173,9 @@ export const PanelsResizable = ({
     disableResizeWithPortalsHack();
   }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
 
-  // Don't render EuiResizableContainer until we have
-  // a container size or our panel sizes will be invalid,
-  // which can cause the resize functionality to break.
-  if (!containerSize) {
+  // Don't render EuiResizableContainer until we have have valid
+  // panel sizes or it can cause the resize functionality to break.
+  if (!panelSizes.fixedPanelSizePct && !panelSizes.flexPanelSizePct) {
     return null;
   }
 

@@ -13,7 +13,7 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
-import React, { ReactNode, RefObject, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
@@ -22,12 +22,12 @@ import { of } from 'rxjs';
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
 export const DiscoverResizableLayout = ({
-  sidebarResizeRef,
+  container,
   unifiedFieldListSidebarContainerApi,
   sidebarPanel,
   mainPanel,
 }: {
-  sidebarResizeRef: RefObject<HTMLElement>;
+  container: HTMLElement | null;
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
@@ -65,7 +65,7 @@ export const DiscoverResizableLayout = ({
         className="dscPageBody__contents"
         mode={layoutMode}
         direction={layoutDirection}
-        resizeRef={sidebarResizeRef}
+        container={container}
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}

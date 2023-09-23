@@ -55,7 +55,7 @@ describe('DiscoverResizableLayout', () => {
   it('should render sidebarPanel and mainPanel', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={null}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -68,7 +68,7 @@ describe('DiscoverResizableLayout', () => {
   it('should use the default sidebar width when no value is stored in local storage', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={null}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -81,7 +81,7 @@ describe('DiscoverResizableLayout', () => {
     mockSidebarWidth = 400;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={null}
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -94,7 +94,7 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={
           { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
         }
@@ -109,7 +109,7 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = true;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={
           { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
         }
@@ -124,7 +124,7 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={
           { isSidebarCollapsed$: of(true) } as UnifiedFieldListSidebarContainerApi
         }
@@ -139,7 +139,7 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={
           { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
         }
@@ -156,7 +156,7 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = true;
     const wrapper = mount(
       <DiscoverResizableLayout
-        sidebarResizeRef={{ current: null }}
+        container={null}
         unifiedFieldListSidebarContainerApi={
           { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
         }

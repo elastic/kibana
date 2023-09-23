@@ -184,8 +184,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isPlainRecord]);
 
-  const sidebarResizeRef = useRef<HTMLDivElement>(null);
-  const histogramLayoutResizeRef = useRef<HTMLDivElement>(null);
+  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
+  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
@@ -214,7 +214,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
-          resizeRef={histogramLayoutResizeRef}
+          container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
@@ -224,12 +224,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     currentColumns,
     dataView,
     isPlainRecord,
+    mainContainer,
     onAddFilter,
+    onDropFieldToTable,
     onFieldEdited,
     resultState,
     stateContainer,
     viewMode,
-    onDropFieldToTable,
   ]);
 
   const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
@@ -272,7 +273,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
-          ref={sidebarResizeRef}
+          ref={setSidebarContainer}
           css={css`
             width: 100%;
             height: 100%;
@@ -284,7 +285,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             history={history}
           />
           <DiscoverResizableLayout
-            sidebarResizeRef={sidebarResizeRef}
+            container={sidebarContainer}
             unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
             sidebarPanel={
               <EuiFlexGroup
@@ -347,7 +348,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 ) : (
                   <EuiPanel
                     role="main"
-                    panelRef={histogramLayoutResizeRef}
+                    panelRef={setMainContainer}
                     paddingSize="none"
                     borderRadius="none"
                     hasShadow={false}

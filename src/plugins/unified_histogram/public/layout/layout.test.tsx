@@ -50,7 +50,7 @@ describe('Layout', () => {
     services = unifiedHistogramServicesMock,
     hits = createHits(),
     chart = createChart(),
-    resizeRef = { current: null },
+    container = null,
     ...rest
   }: Partial<Omit<UnifiedHistogramLayoutProps, 'hits' | 'chart'>> & {
     hits?: UnifiedHistogramHitsContext | null;
@@ -65,7 +65,7 @@ describe('Layout', () => {
         services={services}
         hits={hits ?? undefined}
         chart={chart ?? undefined}
-        resizeRef={resizeRef}
+        container={container}
         dataView={dataViewWithTimefieldMock}
         query={{
           language: 'kuery',

@@ -22,7 +22,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 
 export const ResizablePage = () => {
   const [fixedPanelSize, setFixedPanelSize] = useState(500);
-  const resizeRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [fixedPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -55,7 +55,7 @@ export const ResizablePage = () => {
   `;
 
   return (
-    <div ref={resizeRef} css={fullWidthAndHeightCss}>
+    <div ref={setContainer} css={fullWidthAndHeightCss}>
       <InPortal node={fixedPanelNode}>
         <div css={fixedPanelCss}>
           This is the fixed width panel. It will remain the same size when resizing the window until
@@ -71,7 +71,7 @@ export const ResizablePage = () => {
       <ResizableLayout
         mode={layoutMode}
         direction={layoutDirection}
-        resizeRef={resizeRef}
+        container={container}
         fixedPanelSize={fixedPanelSize}
         minFixedPanelSize={300}
         minFlexPanelSize={500}

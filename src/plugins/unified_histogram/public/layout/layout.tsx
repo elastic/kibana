@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, RefObject, useMemo, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -96,9 +96,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   breakdown?: UnifiedHistogramBreakdownContext;
   /**
-   * Ref to the element wrapping the layout which will be used for resize calculations
+   * The parent container element, used to calculate the layout size
    */
-  resizeRef: RefObject<HTMLDivElement>;
+  container: HTMLElement | null;
   /**
    * Current top panel height -- leave undefined to use the default
    */
@@ -191,7 +191,7 @@ export const UnifiedHistogramLayout = ({
   lensTablesAdapter,
   chart: originalChart,
   breakdown,
-  resizeRef,
+  container,
   topPanelHeight,
   appendHitsCounter,
   disableAutoFetching,
@@ -305,7 +305,7 @@ export const UnifiedHistogramLayout = ({
         className={className}
         mode={panelsMode}
         direction={ResizableLayoutDirection.Vertical}
-        resizeRef={resizeRef}
+        container={container}
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}

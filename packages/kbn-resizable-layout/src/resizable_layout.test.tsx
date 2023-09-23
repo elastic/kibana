@@ -7,7 +7,7 @@
  */
 
 import { mount } from 'enzyme';
-import type { ReactElement, RefObject } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 import ResizableLayout from './resizable_layout';
 import { PanelsResizable } from './panels_resizable';
@@ -22,7 +22,7 @@ jest.mock('@elastic/eui', () => ({
 describe('ResizableLayout component', () => {
   const mountComponent = ({
     mode = ResizableLayoutMode.Resizable,
-    resizeRef = { current: null },
+    container = null,
     initialFixedPanelSize = 200,
     minFixedPanelSize = 100,
     minFlexPanelSize = 100,
@@ -30,7 +30,7 @@ describe('ResizableLayout component', () => {
     flexPanel = <></>,
   }: {
     mode?: ResizableLayoutMode;
-    resizeRef?: RefObject<HTMLDivElement>;
+    container?: HTMLElement | null;
     initialFixedPanelSize?: number;
     minFixedPanelSize?: number;
     minFlexPanelSize?: number;
@@ -41,7 +41,7 @@ describe('ResizableLayout component', () => {
       <ResizableLayout
         mode={mode}
         direction={ResizableLayoutDirection.Vertical}
-        resizeRef={resizeRef}
+        container={container}
         fixedPanelSize={initialFixedPanelSize}
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}
