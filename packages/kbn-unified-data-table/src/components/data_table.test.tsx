@@ -433,8 +433,8 @@ describe('UnifiedDataTable', () => {
     });
   });
 
-  describe('gridStyle', () => {
-    it('should render the grid with the default style if no gridStyle is provided', async () => {
+  describe('gridStyleOverride', () => {
+    it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
       const component = await getComponent({
         ...getProps(),
       });
@@ -448,10 +448,10 @@ describe('UnifiedDataTable', () => {
       expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
       expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
     });
-    it('should render the grid with style override if gridStyle is provided', async () => {
+    it('should render the grid with style override if gridStyleOverride is provided', async () => {
       const component = await getComponent({
         ...getProps(),
-        gridStyle: {
+        gridStyleOverride: {
           stripes: false,
           rowHover: 'none',
           border: 'none',
