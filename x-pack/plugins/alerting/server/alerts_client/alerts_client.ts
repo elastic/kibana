@@ -7,7 +7,6 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
