@@ -1178,7 +1178,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-
         setup_access: { value: 'manual' },
       });
 
