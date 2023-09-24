@@ -31,6 +31,20 @@ export const migratePackagePolicyToV8110: SavedObjectModelDataBackfillFn<
     const policy = input.config.policy.value;
 
     policy.global_manifest_version = 'latest';
+
+    if (policy.windows) {
+      // Credential Access has been renamed to API
+      // The meaning of this flag is a superset of the previous meaning
+      // It can be migrated directly
+      policy.windows.events.api = policy.windows.events.credential_access;
+      delete policy.windows.events.credential_access;
+
+      // 'advanced.api: bool' is superseded by 'advanced.api_call: { [string] : bool }'
+      // If it was explictly false then propagate this value
+      if( policy.windows.advanced?.api == false ) {
+        policy.windows.advanced.api_call = {etw_threat_intelligence: false, etw_win32k: false }
+      }
+    }
   }
 
   return {
