@@ -108,7 +108,6 @@ const getIndexSize = async ({
     const riskScoreIndexStats = await esClient.indices.stats({
       index,
     });
-
     const sizeInMb = (riskScoreIndexStats?._all?.primaries?.store?.size_in_bytes ?? 0) / 1e6;
     return {
       [metricField]: sizeInMb,
@@ -143,8 +142,8 @@ export const getRiskEngineMetrics = async ({
         index: riskEngineIndexPatterns.latest,
         logger,
         lastDay: false,
-        hostMetricField: 'unique_user_risk_score_total',
-        userMetricField: 'unique_host_risk_score_total',
+        hostMetricField: 'unique_host_risk_score_total',
+        userMetricField: 'unique_user_risk_score_total',
       }),
       getEntitiesAggregationData({
         esClient,
