@@ -9,6 +9,8 @@ import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
 import type {
   CaseAssignees,
+  CaseCustomField,
+  CaseCustomFields,
   CaseUserProfile,
   UserActionAction,
   UserActionType,
@@ -37,7 +39,7 @@ import type {
   UserActionEvent,
   UserActionsDict,
 } from '../types';
-import { isAssigneesArray, isStringArray } from '../type_guards';
+import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
@@ -120,6 +122,12 @@ export class UserActionPersister {
       isStringArray(newValue)
     ) {
       return this.buildTagsUserActions({ ...params, originalValue, newValue });
+    } else if (
+      field === UserActionTypes.customFields &&
+      isCustomFieldsArray(originalValue) &&
+      isCustomFieldsArray(newValue)
+    ) {
+      return this.buildCustomFieldsUserActions({ ...params, originalValue, newValue });
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -152,6 +160,52 @@ export class UserActionPersister {
     });
 
     return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.tags);
+  }
+
+  private buildCustomFieldsUserActions(params: TypedUserActionDiffedItems<CaseCustomField>) {
+    const createPayload: CreatePayloadFunction<
+      CaseCustomField,
+      typeof UserActionTypes.customFields
+    > = (items: CaseCustomFields) => ({ customFields: items });
+
+    const { originalValue, newValue } = params;
+    const compareValues = arraysDifference(originalValue, newValue);
+    const updatedCustomFieldsKeys = new Set(
+      compareValues?.addedItems.map((customField) => customField.key) ?? []
+    );
+
+    const updatedCustomFieldsUsersActions = compareValues?.addedItems
+      .map((customField) =>
+        this.buildUserAction({
+          commonArgs: params,
+          actionType: UserActionTypes.customFields,
+          action: UserActionActions.update,
+          createPayload,
+          modifiedItems: [customField],
+        })
+      )
+      .filter((userAction): userAction is UserActionEvent => userAction != null);
+
+    const customFieldsRemovedUserActions = compareValues?.deletedItems
+      .map((customField) => {
+        if (updatedCustomFieldsKeys.has(customField.key)) {
+          return null;
+        }
+
+        return this.buildUserAction({
+          commonArgs: params,
+          actionType: UserActionTypes.customFields,
+          action: UserActionActions.delete,
+          createPayload,
+          modifiedItems: [customField],
+        });
+      })
+      .filter((userAction): userAction is UserActionEvent => userAction != null);
+
+    return [
+      ...(updatedCustomFieldsUsersActions ? updatedCustomFieldsUsersActions : []),
+      ...(customFieldsRemovedUserActions ? customFieldsRemovedUserActions : []),
+    ];
   }
 
   private buildAddDeleteUserActions<Item, ActionType extends UserActionType>(

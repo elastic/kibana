@@ -12,7 +12,13 @@ import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 import { alertComment, comment } from '../../mocks';
 import type { UserActionsDict } from './types';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
+import type { PatchCasesArgs } from '../cases/types';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',
@@ -137,6 +143,117 @@ export const patchTagsCasesRequest = {
         tags: ['a', 'b'],
       },
       originalCase: originalCases[0],
+    },
+  ],
+};
+
+const originalCasesWithCustomFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['old value'] },
+          },
+        ],
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const patchAddCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['this is a text field value'] },
+          },
+        ],
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchUpdateCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['updated value'] },
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchRemoveCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchAddRemoveCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['new custom field 2'] },
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchAddResetCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: null },
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['new custom field 2'] },
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
     },
   ],
 };
