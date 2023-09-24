@@ -328,7 +328,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
       '--env',
       `ELASTICSEARCH_HOSTS=${esUrlWithRealIp}`,
       '--env',
-      `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount}`,
+      `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount.token}`,
       '--env',
       `ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=${CA_TRUSTED_FINGERPRINT}`,
       '--volume',
