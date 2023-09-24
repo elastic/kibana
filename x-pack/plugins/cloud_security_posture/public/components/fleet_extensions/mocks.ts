@@ -131,6 +131,7 @@ const getPolicyMock = (
 
   const gcpVarsMock = {
     'gcp.project_id': { type: 'text' },
+    'gcp.organization_id': { type: 'text' },
     'gcp.credentials.file': { type: 'text' },
     'gcp.credentials.json': { type: 'text' },
     'gcp.credentials.type': { type: 'text' },

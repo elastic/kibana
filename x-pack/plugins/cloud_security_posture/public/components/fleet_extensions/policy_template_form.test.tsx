@@ -1130,7 +1130,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        'gcp.organization_id': { value: 'TEST_ORG'},
         setup_access: { value: 'google_cloud_shell' },
       });
 
@@ -1140,16 +1139,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
 
-      expect(
-        getByLabelText('Organization ID')
-      ).toBeInTheDocument();
+      expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
 
     it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is manual`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        'gcp.organization_id': { value: 'TEST_ORG'},
         setup_access: { value: 'manual' },
       });
 
@@ -1159,16 +1155,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
 
-      expect(
-        getByLabelText('Organization ID')
-      ).toBeInTheDocument();
+      expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
 
     it(`Should not render ${CLOUDBEAT_GCP} Organization fields when account type is Single`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
-        'gcp.organization_id': { value: 'TEST_ORG'},
         setup_access: { value: 'google_cloud_shell' },
       });
 
@@ -1176,18 +1169,16 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull()
+      expect(queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
 
-      expect(
-        queryByLabelText('Organization ID')
-      ).toBeNull()
+      expect(queryByLabelText('Organization ID')).toBeNull();
     });
 
     it(`updates ${CLOUDBEAT_GCP} organization id`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        'gcp.organization_id': { value: 'TEST'},
+
         setup_access: { value: 'manual' },
       });
 
@@ -1195,10 +1186,10 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'TEST1');
+      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.organization_id': { value: 'TEST1'},
+        'gcp.organization_id': { value: 'c' },
       });
 
       expect(onChange).toHaveBeenCalledWith({
