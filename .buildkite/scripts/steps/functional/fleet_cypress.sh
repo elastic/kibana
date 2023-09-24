@@ -11,4 +11,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 echo "--- Fleet Cypress tests"
 
 cd x-pack/plugins/fleet
-yarn --cwd x-pack/plugins/fleet cypress:run
+
+set +e
+yarn cypress:run:reporter; status=$?; yarn junit:merge || :; exit $status
