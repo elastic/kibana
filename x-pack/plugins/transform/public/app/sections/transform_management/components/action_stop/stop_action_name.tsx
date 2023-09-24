@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { TransformCapabilities } from '../../../../../../common/types/capabilities';
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import {
+  isTransformListRowWithStats,
+  missingTransformStats,
+} from '../../../../common/transform_list';
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
@@ -36,10 +39,7 @@ export const getStopActionDisabledMessage = ({
 
   const { canStartStopTransform } = capabilities;
 
-  // Disable transforms if stats does not exist
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
-
-  if (hasNoStats) {
+  if (missingTransformStats(items)) {
     return createNoStatsTooltipMessage({
       actionName: stopActionNameText,
       count: items.length,
@@ -77,10 +77,13 @@ export const isStopActionDisabled = (
   const stoppedTransform = items.some(
     (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STOPPED
   );
-  // Disable transforms if stats does not exist
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
-  return forceDisable === true || !canStartStopTransform || stoppedTransform === true || hasNoStats;
+  return (
+    forceDisable === true ||
+    !canStartStopTransform ||
+    stoppedTransform === true ||
+    missingTransformStats(items)
+  );
 };
 
 export interface StopActionNameProps {

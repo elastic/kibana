@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiToolTip } from '@elastic/eui';
 
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { missingTransformStats } from '../../../../common/transform_list';
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import { TransformListRow } from '../../../../common';
@@ -31,9 +31,8 @@ const transformCanNotBeDeleted = (i: TransformListRow) =>
 
 export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeDeleted);
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
-  return forceDisable === true || disabled || hasNoStats;
+  return forceDisable === true || disabled || missingTransformStats(items);
 };
 
 export interface DeleteActionNameProps {
@@ -55,10 +54,7 @@ export const getDeleteActionDisabledMessage = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  // Disable for transforms if stats does not exist
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
-
-  if (hasNoStats) {
+  if (missingTransformStats(items)) {
     return createNoStatsTooltipMessage({
       actionName: deleteActionNameText,
       count: items.length,

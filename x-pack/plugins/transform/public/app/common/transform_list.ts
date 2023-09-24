@@ -33,6 +33,11 @@ export function isTransformListRowWithStats(
 ): arg is TransformListRowWithStats {
   return arg.stats !== undefined;
 }
+
+export function missingTransformStats(items: TransformListRow[]) {
+  return items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+}
+
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single
 // Action type from the array of actions.

@@ -12,7 +12,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { missingTransformStats } from '../../../../common/transform_list';
 import { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
@@ -32,9 +32,8 @@ const transformCanNotBeReseted = (i: TransformListRow) =>
 
 export const isResetActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeReseted);
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
-  return forceDisable === true || disabled || hasNoStats;
+  return forceDisable === true || disabled || missingTransformStats(items);
 };
 
 export const getResetActionDisabledMessage = ({
@@ -48,10 +47,7 @@ export const getResetActionDisabledMessage = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  // Disable for transforms if stats does not exist
-  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
-
-  if (hasNoStats) {
+  if (missingTransformStats(items)) {
     return createNoStatsTooltipMessage({
       actionName: resetActionNameText,
       count: items.length,

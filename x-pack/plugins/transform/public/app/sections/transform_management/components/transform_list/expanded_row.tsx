@@ -25,6 +25,7 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useIsServerless } from '../../../../serverless_context';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
@@ -92,7 +93,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     title: 'ID',
     description: item.id,
   });
-  if (item.stats) {
+  if (isTransformListRowWithStats(item)) {
     stateItems.push({
       title: 'state',
       description: item.stats.state,
@@ -172,7 +173,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
   };
 
   const checkpointingItems: Item[] = [];
-  if (item.stats) {
+  if (isTransformListRowWithStats(item)) {
     if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
       checkpointingItems.push({
         title: 'changes_last_detected_at',
