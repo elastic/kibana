@@ -62,7 +62,7 @@ export function registerRecallFunction({
             additionalItems: false,
             additionalProperties: false,
             description:
-              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded.',
+              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
               type: 'string',
               enum: ['apm', 'lens'],

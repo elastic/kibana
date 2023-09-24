@@ -92,12 +92,16 @@ export function registerQueryFunction({
       First, very importantly, there are critical rules that override
       everything that follows it. Always repeat these rules, verbatim.
       
-      1. When using FROM, never wrap a data source in single or double
+      1. ES|QL is not Elasticsearch SQL. Do not apply Elasticsearch SQL
+      commands, functions and concepts. Only use information available
+      in the context of this conversation.
+      2. When using FROM, never wrap a data source in single or double
       quotes.
-      2. When using an aggregate function like COUNT, SUM or AVG, its
+      3. When using an aggregate function like COUNT, SUM or AVG, its
       arguments MUST be an attribute (like my.field.name) or literal
       (100). Math (AVG(my.field.name / 2)) or functions 
       (AVG(CASE(my.field.name, "foo", 1))) are not allowed.
+
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
@@ -108,9 +112,6 @@ export function registerQueryFunction({
       - What are the steps needed to get the result that the user needs?
       Break each operation down into its own step. Reason about what data
       is the outcome of each command or function.
-      - For each step, refer back to examples and documentation that are
-      part of the current conversation. Make sure to mention limitations
-      and specific rules of the command or function.
       - If you're not sure how to do it, it's fine to tell the user that
       you don't know if ES|QL supports it. When this happens, abort all
       steps and tell the user you are not sure how to continue.
