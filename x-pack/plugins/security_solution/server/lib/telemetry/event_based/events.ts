@@ -6,7 +6,7 @@
  */
 import type { EventTypeOpts } from '@kbn/analytics-client';
 
-const RISK_SCORE_EXECUTION_SUCESS_EVENT: EventTypeOpts<{
+export const RISK_SCORE_EXECUTION_SUCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskCompletionTimeSeconds: number;
   isRunMoreThanInteval: boolean;
@@ -34,4 +34,9 @@ const RISK_SCORE_EXECUTION_SUCESS_EVENT: EventTypeOpts<{
   },
 };
 
-export const events = [RISK_SCORE_EXECUTION_SUCESS_EVENT];
+export const RISK_SCORE_EXECUTION_ERROR_EVENT: EventTypeOpts<{}> = {
+  eventType: 'risk_score_execution_error',
+  schema: {},
+};
+
+export const events = [RISK_SCORE_EXECUTION_SUCESS_EVENT, RISK_SCORE_EXECUTION_ERROR_EVENT];

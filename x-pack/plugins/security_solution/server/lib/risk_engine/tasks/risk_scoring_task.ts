@@ -33,6 +33,10 @@ import {
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
+import {
+  RISK_SCORE_EXECUTION_SUCESS_EVENT,
+  RISK_SCORE_EXECUTION_ERROR_EVENT,
+} from '../../telemetry/event_based/events';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -168,106 +172,111 @@ export const runTask = async ({
   const state = taskInstance.state as RiskScoringTaskState;
   const taskId = taskInstance.id;
   const log = logFactory(logger, taskId);
-  const taskExecutionTime = moment().utc().toISOString();
-  log('running task');
+  try {
+    const taskExecutionTime = moment().utc().toISOString();
+    log('running task');
 
-  let scoresWritten = 0;
-  const updatedState = {
-    lastExecutionTimestamp: taskExecutionTime,
-    namespace: state.namespace,
-    runs: state.runs + 1,
-    scoresWritten,
-  };
+    let scoresWritten = 0;
+    const updatedState = {
+      lastExecutionTimestamp: taskExecutionTime,
+      namespace: state.namespace,
+      runs: state.runs + 1,
+      scoresWritten,
+    };
 
-  if (taskId !== getTaskId(state.namespace)) {
-    log('outdated task; exiting');
-    return { state: updatedState };
-  }
-
-  const riskScoreService = await getRiskScoreService(state.namespace);
-  if (!riskScoreService) {
-    log('risk score service is not available; exiting task');
-    return { state: updatedState };
-  }
-
-  const configuration = await riskScoreService.getConfiguration();
-  if (configuration == null) {
-    log(
-      'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
-    );
-    return { state: updatedState };
-  }
-
-  const {
-    dataViewId,
-    enabled,
-    filter,
-    identifierType: configuredIdentifierType,
-    range: configuredRange,
-    pageSize,
-  } = configuration;
-  if (!enabled) {
-    log('risk engine is not enabled, exiting task');
-    return { state: updatedState };
-  }
-
-  const range = convertRangeToISO(configuredRange);
-  const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
-    dataViewId,
-  });
-  const identifierTypes: IdentifierType[] = configuredIdentifierType
-    ? [configuredIdentifierType]
-    : [RiskScoreEntity.host, RiskScoreEntity.user];
-
-  await asyncForEach(identifierTypes, async (identifierType) => {
-    let isWorkComplete = false;
-    let afterKeys: AfterKeys = {};
-    while (!isWorkComplete) {
-      const result = await riskScoreService.calculateAndPersistScores({
-        afterKeys,
-        index,
-        filter,
-        identifierType,
-        pageSize,
-        range,
-        runtimeMappings,
-        weights: [],
-      });
-
-      isWorkComplete = isRiskScoreCalculationComplete(result);
-      afterKeys = result.after_keys;
-      scoresWritten += result.scores_written;
+    if (taskId !== getTaskId(state.namespace)) {
+      log('outdated task; exiting');
+      return { state: updatedState };
     }
-  });
 
-  updatedState.scoresWritten = scoresWritten;
+    const riskScoreService = await getRiskScoreService(state.namespace);
+    if (!riskScoreService) {
+      log('risk score service is not available; exiting task');
+      return { state: updatedState };
+    }
 
-  const taskCompletedTime = moment().utc().toISOString();
+    const configuration = await riskScoreService.getConfiguration();
+    if (configuration == null) {
+      log(
+        'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
+      );
+      return { state: updatedState };
+    }
 
-  const taskCompletionTimeSeconds = moment(taskCompletedTime).diff(
-    moment(taskExecutionTime),
-    'seconds'
-  );
+    const {
+      dataViewId,
+      enabled,
+      filter,
+      identifierType: configuredIdentifierType,
+      range: configuredRange,
+      pageSize,
+    } = configuration;
+    if (!enabled) {
+      log('risk engine is not enabled, exiting task');
+      return { state: updatedState };
+    }
 
-  let isRunMoreThanInteval = false;
-  const intervalSeconds = taskInstance?.schedule?.interval;
-  if (intervalSeconds) {
-    isRunMoreThanInteval = taskCompletionTimeSeconds > parseIntervalAsSecond(intervalSeconds);
+    const range = convertRangeToISO(configuredRange);
+    const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
+      dataViewId,
+    });
+    const identifierTypes: IdentifierType[] = configuredIdentifierType
+      ? [configuredIdentifierType]
+      : [RiskScoreEntity.host, RiskScoreEntity.user];
+
+    await asyncForEach(identifierTypes, async (identifierType) => {
+      let isWorkComplete = false;
+      let afterKeys: AfterKeys = {};
+      while (!isWorkComplete) {
+        const result = await riskScoreService.calculateAndPersistScores({
+          afterKeys,
+          index,
+          filter,
+          identifierType,
+          pageSize,
+          range,
+          runtimeMappings,
+          weights: [],
+        });
+
+        isWorkComplete = isRiskScoreCalculationComplete(result);
+        afterKeys = result.after_keys;
+        scoresWritten += result.scores_written;
+      }
+    });
+
+    updatedState.scoresWritten = scoresWritten;
+
+    const taskCompletedTime = moment().utc().toISOString();
+
+    const taskCompletionTimeSeconds = moment(taskCompletedTime).diff(
+      moment(taskExecutionTime),
+      'seconds'
+    );
+
+    let isRunMoreThanInteval = false;
+    const intervalSeconds = taskInstance?.schedule?.interval;
+    if (intervalSeconds) {
+      isRunMoreThanInteval = taskCompletionTimeSeconds > parseIntervalAsSecond(intervalSeconds);
+    }
+
+    const telemetryEvent = {
+      scoresWritten,
+      taskCompletionTimeSeconds,
+      isRunMoreThanInteval,
+    };
+
+    telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCESS_EVENT.eventType, telemetryEvent);
+
+    log('task run completed');
+    log(JSON.stringify(telemetryEvent));
+    return {
+      state: updatedState,
+    };
+  } catch (e) {
+    telemetry.reportEvent(RISK_SCORE_EXECUTION_ERROR_EVENT.eventType, {});
+    throw e;
   }
-
-  const telemetryEvent = {
-    scoresWritten,
-    taskCompletionTimeSeconds,
-    isRunMoreThanInteval,
-  };
-
-  telemetry.reportEvent('risk_score_execution_success', telemetryEvent);
-
-  log('task run completed');
-  log(JSON.stringify(telemetryEvent));
-  return {
-    state: updatedState,
-  };
 };
 
 const createTaskRunnerFactory =
