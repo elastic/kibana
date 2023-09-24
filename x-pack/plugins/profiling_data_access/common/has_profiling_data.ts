@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { PartialSetupState } from '../../../common/setup';
-import { ProfilingSetupOptions } from './types';
+import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export async function hasProfilingData({
   client,

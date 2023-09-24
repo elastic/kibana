@@ -479,6 +479,29 @@ describe('create', () => {
         `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
       );
     });
+
+    it('throws with duplicated customFields keys', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: [
+              {
+                key: 'duplicated_key',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['this is a text field value', 'this is second'] },
+              },
+              {
+                key: 'duplicated_key',
+                type: CustomFieldTypes.TOGGLE,
+                field: { value: [true] },
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
+    });
   });
 
   describe('User actions', () => {

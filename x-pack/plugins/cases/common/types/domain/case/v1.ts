@@ -52,7 +52,7 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
-const customFieldValue = <C extends rt.Mixed>(codec: C) =>
+export const customFieldValue = <C extends rt.Mixed>(codec: C) =>
   rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
 
 const CustomFieldText = rt.strict({
@@ -61,7 +61,7 @@ const CustomFieldText = rt.strict({
   field: customFieldValue(rt.string),
 });
 
-const CustomFieldToggle = rt.strict({
+export const CustomFieldToggle = rt.strict({
   key: rt.string,
   type: CustomFieldToggleTypeRt,
   field: customFieldValue(rt.boolean),
