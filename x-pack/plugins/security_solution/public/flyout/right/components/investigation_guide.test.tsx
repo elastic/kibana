@@ -16,7 +16,7 @@ import {
   INVESTIGATION_GUIDE_NO_DATA_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockContextValue } from '../mocks/mock_context';
 import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -24,15 +24,16 @@ import { LeftPanelInvestigationTab, LeftPanelKey } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 
-const renderInvestigationGuide = () => (
-  <IntlProvider locale="en">
-    <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-      <RightPanelContext.Provider value={mockContextValue}>
-        <InvestigationGuide />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
-  </IntlProvider>
-);
+const renderInvestigationGuide = () =>
+  render(
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+        <RightPanelContext.Provider value={mockContextValue}>
+          <InvestigationGuide />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
+  );
 
 describe('<InvestigationGuide />', () => {
   it('should render investigation guide button correctly', () => {
@@ -42,7 +43,7 @@ describe('<InvestigationGuide />', () => {
       basicAlertData: { ruleId: 'ruleId' },
       ruleNote: 'test note',
     });
-    const { getByTestId, queryByTestId } = render(renderInvestigationGuide());
+    const { getByTestId, queryByTestId } = renderInvestigationGuide();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent('Investigation guide');
     expect(getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -57,7 +58,7 @@ describe('<InvestigationGuide />', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: true,
     });
-    const { getByTestId, queryByTestId } = render(renderInvestigationGuide());
+    const { getByTestId, queryByTestId } = renderInvestigationGuide();
     expect(getByTestId(INVESTIGATION_GUIDE_LOADING_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
@@ -69,7 +70,7 @@ describe('<InvestigationGuide />', () => {
       basicAlertData: {},
       ruleNote: 'test note',
     });
-    const { getByTestId, queryByTestId } = render(renderInvestigationGuide());
+    const { getByTestId, queryByTestId } = renderInvestigationGuide();
     expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toHaveTextContent(
@@ -82,7 +83,7 @@ describe('<InvestigationGuide />', () => {
       basicAlertData: { ruleId: 'ruleId' },
       ruleNote: undefined,
     });
-    const { getByTestId, queryByTestId } = render(renderInvestigationGuide());
+    const { getByTestId, queryByTestId } = renderInvestigationGuide();
     expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toHaveTextContent(
@@ -96,7 +97,7 @@ describe('<InvestigationGuide />', () => {
       error: true,
     });
 
-    const { getByTestId } = render(renderInvestigationGuide());
+    const { getByTestId } = renderInvestigationGuide();
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
   });
 
@@ -108,7 +109,7 @@ describe('<InvestigationGuide />', () => {
       ruleNote: 'test note',
     });
 
-    const { getByTestId } = render(renderInvestigationGuide());
+    const { getByTestId } = renderInvestigationGuide();
     getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID).click();
 
     expect(mockFlyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
