@@ -9,6 +9,8 @@
 import { resolve } from 'path';
 
 export const CA_CERT_PATH = process.env.TEST_CA_CERT_PATH || resolve(__dirname, '../certs/ca.crt');
+export const CA_TRUSTED_FINGERPRINT =
+  'F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84';
 export const ES_KEY_PATH = resolve(__dirname, '../certs/elasticsearch.key');
 export const ES_CERT_PATH = resolve(__dirname, '../certs/elasticsearch.crt');
 export const ES_P12_PATH = resolve(__dirname, '../certs/elasticsearch.p12');

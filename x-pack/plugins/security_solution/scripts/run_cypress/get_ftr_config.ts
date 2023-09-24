@@ -9,6 +9,7 @@ import _ from 'lodash';
 
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 import type { parseTestFileConfig } from './utils';
 
@@ -141,7 +142,7 @@ export const getFTRConfig = ({
             `--xpack.fleet.agents.elasticsearch.host=https://es01:${esPort}`
           );
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84`
+            `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=${CA_TRUSTED_FINGERPRINT}`
           );
         } else {
           vars.kbnTestServer.serverArgs.push(

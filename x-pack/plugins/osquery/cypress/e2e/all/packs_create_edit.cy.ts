@@ -379,7 +379,11 @@ describe('Packs - Create and Edit', () => {
           loadPack({
             policy_ids: [response.body.items[0].policy_id],
             queries: {
-              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+              [savedQueryName]: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
+              },
             },
           })
         )

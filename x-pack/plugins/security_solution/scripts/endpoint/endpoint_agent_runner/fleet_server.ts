@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { FLEET_SERVER_CERT_PATH, FLEET_SERVER_KEY_PATH } from '@kbn/dev-utils';
+import {
+  CA_TRUSTED_FINGERPRINT,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_KEY_PATH,
+  fleetServerDevServiceAccount,
+} from '@kbn/dev-utils';
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
@@ -39,6 +44,7 @@ import type {
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
 import { resolve } from 'path';
+import { SERVERLESS_NODES } from '@kbn/es';
 import { isServerlessKibanaFlavor } from '../common/stack_services';
 import type { FormattedAxiosError } from '../common/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
@@ -290,7 +296,7 @@ export const startFleetServerStandAloneWithDocker = async () => {
   log.indent(4);
   const esURL = new URL(elasticUrl);
 
-  esURL.hostname = 'es01';
+  esURL.hostname = SERVERLESS_NODES[0].name;
 
   const esUrlWithRealIp = esURL.toString();
 
@@ -322,9 +328,9 @@ export const startFleetServerStandAloneWithDocker = async () => {
       '--env',
       `ELASTICSEARCH_HOSTS=${esUrlWithRealIp}`,
       '--env',
-      'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ',
+      `ELASTICSEARCH_SERVICE_TOKEN=${fleetServerDevServiceAccount}`,
       '--env',
-      'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
+      `ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=${CA_TRUSTED_FINGERPRINT}`,
       '--volume',
       `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
       '--publish',
