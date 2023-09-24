@@ -6,14 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { CustomFieldRt } from '../../case/v1';
+import { CaseCustomFieldsRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const CustomFieldsUserActionPayloadRt = rt.strict({
-  customField: CustomFieldRt,
+  customField: CaseCustomFieldsRt,
 });
 
 export const CustomFieldsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.customField),
+  type: rt.literal(UserActionTypes.customFields),
   payload: CustomFieldsUserActionPayloadRt,
 });

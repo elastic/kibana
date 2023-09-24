@@ -36,7 +36,7 @@ import {
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
-  CustomFieldRt,
+  CaseCustomFieldRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
@@ -109,7 +109,7 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: limitedArraySchema({
-        codec: CustomFieldRt,
+        codec: CaseCustomFieldRt,
         fieldName: 'customFields',
         min: 0,
         max: MAX_CUSTOM_FIELDS_PER_CASE,
@@ -372,7 +372,7 @@ export const CasePatchRequestRt = rt.intersection([
        * Custom fields of the case
        */
       customFields: limitedArraySchema({
-        codec: CustomFieldRt,
+        codec: CaseCustomFieldRt,
         fieldName: 'customFields',
         min: 0,
         max: MAX_CUSTOM_FIELDS_PER_CASE,

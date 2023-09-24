@@ -14,7 +14,7 @@ import {
   CaseSeverity,
   CasesRt,
   CaseStatuses,
-  CustomFieldRt,
+  CaseCustomFieldRt,
   RelatedCaseRt,
 } from './v1';
 
@@ -267,7 +267,7 @@ describe('CasesRt', () => {
   });
 });
 
-describe('CustomFieldRt', () => {
+describe('CaseCustomFieldRt', () => {
   it.each([
     [
       'type text value text',
@@ -302,7 +302,7 @@ describe('CustomFieldRt', () => {
       },
     ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
-    const query = CustomFieldRt.decode(customField);
+    const query = CaseCustomFieldRt.decode(customField);
 
     expect(query).toStrictEqual({
       _tag: 'Right',
@@ -311,7 +311,7 @@ describe('CustomFieldRt', () => {
   });
 
   it('fails if text type and value dont match expected attributes in request', () => {
-    const query = CustomFieldRt.decode({
+    const query = CaseCustomFieldRt.decode({
       key: 'text_custom_field_1',
       type: 'text',
       field: { value: [666] },
@@ -321,7 +321,7 @@ describe('CustomFieldRt', () => {
   });
 
   it('fails if toggle type and value dont match expected attributes in request', () => {
-    const query = CustomFieldRt.decode({
+    const query = CaseCustomFieldRt.decode({
       key: 'list_custom_field_1',
       type: 'toggle',
       field: { value: ['hello'] },

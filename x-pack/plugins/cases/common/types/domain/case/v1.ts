@@ -67,9 +67,8 @@ const CustomFieldToggle = rt.strict({
   field: customFieldValue(rt.boolean),
 });
 
-export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
-
-const CaseCustomFieldsRt = rt.array(CustomFieldRt);
+export const CaseCustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
+export const CaseCustomFieldsRt = rt.array(CaseCustomFieldRt);
 
 const CaseBasicRt = rt.strict({
   /**
@@ -165,6 +164,7 @@ export const RelatedCaseRt = rt.strict({
 });
 
 export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
+export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
