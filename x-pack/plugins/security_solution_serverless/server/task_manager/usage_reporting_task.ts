@@ -198,7 +198,7 @@ export class SecurityUsageReportingTask {
     }
 
     this.logger.error(
-      `lastSuccessfulReport time of ${nextLastSuccessfulReport?.toISOString()} is past the limit of ${lookBackLimitMinutes} minutes, adjusting lastSuccessfulReport to ${lookBackLimitTime?.toISOString()}`
+      `lastSuccessfulReport time of ${nextLastSuccessfulReport.toISOString()} is past the limit of ${lookBackLimitMinutes} minutes, adjusting lastSuccessfulReport to ${lookBackLimitTime.toISOString()}`
     );
     return lookBackLimitTime;
   }

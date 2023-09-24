@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-
+import { SERVERLESS_NODES } from '@kbn/es';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
@@ -139,7 +139,7 @@ export const getFTRConfig = ({
             `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${fleetServerPort}"]`
           );
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.elasticsearch.host=https://es01:${esPort}`
+            `--xpack.fleet.agents.elasticsearch.host=https://${SERVERLESS_NODES[0].name}:${esPort}`
           );
           vars.kbnTestServer.serverArgs.push(
             `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=${CA_TRUSTED_FINGERPRINT}`
