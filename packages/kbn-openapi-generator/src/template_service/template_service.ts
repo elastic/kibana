@@ -1,28 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Handlebars from 'handlebars';
-import type { OpenAPIV3 } from 'openapi-types';
 import { resolve } from 'path';
-import type { ImportsMap } from '../parsers/get_imports_map';
-import type { NormalizedOperation } from '../parsers/openapi_types';
+import { GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
-export interface TemplateContext {
-  importsMap: ImportsMap;
-  apiOperations: NormalizedOperation[];
-  components: OpenAPIV3.ComponentsObject | undefined;
-}
+export const AVAILABLE_TEMPLATES = ['zod_operation_schema'] as const;
 
-export type TemplateName = 'schemas';
+export type TemplateName = typeof AVAILABLE_TEMPLATES[number];
 
 export interface ITemplateService {
-  compileTemplate: (templateName: TemplateName, context: TemplateContext) => string;
+  compileTemplate: (templateName: TemplateName, context: GenerationContext) => string;
 }
 
 /**
@@ -36,7 +31,7 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
   const templates = await registerTemplates(resolve(__dirname, './templates'), handlebars);
 
   return {
-    compileTemplate: (templateName: TemplateName, context: TemplateContext) => {
+    compileTemplate: (templateName: TemplateName, context: GenerationContext) => {
       return handlebars.compile(templates[templateName])(context);
     },
   };
