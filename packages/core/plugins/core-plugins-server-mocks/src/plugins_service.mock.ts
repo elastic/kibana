@@ -7,6 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import {
   PluginsService,
   type InternalPluginsServiceSetup,
@@ -32,6 +33,22 @@ const createServiceMock = (): PluginsServiceMock => ({
   stop: jest.fn(),
 });
 
+const createSetupContractMock = () => {
+  const contract: jest.Mocked<PluginsServiceSetup> = {
+    onSetup: jest.fn(),
+    onStart: jest.fn(),
+  };
+
+  return contract;
+};
+
+const createStartContractMock = () => {
+  const contract: jest.Mocked<PluginsServiceStart> = {
+    onStart: jest.fn(),
+  };
+  return contract;
+};
+
 function createUiPlugins() {
   return {
     browserConfigs: new Map(),
@@ -42,6 +59,8 @@ function createUiPlugins() {
 
 export const pluginServiceMock = {
   create: createServiceMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
   createUiPlugins,
