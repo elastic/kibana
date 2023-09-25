@@ -47,6 +47,7 @@ export const AlertAttributesExcludedFromAAD = [
   'nextRun',
   'revision',
   'running',
+  'runtimeVersion',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a

@@ -51,7 +51,11 @@ import {
   SanitizedRule,
   RuleNotifyWhen,
 } from '../../common';
-import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import {
+  EXPECTED_RUNTIME_VERSION,
+  NormalizedRuleType,
+  UntypedNormalizedRuleType,
+} from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
@@ -202,6 +206,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      runtimeVersion: number;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -766,6 +771,7 @@ export class TaskRunner<
         nextRun,
         lastRun: lastRunToRaw(lastRun),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+        runtimeVersion: EXPECTED_RUNTIME_VERSION,
       });
     }
 
@@ -920,7 +926,6 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring: this.ruleMonitoring.getMonitoring(),
       hasError: isErr(schedule),
     };
   }
@@ -990,6 +995,7 @@ export class TaskRunner<
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
+      runtimeVersion: EXPECTED_RUNTIME_VERSION,
     });
   }
 }

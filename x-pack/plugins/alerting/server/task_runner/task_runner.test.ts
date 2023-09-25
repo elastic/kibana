@@ -3106,7 +3106,7 @@ describe('Task Runner', () => {
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
-      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes }),
+      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes.params }),
     });
   });
 

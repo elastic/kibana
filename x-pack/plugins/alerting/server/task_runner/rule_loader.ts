@@ -25,12 +25,14 @@ import {
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
-export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
+export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<Params> {
+  indirectParams: Params;
   rule: SanitizedRule<Params>;
   version: string | undefined;
+  runtimeVersion: number;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
+  apiKey: string | null;
 }
 
 export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
@@ -50,6 +52,8 @@ interface ValidateRuleParams<Params extends RuleTypeParams> {
   ruleData: RuleDataResult<RuleData<Params>>;
 }
 
+const INITIAL_RUNTIME_VERSION = 1;
+
 export function validateRule<Params extends RuleTypeParams>(
   params: ValidateRuleParams<Params>
 ): ValidatedRuleData<Params> {
@@ -59,16 +63,14 @@ export function validateRule<Params extends RuleTypeParams>(
 
   const {
     ruleData: {
-      data: { indirectParams, rule, fakeRequest, rulesClient, version },
+      data: { indirectParams, rule, fakeRequest, rulesClient, version, apiKey, runtimeVersion },
     },
     ruleTypeRegistry,
     paramValidator,
     alertingEventLogger,
   } = params;
 
-  const { enabled, apiKey } = indirectParams;
-
-  if (!enabled) {
+  if (!rule.enabled) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`)
@@ -98,6 +100,7 @@ export function validateRule<Params extends RuleTypeParams>(
   return {
     rule,
     indirectParams,
+    runtimeVersion,
     fakeRequest,
     apiKey,
     rulesClient,
@@ -133,9 +136,11 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   return {
     rule,
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
+    indirectParams: rawRule.attributes.params as Params,
     fakeRequest,
     rulesClient,
+    apiKey: rawRule.attributes.apiKey,
+    runtimeVersion: rawRule.attributes.runtimeVersion || INITIAL_RUNTIME_VERSION,
   };
 }
 

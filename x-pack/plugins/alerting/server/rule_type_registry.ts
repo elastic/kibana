@@ -14,7 +14,6 @@ import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { rawRuleSchema } from './raw_rule_schema';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -93,6 +92,8 @@ const ruleTypeIdSchema = schema.string({
     }
   },
 });
+
+export const EXPECTED_RUNTIME_VERSION = 1;
 
 export type NormalizedRuleType<
   Params extends RuleTypeParams,
@@ -305,7 +306,8 @@ export class RuleTypeRegistry {
           spaceId: schema.string(),
           consumer: schema.maybe(schema.string()),
         }),
-        indirectParamsSchema: rawRuleSchema,
+        indirectParamsSchema: ruleType.validate.params,
+        expectedRuntimeVersion: EXPECTED_RUNTIME_VERSION,
       },
     });
 
