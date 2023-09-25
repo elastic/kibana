@@ -11,7 +11,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -65,6 +65,7 @@ export const DetailsPanel = React.memo(
     const expandedDetail = useDeepEqualSelector(
       (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
     );
+    const scopedActions = getScopedActions(scopeId);
 
     useEffect(() => {
       /**
@@ -73,21 +74,23 @@ export const DetailsPanel = React.memo(
        * the localStorage state will be maintained
        * */
       return () => {
-        dispatch(
-          dataTableActions.toggleDetailPanel({
-            id: scopeId,
-          })
-        );
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              id: scopeId,
+              tabType,
+            })
+          );
+        }
       };
-    }, [dispatch, scopeId]);
+    }, [dispatch, scopeId, scopedActions, tabType]);
 
     // To be used primarily in the flyout scenario where we don't want to maintain the tabType
     const defaultOnPanelClose = useCallback(() => {
-      const scopedActions = getScopedActions(scopeId);
       if (scopedActions) {
         dispatch(scopedActions.toggleDetailPanel({ id: scopeId }));
       }
-    }, [dispatch, scopeId]);
+    }, [dispatch, scopeId, scopedActions]);
 
     const activeTab = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {

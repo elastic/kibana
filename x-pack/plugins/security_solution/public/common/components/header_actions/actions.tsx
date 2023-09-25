@@ -15,6 +15,8 @@ import {
   eventHasNotes,
   getEventType,
   getPinOnClick,
+  isEvenEqlSequence,
+  isEventBuildingBlockType,
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
@@ -34,9 +36,20 @@ import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
+import { useTourContext } from '../guided_onboarding_tour';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
-const ActionsContainer = styled.div`
+const ActionsContainer = styled.div.attrs(
+  ({ className = '', $ariaRowindex }: { className?: string; $ariaRowindex: number }) => ({
+    'aria-rowindex': `${$ariaRowindex}`,
+    className: `timeline__actionsGroup ${className}`,
+  })
+)<{
+  className?: string;
+}>`
   align-items: center;
   display: flex;
   height: 25px;
@@ -50,11 +63,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
+  onEventDetailsPanelOpened,
   onRuleChange,
   showNotes,
   timelineId,
   toggleShowNotes,
   refetch,
+  isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
   const emptyNotes: string[] = [];
@@ -184,8 +199,70 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
+  const { activeStep, isTourShown, incrementStep } = useTourContext();
+
+  const isTourAnchor = useMemo(
+    () =>
+      isTourShown(SecurityStepId.alertsCases) &&
+      eventType === 'signal' &&
+      isDetectionsAlertsTable(timelineId) &&
+      ariaRowindex === 1,
+    [isTourShown, ariaRowindex, eventType, timelineId]
+  );
+
+  const onExpandEvent = useCallback(() => {
+    if (
+      isTourAnchor &&
+      activeStep === AlertsCasesTourSteps.expandEvent &&
+      isTourShown(SecurityStepId.alertsCases)
+    ) {
+      incrementStep(SecurityStepId.alertsCases);
+    }
+    if (onEventDetailsPanelOpened) {
+      onEventDetailsPanelOpened();
+    }
+  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+
+  const evetTypeClassName = useMemo(
+    () =>
+      eventType === 'raw'
+        ? 'rawEvent'
+        : eventType === 'eql'
+        ? isEvenEqlSequence(ecsData)
+          ? 'eqlSequence'
+          : 'eqlNonSequence'
+        : 'nonRawEvent',
+    [ecsData, eventType]
+  );
+  const buildingBlockTypeClassName = useMemo(
+    () => (isEventBuildingBlockType(ecsData) ? 'buildingBlockType' : ''),
+    [ecsData]
+  );
+
   return (
-    <ActionsContainer>
+    <ActionsContainer className={`${evetTypeClassName} ${buildingBlockTypeClassName}`}>
+      {!isUnifiedDataTable ? (
+        <GuidedOnboardingTourStep
+          isTourAnchor={isTourAnchor}
+          onClick={onExpandEvent}
+          step={AlertsCasesTourSteps.expandEvent}
+          tourId={SecurityStepId.alertsCases}
+        >
+          <div key="expand-event">
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="expand-event"
+                  iconType="expand"
+                  onClick={onExpandEvent}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        </GuidedOnboardingTourStep>
+      ) : null}
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction

@@ -150,6 +150,8 @@ export interface ActionProps {
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
+  // Till fully migrate to UnifiedDataTable
+  isUnifiedDataTable?: boolean;
 }
 
 interface AdditionalControlColumnProps {

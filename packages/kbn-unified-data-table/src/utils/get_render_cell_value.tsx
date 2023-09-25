@@ -9,7 +9,6 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
@@ -56,21 +55,6 @@ export const getRenderCellValueFn =
     isExpandable,
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
-      return (
-        <>
-          {externalCustomRenderers[columnId]({
-            rowIndex,
-            columnId,
-            isDetails,
-            setCellProps,
-            isExpandable,
-            isExpanded,
-            colIndex,
-          })}
-        </>
-      );
-    }
     const row = rows ? rows[rowIndex] : undefined;
 
     const field = dataView.fields.getByName(columnId);
@@ -83,16 +67,28 @@ export const getRenderCellValueFn =
         });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
-          style: {
-            backgroundColor: ctx.isDarkMode
-              ? themeDark.euiColorHighlight
-              : themeLight.euiColorHighlight,
-          },
+          className: 'dscDocsGrid__cell--expanded',
         });
       } else {
         setCellProps({ style: undefined });
       }
     }, [ctx, row, setCellProps]);
+
+    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+      return (
+        <span className={CELL_CLASS}>
+          {externalCustomRenderers[columnId]({
+            rowIndex,
+            columnId,
+            isDetails,
+            setCellProps,
+            isExpandable,
+            isExpanded,
+            colIndex,
+          })}
+        </span>
+      );
+    }
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;

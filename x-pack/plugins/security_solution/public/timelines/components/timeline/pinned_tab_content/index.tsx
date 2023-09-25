@@ -14,6 +14,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -182,7 +183,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+  const [dataLoadingState, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -257,7 +258,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 height={footerHeight}
                 id={timelineId}
                 isLive={false}
-                isLoading={isQueryLoading || loadingSourcerer}
+                isLoading={dataLoadingState === DataLoadingState.loading || loadingSourcerer}
                 itemsCount={events.length}
                 itemsPerPage={itemsPerPage}
                 itemsPerPageOptions={itemsPerPageOptions}

@@ -8,9 +8,7 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { i18n } from '@kbn/i18n';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../common/constants';
-import { EXIT_FULL_SCREEN } from '../../../../common/components/exit_full_screen/translations';
 import { isActiveTimeline } from '../../../../helpers';
 import { timelineActions } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -26,10 +24,8 @@ import {
 import { useFieldBrowserOptions } from '../../fields_browser';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
-
-export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
-  defaultMessage: 'Full screen',
-});
+import { FixedWidthLastUpdatedContainer } from './last_updated';
+import * as i18n from './translations';
 
 export const isFullScreen = ({
   globalFullScreen,
@@ -45,9 +41,14 @@ export const isFullScreen = ({
 interface Props {
   timelineId: string;
   columns: ColumnHeaderOptions[];
+  updatedAt: number;
 }
 
-export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ columns, timelineId }) => {
+export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({
+  columns,
+  timelineId,
+  updatedAt,
+}) => {
   const dispatch = useDispatch();
   const {
     services: { triggersActionsUi },
@@ -129,8 +130,9 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ columns, t
         options: fieldBrowserOptions,
       })}
       <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={timelineId} />
-      <>
-        <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
+      <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+      <span className="rightPosition">
+        <EuiToolTip content={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
           <EuiButtonIcon
             aria-label={
               isFullScreen({
@@ -138,10 +140,10 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ columns, t
                 isActiveTimelines: isActiveTimeline(timelineId),
                 timelineFullScreen,
               })
-                ? EXIT_FULL_SCREEN
-                : FULL_SCREEN
+                ? i18n.EXIT_FULL_SCREEN
+                : i18n.FULL_SCREEN
             }
-            className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
+            className={`${fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}`}
             color={fullScreen ? 'ghost' : 'primary'}
             data-test-subj={
               // a full screen button gets created for timeline and for the host page
@@ -152,7 +154,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ columns, t
             onClick={toggleFullScreen}
           />
         </EuiToolTip>
-      </>
+      </span>
     </>
   );
 };

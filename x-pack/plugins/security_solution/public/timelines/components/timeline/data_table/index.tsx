@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  EuiDataGridCellProps,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridProps,
+import {
+  EuiProgress,
+  type EuiDataGridCellValueElementProps,
+  type EuiDataGridControlColumn,
+  type EuiDataGridCustomBodyProps,
+  type EuiDataGridProps,
 } from '@elastic/eui';
-import { logicalCSS, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { JSXElementConstructor } from 'react';
-import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -23,7 +20,7 @@ import { flattenHit } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
-import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
+import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -47,32 +44,27 @@ import type {
 } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../common/store';
-import { appSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { getDefaultControlColumn } from '../body/control_columns';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
-import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
-import { RowRendererId } from '../../../../../common/api/timeline';
 import { Actions } from '../../../../common/components/header_actions/actions';
-import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { eventIsPinned } from '../body/helpers';
 import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
-import { EventsTrSupplement } from '../styles';
-import { NoteCards } from '../../notes/note_cards';
-import type { TimelineResultNote } from '../../open_timeline/types';
 import { getFormattedFields } from '../body/renderers/formatted_field';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
+import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
+import { RowRendererId } from '../../../../../common/api/timeline';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
+import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
+import CustomGridBodyControls from './render_custom_body';
+import RowDetails from './row_details';
 
-/** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
-const ARIA_ROW_INDEX_OFFSET = 2;
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -86,13 +78,14 @@ interface Props {
   sort: SortColumnTimeline[];
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
-  isQueryLoading: boolean;
   totalCount: number;
   onEventClosed: (args: ToggleDetailPanel) => void;
   expandedDetail: ExpandedDetailTimeline;
   showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
+  dataLoadingState: DataLoadingState;
+  updatedAt: number;
 }
 
 export const TimelineDataTableComponent: React.FC<Props> = ({
@@ -105,15 +98,15 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   sort,
   events,
   refetch,
-  isQueryLoading,
+  dataLoadingState,
   totalCount,
   onEventClosed,
   showExpandedDetails,
   expandedDetail,
   onChangePage,
+  updatedAt,
 }) => {
   const dispatch = useDispatch();
-  const { euiTheme } = useEuiTheme();
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: timelineId,
@@ -142,16 +135,11 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const {
     timeline: {
-      // columns,
       eventIdToNoteIds,
       excludedRowRendererIds,
-      isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
       filterManager,
-      show,
-      queryFields,
-      selectAll,
       pinnedEventIds,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
@@ -292,6 +280,13 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           ...x.headerCellProps,
         },
         rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+          if (expandedDoc && expandedDoc.id === discoverGridRows[cveProps.rowIndex].id) {
+            cveProps.setCellProps({
+              className: 'dscDocsGrid__cell--expanded',
+            });
+          } else {
+            cveProps.setCellProps({ style: undefined });
+          }
           return (
             <Actions
               ariaRowindex={cveProps.rowIndex}
@@ -319,6 +314,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
               refetch={refetch}
               setEventsLoading={setEventsLoading}
+              isUnifiedDataTable={true}
             />
           );
         },
@@ -326,7 +322,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       })),
     [
       ACTION_BUTTON_COUNT,
-      timelineId,
       discoverGridRows,
       setEventsDeleted,
       selectedEventIds,
@@ -334,8 +329,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       eventIdToNoteIds,
       loadingEventIds,
       showNotes,
+      timelineId,
       refetch,
       setEventsLoading,
+      expandedDoc,
       onToggleShowNotes,
     ]
   );
@@ -368,124 +365,37 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const associateNote = useCallback(
-    (noteId: string, event: DataTableRecord) => {
-      dispatch(timelineActions.addNoteToEvent({ eventId: event.id, id: timelineId, noteId }));
-      const isEventPinned = eventIsPinned({
-        eventId: event.id,
-        pinnedEventIds,
-      });
-      if (!isEventPinned) {
-        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event.id }));
-      }
-    },
-    [dispatch, pinnedEventIds, timelineId]
-  );
+  const enabledRowRenderers = useMemo(() => {
+    if (
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
+    )
+      return [plainRowRenderer];
 
-  const renderVisibleCols = useCallback(
-    (
-      colIndex: number,
-      rowIndex: number,
-      Cell: JSXElementConstructor<
-        {
-          colIndex: number;
-          visibleRowIndex: number;
-        } & Partial<EuiDataGridCellProps>
-      >,
-      visibleColumn: EuiDataGridColumn
-    ) => {
-      // Skip the row details cell - we'll render it manually outside of the flex wrapper
-      if (visibleColumn.id.includes('timeline')) {
-        return (
-          <Cell colIndex={colIndex} visibleRowIndex={rowIndex} key={`${rowIndex},${colIndex}`} />
-        );
-      }
-      // Render the rest of the cells normally
-      if (visibleColumn.id !== 'row-details') {
-        // TODO: using renderCellValue to render the draggable cell. We need to fix the styling though
+    if (!excludedRowRendererIds) return rowRenderers;
 
-        // return renderCellValue({
-        //   columnId: column.id,
-        //   eventId: discoverGridRows[rowIndex]._id,
-        //   data: discoverGridRows[rowIndex].data,
-        //   header: defaultHeaders.find(({ id }) => column.id === id),
-        //   isDraggable: true,
-        //   isExpandable: true,
-        //   isExpanded: false,
-        //   isDetails: false,
-        //   isTimeline: true,
-        //   linkValues: undefined,
-        //   rowIndex,
-        //   colIndex,
-        //   setCellProps: () => {},
-        //   scopeId: timelineId,
-        //   key: `${timelineId}-query`,
-        // });
-        return (
-          <Cell colIndex={colIndex} visibleRowIndex={rowIndex} key={`${rowIndex},${colIndex}`} />
-        );
-      }
-    },
-    []
-  );
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
 
-  const renderCustomGridBody: EuiDataGridProps['renderCustomGridBody'] = useCallback(
-    ({ Cell, visibleColumns: visibleCols, visibleRowData, setCustomGridBodyProps }) => {
-      // Ensure we're displaying correctly-paginated rows
-      const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
-
-      // Add styling needed for custom grid body rows
-      const styles = {
-        row: css`
-          ${logicalCSS('width', 'fit-content')};
-          ${logicalCSS('border-bottom', euiTheme.border.thin)};
-          background-color: ${euiTheme.colors.emptyShade};
-        `,
-        rowCellsWrapper: css`
-          display: flex;
-        `,
-        rowDetailsWrapper: css`
-          text-align: center;
-          background-color: ${euiTheme.colors.body};
-        `,
-      };
-
-      // Set custom props onto the grid body wrapper
-      const bodyRef = useRef<HTMLDivElement | null>(null);
-      useEffect(() => {
-        setCustomGridBodyProps({
-          ref: bodyRef,
-        });
-      }, [setCustomGridBodyProps]);
-
-      return (
-        <>
-          {visibleRows.map((row, rowIndex) => (
-            <div role="row" css={styles.row} key={rowIndex}>
-              <div css={styles.rowCellsWrapper}>
-                {visibleCols.map((visibleColumn: EuiDataGridColumn, colIndex: number) =>
-                  renderVisibleCols(colIndex, rowIndex, Cell, visibleColumn)
-                )}
-              </div>
-              {/* TODO: This renders the last row which is our expandableRow and where we can put row rendering and notes */}
-              <div css={styles.rowDetailsWrapper}>
-                <Cell
-                  colIndex={visibleCols.length - 1} // If the row is being shown, it should always be the last index
-                  visibleRowIndex={rowIndex}
-                />
-              </div>
-            </div>
-          ))}
-        </>
-      );
-    },
-    [
-      discoverGridRows,
-      euiTheme.border.thin,
-      euiTheme.colors.body,
-      euiTheme.colors.emptyShade,
-      renderVisibleCols,
-    ]
+  const renderCustomGridBody = useCallback(
+    ({
+      Cell,
+      visibleRowData,
+      visibleColumns,
+      setCustomGridBodyProps,
+    }: EuiDataGridCustomBodyProps) => (
+      <CustomGridBodyControls
+        timelineId={timelineId}
+        discoverGridRows={discoverGridRows}
+        Cell={Cell}
+        visibleColumns={visibleColumns}
+        visibleRowData={visibleRowData}
+        setCustomGridBodyProps={setCustomGridBodyProps}
+        hasAddNotes={showNotes}
+        hasRowRenderers={enabledRowRenderers.length > 0}
+      />
+    ),
+    [discoverGridRows, enabledRowRenderers.length, showNotes, timelineId]
   );
 
   const handleOnPanelClosed = useCallback(() => {
@@ -500,93 +410,41 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     }
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
-  const enabledRowRenderers = useMemo(() => {
-    if (
-      excludedRowRendererIds &&
-      excludedRowRendererIds.length === Object.keys(RowRendererId).length
-    )
-      return [plainRowRenderer];
-
-    if (!excludedRowRendererIds) return rowRenderers;
-
-    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-  }, [excludedRowRendererIds, rowRenderers]);
-
-  const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
-  const notesById = useDeepEqualSelector(getNotesByIds);
-  const getNotes = useCallback(
-    (event: DataTableRecord) => {
-      const noteIds: string[] = eventIdToNoteIds[event.id] || [];
-      return appSelectors.getNotes(notesById, noteIds).map((note) => ({
-        savedObjectId: note.saveObjectId,
-        note: note.note,
-        noteId: note.id,
-        updated: (note.lastEdit ?? note.created).getTime(),
-        updatedBy: note.user,
-      })) as unknown as TimelineResultNote[];
-    },
-    [eventIdToNoteIds, notesById]
-  );
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
   // @see https://fuschia-stretch.glitch.me/ for more
-  const rowDetails: EuiDataGridProps['trailingControlColumns'] = [
-    {
-      id: 'row-details',
+  const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = useMemo(
+    () => [
+      {
+        id: 'row-details',
 
-      // The header cell should be visually hidden, but available to screen readers
-      width: 0,
-      headerCellRender: () => <></>,
-      headerCellProps: { className: 'euiScreenReaderOnly' },
+        // The header cell should be visually hidden, but available to screen readers
+        width: 0,
+        headerCellRender: () => <></>,
+        headerCellProps: { className: 'euiScreenReaderOnly' },
 
-      // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
-      footerCellProps: { style: { display: 'none' } },
+        // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
+        footerCellProps: { style: { display: 'none' } },
 
-      // When rendering this custom cell, we'll want to override
-      // the automatic width/heights calculated by EuiDataGrid
-      rowCellRender: ({ setCellProps, rowIndex }) => {
-        setCellProps({ style: { width: '100%', height: 'auto' } });
-        return (
-          <>
-            <EventsTrSupplement
-              className="siemEventsTable__trSupplement--notes"
-              data-test-subj="event-notes-flex-item"
-              $display="block"
-            >
-              <NoteCards
-                ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-                associateNote={(noteId: string) =>
-                  associateNote(noteId, discoverGridRows[rowIndex])
-                }
-                data-test-subj="note-cards"
-                notes={getNotes(discoverGridRows[rowIndex])}
-                showAddNote={!!showNotes[discoverGridRows[rowIndex]._id]}
-                toggleShowAddNote={() => onToggleShowNotes(discoverGridRows[rowIndex])}
-              />
-            </EventsTrSupplement>
-
-            <EuiFlexGroup gutterSize="none" justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EventsTrSupplement>
-                  <StatefulRowRenderer
-                    ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-                    containerRef={containerRef}
-                    event={discoverGridRows[rowIndex] as TimelineItem}
-                    lastFocusedAriaColindex={rowIndex - 1}
-                    rowRenderers={enabledRowRenderers}
-                    timelineId={timelineId}
-                  />
-                </EventsTrSupplement>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        );
+        // When rendering this custom cell, we'll want to override
+        // the automatic width/heights calculated by EuiDataGrid
+        rowCellRender: ({ setCellProps, rowIndex }) => {
+          setCellProps({ style: { width: '100%', height: 'auto' } });
+          return (
+            <RowDetails
+              timelineId={timelineId}
+              event={discoverGridRows[rowIndex]}
+              rowIndex={rowIndex}
+              onToggleShowNotes={onToggleShowNotes}
+              rowRenderers={enabledRowRenderers}
+              showAddNote={!!showNotes[discoverGridRows[rowIndex].id]}
+            />
+          );
+        },
       },
-    },
-  ];
+    ],
+    [discoverGridRows, enabledRowRenderers, onToggleShowNotes, showNotes, timelineId]
+  );
   const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
   const { onSetColumns } = useColumns({
     capabilities,
@@ -701,20 +559,30 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   );
 
   const handleChangePageClick = useCallback(() => {
+    onChangePage(fetchedPage + 1);
     setFechedPage(fetchedPage + 1);
-    onChangePage(fetchedPage);
   }, [fetchedPage, onChangePage]);
 
   const additionalControls = useMemo(
-    () => <ToolbarAdditionalControls timelineId={timelineId} columns={columns} />,
-    [columns, timelineId]
+    () => (
+      <ToolbarAdditionalControls timelineId={timelineId} columns={columns} updatedAt={updatedAt} />
+    ),
+    [columns, timelineId, updatedAt]
   );
 
   if (!dataView) {
     return null;
   }
   return (
-    <div className="unifiedDataTable">
+    <StyledTimelineUnifiedDataTable>
+      {dataLoadingState !== DataLoadingState.loaded && (
+        <EuiProgress
+          data-test-subj="discoverDataGridUpdating"
+          size="xs"
+          color="accent"
+          css={progressStyle}
+        />
+      )}
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <DataGridMemoized
           ariaLabelledBy="timelineDocumentsAriaLabel"
@@ -722,7 +590,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           columns={defaultColumns}
           expandedDoc={expandedDoc}
           dataView={dataView}
-          loadingState={isQueryLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+          loadingState={dataLoadingState}
           onFilter={onAddFilter as DocViewFilterFn}
           onResize={onResizeDataGrid}
           onSetColumns={onSetColumns}
@@ -755,7 +623,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           renderDocumentView={renderDetailsPanel}
           externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
           externalAdditionalControls={additionalControls}
-          // trailingControlColumns={rowDetails}
+          // trailingControlColumns={trailingControlColumns}
           // renderCustomGridBody={renderCustomGridBody}
           rowsPerPageOptions={itemsPerPageOptions}
           showFullScreenButton={false}
@@ -768,7 +636,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           showMultiFields={true}
         />
       </StatefulEventContext.Provider>
-    </div>
+    </StyledTimelineUnifiedDataTable>
   );
 };
 
