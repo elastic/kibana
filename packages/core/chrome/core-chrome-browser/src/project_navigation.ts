@@ -47,9 +47,6 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
-/** @public */
-export type BadgeType = 'beta';
-
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
