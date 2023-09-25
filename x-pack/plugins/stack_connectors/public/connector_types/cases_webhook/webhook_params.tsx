@@ -169,6 +169,25 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           data-test-subj="tagsComboBox"
         />
       </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.statusFieldLabel', {
+          defaultMessage: 'Status',
+        })}
+        error={errors['subActionParams.incident.status'] as string[]}
+      >
+        STATUS
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.severityFieldLabel', {
+          defaultMessage: 'Severity',
+        })}
+        error={errors['subActionParams.incident.severity'] as string[]}
+      >
+        SEVERITY
+      </EuiFormRow>
       <>
         <TextAreaWithMessageVariables
           index={index}

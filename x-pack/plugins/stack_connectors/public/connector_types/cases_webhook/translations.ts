@@ -503,3 +503,49 @@ export const EXTERNAL_TITLE_DESC = i18n.translate(
 export const DOC_LINK = i18n.translate('xpack.stackConnectors.components.casesWebhook.docLink', {
   defaultMessage: 'Configuring Webhook - Case Management connector.',
 });
+
+export const SEVERITY_CRITICAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+export const SEVERITY_HIGH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.highLabel',
+  {
+    defaultMessage: 'High',
+  }
+);
+export const SEVERITY_MEDIUM_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.mediumLabel',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+export const SEVERITY_LOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.lowLabel',
+  {
+    defaultMessage: 'Low',
+  }
+);
+export const STATUS_ACKNOWLEDGED = i18n.translate(
+  'stackConnectors.components.casesWebhook.status.acknowledged',
+  {
+    defaultMessage: 'Acknowledged',
+  }
+);
+export const STATUS_OPEN = i18n.translate('stackConnectors.components.casesWebhook.status.open', {
+  defaultMessage: 'Open',
+});
+export const STATUS_CLOSED = i18n.translate(
+  'stackConnectors.components.casesWebhook.status.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);
+export const STATUS_IN_PROGRESS = i18n.translate(
+  'stackConnectors.components.casesWebhook.status.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
