@@ -16,7 +16,8 @@ import {
   openTab,
   openTableInspectModal,
 } from '../../tasks/inspect';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { postDataView, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
