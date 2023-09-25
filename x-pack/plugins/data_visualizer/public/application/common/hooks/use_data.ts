@@ -6,7 +6,6 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '@kbn/ml-url-state';
 import { Moment } from 'moment';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -14,6 +13,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { createMergedEsQuery } from '../../index_data_visualizer/utils/saved_search_utils';
+import { useDataDriftStateManagerContext } from '../../data_drift/use_state_manager';
 import type { InitialSettings } from '../../data_drift/use_data_drift_result';
 import {
   type DocumentStatsSearchStrategyParams,
@@ -28,7 +32,8 @@ export const useData = (
   initialSettings: InitialSettings,
   selectedDataView: DataView,
   contextId: string,
-  searchQuery: estypes.QueryDslQueryContainer,
+  searchString: Query['query'],
+  searchQueryLanguage: SearchQueryLanguage,
   randomSampler: RandomSampler,
   randomSamplerProd: RandomSampler,
   onUpdate?: (params: Dictionary<unknown>) => void,
@@ -36,7 +41,11 @@ export const useData = (
   timeRange?: { min: Moment; max: Moment }
 ) => {
   const {
-    services: { executionContext },
+    services: {
+      executionContext,
+      uiSettings,
+      data: { query: queryManager },
+    },
   } = useDataVisualizerKibana();
 
   useExecutionContext(executionContext, {
@@ -53,12 +62,20 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
+  const { reference: referenceStateManager, comparison: comparisonStateManager } =
+    useDataDriftStateManagerContext();
+
   const docCountRequestParams:
     | {
         reference: DocumentStatsSearchStrategyParams | undefined;
         comparison: DocumentStatsSearchStrategyParams | undefined;
       }
     | undefined = useMemo(() => {
+    const searchQuery =
+      searchString !== undefined && searchQueryLanguage !== undefined
+        ? { query: searchString, language: searchQueryLanguage }
+        : undefined;
+
     const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
       _timeBuckets.setInterval('auto');
@@ -68,23 +85,55 @@ export const useData = (
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-        searchQuery,
         timeFieldName: selectedDataView.timeFieldName,
         runtimeFieldMap: selectedDataView.getRuntimeMappings(),
       };
+
+      const refQuery = createMergedEsQuery(
+        searchQuery,
+        mapAndFlattenFilters([
+          ...queryManager.filterManager.getFilters(),
+          ...(referenceStateManager.filters ?? []),
+        ]),
+        selectedDataView,
+        uiSettings
+      );
+
+      const compQuery = createMergedEsQuery(
+        searchQuery,
+        mapAndFlattenFilters([
+          ...queryManager.filterManager.getFilters(),
+          ...(comparisonStateManager.filters ?? []),
+        ]),
+        selectedDataView,
+        uiSettings
+      );
+
       return {
         reference: {
           ...query,
+          searchQuery: refQuery,
           index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
         },
         comparison: {
           ...query,
+          searchQuery: compQuery,
           index: initialSettings ? initialSettings.comparison : selectedDataView.getIndexPattern(),
         },
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, JSON.stringify({ searchQuery, timeRange })]);
+  }, [
+    lastRefresh,
+    JSON.stringify({
+      searchString,
+      searchQueryLanguage,
+      timeRange,
+      globalFilters: queryManager.filterManager.getFilters(),
+      compFilters: comparisonStateManager?.filters,
+      refFilters: referenceStateManager?.filters,
+    }),
+  ]);
 
   const documentStats = useDocumentCountStats(
     docCountRequestParams?.reference,
@@ -131,9 +180,15 @@ export const useData = (
     documentStatsProd,
     timefilter,
     /** Start timestamp filter */
-    earliest: docCountRequestParams?.reference?.earliest,
+    earliest: Math.min(
+      docCountRequestParams?.reference?.earliest ?? 0,
+      docCountRequestParams?.comparison?.earliest ?? 0
+    ),
     /** End timestamp filter */
-    latest: docCountRequestParams?.reference?.latest,
+    latest: Math.max(
+      docCountRequestParams?.reference?.latest ?? 0,
+      docCountRequestParams?.comparison?.latest ?? 0
+    ),
     intervalMs: docCountRequestParams?.reference?.intervalMs,
     forceRefresh: () => setLastRefresh(Date.now()),
   };

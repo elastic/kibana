@@ -91,14 +91,14 @@ export function trainedModelsRoutes(
           const {
             with_pipelines: withPipelines,
             with_indices: withIndicesRaw,
-            ...query
+            ...getTrainedModelsRequestParams
           } = request.query;
 
           const withIndices =
             request.query.with_indices === 'true' || request.query.with_indices === true;
 
           const resp = await mlClient.getTrainedModels({
-            ...query,
+            ...getTrainedModelsRequestParams,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
           } as MlGetTrainedModelsRequest);
