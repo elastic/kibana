@@ -13,9 +13,11 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+
+import { APP_NAME } from '../common';
 import { LinksFactoryDefinition } from './embeddable';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
-import { APP_NAME } from '../common';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
@@ -25,8 +27,9 @@ export interface LinksSetupDependencies {
 
 export interface LinksStartDependencies {
   embeddable: EmbeddableStart;
-  contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
+  presentationUtil: PresentationUtilPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class LinksPlugin

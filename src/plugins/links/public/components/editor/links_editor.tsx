@@ -10,10 +10,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiForm,
+  EuiBadge,
   EuiTitle,
   EuiButton,
   EuiSwitch,
   EuiFormRow,
+  EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiDroppable,
@@ -153,13 +155,25 @@ const LinksEditor = ({
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="links--panelEditor--title">
-          <h2>
-            {isEditingExisting
-              ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
-              : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="links--panelEditor--title">
+              <h2>
+                {isEditingExisting
+                  ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
+                  : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
+              {/* The EuiBadge needs an empty title to prevent the default tooltip */}
+              <EuiBadge color="hollow" tabIndex={0} title="">
+                {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>

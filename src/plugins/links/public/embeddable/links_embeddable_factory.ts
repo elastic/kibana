@@ -11,25 +11,29 @@ import {
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-
-import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
 } from '@kbn/kibana-utils-plugin/common';
-import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
-import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from './types';
+import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
+
+import {
+  coreServices,
+  presentationUtil,
+  untilPluginStartServicesReady,
+} from '../services/kibana_services';
 import { extract, inject } from '../../common/embeddable';
-import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { LinksEmbeddable } from './links_embeddable';
-import { LinksAttributes } from '../../common/content_management';
 import { LinksStrings } from '../components/links_strings';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
+import { LinksAttributes } from '../../common/content_management';
 import { getLinksAttributeService } from '../services/attribute_service';
-import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from './types';
 
 export type LinksFactory = EmbeddableFactory;
 
@@ -86,7 +90,7 @@ export class LinksFactoryDefinition
   }
 
   public canCreateNew() {
-    return true;
+    return presentationUtil.labsService.isProjectEnabled('labs:dashboard:linksPanel');
   }
 
   public getDefaultInput(): Partial<LinksInput> {
