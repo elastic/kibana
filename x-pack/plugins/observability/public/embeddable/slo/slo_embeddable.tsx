@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -50,8 +51,18 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
   }
 
+  setTitle(title: string) {
+    this.updateInput({ title });
+  }
+
   public render(node: HTMLElement) {
     this.node = node;
+    this.setTitle(
+      this.input.title ||
+        i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
+          defaultMessage: 'SLO Overview',
+        })
+    );
     const startTimestamp = datemathToEpochMillis(this.input.timeRange!.from);
     const endTimestamp = datemathToEpochMillis(this.input.timeRange!.to, 'up');
     const { sloId, sloInstanceId } = this.getInput();

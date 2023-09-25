@@ -77,7 +77,13 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   }
 
   if (isSloNotFound) {
-    return null;
+    return (
+      <LoadingContainer>
+        <LoadingContent>
+          The SLO has been deleted. You can safely delete the widget from the dashboard.
+        </LoadingContent>
+      </LoadingContainer>
+    );
   }
 
   const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
