@@ -432,6 +432,9 @@ For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HT
 `xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
 
+`xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl`::
+For a <<torq-action-type,Torq connector>>, specifies the endpoint URL of the Elastic Security integration in Torq.
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
 
@@ -492,6 +495,7 @@ A token secret that varies by connector:
 --
 * For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
 * For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
+* For a <<torq-action-type,Torq connector>>, specifies the secret of the webhook authentication header.
 --
 
 `xpack.actions.preconfigured.<connector-id>.secrets.user`::

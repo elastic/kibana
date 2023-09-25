@@ -296,6 +296,7 @@ describe('resolve()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
@@ -432,6 +433,7 @@ describe('resolve()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({

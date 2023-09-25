@@ -188,6 +188,7 @@ describe('update()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
@@ -1010,6 +1011,7 @@ describe('update()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1525,6 +1527,7 @@ describe('update()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(
       rulesClient.update({
@@ -1909,6 +1912,7 @@ describe('update()', () => {
         validate: {
           params: { validate: (params) => params },
         },
+        validLegacyConsumers: [],
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,

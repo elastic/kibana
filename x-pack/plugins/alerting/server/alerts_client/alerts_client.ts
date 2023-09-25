@@ -54,6 +54,7 @@ import {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
 } from './lib';
+import { isValidAlertIndexName } from '../alerts_service';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -420,7 +421,7 @@ export class AlertsClient<
               })
         );
       } else {
-        this.options.logger.warn(
+        this.options.logger.debug(
           `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
             id
           ].getUuid()}`
@@ -428,10 +429,23 @@ export class AlertsClient<
       }
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
+    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
+      (alert: Alert & AlertData) => {
+        const alertIndex = this.fetchedAlerts.indices[alert.kibana.alert.uuid];
+        if (!alertIndex) {
+          return true;
+        } else if (!isValidAlertIndexName(alertIndex)) {
+          this.options.logger.warn(
+            `Could not update alert ${alert.kibana.alert.uuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
+          );
+          return false;
+        }
+        return true;
+      }
+    );
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
-        [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
+        alertsToIndex.map((alert: Alert & AlertData) => [
           getBulkMeta(
             alert.kibana.alert.uuid,
             this.fetchedAlerts.indices[alert.kibana.alert.uuid],
