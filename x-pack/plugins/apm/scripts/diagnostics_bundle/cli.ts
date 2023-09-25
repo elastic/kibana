@@ -69,7 +69,7 @@ async function init() {
 
   if (argv.local) {
     esHost = 'http://localhost:9200';
-    kbHost = await getHostnameWithBasePath('http://127.0.0.1:5601');
+    kbHost = 'http://127.0.0.1:5601';
     password = 'changeme';
     username = 'elastic';
   }
@@ -85,7 +85,7 @@ async function init() {
     );
 
     console.log('Example 2:');
-    console.log('--cloudId foo:very_secret');
+    console.log('--cloudId foo:very_secret\n');
 
     console.log('Example 3:');
     console.log('--local');
@@ -101,7 +101,7 @@ async function init() {
     console.log('--username elastic --password changeme\n');
 
     console.log('Example 2:');
-    console.log('--apiKey very_secret');
+    console.log('--apiKey very_secret\n');
 
     console.log('Example 3:');
     console.log('--local');
@@ -118,7 +118,7 @@ async function init() {
 
   initDiagnosticsBundle({
     esHost,
-    kbHost,
+    kbHost: await getHostnameWithBasePath(kbHost),
     password,
     apiKey,
     cloudId,
@@ -159,15 +159,17 @@ function convertDate(dateString: string): number {
   throw new Error(`Incorrect argument: ${dateString}`);
 }
 
-async function getHostnameWithBasePath(kibanaHostname: string) {
+async function getHostnameWithBasePath(kibanaHostname?: string) {
+  if (!kibanaHostname) {
+    return;
+  }
+
   try {
     await axios.get(kibanaHostname, { maxRedirects: 0 });
   } catch (e) {
-    if (isAxiosError(e)) {
+    if (isAxiosError(e) && e.response?.status === 302) {
       const location = e.response?.headers?.location ?? '';
-      const hasBasePath = RegExp(/^\/\w{3}$/).test(location);
-      const basePath = hasBasePath ? location : '';
-      return `${kibanaHostname}${basePath}`;
+      return `${kibanaHostname}${location}`;
     }
 
     throw e;
