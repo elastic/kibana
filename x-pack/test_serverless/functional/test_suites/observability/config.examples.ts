@@ -12,7 +12,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('../common/index.examples')],
+  testFiles: [require.resolve('../common/examples')],
   junit: {
     reportName: 'Serverless Observability Examples Functional Tests',
   },

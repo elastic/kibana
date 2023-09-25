@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
