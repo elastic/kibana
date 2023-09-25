@@ -44,6 +44,7 @@ This is a code block
 
 This text is loa`}
         loading
+        onActionClick={async () => {}}
       />
     ),
   },
@@ -51,13 +52,25 @@ This text is loa`}
 
 export const ContentLoaded: ComponentStoryObj<typeof Component> = {
   args: {
-    body: <MessageText content={`This response has fully loaded.`} loading={false} />,
+    body: (
+      <MessageText
+        content={`This response has fully loaded.`}
+        loading={false}
+        onActionClick={async () => {}}
+      />
+    ),
   },
 };
 
 export const ContentFailed: ComponentStoryObj<typeof Component> = {
   args: {
-    body: <MessageText content={`This is a partial re`} loading={false} />,
+    body: (
+      <MessageText
+        content={`This is a partial re`}
+        loading={false}
+        onActionClick={async () => {}}
+      />
+    ),
     error: new Error(),
   },
 };
@@ -83,6 +96,7 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
     
     Please note that all times are in UTC.`)}
         loading={false}
+        onActionClick={async () => {}}
       />
     ),
   },
@@ -90,7 +104,13 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
 
 export const Controls: ComponentStoryObj<typeof Component> = {
   args: {
-    body: <MessageText content={`This is a partial re`} loading={false} />,
+    body: (
+      <MessageText
+        content={`This is a partial re`}
+        loading={false}
+        onActionClick={async () => {}}
+      />
+    ),
     error: new Error(),
     controls: <FeedbackButtons onClickFeedback={() => {}} />,
   },

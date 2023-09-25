@@ -6,6 +6,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
+import { omit } from 'lodash';
 import { MessageRole, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 
@@ -22,17 +23,26 @@ export function registerRecallFunction({
       contexts: ['core'],
       description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
       
-      Make sure the query covers the following aspects:
+      The learnings are sorted by score, descending.
+      
+      Make sure the query covers ONLY the following aspects:
       - Anything you've inferred from the user's request, but is not mentioned in the user's request
       - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
 
       DO NOT include the user's request. It will be added internally.
       
       The user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?"
-      You recall:
-      - "APM service"
-      - "lens function usage"
-      - "get_apm_timeseries function usage"`,
+      You recall: {
+        "queries": [
+          "APM service,
+          "lens function usage",
+          "get_apm_timeseries function usage"    
+        ],
+        "contexts": [
+          "lens",
+          "apm"
+        ]
+      }`,
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
@@ -42,16 +52,27 @@ export function registerRecallFunction({
             type: 'array',
             additionalItems: false,
             additionalProperties: false,
+            description: 'The query for the semantic search',
             items: {
               type: 'string',
-              description: 'The query for the semantic search',
+            },
+          },
+          contexts: {
+            type: 'array',
+            additionalItems: false,
+            additionalProperties: false,
+            description:
+              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
+            items: {
+              type: 'string',
+              enum: ['apm', 'lens'],
             },
           },
         },
-        required: ['queries'],
+        required: ['queries', 'contexts'],
       } as const,
     },
-    ({ arguments: { queries }, messages }, signal) => {
+    ({ arguments: { queries, contexts }, messages }, signal) => {
       const userMessages = messages.filter((message) => message.message.role === MessageRole.User);
 
       const userPrompt = userMessages[userMessages.length - 1]?.message.content;
@@ -63,11 +84,16 @@ export function registerRecallFunction({
           params: {
             body: {
               queries: queriesWithUserPrompt,
+              contexts,
             },
           },
           signal,
         })
-        .then((response) => ({ content: response as unknown as Serializable }));
+        .then((response): { content: Serializable } => ({
+          content: response.entries.map((entry) =>
+            omit(entry, 'labels', 'score', 'is_correction')
+          ) as unknown as Serializable,
+        }));
     }
   );
 }
