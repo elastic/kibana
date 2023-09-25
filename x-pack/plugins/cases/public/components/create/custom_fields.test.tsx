@@ -49,6 +49,7 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
+    expect(screen.queryByText(i18n.ADDITIONAL_FIELDS)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 

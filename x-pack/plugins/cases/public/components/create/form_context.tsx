@@ -110,7 +110,7 @@ export const FormContext: React.FC<Props> = ({
         if (configCustomField) {
           const fieldValue =
             configCustomField.type === CustomFieldTypes.TEXT && isEmpty(value) ? null : [value];
-          
+
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,

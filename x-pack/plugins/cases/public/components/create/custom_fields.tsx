@@ -45,14 +45,16 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfigu
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiText
-        size="m"
-        css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-        `}
-      >
-        {i18n.ADDITIONAL_FIELDS}
-      </EuiText>
+      {customFieldsComponents.length ? (
+        <EuiText
+          size="m"
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
+          {i18n.ADDITIONAL_FIELDS}
+        </EuiText>
+      ) : null}
       <EuiSpacer size="xs" />
       <EuiFlexItem data-test-subj="create-case-custom-fields">{customFieldsComponents}</EuiFlexItem>
     </EuiFlexGroup>

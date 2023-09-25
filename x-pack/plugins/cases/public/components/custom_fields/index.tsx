@@ -68,7 +68,10 @@ const CustomFieldsComponent: React.FC<Props> = ({
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {customFields.length ? (
           <>
-            <CustomFieldsList customFields={customFields} onDeleteCustomField={handleDeleteCustomField} />
+            <CustomFieldsList
+              customFields={customFields}
+              onDeleteCustomField={handleDeleteCustomField}
+            />
             {error ? (
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
