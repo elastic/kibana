@@ -489,7 +489,7 @@ export const UnifiedDataTable = ({
   );
 
   const shouldShowFieldHandler = useMemo(() => {
-    if(!dataView) return () => false;
+    if (!dataView) return () => false;
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
