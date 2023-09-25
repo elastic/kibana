@@ -142,6 +142,11 @@ const loginWithUsernameAndPassword = (username: string, password: string) => {
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
+
+      if (!basicProvider) {
+        throw Error(`Could not find a basic provider to log in!`);
+      }
+
       return cy.request({
         url: `${baseUrl}/internal/security/login`,
         method: 'POST',

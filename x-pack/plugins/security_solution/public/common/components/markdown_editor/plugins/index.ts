@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DefaultEuiMarkdownProcessingPlugins } from '@elastic/eui/src/components/markdown_editor/plugins/markdown_default_plugins/processing_plugins';
 import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
@@ -14,15 +15,10 @@ import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
 
-export const {
-  uiPlugins: nonStatefulUiPlugins,
-  parsingPlugins,
-  processingPlugins,
-} = {
-  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
-  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
-};
+export const nonStatefulUiPlugins = getDefaultEuiMarkdownUiPlugins();
+export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+export const processingPlugins: DefaultEuiMarkdownProcessingPlugins =
+  getDefaultEuiMarkdownProcessingPlugins();
 
 export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
