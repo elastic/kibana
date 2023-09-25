@@ -250,7 +250,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       end,
     });
 
-    if (serviceMetadataDetails?.container?.ids && resources.plugins.infra) {
+    if (serviceMetadataDetails?.container?.ids) {
       const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceOverviewContainerMetadata({
         infraMetricsClient,
@@ -761,10 +761,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
         end,
       });
 
-    if (
-      serviceInstanceMetadataDetails?.container?.id &&
-      resources.plugins.infra
-    ) {
+    if (serviceInstanceMetadataDetails?.container?.id) {
       const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceInstanceContainerMetadata({
         infraMetricsClient,
