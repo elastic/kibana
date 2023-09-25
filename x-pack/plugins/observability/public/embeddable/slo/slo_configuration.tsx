@@ -49,7 +49,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
                 } else {
                   setHasError(false);
                 }
-                setSelectedSlo({ sloId: slo!.id, sloInstanceId: slo!.instanceId });
+                setSelectedSlo({ sloId: slo?.id, sloInstanceId: slo?.instanceId });
               }}
             />
           </EuiFlexItem>
