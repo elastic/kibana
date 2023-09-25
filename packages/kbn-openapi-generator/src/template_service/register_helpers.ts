@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type Handlebars from '@kbn/handlebars';
@@ -12,9 +13,6 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('concat', (...args) => {
     const values = args.slice(0, -1) as unknown[];
     return values.join('');
-  });
-  handlebarsInstance.registerHelper('parseRef', (refName: string) => {
-    return refName.split('/').pop();
   });
   handlebarsInstance.registerHelper('snakeCase', snakeCase);
   handlebarsInstance.registerHelper('camelCase', camelCase);
@@ -42,14 +40,5 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
    */
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
     return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
-  });
-  handlebarsInstance.registerHelper('isEmpty', (val) => {
-    if (Array.isArray(val)) {
-      return val.length === 0;
-    }
-    if (typeof val === 'object') {
-      return Object.keys(val).length === 0;
-    }
-    return val === undefined || val === null || val === '';
   });
 }
