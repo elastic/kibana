@@ -44,7 +44,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
         {/* Reversing column direction here so screenreaders keep h1 as the first element */}
         <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle className="serverlessSearchHeaderTitle" size="l">
+            <EuiTitle size="l">
               <h1>
                 {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
                   defaultMessage: 'Get started with Elasticsearch',
