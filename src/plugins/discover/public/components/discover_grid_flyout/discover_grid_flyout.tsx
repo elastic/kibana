@@ -165,7 +165,7 @@ export function DiscoverGridFlyout({
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                {dataView?.id && dataView?.isTimeBased()  && (
+                {dataView?.id && dataView?.isTimeBased() && (
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                     <EuiFlexItem grow={false}>
                       {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
