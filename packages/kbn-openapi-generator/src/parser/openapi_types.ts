@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
@@ -27,6 +28,21 @@ declare module 'openapi-types' {
   }
 }
 
+export type NormalizedReferenceObject = OpenAPIV3.ReferenceObject & {
+  referenceName: string;
+};
+
+export interface UnknownType {
+  type: 'unknown';
+}
+
+export type NormalizedSchemaObject =
+  | OpenAPIV3.ArraySchemaObject
+  | OpenAPIV3.NonArraySchemaObject
+  | UnknownType;
+
+export type NormalizedSchemaItem = OpenAPIV3.SchemaObject | NormalizedReferenceObject;
+
 /**
  * OpenAPI types do not have a dedicated type for objects, so we need to create
  * to use for path and query parameters
@@ -36,7 +52,7 @@ export interface ObjectSchema {
   required: string[];
   description?: string;
   properties: {
-    [name: string]: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
+    [name: string]: NormalizedSchemaItem;
   };
 }
 
@@ -50,8 +66,8 @@ export interface NormalizedOperation {
   description?: string;
   tags?: string[];
   deprecated?: boolean;
-  requestParams?: ObjectSchema;
-  requestQuery?: ObjectSchema;
-  requestBody?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
-  response?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
+  requestParams?: NormalizedSchemaItem;
+  requestQuery?: NormalizedSchemaItem;
+  requestBody?: NormalizedSchemaItem;
+  response?: NormalizedSchemaItem;
 }
