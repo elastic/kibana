@@ -126,7 +126,7 @@ export function TagsDimensionEditor({
             siblingRef={panelRef}
             isOpen={isPaletteOpen}
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-            title={i18n.translate('xpack.lens.colorMapping.editColorMappingButton', {
+            title={i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
               defaultMessage: 'Edit color by term mapping',
             })}
           >

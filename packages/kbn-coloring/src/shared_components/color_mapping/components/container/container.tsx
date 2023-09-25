@@ -120,6 +120,7 @@ export function Container(props: {
       <EuiFlexItem>
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="s">
           <div
+            data-test-subj="lns-colorMapping-assignmentsList"
             css={css`
               display: grid;
               grid-template-columns: ${colorMode.type === 'gradient' ? '[gradient] 16px' : ''} [assignment] auto;
@@ -138,6 +139,7 @@ export function Container(props: {
             {assignments.map((assignment, i) => {
               return (
                 <div
+                  key={i}
                   css={css`
                     position: relative;
                     grid-column: ${colorMode.type === 'gradient' ? 2 : 1};
@@ -146,7 +148,6 @@ export function Container(props: {
                   `}
                 >
                   <Assignment
-                    key={i}
                     data={props.data}
                     index={i}
                     total={assignments.length}
