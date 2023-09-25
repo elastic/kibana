@@ -36,6 +36,7 @@ import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsApiLogRateAnalysis } from '../../../common/api';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -113,8 +114,8 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
-  /** Optional identifier to indicate the plugin utilizing the component */
-  source?: string;
+  /** Identifier to indicate the plugin utilizing the component */
+  source: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -202,7 +203,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       sampleProbability,
     },
     { reducer: streamReducer, initialState },
-    { source }
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: source }
   );
 
   const { significantTerms } = data;

@@ -14,7 +14,7 @@ import { AIOPS_API_ENDPOINT } from '../../common/api';
 import type { AiopsLicense } from '../types';
 import { wrapError } from './error_wrapper';
 import { trackAIOpsRouteUsage } from '../lib/track_route_usage';
-import { LOG_PATTERN_ANALYSIS } from '../../common/constants';
+import { AIOPS_TELEMETRY_ID } from '../../common/constants';
 
 export const defineLogCategorizationRoutes = (
   router: IRouter<DataRequestHandlerContext>,
@@ -37,7 +37,11 @@ export const defineLogCategorizationRoutes = (
       },
       async (context, request, response) => {
         const { headers } = request;
-        trackAIOpsRouteUsage(LOG_PATTERN_ANALYSIS, headers.source, usageCounter);
+        trackAIOpsRouteUsage(
+          AIOPS_TELEMETRY_ID.LOG_PATTERN_ANALYSIS_RUN,
+          headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+          usageCounter
+        );
 
         if (!license.isActivePlatinumLicense) {
           return response.forbidden();

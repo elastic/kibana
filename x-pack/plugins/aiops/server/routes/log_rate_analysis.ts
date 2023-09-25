@@ -25,7 +25,7 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS } from '../../common/constants';
+import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -89,7 +89,12 @@ export const defineLogRateAnalysisRoute = (
       },
       async (context, request, response) => {
         const { headers } = request;
-        trackAIOpsRouteUsage(LOG_RATE_ANALYSIS, headers.source, usageCounter);
+
+        trackAIOpsRouteUsage(
+          AIOPS_TELEMETRY_ID.LOG_RATE_ANALYSIS_RUN,
+          headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+          usageCounter
+        );
 
         if (!license.isActivePlatinumLicense) {
           return response.forbidden();
