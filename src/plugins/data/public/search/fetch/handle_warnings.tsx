@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { EuiTextAlign } from '@elastic/eui';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { estypes } from '@elastic/elasticsearch';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
-import { OpenIncompleteResultsModalButton } from '../../incomplete_results_modal';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
@@ -28,19 +27,19 @@ import { extractWarnings } from './extract_warnings';
 export function handleWarnings({
   request,
   response,
-  theme,
   callback,
-  sessionId = '',
   requestId,
+  inspector,
+  inspectorService,
 }: {
   request: SearchRequest;
   response: estypes.SearchResponse;
-  theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
-  sessionId?: string;
   requestId?: string;
+  inspector?: IInspectorInfo;
+  inspectorService: InspectorStartContract;
 }) {
-  const warnings = extractWarnings(response);
+  const warnings = extractWarnings(response, inspectorService, inspector);
   if (warnings.length === 0) {
     return;
   }
@@ -61,18 +60,19 @@ export function handleWarnings({
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
   getNotifications().toasts.addWarning({
     title: incompleteWarning.message,
-    text: toMountPoint(
-      <EuiTextAlign textAlign="right">
-        <OpenIncompleteResultsModalButton
-          theme={theme}
-          getRequestMeta={() => ({
-            request,
-            response,
-          })}
-          warning={incompleteWarning}
+    text: (
+      <EuiButton
+        color="warning"
+        size="s"
+        onClick={incompleteWarning.openInInspector}
+        data-test-subj="openInInspector"
+      >
+        <FormattedMessage
+          id="data.search.searchSource.fetch.incompleteResultsWarning.viewDetails"
+          defaultMessage="View details"
+          description="Open inspector to show details"
         />
-      </EuiTextAlign>,
-      { theme$: theme.theme$ }
+      </EuiButton>
     ),
   });
 }
