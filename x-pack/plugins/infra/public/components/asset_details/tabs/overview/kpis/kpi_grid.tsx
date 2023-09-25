@@ -5,57 +5,33 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { LensChart, TooltipContent } from '../../../../lens';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import {
-  assetDetailsDashboards,
-  KPI_CHART_HEIGHT,
-  AVERAGE_SUBTITLE,
-} from '../../../../../common/visualizations';
-import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
+import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
+import { Kpi } from './kpi';
 
 interface Props {
   dataView?: DataView;
-  nodeName: string;
-  timeRange: TimeRange;
+  assetName: string;
+  dateRange: TimeRange;
 }
 
-export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => {
-  const { refreshTs } = useDateRangeProviderContext();
-  const filters = useMemo(() => {
-    return [
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: [nodeName],
-        dataView,
-      }),
-    ];
-  }, [dataView, nodeName]);
-
+export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {assetDetailsDashboards.host.hostKPICharts.map(({ id, layers, title, toolTip }, index) => (
+      {assetDetailsDashboards.host.hostKPICharts.map((chartProps, index) => (
         <EuiFlexItem key={index}>
-          <LensChart
-            id={`infraAssetDetailsKPI${id}`}
+          <Kpi
+            {...chartProps}
+            dateRange={dateRange}
+            assetName={assetName}
             dataView={dataView}
-            dateRange={timeRange}
-            layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}
-            lastReloadRequestTime={refreshTs}
             height={KPI_CHART_HEIGHT}
-            filters={filters}
-            title={title}
-            toolTip={<TooltipContent description={toolTip} />}
-            visualizationType="lnsMetric"
-            disableTriggers
-            hidePanelTitles
           />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
-});
+};

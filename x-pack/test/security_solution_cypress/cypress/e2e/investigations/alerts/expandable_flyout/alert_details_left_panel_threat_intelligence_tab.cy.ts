@@ -12,7 +12,8 @@ import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_f
 import { INDICATOR_MATCH_ENRICHMENT_SECTION } from '../../../../screens/alerts_details';
 import { cleanKibana } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { openThreatIntelligenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
