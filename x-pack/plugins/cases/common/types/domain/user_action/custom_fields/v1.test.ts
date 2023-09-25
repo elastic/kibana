@@ -11,11 +11,13 @@ import { CustomFieldsUserActionPayloadRt, CustomFieldsUserActionRt } from './v1'
 describe('Custom field', () => {
   describe('CustomFieldsUserActionPayloadRt', () => {
     const defaultRequest = {
-      customField: {
-        key: 'first_custom_field_key',
-        type: 'text',
-        field: { value: ['this is a text field value'] },
-      },
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: 'text',
+          field: { value: ['this is a text field value'] },
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {
@@ -39,10 +41,12 @@ describe('Custom field', () => {
     it('removes foo:bar attributes from the field', () => {
       const query = CustomFieldsUserActionPayloadRt.decode({
         ...defaultRequest,
-        customField: {
-          ...defaultRequest.customField,
-          field: { ...defaultRequest.customField.field, foo: 'bar' },
-        },
+        customFields: [
+          {
+            ...defaultRequest.customFields[0],
+            field: { ...defaultRequest.customFields[0].field, foo: 'bar' },
+          },
+        ],
       });
 
       expect(query).toStrictEqual({
@@ -54,13 +58,15 @@ describe('Custom field', () => {
 
   describe('CustomFieldsUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionTypes.customField,
+      type: UserActionTypes.customFields,
       payload: {
-        customField: {
-          key: 'first_custom_field_key',
-          type: 'text',
-          field: { value: ['this is a text field value'] },
-        },
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: 'text',
+            field: { value: ['this is a text field value'] },
+          },
+        ],
       },
     };
 
@@ -99,7 +105,7 @@ describe('Custom field', () => {
         ...defaultRequest,
         payload: {
           ...defaultRequest.payload,
-          customField: { ...defaultRequest.payload.customField, foo: 'bar' },
+          customFields: [{ ...defaultRequest.payload.customFields[0], foo: 'bar' }],
         },
       });
 

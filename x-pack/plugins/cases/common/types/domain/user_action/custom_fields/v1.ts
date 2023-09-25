@@ -6,11 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseCustomFieldsRt } from '../../case/v1';
+import { CaseCustomFieldsRt } from '../../custom_field/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const CustomFieldsUserActionPayloadRt = rt.strict({
-  customField: CaseCustomFieldsRt,
+  customFields: CaseCustomFieldsRt,
 });
 
 export const CustomFieldsUserActionRt = rt.strict({

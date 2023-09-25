@@ -37,7 +37,7 @@ const CommonPayloadAttributesRt = rt.strict({
 const OptionalPayloadAttributesRt = rt.exact(
   rt.partial({
     category: CategoryUserActionPayloadRt.type.props.category,
-    customFields: rt.array(CustomFieldsUserActionPayloadRt.type.props.customField),
+    customFields: CustomFieldsUserActionPayloadRt.type.props.customFields,
   })
 );
 
