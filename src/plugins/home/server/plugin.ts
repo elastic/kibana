@@ -80,3 +80,5 @@ export interface HomeServerPluginStart {
   tutorials: TutorialsRegistryStart;
   sampleData: SampleDataRegistryStart;
 }
+
+export type { SampleDatasetSchema } from './services/sample_data/lib/sample_dataset_registry_types';

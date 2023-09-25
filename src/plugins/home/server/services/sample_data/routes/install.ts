@@ -8,19 +8,35 @@
 
 import { schema } from '@kbn/config-schema';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import {
+  SampleDataContext,
+  SampleDatasetDashboardPanel,
+  SampleDatasetProvider,
+  SampleDatasetSchema,
+} from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
+import {
+  getSampleDataInstaller,
+  getSampleDatasetsWithSpaceAwareSavedObjects,
+  getSpaceAwareSampleDatasets,
+  SAMPLE_DATA_INSTALLED_EVENT,
+} from './utils';
 import { SampleDataInstallError } from '../errors';
+import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
+import { SavedObjectsSchema } from '../lib/sample_dataset_schema';
 
 export function createInstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
-  analytics: AnalyticsServiceSetup
+  analytics: AnalyticsServiceSetup,
+  getScopedContext: (req: KibanaRequest) => SampleDataContext,
+  specProviders: Record<string, SampleDatasetProvider>,
+  panelReplacementRecords: Record<string, SampleDatasetDashboardPanel[]>,
+  additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema>
 ): void {
   router.post(
     {
@@ -33,18 +49,30 @@ export function createInstallRoute(
     },
     async (context, req, res) => {
       const routeStartTime = performance.now();
+      const scopedContext = getScopedContext(req);
+      const maybeSpaceId = getSpaceId(scopedContext);
+      const spaceId = maybeSpaceId.length === 0 ? 'default' : maybeSpaceId;
+
       const { params, query } = req;
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return res.notFound();
       }
+      const spaceAwareSampleDatasets = getSpaceAwareSampleDatasets(specProviders, spaceId);
+      const spaceAwareSampleDataset = spaceAwareSampleDatasets[params.id];
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
+      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects({
+        sampleDatasets,
+        spaceAwareSampleDataset,
+        panelReplacementRecords: panelReplacementRecords[params.id],
+        additionalSampleDataSavedObjects: additionalSampleDataSavedObjects[params.id],
+      });
 
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
-        sampleDatasets,
+        sampleDatasets: sampleDatasetsWithSpaceAwareSavedObjects,
         logger,
         context,
       });

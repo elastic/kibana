@@ -27,7 +27,7 @@ import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
-import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
+import { createSpacesHomeContextFactory } from './lib/spaces_home_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
@@ -206,7 +206,11 @@ export class SpacesPlugin
 
     if (plugins.home) {
       plugins.home.tutorials.addScopedTutorialContextFactory(
-        createSpacesTutorialContextFactory(getSpacesService)
+        createSpacesHomeContextFactory(getSpacesService)
+      );
+
+      plugins.home.sampleData.addScopedSampleDataContextFactory(
+        createSpacesHomeContextFactory(getSpacesService)
       );
     }
 

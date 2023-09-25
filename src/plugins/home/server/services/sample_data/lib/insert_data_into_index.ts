@@ -56,6 +56,7 @@ export const insertDataIntoIndex = ({
 
     const resp = await esClient.asCurrentUser.bulk({
       body: bulk,
+      refresh: true,
     });
 
     if (resp.errors) {

@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
   SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDataContextFactory,
+  ScopedSampleDataContextFactory,
+  SampleDataContext,
 } from './lib/sample_dataset_registry_types';
-import { sampleDataSchema } from './lib/sample_dataset_schema';
+import { sampleDataSchema, SavedObjectsSchema } from './lib/sample_dataset_schema';
 
 import {
   flightsSpecProvider,
@@ -28,12 +32,17 @@ import { createListRoute, createInstallRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
+import { getDashboardReferenceByIdFromDataset } from './routes/utils';
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+  private readonly scopedSampleDataContextFactories: SampleDataContextFactory[] = [];
+  private readonly validatedSpaceProviders: Record<string, SampleDatasetProvider> = {};
+  private panelReplacementRecords: Record<string, SampleDatasetDashboardPanel[]> = {};
+  private additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema> = {};
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
     let value: SampleDatasetSchema;
@@ -59,7 +68,9 @@ export class SampleDataRegistry {
         `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
       );
     }
+
     this.sampleDatasets.push(value);
+    this.validatedSpaceProviders[value.id] = specProvider;
   }
 
   public setup(
@@ -77,11 +88,36 @@ export class SampleDataRegistry {
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
       this.initContext.logger.get('sample_data', 'usage')
     );
+
+    const getScopedContext = (req: KibanaRequest): SampleDataContext =>
+      this.scopedSampleDataContextFactories.reduce((accumulatedContext, contextFactory) => {
+        return { ...accumulatedContext, ...contextFactory(req) };
+      }, {} as SampleDataContext);
     const router = core.http.createRouter();
     const logger = this.initContext.logger.get('sampleData');
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
-    createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
-    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+    createInstallRoute(
+      router,
+      this.sampleDatasets,
+      logger,
+      usageTracker,
+      core.analytics,
+      getScopedContext,
+      this.validatedSpaceProviders,
+      this.panelReplacementRecords,
+      this.additionalSampleDataSavedObjects
+    );
+    createUninstallRoute(
+      router,
+      this.sampleDatasets,
+      logger,
+      usageTracker,
+      core.analytics,
+      getScopedContext,
+      this.validatedSpaceProviders,
+      this.panelReplacementRecords,
+      this.additionalSampleDataSavedObjects
+    );
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
@@ -94,6 +130,7 @@ export class SampleDataRegistry {
     }
 
     return {
+      registerSampleDataSet: this.registerSampleDataSet.bind(this),
       getSampleDatasets: () => this.sampleDatasets,
 
       addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {
@@ -106,6 +143,11 @@ export class SampleDataRegistry {
         }
 
         sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
+
+        this.additionalSampleDataSavedObjects[id] =
+          this.additionalSampleDataSavedObjects[id] == null
+            ? savedObjects
+            : [...this.additionalSampleDataSavedObjects[id], ...savedObjects];
       },
 
       addAppLinksToSampleDataset: (id: string, appLinks: AppLinkData[]) => {
@@ -121,34 +163,38 @@ export class SampleDataRegistry {
         this.appLinksMap.set(id, [...existingAppLinks, ...appLinks]);
       },
 
-      replacePanelInSampleDatasetDashboard: ({
-        sampleDataId,
-        dashboardId,
-        oldEmbeddableId,
-        embeddableId,
-        embeddableType,
-        embeddableConfig,
-      }: SampleDatasetDashboardPanel) => {
-        const sampleDataset = this.sampleDatasets.find((dataset) => {
-          return dataset.id === sampleDataId;
-        });
-        if (!sampleDataset) {
-          throw new Error(`Unable to find sample dataset with id: ${sampleDataId}`);
+      addScopedSampleDataContextFactory: (
+        scopedSampleDataContextFactory: ScopedSampleDataContextFactory
+      ) => {
+        if (typeof scopedSampleDataContextFactory !== 'function') {
+          throw new Error(
+            `Unable to add scoped(request) context factory because you did not provide a function`
+          );
         }
 
-        const dashboard = sampleDataset.savedObjects.find((savedObject) => {
-          return savedObject.id === dashboardId && savedObject.type === 'dashboard';
-        }) as SavedObject<{ panelsJSON: string }>;
-        if (!dashboard) {
-          throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
-        }
+        this.scopedSampleDataContextFactories.push(scopedSampleDataContextFactory);
+      },
+
+      replacePanelInSampleDatasetDashboard: (
+        sampleDatasetDashboardPanel: SampleDatasetDashboardPanel
+      ) => {
+        const {
+          sampleDataId,
+          dashboardId,
+          oldEmbeddableId,
+          embeddableId,
+          embeddableType,
+          embeddableConfig,
+        } = sampleDatasetDashboardPanel;
+
         try {
-          const reference = dashboard.references.find((referenceItem: any) => {
-            return referenceItem.id === oldEmbeddableId;
+          const { dashboard, reference } = getDashboardReferenceByIdFromDataset({
+            sampleDatasets: this.sampleDatasets,
+            sampleDataId,
+            dashboardId,
+            referenceId: oldEmbeddableId,
           });
-          if (!reference) {
-            throw new Error(`Unable to find reference for embeddable: ${oldEmbeddableId}`);
-          }
+
           reference.type = embeddableType;
           reference.id = embeddableId;
 
@@ -165,6 +211,11 @@ export class SampleDataRegistry {
           }
           panel.embeddableConfig = embeddableConfig;
           dashboard.attributes.panelsJSON = JSON.stringify(panels);
+
+          this.panelReplacementRecords[sampleDataId] =
+            this.panelReplacementRecords[sampleDataId] == null
+              ? [sampleDatasetDashboardPanel]
+              : [...this.panelReplacementRecords[sampleDataId], sampleDatasetDashboardPanel];
         } catch (error) {
           throw new Error(
             `Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`

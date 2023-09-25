@@ -14,6 +14,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type { SampleDatasetSchema, DataIndexSchema } from './lib/sample_dataset_registry_types';
 import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
 import { createIndexName } from './lib/create_index_name';
@@ -115,17 +116,20 @@ export class SampleDataInstaller {
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     let index = createIndexName(dataset.id, dataIndex.id);
 
-    try {
-      // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
-      // index. In that case, we need to get rid of the alias and to delete the underlying index
-      const response = await this.esClient.asCurrentUser.indices.getAlias({
-        name: index,
-      });
-      const aliasName = index;
-      index = Object.keys(response)[0];
-      await this.esClient.asCurrentUser.indices.deleteAlias({ name: aliasName, index });
-    } catch (err) {
-      // ignore errors from missing alias
+    // some sample data indices are pointing to the actual alias. In that case, we cannot delete the alias when installing or removing it.
+    if (dataIndex.deleteAliasWhenRemoved == null || dataIndex.deleteAliasWhenRemoved === true) {
+      try {
+        // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
+        // index. In that case, we need to get rid of the alias and to delete the underlying index
+        const response = await this.esClient.asCurrentUser.indices.getAlias({
+          name: index,
+        });
+        const aliasName = index;
+        index = Object.keys(response)[0];
+        await this.esClient.asCurrentUser.indices.deleteAlias({ name: aliasName, index });
+      } catch (err) {
+        // ignore errors from missing alias
+      }
     }
 
     try {
@@ -151,18 +155,40 @@ export class SampleDataInstaller {
     } catch (err) {
       // ignore error
     }
+
+    if (dataIndex.pipeline) {
+      try {
+        await this.esClient.asCurrentUser.ingest.deletePipeline({
+          id: dataIndex.pipeline?.id,
+        });
+      } catch (err) {
+        // ignore error
+      }
+    }
   }
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
-
+    const aliases = dataIndex.aliases;
     try {
+      if (dataIndex.pipeline) {
+        await this.esClient.asCurrentUser.ingest.putPipeline({
+          id: dataIndex.pipeline.id,
+          body: {
+            description: dataIndex.pipeline.description,
+            processors: dataIndex.pipeline.processors,
+          },
+        });
+      }
+
       if (dataIndex.isDataStream) {
         const request = {
           name: index,
           body: {
             template: {
               mappings: { properties: dataIndex.fields },
+              settings: dataIndex.indexSettings,
+              aliases,
             },
             index_patterns: [index],
             data_stream: {},
@@ -176,14 +202,18 @@ export class SampleDataInstaller {
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,
-          body: {
-            settings: {
-              index: {
-                ...dataIndex.indexSettings,
-              },
+          settings: {
+            index: {
+              ...dataIndex.indexSettings,
             },
-            mappings: { properties: dataIndex.fields },
           },
+          mappings: {
+            properties: dataIndex.fields,
+            dynamic_templates: dataIndex.dynamicTemplates as Array<
+              Record<string, MappingDynamicTemplate>
+            >,
+          },
+          aliases,
         });
       }
     } catch (err) {

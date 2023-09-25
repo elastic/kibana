@@ -7,7 +7,7 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
+import { createSpacesHomeContextFactory } from './spaces_home_context_factory';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../spaces_service';
@@ -15,15 +15,15 @@ import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 
 const service = new SpacesService();
 
-describe('createSpacesTutorialContextFactory', () => {
+describe('createSpacesHomeContextFactory', () => {
   it('should create a valid context factory', async () => {
     const spacesService = spacesServiceMock.createStartContract();
-    expect(typeof createSpacesTutorialContextFactory(() => spacesService)).toEqual('function');
+    expect(typeof createSpacesHomeContextFactory(() => spacesService)).toEqual('function');
   });
 
   it('should create context with the current space id for space my-space-id', async () => {
     const spacesService = spacesServiceMock.createStartContract('my-space-id');
-    const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
+    const contextFactory = createSpacesHomeContextFactory(() => spacesService);
 
     const request = httpServerMock.createKibanaRequest();
 
@@ -37,7 +37,7 @@ describe('createSpacesTutorialContextFactory', () => {
     service.setup({
       basePath: coreMock.createSetup().http.basePath,
     });
-    const contextFactory = createSpacesTutorialContextFactory(() =>
+    const contextFactory = createSpacesHomeContextFactory(() =>
       service.start({
         basePath: coreMock.createStart().http.basePath,
         spacesClientService: spacesClientServiceMock.createStart(),

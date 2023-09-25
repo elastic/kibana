@@ -116,11 +116,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
+  private _sampleDataRegistered?: boolean = false;
 
   public setup(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
-  ): PluginSetup {
+  ): Promise<PluginSetup> {
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
