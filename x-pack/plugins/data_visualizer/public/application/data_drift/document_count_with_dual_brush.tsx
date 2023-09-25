@@ -12,12 +12,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
+
 import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
-
+import { getDataTestSubject } from '../common/util/get_data_test_subject';
 export interface DocumentCountContentProps
   extends Omit<
     DocumentCountChartProps,
@@ -47,9 +50,11 @@ export interface DocumentCountContentProps
   approximate: boolean;
   stateManager: DataDriftStateManager;
   label?: string;
+  id?: string;
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
+  id,
   randomSampler,
   reload,
   brushSelectionUpdateHandler,
@@ -64,7 +69,6 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   barHighlightColorOverride,
   windowParameters,
   incomingInitialAnalysisStart,
-  approximate,
   stateManager,
   label,
   ...docCountChartProps
@@ -82,6 +86,11 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   } = useDataVisualizerKibana();
 
   const { dataView } = useDataDriftStateManagerContext();
+
+  const approximate = useObservable(
+    randomSampler.getProbability$().pipe(map((samplingProbability) => samplingProbability < 1)),
+    false
+  );
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -144,7 +153,11 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
+    <EuiFlexGroup
+      gutterSize="m"
+      direction="column"
+      data-test-subj={getDataTestSubject('dataDriftTotalDocCountHeader', id)}
+    >
       <EuiFlexItem>
         <TotalCountHeader totalCount={totalCount} approximate={approximate} label={label} />
       </EuiFlexItem>
@@ -168,7 +181,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <SamplingMenu randomSampler={randomSampler} reload={reload} />
+          <SamplingMenu randomSampler={randomSampler} reload={reload} id={id} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -189,6 +202,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
             barHighlightColorOverride={barHighlightColorOverride}
             {...docCountChartProps}
             height={60}
+            dataTestSubj={getDataTestSubject('dataDriftDocCountChart', id)}
           />
         </EuiFlexItem>
       )}

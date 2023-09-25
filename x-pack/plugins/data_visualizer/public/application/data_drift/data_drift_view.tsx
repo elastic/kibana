@@ -176,7 +176,7 @@ export const DataDriftView = ({
           />
         </p>
       }
-      data-test-subj="dataVisualizerNoWindowParametersEmptyPrompt"
+      data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
     />
   ) : (
     <div>

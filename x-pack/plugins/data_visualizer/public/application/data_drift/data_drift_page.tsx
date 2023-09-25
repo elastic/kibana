@@ -313,6 +313,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
               <DocumentCountWithDualBrush
+                id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
                 reload={forceRefresh}
@@ -349,6 +350,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
               />
               <EuiHorizontalRule />
               <DocumentCountWithDualBrush
+                id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}

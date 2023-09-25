@@ -288,7 +288,8 @@ export const DataDriftOverviewTable = ({
 
   return (
     <EuiInMemoryTable<Feature>
-      tableCaption={i18n.translate('xpack.dataVisualizer.dataDrift.dataComparisonTableCaption', {
+      data-test-subj="mlDataDriftTable"
+      tableCaption={i18n.translate('xpack.dataVisualizer.dataDrift.dataDriftTableCaption', {
         defaultMessage: 'Data drift overview',
       })}
       items={data}

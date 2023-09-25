@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { getDataTestSubject } from '../../util/get_data_test_subject';
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 const defaultDocCountLabel = i18n.translate(
@@ -18,11 +18,13 @@ const defaultDocCountLabel = i18n.translate(
 );
 
 export const TotalCountHeader = ({
+  id,
   totalCount,
   approximate,
   loading,
   label = defaultDocCountLabel,
 }: {
+  id?: string;
   totalCount: number;
   label?: string;
   loading?: boolean;
@@ -30,7 +32,11 @@ export const TotalCountHeader = ({
 }) => {
   return (
     <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
-      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader" textAlign="center">
+      <EuiText
+        size="s"
+        data-test-subj={getDataTestSubject('dataVisualizerTotalDocCountHeader', id)}
+        textAlign="center"
+      >
         <FormattedMessage
           id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
           defaultMessage="{label}: {prepend}{strongTotalCount}"
@@ -40,7 +46,7 @@ export const TotalCountHeader = ({
             strongTotalCount: loading ? (
               <EuiLoadingSpinner size="s" />
             ) : (
-              <strong data-test-subj="dataVisualizerTotalDocCount">
+              <strong data-test-subj={getDataTestSubject('dataVisualizerTotalDocCount', id)}>
                 <FormattedMessage
                   id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
                   defaultMessage="{totalCount, plural, one {#} other {#}}"
