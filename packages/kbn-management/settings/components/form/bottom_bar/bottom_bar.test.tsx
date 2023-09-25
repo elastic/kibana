@@ -21,8 +21,8 @@ const clearAllUnsaved = jest.fn();
 const unsavedChangesCount = 3;
 
 const defaultProps: BottomBarProps = {
-  saveAll,
-  clearAllUnsaved,
+  onSaveAll: saveAll,
+  onClearAllUnsaved: clearAllUnsaved,
   hasInvalidChanges: false,
   unsavedChangesCount,
   isLoading: false,
