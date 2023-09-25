@@ -8,8 +8,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
 export interface EmbeddableSloProps {
-  sloId?: string | undefined;
-  sloInstanceId?: string | undefined;
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
   lastReloadRequestTime?: number | undefined;
 }
 

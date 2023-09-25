@@ -120,7 +120,7 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
     <>
       <Chart>
         <Settings
-          onElementClick={([d]) => {
+          onElementClick={() => {
             navigateToUrl(
               basePath.prepend(
                 paths.observability.sloDetails(

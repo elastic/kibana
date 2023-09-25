@@ -49,7 +49,6 @@ export function useFetchSloList({
   sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
-  search = '',
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const {
     http,
@@ -72,7 +71,6 @@ export function useFetchSloList({
               ...(sortBy && { sortBy }),
               ...(sortDirection && { sortDirection }),
               ...(page && { page }),
-              ...(search && { search }),
             },
             signal,
           });

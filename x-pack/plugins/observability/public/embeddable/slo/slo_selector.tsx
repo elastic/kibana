@@ -27,7 +27,7 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isInitialLoading, isLoading, sloList } = useFetchSloList({
-    kqlQuery: `slo.name:* ${searchValue}`,
+    kqlQuery: `slo.name: ${searchValue.replaceAll(' ', '*')}*`,
   });
 
   useEffect(() => {
