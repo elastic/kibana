@@ -151,7 +151,7 @@ export const OptionsListEditorOptions = ({
         </EuiFormRow>
       ) : (
         allowExpensiveQueries &&
-        fieldType !== 'ip' && (
+        !['ip', 'date'].includes(fieldType) && (
           <EuiFormRow
             label={OptionsListStrings.editor.getSearchOptionsTitle()}
             data-test-subj="optionsListControl__searchOptionsRadioGroup"
