@@ -48,6 +48,10 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import {
+  getMlSharedServices,
+  MlSharedServices,
+} from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -103,6 +107,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | MlLocator;
+
+  private sharedMlServices: MlSharedServices | undefined;
+
   private isServerless: boolean = false;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -110,6 +117,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+    this.sharedMlServices = getMlSharedServices(core.http);
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -249,6 +258,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices?.elasticModels,
     };
   }
 
