@@ -198,9 +198,14 @@ export const ActionTypeForm = ({
     [aadTemplateFields, availableActionVariables, useAadTemplateFields]
   );
 
-  const showMustacheAutocompleteSwitch = getIsExperimentalFeatureEnabled(
-    'showMustacheAutocompleteSwitch'
-  );
+  let showMustacheAutocompleteSwitch;
+  try {
+    showMustacheAutocompleteSwitch = getIsExperimentalFeatureEnabled(
+      'showMustacheAutocompleteSwitch'
+    );
+  } catch (e) {
+    showMustacheAutocompleteSwitch = false;
+  }
 
   const handleUseAadTemplateFields = useCallback(
     () =>
