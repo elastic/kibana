@@ -30,7 +30,9 @@ export const migratePackagePolicyToV8103: SavedObjectModelDataBackfillFn<
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    const newMetaValues = { license_uuid: policy?.meta?.license_uid ? policy.meta.license_uid : '' };
+    const newMetaValues = {
+      license_uuid: policy?.meta?.license_uid ? policy.meta.license_uid : '',
+    };
 
     policy.meta = policy?.meta ? { ...policy.meta, ...newMetaValues } : newMetaValues;
   }
