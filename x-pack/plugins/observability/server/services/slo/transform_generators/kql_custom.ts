@@ -49,7 +49,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
             {
               range: {
                 [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}`,
+                  gte: `now-${slo.timeWindow.duration.format()}/d`,
                 },
               },
             },
