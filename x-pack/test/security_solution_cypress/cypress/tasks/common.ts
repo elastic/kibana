@@ -10,6 +10,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { deleteAllDocuments } from './api_calls/elasticsearch';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
 
 const primaryButton = 0;
 
@@ -135,7 +136,7 @@ export const deleteAlertsAndRules = () => {
     },
   });
 
-  deleteAllDocuments('.lists-*,.items-*,.alerts-security.alerts-*');
+  deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
 };
 
 export const deleteTimelines = () => {

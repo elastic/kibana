@@ -7,9 +7,10 @@
 
 import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
+import { login, loginWithUser } from '../../tasks/login';
+import { visitWithTimeRange, visitWithUser } from '../../tasks/navigation';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { hostsUrl } from '../../urls/navigation';
 import {
   addIndexToDefault,
   deselectSourcererOptions,
@@ -49,7 +50,7 @@ describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, ()
     });
     it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
       loginWithUser(secReadCasesAllUser);
-      visitWithUser(HOSTS_URL, secReadCasesAllUser);
+      visitWithUser(hostsUrl('allHosts'), secReadCasesAllUser);
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
@@ -60,7 +61,7 @@ describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, ()
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
     });
 
     it('correctly loads SIEM data view', () => {
