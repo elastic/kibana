@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -25,14 +25,8 @@ import type { SloConfigurationProps, EmbeddableSloProps } from './types';
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
-  const updatedProps = useMemo(() => {
-    return {
-      ...selectedSlo,
-      title: i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
-        defaultMessage: 'SLO Overview',
-      }),
-    };
-  }, [selectedSlo]);
+  const onConfirmClick = () =>
+    onCreate({ sloId: selectedSlo?.sloId, sloInstanceId: selectedSlo?.sloInstanceId });
   const [hasError, setHasError] = useState(false);
 
   return (
@@ -72,7 +66,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
         <EuiButton
           data-test-subj="sloConfirmButton"
           isDisabled={!selectedSlo || hasError}
-          onClick={onCreate.bind(null, updatedProps)}
+          onClick={onConfirmClick}
           fill
         >
           <FormattedMessage

@@ -28,7 +28,6 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
   const { isLoading, slo, refetch, isRefetching } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
-    shouldRefetch: true,
   });
 
   useEffect(() => {
@@ -54,16 +53,16 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       color = '#e6f9f7';
       break;
     case 'NO_DATA':
-      color = 'f7f8fc';
+      color = '#f7f8fc';
       break;
     case 'DEGRADING':
-      color = 'fff9e8';
+      color = '#fff9e8';
       break;
     case 'VIOLATED':
-      color = 'f8e9e9';
+      color = '#f8e9e9';
       break;
     default:
-      color = 'f7f8fc';
+      color = '#f7f8fc';
   }
 
   if (isRefetching) {
@@ -100,7 +99,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
             value:
               sloStatus === 'NO_DATA'
                 ? NOT_AVAILABLE_LABEL
-                : numeral(Number.parseFloat(slo.summary.sliValue.toString())).format(percentFormat),
+                : numeral(slo.summary.sliValue).format(percentFormat),
             valueFormatter: (value: number) => `${value}%`,
             extra,
             trend: [],
