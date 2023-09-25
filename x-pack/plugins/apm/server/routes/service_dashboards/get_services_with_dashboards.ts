@@ -7,12 +7,12 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { estypes } from '@elastic/elasticsearch';
 import { SavedServiceDashboard } from '../../../common/service_dashboards';
 
 function getSearchRequest(
