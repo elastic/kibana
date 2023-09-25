@@ -15,6 +15,7 @@ import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
 
+import { isDefined } from '@kbn/ml-is-defined';
 import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { type DocumentCountStats } from '../../../common/types/field_stats';
@@ -88,7 +89,13 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   const { dataView } = useDataDriftStateManagerContext();
 
   const approximate = useObservable(
-    randomSampler.getProbability$().pipe(map((samplingProbability) => samplingProbability < 1)),
+    randomSampler
+      .getProbability$()
+      .pipe(
+        map((samplingProbability) =>
+          isDefined(samplingProbability) ? samplingProbability < 1 : false
+        )
+      ),
     false
   );
 
