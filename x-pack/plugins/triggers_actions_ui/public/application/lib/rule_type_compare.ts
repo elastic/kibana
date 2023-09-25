@@ -8,25 +8,19 @@
 import { RuleTypeModel } from '../../types';
 import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
+export type RuleTypeGroup = [
+  string,
+  Array<{
+    id: string;
+    name: string;
+    checkEnabledResult: IsEnabledResult | IsDisabledResult;
+    ruleTypeItem: RuleTypeModel;
+  }>
+];
+
 export function ruleTypeGroupCompare(
-  left: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
-  right: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
+  left: RuleTypeGroup,
+  right: RuleTypeGroup,
   groupNames: Map<string, string> | undefined
 ) {
   const groupNameA = left[0];
@@ -55,24 +49,8 @@ export function ruleTypeGroupCompare(
 }
 
 export function ruleTypeUngroupedCompare(
-  left: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
-  right: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
+  left: RuleTypeGroup,
+  right: RuleTypeGroup,
   ruleTypes?: string[]
 ) {
   const leftRuleTypesList = left[1];

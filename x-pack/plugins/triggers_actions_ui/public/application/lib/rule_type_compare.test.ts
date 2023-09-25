@@ -7,6 +7,7 @@
 
 import { RuleTypeModel } from '../../types';
 import {
+  RuleTypeGroup,
   ruleTypeGroupCompare,
   ruleTypeCompare,
   ruleTypeUngroupedCompare,
@@ -14,17 +15,7 @@ import {
 import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
 test('should sort groups by containing enabled rule types first and then by name', async () => {
-  const ruleTypes: Array<
-    [
-      string,
-      Array<{
-        id: string;
-        name: string;
-        checkEnabledResult: IsEnabledResult | IsDisabledResult;
-        ruleTypeItem: RuleTypeModel;
-      }>
-    ]
-  > = [
+  const ruleTypes: RuleTypeGroup[] = [
     [
       'abc',
       [
@@ -119,17 +110,7 @@ test('should sort groups by containing enabled rule types first and then by name
 
 describe('ruleTypeUngroupedCompare', () => {
   test('should maintain the order of rules', async () => {
-    const ruleTypes: Array<
-      [
-        string,
-        Array<{
-          id: string;
-          name: string;
-          checkEnabledResult: IsEnabledResult | IsDisabledResult;
-          ruleTypeItem: RuleTypeModel;
-        }>
-      ]
-    > = [
+    const ruleTypes: RuleTypeGroup[] = [
       [
         'abc',
         [
