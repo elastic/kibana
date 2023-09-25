@@ -20,7 +20,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "guideId": "databaseSearch",
               "icon": "database",
-              "order": 13,
+              "order": 1,
               "solution": "search",
               "telemetryId": "onboarding--search--database",
               "title": <FormattedMessage
@@ -54,7 +54,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "navigateTo": Object {
                 "appId": "enterpriseSearchVectorSearch",
               },
-              "order": 1,
+              "order": 4,
               "solution": "search",
               "telemetryId": "onboarding--search--vector",
               "title": "Set up vector search",
@@ -80,7 +80,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "navigateTo": Object {
                 "appId": "enterpriseSearchAISearch",
               },
-              "order": 4,
+              "order": 7,
               "solution": "search",
               "telemetryId": "onboarding--search--ai",
               "title": "Build an AI-powered search experience",
@@ -104,7 +104,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "guideId": "appSearch",
               "icon": "wrench",
-              "order": 7,
+              "order": 10,
               "solution": "search",
               "telemetryId": "onboarding--search--application",
               "title": <FormattedMessage
@@ -136,7 +136,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "guideId": "websiteSearch",
               "icon": "search",
-              "order": 10,
+              "order": 13,
               "solution": "search",
               "telemetryId": "onboarding--search--website",
               "title": "Add search to my website",
