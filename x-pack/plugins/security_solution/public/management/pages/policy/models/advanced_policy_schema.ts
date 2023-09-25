@@ -1260,8 +1260,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.credential_access',
       {
-        defaultMessage:
-          'Controls whether Credential Access API events are enabled. Default: true',
+        defaultMessage: 'Controls whether Credential Access API events are enabled. Default: true',
       }
     ),
   },
@@ -1293,8 +1292,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.disbaled',
       {
-        defaultMessage:
-          'A comma separated list of API names to selectively disable.',
+        defaultMessage: 'A comma separated list of API names to selectively disable.',
       }
     ),
   },

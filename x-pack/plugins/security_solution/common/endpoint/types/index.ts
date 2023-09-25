@@ -963,7 +963,7 @@ export interface PolicyConfig {
     };
     events: {
       api: boolean;
-      credential_access?: boolean, // deprecated in 8.11
+      credential_access?: boolean; // deprecated in 8.11
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
