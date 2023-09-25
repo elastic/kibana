@@ -7,16 +7,21 @@
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const getSafeCspmCloudAccountIdRuntimeMapping = (): MappingRuntimeFields => ({
-  safe_cloud_account_id: {
+export const getSafeCloudAccountIdRuntimeMapping = (): MappingRuntimeFields => ({
+  asset_identifier: {
     type: 'keyword',
     script: {
       source: `
         def cloudAccountIdAvailable = doc.containsKey("cloud.account.id") &&
           !doc["cloud.account.id"].empty;
+        def packagePolicyId = doc.containsKey("cloud_security_posture.package_policy_id") &&
+          !doc["cloud_security_posture.package_policy_id"].empty;
         if (cloudAccountIdAvailable) {
           emit(doc["cloud.account.id"].value);
         }
+        if (packagePolicyId) {
+          emit(doc["cloud_security_posture.package_policy_id"].value);
+        } 
         `,
     },
   },

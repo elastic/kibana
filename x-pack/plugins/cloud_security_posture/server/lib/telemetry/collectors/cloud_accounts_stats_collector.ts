@@ -10,15 +10,16 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getSafeCspmCloudAccountIdRuntimeMapping } from '../../../../common/runtime_mappings/get_cloud_account_id_mapping';
+import { getSafeCloudAccountIdRuntimeMapping } from '../../../../common/runtime_mappings/get_cloud_account_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
-import type { CloudAccountsStats } from './types';
+import type { CloudProviderKey, CloudSecurityAccountsStats } from './types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
 
 interface Value {
@@ -32,13 +33,18 @@ interface BenchmarkVersion {
   metrics: { 'rule.benchmark.version': string };
 }
 
+interface BenchmarkId {
+  metrics: { 'rule.benchmark.id': string };
+}
+
 interface BenchmarkPostureType {
-  metrics: { 'rule.benchmark.postureType': string };
+  metrics: { 'rule.benchmark.posture_type': string };
 }
 
 interface CloudProvider {
   metrics: { 'cloud.provider': string };
 }
+
 interface KubernetesVersion {
   metrics: { 'cloudbeat.kubernetes.version': string };
 }
@@ -65,6 +71,7 @@ interface AccountEntity {
   cloud_provider: { top: CloudProvider[] };
   latest_doc_updated_timestamp: { top: LatestDocTimestamp[] };
   benchmark_posture_type: { top: BenchmarkPostureType[] };
+  benchmark_id: { top: BenchmarkId[] };
   benchmark_name: { top: BenchmarkName[] };
   benchmark_version: { top: BenchmarkVersion[] };
   kubernetes_version: { top: KubernetesVersion[] };
@@ -103,6 +110,17 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
             },
           },
         },
+        package_policy_id: {
+          top_metrics: {
+            metrics: {
+              field: 'cloud_security_posture.package_policy_id',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
         latest_doc_updated_timestamp: {
           top_metrics: {
             metrics: {
@@ -117,7 +135,18 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
         benchmark_posture_type: {
           top_metrics: {
             metrics: {
-              field: 'rule.benchmark.postureType',
+              field: 'rule.benchmark.posture_type',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        benchmark_id: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.benchmark.id',
             },
             size: 1,
             sort: {
@@ -247,7 +276,7 @@ const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
 
 const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
-  runtime_mappings: getSafeCspmCloudAccountIdRuntimeMapping(),
+  runtime_mappings: getSafeCloudAccountIdRuntimeMapping(),
   query: {
     match_all: {},
   },
@@ -261,17 +290,6 @@ const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
         size: 100,
       },
       aggs: {
-        cloud_provider: {
-          top_metrics: {
-            metrics: {
-              field: 'cloud.provider',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
         latest_doc_updated_timestamp: {
           top_metrics: {
             metrics: {
@@ -283,10 +301,31 @@ const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
             },
           },
         },
+        package_policy_id: {
+          top_metrics: {
+            metrics: {
+              field: 'cloud_security_posture.package_policy_id',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        cloud_provider: {
+          top_metrics: {
+            metrics: {
+              field: 'cloud.provider',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
       },
     },
   },
-
   size: 0,
   _source: false,
 });
@@ -297,7 +336,8 @@ const cloudBaseStats = (account: AccountEntity, product: string) => ({
   latest_doc_updated_timestamp: account.latest_doc_updated_timestamp.top[0].metrics['@timestamp'],
   product,
   cloud_provider: account.cloud_provider.top[0].metrics['cloud.provider'],
-  package_policy_id: 'packagePolicyID',
+  package_policy_id:
+    account.package_policy_id.top[0].metrics['cloud_security_posture.package_policy_id'],
 });
 
 const cloudPostureStats = (account: AccountEntity) => ({
@@ -322,14 +362,33 @@ const kspmStats = (account: AccountEntity) => ({
   },
 });
 
-const getCloudPostureAccountsStats = (
+const kspmCloudProviders: Record<CloudProviderKey, string> = {
+  'cis/eks': 'aws',
+  'cis/gke': 'gcp',
+  'cis/k8s': 'self_managed',
+  'cis/ake': 'azure',
+};
+
+const getCloudProvider = (ruleBenchmarkId: CloudProviderKey) => {
+  return kspmCloudProviders[ruleBenchmarkId];
+};
+
+const getCloudAccountsStats = (
   aggregatedResourcesStats: AccountsStats,
   logger: Logger
-): CloudAccountsStats[] => {
+): CloudSecurityAccountsStats[] => {
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
-  const cloudPostureAccountsStats = accounts.map((account) => {
-    const postureType = account.benchmark_posture_type.top[0].metrics['rule.benchmark.postureType'];
+  const cloudAccountsStats = accounts.map((account) => {
+    const postureType =
+      account.benchmark_posture_type?.top?.[0]?.metrics['rule.benchmark.posture_type'];
+
+    if (!postureType) {
+      return {
+        ...cloudBaseStats(account, VULN_MGMT_POLICY_TEMPLATE),
+      };
+    }
+
     if (postureType === CSPM_POLICY_TEMPLATE) {
       return {
         ...cloudBaseStats(account, CSPM_POLICY_TEMPLATE),
@@ -341,15 +400,18 @@ const getCloudPostureAccountsStats = (
       ...cloudBaseStats(account, KSPM_POLICY_TEMPLATE),
       ...cloudPostureStats(account),
       ...kspmStats(account),
+      cloud_provider: getCloudProvider(
+        account.benchmark_id.top[0].metrics['rule.benchmark.id'] as CloudProviderKey
+      ),
     };
   });
 
   logger.info('Cloud Posture telemetry: accounts stats was sent');
 
-  return cloudPostureAccountsStats;
+  return cloudAccountsStats;
 };
 
-const indexAccountStats = async (
+const getIndexAccountStats = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   index: string,
@@ -360,14 +422,14 @@ const indexAccountStats = async (
   );
 
   return accountsStatsResponse.aggregations
-    ? getCloudPostureAccountsStats(accountsStatsResponse.aggregations, logger)
+    ? getCloudAccountsStats(accountsStatsResponse.aggregations, logger)
     : [];
 };
 
-export const getCloudAccountsStats = async (
+export const getAllCloudAccountsStats = async (
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<CloudAccountsStats[]> => {
+): Promise<CloudSecurityAccountsStats[]> => {
   try {
     const indices = [LATEST_FINDINGS_INDEX_DEFAULT_NS, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS];
     const [findingIndex, vulnerabilitiesIndex] = await Promise.all(
@@ -379,12 +441,12 @@ export const getCloudAccountsStats = async (
       }))
     );
 
-    let postureIndexAccountStats: CloudAccountsStats[] = [];
-    let vulnerabilityIndexAccountStats: CloudAccountsStats[] = [];
+    let postureIndexAccountStats: CloudSecurityAccountsStats[] = [];
+    let vulnerabilityIndexAccountStats: CloudSecurityAccountsStats[] = [];
 
     if (!findingIndex.exists && !vulnerabilitiesIndex.exists) return [];
     if (findingIndex.exists) {
-      postureIndexAccountStats = await indexAccountStats(
+      postureIndexAccountStats = await getIndexAccountStats(
         esClient,
         logger,
         findingIndex.name,
@@ -393,7 +455,7 @@ export const getCloudAccountsStats = async (
     }
 
     if (vulnerabilitiesIndex.exists) {
-      vulnerabilityIndexAccountStats = await indexAccountStats(
+      vulnerabilityIndexAccountStats = await getIndexAccountStats(
         esClient,
         logger,
         vulnerabilitiesIndex.name,
@@ -404,6 +466,7 @@ export const getCloudAccountsStats = async (
     return [...postureIndexAccountStats, ...vulnerabilityIndexAccountStats];
   } catch (e) {
     logger.error(`Failed to get cloud account stats v2 ${e}`);
+    logger.error(`Failed to get cloud account stats v2 ${e.stack}`);
     return [];
   }
 };

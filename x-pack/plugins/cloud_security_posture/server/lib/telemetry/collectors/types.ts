@@ -13,7 +13,10 @@ export type CloudSecurityUsageCollectorType =
   | 'Resources'
   | 'Rules'
   | 'Installation'
-  | 'Alerts';
+  | 'Alerts'
+  | 'Cloud Accounts';
+
+export type CloudProviderKey = 'cis/eks' | 'cis/gke' | 'cis/k8s' | 'cis/ake';
 
 export interface CspmUsage {
   indices: CspmIndicesStats;
@@ -22,6 +25,7 @@ export interface CspmUsage {
   rules_stats: CspmRulesStats[];
   installation_stats: CloudSecurityInstallationStats[];
   alerts_stats: CloudSecurityAlertsStats[];
+  cloud_account_stats: CloudSecurityAccountsStats[];
 }
 
 export interface PackageSetupStatus {
@@ -59,7 +63,7 @@ export interface CspmResourcesStats {
   failed_findings_count: number;
 }
 
-export interface CloudAccountsStats {
+export interface CloudSecurityAccountsStats {
   account_id: string;
   product: string;
   cloud_provider: string;
@@ -82,6 +86,19 @@ export interface KSPMAccountsStats {
   agents_count: number;
   nodes_count: number;
   pods_count: number;
+}
+
+interface VulnMgmtAccountsStats {
+  vulnerability_id: string;
+  vulnerability_score: number;
+  cloud_service_name: string;
+  cloud_machine_type: string;
+  cloud_machine_image: string;
+  cloud_region: string;
+  critical_severity_count: number;
+  high_severity_count: number;
+  medium_severity_count: number;
+  low_severity_count: number;
 }
 
 export interface CspmAccountsStats {
