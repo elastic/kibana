@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import {
   EuiLink,
   EuiSpacer,
@@ -16,6 +15,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import { ENABLE_STATUS_ALERT } from '../../../overview/monitor_list/columns/translations';
+import { monitorStatusSelector } from '../../../../state/selectors';
+import { EnableMonitorAlert } from '../../../overview/monitor_list/columns/enable_alert';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
@@ -30,20 +33,6 @@ import { MonitorLocations } from '../../../../../../common/runtime_types/monitor
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
 import { MonitorTags } from '../../../common/monitor_tags';
-
-export const MonListTitle = styled(EuiDescriptionListTitle)`
-  &&& {
-    width: 30%;
-    max-width: 250px;
-  }
-`;
-
-export const MonListDescription = styled(EuiDescriptionListDescription)`
-  &&& {
-    width: 70%;
-    overflow-wrap: anywhere;
-  }
-`;
 
 export const renderMonitorType = (type: string | undefined) => {
   switch (type) {
@@ -77,24 +66,29 @@ export const MonitorStatusBar: React.FC = () => {
 
   const availability = (ups === 0 && downs === 0) || !ups ? 0 : (ups / (ups + downs)) * 100;
 
+  const selectedMonitor = useSelector(monitorStatusSelector);
+
   return (
     <>
       <div>
         <StatusByLocations locations={locations ?? []} />
       </div>
       <EuiSpacer />
-      <EuiDescriptionList type="column" compressed={true} textStyle="reverse">
-        <MonListTitle>{OverallAvailability}</MonListTitle>
-        <MonListDescription data-test-subj="uptimeOverallAvailability">
+      <EuiDescriptionList type="column" compressed={true} textStyle="reverse" columnWidths={[1, 3]}>
+        <EuiDescriptionListTitle>{OverallAvailability}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription data-test-subj="uptimeOverallAvailability">
           <FormattedMessage
             id="xpack.uptime.availabilityLabelText"
             defaultMessage="{value} %"
             values={{ value: formatAvailabilityValue(availability) }}
             description="A percentage value, like 23.5 %"
           />
-        </MonListDescription>
-        <MonListTitle>{URL_LABEL}</MonListTitle>
-        <MonListDescription data-test-subj="monitor-page-url">
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          data-test-subj="monitor-page-url"
+          className="eui-textBreakAll"
+        >
           {full ? (
             <EuiLink
               data-test-subj="syntheticsMonitorStatusBarLink"
@@ -108,29 +102,39 @@ export const MonitorStatusBar: React.FC = () => {
           ) : (
             '--'
           )}
-        </MonListDescription>
-        <MonListTitle>{MonitorIDLabel}</MonListTitle>
-        <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{MonitorIDLabel}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription data-test-subj="monitor-page-title">
+          {monitorId}
+        </EuiDescriptionListDescription>
         {monitorStatus?.monitor?.type && (
           <>
-            <MonListTitle aria-label={labels.typeAriaLabel}>{labels.typeLabel}</MonListTitle>
-            <MonListDescription data-test-subj="monitor-page-type">
+            <EuiDescriptionListTitle aria-label={labels.typeAriaLabel}>
+              {labels.typeLabel}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="monitor-page-type">
               {renderMonitorType(monitorStatus?.monitor?.type)}
-            </MonListDescription>
+            </EuiDescriptionListDescription>
           </>
         )}
-        <MonListTitle>{TAGS_LABEL}</MonListTitle>
-        <MonListDescription>
+        <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
           <MonitorTags ping={monitorStatus} />
-        </MonListDescription>
+        </EuiDescriptionListDescription>
         {monitorStatus?.monitor?.project?.id && (
           <>
-            <MonListTitle>{PROJECT_LABEL}</MonListTitle>
-            <MonListDescription>{monitorStatus?.monitor?.project.id}</MonListDescription>
+            <EuiDescriptionListTitle>{PROJECT_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitorStatus?.monitor?.project.id}
+            </EuiDescriptionListDescription>
           </>
         )}
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
         <MonitorRedirects monitorStatus={monitorStatus} />
+        <EuiDescriptionListTitle>{ENABLE_STATUS_ALERT}</EuiDescriptionListTitle>
+        {selectedMonitor && (
+          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor} />
+        )}
       </EuiDescriptionList>
     </>
   );

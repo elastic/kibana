@@ -729,6 +729,18 @@
             "path": "src/plugins/home/public/application/application.tsx"
           },
           {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
             "plugin": "management",
             "path": "src/plugins/management/public/components/management_app/management_app.tsx"
           },
@@ -923,18 +935,6 @@
           {
             "plugin": "indexManagement",
             "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
           {
             "plugin": "visualizations",
@@ -3359,14 +3359,6 @@
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
           },
           {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -3953,6 +3945,14 @@
           {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/public/components/edit_index_pattern/remove_data_view.tsx"
+          },
+          {
+            "plugin": "eventAnnotationListing",
+            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
+          },
+          {
+            "plugin": "eventAnnotationListing",
+            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
           },
           {
             "plugin": "filesManagement",
