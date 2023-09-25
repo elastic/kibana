@@ -7,7 +7,6 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import type { HostsUncommonProcessesRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './dsl/query.dsl';
 import { uncommonProcesses } from '.';
 import {
@@ -15,6 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('uncommonProcesses search strategy', () => {
   const buildUncommonProcessesQuery = jest.spyOn(buildQuery, 'buildQuery');
@@ -36,7 +36,7 @@ describe('uncommonProcesses search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as HostsUncommonProcessesRequestOptions;
+      } as HostUncommonProcessesRequestOptions;
 
       expect(() => {
         uncommonProcesses.buildDsl(overSizeOptions);

@@ -7,18 +7,19 @@
 import React, { useCallback, useMemo } from 'react';
 import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
+import type { TimeRange } from '@kbn/es-query';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { BrushEndArgs, LensChart, OnFilterEvent } from '../../../../lens';
+import { type BrushEndArgs, LensChart, type OnFilterEvent } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
+import type { XYConfig } from '../../../../../common/visualizations';
 
 export interface ChartProps extends XYConfig {
   visualOptions?: XYVisualOptions;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  filterFieldName: string;
   dateRange: TimeRange;
   assetName: string;
   ['data-test-subj']: string;
@@ -30,6 +31,7 @@ export const Chart = ({
   layers,
   metricsDataView,
   logsDataView,
+  filterFieldName,
   visualOptions,
   dataViewOrigin,
   overrides,
@@ -46,12 +48,12 @@ export const Chart = ({
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
-        field: 'host.name',
+        field: filterFieldName,
         values: [assetName],
         dataView,
       }),
     ];
-  }, [assetName, dataView]);
+  }, [assetName, dataView, filterFieldName]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
