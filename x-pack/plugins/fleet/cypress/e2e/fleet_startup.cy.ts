@@ -19,7 +19,7 @@ import {
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { request } from '../tasks/common';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
-import { deleteFleetServer } from '../tasks/fleet_server';
+import { deleteFleetServer, setFleetServerHost } from '../tasks/fleet_server';
 import { login } from '../tasks/login';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
@@ -29,6 +29,8 @@ describe('Fleet startup', () => {
       unenrollAgent();
       cleanupAgentPolicies();
       deleteFleetServer();
+
+      setFleetServerHost();
     });
 
     after(() => {
