@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import Boom from '@hapi/boom';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -30,10 +29,6 @@ const infrastructureRoute = createApmServerRoute({
     hostNames: string[];
     podNames: string[];
   }> => {
-    if (!resources.plugins.infra) {
-      throw Boom.notFound();
-    }
-
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
