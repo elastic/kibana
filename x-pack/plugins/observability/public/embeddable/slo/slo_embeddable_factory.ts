@@ -17,8 +17,8 @@ import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../..';
 import type { SloEmbeddableInput } from './types';
 
-export type SloListFactory = EmbeddableFactory;
-export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
+export type SloOverviewEmbeddableFactory = EmbeddableFactory;
+export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_EMBEDDABLE;
 
   constructor(

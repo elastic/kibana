@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SloListFactoryDefinition } from './slo_embeddable_factory';
+export { SloOverviewEmbeddableFactoryDefinition } from './slo_embeddable_factory';

@@ -289,8 +289,10 @@ export class Plugin
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
     const registerSloEmbeddableFactory = async () => {
-      const { SloListFactoryDefinition } = await import('./embeddable/slo/slo_embeddable_factory');
-      const factory = new SloListFactoryDefinition(coreSetup.getStartServices);
+      const { SloOverviewEmbeddableFactoryDefinition } = await import(
+        './embeddable/slo/slo_embeddable_factory'
+      );
+      const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
       pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
     };
     registerSloEmbeddableFactory();
