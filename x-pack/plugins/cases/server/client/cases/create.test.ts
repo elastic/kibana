@@ -682,7 +682,7 @@ describe('create', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
     });
 
-    it('throws if no configuration found when trying to update custom fields', async () => {
+    it('throws if no configuration found when trying to create custom fields', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([]);
 
       await expect(

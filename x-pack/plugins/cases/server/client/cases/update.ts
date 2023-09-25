@@ -117,7 +117,6 @@ export async function throwIfCustomFieldKeysInvalid({
   casesToUpdate: UpdateRequestWithOriginalCase[];
   casesClient: CasesClient;
 }) {
-  // const configurations = await caseConfigureService.find({ unsecuredSavedObjectsClient });
   const configurations = await casesClient.configure.get({});
 
   const configurationMap: Record<string, CustomFieldsConfiguration> = {};
