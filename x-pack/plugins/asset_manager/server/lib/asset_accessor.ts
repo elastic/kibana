@@ -17,14 +17,14 @@ import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
 import { getServicesByAssets } from './accessors/services/get_services_by_assets';
 import { getServicesBySignals } from './accessors/services/get_services_by_signals';
 
-interface AssetAccessorClassOptions {
+interface AssetClientClassOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
   source: AssetManagerConfig['lockedSource'];
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
 }
 
-export class AssetAccessor {
-  constructor(private options: AssetAccessorClassOptions) {}
+export class AssetClient {
+  constructor(private options: AssetClientClassOptions) {}
 
   injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
     return {

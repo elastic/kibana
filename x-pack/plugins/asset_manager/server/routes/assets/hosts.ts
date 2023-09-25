@@ -18,7 +18,7 @@ import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-se
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import { ASSET_MANAGER_API_BASE } from '../../constants';
-import { getEsClientFromContext } from '../utils';
+import { getClientsFromContext } from '../utils';
 
 const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
 const assetDateRT = rt.union([dateRt, datemathStringRt]);
@@ -34,7 +34,7 @@ export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptio
 
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,
-  assetAccessor,
+  assetClient,
 }: SetupRouteOptions<T>) {
   // GET /assets/hosts
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
@@ -46,16 +46,15 @@ export function hostsRoutes<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       const { from = 'now-24h', to = 'now' } = req.query || {};
-      const esClient = await getEsClientFromContext(context);
-      const coreContext = await context.core;
-      const soClient = coreContext.savedObjects.client;
+
+      const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
-        const response = await assetAccessor.getHosts({
+        const response = await assetClient.getHosts({
           from: datemath.parse(from)!.toISOString(),
           to: datemath.parse(to)!.toISOString(),
-          esClient,
-          soClient,
+          elasticsearchClient,
+          savedObjectsClient,
         });
 
         return res.ok({ body: response });

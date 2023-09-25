@@ -19,7 +19,7 @@ import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetManagerConfig, configSchema } from './types';
-import { AssetAccessor } from './lib/asset_accessor';
+import { AssetClient } from './lib/asset_accessor';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
@@ -55,17 +55,17 @@ export class AssetManagerServerPlugin
 
     this.logger.info('Asset manager plugin [tech preview] is enabled');
 
-    const assetAccessor = new AssetAccessor({
+    const assetClient = new AssetClient({
       source: this.config.lockedSource,
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
     });
 
     const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router, assetAccessor });
+    setupRoutes<RequestHandlerContext>({ router, assetClient });
 
     return {
-      assetAccessor,
+      assetClient,
     };
   }
 

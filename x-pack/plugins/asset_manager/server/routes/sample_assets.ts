@@ -11,7 +11,7 @@ import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getSampleAssetDocs, sampleAssets } from '../lib/sample_assets';
 import { writeAssets } from '../lib/write_assets';
 import { SetupRouteOptions } from './types';
-import { getEsClientFromContext } from './utils';
+import { getClientsFromContext } from './utils';
 
 export type WriteSamplesPostBody = {
   baseDateTime?: string | number;
@@ -62,7 +62,7 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
           },
         });
       }
-      const esClient = await getEsClientFromContext(context);
+      const { esClient } = await getClientsFromContext(context);
       const assetDocs = getSampleAssetDocs({ baseDateTime: parsed, excludeEans });
 
       try {
@@ -101,7 +101,7 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       validate: {},
     },
     async (context, req, res) => {
-      const esClient = await getEsClientFromContext(context);
+      const { esClient } = await getClientsFromContext(context);
 
       const sampleDataStreams = await esClient.indices.getDataStream({
         name: 'assets-*-sample_data',
