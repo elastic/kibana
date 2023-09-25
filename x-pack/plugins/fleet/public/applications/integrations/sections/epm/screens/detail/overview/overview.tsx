@@ -53,8 +53,12 @@ interface Item {
 }
 
 const LeftColumn = styled(EuiFlexItem)`
+  position: sticky;
+  top: 70px;
   padding-top: 50px;
   padding-left: 10px;
+  text-overflow: ellipsis;
+  max-width: 180px;
 `;
 
 const UnverifiedCallout: React.FC = () => {
@@ -130,6 +134,9 @@ const PrereleaseCallout: React.FC<{
   );
 };
 
+export const getAnchorId = (name: string, index: number) =>
+  `${name.replaceAll(' ', '').toLowerCase().slice(0, 8)}-${index}`;
+
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
     const screenshots = useMemo(
@@ -142,14 +149,19 @@ export const OverviewPage: React.FC<Props> = memo(
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemName, setSelectedItem] = useState<string>(undefined);
 
+    const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+
     const selectItem = (name: string) => {
       setSelectedItem(name);
+    };
+    const toggleOpenOnMobile = () => {
+      setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
     };
 
     const readmePath =
       integrationInfo && isIntegrationPolicyTemplate(integrationInfo) && integrationInfo?.readme
         ? integrationInfo?.readme
-        : packageInfo.readme;
+        : packageInfo.readme || '';
 
     useEffect(() => {
       sendGetFileByPath(readmePath).then((res) => {
@@ -169,19 +181,19 @@ export const OverviewPage: React.FC<Props> = memo(
       (name: string, index: number, options: any = {}): Item => {
         // NOTE: Duplicate `name` values will cause `id` collisions
         // some names are too long so they're trimmed at 8 characters long
-        const id = `${name.replaceAll(' ', '').toLowerCase().slice(0, 8)}-${index}`;
+        const id = getAnchorId(name, index);
         return {
           id,
           name,
-          isSelected: selectedItemName === name,
-          onClick: () => selectItem(name),
+          isSelected: selectedItemName === id,
+          onClick: () => selectItem(id),
           ...options,
         };
       },
       [selectedItemName]
     );
-
-    // function that gets the headings and creates a nested structure as requested by EuiSideNav
+    console.log(selectedItemName);
+    // get the headings and creates a nested structure as requested by EuiSideNav
     const headingsToNavItems = useCallback(
       (headings: string[]): Item[] => {
         const options = { forceOpen: true };
@@ -199,11 +211,12 @@ export const OverviewPage: React.FC<Props> = memo(
               i++;
             }
             const prevIndex = acc.length - 1;
-            // const currentIndex = prevIndex >= 0 ? prevIndex : 0;
+
             if (prevIndex >= 0) {
               if (!acc[prevIndex]?.items) acc[prevIndex].items = [];
               acc[prevIndex]?.items?.push(subGroup);
             } else {
+              // this handles a case where the headings only have ### and no ##
               const fakeItem = createItem(getName(''), i, options);
               acc.push(fakeItem);
               if (!acc[0]?.items) acc[0].items = [];
@@ -226,7 +239,7 @@ export const OverviewPage: React.FC<Props> = memo(
       return [
         {
           name: `${title}`,
-          id: `${title}`,
+          id: getAnchorId(title, 0),
           items: navItems,
         },
       ];
@@ -237,8 +250,8 @@ export const OverviewPage: React.FC<Props> = memo(
         <LeftColumn grow={2}>
           <EuiSideNav
             mobileTitle="Nav Items"
-            // toggleOpenOnMobile={toggleOpenOnMobile}
-            // isOpenOnMobile={isSideNavOpenOnMobile}
+            toggleOpenOnMobile={toggleOpenOnMobile}
+            isOpenOnMobile={isSideNavOpenOnMobile}
             items={sideNavItems}
           />
         </LeftColumn>
@@ -256,6 +269,7 @@ export const OverviewPage: React.FC<Props> = memo(
               markdown={markdown}
               packageName={packageInfo.name}
               version={packageInfo.version}
+              // selectedItemName
             />
           ) : null}
         </EuiFlexItem>

@@ -12,9 +12,12 @@ import {
   EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
+  EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
 import type { TransformOptions } from 'react-markdown';
+
+import { getAnchorId } from './overview';
 
 /** prevents links to the new pages from accessing `window.opener` */
 const REL_NOOPENER = 'noopener';
@@ -38,11 +41,51 @@ export const markdownRenderers: TransformOptions['components'] = {
   td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
   // the headings used in markdown don't match our page so mapping them to the appropriate one
   h1: ({ children }) => <h3>{children}</h3>,
-  h2: ({ children }) => <h4>{children}</h4>,
-  h3: ({ children }) => <h5>{children}</h5>,
-  h4: ({ children }) => <h6>{children}</h6>,
-  h5: ({ children }) => <h6>{children}</h6>,
-  h6: ({ children }) => <h6>{children}</h6>,
+  h2: ({ children }) => (
+    <h4>
+      {children}
+      &nbsp;
+      <EuiLink href={`#${getAnchorId(children[0]?.toString(), 1)}`}>
+        <EuiIcon type="link" aria-label="anchor-h4" />
+      </EuiLink>
+    </h4>
+  ),
+  h3: ({ children }) => (
+    <h5>
+      {children}
+      &nbsp;
+      <EuiLink href="#/navigation/link">
+        <EuiIcon type="link" aria-label="anchor-h5" />
+      </EuiLink>
+    </h5>
+  ),
+  h4: ({ children }) => (
+    <h6>
+      {children}
+      &nbsp;
+      <EuiLink href="#/navigation/link">
+        <EuiIcon type="link" aria-label="anchor-h6" />
+      </EuiLink>
+    </h6>
+  ),
+  h5: ({ children }) => (
+    <h6>
+      {children}
+      &nbsp;
+      <EuiLink href="#/navigation/link">
+        <EuiIcon type="link" aria-label="anchor-h6" />
+      </EuiLink>
+    </h6>
+  ),
+  h6: ({ children }) => (
+    <h6>
+      {children}
+      &nbsp;
+      <EuiLink href="#/navigation/link">
+        <EuiIcon type="link" aria-label="anchor-h6" />
+      </EuiLink>
+    </h6>
+  ),
   link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
     <EuiLink href={href} target="_blank" rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}>
       {children}
@@ -64,7 +107,7 @@ export const markdownRenderers: TransformOptions['components'] = {
       return <EuiCode>{children}</EuiCode>;
     }
     return (
-      <EuiCodeBlock language={parsedLang} isCopyable>
+      <EuiCodeBlock language={parsedLang} overflowHeight={500} isCopyable>
         {children}
       </EuiCodeBlock>
     );
