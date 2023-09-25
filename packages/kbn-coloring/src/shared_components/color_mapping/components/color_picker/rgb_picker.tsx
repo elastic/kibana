@@ -78,8 +78,8 @@ export function RGBPicker({
           color={customColorHex}
           display="inline"
           swatches={[]}
+          secondaryInputDisplay="bottom"
         />
-        <EuiTextInpu />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
