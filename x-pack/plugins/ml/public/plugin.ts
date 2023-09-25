@@ -48,11 +48,11 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import {
   getMlSharedServices,
   MlSharedServices,
 } from './application/services/get_shared_ml_services';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
