@@ -11,6 +11,7 @@ import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConnectorMapping } from './types';
 import type { CasesConfigurationUI } from '../types';
+import { customFieldsConfigurationMock } from '../mock';
 
 export const mappings: CaseConnectorMapping[] = [
   {
@@ -72,5 +73,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   closureType: 'close-by-pushing',
   mappings: [],
   version: 'WzHJ12',
-  customFields: [],
+  customFields: customFieldsConfigurationMock,
 };
