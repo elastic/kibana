@@ -169,18 +169,20 @@ export const initializeDashboard = async ({
     if (!useSessionStorageIntegration) return;
     return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
   })();
-  const localViewMode = dashboardSessionStorage.getViewMode();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const initialViewMode = loadDashboardReturn.dashboardCreated
+    ? ViewMode.EDIT
+    : dashboardSessionStorage.getViewMode();
   const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
 
-    ...(localViewMode && useSessionStorageIntegration ? { viewMode: localViewMode } : {}),
+    ...(initialViewMode && useSessionStorageIntegration ? { viewMode: initialViewMode } : {}),
     ...overrideInput,
   });
 
@@ -193,12 +195,22 @@ export const initializeDashboard = async ({
   // Store view mode in local storage to keep all Dashboards in the same view mode.
   // --------------------------------------------------------------------------------------
   dashboardSessionStorage.storeViewMode(initialInput.viewMode);
-  untilDashboardReady().then((dashboard) => {
-    dashboard
-      .getInput$()
-      .pipe(distinctUntilKeyChanged('viewMode'))
-      .subscribe(({ viewMode }) => dashboardSessionStorage.storeViewMode(viewMode));
-  });
+
+  // managed Dashboards are always in view mode - but we don't want to store this.
+  if (loadDashboardReturn.managed) {
+    initialInput.viewMode = ViewMode.VIEW;
+  } else {
+    untilDashboardReady().then((dashboard) => {
+      dashboard.integrationSubscriptions.add(
+        dashboard
+          .getInput$()
+          .pipe(distinctUntilKeyChanged('viewMode'))
+          .subscribe(({ viewMode }) => dashboardSessionStorage.storeViewMode(viewMode))
+      );
+    });
+  }
+
+  // override view mode if this Dashboard is managed.
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
