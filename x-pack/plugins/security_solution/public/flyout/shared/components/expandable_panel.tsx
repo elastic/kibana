@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -28,10 +29,16 @@ export interface ExpandablePanelPanelProps {
      * String value of the title to be displayed in the header of panel
      */
     title: string | React.ReactNode;
-    /**
-     * Callback function to be called when the title is clicked
-     */
-    callback?: () => void;
+    link?: {
+      /**
+       * Callback function to be called when the title is clicked
+       */
+      callback: () => void;
+      /**
+       * Tooltip text to be displayed around the title link
+       */
+      tooltip: React.ReactNode;
+    };
     /**
      * Icon string for displaying the specified icon in the header
      */
@@ -74,7 +81,7 @@ export interface ExpandablePanelPanelProps {
  * The component can be expanded or collapsed by clicking on the chevron icon on the left of the title.
  */
 export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
-  header: { title, callback, iconType, headerContent },
+  header: { title, link, iconType, headerContent },
   content: { loading, error } = { loading: false, error: false },
   expand: { expandable, expandedOnFirstRender } = {
     expandable: false,
@@ -116,7 +123,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIcon
-              color={callback ? 'primary' : 'text'}
+              color={link?.callback ? 'primary' : 'text'}
               type={iconType}
               css={css`
                 margin: ${euiTheme.size.s} 0;
@@ -125,17 +132,19 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {callback ? (
-              <EuiLink
-                css={css`
-                  font-size: 12px;
-                  font-weight: 700;
-                `}
-                data-test-subj={`${dataTestSubj}TitleLink`}
-                onClick={callback}
-              >
-                {title}
-              </EuiLink>
+            {link?.callback ? (
+              <EuiToolTip content={link?.tooltip}>
+                <EuiLink
+                  css={css`
+                    font-size: 12px;
+                    font-weight: 700;
+                  `}
+                  data-test-subj={`${dataTestSubj}TitleLink`}
+                  onClick={link?.callback}
+                >
+                  {title}
+                </EuiLink>
+              </EuiToolTip>
             ) : (
               <EuiTitle size="xxxs">
                 <EuiText data-test-subj={`${dataTestSubj}TitleText`}>{title}</EuiText>
@@ -145,7 +154,17 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     ),
-    [dataTestSubj, expandable, children, toggleIcon, callback, iconType, euiTheme.size.s, title]
+    [
+      dataTestSubj,
+      expandable,
+      children,
+      toggleIcon,
+      link?.callback,
+      iconType,
+      euiTheme.size.s,
+      link?.tooltip,
+      title,
+    ]
   );
 
   const headerRightSection = useMemo(
