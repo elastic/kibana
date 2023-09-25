@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
@@ -22,18 +21,19 @@ jest.mock('./dashboard_grid_item', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
-        const className = classNames(
+        const className = `${
           props.expandedPanelId === undefined
             ? 'regularPanel'
             : props.expandedPanelId === props.id
             ? 'expandedPanel'
-            : 'hiddenPanel',
+            : 'hiddenPanel'
+        } ${
           props.focusedPanelId
             ? props.focusedPanelId === props.id
               ? 'focusedPanel'
               : 'blurredPanel'
             : ''
-        );
+        }`;
         return (
           <div className={className} id={`mockDashboardGridItem_${props.id}`}>
             mockDashboardGridItem
@@ -119,7 +119,7 @@ test('DashboardGrid renders focused panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('blurredPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(true);
 
-  dashboardContainer.setExpandedPanelId();
+  dashboardContainer.setFocusedPanelId(undefined);
   component.update();
   expect(component.find('GridItem').length).toBe(2);
 
