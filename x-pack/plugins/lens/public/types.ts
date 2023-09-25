@@ -1011,6 +1011,7 @@ interface AddLayerButtonProps {
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+  isInlineEditing?: boolean;
 }
 
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
