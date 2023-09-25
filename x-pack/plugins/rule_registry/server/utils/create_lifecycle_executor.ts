@@ -84,7 +84,6 @@ export interface LifecycleAlertServices<
   getAlertByAlertUuid: (
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
-  clearAlertUuid: (alertInstanceId: string) => void;
 }
 
 export type LifecycleRuleExecutor<
@@ -195,9 +194,6 @@ export const createLifecycleExecutor =
           return null;
         }
       },
-      clearAlertUuid: (alertId: string) => {
-        alertUuidMap.delete(alertId);
-      },
     };
 
     const wrappedExecutorResult = await wrappedExecutor({
@@ -239,14 +235,6 @@ export const createLifecycleExecutor =
       result.forEach((hit) => {
         const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
         if (alertInstanceId && hit._source) {
-          const alertState = hit._source[ALERT_STATUS];
-          if (alertState === ALERT_STATUS_UNTRACKED) {
-            // Clear alerts that were previously tracked but are now untracked
-            // Treat them as new alerts so that they generate new events
-            delete state.trackedAlerts[alertInstanceId];
-            lifecycleAlertServices.clearAlertUuid(alertInstanceId);
-            return;
-          }
           const alertLabel = `${rule.ruleTypeId}:${rule.id} ${alertInstanceId}`;
           if (hit._seq_no == null) {
             logger.error(`missing _seq_no on alert instance ${alertLabel}`);

@@ -235,7 +235,7 @@ const tryToDisableTasks = async ({
   return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
     if (taskIdsToDisable.length > 0) {
       try {
-        const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable);
+        const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable, true);
         if (resultFromDisablingTasks.tasks.length) {
           logger.debug(
             `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks

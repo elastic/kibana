@@ -38,5 +38,4 @@ export const createLifecycleAlertServicesMock = <
   getAlertStartedDate: jest.fn((id: string) => null),
   getAlertUuid: jest.fn((id: string) => 'mock-alert-uuid'),
   getAlertByAlertUuid: jest.fn((id: string) => Promise.resolve(null)),
-  clearAlertUuid: jest.fn((id: string) => void 0),
 });
