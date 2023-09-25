@@ -240,27 +240,36 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         try {
           setIsLoading(true);
-          const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
-            await Promise.all([
-              sendGetAgents({
-                page: pagination.currentPage,
-                perPage: pagination.pageSize,
-                kuery: kuery && kuery !== '' ? kuery : undefined,
-                sortField: getSortFieldForAPI(sortField),
-                sortOrder,
-                showInactive,
-                showUpgradeable,
-                getStatusSummary: true,
-                withMetrics: displayAgentMetrics,
-              }),
-              sendGetAgentStatus({
-                kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-              }),
-              sendGetAgentTags({
-                kuery: kuery && kuery !== '' ? kuery : undefined,
-                showInactive,
-              }),
-            ]);
+          const [
+            agentsResponse,
+            totalInactiveAgentsResponse,
+            managedAgentPoliciesResponse,
+            agentTagsResponse,
+          ] = await Promise.all([
+            sendGetAgents({
+              page: pagination.currentPage,
+              perPage: pagination.pageSize,
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              sortField: getSortFieldForAPI(sortField),
+              sortOrder,
+              showInactive,
+              showUpgradeable,
+              getStatusSummary: true,
+              withMetrics: displayAgentMetrics,
+            }),
+            sendGetAgentStatus({
+              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+            }),
+            sendGetAgentPolicies({
+              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+              perPage: SO_SEARCH_LIMIT,
+              full: false,
+            }),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
+          ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -275,6 +284,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (!totalInactiveAgentsResponse.data) {
             throw new Error('Invalid GET /agents_status response');
           }
+          if (managedAgentPoliciesResponse.error) {
+            throw new Error(managedAgentPoliciesResponse.error.message);
+          }
           if (agentTagsResponse.error) {
             throw agentTagsResponse.error;
           }
@@ -283,14 +295,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }
 
           const statusSummary = agentsResponse.data.statusSummary;
-
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
           const newAllTags = agentTagsResponse.data.items;
-
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
@@ -305,11 +315,34 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setInactiveShownAgents(
             showInactive ? totalInactiveAgentsResponse.data.results.inactive || 0 : 0
           );
-          setManagedAgentsOnCurrentPage(
-            agentsResponse.data.items
-              .map((agent) => agent.id)
-              .filter((agentId) => totalManagedAgentIds.includes(agentId)).length
-          );
+
+          const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
+          if (managedAgentPolicies.length === 0) {
+            setTotalManagedAgentIds([]);
+            setManagedAgentsOnCurrentPage(0);
+          } else {
+            // Find all the agents that have managed policies and are not unenrolled
+            const policiesKuery = managedAgentPolicies
+              .map((policy) => `policy_id:"${policy.id}"`)
+              .join(' or ');
+            const response = await sendGetAgents({
+              kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
+              perPage: SO_SEARCH_LIMIT,
+              showInactive: true,
+            });
+            if (response.error) {
+              throw new Error(response.error.message);
+            }
+            const allManagedAgents = response.data?.items ?? [];
+            const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
+            setTotalManagedAgentIds(allManagedAgentIds);
+
+            setManagedAgentsOnCurrentPage(
+              agentsResponse.data.items
+                .map((agent) => agent.id)
+                .filter((agentId) => allManagedAgentIds.includes(agentId)).length
+            );
+          }
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -332,7 +365,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       displayAgentMetrics,
       allTags,
       notifications.toasts,
-      totalManagedAgentIds,
     ]
   );
 
@@ -352,49 +384,49 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     full: true,
   });
 
-  // Request to fetch all agents with managed policies
-  const fetchManagedAgents = useCallback(async () => {
-    const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
+  // // Request to fetch all agents with managed policies
+  // const fetchManagedAgents = useCallback(async () => {
+  //   const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
 
-    const agentPoliciesResponse = await sendGetAgentPolicies({
-      kuery: managedPoliciesKuery,
-      perPage: SO_SEARCH_LIMIT,
-      full: false,
-    });
+  //   const agentPoliciesResponse = await sendGetAgentPolicies({
+  //     kuery: managedPoliciesKuery,
+  //     perPage: SO_SEARCH_LIMIT,
+  //     full: false,
+  //   });
 
-    if (agentPoliciesResponse.error) {
-      throw new Error(agentPoliciesResponse.error.message);
-    }
+  //   if (agentPoliciesResponse.error) {
+  //     throw new Error(agentPoliciesResponse.error.message);
+  //   }
 
-    const managedPolicies = agentPoliciesResponse.data?.items ?? [];
+  //   const managedPolicies = agentPoliciesResponse.data?.items ?? [];
 
-    if (managedPolicies.length === 0) {
-      return [];
-    }
+  //   if (managedPolicies.length === 0) {
+  //     return [];
+  //   }
 
-    // find all the agents that have those policies and are not unenrolled
-    const policiesKuery = managedPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or ');
-    const response = await sendGetAgents({
-      kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
-      perPage: SO_SEARCH_LIMIT,
-      showInactive: true,
-    });
+  //   // find all the agents that have those policies and are not unenrolled
+  //   const policiesKuery = managedPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or ');
+  //   const response = await sendGetAgents({
+  //     kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
+  //     perPage: SO_SEARCH_LIMIT,
+  //     showInactive: true,
+  //   });
 
-    if (response.error) {
-      throw new Error(response.error.message);
-    }
+  //   if (response.error) {
+  //     throw new Error(response.error.message);
+  //   }
 
-    return response.data?.items ?? [];
-  }, []);
+  //   return response.data?.items ?? [];
+  // }, []);
 
-  // Send request to fetch all agents with managed policies
-  useEffect(() => {
-    async function fetchDataAsync() {
-      const allManagedAgents = await fetchManagedAgents();
-      setTotalManagedAgentIds(allManagedAgents?.map((agent) => agent.id));
-    }
-    fetchDataAsync();
-  }, [fetchManagedAgents]);
+  // // Send request to fetch all agents with managed policies
+  // useEffect(() => {
+  //   async function fetchDataAsync() {
+  //     const allManagedAgents = await fetchManagedAgents();
+  //     setTotalManagedAgentIds(allManagedAgents?.map((agent) => agent.id));
+  //   }
+  //   fetchDataAsync();
+  // }, [fetchManagedAgents]);
 
   const agentPolicies = useMemo(
     () => (agentPoliciesRequest.data ? agentPoliciesRequest.data.items : []),
