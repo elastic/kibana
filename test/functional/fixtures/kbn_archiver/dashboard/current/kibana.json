@@ -2288,7 +2288,7 @@
       "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
     },
     "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3\"}]",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3\"}]",
     "refreshInterval": {
       "display": "Off",
       "pause": false,
@@ -2743,4 +2743,165 @@
     "dashboard": "8.6.0"
   },
   "coreMigrationVersion": "8.6.0"
+}
+
+{
+  "id": "16e12160-5bc2-11ee-9a85-7b86504227bc",
+  "type": "links",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-25T16:40:49.785Z",
+  "created_at": "2023-09-25T16:39:26.070Z",
+  "version": "WzEyMzgsMV0=",
+  "attributes": {
+    "links": [
+      {
+        "type": "dashboardLink",
+        "id": "link01",
+        "order": 0,
+        "destinationRefName": "link_link01_dashboard"
+      },
+      {
+        "type": "dashboardLink",
+        "id": "link02",
+        "order": 1,
+        "destinationRefName": "link_link02_dashboard"
+      },
+      {
+        "type": "dashboardLink",
+        "id": "link03",
+        "order": 2,
+        "destinationRefName": "link_link03_dashboard"
+      }
+    ],
+    "layout": "horizontal",
+    "title": "a few links",
+    "description": ""
+  },
+  "references": [
+    {
+      "name": "link_link01_dashboard",
+      "type": "dashboard",
+      "id": "0930f310-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "name": "link_link02_dashboard",
+      "type": "dashboard",
+      "id": "24751520-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "name": "link_link03_dashboard",
+      "type": "dashboard",
+      "id": "27398c50-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}
+
+{
+  "id": "0930f310-5bc2-11ee-9a85-7b86504227bc",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-25T16:39:42.362Z",
+  "created_at": "2023-09-25T16:39:42.362Z",
+  "version": "WzEyMzMsMV0=",
+  "attributes": {
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "timeRestore": false,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"26533acc-3516-445c-9c05-3b0e18686f38\"},\"panelIndex\":\"26533acc-3516-445c-9c05-3b0e18686f38\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_26533acc-3516-445c-9c05-3b0e18686f38\"}]",
+    "title": "links 001"
+  },
+  "references": [
+    {
+      "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
+      "type": "links",
+      "id": "16e12160-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "type": "tag",
+      "id": "067be530-5bc2-11ee-9a85-7b86504227bc",
+      "name": "tag-ref-067be530-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "24751520-5bc2-11ee-9a85-7b86504227bc",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-25T16:39:48.850Z",
+  "created_at": "2023-09-25T16:39:48.850Z",
+  "version": "WzEyMzQsMV0=",
+  "attributes": {
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "timeRestore": false,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"26533acc-3516-445c-9c05-3b0e18686f38\"},\"panelIndex\":\"26533acc-3516-445c-9c05-3b0e18686f38\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_26533acc-3516-445c-9c05-3b0e18686f38\"}]",
+    "title": "links 002"
+  },
+  "references": [
+    {
+      "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
+      "type": "links",
+      "id": "16e12160-5bc2-11ee-9a85-7b86504227bc"
+    },
+    {
+      "type": "tag",
+      "id": "067be530-5bc2-11ee-9a85-7b86504227bc",
+      "name": "tag-ref-067be530-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "27398c50-5bc2-11ee-9a85-7b86504227bc",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-25T16:42:56.124Z",
+  "created_at": "2023-09-25T16:42:56.124Z",
+  "version": "WzEyMzksMV0=",
+  "attributes": {
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "timeRestore": false,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":3,\"i\":\"12e3dea4-44cc-405e-99de-408c5879ab55\"},\"panelIndex\":\"12e3dea4-44cc-405e-99de-408c5879ab55\",\"embeddableConfig\":{\"savedVis\":{\"id\":\"\",\"title\":\"\",\"description\":\"\",\"type\":\"markdown\",\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"This panel appears at the top\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}},\"enhancements\":{}}}]",
+    "title": "links 003"
+  },
+  "references": [
+    {
+      "type": "tag",
+      "id": "067be530-5bc2-11ee-9a85-7b86504227bc",
+      "name": "tag-ref-067be530-5bc2-11ee-9a85-7b86504227bc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
 }
