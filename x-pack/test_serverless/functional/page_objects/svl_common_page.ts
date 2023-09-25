@@ -15,6 +15,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const browser = getService('browser');
 
   const delay = (ms: number) =>
     new Promise((resolve) => {
@@ -69,10 +70,30 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
         }
       );
 
-      return await pageObjects.security.login(
-        config.get('servers.kibana.username'),
-        config.get('servers.kibana.password')
-      );
+      await retry.waitForWithTimeout('Login to Kibana via UI', 90_000, async () => {
+        await pageObjects.common.navigateToUrl('login');
+        // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+        // to use the yml setting, e.g. cloud
+        await browser.setLocalStorageItem('home:welcome:show', 'false');
+
+        log.debug('Waiting for Login Form to appear.');
+        await retry.waitForWithTimeout('login form', 10_000, async () => {
+          return await pageObjects.security.isLoginFormVisible();
+        });
+
+        await testSubjects.setValue('loginUsername', config.get('servers.kibana.username'));
+        await testSubjects.setValue('loginPassword', config.get('servers.kibana.password'));
+        await testSubjects.click('loginSubmit');
+
+        if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+          return true;
+        } else {
+          // Sometimes authentication fails and user is redirected to Cloud login page
+          // [plugins.security.authentication] Authentication attempt failed: UNEXPECTED_SESSION_ERROR
+          const currentUrl = await browser.getCurrentUrl();
+          throw new Error(`Failed to login, currentUrl=${currentUrl}`);
+        }
+      });
     },
 
     async forceLogout() {

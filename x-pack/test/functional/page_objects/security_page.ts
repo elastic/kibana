@@ -168,7 +168,7 @@ export class SecurityPageObject extends FtrService {
     );
   }
 
-  private async isLoginFormVisible() {
+  public async isLoginFormVisible() {
     return await this.testSubjects.exists('loginForm');
   }
 
@@ -326,6 +326,7 @@ export class SecurityPageObject extends FtrService {
 
         if (this.config.get('serverless')) {
           // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+          this.log.debug('Wait 5 sec for Cloud login page to be displayed');
           return await this.find.existsByDisplayedByCssSelector('.login-form-password', 5000);
         } else {
           return !(await this.browser.getCurrentUrl()).includes('/logout');
