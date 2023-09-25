@@ -341,20 +341,6 @@ export function validateKafkaTopics(
         condition: true,
       });
     }
-    if (topic.when?.condition) {
-      if (topic.when.condition.includes('"') || topic.when.condition.includes("'")) {
-        errors.push({
-          message: i18n.translate(
-            'xpack.fleet.settings.outputForm.kafkaTopicConditionQuotesNotAllowed',
-            {
-              defaultMessage: 'Key values cannot contain quotes',
-            }
-          ),
-          index,
-          condition: true,
-        });
-      }
-    }
   });
   if (errors.length) {
     return errors;
