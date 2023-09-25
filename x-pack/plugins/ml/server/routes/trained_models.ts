@@ -54,7 +54,7 @@ export function filterForEnabledFeatureModels(
 
 export function trainedModelsRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
-  { cloud }: { cloud: CloudSetup }
+  cloud: CloudSetup
 ) {
   /**
    * @apiGroup TrainedModels

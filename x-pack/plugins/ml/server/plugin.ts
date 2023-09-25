@@ -241,7 +241,7 @@ export class MlServerPlugin
     // Register Trained Model Management routes
     if (this.enabledFeatures.dfa || this.enabledFeatures.nlp) {
       modelManagementRoutes(routeInit);
-      trainedModelsRoutes(routeInit, { cloud: plugins.cloud });
+      trainedModelsRoutes(routeInit, plugins.cloud);
     }
 
     // Register Miscellaneous routes
