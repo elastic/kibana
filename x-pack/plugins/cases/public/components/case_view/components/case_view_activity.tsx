@@ -75,9 +75,7 @@ export const CaseViewActivity = ({
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
-  const {
-    data: { customFields: customFieldsConfiguration },
-  } = useGetCaseConfiguration();
+  const { data: casesConfiguration } = useGetCaseConfiguration();
 
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
@@ -224,6 +222,7 @@ export const CaseViewActivity = ({
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
+                casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
@@ -305,7 +304,7 @@ export const CaseViewActivity = ({
           <CustomFields
             isLoading={isLoading && loadingKey === 'customFields'}
             customFields={caseData.customFields}
-            customFieldsConfiguration={customFieldsConfiguration}
+            customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomFields}
           />
         </EuiFlexGroup>

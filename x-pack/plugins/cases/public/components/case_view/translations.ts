@@ -49,6 +49,10 @@ export const REMOVED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.re
   defaultMessage: 'removed',
 });
 
+export const RESET_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.resetField', {
+  defaultMessage: 'reset',
+});
+
 export const VIEW_INCIDENT = (incidentNumber: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.viewIncident', {
     defaultMessage: 'View {incidentNumber}',

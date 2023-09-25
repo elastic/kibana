@@ -15,6 +15,7 @@ import type {
   AttachmentUI,
   UseFetchAlertData,
   CaseUserActionsStats,
+  CasesConfigurationUI,
 } from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
@@ -31,6 +32,7 @@ export interface UserActionTreeProps {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
+  casesConfiguration: CasesConfigurationUI;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -51,6 +53,7 @@ export type SupportedUserActionTypes = keyof Omit<
 export interface UserActionBuilderArgs {
   appId?: string;
   caseData: CaseUI;
+  casesConfiguration: CasesConfigurationUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
