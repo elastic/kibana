@@ -392,11 +392,11 @@ export const uiSettings: Record<string, UiSettings> = {
   [profilingDatacenterPUE]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingName', {
-      defaultMessage: 'Data Centre PUE',
+      defaultMessage: 'Data Center PUE',
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) is a metric used to measure how efficiently a data center uses energy. The {uptimeLink} survey has found average on-premise data center PUE to  be 1.7.  
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. The {uptimeLink} survey has found the average on-premise data center PUE to  be 1.7.  
       </br></br>
       The Cloud Provider PUEs are: 
       <ul style="list-style-type: none;margin-left: 4px;">
@@ -425,9 +425,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.000379069,
     description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
-      defaultMessage: `Carbon intensity is a measure of how clean your data centre electricity is.  
-      It is a measure of the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
-      You may use the cloud carbon footprint {datasheetLink} to update this value. Defaults to US East (N. Virginia).`,
+      defaultMessage: `Carbon intensity measures how clean your data center electricity is.  
+      Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
+      Use the cloud carbon footprint {datasheetLink} to update this value according to your region. Defaults to US East (N. Virginia).`,
       values: {
         datasheetLink:
           '<a href="https://ela.st/grid-datasheet" target="_blank" rel="noopener noreferrer">' +
