@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: Elastic Maps Tile Service
+  description: OpenAPI schema for the Elastic Maps Tile Service manifest endpoint
+  version: '0.1'
+  contact:
+    name: Presentation Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: ems
+    description: Elastic Maps Service.
+servers:
+  - url: 'https://tiles.maps.elastic.co'
+    description: Production
+  - url: 'https://tiles.maps.elastic.dev/'
+    description: Staging
+paths:
+   '/latest/manifest':
+     get:
+      summary: "Manifest of the EMS File Service"
+      description: "Describes the basemap styles available"
+      parameters: []
+      responses:
+        "200":
+          description: "Manifest is returned"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    description: "Version of the API as a date in YYYY-MM-DD format"
+                  services:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Identifier of the style
