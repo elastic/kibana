@@ -5,37 +5,25 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import datemath from '@kbn/datemath';
-import {
-  dateRt,
-  inRangeFromStringRt,
-  datemathStringRt,
-  createRouteValidationFunction,
-  createLiteralValueFromUndefinedRT,
-} from '@kbn/io-ts-utils';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../../common/types_api';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import { ASSET_MANAGER_API_BASE } from '../../constants';
 import { getClientsFromContext } from '../utils';
 
-const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
-const assetDateRT = rt.union([dateRt, datemathStringRt]);
-const getHostAssetsQueryOptionsRT = rt.exact(
-  rt.partial({
-    from: assetDateRT,
-    to: assetDateRT,
-    size: sizeRT,
-  })
-);
-
-export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
-
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
+  console.log(
+    'Verifying existence of assetClient in server',
+    typeof assetClient,
+    Object.keys(assetClient)
+  );
+
   // GET /assets/hosts
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
     {

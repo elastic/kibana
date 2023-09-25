@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
-
-interface PublicAssetClient {}
-
+import type { Plugin as PluginClass } from '@kbn/core/public';
+import { GetHostsOptionsPublic } from '../common/types_client';
+import { GetHostAssetsResponse } from '../common/types_api';
 export interface AssetManagerSetupExports {
-  assetClient: PublicAssetClient;
+  publicAssetsClient: IPublicAssetsClient;
 }
+
 export type AssetManagerStartExports = void;
 export interface AssetManagerSetupDeps {}
 export interface AssetManagerStartDeps {}
@@ -21,3 +21,7 @@ export type AssetManagerPluginClass = PluginClass<
   AssetManagerSetupDeps,
   AssetManagerStartDeps
 >;
+
+export interface IPublicAssetsClient {
+  getHosts: (options: GetHostsOptionsPublic) => Promise<GetHostAssetsResponse>;
+}

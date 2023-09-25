@@ -7,25 +7,21 @@
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { AssetManagerPluginClass, AssetManagerSetupDeps } from './types';
+import { PublicAssetsClient } from './lib/public_assets_client';
 
 export class Plugin implements AssetManagerPluginClass {
   public config: {};
-  private kibanaVersion: string;
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
-
-    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(core: CoreSetup, pluginsSetup: AssetManagerSetupDeps) {
-    const assetClient = {}; // tbd
     return {
-      assetClient,
+      PublicAssetsClient,
     };
   }
 
   start() {}
-
   stop() {}
 }

@@ -14,7 +14,7 @@
     "requiredPlugins": [
       "apmDataAccess"
     ],
-    "browser": false,
+    "browser": true,
     "server": true,
     "requiredBundles": [
     ]

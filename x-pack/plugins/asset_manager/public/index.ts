@@ -23,4 +23,5 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
-export type AssetManagerAppId = 'asset_manager';
+export type { AssetManagerSetupExports, AssetManagerStartExports };
+export type AssetManagerAppId = 'assetManager';
