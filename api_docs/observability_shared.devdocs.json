@@ -55,7 +55,47 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "() => { navigation: { registerSections: (sections$: ",
+              "(coreSetup: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, pluginsSetup: ",
+              "ObservabilitySharedSetup",
+              ") => { locators: { profiling: { flamegraphLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "FlamegraphLocatorParams",
+              ">; topNFunctionsLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "TopNFunctionsLocatorParams",
+              ">; stacktracesLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "StacktracesLocatorParams",
+              ">; }; }; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -70,7 +110,45 @@
             "path": "x-pack/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreSetup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "pluginsSetup",
+                "description": [],
+                "signature": [
+                  "ObservabilitySharedSetup"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -2560,7 +2638,37 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ navigation: { registerSections: (sections$: ",
+          "{ locators: { profiling: { flamegraphLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "FlamegraphLocatorParams",
+          ">; topNFunctionsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "TopNFunctionsLocatorParams",
+          ">; stacktracesLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "StacktracesLocatorParams",
+          ">; }; }; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {
