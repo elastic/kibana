@@ -319,6 +319,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   /**
    * ensures when user switches between rule types, written ES|QL query is not getting lost
    * additional work is required in this code area, as currently switching to EQL will result in query lose
+   * https://github.com/elastic/kibana/issues/166933
    */
   useEffect(() => {
     const { queryBar: currentQuery } = getFields();

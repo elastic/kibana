@@ -37,3 +37,7 @@ xpack.securitySolution.enableEsqlRuleType: false
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: false

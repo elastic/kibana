@@ -1915,8 +1915,7 @@
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
         "; name: string; isHealthy: boolean; } | undefined>; }; } & ",
-        "TrainedModelsProvider",
-        " & MlSetup"
+        "TrainedModelsProvider"
       ],
       "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,

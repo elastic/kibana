@@ -91,6 +91,7 @@ describe('find()', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -153,6 +154,7 @@ describe('find()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -466,6 +468,7 @@ describe('find()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -484,6 +487,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -504,6 +508,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
@@ -674,6 +679,7 @@ describe('find()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -692,6 +698,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -712,6 +719,7 @@ describe('find()', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       total: 2,
