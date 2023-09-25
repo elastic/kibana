@@ -5,8 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { parseErrors, parseWarning, getInlineEditorText, getWrappedInPipesCode } from './helpers';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import {
+  parseErrors,
+  parseWarning,
+  getInlineEditorText,
+  getWrappedInPipesCode,
+  getIndicesForAutocomplete,
+} from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -157,6 +163,27 @@ describe('helpers', function () {
         true
       );
       expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
+    });
+  });
+
+  describe('getIndicesForAutocomplete', function () {
+    it('should not return system indices', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: '.system1',
+            title: 'system1',
+          },
+          {
+            name: 'logs',
+            title: 'logs',
+          },
+        ]),
+      };
+      const indices = await getIndicesForAutocomplete(updatedDataViewsMock);
+      expect(indices).toStrictEqual(['logs']);
     });
   });
 });

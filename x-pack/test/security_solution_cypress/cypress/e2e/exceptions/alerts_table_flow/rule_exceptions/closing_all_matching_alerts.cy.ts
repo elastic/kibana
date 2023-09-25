@@ -11,8 +11,8 @@ import {
   waitForAlerts,
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { ruleDetailsUrl } from '../../../../urls/navigation';
+import { login } from '../../../../tasks/login';
+import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -46,7 +46,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
         interval: '10s',
         rule_id: 'rule_testing',
       })
-    ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+    ).then((rule) => visitRuleDetailsPage(rule.body.id));
 
     waitForAlertsToPopulate();
   });
