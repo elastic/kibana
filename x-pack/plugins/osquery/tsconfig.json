@@ -77,5 +77,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
+    "@kbn/shared-ux-page-kibana-template",
   ]
 }
