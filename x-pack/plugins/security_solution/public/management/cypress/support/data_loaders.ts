@@ -83,7 +83,8 @@ class TestRoleAndUserLoader extends EndpointSecurityTestRolesLoader {
   async load(
     name: EndpointSecurityRoleNames | KibanaKnownUserAccounts
   ): Promise<LoadedRoleAndUser> {
-    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS.includes(name as KibanaKnownUserAccounts)) {
+    // If its a known system account, then just exit here and use the default `changeme` password
+    if (KIBANA_KNOWN_DEFAULT_ACCOUNTS[name as KibanaKnownUserAccounts]) {
       return {
         role: name,
         username: name,

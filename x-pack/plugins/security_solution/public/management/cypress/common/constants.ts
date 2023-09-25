@@ -7,12 +7,15 @@
 
 import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
 
-export type KibanaKnownUserAccounts = typeof KIBANA_KNOWN_DEFAULT_ACCOUNTS[number];
+export type KibanaKnownUserAccounts = keyof typeof KIBANA_KNOWN_DEFAULT_ACCOUNTS;
 
 export type SecurityTestUser = EndpointSecurityRoleNames | KibanaKnownUserAccounts;
 
-export const KIBANA_KNOWN_DEFAULT_ACCOUNTS = [
-  'elastic',
-  'elastic_serverless',
-  'system_indices_superuser',
-] as const;
+/**
+ * List of kibana system accounts
+ */
+export const KIBANA_KNOWN_DEFAULT_ACCOUNTS = {
+  elastic: 'elastic',
+  elastic_serverless: 'elastic_serverless',
+  system_indices_superuser: 'system_indices_superuser',
+} as const;
