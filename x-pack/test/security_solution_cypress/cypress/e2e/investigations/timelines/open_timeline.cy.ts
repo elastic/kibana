@@ -24,7 +24,8 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   markAsFavorite,
   openTimelineById,
@@ -40,7 +41,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
     before(function () {
       cleanKibana();
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
 
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
@@ -64,7 +65,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
 
     beforeEach(function () {
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
     });
