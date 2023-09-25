@@ -50,11 +50,9 @@ import {
   goToActionsStepTab,
   goToScheduleStepTab,
 } from '../../../tasks/create_new_rule';
-import { saveEditedRule } from '../../../tasks/edit_rule';
+import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import { getDetails, goToRuleEditSettings } from '../../../tasks/rule_details';
-import { ruleDetailsUrl } from '../../../urls/rule_details';
+import { getDetails } from '../../../tasks/rule_details';
 
 describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEditedRule();
@@ -69,14 +67,12 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
     deleteAlertsAndRules();
     login();
     createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
-      visit(ruleDetailsUrl(createdRule.body.id));
+      visitEditRulePage(createdRule.body.id);
     });
   });
 
   it('Allows a rule to be edited', () => {
     const existingRule = getExistingRule();
-
-    goToRuleEditSettings();
 
     // expect define step to populate
     cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.query);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
 
 import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
@@ -17,7 +18,7 @@ import {
 import { deleteSelectedRules } from '../../../../../tasks/rules_bulk_actions';
 import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
 
 describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const testRules = [
@@ -31,7 +32,7 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
     createRule(testRules[1]);
     createRule(testRules[2]);
     login();
-    visitSecurityDetectionRulesPage();
+    visitRulesManagementTable();
   });
 
   it('User can delete an individual rule', () => {
