@@ -37,6 +37,11 @@ import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/t
 import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
 
 import {
+  migratePackagePolicyEvictionsFromV8103,
+  migratePackagePolicyToV8103,
+} from './migrations/security_solution/to_v8_10_3';
+
+import {
   migrateAgentPolicyToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
@@ -325,6 +330,17 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
       },
       '2': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8103,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8103,
+        },
+      },
+      '3': {
         changes: [
           {
             type: 'data_backfill',
