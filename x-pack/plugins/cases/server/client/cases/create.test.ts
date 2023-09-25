@@ -752,7 +752,7 @@ describe('create', () => {
       ).resolves.not.toThrow();
     });
 
-    it('does not throw if no custom fields are in request', async () => {
+    it('does not throw if there are only optional custom fields in configuration', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
@@ -760,6 +760,12 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
               label: 'foo',
               required: false,
             },
