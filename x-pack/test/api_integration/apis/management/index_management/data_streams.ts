@@ -210,6 +210,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+
+    describe('Update', () => {
+      const testDataStreamName = 'test-data-stream';
+
+      before(async () => await createDataStream(testDataStreamName));
+      after(async () => await deleteDataStream(testDataStreamName));
+
+      it('updates the data retention of a DS', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataRetention: '7d'
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+    });
+
     describe('Delete', () => {
       const testDataStreamName1 = 'test-data-stream1';
       const testDataStreamName2 = 'test-data-stream2';
