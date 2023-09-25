@@ -13,7 +13,6 @@ import {
   EuiBadge,
   EuiTitle,
   EuiButton,
-  EuiSpacer,
   EuiSwitch,
   EuiFormRow,
   EuiToolTip,
@@ -169,7 +168,7 @@ const LinksEditor = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
               {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge iconType="beaker" color="hollow" tabIndex={0} title="">
+              <EuiBadge color="hollow" tabIndex={0} title="">
                 {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
               </EuiBadge>
             </EuiToolTip>
