@@ -15,6 +15,7 @@ type TransformId = string;
 
 export interface TransformManager {
   install(slo: SLO): Promise<TransformId>;
+  preview(transformId: TransformId): Promise<void>;
   start(transformId: TransformId): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
   uninstall(transformId: TransformId): Promise<void>;
@@ -45,6 +46,22 @@ export class DefaultTransformManager implements TransformManager {
     }
 
     return transformParams.transform_id;
+  }
+
+  async preview(transformId: string): Promise<void> {
+    try {
+      await retryTransientEsErrors(
+        () =>
+          this.esClient.transform.previewTransform(
+            { transform_id: transformId },
+            { ignore: [409] }
+          ),
+        { logger: this.logger }
+      );
+    } catch (err) {
+      this.logger.error(`Cannot preview transform id ${transformId}: ${err}`);
+      throw err;
+    }
   }
 
   async start(transformId: TransformId): Promise<void> {

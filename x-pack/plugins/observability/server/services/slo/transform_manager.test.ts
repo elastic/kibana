@@ -80,6 +80,20 @@ describe('TransformManager', () => {
     });
   });
 
+  describe('Preview', () => {
+    it('previews the transform', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+      };
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
+
+      await transformManager.preview('slo-transform-id');
+
+      expect(esClientMock.transform.previewTransform).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Start', () => {
     it('starts the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
