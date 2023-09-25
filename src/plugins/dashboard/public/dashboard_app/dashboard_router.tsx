@@ -16,7 +16,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -148,19 +148,21 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     <I18nProvider>
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <HashRouter>
-            <Routes>
-              <Route
-                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                render={renderDashboard}
-              />
-              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Routes>
-          </HashRouter>
+          <KibanaContextProvider services={core}>
+            <HashRouter>
+              <Routes>
+                <Route
+                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+                  render={renderDashboard}
+                />
+                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+                <Route exact path="/">
+                  <Redirect to={LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Routes>
+            </HashRouter>
+          </KibanaContextProvider>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>
     </I18nProvider>

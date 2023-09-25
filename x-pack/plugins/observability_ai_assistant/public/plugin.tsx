@@ -126,6 +126,7 @@ export class ObservabilityAIAssistantPlugin
   ): ObservabilityAIAssistantPluginStart {
     const service = (this.service = createService({
       coreStart,
+      dataViewsStart: pluginsStart.dataViews,
       securityStart: pluginsStart.security,
       licenseStart: pluginsStart.licensing,
       shareStart: pluginsStart.share,

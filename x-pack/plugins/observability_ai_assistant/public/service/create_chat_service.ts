@@ -7,7 +7,7 @@
 /* eslint-disable max-classes-per-file*/
 import { Validator, type Schema, type OutputUnit } from '@cfworker/json-schema';
 
-import { HttpResponse } from '@kbn/core/public';
+import {CoreStart, HttpResponse} from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
@@ -23,6 +23,7 @@ import {
   scan,
   shareReplay,
   tap,
+  take,
 } from 'rxjs';
 import {
   ContextRegistry,
@@ -40,6 +41,7 @@ import type {
   PendingMessage,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
+import {DataViewsPublicPluginStart} from "@kbn/data-views-plugin/public";
 
 class TokenLimitReachedError extends Error {
   constructor() {
@@ -56,10 +58,14 @@ export class FunctionArgsValidationError extends Error {
 }
 
 export async function createChatService({
+  coreStart,
+  dataViewsStart,
   signal: setupAbortSignal,
   registrations,
   client,
 }: {
+  coreStart: CoreStart;
+  dataViewsStart: DataViewsPublicPluginStart;
   signal: AbortSignal;
   registrations: ChatRegistrationFunction[];
   client: ObservabilityAIAssistantAPIClient;
@@ -69,6 +75,10 @@ export async function createChatService({
 
   const validators = new Map<string, Validator>();
 
+  const currentAppId = await coreStart.application.currentAppId$.pipe(take(1)).toPromise()
+
+  const availableDataViews = await dataViewsStart.getTitles();
+  const dataview = await dataViewsStart.getDefaultDataView();
   const registerContext: RegisterContextDefinition = (context) => {
     contextRegistry.set(context.name, context);
   };
@@ -79,7 +89,24 @@ export async function createChatService({
   };
 
   const getContexts: ObservabilityAIAssistantChatService['getContexts'] = () => {
-    return Array.from(contextRegistry.values());
+    const contexts = Array.from(contextRegistry.values());
+    if (currentAppId === 'lens') {
+
+      const selectedDataView = dataview!.title || dataview!.id;
+      const selectedDataViewFields = JSON.stringify(dataview!.fields.map((field) => field.name));
+
+      contexts.push({
+        name: 'system',
+        description: `you are currently inside ${currentAppId} application, the selected dataview is ${selectedDataView} and this are the fields available on it: ${selectedDataViewFields}. Other DataViews available to use are: ${availableDataViews}.`,
+      });
+    } else {
+      contexts.push({
+        name: 'system',
+        description: `you are currently inside ${currentAppId} application`,
+      });
+    }
+
+    return contexts;
   };
   const getFunctions: ObservabilityAIAssistantChatService['getFunctions'] = ({
     contexts,

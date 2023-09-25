@@ -11,6 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
+import {DataViewsPublicPluginStart} from "@kbn/data-views-plugin/public";
 
 export function createService({
   coreStart,
@@ -18,15 +19,16 @@ export function createService({
   licenseStart,
   securityStart,
   shareStart,
+  dataViewsStart,
 }: {
   coreStart: CoreStart;
   enabled: boolean;
   licenseStart: LicensingPluginStart;
   securityStart: SecurityPluginStart;
   shareStart: SharePluginStart;
+  dataViewsStart: DataViewsPublicPluginStart;
 }): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationFunction) => void } {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
-
   const registrations: ChatRegistrationFunction[] = [];
 
   return {
@@ -38,7 +40,7 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ client, signal, registrations });
+      return await mod.createChatService({ coreStart, dataViewsStart, client, signal, registrations });
     },
 
     callApi: client,
