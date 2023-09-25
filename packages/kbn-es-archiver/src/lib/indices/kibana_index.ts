@@ -10,9 +10,10 @@ import { inspect } from 'util';
 
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type { estypes } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
-import { Stats } from '../stats';
+import type { ToolingLog } from '@kbn/dev-utils';
+import type { KbnClient } from '@kbn/test';
+import { kibanaPackageJson } from '@kbn/utils';
+import type { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 import {
@@ -123,7 +124,8 @@ export async function cleanSavedObjectIndices({
             bool: {
               must_not: {
                 ids: {
-                  values: ['space:default'],
+                  // preserve the default space and the default config
+                  values: ['space:default', `config:${kibanaPackageJson.version}`],
                 },
               },
             },
