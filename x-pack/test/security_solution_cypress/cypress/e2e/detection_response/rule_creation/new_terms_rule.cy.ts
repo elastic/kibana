@@ -54,9 +54,10 @@ import {
   selectNewTermsRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -79,7 +80,7 @@ describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless
     });
 
     it('Creates and enables a new terms rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectNewTermsRuleType();
       fillDefineNewTermsRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
