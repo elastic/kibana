@@ -18,7 +18,6 @@ import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
-import { GroupAsLink } from './group_as_link';
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNode,
@@ -120,21 +119,16 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     return null;
   }
 
-  const propsForGroupAsLink = groupIsLink
+  const propsForGroupAsLink: Partial<EuiCollapsibleNavItemProps> = groupIsLink
     ? {
-        buttonElement: 'div' as const,
-        // If we don't force the state there is a little UI animation  as if the
-        // accordion was openin/closing. We don't want any animation when it is a link.
-        forceState: 'closed' as const,
-        buttonContent: (
-          <GroupAsLink
-            title={title}
-            iconType={icon}
-            href={groupHref}
-            navigateToUrl={navigateToUrl}
-          />
-        ),
-        arrowProps: { style: { display: 'none' } },
+        linkProps: {
+          href: groupHref,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateToUrl(groupHref);
+          },
+        },
       }
     : {};
 
@@ -146,13 +140,13 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       iconProps={{ size: 'm' }}
       accordionProps={{
         initialIsOpen: isActive,
+        forceState: isCollapsed ? 'closed' : 'open',
         onToggle: (isOpen) => {
           setIsCollapsed(!isOpen);
           setDoCollapseFromActiveState(false);
         },
         ...navNode.accordionProps,
       }}
-      forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}
       {...propsForGroupAsLink}
       items={filteredItems.map((item) =>
