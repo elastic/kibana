@@ -53,3 +53,5 @@ export {
 } from './ui_metric';
 
 export { MAJOR_VERSION } from './plugin';
+
+export { Section, IndexDetailsSection } from './home_sections';
