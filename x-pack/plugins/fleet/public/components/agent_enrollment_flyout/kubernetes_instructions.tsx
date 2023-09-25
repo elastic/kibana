@@ -31,6 +31,15 @@ interface Props {
   fleetServerHost?: string;
 }
 
+export const getManifestDownloadLink = (fleetServerHost?: string, enrollmentAPIKey?: string) => {
+  const searchParams = new URLSearchParams({
+    ...(fleetServerHost && { fleetServer: fleetServerHost }),
+    ...(enrollmentAPIKey && { enrolToken: enrollmentAPIKey }),
+  });
+
+  return `${agentPolicyRouteService.getK8sFullDownloadPath()}?${searchParams.toString()}`;
+};
+
 export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   onCopy,
@@ -111,13 +120,8 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
     </EuiCopy>
   );
 
-  const searchParams = new URLSearchParams({
-    ...(fleetServerHost && { fleetServer: fleetServerHost }),
-    ...(enrollmentAPIKey && { enrolToken: enrollmentAPIKey }),
-  });
-
   const downloadLink = core.http.basePath.prepend(
-    `${agentPolicyRouteService.getK8sFullDownloadPath()}${searchParams.toString()}`
+    getManifestDownloadLink(fleetServerHost, enrollmentAPIKey)
   );
 
   const k8sDownloadYaml = (
