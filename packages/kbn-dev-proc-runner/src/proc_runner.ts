@@ -131,7 +131,7 @@ export class ProcRunner {
         );
       }
 
-      if (wait) {
+      if (wait === true) {
         // wait for process to complete
         await proc.outcomePromise;
       }
