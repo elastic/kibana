@@ -744,13 +744,13 @@ describe('create', () => {
         owner: caseWithOptionalFields.owner,
         customFields: [
           {
-            key: 'first_key',
+            key: 'first_customField_key',
             type: CustomFieldTypes.TEXT,
             label: 'foo',
             required: false,
           },
           {
-            key: 'second_key',
+            key: 'second_customField_key',
             type: CustomFieldTypes.TOGGLE,
             label: 'foo',
             required: false,

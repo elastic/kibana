@@ -8,19 +8,25 @@
 import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../../../common/ui';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CustomFieldsUserAction } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { UserActionBuilder } from '../types';
 import * as i18n from '../translations';
 
 const getLabelTitle = (
+  userAction: SnakeToCamelCase<CustomFieldsUserAction>,
   customField: CaseUICustomField,
   customFieldConfiguration?: CasesConfigurationUICustomField
 ) => {
   const customFieldValue = customField.field.value;
   const label = customFieldConfiguration?.label ?? customFieldConfiguration?.key ?? i18n.UNKNOWN;
 
-  if (customFieldValue == null || customFieldValue.length === 0) {
-    return `${i18n.RESET_FIELD.toLowerCase()} ${label}`;
+  if (
+    customFieldValue == null ||
+    customFieldValue.length === 0 ||
+    userAction.action === UserActionActions.delete
+  ) {
+    return i18n.CHANGED_FIELD_TO_EMPTY(label);
   }
 
   const value = customFieldValue[0];
@@ -46,7 +52,7 @@ export const createCustomFieldsUserActionBuilder: UserActionBuilder = ({
       (configCustomField) => configCustomField.key === customField.key
     );
 
-    const label = getLabelTitle(customField, customFieldConfiguration);
+    const label = getLabelTitle(customFieldsUserAction, customField, customFieldConfiguration);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,
