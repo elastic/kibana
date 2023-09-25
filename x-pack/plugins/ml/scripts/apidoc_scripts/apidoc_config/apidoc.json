@@ -181,6 +181,7 @@
     "CreateInferencePipeline",
     "GetIngestPipelines",
     "GetTrainedModelDownloadList",
+    "GetElserConfig",
 
     "Alerting",
     "PreviewAlert",
