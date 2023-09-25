@@ -80,6 +80,12 @@ describe('CustomFields', () => {
     expect(props.handleAddCustomField).toBeCalled();
   });
 
+  it('shows the experimental badge', () => {
+    appMockRender.render(<CustomFields {...props} />);
+
+    expect(screen.getByTestId('case-experimental-badge')).toBeInTheDocument();
+  });
+
   it('shows error when custom fields reaches the limit', async () => {
     const customFields = [
       ...customFieldsMock,
