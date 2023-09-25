@@ -15,25 +15,12 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import dateMath from '@kbn/datemath';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SloOverview } from './slo_overview';
 import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
-
-function datemathToEpochMillis(
-  value: string,
-  round: 'down' | 'up' = 'down',
-  forceNow?: Date
-): number | null {
-  const parsedValue = dateMath.parse(value, { roundUp: round === 'up', forceNow });
-  if (!parsedValue || !parsedValue.isValid()) {
-    return null;
-  }
-  return parsedValue.valueOf();
-}
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
   public readonly type = SLO_EMBEDDABLE;
@@ -63,8 +50,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
           defaultMessage: 'SLO Overview',
         })
     );
-    const startTimestamp = datemathToEpochMillis(this.input.timeRange!.from);
-    const endTimestamp = datemathToEpochMillis(this.input.timeRange!.to, 'up');
+    this.input.lastReloadRequestTime = Date.now();
+
     const { sloId, sloInstanceId } = this.getInput();
     const queryClient = new QueryClient();
 
@@ -76,8 +63,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
             <SloOverview
               sloId={sloId}
               sloInstanceId={sloInstanceId}
-              startTime={startTimestamp}
-              endTime={endTimestamp}
+              lastReloadRequestTime={this.input.lastReloadRequestTime}
             />
           </QueryClientProvider>
         </KibanaContextProvider>

@@ -20,7 +20,7 @@ import { paths } from '../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 
-export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: EmbeddableSloProps) {
+export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: EmbeddableSloProps) {
   const {
     uiSettings,
     application: { navigateToUrl },
@@ -33,7 +33,7 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
 
   useEffect(() => {
     refetch();
-  }, [startTime, endTime, refetch]);
+  }, [lastReloadRequestTime, refetch]);
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloNotFound = !isLoading && slo === undefined;
