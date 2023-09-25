@@ -7,7 +7,8 @@
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
@@ -20,7 +21,7 @@ import {
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
-import { EXCEPTIONS_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -36,6 +37,7 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
+import { visitRuleDetailsPage } from '../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
@@ -49,7 +51,7 @@ describe(
       createRule(getNewRule()).as('createdRule');
 
       login();
-      visitWithoutDateRange(EXCEPTIONS_URL);
+      visit(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });
 
@@ -87,7 +89,7 @@ describe(
 
         // Navigate to Rule details page
         cy.get<Cypress.Response<RuleResponse>>('@createdRule').then((rule) =>
-          visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions'))
+          visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' })
         );
 
         // Only one Exception should generated
@@ -107,7 +109,7 @@ describe(
         cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
         // Go back to Shared Exception List
-        visitWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
 
         // Click on "Create shared exception list" button on the header
         // Click on "Create exception item"
