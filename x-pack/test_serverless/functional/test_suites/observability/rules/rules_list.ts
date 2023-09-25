@@ -17,6 +17,7 @@ import {
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
   const svlObltNavigation = getService('svlObltNavigation');
@@ -67,6 +68,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     beforeEach(async () => {
+      await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
       await testSubjects.click('manageRulesPageButton');
@@ -81,6 +83,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             .set('x-elastic-internal-origin', 'foo');
         })
       );
+      await svlCommonPage.forceLogout();
     });
 
     it('should display rules in alphabetical order', async () => {
