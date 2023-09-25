@@ -11,7 +11,7 @@ import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
+import type { GetElserOptions, ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
@@ -59,12 +59,24 @@ export interface InferenceStatsResponse {
 export function trainedModelsApiProvider(httpService: HttpService) {
   return {
     /**
-     * Fetches the trained models list available for download
+     * Fetches the trained models list available for download.
      */
     getTrainedModelDownloads() {
       return httpService.http<ModelDefinitionResponse[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
         method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Gets ELSER config for download based on the cluster OS and CPU architecture.
+     */
+    getElserConfig(options?: GetElserOptions) {
+      return httpService.http<ModelDefinitionResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
+        method: 'GET',
+        ...(options ? { query: options as HttpFetchQuery } : {}),
         version: '1',
       });
     },

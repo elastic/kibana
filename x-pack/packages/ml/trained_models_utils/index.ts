@@ -18,4 +18,6 @@ export {
   type ElasticModelId,
   type ModelDefinition,
   type ModelDefinitionResponse,
+  type ElserVersion,
+  type GetElserOptions,
 } from './src/constants/trained_models';

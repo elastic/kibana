@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
+import { type ElserVersion } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { MlFeatures, RouteInitialization } from '../types';
@@ -658,7 +658,7 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/model_downloads Gets available models for download
+   * @api {get} /internal/ml/trained_models/model_downloads Gets available models for download
    * @apiName GetTrainedModelDownloadList
    * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
    */
@@ -673,50 +673,52 @@ export function trainedModelsRoutes(
     .addVersion(
       {
         version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
+        try {
+          const body = await modelsProvider(client, cloud).getModelDownloads();
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/elser_config Gets ELSER config for download
+   * @apiName GetElserConfig
+   * @apiDescription Gets ELSER config for download based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
         validate: {
           request: {
             query: modelDownloadsQuery,
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ response, client, request }) => {
         try {
-          // We assume that ML nodes in Cloud are always on linux-x86_64, even if other node types aren't.
-          const isCloud = !!cloud.cloudId;
+          const { version } = request.query;
 
-          const nodesInfoResponse =
-            await client.asInternalUser.transport.request<estypes.NodesInfoResponseBase>({
-              method: 'GET',
-              path: `/_nodes/ml:true/os`,
-            });
-
-          let osName: string | undefined;
-          let arch: string | undefined;
-          // Indicates that all ML nodes have the same architecture
-          let sameArch = true;
-          for (const node of Object.values(nodesInfoResponse.nodes)) {
-            if (!osName) {
-              osName = node.os?.name;
-            }
-            if (!arch) {
-              arch = node.os?.arch;
-            }
-            if (node.os?.name !== osName || node.os?.arch !== arch) {
-              sameArch = false;
-              break;
-            }
-          }
-
-          const body = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
-            const recommended =
-              (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
-              (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
-            return {
-              ...def,
-              name,
-              ...(recommended ? { recommended } : {}),
-            };
-          });
+          const body = await modelsProvider(client, cloud).getELSER(
+            version ? { version: Number(version) as ElserVersion } : undefined
+          );
 
           return response.ok({
             body,

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { type ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
+import type { ModelDefinitionResponse, GetElserOptions } from '@kbn/ml-trained-models-utils';
 import { type TrainedModelsApiService } from './ml_api_service/trained_models';
-
-export type ElserVersion = 1 | 2;
 
 export class ElasticModels {
   constructor(private readonly trainedModels: TrainedModelsApiService) {}
@@ -19,31 +17,7 @@ export class ElasticModels {
    * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
    * a portable version of the model is returned.
    */
-  public async getELSER(options?: { version?: ElserVersion }): Promise<ModelDefinitionResponse> {
-    const response = await this.trainedModels.getTrainedModelDownloads();
-
-    let requestedModel: ModelDefinitionResponse | undefined;
-    let recommendedModel: ModelDefinitionResponse | undefined;
-    let defaultModel: ModelDefinitionResponse | undefined;
-
-    for (const model of response) {
-      if (options?.version === model.version) {
-        requestedModel = model;
-        if (model.recommended) {
-          requestedModel = model;
-          break;
-        }
-      } else if (model.recommended) {
-        recommendedModel = model;
-      } else if (model.default) {
-        defaultModel = model;
-      }
-    }
-
-    if (!requestedModel && !defaultModel && !recommendedModel) {
-      throw new Error('Requested model not found');
-    }
-
-    return requestedModel || recommendedModel || defaultModel!;
+  public async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> {
+    return await this.trainedModels.getElserConfig(options);
   }
 }

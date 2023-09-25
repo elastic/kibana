@@ -88,4 +88,6 @@ export const createIngestPipelineSchema = schema.object({
   ),
 });
 
-export const modelDownloadsQuery = schema.object({});
+export const modelDownloadsQuery = schema.object({
+  version: schema.maybe(schema.oneOf([schema.literal('1'), schema.literal('2')])),
+});
