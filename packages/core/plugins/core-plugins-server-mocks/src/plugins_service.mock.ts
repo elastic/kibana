@@ -42,7 +42,7 @@ function createUiPlugins() {
 
 export const pluginServiceMock = {
   create: createServiceMock,
-  createSetupContract: createInternalSetupContractMock,
-  createStartContract: createInternalStartContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
   createUiPlugins,
 };
