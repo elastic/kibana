@@ -100,7 +100,7 @@ export const TransformManagement: FC = () => {
     error: transformsStatsErrorMessage,
     data: transformsStats,
   } = useGetTransformsStats({
-    enabled: !transformNodesInitialLoading && (transformNodes > 0 || hideNodeInfo),
+    enabled: !transformNodesInitialLoading && transformNodes > 0,
   });
 
   const transforms: TransformListRow[] = useMemo(() => {
