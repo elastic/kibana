@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { TestProviders } from '../../common/mock';
 import { RightPanelContext } from './context';
-import { mockContextValue } from './mocks/mock_right_panel_context';
+import { mockContextValue } from './mocks/mock_context';
 import { PanelHeader } from './header';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
