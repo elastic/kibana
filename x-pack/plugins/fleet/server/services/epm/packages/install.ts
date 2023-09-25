@@ -103,6 +103,7 @@ import { createAssets } from './custom_integrations';
 import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
+import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -784,6 +785,7 @@ export async function installCustomPackage(
 
   // Validate that we can create this package, validations will throw if they don't pass
   await checkForNamingCollision(savedObjectsClient, pkgName);
+  checkDatasetsNameFormat(datasets, pkgName);
 
   // Compose a packageInfo
   const packageInfo = {

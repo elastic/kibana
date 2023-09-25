@@ -28,6 +28,7 @@ import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
+import { ExtensionsSummary } from './extensions_summary';
 
 interface Props {
   indexDetails: Index;
@@ -156,6 +157,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       </EuiFlexGroup>
 
       <EuiSpacer />
+
+      <ExtensionsSummary index={indexDetails} />
 
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

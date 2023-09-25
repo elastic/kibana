@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
   getConnectorIds,
@@ -77,7 +78,7 @@ describe(
     });
 
     it('Correct incident fields show when connector is changed', () => {
-      visitWithoutDateRange(CASES_URL);
+      visit(CASES_URL);
       goToCreateNewCase();
       fillCasesMandatoryfields(getCase1());
       fillJiraConnectorOptions(getJiraConnectorOptions());
