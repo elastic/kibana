@@ -41,7 +41,6 @@ class InferenceModel {
 
   public setModelId(modelId: string): void {
     this.modelId = modelId;
-    console.log(this);
   }
 }
 
