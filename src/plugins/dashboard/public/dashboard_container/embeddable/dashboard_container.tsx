@@ -425,18 +425,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dispatch.setExpandedPanelId(newId);
   };
 
-  public openOverlay = (ref: OverlayRef, options?: { focusPanelId?: string }) => {
+  public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
     this.clearOverlays();
     this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
-    if (options?.focusPanelId) {
-      this.setFocusPanelId(options?.focusPanelId);
+    if (options?.focusedPanelId) {
+      this.setFocusedPanelId(options?.focusedPanelId);
     }
   };
 
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
-    this.dispatch.setFocusPanelId(undefined);
+    this.dispatch.setFocusedPanelId(undefined);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
@@ -496,7 +496,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.setHighlightPanelId(undefined);
   };
 
-  public setFocusPanelId = (id: string | undefined) => {
-    this.dispatch.setFocusPanelId(id);
+  public setFocusedPanelId = (id: string | undefined) => {
+    this.dispatch.setFocusedPanelId(id);
   };
 }

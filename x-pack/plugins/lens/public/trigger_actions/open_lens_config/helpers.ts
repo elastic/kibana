@@ -58,6 +58,6 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         outsideClickCloses: true,
       }
     );
-    overlayTracker?.openOverlay(handle, { focusPanelId: embeddable.id });
+    overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
   }
 }

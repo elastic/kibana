@@ -9,7 +9,7 @@
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 interface TracksOverlaysOptions {
-  focusPanelId?: string;
+  focusedPanelId?: string;
 }
 
 interface TracksOverlays {

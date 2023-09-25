@@ -24,6 +24,7 @@ export interface Props extends DivProps {
   index?: number;
   type: DashboardPanelState['type'];
   expandedPanelId?: string;
+  focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
   onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
@@ -33,6 +34,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       expandedPanelId,
+      focusedPanelId,
       id,
       index,
       type,
@@ -49,12 +51,11 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
-    const focusPanelId = container.select((state) => state.componentState.focusPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
-    const focusPanel = focusPanelId !== undefined && focusPanelId === id;
-    const blurPanel = focusPanelId !== undefined && focusPanelId !== id;
+    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
+    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
     const classes = classNames({
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -74,7 +75,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         }
 
         ref.current.querySelectorAll('*').forEach((e) => {
-          if (focusPanelId && focusPanelId !== id) {
+          if (blurPanel) {
             // remove blurred panels and nested elements from tab order
             e.setAttribute('tabindex', '-1');
           } else {
@@ -83,15 +84,14 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
           }
         });
       }
-    }, [id, container, scrollToPanelId, highlightPanelId, ref, focusPanelId]);
+    }, [id, container, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const focusStyles =
-      focusPanelId && focusPanelId !== id
-        ? css`
-            pointer-events: none;
-            opacity: 0.25;
-          `
-        : css``;
+    const focusStyles = blurPanel
+      ? css`
+          pointer-events: none;
+          opacity: 0.25;
+        `
+      : css``;
 
     return (
       <div
@@ -162,7 +162,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
   const container = useDashboardContainer();
-  const focusPanelId = container.select((state) => state.componentState.focusPanelId);
+  const focusedPanelId = container.select((state) => state.componentState.focusedPanelId);
 
   const dashboard = useDashboardContainer();
 
@@ -170,7 +170,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const isEnabled =
     !isPrintMode &&
     isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
-    (!focusPanelId || focusPanelId === props.id);
+    (!focusedPanelId || focusedPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });

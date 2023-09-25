@@ -58,11 +58,11 @@ export const DashboardViewportComponent = () => {
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const description = dashboard.select((state) => state.explicitInput.description);
-  const focusPanelId = dashboard.select((state) => state.componentState.focusPanelId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
-  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(Boolean(focusPanelId));
+  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
   const classes = classNames({
     dshDashboardViewport: true,
