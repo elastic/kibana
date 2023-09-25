@@ -55,14 +55,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    afterEach(async () => {
-      await cleanRiskEngineConfig({ kibanaServer });
-      await deleteRiskEngineTask({ es, log });
-      await deleteRiskScoreIndecies(log, es);
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-    });
-
     describe('Risk engine not enabled', () => {
       it('should has empty riskEngineMetrics', async () => {
         await retry.try(async () => {
@@ -107,6 +99,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         await riskEngineRoutes.init();
+      });
+
+      afterEach(async () => {
+        await cleanRiskEngineConfig({ kibanaServer });
+        await deleteRiskEngineTask({ es, log });
+        await deleteRiskScoreIndecies(log, es);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should return riskEngineMetrics with expected values', async () => {

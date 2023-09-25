@@ -6,14 +6,14 @@
  */
 
 export interface RiskEngineMetrics {
-  unique_host_risk_score_total?: string;
-  unique_user_risk_score_total?: string;
-  unique_user_risk_score_day?: string;
-  unique_host_risk_score_day?: string;
-  all_user_risk_scores_total?: string;
-  all_host_risk_scores_total?: string;
-  all_user_risk_scores_total_day?: string;
-  all_host_risk_scores_total_day?: string;
-  all_risk_scores_index_size?: string;
-  unique_risk_scores_index_size?: string;
+  unique_host_risk_score_total?: number;
+  unique_user_risk_score_total?: number;
+  unique_user_risk_score_day?: number;
+  unique_host_risk_score_day?: number;
+  all_user_risk_scores_total?: number;
+  all_host_risk_scores_total?: number;
+  all_user_risk_scores_total_day?: number;
+  all_host_risk_scores_total_day?: number;
+  all_risk_scores_index_size?: number;
+  unique_risk_scores_index_size?: number;
 }
