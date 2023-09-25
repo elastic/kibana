@@ -8,29 +8,14 @@
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import {
-  areResourcesSetup,
-  createDefaultSetupState,
-  mergePartialSetupStates,
-} from '../../common/setup';
-import {
-  enableResourceManagement,
-  setMaximumBuckets,
-  validateMaximumBuckets,
-  validateResourceManagement,
-} from '../lib/setup/cluster_settings';
+import { enableResourceManagement, setMaximumBuckets } from '../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
   removeProfilingFromApmPackagePolicy,
-  validateCollectorPackagePolicy,
-  validateProfilingInApmPackagePolicy,
-  validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { hasProfilingData } from '../lib/setup/has_profiling_data';
-import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
-import { ProfilingSetupOptions } from '../lib/setup/types';
+import { setSecurityRole } from '../lib/setup/security_role';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
 
@@ -52,82 +37,15 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         const core = await context.core;
-        const clientWithDefaultAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: true,
-        });
-        const clientWithProfilingAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: false,
-        });
 
-        const setupOptions: ProfilingSetupOptions = {
-          client: clientWithDefaultAuth,
-          logger,
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+        const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
+          esClient,
           soClient: core.savedObjects.client,
-          spaceId:
-            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-          config: dependencies.config,
-        };
-
-        const state = createDefaultSetupState();
-        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
-
-        if (!state.cloud.available) {
-          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
-          logger.error(msg);
-          return response.custom({
-            statusCode: 500,
-            body: {
-              message: msg,
-            },
-          });
-        }
-        const verifyFunctions = [
-          validateMaximumBuckets,
-          validateResourceManagement,
-          validateSecurityRole,
-          validateCollectorPackagePolicy,
-          validateSymbolizerPackagePolicy,
-          validateProfilingInApmPackagePolicy,
-        ];
-
-        const partialStates = await Promise.all([
-          ...verifyFunctions.map((fn) => fn(setupOptions)),
-          hasProfilingData({
-            ...setupOptions,
-            client: clientWithProfilingAuth,
-          }),
-        ]);
-
-        const mergedState = mergePartialSetupStates(state, partialStates);
-
-        return response.ok({
-          body: {
-            has_setup: areResourcesSetup(mergedState),
-            has_data: mergedState.data.available,
-            pre_8_9_1_data: mergedState.resources.pre_8_9_1_data,
-          },
+          spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
         });
+
+        return response.ok({ body: profilingStatus });
       } catch (error) {
-        // We cannot fully check the status of all resources
-        // to make sure Profiling has been set up and has data
-        // for users with monitor privileges. This privileges
-        // is needed to call the profiling ES plugin for example.
-        if (error?.meta?.statusCode === 403) {
-          return response.ok({
-            body: {
-              has_setup: true,
-              pre_8_9_1_data: false,
-              has_data: true,
-              unauthorized: true,
-            },
-          });
-        }
         return handleRouteHandlerError({
           error,
           logger,
@@ -146,28 +64,9 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const esClient = await getClient(context);
-        const core = await context.core;
-        const clientWithDefaultAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: true,
-        });
-        const setupOptions: ProfilingSetupOptions = {
-          client: clientWithDefaultAuth,
-          logger,
-          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
-          soClient: core.savedObjects.client,
-          spaceId:
-            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-          config: dependencies.config,
-        };
+        const isCloudEnabled = dependencies.setup.cloud.isCloudEnabled;
 
-        const state = createDefaultSetupState();
-        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
-
-        if (!state.cloud.available) {
+        if (!isCloudEnabled) {
           const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
           logger.error(msg);
           return response.custom({
@@ -178,28 +77,44 @@ export function registerSetupRoute({
           });
         }
 
-        const partialStates = await Promise.all(
-          [
-            validateResourceManagement,
-            validateSecurityRole,
-            validateMaximumBuckets,
-            validateCollectorPackagePolicy,
-            validateSymbolizerPackagePolicy,
-            validateProfilingInApmPackagePolicy,
-          ].map((fn) => fn(setupOptions))
+        const esClient = await getClient(context);
+        const core = await context.core;
+        const clientWithDefaultAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: true,
+        });
+        const clientWithProfilingAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: false,
+        });
+
+        const commonParams = {
+          client: clientWithDefaultAuth,
+          logger,
+          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+          soClient: core.savedObjects.client,
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+          isCloudEnabled,
+        };
+
+        const setupState = await dependencies.start.profilingDataAccess.services.getSetupState(
+          commonParams,
+          clientWithProfilingAuth
         );
-        const mergedState = mergePartialSetupStates(state, partialStates);
 
         const executeAdminFunctions = [
-          ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
-          ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
-          ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
+          ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
+          ...(setupState.permissions.configured ? [] : [setSecurityRole]),
+          ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
         ];
 
         const executeViewerFunctions = [
-          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
-          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
-          ...(mergedState.policies.apm.profilingEnabled
+          ...(setupState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(setupState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(setupState.policies.apm.profilingEnabled
             ? [removeProfilingFromApmPackagePolicy]
             : []),
         ];
@@ -208,8 +123,12 @@ export function registerSetupRoute({
           return response.ok();
         }
 
-        await Promise.all(executeAdminFunctions.map((fn) => fn(setupOptions)));
-        await Promise.all(executeViewerFunctions.map((fn) => fn(setupOptions)));
+        const setupParams = {
+          ...commonParams,
+          config: dependencies.config,
+        };
+        await Promise.all(executeAdminFunctions.map((fn) => fn(setupParams)));
+        await Promise.all(executeViewerFunctions.map((fn) => fn(setupParams)));
 
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({

@@ -16,7 +16,8 @@ import {
   openAddNewConnectorOption,
   verifyNewConnectorSelected,
 } from '../../../tasks/configure_cases';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CASES_URL } from '../../../urls/navigation';
 
@@ -92,7 +93,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Configures a new connector', () => {
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);

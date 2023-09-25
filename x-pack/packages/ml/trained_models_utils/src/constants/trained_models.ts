@@ -46,8 +46,9 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
-export const ELASTIC_MODEL_DEFINITIONS = {
+export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
   '.elser_model_1': {
+    version: 1,
     config: {
       input: {
         field_names: ['text_field'],
@@ -57,7 +58,49 @@ export const ELASTIC_MODEL_DEFINITIONS = {
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
-} as const;
+  '.elser_model_2_SNAPSHOT': {
+    version: 2,
+    default: true,
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2Description', {
+      defaultMessage: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+    }),
+  },
+  '.elser_model_2_linux-x86_64_SNAPSHOT': {
+    version: 2,
+    os: 'Linux',
+    arch: 'amd64',
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2x86Description', {
+      defaultMessage:
+        'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+    }),
+  },
+} as const);
+
+export interface ModelDefinition {
+  version: number;
+  config: object;
+  description: string;
+  os?: string;
+  arch?: string;
+  default?: boolean;
+  recommended?: boolean;
+}
+
+export type ModelDefinitionResponse = ModelDefinition & {
+  name: string;
+};
+
+export type ElasticModelId = keyof typeof ELASTIC_MODEL_DEFINITIONS;
 
 export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
@@ -66,3 +109,9 @@ export const MODEL_STATE = {
 } as const;
 
 export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;
+
+export type ElserVersion = 1 | 2;
+
+export interface GetElserOptions {
+  version?: ElserVersion;
+}
