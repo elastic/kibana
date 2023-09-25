@@ -10,7 +10,6 @@ tags: ['kibana', 'dev', 'architecture', 'contributor']
 If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you're after.
 
 Feature Privileges allow you to define precisely who can access your feature and what actions they can perform, all while seamlessly integrating with Kibana's role-based access control (RBAC) system.
-`
 This documentation will guide you through the process of creating and configuring Feature Privileges for your Kibana plugin or features. Whether you're building a new visualization, enhancing an existing application, or extending Kibana's capabilities, understanding how to set up Feature Privileges is vital to maintaining security, control, and user satisfaction.
 
 By the end of this guide, you'll know how to:
@@ -164,9 +163,7 @@ router.get(
       {
         path: '/internal/my_plugin/sensitive_action',
         validate: false,
-        options: {
-          tags: ['access:my_closed_example_api'],
-        },
+        
       },
       async (context, request, response) => {
         return response.ok({
@@ -176,6 +173,40 @@ router.get(
         });
       }
     );
+
+public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
+  // ...
+  const router = core.http.createRouter();
+    router.get(
+      {
+        path: '/internal/my_plugin/read',
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new Date().toISOString(),
+          },
+        });
+      }
+    );
+    router.get(
+      {
+        path: '/internal/my_plugin/sensitive_action',
+        validate: false,
+        options: {
+          tags: ['access:my_closed_example_api'],
+        },
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new SecretClass().secretResponse(),
+          },
+        });
+      }
+    );
+}
 ```
 
 Notice, we've added an `options.tags` property for the API route that returns sensitive information. This tag is then used in the privileges object as follow
