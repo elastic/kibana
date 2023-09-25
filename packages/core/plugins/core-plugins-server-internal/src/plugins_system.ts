@@ -23,11 +23,13 @@ import type {
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
+import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const Sec = 1000;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
+  private readonly runtimeResolver = new RuntimePluginContractResolver();
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
@@ -114,17 +116,16 @@ export class PluginsSystem<T extends PluginType> {
 
       let pluginSetupContext;
       if (this.type === PluginType.preboot) {
-        pluginSetupContext = createPluginPrebootSetupContext(
-          this.coreContext,
-          deps as PluginsServicePrebootSetupDeps,
-          plugin
-        );
+        pluginSetupContext = createPluginPrebootSetupContext({
+          deps: deps as PluginsServicePrebootSetupDeps,
+          plugin,
+        });
       } else {
-        pluginSetupContext = createPluginSetupContext(
-          this.coreContext,
-          deps as PluginsServiceSetupDeps,
-          plugin
-        );
+        pluginSetupContext = createPluginSetupContext({
+          deps: deps as PluginsServiceSetupDeps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        });
       }
 
       let contract: unknown;
@@ -154,6 +155,8 @@ export class PluginsSystem<T extends PluginType> {
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
+
+    this.runtimeResolver.resolveSetupRequests(contracts);
 
     return contracts;
   }
@@ -186,7 +189,7 @@ export class PluginsSystem<T extends PluginType> {
 
       let contract: unknown;
       const contractOrPromise = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
+        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
         pluginDepContracts
       );
       if (isPromise(contractOrPromise)) {
@@ -213,6 +216,8 @@ export class PluginsSystem<T extends PluginType> {
 
       contracts.set(pluginName, contract);
     }
+
+    this.runtimeResolver.resolveStartRequests(contracts);
 
     return contracts;
   }

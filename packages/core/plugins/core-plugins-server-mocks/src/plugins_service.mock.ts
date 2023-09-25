@@ -7,11 +7,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginsService, type PluginsServiceSetup } from '@kbn/core-plugins-server-internal';
+import { PluginsService, type InternalPluginsServiceSetup } from '@kbn/core-plugins-server-internal';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
-const createSetupContractMock = (): PluginsServiceSetup => ({
+const createSetupContractMock = (): InternalPluginsServiceSetup => ({
   contracts: new Map(),
   initialized: true,
 });

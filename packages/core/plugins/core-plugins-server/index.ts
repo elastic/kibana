@@ -19,6 +19,12 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
   DynamicConfigDescriptor,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginContractMap,
+  PluginContractResolver,
+  PluginContractResolverResponse,
+  PluginContractResolverResponseItem,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';

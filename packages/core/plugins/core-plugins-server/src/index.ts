@@ -7,6 +7,14 @@
  */
 
 export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginContractMap,
+  PluginContractResolver,
+  PluginContractResolverResponse,
+  PluginContractResolverResponseItem,
+} from './contracts';
+export type {
   PrebootPlugin,
   Plugin,
   AsyncPlugin,
