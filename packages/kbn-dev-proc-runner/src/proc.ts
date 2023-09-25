@@ -13,7 +13,7 @@ import stripAnsi from 'strip-ansi';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { tap, share, take, mergeMap, map, ignoreElements } from 'rxjs/operators';
+import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs/operators';
 import chalk from 'chalk';
 import treeKill from 'tree-kill';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -88,8 +88,17 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
     Rx.fromEvent<[number, string]>(childProcess, 'exit').pipe(
+      filter(([code]) => {
+        if (stopCalled) {
+          // when stop was already called, that's a graceful exit, let those events pass.
+          return true;
+        } else {
+          // filtering out further interruption events to prevent `take()` from closing the stream.
+          return code !== null;
+        }
+      }),
       take(1),
-      map(([code, signal]) => {
+      map(([code]) => {
         if (stopCalled) {
           return null;
         }
@@ -101,18 +110,18 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
           });
         }
 
-        // A stop signal of SIGABRT indicates a self-inflicted app crash,
-        // then we can't rely on an exit code, because it's not passed
-        if (signal === 'SIGABRT') {
-          throw createFailError(`[${name}] aborted ${code ? `with code: ${code}` : ''}`);
-        }
-
         return code;
       })
     ),
 
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(
+      take(1),
+      mergeMap((err) => Rx.throwError(err))
+    ),
+
+    // observe a promise rejection
+    Rx.from(childProcess).pipe(
       take(1),
       mergeMap((err) => Rx.throwError(err))
     )
