@@ -250,22 +250,25 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         <EuiModalBody>
           {configuredByILM && (
             <>
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              title={i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle', {
-                defaultMessage: 'Override ILM data retention',
-              })}
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningText"
-                  defaultMessage="Changing this setting will override the data retention period configured in the ILM policy."
-                />
-              </p>
-            </EuiCallOut>
+              <EuiCallOut
+                color="warning"
+                iconType="warning"
+                title={i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle',
+                  {
+                    defaultMessage: 'Override ILM data retention',
+                  }
+                )}
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningText"
+                    defaultMessage="Changing this setting will override the data retention period configured in the ILM policy."
+                  />
+                </p>
+              </EuiCallOut>
 
-            <EuiSpacer size="m" />
+              <EuiSpacer size="m" />
             </>
           )}
           <UseField
