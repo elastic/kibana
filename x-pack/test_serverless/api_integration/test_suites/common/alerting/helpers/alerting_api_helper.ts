@@ -170,6 +170,55 @@ export async function createAnomalyRule({
   return body;
 }
 
+export async function createLatencyThresholdRule({
+  supertest,
+  name = generateUniqueKey(),
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer = 'apm',
+  notifyWhen,
+  enabled = true,
+  ruleTypeId = 'apm.transaction_duration',
+  params,
+}: {
+  supertest: SuperTest<Test>;
+  name?: string;
+  consumer?: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: params || {
+        aggregationType: 'avg',
+        environment: 'ENVIRONMENT_ALL',
+        threshold: 1500,
+        windowSize: 5,
+        windowUnit: 'm',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
+      },
+      tags,
+      name,
+      rule_type_id: ruleTypeId,
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    });
+  return body;
+}
+
 export async function createInventoryRule({
   supertest,
   name = generateUniqueKey(),

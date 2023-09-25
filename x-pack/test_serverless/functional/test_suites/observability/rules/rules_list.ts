@@ -14,6 +14,7 @@ import {
   runRule,
   createIndexConnector,
   snoozeRule,
+  createLatencyThresholdRule,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -67,7 +68,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     };
 
-    beforeEach(async () => {
+    before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
@@ -83,6 +84,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             .set('x-elastic-internal-origin', 'foo');
         })
       );
+    });
+
+    after(async () => {
       await svlCommonPage.forceLogout();
     });
 
@@ -575,15 +579,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         supertest,
       });
 
-      const rule2 = await createRule({
+      const rule2 = await createLatencyThresholdRule({
         supertest,
-        ruleTypeId: 'apm.anomaly',
-        params: {
-          anomalySeverityType: 'critical',
-          environment: 'ENVIRONMENT_ALL',
-          windowSize: 30,
-          windowUnit: 'm',
-        },
       });
 
       ruleIdList = [rule1.id, rule2.id];
@@ -604,7 +601,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
       });
 
-      await testSubjects.click('ruleTypemetrics.alert.inventory.thresholdFilterOption');
+      await testSubjects.click('ruleTypeapm.anomalyFilterOption');
 
       await retry.try(async () => {
         const filterInventoryRuleOnlyResults = await svlTriggersActionsUI.getRulesList();
@@ -747,19 +744,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
-      const actionId = await createIndexConnector({
+      const action = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: '.alerts-observability.apm.alerts-default',
       });
-      expect(actionId).not.toBe(undefined);
+      expect(action).not.toBe(undefined);
 
       const rule1 = await createRule({
         supertest,
         actions: [
           {
-            group: 'metrics.inventory_threshold.fired',
-            id: actionId,
+            group: 'threshold_met',
+            id: action.id,
             params: {
               documents: [{ a: '2' }],
             },
@@ -847,7 +844,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const resultToast = await toasts.getToastElement(1);
         const toastText = await resultToast.getVisibleText();
-        expect(toastText).toEqual('Rule successfully unsnoozed');
+        expect(toastText).toEqual('Rules notification successfully unsnoozed');
       });
 
       await svlTriggersActionsUI.searchRules(rule1.name);
