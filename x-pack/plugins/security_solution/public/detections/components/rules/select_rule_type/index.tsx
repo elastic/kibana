@@ -18,11 +18,11 @@ import {
   isNewTermsRule,
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
-import { KibanaServices } from '../../../../common/lib/kibana';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -49,7 +49,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
 
-    const isEsqlFeatureEnabled = KibanaServices.getEnableEsqlRuleType();
+    const isEsqlFeatureEnabled = !useIsExperimentalFeatureEnabled('esqlRulesDisabled');
 
     const eqlSelectableConfig = useMemo(
       () => ({

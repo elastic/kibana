@@ -19,7 +19,6 @@ export interface ServerApiError {
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
   prebuiltRulesPackageVersion?: string;
-  enableEsqlRuleType: boolean;
 }
 
 /**

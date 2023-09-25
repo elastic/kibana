@@ -96,11 +96,6 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
-   * enables ES|QL rule type
-   */
-  enableEsqlRuleType: schema.boolean({ defaultValue: true }),
-
-  /**
    * Artifacts Configuration for package policy update concurrency
    */
   packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),

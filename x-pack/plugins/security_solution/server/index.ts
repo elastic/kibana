@@ -21,7 +21,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
     prebuiltRulesPackageVersion: true,
-    enableEsqlRuleType: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
