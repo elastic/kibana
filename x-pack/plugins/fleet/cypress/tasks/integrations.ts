@@ -13,9 +13,9 @@ import {
 } from '../screens/integrations';
 
 import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX, EXISTING_HOSTS_TAB } from '../screens/fleet';
-import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
+import { CONFIRM_MODAL } from '../screens/navigation';
 
-import { API_VERSIONS } from '../../common/constants';
+import { request } from './common';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
@@ -33,7 +33,6 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
       force: true,
     });
   }
-  cy.getBySel(TOAST_CLOSE_BTN).click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
@@ -50,23 +49,37 @@ export function clickIfVisible(selector: string) {
   });
 }
 
-export const deleteIntegrations = async () => {
-  const ids: string[] = [];
-  cy.request('/api/fleet/package_policies').then((response: any) => {
-    response.body.items.forEach((policy: any) => ids.push(policy.id));
-    cy.request({
-      url: `/api/fleet/package_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
-      body: `{ "packagePolicyIds": ${JSON.stringify(ids)}, "force": true }`,
-      method: 'POST',
+export const deleteIntegrations = () => {
+  request({ url: '/api/fleet/package_policies' })
+    .then((packagePoliciesResponse: any) => {
+      const packagePolicyIds = packagePoliciesResponse.body.items.map((policy: any) => policy.id);
+
+      request({
+        url: `/api/fleet/package_policies/delete`,
+        body: `{ "packagePolicyIds": ${JSON.stringify(packagePolicyIds)}, "force": true }`,
+        method: 'POST',
+      });
+    })
+    .then(() => {
+      request({ url: '/api/fleet/epm/packages' }).then((packagesResponse: any) => {
+        for (const pkg of packagesResponse.body.items.filter(
+          (item: any) => item.status === 'installed'
+        )) {
+          request({
+            url: `/api/fleet/epm/packages/${pkg.name}/${pkg.version}`,
+            method: 'DELETE',
+            body: {
+              force: true,
+            },
+          });
+        }
+      });
     });
-  });
 };
 
 export const installPackageWithVersion = (integration: string, version: string) => {
-  cy.request({
+  request({
     url: `/api/fleet/epm/packages/${integration}/${version}`,
-    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     body: '{ "force": true }',
     method: 'POST',
   });

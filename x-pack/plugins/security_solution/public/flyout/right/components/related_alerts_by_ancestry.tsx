@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { CORRELATIONS_ANCESTRY_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
+import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
 
 const ICON = 'warning';
 
@@ -41,7 +41,13 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
     indices,
     scopeId,
   });
-  const text = CORRELATIONS_ANCESTRY_ALERTS(dataCount);
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.ancestryAlertsLabel"
+      defaultMessage="{count, plural, one {alert} other {alerts}} related by ancestry"
+      values={{ count: dataCount }}
+    />
+  );
 
   return (
     <InsightsSummaryRow
@@ -50,7 +56,7 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
       icon={ICON}
       value={dataCount}
       text={text}
-      data-test-subj={INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID}
+      data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID}
       key={`correlation-row-${text}`}
     />
   );

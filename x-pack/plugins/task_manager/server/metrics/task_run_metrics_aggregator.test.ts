@@ -8,7 +8,12 @@
 import * as uuid from 'uuid';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
-import { asTaskRunEvent, TaskPersistence } from '../task_events';
+import {
+  asTaskManagerStatEvent,
+  asTaskRunEvent,
+  TaskManagerStats,
+  TaskPersistence,
+} from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
@@ -69,6 +74,10 @@ export const getTaskRunFailedEvent = (type: string, isExpired: boolean = false) 
   );
 };
 
+export const getTaskManagerStatEvent = (value: number, id: TaskManagerStats = 'runDelay') => {
+  return asTaskManagerStatEvent(id, asOk(value));
+};
+
 describe('TaskRunMetricsAggregator', () => {
   let taskRunMetricsAggregator: TaskRunMetricsAggregator;
   beforeEach(() => {
@@ -77,13 +86,14 @@ describe('TaskRunMetricsAggregator', () => {
 
   test('should correctly initialize', () => {
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0 },
+      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskRunMetricsAggregator.initialMetric()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0 },
+      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
+      by_type: {},
     });
   });
 
@@ -91,10 +101,26 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, not_timed_out: 2, total: 2 },
+      overall: { success: 2, not_timed_out: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 2, not_timed_out: 2, total: 2 },
       },
+    });
+  });
+
+  test('should correctly process task manager runDelay stat', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [1], values: [10] } },
+    });
+  });
+
+  test('should ignore task manager stats that are not runDelays', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskManagerStatEvent(3.343, 'pollingDelay')
+    );
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
@@ -102,7 +128,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, not_timed_out: 0, total: 2 },
+      overall: { success: 2, not_timed_out: 0, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 2, not_timed_out: 0, total: 2 },
       },
@@ -113,7 +139,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 2, total: 2 },
+      overall: { success: 0, not_timed_out: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 0, not_timed_out: 2, total: 2 },
       },
@@ -124,7 +150,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 2 },
+      overall: { success: 0, not_timed_out: 0, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 0, not_timed_out: 0, total: 2 },
       },
@@ -137,7 +163,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 3, not_timed_out: 3, total: 4 },
+      overall: { success: 3, not_timed_out: 3, total: 4, delay: { counts: [], values: [] } },
       by_type: {
         report: { success: 2, not_timed_out: 1, total: 2 },
         telemetry: { success: 1, not_timed_out: 2, total: 2 },
@@ -167,7 +193,7 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, not_timed_out: 12, total: 14 },
+      overall: { success: 11, not_timed_out: 12, total: 14, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 3, not_timed_out: 3, total: 3 },
         'actions:__email': { success: 1, not_timed_out: 1, total: 1 },
@@ -182,6 +208,11 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly reset counter', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(25.45));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(6.4478));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(9.241));
+
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
@@ -203,7 +234,12 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, not_timed_out: 12, total: 14 },
+      overall: {
+        success: 11,
+        not_timed_out: 12,
+        total: 14,
+        delay: { counts: [3, 0, 1], values: [10, 20, 30] },
+      },
       by_type: {
         actions: { success: 3, not_timed_out: 3, total: 3 },
         'actions:__email': { success: 1, not_timed_out: 1, total: 1 },
@@ -218,7 +254,7 @@ describe('TaskRunMetricsAggregator', () => {
 
     taskRunMetricsAggregator.reset();
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, not_timed_out: 0, total: 0 },
+      overall: { success: 0, not_timed_out: 0, total: 0, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 0, not_timed_out: 0, total: 0 },
         'actions:__email': { success: 0, not_timed_out: 0, total: 0 },

@@ -359,5 +359,50 @@ describe('ApmConfiguration', () => {
         })
       );
     });
+
+    it('allows overriding some services settings', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: true,
+            serverUrl: 'http://an.internal.apm.server:port/',
+            transactionSampleRate: 0.1,
+            servicesOverrides: {
+              externalServiceName: {
+                active: false,
+                serverUrl: 'http://a.public.apm.server:port/',
+                disableSend: true, // just adding an extra field to prove merging works
+              },
+            },
+          },
+        },
+      };
+
+      const internalService = new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig(
+        'internalServiceName'
+      );
+      expect(internalService).toEqual(
+        expect.objectContaining({
+          active: true,
+          serverUrl: 'http://an.internal.apm.server:port/',
+          transactionSampleRate: 0.1,
+          serviceName: 'internalServiceName',
+        })
+      );
+      expect(internalService).not.toHaveProperty('disableSend');
+      expect(internalService).not.toHaveProperty('servicesOverrides'); // We don't want to leak this to the client's config
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('externalServiceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          serverUrl: 'http://a.public.apm.server:port/',
+          transactionSampleRate: 0.1,
+          disableSend: true,
+          serviceName: 'externalServiceName',
+        })
+      );
+    });
   });
 });

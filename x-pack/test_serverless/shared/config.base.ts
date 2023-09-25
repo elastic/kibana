@@ -27,7 +27,11 @@ export default async () => {
       protocol: 'https',
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
-    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
+    elasticsearch: {
+      ...esTestConfig.getUrlParts(),
+      protocol: 'https',
+      certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
+    },
   };
 
   // "Fake" SAML provider
@@ -121,6 +125,11 @@ export default async () => {
         // In the real world the SAML config is injected by control plane.
         `--plugin-path=${samlIdPPlugin}`,
         '--xpack.cloud.id=ftr_fake_cloud_id',
+        // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
+        // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
+        // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
+        // order, we indicate that basic authentication can still be used, but only if explicitly requested when the
+        // user navigates to `/login` page directly and enters username and password in the login form.
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
           saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
