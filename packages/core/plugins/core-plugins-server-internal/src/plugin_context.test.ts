@@ -237,7 +237,7 @@ describe('createPluginPrebootSetupContext', () => {
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
-    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+    const prebootSetupContext = createPluginPrebootSetupContext({ deps: corePreboot, plugin });
 
     const holdSetupPromise = Promise.resolve(undefined);
     prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);

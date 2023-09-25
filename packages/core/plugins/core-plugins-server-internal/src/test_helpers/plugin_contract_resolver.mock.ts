@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { createCoreContextConfigServiceMock } from './create_core_context_config_service.mock';
-export { createRuntimePluginContractResolverMock } from './plugin_contract_resolver.mock';
+import type { IRuntimePluginContractResolver } from '../plugin_contract_resolver';
+
+export const createRuntimePluginContractResolverMock =
+  (): jest.Mocked<IRuntimePluginContractResolver> => {
+    return {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
+      resolveSetupRequests: jest.fn(),
+      resolveStartRequests: jest.fn(),
+    };
+  };
