@@ -58,11 +58,16 @@ export function registerAlertsFunction({
             description:
               'a KQL query to filter the data by. If no filter should be applied, leave it empty.',
           },
+          includeRecovered: {
+            type: 'boolean',
+            description:
+              'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned',
+          },
         },
         required: ['start', 'end'],
       } as const,
     },
-    ({ arguments: { start, end, featureIds, filter } }, signal) => {
+    ({ arguments: { start, end, featureIds, filter, includeRecovered } }, signal) => {
       return service.callApi('POST /internal/observability_ai_assistant/functions/alerts', {
         params: {
           body: {
@@ -71,6 +76,7 @@ export function registerAlertsFunction({
             featureIds:
               featureIds && featureIds.length > 0 ? featureIds : DEFAULT_FEATURE_IDS.concat(),
             filter,
+            includeRecovered,
           },
         },
         signal,

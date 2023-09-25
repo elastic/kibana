@@ -6,41 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutTabIds, type Tab } from '../../../../../components/asset_details/types';
+import { ContentTabIds, type Tab } from '../../../../../components/asset_details/types';
 
 export const orderedFlyoutTabs: Tab[] = [
   {
-    id: FlyoutTabIds.OVERVIEW,
+    id: ContentTabIds.OVERVIEW,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
       defaultMessage: 'Overview',
     }),
   },
   {
-    id: FlyoutTabIds.METADATA,
+    id: ContentTabIds.METADATA,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
       defaultMessage: 'Metadata',
     }),
   },
   {
-    id: FlyoutTabIds.PROCESSES,
+    id: ContentTabIds.PROCESSES,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
   },
   {
-    id: FlyoutTabIds.LOGS,
+    id: ContentTabIds.LOGS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.logs.title', {
       defaultMessage: 'Logs',
     }),
   },
   {
-    id: FlyoutTabIds.ANOMALIES,
+    id: ContentTabIds.ANOMALIES,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
     }),
   },
   {
-    id: FlyoutTabIds.OSQUERY,
+    id: ContentTabIds.OSQUERY,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
       defaultMessage: 'Osquery',
     }),

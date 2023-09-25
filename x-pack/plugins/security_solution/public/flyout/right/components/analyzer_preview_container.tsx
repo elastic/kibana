@@ -8,6 +8,8 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { EuiLink, EuiMark } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
@@ -16,8 +18,7 @@ import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions'
 import { useRightPanelContext } from '../context';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { ANALYZER_PREVIEW_ERROR, ANALYZER_PREVIEW_TITLE } from './translations';
+import { ANALYZER_PREVIEW_NO_DATA_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
@@ -29,7 +30,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { dataAsNestedObject } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not
-  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject || undefined);
+  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
@@ -56,16 +57,51 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: ANALYZER_PREVIEW_TITLE,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTitle"
+            defaultMessage="Analyzer preview"
+          />
+        ),
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToAnalyzerTab }),
+        ...(isEnabled && {
+          link: {
+            callback: goToAnalyzerTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
+                defaultMessage="Show analyzer graph"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
       {isEnabled ? (
         <AnalyzerPreview />
       ) : (
-        <div data-test-subj={`${ANALYZER_PREVIEW_TEST_ID}Error`}>{ANALYZER_PREVIEW_ERROR}</div>
+        <p data-test-subj={ANALYZER_PREVIEW_NO_DATA_TEST_ID}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription"
+            defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
+            values={{
+              sysmon: <EuiMark>{'sysmon'}</EuiMark>,
+              winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
+              link: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
+                    defaultMessage="Visual event analyzer"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
       )}
     </ExpandablePanel>
   );

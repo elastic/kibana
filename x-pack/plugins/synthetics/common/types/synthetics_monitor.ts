@@ -20,3 +20,11 @@ export interface TestNowResponse {
   configId: string;
   monitor: SyntheticsMonitor;
 }
+
+export interface AgentPolicyInfo {
+  id: string;
+  name: string;
+  agents: number;
+  status: string;
+  description?: string;
+}

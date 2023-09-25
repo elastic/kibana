@@ -96,7 +96,7 @@ export class ContentClient {
     private readonly crudClientProvider: (contentType?: string) => CrudClient,
     private readonly contentTypeRegistry: ContentTypeRegistry
   ) {
-    this.queryClient = new QueryClient();
+    this.queryClient = new QueryClient({ defaultOptions: { queries: { networkMode: 'always' } } });
     this.queryOptionBuilder = createQueryOptionBuilder({
       crudClientProvider: this.crudClientProvider,
       contentTypeRegistry: this.contentTypeRegistry,

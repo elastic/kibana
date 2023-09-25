@@ -100,8 +100,8 @@ export function LensEditConfigurationFlyout({
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
-          overflow-y: scroll;
+          // styles needed to display extra drop targets that are outside of the config panel main area
+          overflow-y: auto;
           padding-left: ${euiThemeVars.euiFormMaxWidth};
           margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none !important;
@@ -123,7 +123,7 @@ export function LensEditConfigurationFlyout({
               <EuiCallOut
                 size="s"
                 title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage: 'SQL currently offers limited configuration options',
+                  defaultMessage: 'ES|QL currently offers limited configuration options',
                 })}
                 iconType="iInCircle"
               />

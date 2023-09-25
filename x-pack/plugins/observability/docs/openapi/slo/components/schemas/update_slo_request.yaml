@@ -25,3 +25,8 @@ properties:
     $ref: "objective.yaml"
   settings:
     $ref: "settings.yaml"
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string

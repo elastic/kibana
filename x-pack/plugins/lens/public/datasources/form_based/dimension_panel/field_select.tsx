@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import { getFieldIconType } from '@kbn/unified-field-list';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
 import type { IndexPattern } from '../../../types';
-import { getFieldType } from '../pure_utils';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -89,7 +89,7 @@ export function FieldSelect({
             value: {
               type: 'field' as const,
               field,
-              dataType: fieldInstance ? getFieldType(fieldInstance) : undefined,
+              dataType: fieldInstance ? getFieldIconType(fieldInstance) : undefined,
               // Use the operation directly, or choose the first compatible operation.
               // All fields are guaranteed to have at least one operation because they
               // won't appear in the list otherwise

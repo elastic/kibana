@@ -6,7 +6,8 @@
  */
 
 import { exportTimeline } from '../../../tasks/timelines';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,
@@ -17,7 +18,9 @@ import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165760
+// FLAKY: https://github.com/elastic/kibana/issues/165645
+describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
 
@@ -34,7 +37,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
     exportTimeline(this.templateId);
 

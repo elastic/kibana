@@ -27,7 +27,7 @@ import {
   SET_RULE_SEARCH_FILTER,
   createCoverageOverviewDashboardReducer,
 } from './coverage_overview_dashboard_reducer';
-import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
+import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 
 export interface CoverageOverviewDashboardActions {

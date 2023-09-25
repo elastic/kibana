@@ -100,7 +100,7 @@ describe('setAlertTagsRoute', () => {
         body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.bulk.mockRejectedValue(
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
         new Error('Test error')
       );
 

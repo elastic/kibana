@@ -9,14 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { isCategoryEntry } from '../../../../../../common/connectors/is_category_entry';
 import {
   ConnectorConfigProperties,
   ConnectorConfiguration,
   ConnectorStatus,
   Dependency,
   FieldType,
-} from '../../../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { isCategoryEntry } from '../../../../../../common/connectors/is_category_entry';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {

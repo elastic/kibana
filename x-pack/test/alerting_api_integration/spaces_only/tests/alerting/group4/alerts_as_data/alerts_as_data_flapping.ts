@@ -298,6 +298,63 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
     });
 
+    it('Should not fail when an alert is flapping and recovered for a rule with notify_when: onThrottleInterval', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: true,
+          look_back_window: 5,
+          status_change_threshold: 3,
+        })
+        .expect(200);
+
+      const pattern = {
+        alertA: [true, false, true, false, false, false, false, false, false],
+      };
+      const ruleParameters = { pattern };
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to activeCurrent
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            // set the schedule long so we can use "runSoon" to specify rule runs
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+          })
+        );
+
+      expect(createdRule.status).to.eql(200);
+      const ruleId = createdRule.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // Wait for the rule to run once
+      let run = 1;
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      // Run the rule 10 more times
+      for (let i = 0; i < 5; i++) {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+      }
+
+      const alertDocs = await queryForAlertDocs<PatternFiringAlert>();
+      const state = await getRuleState(ruleId);
+
+      expect(alertDocs.length).to.equal(2);
+
+      // Alert is recovered and flapping
+      expect(alertDocs[0]._source!.kibana.alert.flapping).to.equal(true);
+      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+    });
+
     it('should set flapping and flapping_history for flapping alerts over a period of time longer than the lookback', async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)

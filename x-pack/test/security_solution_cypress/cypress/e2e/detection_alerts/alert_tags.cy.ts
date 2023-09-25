@@ -14,7 +14,8 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
@@ -24,7 +25,8 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 
-describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
@@ -35,7 +37,7 @@ describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

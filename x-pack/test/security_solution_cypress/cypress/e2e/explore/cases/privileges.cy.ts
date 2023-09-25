@@ -17,7 +17,8 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { login, loginWithUser, visitWithUser } from '../../../tasks/login';
+import { login, loginWithUser } from '../../../tasks/login';
+import { visitWithUser } from '../../../tasks/navigation';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -48,7 +49,7 @@ const testCase: TestCaseWithoutTimeline = {
   owner: 'securitySolution',
 };
 
-describe('Cases privileges', { tags: '@ess' }, () => {
+describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);

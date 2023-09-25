@@ -8,6 +8,9 @@
 import React, { type FC, useCallback } from 'react';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
+import { EuiLink, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css/dist/emotion-css.cjs';
 import { useLicense } from '../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
@@ -15,12 +18,11 @@ import { useInvestigateInTimeline } from '../../../detections/components/alerts_
 import { useRightPanelContext } from '../context';
 import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
-  SESSION_PREVIEW_ERROR,
-  SESSION_PREVIEW_TITLE,
-  SESSION_PREVIEW_UPSELL,
-} from './translations';
+  SESSION_PREVIEW_NO_DATA_TEST_ID,
+  SESSION_PREVIEW_TEST_ID,
+  SESSION_PREVIEW_UPSELL_TEST_ID,
+} from './test_ids';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions';
 import { getScopedActions } from '../../../helpers';
@@ -65,18 +67,80 @@ export const SessionPreviewContainer: FC = () => {
     startTransaction,
   ]);
 
+  const { euiTheme } = useEuiTheme();
+
   const noSessionMessage = !isEnterprisePlus ? (
-    <div data-test-subj={`${SESSION_PREVIEW_TEST_ID}UpSell`}>{SESSION_PREVIEW_UPSELL}</div>
+    <div data-test-subj={SESSION_PREVIEW_UPSELL_TEST_ID}>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellDescription"
+        defaultMessage="This feature requires an {subscription}"
+        values={{
+          subscription: (
+            <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellLinkText"
+                defaultMessage="Enterprise subscription"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </div>
   ) : !sessionViewConfig ? (
-    <div data-test-subj={`${SESSION_PREVIEW_TEST_ID}Error`}>{SESSION_PREVIEW_ERROR}</div>
+    <div data-test-subj={SESSION_PREVIEW_NO_DATA_TEST_ID}>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataDescription"
+        defaultMessage="You can only view Linux session details if you’ve enabled the {setting} setting in your Elastic Defend integration policy. Refer to {link} for more information."
+        values={{
+          setting: (
+            <span
+              css={css`
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataSettingDescription"
+                defaultMessage="Include session data"
+              />
+            </span>
+          ),
+          link: (
+            <EuiLink
+              href="https://www.elastic.co/guide/en/security/current/session-view.html#enable-session-view"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataLinkText"
+                defaultMessage="Enable Session View data"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </div>
   ) : null;
 
   return (
     <ExpandablePanel
       header={{
-        title: SESSION_PREVIEW_TITLE,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTitle"
+            defaultMessage="Session viewer preview"
+          />
+        ),
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToSessionViewTab }),
+        ...(isEnabled && {
+          link: {
+            callback: goToSessionViewTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
+                defaultMessage="Show session viewer"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >

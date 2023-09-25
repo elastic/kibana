@@ -146,6 +146,7 @@ const AnomalyActionMenu = ({
         panelPaddingSize="none"
         button={
           <EuiButtonIcon
+            data-test-subj="infraAnomalyActionMenuButton"
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
             aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {

@@ -21,6 +21,12 @@ export enum FEATURE_FLAG_NAMES {
    * It resolves the URL that the button "Add Integrations" will point to.
    */
   'security-solutions.add-integrations-url' = 'security-solutions.add-integrations-url',
+  /**
+   * Used in the Security Solutions guided onboarding tour.
+   * Returns JSON corresponding to the tour guide  config as
+   * defined by type { GuideConfig } from '@kbn/guided-onboarding';
+   */
+  'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
 }
 
 /**

@@ -27,7 +27,7 @@ import { requestContextMock } from '../../../routes/__mocks__/request_context';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { Readable } from 'stream';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
 

@@ -41,12 +41,8 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails } from '../../../tasks/rule_details';
-import {
-  expectNumberOfRules,
-  goToRuleDetails,
-  goToTheRuleDetailsOf,
-} from '../../../tasks/alerts_detection_rules';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -55,13 +51,14 @@ import {
   fillScheduleRuleAndContinue,
   selectEqlRuleType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -82,7 +79,7 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
     const expectedNumberOfAlerts = '2 alerts';
 
     it('Creates and enables a new EQL rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -98,7 +95,7 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -159,13 +156,13 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     it('Creates and enables a new EQL rule with a sequence', function () {
       login();
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
-      goToTheRuleDetailsOf(rule.name);
+      goToRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 

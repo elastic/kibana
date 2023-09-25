@@ -17,7 +17,6 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
-    "public/management/cypress_endpoint.config.ts",
     "public/management/cypress.config.ts"
   ],
   "kbn_references": [
@@ -149,7 +148,6 @@
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
     "@kbn/securitysolution-data-table",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
@@ -171,6 +169,9 @@
     "@kbn/navigation-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
-    "@kbn/handlebars"
+    "@kbn/security-solution-features",
+    "@kbn/content-management-plugin",
+    "@kbn/subscription-tracking",
+    "@kbn/openapi-generator"
   ]
 }

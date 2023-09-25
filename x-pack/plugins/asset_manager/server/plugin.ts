@@ -22,6 +22,7 @@ import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetManagerConfig, configSchema } from './types';
 import { AssetAccessor } from './lib/asset_accessor';
+import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -31,7 +32,13 @@ export const config: PluginConfigDescriptor<AssetManagerConfig> = {
 };
 
 export class AssetManagerServerPlugin
-  implements Plugin<AssetManagerServerPluginSetup, AssetManagerServerPluginStart>
+  implements
+    Plugin<
+      AssetManagerServerPluginSetup,
+      AssetManagerServerPluginStart,
+      AssetManagerPluginSetupDependencies,
+      AssetManagerPluginStartDependencies
+    >
 {
   private context: PluginInitializerContext<AssetManagerConfig>;
   private stopImplicitCollection?: () => void;
@@ -44,7 +51,7 @@ export class AssetManagerServerPlugin
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: AssetManagerPluginSetupDependencies) {
     // Check for config value and bail out if not "alpha-enabled"
     if (!this.config.alphaEnabled) {
       this.logger.info('Asset manager plugin [tech preview] is NOT enabled');
@@ -56,6 +63,7 @@ export class AssetManagerServerPlugin
     const assetAccessor = new AssetAccessor({
       source: this.config.lockedSource,
       sourceIndices: this.config.sourceIndices,
+      getApmIndices: plugins.apmDataAccess.getApmIndices,
     });
 
     const router = core.http.createRouter();

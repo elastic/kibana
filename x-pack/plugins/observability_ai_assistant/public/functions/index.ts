@@ -14,7 +14,7 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
-import { registerSummarisationFunction } from './summarise';
+import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
 
 export async function registerFunctions({
@@ -49,11 +49,14 @@ export async function registerFunctions({
         In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
         /\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!
 
-        You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.`
+        You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
+        
+        If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
+        `
       );
 
       if (isReady) {
-        description += `You can use the "summarise" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. 
+        description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
 
         Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database.
         `;
@@ -64,9 +67,9 @@ export async function registerFunctions({
         - ALWAYS query the knowledge base, using the recall function, when a user starts a chat, no matter how confident you are in your ability to answer the question.
         - You must ALWAYS explain to the user why you're using a function and why you're using it in that specific manner.
         - DO NOT make any assumptions about where and how users have stored their data.
-        - ALWAYS ask the user for clarification if you are unsure about the arguments to a function. When given this clarification, you MUST use the summarise function to store what you have learned.
+        - ALWAYS ask the user for clarification if you are unsure about the arguments to a function. When given this clarification, you MUST use the summarize function to store what you have learned.
         `;
-        registerSummarisationFunction({ service, registerFunction });
+        registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
       } else {

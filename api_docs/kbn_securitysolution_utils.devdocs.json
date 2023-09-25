@@ -495,7 +495,7 @@
         "label": "BlocklistConditionEntryField",
         "description": [],
         "signature": [
-          "\"file.path\" | \"file.hash.*\" | \"file.Ext.code_signature\" | \"file.path.caseless\""
+          "\"file.path\" | \"file.Ext.code_signature\" | \"file.hash.*\" | \"file.path.caseless\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

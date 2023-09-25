@@ -17,7 +17,7 @@ import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
-import { aggregateRulesRoute } from './aggregate_rules';
+import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute, findInternalRulesRoute } from './find_rules';
@@ -47,18 +47,19 @@ import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
+import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 
-import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
-import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
-import { updateMaintenanceWindowRoute } from './maintenance_window/update_maintenance_window';
-import { deleteMaintenanceWindowRoute } from './maintenance_window/delete_maintenance_window';
-import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenance_windows';
-import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
-import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
-import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
+import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
+import { updateMaintenanceWindowRoute } from './maintenance_window/apis/update/update_maintenance_window_route';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/delete/delete_maintenance_window_route';
+import { findMaintenanceWindowsRoute } from './maintenance_window/apis/find/find_maintenance_windows_route';
+import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/archive/archive_maintenance_window_route';
+import { finishMaintenanceWindowRoute } from './maintenance_window/apis/finish/finish_maintenance_window_route';
+import { getActiveMaintenanceWindowsRoute } from './maintenance_window/apis/get_active/get_active_maintenance_windows_route';
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
-import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
+import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 
 export interface RouteOptions {
@@ -124,9 +125,10 @@ export function defineRoutes(opts: RouteOptions) {
   findMaintenanceWindowsRoute(router, licenseState);
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
-  activeMaintenanceWindowsRoute(router, licenseState);
+  getActiveMaintenanceWindowsRoute(router, licenseState);
   registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
+  getScheduleFrequencyRoute(router, licenseState);
 }

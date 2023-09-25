@@ -8,7 +8,7 @@
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -20,21 +20,20 @@ import {
   THREAT_DETAILS_ACCORDION,
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
+import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { addsFieldsToTimeline } from '../../tasks/rule_details';
-
-describe('CTI Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
+    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();
-    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
+
     disableExpandableFlyout();
   });
 
@@ -45,10 +44,12 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
+    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
+      (rule) => visitRuleDetailsPage(rule.body.id)
+    );
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161539
   // Skipped: https://github.com/elastic/kibana/issues/162818
   it.skip('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
@@ -156,12 +157,6 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   describe('with additional indicators', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
-    });
-
-    beforeEach(() => {
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
     });
 
     after(() => {

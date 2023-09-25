@@ -25,7 +25,7 @@ interface IngestDataProps {
     beats: string;
     connectors: string;
     integrations: string;
-    logStash: string;
+    logstash: string;
   };
   assetBasePath: string;
   application?: ApplicationStart;

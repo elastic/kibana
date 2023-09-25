@@ -162,7 +162,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   };
 
   // Dashboard and discover are displayed in larger cards
-  const mainApps = ['dashboard', 'discover'];
+  const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   const onDataViewCreated = () => {
