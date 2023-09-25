@@ -11,7 +11,7 @@ import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { MlFeatures, RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
