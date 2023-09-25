@@ -81,7 +81,7 @@ export function buildMockDashboard({
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput }
+    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
   );
   return dashboardContainer;
 }

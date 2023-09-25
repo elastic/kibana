@@ -1504,7 +1504,7 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
-      navigation_embeddable: {
+      links: {
         properties: {
           id: {
             type: 'text',
