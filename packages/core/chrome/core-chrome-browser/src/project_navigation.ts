@@ -166,6 +166,8 @@ export interface NodeDefinition<
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /**

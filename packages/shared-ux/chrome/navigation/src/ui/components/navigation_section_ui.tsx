@@ -43,6 +43,7 @@ const navigationNodeToEuiItem = (
     title: item.title,
     isSelected,
     accordionProps: {
+      ...item.accordionProps,
       initialIsOpen: true, // FIXME open state is controlled on component mount
     },
     linkProps: { external: isExternal },

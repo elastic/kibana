@@ -54,6 +54,9 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          accordionProps: {
+            arrowProps: { css: { display: 'none' } },
+          },
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
@@ -96,6 +99,9 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          accordionProps: {
+            arrowProps: { css: { display: 'none' } },
+          },
           children: [
             {
               link: 'apm:services',
