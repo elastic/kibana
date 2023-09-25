@@ -71,15 +71,15 @@ export function ServiceDashboards() {
   );
 
   useEffect(() => {
-    const serviceDashboards = (data?.serviceDashboards ?? []).reduce(
-      (result, dashboard) => {
+    const filteredServiceDashbords = (data?.serviceDashboards ?? []).reduce(
+      (result, serviceDashboard) => {
         const matchedDashboard = allAvailableDashboards.find(
-          ({ id }) => id === dashboard.dashboardSavedObjectId
+          ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );
         if (matchedDashboard) {
           result.push({
             title: matchedDashboard.attributes.title,
-            ...dashboard,
+            ...serviceDashboard,
           });
         }
         return result;
@@ -87,16 +87,16 @@ export function ServiceDashboards() {
       []
     );
 
-    setServiceDashboards(serviceDashboards);
+    setServiceDashboards(filteredServiceDashbords);
 
     const preselectedDashboard =
-      serviceDashboards.find(
+      filteredServiceDashbords.find(
         ({ dashboardSavedObjectId }) => dashboardSavedObjectId === dashboardId
-      ) ?? serviceDashboards[0];
+      ) ?? filteredServiceDashbords[0];
 
     // preselect dashboard
     setCurrentDashboard(preselectedDashboard);
-  }, [allAvailableDashboards, data]);
+  }, [allAvailableDashboards, data?.serviceDashboards, dashboardId]);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -105,7 +105,8 @@ export function ServiceDashboards() {
         timeRange: { from: rangeFrom, to: rangeTo },
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-    }, []);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
     if (!dashboard) return;

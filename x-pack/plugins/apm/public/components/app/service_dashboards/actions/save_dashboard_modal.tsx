@@ -122,7 +122,16 @@ export function SaveDashboardModal({
       }
       onClose();
     },
-    [selectedDashboard, notifications.toasts, useContextFilter]
+    [
+      selectedDashboard,
+      notifications.toasts,
+      useContextFilter,
+      onClose,
+      reloadServiceDashboards,
+      isEditMode,
+      serviceName,
+      currentDashboard,
+    ]
   );
 
   return (

@@ -57,7 +57,13 @@ export function UnlinkDashboard({
       }
       setIsModalVisible(!isModalVisible);
     },
-    [currentDashboard, notifications.toasts]
+    [
+      currentDashboard,
+      notifications.toasts,
+      setIsModalVisible,
+      onRefresh,
+      isModalVisible,
+    ]
   );
   return (
     <>

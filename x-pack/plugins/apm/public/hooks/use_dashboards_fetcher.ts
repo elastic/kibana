@@ -51,6 +51,6 @@ export function useDashboardFetcher(query?: string): SearchDashboardsResult {
       }
     };
     getDashboards();
-  }, []);
+  }, [dashboard, query]);
   return result;
 }

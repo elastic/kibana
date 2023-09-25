@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MergedServiceDashboard } from '.';
@@ -25,8 +25,6 @@ export function DashboardSelector({
 }: Props) {
   const history = useHistory();
 
-  console.log('currentDashboard', currentDashboard);
-
   useEffect(
     () =>
       history.push({
@@ -36,10 +34,12 @@ export function DashboardSelector({
           dashboardId: currentDashboard?.id,
         }),
       }),
+    // It should only update when loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const onChange = (newDashboardId?: string) => {
+  function onChange(newDashboardId: string) {
     history.push({
       ...history.location,
       search: fromQuery({
@@ -48,7 +48,7 @@ export function DashboardSelector({
       }),
     }),
       handleOnChange();
-  };
+  }
   return (
     <EuiComboBox
       compressed
