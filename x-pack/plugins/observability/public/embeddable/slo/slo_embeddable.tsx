@@ -17,10 +17,18 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { SloOverview } from './slo_overview';
-import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
+import type { SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
+
+interface SloEmbeddableDeps {
+  uiSettings: IUiSettingsClient;
+  http: CoreStart['http'];
+  i18n: CoreStart['i18n'];
+  application: ApplicationStart;
+}
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
   public readonly type = SLO_EMBEDDABLE;

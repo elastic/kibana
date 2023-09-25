@@ -70,7 +70,7 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
       color = noDataColor;
   }
 
-  if (isRefetching) {
+  if (isRefetching || isLoading) {
     return (
       <LoadingContainer>
         <LoadingContent>
@@ -84,7 +84,10 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
     return (
       <LoadingContainer>
         <LoadingContent>
-          The SLO has been deleted. You can safely delete the widget from the dashboard.
+          {i18n.translate('xpack.observability.sloEmbeddable.overview.sloNotFoundText', {
+            defaultMessage:
+              'The SLO has been deleted. You can safely delete the widget from the dashboard.',
+          })}
         </LoadingContent>
       </LoadingContainer>
     );

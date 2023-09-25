@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;
@@ -13,19 +12,4 @@ export interface EmbeddableSloProps {
   lastReloadRequestTime?: number | undefined;
 }
 
-export interface SloConfigurationProps {
-  onCreate: (props: EmbeddableSloProps) => void;
-  onCancel: () => void;
-}
-
-export type SloEmbeddableInput = EmbeddableInput &
-  EmbeddableSloProps & {
-    lastReloadRequestTime: number | undefined;
-  };
-
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  application: ApplicationStart;
-}
+export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
