@@ -26,7 +26,9 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { isInitialLoading, isLoading, sloList } = useFetchSloList({ search: searchValue });
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList({
+    kqlQuery: `slo.name:* ${searchValue}`,
+  });
 
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList!.results !== undefined;
@@ -56,7 +58,13 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
     onSelected(selectedSlo);
   };
 
-  const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
+  const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
+    []
+  );
 
   if (isInitialLoading) {
     return null;

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
@@ -84,8 +85,12 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
       </LoadingContainer>
     );
   }
-
-  const extraContent = `Target <b>${numeral(slo?.objective.target).format(percentFormat)}</b>`;
+  const TargetCopy = i18n.translate('xpack.observability.sloEmbeddable.overview.sloTargetLabel', {
+    defaultMessage: 'Target',
+  });
+  const extraContent = `${TargetCopy} <b>${numeral(slo?.objective.target).format(
+    percentFormat
+  )}</b>`;
   // eslint-disable-next-line react/no-danger
   const extra = <span dangerouslySetInnerHTML={{ __html: extraContent }} />;
   const metricData =
