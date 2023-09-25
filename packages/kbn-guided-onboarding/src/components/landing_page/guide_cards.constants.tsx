@@ -46,11 +46,11 @@ export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
     icon: 'magnifyWithPlus',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.esreSearch.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
       defaultMessage: 'Build a semantic search experience',
     }),
     navigateTo: {
-      appId: 'enterpriseSearchEsre',
+      appId: 'enterpriseSearchAISearch',
     },
     telemetryId: 'onboarding--search--semantic',
     order: 4,

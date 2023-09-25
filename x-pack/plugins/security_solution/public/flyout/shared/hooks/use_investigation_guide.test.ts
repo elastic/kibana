@@ -13,7 +13,7 @@ import type {
 } from './use_investigation_guide';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { useInvestigationGuide } from './use_investigation_guide';
 
 jest.mock('../../../timelines/components/side_panel/event_details/helpers');

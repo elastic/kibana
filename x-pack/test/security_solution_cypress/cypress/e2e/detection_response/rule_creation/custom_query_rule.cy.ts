@@ -105,15 +105,17 @@ import {
   importSavedQuery,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { saveEditedRule } from '../../../tasks/edit_rule';
+import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  login,
-  visit,
-  visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
-} from '../../../tasks/login';
-import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
-import { ruleDetailsUrl, ruleEditUrl, RULE_CREATION } from '../../../urls/navigation';
+  enablesRule,
+  getDetails,
+  visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -132,7 +134,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(RULE_CREATION);
+      visitWithTimeRange(CREATE_RULE_URL);
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
@@ -258,7 +260,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
         );
         createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: false }));
         login();
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
       });
 
       it('Deletes one rule', () => {
@@ -356,7 +358,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
           deleteConnectors();
           login();
           createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+            visitRuleDetailsPage(rule.body.id)
           );
         });
 
@@ -379,7 +381,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
           deleteConnectors();
           login();
           createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
-            visitWithoutDateRange(ruleEditUrl(rule.body.id))
+            visitEditRulePage(rule.body.id)
           );
         });
 

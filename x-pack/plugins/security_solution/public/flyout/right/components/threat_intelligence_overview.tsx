@@ -55,7 +55,15 @@ export const ThreatIntelligenceOverview: FC = () => {
             defaultMessage="Threat intelligence"
           />
         ),
-        callback: goToThreatIntelligenceTab,
+        link: {
+          callback: goToThreatIntelligenceTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
+              defaultMessage="Show all threat intelligence"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
