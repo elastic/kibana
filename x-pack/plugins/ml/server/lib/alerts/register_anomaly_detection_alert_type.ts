@@ -104,7 +104,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
       [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },
       [ALERT_ANOMALY_TIMESTAMP]: { type: ES_FIELD_TYPES.DATE, array: false, required: false },
       [ALERT_TOP_RECORDS]: {
-        type: ES_FIELD_TYPES.NESTED,
+        type: ES_FIELD_TYPES.OBJECT,
         array: true,
         required: false,
         dynamic: false,
@@ -128,7 +128,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
         },
       },
       [ALERT_TOP_INFLUENCERS]: {
-        type: ES_FIELD_TYPES.NESTED,
+        type: ES_FIELD_TYPES.OBJECT,
         array: true,
         required: false,
         dynamic: false,

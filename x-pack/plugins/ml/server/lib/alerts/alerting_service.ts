@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
-import { memoize } from 'lodash';
+import { memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -37,6 +37,8 @@ import type {
   PreviewResultsKeys,
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
+  TopInfluencerAADDoc,
+  TopRecordAADDoc,
 } from '../../../common/types/alerts';
 import type {
   AnomalyDetectionAlertContext,
@@ -431,17 +433,43 @@ export function alertingServiceProvider(
         anomaly_score: topAnomaly._source[getScoreFields(resultType, useInitialScore)],
         top_records: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
-          return {
-            ...h._source,
-            typical,
-            actual,
-          };
-        }) as RecordAnomalyAlertDoc[],
+          return pick<RecordAnomalyAlertDoc>(
+            {
+              ...h._source,
+              typical,
+              actual,
+            },
+            [
+              'job_id',
+              'record_score',
+              'initial_record_score',
+              'detector_index',
+              'is_interim',
+              'timestamp',
+              'partition_field_name',
+              'partition_field_value',
+              'function',
+              'actual',
+              'typical',
+            ]
+          ) as TopRecordAADDoc;
+        }) as TopRecordAADDoc[],
         top_influencers: v.influencer_results.top_influencer_hits.hits.hits.map((influencerDoc) => {
-          return {
-            ...influencerDoc._source,
-          };
-        }) as InfluencerAnomalyAlertDoc[],
+          return pick<InfluencerAnomalyAlertDoc>(
+            {
+              ...influencerDoc._source,
+            },
+            [
+              'job_id',
+              'influencer_field_name',
+              'influencer_field_value',
+              'influencer_score',
+              'initial_influencer_score',
+              'is_interim',
+              'timestamp',
+            ]
+          ) as TopInfluencerAADDoc;
+        }) as TopInfluencerAADDoc[],
       };
     };
   };
