@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,6 +38,7 @@ import { updateDataRetention } from '../../../../services/api';
 interface Props {
   dataRetention: string;
   dataStreamName: string;
+  configuredByILM: boolean;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
@@ -185,6 +187,7 @@ const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   dataRetention,
   dataStreamName,
+  configuredByILM,
   onClose,
 }) => {
   const { size, unit } = splitSizeAndUnits(dataRetention || DEFAULT_DATA_RETENTION_PERIOD);
@@ -245,6 +248,26 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
+          {configuredByILM && (
+            <>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle', {
+                defaultMessage: 'Override ILM data retention',
+              })}
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningText"
+                  defaultMessage="Changing this setting will override the data retention period configured in the ILM policy."
+                />
+              </p>
+            </EuiCallOut>
+
+            <EuiSpacer size="m" />
+            </>
+          )}
           <UseField
             path="dataRetention"
             component={NumericField}

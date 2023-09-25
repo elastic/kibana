@@ -363,6 +363,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             }
           }}
           dataStreamName={dataStreamName}
+          configuredByILM={!!dataStream?.ilmPolicyName}
           dataRetention={dataStream?.lifecycle?.data_retention as string}
         />
       )}
