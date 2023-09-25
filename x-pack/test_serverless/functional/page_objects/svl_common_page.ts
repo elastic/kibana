@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const config = getService('config');
-  const pageObjects = getPageObjects(['security']);
+  const pageObjects = getPageObjects(['security', 'common']);
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
@@ -24,6 +24,9 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   return {
     async login() {
       await pageObjects.security.forceLogout({ waitForLoginPage: false });
+
+      // adding sleep to settle down logout
+      await pageObjects.common.sleep(2500);
 
       await retry.waitForWithTimeout(
         'Login successfully via API',

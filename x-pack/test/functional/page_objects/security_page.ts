@@ -323,7 +323,13 @@ export class SecurityPageObject extends FtrService {
         if (alert?.accept) {
           await alert.accept();
         }
-        return !(await this.browser.getCurrentUrl()).includes('/logout');
+
+        if (this.config.get('serverless')) {
+          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+          return await this.find.existsByDisplayedByCssSelector('.login-form-password', 5000);
+        } else {
+          return !(await this.browser.getCurrentUrl()).includes('/logout');
+        }
       });
     }
   }
