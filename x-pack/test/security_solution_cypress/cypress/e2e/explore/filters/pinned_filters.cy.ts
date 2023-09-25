@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
@@ -32,7 +33,7 @@ describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('show pinned filters on security', () => {
-    visitWithoutDateRange(DISCOVER_WITH_PINNED_FILTER_URL);
+    visit(DISCOVER_WITH_PINNED_FILTER_URL);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
     openKibanaNavigation();
@@ -42,7 +43,7 @@ describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('does not show discover filters on security', () => {
-    visitWithoutDateRange(DISCOVER_WITH_FILTER_URL);
+    visit(DISCOVER_WITH_FILTER_URL);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 
     openKibanaNavigation();

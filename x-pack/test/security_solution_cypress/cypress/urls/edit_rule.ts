@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import type { OpenApiDocument } from './openapi_types';
-
-export function getComponents(parsedSchema: OpenApiDocument) {
-  if (parsedSchema.components?.['x-codegen-enabled'] === false) {
-    return undefined;
-  }
-  return parsedSchema.components;
+export function editRuleUrl(ruleId: string): string {
+  return `/app/security/rules/id/${ruleId}/edit`;
 }
