@@ -26,7 +26,8 @@ import {
 } from '../../tasks/alerts';
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
@@ -48,7 +49,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
