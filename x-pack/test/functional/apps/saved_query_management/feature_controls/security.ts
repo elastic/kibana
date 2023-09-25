@@ -69,50 +69,15 @@ export default function (ctx: FtrProviderContext) {
     await security.user.delete(`${name}-user`);
   }
 
-  async function doBefore(appName: AppName) {
-    switch (appName) {
-      case 'discover':
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
-        );
-        break;
-      case 'dashboard':
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
-        break;
-      default:
-        break;
-    }
-  }
-
-  async function doAfter(appName: AppName) {
-    switch (appName) {
-      case 'discover':
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
-        );
-        break;
-      case 'dashboard':
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
-        break;
-      default:
-        break;
-    }
-  }
-
   async function navigateToApp(appName: AppName) {
     switch (appName) {
       case 'discover':
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
-        await PageObjects.common.waitForTopNavToBeVisible();
         break;
       case 'dashboard':
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
         break;
       case 'maps':
         await PageObjects.maps.openNewMap();
@@ -129,7 +94,11 @@ export default function (ctx: FtrProviderContext) {
   describe('Security: App vs Global privilege', () => {
     apps.forEach((appName) => {
       before(async () => {
-        await doBefore(appName);
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_query_management/feature_controls/security'
+        );
 
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
@@ -142,15 +111,18 @@ export default function (ctx: FtrProviderContext) {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
 
-        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_query_management/feature_controls/security'
+        );
 
-        await doAfter(appName);
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       describe(`${appName} read-only privileges with enabled savedQueryManagement.saveQuery privilege`, () => {
         before(async () => {
           await login(appName, 'read', 'all');
           await navigateToApp(appName);
+          await PageObjects.common.waitForTopNavToBeVisible();
         });
 
         after(async () => {
