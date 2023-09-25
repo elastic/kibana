@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiColorPicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-} from '@elastic/eui';
+import { EuiColorPicker, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ColorMapping } from '../../config';
 
