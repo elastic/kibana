@@ -105,7 +105,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
       await retry.try(async () => {
-        await testSubjects.click('infraNodeContextPopoverOpenAsPageButton');
+        await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
 
