@@ -42,7 +42,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   fillAboutRule,
@@ -59,11 +59,8 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedEditedtags = rule.tags?.join('');
   const expectedEditedIndexPatterns = rule.index;
 
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
+    deleteConnectors();
     deleteAlertsAndRules();
     login();
     createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
