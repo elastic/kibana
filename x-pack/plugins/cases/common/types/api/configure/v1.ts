@@ -6,8 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_CUSTOM_FIELD_KEY_LENGTH, MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
-import { limitedStringSchema } from '../../../schema';
+import {
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_KEY_LENGTH,
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+} from '../../../constants';
+import { limitedArraySchema, limitedStringSchema } from '../../../schema';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
@@ -38,9 +42,12 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
 ]);
 
-export const CustomFieldsConfigurationRt = rt.array(
-  rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt])
-);
+export const CustomFieldsConfigurationRt = limitedArraySchema({
+  codec: rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt]),
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+  fieldName: 'customFields',
+});
 
 export const ConfigurationRequestRt = rt.intersection([
   rt.strict({
@@ -79,7 +86,13 @@ export const CaseConfigureRequestParamsRt = rt.strict({
 });
 
 export const ConfigurationPatchRequestRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
+  rt.exact(
+    rt.partial({
+      closure_type: ConfigurationBasicWithoutOwnerRt.type.props.closure_type,
+      connector: ConfigurationBasicWithoutOwnerRt.type.props.connector,
+      customFields: CustomFieldsConfigurationRt,
+    })
+  ),
   rt.strict({ version: rt.string }),
 ]);
 
