@@ -16446,8 +16446,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "备注",
     "xpack.fleet.initializationErrorMessageTitle": "无法初始化 Fleet",
     "xpack.fleet.integrations.customInputsLink": "定制输入",
-    "xpack.fleet.integrations.deploymentButton": "查看部署详情",
-    "xpack.fleet.integrations.deploymentDescription": "通过引用部署，将数据从应用程序发送到 Elastic。",
     "xpack.fleet.integrations.discussForumLink": "论坛",
     "xpack.fleet.integrations.installPackage.uploadedTooltip": "此集成通过上传进行安装，因此无法自动重新安装。请再次将其上传，以便重新安装。",
     "xpack.fleet.integrations.integrationSaved": "已保存集成设置",
