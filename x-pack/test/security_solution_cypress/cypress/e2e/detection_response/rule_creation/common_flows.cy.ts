@@ -38,8 +38,9 @@ import {
   fillThreatTechnique,
   importSavedQuery,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
-import { RULE_CREATION } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { visit } from '../../../tasks/navigation';
 
 // This test is meant to test touching all the common various components in rule creation
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
@@ -54,11 +55,10 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
       })
       .as('timelineId');
     login();
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a rule', function () {
-    visit(RULE_CREATION);
-
     cy.log('Filling define section');
     importSavedQuery(this.timelineId);
     cy.get(DEFINE_CONTINUE_BUTTON).click();

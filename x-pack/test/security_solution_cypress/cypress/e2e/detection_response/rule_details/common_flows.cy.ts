@@ -12,7 +12,6 @@ import {
   RULES_ROW,
 } from '../../../screens/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { getDetails } from '../../../tasks/rule_details';
 import { ruleFields } from '../../../data/detection_engine';
 import { getTimeline } from '../../../objects/timeline';
@@ -47,7 +46,9 @@ import {
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 // This test is meant to test all common aspects of the rule details page that should function
 // the same regardless of rule type. For any rule type specific functionalities, please include
@@ -92,7 +93,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
           ],
         }),
       }).then((rule) => {
-        visitWithoutDateRange(ruleDetailsUrl(rule.body.id));
+        visit(ruleDetailsUrl(rule.body.id));
       });
     });
   });

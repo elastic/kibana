@@ -41,7 +41,6 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { editFirstRule } from '../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
@@ -52,10 +51,10 @@ import {
   goToScheduleStepTab,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
-
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { getDetails, goToRuleEditSettings } from '../../../tasks/rule_details';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEditedRule();
@@ -68,15 +67,16 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
     login();
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
+      visit(ruleDetailsUrl(createdRule.body.id));
+    });
   });
 
   it('Allows a rule to be edited', () => {
     const existingRule = getExistingRule();
 
-    editFirstRule();
+    goToRuleEditSettings();
 
     // expect define step to populate
     cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.query);

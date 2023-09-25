@@ -58,9 +58,9 @@ export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConne
 };
 
 export const createEmailConnector = () => {
-  cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+  cy.get(CREATE_ACTION_CONNECTOR_BTN).click({ force: true });
   fillEmailConnectorForm();
-  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).click({ force: true });
 };
 
 export const fillEmailRuleActionForm = (email: string, subject: string) => {
@@ -69,7 +69,7 @@ export const fillEmailRuleActionForm = (email: string, subject: string) => {
 };
 
 export const addEmailConnectorAndRuleAction = (email: string, subject: string) => {
-  cy.get(EMAIL_ACTION_BTN).click();
+  cy.get(EMAIL_ACTION_BTN).click({ force: true });
   createEmailConnector();
   fillEmailRuleActionForm(email, subject);
 
