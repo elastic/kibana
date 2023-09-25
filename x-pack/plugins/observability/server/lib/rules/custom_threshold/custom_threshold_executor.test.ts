@@ -11,6 +11,8 @@ import {
   RuleExecutorServicesMock,
   alertsMock,
 } from '@kbn/alerting-plugin/server/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
@@ -1752,30 +1754,17 @@ const mockedIndex = {
 };
 const mockedDataView = {
   getIndexPattern: () => 'mockedIndexPattern',
-  getName: () => 'mockedName',
   ...mockedIndex,
 };
 const mockedSearchSource = {
-  id: 'data_source',
-  shouldOverwriteDataViewType: false,
-  requestStartHandlers: [],
-  inheritOptions: {},
-  history: [],
-  fields: {
-    index: mockedIndex,
-  },
   getField: jest.fn(() => mockedDataView),
-  dependencies: {
-    aggs: {
-      types: {},
-    },
-  },
-};
+} as any as ISearchSource;
 const services: RuleExecutorServicesMock &
   LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {
+    ...searchSourceCommonMock,
     create: jest.fn(() => Promise.resolve(mockedSearchSource)),
   },
 };
