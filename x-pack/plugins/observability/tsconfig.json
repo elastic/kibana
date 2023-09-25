@@ -86,7 +86,8 @@
     "@kbn/osquery-plugin",
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*"
