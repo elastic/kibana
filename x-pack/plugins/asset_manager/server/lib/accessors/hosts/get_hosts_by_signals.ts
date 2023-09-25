@@ -13,7 +13,7 @@ export async function getHostsBySignals(
   options: GetHostsOptionsInjected
 ): Promise<{ hosts: Asset[] }> {
   const { assets } = await collectHosts({
-    client: options.esClient,
+    client: options.elasticsearchClient,
     from: options.from,
     to: options.to,
     sourceIndices: options.sourceIndices,

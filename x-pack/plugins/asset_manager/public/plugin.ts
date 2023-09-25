@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { AssetManagerPluginClass, AssetManagerSetupDeps } from './types';
+
+export class Plugin implements AssetManagerPluginClass {
+  public config: {};
+  private kibanaVersion: string;
+
+  constructor(context: PluginInitializerContext<{}>) {
+    this.config = context.config.get();
+
+    this.kibanaVersion = context.env.packageInfo.version;
+  }
+
+  setup(core: CoreSetup, pluginsSetup: AssetManagerSetupDeps) {
+    const assetClient = {}; // tbd
+    return {
+      assetClient,
+    };
+  }
+
+  start() {}
+
+  stop() {}
+}

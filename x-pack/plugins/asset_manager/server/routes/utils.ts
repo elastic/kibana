@@ -12,7 +12,7 @@ export async function getClientsFromContext<T extends RequestHandlerContext>(con
 
   return {
     coreContext,
-    esClient: coreContext.elasticsearch.client.asCurrentUser,
-    soClient: coreContext.savedObjects.client,
+    elasticsearchClient: coreContext.elasticsearch.client.asCurrentUser,
+    savedObjectsClient: coreContext.savedObjects.client,
   };
 }

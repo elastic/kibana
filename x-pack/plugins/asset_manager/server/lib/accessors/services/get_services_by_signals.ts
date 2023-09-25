@@ -26,9 +26,9 @@ export async function getServicesBySignals(
     });
   }
 
-  const apmIndices = await options.getApmIndices(options.soClient);
+  const apmIndices = await options.getApmIndices(options.savedObjectsClient);
   const { assets } = await collectServices({
-    client: options.esClient,
+    client: options.elasticsearchClient,
     from: options.from,
     to: options.to,
     apmIndices,

@@ -102,10 +102,10 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
         });
       }
 
-      const { esClient } = await getClientsFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
 
       try {
-        const results = await getAssets({ esClient, size, filters });
+        const results = await getAssets({ elasticsearchClient, size, filters });
         return res.ok({ body: { results } });
       } catch (error: unknown) {
         debug('error looking up asset records', error);
@@ -129,7 +129,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       // Add references into sample data and write integration tests
 
       const { from, to, ean, relation, maxDistance, size, type, kind } = req.query || {};
-      const { esClient } = await getClientsFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
 
       if (to && !isValidRange(from, to)) {
         return res.badRequest({
@@ -140,7 +140,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       try {
         return res.ok({
           body: {
-            results: await getAllRelatedAssets(esClient, {
+            results: await getAllRelatedAssets(elasticsearchClient, {
               ean,
               from,
               to,
@@ -187,11 +187,11 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
         });
       }
 
-      const { esClient } = await getClientsFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
 
       try {
         const resultsForA = await getAssets({
-          esClient,
+          elasticsearchClient,
           filters: {
             from: aFrom,
             to: aTo,
@@ -201,7 +201,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
         });
 
         const resultsForB = await getAssets({
-          esClient,
+          elasticsearchClient,
           filters: {
             from: bFrom,
             to: bTo,

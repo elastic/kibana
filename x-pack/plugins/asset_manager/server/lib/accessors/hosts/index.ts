@@ -6,9 +6,9 @@
  */
 
 import { GetHostsOptionsPublic } from '../../../../common/types_client';
-import { AccessorOptions, OptionsWithInjectedValues } from '..';
+import { AssetClientDependencies, OptionsWithInjectedValues } from '..';
 
-export type GetHostsOptions = GetHostsOptionsPublic & AccessorOptions;
+export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
 export type GetHostsOptionsInjected = OptionsWithInjectedValues<GetHostsOptions>;
 
 export interface HostIdentifier {

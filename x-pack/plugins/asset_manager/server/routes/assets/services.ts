@@ -47,14 +47,14 @@ export function servicesRoutes<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       const { from = 'now-24h', to = 'now', parent } = req.query || {};
-      const { esClient, soClient } = await getClientsFromContext(context);
+      const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
       try {
         const response = await assetClient.getServices({
           from: datemath.parse(from)!.toISOString(),
           to: datemath.parse(to)!.toISOString(),
           parent,
-          esClient,
-          soClient,
+          elasticsearchClient,
+          savedObjectsClient,
         });
 
         return res.ok({ body: response });

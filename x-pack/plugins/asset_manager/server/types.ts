@@ -13,7 +13,7 @@ import {
 } from '@kbn/apm-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
-  esClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchClient;
 }
 
 export const INDEX_DEFAULTS = {

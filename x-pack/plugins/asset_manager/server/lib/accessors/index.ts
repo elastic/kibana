@@ -17,7 +17,7 @@ export interface InjectedValues {
 
 export type OptionsWithInjectedValues<T extends object> = T & InjectedValues;
 
-export interface AccessorOptions {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
+export interface AssetClientDependencies {
+  elasticsearchClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }

@@ -6,9 +6,9 @@
  */
 
 import { GetServicesOptionsPublic } from '../../../../common/types_client';
-import { AccessorOptions, OptionsWithInjectedValues } from '..';
+import { AssetClientDependencies, OptionsWithInjectedValues } from '..';
 
-export type GetServicesOptions = GetServicesOptionsPublic & AccessorOptions;
+export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;
 export type GetServicesOptionsInjected = OptionsWithInjectedValues<GetServicesOptions>;
 
 export interface ServiceIdentifier {
