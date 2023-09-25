@@ -86,7 +86,7 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
    * @param path The path of the request URL.
    */
   private signRequest(body: string, path: string) {
-    const host = this.url.split('://')[1];
+    const { host } = new URL(this.url);
     return aws.sign(
       {
         method: 'POST',
