@@ -11,13 +11,13 @@ import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_ICON_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
-  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
-  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
 
-const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
+const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
+const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 
 const renderSuppressedAlerts = (alertSuppressionCount: number) =>
   render(
@@ -36,7 +36,7 @@ describe('<SuppressedAlerts />', () => {
     expect(value).toHaveTextContent('0 suppressed alert');
     expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
     expect(
-      getByTestId(INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
+      getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
   });
 
@@ -49,7 +49,7 @@ describe('<SuppressedAlerts />', () => {
     expect(value).toHaveTextContent('1 suppressed alert');
     expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
     expect(
-      getByTestId(INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
+      getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
   });
 
@@ -62,7 +62,7 @@ describe('<SuppressedAlerts />', () => {
     expect(value).toHaveTextContent('2 suppressed alerts');
     expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
     expect(
-      getByTestId(INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
+      getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
   });
 });
