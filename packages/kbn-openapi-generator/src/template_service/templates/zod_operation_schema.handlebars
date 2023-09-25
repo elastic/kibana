@@ -9,7 +9,7 @@ import { z } from "zod";
 
 {{> disclaimer}}
 
-{{#each importsMap}}
+{{#each imports}}
 import { 
   {{#each this}}{{.}},{{/each}} 
 } from "{{@key}}"
@@ -22,11 +22,15 @@ import {
   */
 {{/description}}
 export type {{@key}} = z.infer<typeof {{@key}}>;
-export const {{@key}} = {{> schema_item}};
+export const {{@key}} = {{> zod_schema_item}};
+{{#if enum}}
+export const {{@key}}Enum = {{@key}}.enum;
+export type {{@key}}Enum = typeof {{@key}}.enum;
+{{/if}}
 
 {{/each}}
 
-{{#each apiOperations}}
+{{#each operations}}
 {{#if requestQuery}}
 {{#if requestQuery.description}}
 /**
@@ -34,7 +38,7 @@ export const {{@key}} = {{> schema_item}};
 */
 {{/if}}
 export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
-export const {{operationId}}RequestQuery = {{> schema_item requestQuery }};
+export const {{operationId}}RequestQuery = {{> zod_query_item requestQuery }};
 export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
 {{/if}}
 
@@ -45,7 +49,7 @@ export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}Req
 */
 {{/if}}
 export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
-export const {{operationId}}RequestParams = {{> schema_item requestParams }};
+export const {{operationId}}RequestParams = {{> zod_schema_item requestParams }};
 export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
 {{/if}}
 
@@ -56,7 +60,7 @@ export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}Re
 */
 {{/if}}
 export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
-export const {{operationId}}RequestBody = {{> schema_item requestBody }};
+export const {{operationId}}RequestBody = {{> zod_schema_item requestBody }};
 export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;
 {{/if}}
 
@@ -67,6 +71,6 @@ export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}Requ
 */
 {{/if}}
 export type {{operationId}}Response = z.infer<typeof {{operationId}}Response>;
-export const {{operationId}}Response = {{> schema_item response }};
+export const {{operationId}}Response = {{> zod_schema_item response }};
 {{/if}}
 {{/each}}

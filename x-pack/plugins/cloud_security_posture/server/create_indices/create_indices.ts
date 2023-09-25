@@ -77,7 +77,7 @@ const createBenchmarkScoreIndex = async (
 
     const settings: IndexTemplateSettings = {
       index: {
-        default_pipeline: latestFindingsPipelineIngestConfig.id,
+        default_pipeline: scorePipelineIngestConfig.id,
       },
       lifecycle: { name: '' },
     };
