@@ -7,7 +7,10 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginsService, type InternalPluginsServiceSetup } from '@kbn/core-plugins-server-internal';
+import {
+  PluginsService,
+  type InternalPluginsServiceSetup,
+} from '@kbn/core-plugins-server-internal';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 

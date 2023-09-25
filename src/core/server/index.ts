@@ -46,7 +46,10 @@ import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsear
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import type { InternalPluginsServiceSetup, InternalPluginsServiceStart } from '@kbn/core-plugins-server-internal';
+import type {
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-server-internal';
 
 export { bootstrap } from '@kbn/core-root-server-internal';
 
