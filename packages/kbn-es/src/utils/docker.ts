@@ -63,6 +63,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /**
+   * Resource file(s) to overwrite
+   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   */
+  resources?: string | string[];
 }
 
 interface ServerlessEsNodeArgs {
@@ -461,7 +466,7 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, files } = options;
+  const { basePath, clean, ssl, files, resources } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -500,11 +505,36 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
+  const resourceFileOverrides: Record<string, string> = resources
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
+    : {};
+
   const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-    acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+    const fileName = basename(path);
+    let localFilePath = path;
+
+    if (resourceFileOverrides[fileName]) {
+      localFilePath = resourceFileOverrides[fileName];
+      delete resourceFileOverrides[fileName];
+    }
+
+    acc.push('--volume', `${localFilePath}:${SERVERLESS_CONFIG_PATH}${fileName}`);
 
     return acc;
   }, []);
+
+  if (Object.keys(resourceFileOverrides).length > 0) {
+    throw new Error(
+      `Unsupported ES serverless --resources values:\n  ${Object.values(resourceFileOverrides).join(
+        '  \n'
+      )}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
+        basename(filePath)
+      ).join(' | ')}`
+    );
+  }
 
   volumeCmds.push(
     ...getESp12Volume(),
