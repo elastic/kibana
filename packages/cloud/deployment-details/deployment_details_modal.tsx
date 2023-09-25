@@ -34,6 +34,7 @@ export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
         closeModal();
       }}
       style={{ width: 600 }}
+      data-test-subj="deploymentDetailsModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
@@ -56,7 +57,9 @@ export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={closeModal} fill>
-              Close
+              {i18n.translate('cloud.deploymentDetails.modal.closeButtonLabel', {
+                defaultMessage: 'Close',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

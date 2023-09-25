@@ -202,38 +202,40 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <Fragment>
-        {defaultContentLinks.map(({ href, title, iconType, onClick: _onClick }, i) => {
-          const isLast = i === defaultContentLinks.length - 1;
+        {defaultContentLinks.map(
+          ({ href, title, iconType, onClick: _onClick, dataTestSubj }, i) => {
+            const isLast = i === defaultContentLinks.length - 1;
 
-          if (href && _onClick) {
-            throw new Error(
-              'Only one of `href` and `onClick` should be provided for the help menu link.'
+            if (href && _onClick) {
+              throw new Error(
+                'Only one of `href` and `onClick` should be provided for the help menu link.'
+              );
+            }
+
+            const hrefProps = href ? { href, target: '_blank' } : {};
+            const onClick = () => {
+              if (!_onClick) return;
+              _onClick();
+              this.closeMenu();
+            };
+
+            return (
+              <Fragment key={i}>
+                <EuiButtonEmpty
+                  {...hrefProps}
+                  onClick={onClick}
+                  size="s"
+                  flush="left"
+                  iconType={iconType}
+                  data-test-subj={dataTestSubj}
+                >
+                  {title}
+                </EuiButtonEmpty>
+                {!isLast && <EuiSpacer size="xs" />}
+              </Fragment>
             );
           }
-
-          const hrefProps = href ? { href, target: '_blank' } : {};
-          const onClick = () => {
-            if (!_onClick) return;
-            _onClick();
-            this.closeMenu();
-          };
-
-          return (
-            <Fragment key={i}>
-              {}
-              <EuiButtonEmpty
-                {...hrefProps}
-                onClick={onClick}
-                size="s"
-                flush="left"
-                iconType={iconType}
-              >
-                {title}
-              </EuiButtonEmpty>
-              {!isLast && <EuiSpacer size="xs" />}
-            </Fragment>
-          );
-        })}
+        )}
       </Fragment>
     );
   }

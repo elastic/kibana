@@ -21,6 +21,7 @@ export interface ChromeHelpMenuLink {
   href?: string;
   iconType?: string;
   onClick?: () => void;
+  dataTestSubj?: string;
 }
 
 /**

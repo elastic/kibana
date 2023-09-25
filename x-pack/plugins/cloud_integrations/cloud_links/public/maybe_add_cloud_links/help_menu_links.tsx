@@ -54,6 +54,7 @@ export const createHelpMenuLinks = ({
         defaultMessage: 'Endpoints',
       }),
       iconType: 'console',
+      dataTestSubj: 'endpointsHelpLink',
       onClick: () => {
         const modal = overlays.openModal(
           toMountPoint(

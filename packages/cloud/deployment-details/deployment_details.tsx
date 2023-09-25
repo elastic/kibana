@@ -44,7 +44,12 @@ export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) =
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiFieldText value={elasticsearchUrl} fullWidth disabled />
+                <EuiFieldText
+                  value={elasticsearchUrl}
+                  fullWidth
+                  disabled
+                  data-test-subj="deploymentDetailsEsEndpoint"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={elasticsearchUrl}>
@@ -71,7 +76,12 @@ export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) =
         >
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
-              <EuiFieldText value={cloudId} fullWidth disabled />
+              <EuiFieldText
+                value={cloudId}
+                fullWidth
+                disabled
+                data-test-subj="deploymentDetailsCloudID"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={cloudId}>

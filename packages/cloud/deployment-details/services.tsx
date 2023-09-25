@@ -76,7 +76,7 @@ export const DeploymentDetailsKibanaProvider: FC<DeploymentDetailsKibanaDependen
     core: {
       application: { navigateToUrl },
     },
-    cloud: { isCloudEnabled, cloudId = 'abc123', elasticsearchUrl = 'http//coolio.com' },
+    cloud: { isCloudEnabled, cloudId, elasticsearchUrl },
     share: {
       url: { locators },
     },
