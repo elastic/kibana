@@ -45,6 +45,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   assignees: [],
+  customFields: {},
 };
 
 const casesFormProps: CreateCaseFormProps = {

@@ -80,7 +80,7 @@ export type FormProps = Omit<
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
   selectedOwner?: string | null;
-  [x: `customFields?.${string}`]: string | boolean;
+  customFields: Record<string, string | boolean>;
 };
 
 export const schema: FormSchema<FormProps> = {
