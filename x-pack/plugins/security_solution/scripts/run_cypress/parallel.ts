@@ -376,6 +376,10 @@ ${JSON.stringify(config.getAll(), null, 2)}
 
               IS_SERVERLESS: config.get('serverless'),
 
+              // Try to avoid the "Command failed with ENOMEM: not enough memory" error
+              // https://github.com/cypress-io/cypress/issues/27415#issuecomment-1668073106
+              ...(process.env.CI ? { NO_COMMAND_LOG: 1 } : {}),
+
               ...argv.env,
             };
 
