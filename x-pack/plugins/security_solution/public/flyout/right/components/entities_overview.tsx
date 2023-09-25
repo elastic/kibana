@@ -52,7 +52,15 @@ export const EntitiesOverview: React.FC = () => {
               defaultMessage="Entities"
             />
           ),
-          callback: goToEntitiesTab,
+          link: {
+            callback: goToEntitiesTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+                defaultMessage="Show all entities"
+              />
+            ),
+          },
           iconType: 'arrowStart',
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}

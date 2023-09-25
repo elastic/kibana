@@ -130,7 +130,17 @@ export const SessionPreviewContainer: FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToSessionViewTab }),
+        ...(isEnabled && {
+          link: {
+            callback: goToSessionViewTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
+                defaultMessage="Show session viewer"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >
