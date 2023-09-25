@@ -8,10 +8,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
-import { MANAGED_TAG_NAME } from '../../../common/constants';
-
-export const isManagedTag = ({ name }: { name: string }) => name === MANAGED_TAG_NAME;
-
 export const useDashboardRenderer = () => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 

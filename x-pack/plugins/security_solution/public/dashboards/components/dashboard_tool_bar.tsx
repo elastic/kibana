@@ -29,6 +29,7 @@ const DashboardToolBarComponent = ({
   const { euiTheme } = useEuiTheme();
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
+  const managed = dashboardContainer.select((state) => state.componentState.managed);
 
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -93,9 +94,7 @@ const DashboardToolBarComponent = ({
     [euiTheme.size.s]
   );
 
-  const isManaged = dashboardContainer.select((state) => state.componentState.managed);
-
-  return !isManaged ? (
+  return !managed ? (
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
       redirectTo={redirectTo}
