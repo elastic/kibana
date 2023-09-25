@@ -8,12 +8,12 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
-import { Duration } from 'moment/moment';
+import type { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
-  IFieldFormat,
-  SerializedFieldFormat,
+  type IFieldFormat,
+  type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
@@ -25,12 +25,12 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { MlClient } from '../ml_client';
-import {
+import type { MlClient } from '../ml_client';
+import type {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
-import {
+import type {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
   PreviewResponse,
@@ -45,7 +45,7 @@ import type {
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
