@@ -118,6 +118,8 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
   }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
+    console.log('MOreqModelDEL!!!', reqModel);
+    console.log('MODEL!!!', model);
     const signed = this.signRequest(body, `/model/${model}/invoke`);
     const response = await this.request({
       ...signed,

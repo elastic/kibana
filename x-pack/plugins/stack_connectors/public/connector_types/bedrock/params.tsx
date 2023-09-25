@@ -6,12 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import * as i18n from './translations';
 import { DEFAULT_BODY } from './constants';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
@@ -26,7 +28,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
 }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const { body } = subActionParams ?? {};
+  const { body, model } = subActionParams ?? {};
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -52,37 +54,63 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
   }, []);
 
   const editSubActionParams = useCallback(
-    (params: BedrockActionParams['subActionParams']) => {
+    (params: Partial<BedrockActionParams['subActionParams']>) => {
       editAction('subActionParams', { ...subActionParams, ...params }, index);
     },
     [editAction, index, subActionParams]
   );
 
   return (
-    <JsonEditorWithMessageVariables
-      messageVariables={messageVariables}
-      paramsProperty={'body'}
-      inputTargetValue={body}
-      label={i18n.translate('xpack.stackConnectors.components.bedrock.bodyFieldLabel', {
-        defaultMessage: 'Body',
-      })}
-      aria-label={i18n.translate(
-        'xpack.stackConnectors.components.bedrock.bodyCodeEditorAriaLabel',
-        {
-          defaultMessage: 'Code editor',
+    <>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'body'}
+        inputTargetValue={body}
+        label={i18n.BODY}
+        aria-label={i18n.BODY_DESCRIPTION}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) => {
+          editSubActionParams({ body: json });
+        }}
+        onBlur={() => {
+          if (!body) {
+            editSubActionParams({ body: '' });
+          }
+        }}
+        data-test-subj="bedrock-bodyJsonEditor"
+      />
+      <EuiFormRow
+        fullWidth
+        label={i18n.MODEL}
+        helpText={
+          <FormattedMessage
+            defaultMessage="Optionally overwrite default model per request. Current support is for the Anthropic Claude models. For more information, refer to the {bedrockAPIModelDocs}."
+            id="xpack.stackConnectors.components.bedrock.modelHelpText"
+            values={{
+              bedrockAPIModelDocs: (
+                <EuiLink
+                  data-test-subj="bedrock-api-model-doc"
+                  href="https://aws.amazon.com/bedrock/claude/"
+                  target="_blank"
+                >
+                  {`${i18n.BEDROCK} ${i18n.DOCUMENTATION}`}
+                </EuiLink>
+              ),
+            }}
+          />
         }
-      )}
-      errors={errors.body as string[]}
-      onDocumentsChange={(json: string) => {
-        editSubActionParams({ body: json });
-      }}
-      onBlur={() => {
-        if (!body) {
-          editSubActionParams({ body: '' });
-        }
-      }}
-      data-test-subj="bedrock-bodyJsonEditor"
-    />
+      >
+        <EuiFieldText
+          data-test-subj="bedrock-model"
+          placeholder={'anthropic.claude-v2'}
+          value={model}
+          onChange={(ev) => {
+            editSubActionParams({ model: ev.target.value });
+          }}
+          fullWidth
+        />
+      </EuiFormRow>
+    </>
   );
 };
 

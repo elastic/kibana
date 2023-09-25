@@ -10,6 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
@@ -42,11 +43,15 @@ describe('Bedrock Params Fields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={messageVariables}
-      />
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
     );
     expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
+    expect(getByTestId('bedrock-model')).toBeInTheDocument();
   });
   test('useEffect handles the case when subAction and subActionParams are undefined', () => {
     const actionParams = {
@@ -78,7 +83,10 @@ describe('Bedrock Params Fields renders', () => {
         index={0}
         messageVariables={messageVariables}
         errors={errors}
-      />
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
     );
     expect(editAction).toHaveBeenCalledTimes(2);
     expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
@@ -100,13 +108,16 @@ describe('Bedrock Params Fields renders', () => {
         index={0}
         messageVariables={messageVariables}
         errors={errors}
-      />
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
     );
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
   });
 
-  it('calls editAction function with the correct arguments ', () => {
+  it('calls editAction function with the body argument', () => {
     const editAction = jest.fn();
     const errors = {};
     const { getByTestId } = render(
@@ -121,13 +132,45 @@ describe('Bedrock Params Fields renders', () => {
         index={0}
         messageVariables={messageVariables}
         errors={errors}
-      />
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
     );
     const jsonEditor = getByTestId('bodyJsonEditor');
     fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       { body: '{"new_key": "new_value"}' },
+      0
+    );
+  });
+
+  it('calls editAction function with the model argument', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const { getByTestId } = render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{"key": "value"}',
+          },
+        }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    const model = getByTestId('bedrock-model');
+    fireEvent.change(model, { target: { value: 'not-the-default' } });
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { body: '{"key": "value"}', model: 'not-the-default' },
       0
     );
   });

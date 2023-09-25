@@ -83,3 +83,17 @@ export const INVALID_ACTION = i18n.translate(
     defaultMessage: 'Invalid action name.',
   }
 );
+
+export const BODY = i18n.translate('xpack.stackConnectors.components.bedrock.bodyFieldLabel', {
+  defaultMessage: 'Body',
+});
+export const BODY_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.bodyCodeEditorAriaLabel',
+  {
+    defaultMessage: 'Code editor',
+  }
+);
+
+export const MODEL = i18n.translate('xpack.stackConnectors.components.bedrock.model', {
+  defaultMessage: 'Model',
+});
