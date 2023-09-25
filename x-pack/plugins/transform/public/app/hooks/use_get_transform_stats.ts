@@ -35,3 +35,24 @@ export const useGetTransformStats = (
     { enabled, refetchInterval }
   );
 };
+
+export const useGetTransformsStats = ({
+  enabled,
+  refetchInterval,
+}: {
+  enabled?: boolean;
+  refetchInterval?: number | false;
+}) => {
+  const { http } = useAppDependencies();
+
+  return useQuery<GetTransformsStatsResponseSchema, IHttpFetchError>(
+    [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_STATS],
+    ({ signal }) =>
+      http.get<GetTransformsStatsResponseSchema>(addInternalBasePath(`transforms/_stats`), {
+        version: '1',
+        asSystemRequest: true,
+        signal,
+      }),
+    { enabled, refetchInterval }
+  );
+};
