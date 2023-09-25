@@ -32,12 +32,10 @@ export const OptionsListControl = ({
   loadMoreSubject: Subject<number>;
 }) => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
-  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const dimensions = useResizeObserver(resizeRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
