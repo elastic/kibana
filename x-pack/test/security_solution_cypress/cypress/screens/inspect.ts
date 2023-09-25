@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HOSTS_URL, NETWORK_URL, USERS_URL } from '../urls/navigation';
+import { hostsUrl, NETWORK_URL, USERS_URL } from '../urls/navigation';
 import { EVENT_CONTAINER_TABLE_NOT_LOADING } from './alerts';
 import { ALL_HOSTS_TAB, ALL_HOSTS_TABLE, UNIQUE_IPS_VISUALIZATIONS } from './hosts/all_hosts';
 import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
@@ -68,7 +68,7 @@ export interface InspectButtonMetadata {
 export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
     pageName: 'Hosts',
-    url: HOSTS_URL,
+    url: hostsUrl('allHosts'),
     tables: [
       {
         title: 'All Hosts Table',
