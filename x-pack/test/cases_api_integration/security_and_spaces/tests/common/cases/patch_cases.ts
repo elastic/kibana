@@ -921,44 +921,116 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 400,
           });
         });
-      });
 
-      it('400s when trying to patch with a non existent custom field key', async () => {
-        await createConfiguration(
-          supertest,
-          getConfigurationRequest({
-            overrides: {
-              customFields: [
-                {
-                  key: 'test_custom_field',
-                  label: 'text',
-                  type: CustomFieldTypes.TEXT,
-                  required: false,
-                },
-              ],
-            },
-          })
-        );
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
+        it('400s when trying to patch with a custom field key that does not exist', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
                 customFields: [
                   {
-                    key: 'key_does_not_exist',
+                    key: 'test_custom_field',
+                    label: 'text',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value'] },
+                    required: false,
                   },
                 ],
               },
-            ],
-          },
-          expectedHttpCode: 400,
+            })
+          );
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'key_does_not_exist',
+                      type: CustomFieldTypes.TEXT,
+                      field: { value: ['this is a text field value'] },
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when trying to create case with a missing required custom field', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when trying to create case with a custom field with the wrong type', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'test_custom_field',
+                      type: CustomFieldTypes.TOGGLE,
+                      field: { value: [true] },
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
       });
     });

@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { differenceWith } from 'lodash';
 import type { Case } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
@@ -22,76 +21,34 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import { throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
-import { compareCustomFieldKeysAgainstConfiguration } from './utils';
+import {} from '../utils';
+import {
+  throwIfCustomFieldKeysDoNotExist,
+  throwIfCustomFieldTypesInvalid,
+  throwIfDuplicatedCustomFieldKeysInRequest,
+  throwIfMissingRequiredCustomField,
+} from './validation';
 
-/**
- * Throws if any of the custom field keys in the request does not exist in the case configuration.
- */
-export async function throwIfCustomFieldKeysInvalid({
-  casePostRequest,
+async function validateCustomFieldsInRequest({
+  data,
   casesClient,
 }: {
-  casePostRequest: CasePostRequest;
+  data: CasePostRequest;
   casesClient: CasesClient;
 }) {
-  const customFields = casePostRequest.customFields;
+  const requestCustomFields = data.customFields;
 
-  if (!Array.isArray(customFields) || !customFields.length) {
-    return;
-  }
+  throwIfDuplicatedCustomFieldKeysInRequest({ requestCustomFields });
 
-  const configuration = await casesClient.configure.get({ owner: casePostRequest.owner });
-
-  if (configuration.length === 0) {
-    throw Boom.badRequest('No custom fields configured.');
-  }
-
-  const invalidCustomFieldKeys = compareCustomFieldKeysAgainstConfiguration({
-    requestCustomFields: customFields,
-    configurationCustomFields: configuration[0].customFields,
-  });
-
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
-  }
-}
-
-/**
- * Throws if there are required custom fields missing in the request.
- */
-export async function throwIfMissingRequiredCustomField({
-  casePostRequest,
-  casesClient,
-}: {
-  casePostRequest: CasePostRequest;
-  casesClient: CasesClient;
-}) {
-  const requestCustomFields = casePostRequest.customFields;
-
-  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return;
-  }
-
-  const configuration = await casesClient.configure.get({ owner: casePostRequest.owner });
-
-  if (configuration.length === 0) {
-    return;
-  }
-
-  const requiredCustomFields = configuration[0].customFields.filter(
-    (customField) => customField.required
-  );
-
-  const invalidCustomFieldKeys = differenceWith(
-    requiredCustomFields,
+  const configurations = await casesClient.configure.get({ owner: data.owner });
+  const customFieldsValidationParams = {
     requestCustomFields,
-    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
-  ).map((e) => e.key);
+    ...(configurations.length && { customFieldsConfiguration: configurations[0].customFields }),
+  };
 
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
-  }
+  throwIfCustomFieldKeysDoNotExist(customFieldsValidationParams);
+  throwIfMissingRequiredCustomField(customFieldsValidationParams);
+  throwIfCustomFieldTypesInvalid(customFieldsValidationParams);
 }
 
 /**
@@ -114,9 +71,7 @@ export const create = async (
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
 
-    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: query.customFields });
-    await throwIfCustomFieldKeysInvalid({ casePostRequest: query, casesClient });
-    await throwIfMissingRequiredCustomField({ casePostRequest: query, casesClient });
+    await validateCustomFieldsInRequest({ data, casesClient });
 
     const savedObjectID = SavedObjectsUtils.generateId();
 

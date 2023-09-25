@@ -395,7 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('400s when trying to create case with non existant customField key', async () => {
+        it('400s when trying to create case with customField key that does not exist', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -454,6 +454,37 @@ export default ({ getService }: FtrProviderContext): void => {
               customFields: [
                 {
                   key: 'toggle_custom_field',
+                  type: CustomFieldTypes.TOGGLE,
+                  field: { value: [true] },
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with a custom field with the wrong type', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'test_custom_field',
                   type: CustomFieldTypes.TOGGLE,
                   field: { value: [true] },
                 },
