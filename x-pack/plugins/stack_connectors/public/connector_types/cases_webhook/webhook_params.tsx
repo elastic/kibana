@@ -13,6 +13,9 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { CaseStatuses } from '@kbn/cases-components';
+import { CaseSeverity, SeverityFilter } from './severity_filter';
+import { StatusFilter } from './status_filter';
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
 
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
@@ -169,7 +172,6 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           data-test-subj="tagsComboBox"
         />
       </EuiFormRow>
-
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.statusFieldLabel', {
@@ -177,7 +179,10 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         })}
         error={errors['subActionParams.incident.status'] as string[]}
       >
-        STATUS
+        <StatusFilter
+          selectedStatus={incident.status as CaseStatuses}
+          onStatusChanged={(status: CaseStatuses) => editSubActionProperty('status', status)}
+        />
       </EuiFormRow>
       <EuiFormRow
         fullWidth
@@ -186,7 +191,32 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         })}
         error={errors['subActionParams.incident.severity'] as string[]}
       >
-        SEVERITY
+        <SeverityFilter
+          selectedSeverity={incident.severity as CaseSeverity}
+          onSeverityChange={(severity: CaseSeverity) => editSubActionProperty('severity', severity)}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        data-test-subj="id-row"
+        fullWidth
+        error={errors['subActionParams.incident.id']}
+        isInvalid={
+          errors['subActionParams.incident.id'] !== undefined &&
+          errors['subActionParams.incident.id'].length > 0 &&
+          incident.id !== undefined
+        }
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.idFieldLabel', {
+          defaultMessage: 'Case ID',
+        })}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editSubActionProperty}
+          messageVariables={messageVariables}
+          paramsProperty={'id'}
+          inputTargetValue={incident.id ?? undefined}
+          errors={errors['subActionParams.incident.id'] as string[]}
+        />
       </EuiFormRow>
       <>
         <TextAreaWithMessageVariables

@@ -528,12 +528,7 @@ export const SEVERITY_LOW_LABEL = i18n.translate(
     defaultMessage: 'Low',
   }
 );
-export const STATUS_ACKNOWLEDGED = i18n.translate(
-  'stackConnectors.components.casesWebhook.status.acknowledged',
-  {
-    defaultMessage: 'Acknowledged',
-  }
-);
+
 export const STATUS_OPEN = i18n.translate('stackConnectors.components.casesWebhook.status.open', {
   defaultMessage: 'Open',
 });
