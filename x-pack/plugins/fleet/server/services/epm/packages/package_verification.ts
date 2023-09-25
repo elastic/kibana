@@ -57,7 +57,12 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
   let key;
   try {
-    key = await openpgp.readKey({ armoredKey: buffer.toString() });
+    key = await openpgp.readKey({
+      armoredKey: buffer.toString(),
+      config: {
+        preferredHashAlgorithm: openpgp.enums.hash.sha256,
+      },
+    });
   } catch (e) {
     logger.warn(`Unable to parse GPG key from '${gpgKeyPath}': ${e}`);
   }
