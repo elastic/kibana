@@ -8,10 +8,11 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockBrowserFields } from '../../shared/mocks/mock_browser_fields';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { DocumentStatus } from './status';
 import { RightPanelContext } from '../context';
-import { mockBrowserFields, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 
 export default {
   component: DocumentStatus,
