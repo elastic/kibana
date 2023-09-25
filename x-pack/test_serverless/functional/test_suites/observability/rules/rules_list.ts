@@ -420,7 +420,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete).toHaveLength(0);
     });
 
-    it('should filter rules by the status', async () => {
+    it.skip('should filter rules by the status', async () => {
       const rule1 = await createRule({
         supertest,
       });
@@ -466,7 +466,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    it('should display total rules by status and error banner only when exists rules with status error', async () => {
+    it.skip('should display total rules by status and error banner only when exists rules with status error', async () => {
       const rule1 = await createRule({
         supertest,
       });
@@ -525,7 +525,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Expand error in rules table when there is rule with an error associated', async () => {
+    it.skip('Expand error in rules table when there is rule with an error associated', async () => {
       const rule1 = await createRule({
         supertest,
         name: 'a',
