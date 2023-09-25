@@ -11,6 +11,7 @@ import * as i18n from '../translations';
 import { Edit } from './edit';
 import { View } from './view';
 import { Configure } from './configure';
+import { Create } from './create';
 
 export const configureToggleCustomFieldFactory: CustomFieldFactory = () => ({
   id: CustomFieldTypes.TOGGLE,
@@ -19,5 +20,6 @@ export const configureToggleCustomFieldFactory: CustomFieldFactory = () => ({
     Configure,
     Edit,
     View,
+    Create,
   }),
 });

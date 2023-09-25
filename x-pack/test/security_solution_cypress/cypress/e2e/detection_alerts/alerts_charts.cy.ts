@@ -16,7 +16,8 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
@@ -38,7 +39,7 @@ describe(
     beforeEach(() => {
       login();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       selectAlertsHistogram();
     });
 

@@ -18,6 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
 
@@ -64,7 +65,13 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
-                                <h4>{label}</h4>
+                                <EuiText
+                                  css={css`
+                                    font-weight: 700;
+                                  `}
+                                >
+                                  {label}
+                                </EuiText>
                               </EuiFlexItem>
                               <EuiText color="subdued">{renderTypeLabel(type)}</EuiText>
                             </EuiFlexGroup>

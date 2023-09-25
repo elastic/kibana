@@ -16,19 +16,56 @@ import { decodeWithExcessOrThrow } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import { throwIfDuplicatedCustomFieldKeysInRequest } from '../utils';
+import { compareCustomFieldKeysAgainstConfiguration } from './utils';
+
+/**
+ * Throws if any of the custom field keys in the request does not exist in the case configuration.
+ */
+export async function throwIfCustomFieldKeysInvalid({
+  casePostRequest,
+  casesClient,
+}: {
+  casePostRequest: CasePostRequest;
+  casesClient: CasesClient;
+}) {
+  const customFields = casePostRequest.customFields;
+
+  if (!Array.isArray(customFields) || !customFields.length) {
+    return;
+  }
+
+  const configuration = await casesClient.configure.get({ owner: casePostRequest.owner });
+
+  if (configuration.length === 0) {
+    throw Boom.badRequest('No custom fields configured.');
+  }
+
+  const invalidCustomFieldKeys = compareCustomFieldKeysAgainstConfiguration({
+    requestCustomFields: customFields,
+    configurationCustomFields: configuration[0].customFields,
+  });
+
+  if (invalidCustomFieldKeys.length) {
+    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
+  }
+}
 
 /**
  * Creates a new case.
  *
  * @ignore
  */
-export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
+export const create = async (
+  data: CasePostRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -40,6 +77,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
 
     throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: query.customFields });
+    await throwIfCustomFieldKeysInvalid({ casePostRequest: query, casesClient });
 
     const savedObjectID = SavedObjectsUtils.generateId();
 

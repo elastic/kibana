@@ -21,6 +21,10 @@ export interface CustomFieldType {
     isLoading: boolean;
     canUpdate: boolean;
   }>;
+  Create: React.FC<{
+    customFieldConfiguration: CasesConfigurationUICustomField;
+    isLoading: boolean;
+  }>;
 }
 
 export type CustomFieldFactory = () => {

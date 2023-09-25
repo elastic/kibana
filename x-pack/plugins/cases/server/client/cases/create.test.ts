@@ -16,8 +16,8 @@ import {
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
-import { createCasesClientMockArgs } from '../mocks';
-import { create } from './create';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { create, throwIfCustomFieldKeysInvalid } from './create';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -46,6 +46,8 @@ describe('create', () => {
   };
 
   const caseSO = mockCases[0];
+  const casesClientMock = createCasesClientMock();
+  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -56,7 +58,7 @@ describe('create', () => {
     });
 
     it('notifies single assignees', async () => {
-      await create(theCase, clientArgs);
+      await create(theCase, clientArgs, casesClientMock);
 
       expect(clientArgs.services.notificationService.notifyAssignees).toHaveBeenCalledWith({
         assignees: theCase.assignees,
@@ -65,7 +67,11 @@ describe('create', () => {
     });
 
     it('notifies multiple assignees', async () => {
-      await create({ ...theCase, assignees: [{ uid: '1' }, { uid: '2' }] }, clientArgs);
+      await create(
+        { ...theCase, assignees: [{ uid: '1' }, { uid: '2' }] },
+        clientArgs,
+        casesClientMock
+      );
 
       expect(clientArgs.services.notificationService.notifyAssignees).toHaveBeenCalledWith({
         assignees: [{ uid: '1' }, { uid: '2' }],
@@ -74,7 +80,7 @@ describe('create', () => {
     });
 
     it('does not notify when there are no assignees', async () => {
-      await create({ ...theCase, assignees: [] }, clientArgs);
+      await create({ ...theCase, assignees: [] }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalled();
     });
@@ -85,7 +91,8 @@ describe('create', () => {
           ...theCase,
           assignees: [{ uid: '1' }, { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.notificationService.notifyAssignees).toHaveBeenCalledWith({
@@ -97,7 +104,7 @@ describe('create', () => {
     it('should throw an error if the assignees array length is too long', async () => {
       const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foo' });
 
-      await expect(create({ ...theCase, assignees }, clientArgs)).rejects.toThrow(
+      await expect(create({ ...theCase, assignees }, clientArgs, casesClientMock)).rejects.toThrow(
         `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
@@ -114,7 +121,7 @@ describe('create', () => {
     it('should throw an error when an excess field exists', async () => {
       await expect(
         // @ts-expect-error foo is an invalid field
-        create({ ...theCase, foo: 'bar' }, clientArgs)
+        create({ ...theCase, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to create case: Error: invalid keys \\"foo\\""`
       );
@@ -131,7 +138,7 @@ describe('create', () => {
 
     it(`should not throw an error if the title is non empty and less than ${MAX_TITLE_LENGTH} characters`, async () => {
       await expect(
-        create({ ...theCase, title: 'This is a test case!!' }, clientArgs)
+        create({ ...theCase, title: 'This is a test case!!' }, clientArgs, casesClientMock)
       ).resolves.not.toThrow();
     });
 
@@ -143,7 +150,8 @@ describe('create', () => {
             title:
               'This is a very long title with more than one hundred and sixty characters!! To confirm the maximum limit error thrown for more than one hundred and sixty characters!!',
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to create case: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
@@ -151,19 +159,19 @@ describe('create', () => {
     });
 
     it('should throw an error if the title is an empty string', async () => {
-      await expect(create({ ...theCase, title: '' }, clientArgs)).rejects.toThrow(
+      await expect(create({ ...theCase, title: '' }, clientArgs, casesClientMock)).rejects.toThrow(
         'Failed to create case: Error: The title field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the title is a string with empty characters', async () => {
-      await expect(create({ ...theCase, title: '   ' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The title field cannot be an empty string.'
-      );
+      await expect(
+        create({ ...theCase, title: '   ' }, clientArgs, casesClientMock)
+      ).rejects.toThrow('Failed to create case: Error: The title field cannot be an empty string.');
     });
 
     it('should trim title', async () => {
-      await create({ ...theCase, title: 'title with spaces      ' }, clientArgs);
+      await create({ ...theCase, title: 'title with spaces      ' }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -199,7 +207,11 @@ describe('create', () => {
 
     it(`should not throw an error if the description is non empty and less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
       await expect(
-        create({ ...theCase, description: 'This is a test description!!' }, clientArgs)
+        create(
+          { ...theCase, description: 'This is a test description!!' },
+          clientArgs,
+          casesClientMock
+        )
       ).resolves.not.toThrow();
     });
 
@@ -208,19 +220,25 @@ describe('create', () => {
         .fill('x')
         .toString();
 
-      await expect(create({ ...theCase, description }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, description }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         `Failed to create case: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
     it('should throw an error if the description is an empty string', async () => {
-      await expect(create({ ...theCase, description: '' }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, description: '' }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         'Failed to create case: Error: The description field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the description is a string with empty characters', async () => {
-      await expect(create({ ...theCase, description: '   ' }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, description: '   ' }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         'Failed to create case: Error: The description field cannot be an empty string.'
       );
     });
@@ -228,7 +246,8 @@ describe('create', () => {
     it('should trim description', async () => {
       await create(
         { ...theCase, description: 'this is a description with spaces!!      ' },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
@@ -264,31 +283,35 @@ describe('create', () => {
     });
 
     it('should not throw an error if the tags array is empty', async () => {
-      await expect(create({ ...theCase, tags: [] }, clientArgs)).resolves.not.toThrow();
+      await expect(
+        create({ ...theCase, tags: [] }, clientArgs, casesClientMock)
+      ).resolves.not.toThrow();
     });
 
     it('should not throw an error if the tags array has non empty string within limit', async () => {
-      await expect(create({ ...theCase, tags: ['abc'] }, clientArgs)).resolves.not.toThrow();
+      await expect(
+        create({ ...theCase, tags: ['abc'] }, clientArgs, casesClientMock)
+      ).resolves.not.toThrow();
     });
 
     it('should throw an error if the tags array length is too long', async () => {
       const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
 
-      await expect(create({ ...theCase, tags }, clientArgs)).rejects.toThrow(
+      await expect(create({ ...theCase, tags }, clientArgs, casesClientMock)).rejects.toThrow(
         `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
     it('should throw an error if the tags array has empty string', async () => {
-      await expect(create({ ...theCase, tags: [''] }, clientArgs)).rejects.toThrow(
+      await expect(create({ ...theCase, tags: [''] }, clientArgs, casesClientMock)).rejects.toThrow(
         'Failed to create case: Error: The tag field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the tags array has string with empty characters', async () => {
-      await expect(create({ ...theCase, tags: ['  '] }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The tag field cannot be an empty string.'
-      );
+      await expect(
+        create({ ...theCase, tags: ['  '] }, clientArgs, casesClientMock)
+      ).rejects.toThrow('Failed to create case: Error: The tag field cannot be an empty string.');
     });
 
     it('should throw an error if the tag length is too long', async () => {
@@ -296,13 +319,15 @@ describe('create', () => {
         .fill('f')
         .toString();
 
-      await expect(create({ ...theCase, tags: [tag] }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, tags: [tag] }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
     it('should trim tags', async () => {
-      await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs);
+      await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -337,32 +362,39 @@ describe('create', () => {
     });
 
     it('should not throw an error if the category is null', async () => {
-      await expect(create({ ...theCase, category: null }, clientArgs)).resolves.not.toThrow();
+      await expect(
+        create({ ...theCase, category: null }, clientArgs, casesClientMock)
+      ).resolves.not.toThrow();
     });
 
     it('should throw an error if the category length is too long', async () => {
       await expect(
         create(
           { ...theCase, category: 'A very long category with more than fifty characters!' },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow('Failed to create case: Error: The length of the category is too long.');
     });
 
     it('should throw an error if the category is an empty string', async () => {
-      await expect(create({ ...theCase, category: '' }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, category: '' }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "" supplied to "category"'
       );
     });
 
     it('should throw an error if the category is a string with empty characters', async () => {
-      await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
+      await expect(
+        create({ ...theCase, category: '   ' }, clientArgs, casesClientMock)
+      ).rejects.toThrow(
         'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "category"'
       );
     });
 
     it('should trim category', async () => {
-      await create({ ...theCase, category: 'reporting       ' }, clientArgs);
+      await create({ ...theCase, category: 'reporting       ' }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -391,14 +423,35 @@ describe('create', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
 
+    const casesClient = createCasesClientMock();
+    casesClient.configure.get = jest.fn().mockResolvedValue([
+      {
+        owner: theCase.owner,
+        customFields: [
+          {
+            key: 'first_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'foo',
+            required: false,
+          },
+          {
+            key: 'second_key',
+            type: CustomFieldTypes.TOGGLE,
+            label: 'foo',
+            required: false,
+          },
+        ],
+      },
+    ]);
+
     const theCustomFields: CaseCustomFields = [
       {
-        key: 'first_customField_key',
+        key: 'first_key',
         type: CustomFieldTypes.TEXT,
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
-        key: 'second_customField_key',
+        key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
         field: { value: [true] },
       },
@@ -415,7 +468,8 @@ describe('create', () => {
             ...theCase,
             customFields: theCustomFields,
           },
-          clientArgs
+          clientArgs,
+          casesClient
         )
       ).resolves.not.toThrow();
 
@@ -442,7 +496,7 @@ describe('create', () => {
     });
 
     it('should not throw an error and set default value when customFields are undefined', async () => {
-      await expect(create({ ...theCase }, clientArgs)).resolves.not.toThrow();
+      await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -473,7 +527,8 @@ describe('create', () => {
             ...theCase,
             customFields: Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill(theCustomFields[0]),
           },
-          clientArgs
+          clientArgs,
+          casesClient
         )
       ).rejects.toThrow(
         `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
@@ -498,9 +553,154 @@ describe('create', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClient
         )
       ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
+    });
+  });
+
+  describe('throwIfCustomFieldKeysInvalid', () => {
+    const casesClient = createCasesClientMock();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('does not throw if all custom fields are in configuration', async () => {
+      const customFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          field: { value: ['this is a text field value', 'this is second'] },
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TEXT as const,
+          field: { value: null },
+        },
+      ];
+
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        throwIfCustomFieldKeysInvalid({
+          casePostRequest: {
+            customFields,
+          } as unknown as CasePostRequest,
+          casesClient,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('does not throw if no custom fields are in request', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        throwIfCustomFieldKeysInvalid({
+          casePostRequest: {} as unknown as CasePostRequest,
+          casesClient,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('does not throw if no configuration found but no custom fields are in request', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+      await expect(
+        throwIfCustomFieldKeysInvalid({
+          casePostRequest: {} as unknown as CasePostRequest,
+          casesClient,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('throws if the request has invalid custom field keys', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        throwIfCustomFieldKeysInvalid({
+          casePostRequest: {
+            customFields: [
+              {
+                key: 'invalid_key',
+                type: CustomFieldTypes.TOGGLE,
+                label: 'foo',
+                required: false,
+              },
+            ],
+          } as unknown as CasePostRequest,
+          casesClient,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
+    });
+
+    it('throws if no configuration found when trying to create custom fields', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+      await expect(
+        throwIfCustomFieldKeysInvalid({
+          casePostRequest: {
+            customFields: [
+              {
+                key: 'invalid_key',
+                type: CustomFieldTypes.TOGGLE,
+                label: 'foo',
+                required: false,
+              },
+            ],
+          } as unknown as CasePostRequest,
+          casesClient,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
     });
   });
 
@@ -530,15 +730,37 @@ describe('create', () => {
       ],
     };
 
-    const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    const casesClient = createCasesClientMock();
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    casesClient.configure.get = jest.fn().mockResolvedValue([
+      {
+        owner: caseWithOptionalFields.owner,
+        customFields: [
+          {
+            key: 'first_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'foo',
+            required: false,
+          },
+          {
+            key: 'second_key',
+            type: CustomFieldTypes.TOGGLE,
+            label: 'foo',
+            required: false,
+          },
+        ],
+      },
+    ]);
+
     it('should create a user action with defaults correctly', async () => {
-      await create(caseWithOnlyRequiredFields, clientArgs);
+      await create(caseWithOnlyRequiredFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
         caseId: 'mock-id-1',
@@ -566,7 +788,7 @@ describe('create', () => {
     });
 
     it('should create a user action with optional fields set correctly', async () => {
-      await create(caseWithOptionalFields, clientArgs);
+      await create(caseWithOptionalFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
         caseId: 'mock-id-1',
