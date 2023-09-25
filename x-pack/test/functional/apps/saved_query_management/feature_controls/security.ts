@@ -126,7 +126,7 @@ export default function (ctx: FtrProviderContext) {
     }
   }
 
-  describe('Cross apps security', () => {
+  describe('Security: App vs Global privilege', () => {
     apps.forEach((appName) => {
       before(async () => {
         await doBefore(appName);
@@ -195,7 +195,7 @@ export default function (ctx: FtrProviderContext) {
           await globalNav.badgeMissingOrFail();
         });
 
-        savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
+        savedQuerySecurityUtils.shouldAllowSavingQueries();
       });
 
       describe(`${appName} all privileges with disabled savedQueryManagement.saveQuery privilege`, () => {

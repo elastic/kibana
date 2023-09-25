@@ -19,7 +19,6 @@ export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrPr
       {
         it('allows saving via the saved query management component popover with no saved query loaded', async () => {
           await queryBar.setQuery('response:200');
-          await queryBar.clickQuerySubmitButton();
           await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
           await savedQueryManagementComponent.savedQueryExistOrFail('foo');
           await savedQueryManagementComponent.closeSavedQueryManagementComponent();
@@ -53,7 +52,6 @@ export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrPr
         it('allow saving currently loaded query as a copy', async () => {
           await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
           await queryBar.setQuery('response:404');
-          await queryBar.clickQuerySubmitButton();
           await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
             'ok2',
             'description',
