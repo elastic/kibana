@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import execa from 'execa';
-
-export async function formatOutput(path: string) {
-  await execa('npx', ['prettier', '--write', path]);
-}
+export const RULES_MANAGEMENT_URL = '/app/security/rules/management';
+export const RULES_MONITORING_URL = '/app/security/rules/monitoring';
