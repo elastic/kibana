@@ -19,7 +19,6 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
-import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 
 export function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
@@ -34,7 +33,9 @@ export function createCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    plugins: pluginServiceMock.createStartContract(),
+    plugins: {
+      onStart: jest.fn(),
+    },
   };
 
   return mock;
