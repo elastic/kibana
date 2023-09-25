@@ -330,5 +330,5 @@ export function getFieldsByValidationState(
 
 export function getOtherBucketSwitchDefault(column: TermsIndexPatternColumn, size: number) {
   const otherBucketValue = column.params.otherBucket;
-  return Boolean(otherBucketValue && size < MAX_TERMS_OTHER_ENABLED);
+  return (otherBucketValue || otherBucketValue === undefined) && size < MAX_TERMS_OTHER_ENABLED;
 }
