@@ -675,6 +675,7 @@ export function LayerPanel(
             setPanelSettingsOpen(false);
             return true;
           }}
+          isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
