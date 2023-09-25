@@ -6,8 +6,8 @@
   "license": "Elastic License 2.0",
   "scripts": {
     "ftr:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./config/serverless/config.ts",
-    "ftr:runner:serverless": "node ../../../scripts/functional_test_runner --config=config/serverless/config.ts",
+    "ftr:runner:serverless": "node ../../../scripts/functional_test_runner --config=config/serverless/config.ts --grep @serverless --grep  @brokenInServerless --invert",
     "ftr:server:ess": "node ../../../scripts/functional_tests_server.js --config ./config/ess/config.ts",
-    "ftr:runner:ess": "node ../../../scripts/functional_test_runner --config=config/ess/config.ts"
+    "ftr:runner:ess": "node ../../../scripts/functional_test_runner --config=config/ess/config.ts --grep @ess"
   }
 }

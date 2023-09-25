@@ -38,3 +38,4 @@ export * from './action/get_web_hook_action';
 export * from './action/remove_uuid_from_actions';
 
 export * from './count_down_test';
+export * from './update_username';

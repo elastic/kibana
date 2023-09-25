@@ -14,6 +14,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('../../test_suites')],
-    suiteTags: { include: ['@ess'] },
   };
 }

@@ -8,8 +8,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Exceptions API', function () {
-    this.tags(['@serverless']);
-    this.tags(['@ess']);
     loadTestFile(require.resolve('./rule_exception/create_rule_exceptions'));
   });
 }

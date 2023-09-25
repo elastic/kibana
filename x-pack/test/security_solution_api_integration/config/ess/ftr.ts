@@ -11,7 +11,6 @@ import { services } from '../../../api_integration/services';
 
 // TODO combine it with
 interface CreateTestConfigOptions {
-  suiteTags: any;
   license: string;
   ssl?: boolean;
 }
@@ -107,7 +106,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             : []),
         ],
       },
-      suiteTags: options.suiteTags,
     };
   };
 }

@@ -24,7 +24,7 @@ import {
   deleteAllRules,
   createExceptionList,
   deleteAllAlerts,
-} from '../../../utils';
+} from '../../utils';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
 
-  describe('create_rule_exception_route', () => {
+  describe('@serverless @ess create_rule_exception_route', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
     });

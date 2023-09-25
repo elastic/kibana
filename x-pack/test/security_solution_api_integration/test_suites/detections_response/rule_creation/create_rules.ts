@@ -42,7 +42,8 @@ import {
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
-} from '../../utils';
+  updateUsername,
+} from '../utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -54,15 +55,27 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
+  const config = getService('config');
+  const { ELASTICSEARCH_USERNAME } = config.get('kbnTestServer.env');
+  const isServerless = config.get('serverless');
 
-  describe('create_rules', () => {
+  describe('@serverless @ess create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        // TODO ask about best approach here
+        if (isServerless)
+          await esArchiver.load(
+            'x-pack/test/security_solution_api_integration/es_archive/serverless/host_serverless'
+          );
+        else await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        if (isServerless)
+          await esArchiver.unload(
+            'x-pack/test/security_solution_api_integration/es_archive/serverless/host_serverless'
+          );
+        else await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       beforeEach(async () => {
@@ -103,7 +116,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+          const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         /*
@@ -198,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           const expected = {
             actions: [],
             author: [],
-            created_by: 'elastic',
+            created_by: ELASTICSEARCH_USERNAME,
             description: 'Simple Rule Query',
             enabled: true,
             false_positives: [],
@@ -220,7 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
             setup: '',
             severity: 'high',
             severity_mapping: [],
-            updated_by: 'elastic',
+            updated_by: ELASTICSEARCH_USERNAME,
             tags: [],
             to: 'now',
             type: 'query',
@@ -249,7 +263,11 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-          expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+          const expectedRule = updateUsername(
+            getSimpleRuleOutputWithoutRuleId(),
+            ELASTICSEARCH_USERNAME
+          );
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('creates a single Machine Learning rule from a legacy ML Rule format', async () => {
@@ -265,7 +283,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+          const expectedRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('should create a single Machine Learning rule', async () => {
@@ -277,7 +296,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+          const expectedRule = updateUsername(getSimpleMlRuleOutput(), ELASTICSEARCH_USERNAME);
+          expect(bodyToCompare).to.eql(expectedRule);
         });
 
         it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
@@ -418,7 +438,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('t1_analyst', () => {
+      describe('@brokenInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -528,7 +548,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('missing timestamps', () => {
+    describe('@brokenInServerless missing timestamps', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
         // to edit these files run the following script
@@ -611,7 +631,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('per-action frequencies', () => {
+    describe('@brokenInServerless per-action frequencies', () => {
       const createSingleRule = async (rule: RuleCreateProps) => {
         const createdRule = await createRule(supertest, log, rule);
         createdRule.actions = removeUUIDFromActions(createdRule.actions);
@@ -629,8 +649,7 @@ export default ({ getService }: FtrProviderContext) => {
               simpleRule.actions = actionsWithoutFrequencies;
 
               const createdRule = await createSingleRule(simpleRule);
-
-              const expectedRule = getSimpleRuleOutput();
+              const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
                 ...action,
                 frequency: NOTIFICATION_DEFAULT_FREQUENCY,
@@ -652,8 +671,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = actionsWithoutFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
               ...action,
               frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
@@ -683,8 +701,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = actionsWithFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = actionsWithFrequencies;
 
             const rule = removeServerGeneratedProperties(createdRule);
@@ -704,8 +721,7 @@ export default ({ getService }: FtrProviderContext) => {
               simpleRule.actions = someActionsWithFrequencies;
 
               const createdRule = await createSingleRule(simpleRule);
-
-              const expectedRule = getSimpleRuleOutput();
+              const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
                 frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
@@ -727,8 +743,7 @@ export default ({ getService }: FtrProviderContext) => {
             simpleRule.actions = someActionsWithFrequencies;
 
             const createdRule = await createSingleRule(simpleRule);
-
-            const expectedRule = getSimpleRuleOutput();
+            const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
             expectedRule.actions = someActionsWithFrequencies.map((action) => ({
               ...action,
               frequency: action.frequency ?? {
