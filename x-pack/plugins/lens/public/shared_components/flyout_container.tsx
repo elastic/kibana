@@ -71,14 +71,16 @@ export function FlyoutContainer({
   }, [handleClose]);
 
   useEffect(() => {
-    document.body.classList.toggle('lnsBody--overflowHidden', isOpen);
-    return () => {
-      if (isOpen) {
-        setFocusTrapIsEnabled(false);
-      }
-      document.body.classList.remove('lnsBody--overflowHidden');
-    };
-  }, [isOpen]);
+    if (!isInlineEditing) {
+      document.body.classList.toggle('lnsBody--overflowHidden', isOpen);
+      return () => {
+        if (isOpen) {
+          setFocusTrapIsEnabled(false);
+        }
+        document.body.classList.remove('lnsBody--overflowHidden');
+      };
+    }
+  }, [isInlineEditing, isOpen]);
 
   if (!isOpen) {
     return null;
@@ -108,8 +110,9 @@ export function FlyoutContainer({
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
-              // running this onAnimationEnd, otherwise the flyout pushes content when animating
-              setFocusTrapIsEnabled(true);
+              // running this onAnimationEnd, otherwise the flyout pushes content when animating.
+              // The EuiFocusTrap is disabled when inline editing as it causes bugs with comboboxes
+              setFocusTrapIsEnabled(!Boolean(isInlineEditing));
             }
           }}
         >
