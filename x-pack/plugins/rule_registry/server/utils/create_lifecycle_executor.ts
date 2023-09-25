@@ -45,7 +45,6 @@ import {
   VERSION,
   ALERT_FLAPPING,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_STATUS_UNTRACKED,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
