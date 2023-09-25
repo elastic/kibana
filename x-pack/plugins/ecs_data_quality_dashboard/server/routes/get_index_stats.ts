@@ -53,15 +53,32 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           try {
             decodedStartDate = decodeURIComponent(startDate);
           } catch (err) {
-            decodedStartDate = startDate;
             logger.error('decode startDate error', err);
+            return resp.error({
+              body: i18n.translate(
+                'xpack.ecsDataQualityDashboard.getIndexStats.decodeStartDateErrorMessage',
+                {
+                  defaultMessage: 'decode startDate error',
+                }
+              ),
+              statusCode: 400,
+            });
           }
 
           try {
             decodedEndDate = decodeURIComponent(endDate);
           } catch (err) {
-            decodedEndDate = endDate;
             logger.error('decode endDate error', err);
+
+            return resp.error({
+              body: i18n.translate(
+                'xpack.ecsDataQualityDashboard.getIndexStats.decodeEndDateErrorMessage',
+                {
+                  defaultMessage: 'decode endDate error',
+                }
+              ),
+              statusCode: 400,
+            });
           }
 
           const indices = await fetchAvailableIndices(esClient, {

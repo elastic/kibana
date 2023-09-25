@@ -66,7 +66,8 @@ export const INDICES = i18n.translate(
 export const INDICES_CHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.indicesCheckedColumn',
   {
-    defaultMessage: 'Indices checked',
+    defaultMessage:
+      'Indices checked (Internal indices, patterns and kibana sample data are skipped)',
   }
 );
 

@@ -33,6 +33,7 @@ import type {
 } from '../../../types';
 import { getSizeInBytes } from '../../../helpers';
 import { useDataQualityContext } from '../../data_quality_context';
+import { checkIsHiddenPattern, checkIsSkippedIndex } from './check_all/helpers';
 
 const SummaryActionsFlexGroup = styled(EuiFlexGroup)`
   gap: ${({ theme }) => theme.eui.euiSizeS};
@@ -71,22 +72,27 @@ export const getAllMarkdownCommentsFromResults = ({
     stats: patternRollup.stats,
   });
 
-  const summaryTableMarkdownRows: string[] = summaryTableItems.map((item) => {
+  const summaryTableMarkdownRows: string[] = summaryTableItems.reduce<string[]>((acc, item) => {
     const result: DataQualityCheckResult | undefined =
       patternRollup.results != null ? patternRollup.results[item.indexName] : undefined;
-
-    return getSummaryTableMarkdownRow({
-      docsCount: item.docsCount,
-      formatBytes,
-      formatNumber,
-      ilmPhase: item.ilmPhase,
-      indexName: item.indexName,
-      incompatible: result?.incompatible,
-      isILMAvailable,
-      patternDocsCount: patternRollup.docsCount ?? 0,
-      sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
-    }).trim();
-  });
+    const isSkippedIndex = checkIsSkippedIndex(item.indexName);
+    if (!isSkippedIndex) {
+      acc.push(
+        getSummaryTableMarkdownRow({
+          docsCount: item.docsCount,
+          formatBytes,
+          formatNumber,
+          ilmPhase: item.ilmPhase,
+          indexName: item.indexName,
+          incompatible: result?.incompatible,
+          isILMAvailable,
+          patternDocsCount: patternRollup.docsCount ?? 0,
+          sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
+        }).trim()
+      );
+    }
+    return acc;
+  }, []);
 
   const initialComments: string[] =
     summaryTableMarkdownRows.length > 0
@@ -119,24 +125,27 @@ export const getAllMarkdownComments = ({
     return a.localeCompare(b);
   });
 
-  return sortedPatterns.reduce<string[]>(
-    (acc, pattern) => [
-      ...acc,
-      getPatternSummaryMarkdownComment({
-        formatBytes,
-        formatNumber,
-        patternRollup: patternRollups[pattern],
-      }),
-      ...getAllMarkdownCommentsFromResults({
-        formatBytes,
-        formatNumber,
-        isILMAvailable,
-        patternRollup: patternRollups[pattern],
-        patternIndexNames,
-      }),
-    ],
-    []
-  );
+  return sortedPatterns.reduce<string[]>((acc, pattern) => {
+    const isHiddenPattern = checkIsHiddenPattern(pattern);
+
+    return isHiddenPattern
+      ? acc
+      : [
+          ...acc,
+          getPatternSummaryMarkdownComment({
+            formatBytes,
+            formatNumber,
+            patternRollup: patternRollups[pattern],
+          }),
+          ...getAllMarkdownCommentsFromResults({
+            formatBytes,
+            formatNumber,
+            isILMAvailable,
+            patternRollup: patternRollups[pattern],
+            patternIndexNames,
+          }),
+        ];
+  }, []);
 };
 
 export interface Props {

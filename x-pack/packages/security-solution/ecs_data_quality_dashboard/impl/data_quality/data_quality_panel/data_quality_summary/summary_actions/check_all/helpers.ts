@@ -11,11 +11,14 @@ import { orderBy } from 'lodash/fp';
 import { getDocsCount } from '../../../../helpers';
 import type { IndexToCheck, PatternRollup } from '../../../../types';
 
-export const checkIsHiddenPattern = (pattern: string): boolean => pattern.startsWith('.');
+const HIDDEN_PATTERNS = ['.', 'kibana_sample_data_'];
+
+export const checkIsHiddenPattern = (pattern: string): boolean =>
+  HIDDEN_PATTERNS.some((hiddenPattern) => pattern.startsWith(hiddenPattern));
 
 const SKIPPED_INDICES = ['kibana_sample_data_', '.internal'];
 export const checkIsSkippedIndex = (indexName: string): boolean =>
-  SKIPPED_INDICES.some((skipped) => indexName.startsWith(skipped));
+  SKIPPED_INDICES.some((skippedIndex) => indexName.startsWith(skippedIndex));
 
 export const getIndexToCheck = ({
   indexName,
