@@ -31,8 +31,8 @@ export class DefaultTransformManager implements TransformManager {
   async install(slo: SLO): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.error(`No transform generator found for ${slo.indicator.type} SLO type`);
-      throw new Error(`Unsupported SLI type: ${slo.indicator.type}`);
+      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
     const transformParams = generator.getTransformParams(slo);
@@ -41,7 +41,7 @@ export class DefaultTransformManager implements TransformManager {
         logger: this.logger,
       });
     } catch (err) {
-      this.logger.error(`Cannot create transform for ${slo.indicator.type} SLI type: ${err}`);
+      this.logger.error(`Cannot create SLO transform for indicator type [${slo.indicator.type}]`);
       throw err;
     }
 
@@ -51,15 +51,11 @@ export class DefaultTransformManager implements TransformManager {
   async preview(transformId: string): Promise<void> {
     try {
       await retryTransientEsErrors(
-        () =>
-          this.esClient.transform.previewTransform(
-            { transform_id: transformId },
-            { ignore: [409] }
-          ),
+        () => this.esClient.transform.previewTransform({ transform_id: transformId }),
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot preview transform id ${transformId}: ${err}`);
+      this.logger.error(`Cannot preview SLO transform [${transformId}]`);
       throw err;
     }
   }
@@ -72,7 +68,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot start transform id ${transformId}: ${err}`);
+      this.logger.error(`Cannot start SLO transform [${transformId}]`);
       throw err;
     }
   }
@@ -88,7 +84,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot stop transform id ${transformId}: ${err}`);
+      this.logger.error(`Cannot stop SLO transform [${transformId}]`);
       throw err;
     }
   }
@@ -104,7 +100,7 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot delete transform id ${transformId}: ${err}`);
+      this.logger.error(`Cannot delete SLO transform [${transformId}]`);
       throw err;
     }
   }

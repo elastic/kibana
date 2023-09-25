@@ -47,7 +47,7 @@ describe('TransformManager', () => {
 
         await expect(
           service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
-        ).rejects.toThrowError('Unsupported SLI type: sli.apm.transactionErrorRate');
+        ).rejects.toThrowError('Unsupported indicator type [sli.apm.transactionErrorRate]');
       });
 
       it('throws when transform generator fails', async () => {
