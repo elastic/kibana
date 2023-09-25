@@ -97,4 +97,3 @@ export async function createPackagePolicy(
 
   return postPackageResponse.item;
 }
-
