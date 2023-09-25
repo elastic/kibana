@@ -16,7 +16,6 @@ import {
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
@@ -108,18 +107,26 @@ export const ColorSwatch = ({
             data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
             onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
             style={{
-              width: 32,
-              height: 32,
               // the color swatch can't pickup colors written in rgb/css standard
               backgroundColor: colorHex,
               cursor: canPickColor ? 'pointer' : 'not-allowed',
+              width: 32,
+              height: 32,
             }}
-            className={classNames(
-              'colorMappingColorSwatchEditable',
-              colorIsDark
-                ? 'colorMappingColorSwatchEditableWhite'
-                : 'colorMappingColorSwatchEditableBlack'
-            )}
+            css={css`
+              &::after {
+                content: '';
+                width: 0;
+                height: 0;
+                border-left: 3px solid transparent;
+                border-right: 3px solid transparent;
+                border-top: 4px solid ${colorIsDark ? 'white' : 'black'};
+                margin: 0;
+                bottom: 2px;
+                position: absolute;
+                right: 2px;
+              }
+            `}
           />
         )
       }
@@ -152,20 +159,14 @@ export const ColorSwatch = ({
       aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
         defaultMessage: 'Select a new color',
       })}
-      style={{
-        ...(swatchShape === 'round'
-          ? { borderRadius: '50%', width: 15, height: 15 }
-          : { width: 32, height: 32 }),
-        // the color swatch doesn't work here...
-        backgroundColor: colorHex,
-        cursor: canPickColor ? 'pointer' : 'not-allowed',
-      }}
       disabled
-      className={
-        swatchShape === 'round'
-          ? 'colorMappingColorSwatchEditableRound'
-          : 'colorMappingColorSwatchEditable'
-      }
+      style={{
+        // the color swatch can't pickup colors written in rgb/css standard
+        backgroundColor: colorHex,
+        cursor: 'not-allowed',
+        width: 32,
+        height: 32,
+      }}
     />
   );
 };

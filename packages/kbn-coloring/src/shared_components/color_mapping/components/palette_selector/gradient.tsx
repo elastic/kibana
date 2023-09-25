@@ -19,8 +19,6 @@ import { ColorMapping } from '../../config';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { getPalette } from '../../palettes';
 
-import './gradient.scss';
-
 import { addGradientColorStep, updateGradientColorStep } from '../../state/color_mapping';
 import { colorPickerVisibility } from '../../state/ui';
 
@@ -252,7 +250,6 @@ function AddStop({
         padding: 0 0.5px;
         ${euiFocusRing(euiTheme)};
       `}
-      className="colorMappingGradientAddStop"
       onClick={() => {
         dispatch(
           addGradientColorStep({
