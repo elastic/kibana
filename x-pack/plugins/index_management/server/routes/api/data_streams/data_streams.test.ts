@@ -8,7 +8,7 @@
 import { addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 
-import { registerDataStreamRoutes } from './index';
+import { registerDataStreamRoutes } from '.';
 
 describe('Data streams API', () => {
   const router = new RouterMock();
@@ -40,7 +40,7 @@ describe('Data streams API', () => {
       const res = await router.runRequest(mockRequest);
 
       expect(res).toEqual({
-        body: { success: true }
+        body: { success: true },
       });
     });
 

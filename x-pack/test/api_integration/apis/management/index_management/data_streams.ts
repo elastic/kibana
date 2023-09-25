@@ -210,7 +210,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-
     describe('Update', () => {
       const testDataStreamName = 'test-data-stream';
 
@@ -222,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            dataRetention: '7d'
+            dataRetention: '7d',
           })
           .expect(200);
 

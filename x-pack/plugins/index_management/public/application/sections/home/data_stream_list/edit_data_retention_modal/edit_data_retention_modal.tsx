@@ -253,9 +253,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               <EuiCallOut
                 color="warning"
                 iconType="warning"
-                title={i18n.translate('xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle', {
-                  defaultMessage: 'Override ILM data retention',
-                })}
+                title={i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle',
+                  {
+                    defaultMessage: 'Override ILM data retention',
+                  }
+                )}
               >
                 <p>
                   <FormattedMessage
