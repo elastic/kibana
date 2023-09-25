@@ -23,7 +23,7 @@ const DashboardToolBarComponent = ({
   dashboardContainer,
   onLoad,
 }: {
-  dashboardContainer: DashboardAPI | undefined;
+  dashboardContainer: DashboardAPI;
   onLoad: (mode: ViewMode) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -93,7 +93,9 @@ const DashboardToolBarComponent = ({
     [euiTheme.size.s]
   );
 
-  return dashboardContainer ? (
+  const isManaged = dashboardContainer.select((state) => state.componentState.managed);
+
+  return !isManaged ? (
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
       redirectTo={redirectTo}

@@ -66,18 +66,14 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
   const {
-    dashboard: { container: dashboardContainer, isManaged },
+    dashboard: { container: dashboardContainer },
     handleDashboardLoaded,
   } = useDashboardRenderer();
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
 
-  const dashboardExists = dashboardTitle != null;
-  const shouldShowControl =
-    savedObjectId && dashboardExists
-      ? dashboardContainer && showWriteControls && isManaged === false // edit dashboard
-      : dashboardContainer && showWriteControls; // create dashboard
+  const shouldShowEditToolBar = dashboardContainer && showWriteControls;
 
   return (
     <>
@@ -108,7 +104,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                 )
               }
               subtitle2={
-                shouldShowControl && (
+                shouldShowEditToolBar && (
                   <DashboardToolBar
                     dashboardContainer={dashboardContainer}
                     onLoad={onDashboardToolBarLoad}
