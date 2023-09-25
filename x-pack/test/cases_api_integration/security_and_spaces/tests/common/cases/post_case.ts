@@ -425,6 +425,43 @@ export default ({ getService }: FtrProviderContext): void => {
             400
           );
         });
+
+        it('400s when trying to create case with a missing required custom field', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                  {
+                    key: 'toggle_custom_field',
+                    label: 'toggle',
+                    type: CustomFieldTypes.TOGGLE,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'toggle_custom_field',
+                  type: CustomFieldTypes.TOGGLE,
+                  field: { value: [true] },
+                },
+              ],
+            }),
+            400
+          );
+        });
       });
     });
 
