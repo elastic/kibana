@@ -24,19 +24,19 @@ interface AssetClientClassOptions {
 }
 
 export class AssetClient {
-  constructor(private options: AssetClientClassOptions) {}
+  constructor(private baseOptions: AssetClientClassOptions) {}
 
   injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
     return {
       ...options,
-      sourceIndices: this.options.sourceIndices,
-      getApmIndices: this.options.getApmIndices,
+      sourceIndices: this.baseOptions.sourceIndices,
+      getApmIndices: this.baseOptions.getApmIndices,
     };
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.options.source === 'assets') {
+    if (this.baseOptions.source === 'assets') {
       return await getHostsByAssets(withInjected);
     } else {
       return await getHostsBySignals(withInjected);
@@ -45,7 +45,7 @@ export class AssetClient {
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.options.source === 'assets') {
+    if (this.baseOptions.source === 'assets') {
       return await getServicesByAssets(withInjected);
     } else {
       return await getServicesBySignals(withInjected);

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { GetServicesOptionsPublic } from '../../../../common/types_client';
 import { AccessorOptions, OptionsWithInjectedValues } from '..';
 
-export interface GetServicesOptions extends AccessorOptions {
-  from: string;
-  to: string;
-  parent?: string;
-}
+export type GetServicesOptions = GetServicesOptionsPublic & AccessorOptions;
 export type GetServicesOptionsInjected = OptionsWithInjectedValues<GetServicesOptions>;
 
 export interface ServiceIdentifier {
