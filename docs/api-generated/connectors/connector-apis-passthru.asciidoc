@@ -1015,6 +1015,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#config_properties_servicenow"><code>config_properties_servicenow</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_servicenow_itom"><code>config_properties_servicenow_itom</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_swimlane"><code>config_properties_swimlane</code> - Connector request properties for a Swimlane connector</a></li>
+    <li><a href="#config_properties_torq"><code>config_properties_torq</code> - Connector request properties for a Torq connector</a></li>
     <li><a href="#config_properties_webhook"><code>config_properties_webhook</code> - Connector request properties for a Webhook connector</a></li>
     <li><a href="#config_properties_xmatters"><code>config_properties_xmatters</code> - Connector request properties for an xMatters connector</a></li>
     <li><a href="#connector_response_properties"><code>connector_response_properties</code> - Connector response properties</a></li>
@@ -1035,6 +1036,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_swimlane"><code>connector_response_properties_swimlane</code> - Connector response properties for a Swimlane connector</a></li>
     <li><a href="#connector_response_properties_teams"><code>connector_response_properties_teams</code> - Connector response properties for a Microsoft Teams connector</a></li>
     <li><a href="#connector_response_properties_tines"><code>connector_response_properties_tines</code> - Connector response properties for a Tines connector</a></li>
+    <li><a href="#connector_response_properties_torq"><code>connector_response_properties_torq</code> - Connector response properties for a Torq connector</a></li>
     <li><a href="#connector_response_properties_webhook"><code>connector_response_properties_webhook</code> - Connector response properties for a Webhook connector</a></li>
     <li><a href="#connector_response_properties_xmatters"><code>connector_response_properties_xmatters</code> - Connector response properties for an xMatters connector</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - Connector types</a></li>
@@ -1056,6 +1058,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_connector_request_swimlane"><code>create_connector_request_swimlane</code> - Create Swimlane connector request</a></li>
     <li><a href="#create_connector_request_teams"><code>create_connector_request_teams</code> - Create Microsoft Teams connector request</a></li>
     <li><a href="#create_connector_request_tines"><code>create_connector_request_tines</code> - Create Tines connector request</a></li>
+    <li><a href="#create_connector_request_torq"><code>create_connector_request_torq</code> - Create Torq connector request</a></li>
     <li><a href="#create_connector_request_webhook"><code>create_connector_request_webhook</code> - Create Webhook connector request</a></li>
     <li><a href="#create_connector_request_xmatters"><code>create_connector_request_xmatters</code> - Create xMatters connector request</a></li>
     <li><a href="#features"><code>features</code> - </a></li>
@@ -1106,6 +1109,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
     <li><a href="#secrets_properties_teams"><code>secrets_properties_teams</code> - Connector secrets properties for a Microsoft Teams connector</a></li>
+    <li><a href="#secrets_properties_torq"><code>secrets_properties_torq</code> - Connector secrets properties for a Torq connector</a></li>
     <li><a href="#secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a></li>
     <li><a href="#secrets_properties_xmatters"><code>secrets_properties_xmatters</code> - Connector secrets properties for an xMatters connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
@@ -1124,6 +1128,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
     <li><a href="#update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a></li>
+    <li><a href="#update_connector_request_torq"><code>update_connector_request_torq</code> - Update Torq connector request</a></li>
     <li><a href="#update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a></li>
     <li><a href="#update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a></li>
   </ol>
@@ -1530,6 +1535,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="config_properties_torq"><code>config_properties_torq</code> - Connector request properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.torq</code>.</div>
+    <div class="field-items">
+      <div class="param">webhookIntegrationUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The endpoint URL of the Elastic Security integration in Torq. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="config_properties_webhook"><code>config_properties_webhook</code> - Connector request properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines properties for connectors when type is <code>.webhook</code>.</div>
     <div class="field-items">
@@ -1846,6 +1858,22 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="connector_response_properties_torq"><code>connector_response_properties_torq</code> - Connector response properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.torq</div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="connector_response_properties_webhook"><code>connector_response_properties_webhook</code> - Connector response properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -2091,6 +2119,18 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">.tines</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.tines</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_connector_request_torq"><code>create_connector_request_torq</code> - Create Torq connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.</div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.torq</div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_torq">secrets_properties_torq</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2561,6 +2601,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_torq"><code>secrets_properties_torq</code> - Connector secrets properties for a Torq connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.torq</code>.</div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The secret of the webhook authentication header. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.webhook</code>.</div>
     <div class="field-items">
@@ -2716,6 +2763,15 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_teams">secrets_properties_teams</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_torq"><code>update_connector_request_torq</code> - Update Torq connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_torq">config_properties_torq</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_torq">secrets_properties_torq</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

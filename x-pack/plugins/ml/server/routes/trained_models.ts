@@ -8,9 +8,10 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { RouteInitialization } from '../types';
+import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -25,6 +26,7 @@ import {
   threadingParamsSchema,
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
+  modelDownloadsQuery,
 } from './schemas/inference_schema';
 import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
@@ -49,11 +51,10 @@ export function filterForEnabledFeatureModels(
   return filteredModels;
 }
 
-export function trainedModelsRoutes({
-  router,
-  routeGuard,
-  getEnabledFeatures,
-}: RouteInitialization) {
+export function trainedModelsRoutes(
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  cloud: CloudSetup
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -87,7 +88,7 @@ export function trainedModelsRoutes({
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
-          } as MlGetTrainedModelsRequest);
+          } as estypes.MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
@@ -644,6 +645,80 @@ export function trainedModelsRoutes({
             },
             ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
           });
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/model_downloads Gets available models for download
+   * @apiName GetTrainedModelDownloadList
+   * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
+        try {
+          const body = await modelsProvider(client, cloud).getModelDownloads();
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/elser_config Gets ELSER config for download
+   * @apiName GetElserConfig
+   * @apiDescription Gets ELSER config for download based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: modelDownloadsQuery,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client, request }) => {
+        try {
+          const { version } = request.query;
+
+          const body = await modelsProvider(client, cloud).getELSER(
+            version ? { version: Number(version) as ElserVersion } : undefined
+          );
+
           return response.ok({
             body,
           });
