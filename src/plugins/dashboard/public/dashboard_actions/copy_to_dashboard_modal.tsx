@@ -33,7 +33,6 @@ import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_stri
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
 
 interface CopyToDashboardModalProps {
-  PresentationUtilContext: React.FC;
   embeddable: IEmbeddable;
   dashboardId?: string;
   closeModal: () => void;
@@ -42,7 +41,6 @@ interface CopyToDashboardModalProps {
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({
-  PresentationUtilContext,
   dashboardId,
   embeddable,
   closeModal,
@@ -118,7 +116,10 @@ export function CopyToDashboardModal({
                     <DashboardPicker
                       isDisabled={dashboardOption !== 'existing'}
                       idsToOmit={dashboardId ? [dashboardId] : undefined}
-                      onChange={(dashboard) => setSelectedDashboard(dashboard)}
+                      onChange={(dashboard) => {
+                        setSelectedDashboard(dashboard);
+                        setDashboardOption('existing');
+                      }}
                     />
                   </div>
                   <EuiSpacer size="s" />
