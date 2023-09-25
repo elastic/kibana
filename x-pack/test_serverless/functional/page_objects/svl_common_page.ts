@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Url from 'url';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -13,7 +12,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const config = getService('config');
   const pageObjects = getPageObjects(['security', 'common']);
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
+  const deployment = getService('deployment');
   const log = getService('log');
   const browser = getService('browser');
 
@@ -23,6 +22,19 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     });
 
   return {
+    async navigateToLoginForm() {
+      const url = deployment.getHostPort() + '/login';
+      await browser.get(url);
+      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+      // to use the yml setting, e.g. cloud
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
+      log.debug('Waiting for Login Form to appear.');
+      await retry.waitForWithTimeout('login form', 10_000, async () => {
+        return await pageObjects.security.isLoginFormVisible();
+      });
+    },
+
     async login() {
       await pageObjects.security.forceLogout({ waitForLoginPage: false });
 
@@ -30,74 +42,58 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       await pageObjects.common.sleep(2500);
 
       await retry.waitForWithTimeout(
-        'Login successfully via API',
-        10_000,
+        'Waiting for successful authentication',
+        90_000,
         async () => {
-          const response = await kibanaServer.request({
-            method: 'POST',
-            path: Url.format({
-              protocol: config.get('servers.kibana.protocol'),
-              hostname: config.get('servers.kibana.hostname'),
-              port: config.get('servers.kibana.port'),
-              pathname: 'internal/security/login',
-            }),
-            body: {
-              providerType: 'basic',
-              providerName: 'cloud-basic',
-              currentURL: Url.format({
-                protocol: config.get('servers.kibana.protocol'),
-                hostname: config.get('servers.kibana.hostname'),
-                port: config.get('servers.kibana.port'),
-                pathname: 'login',
-              }),
-              params: {
-                username: config.get('servers.kibana.username'),
-                password: config.get('servers.kibana.password'),
-              },
-            },
-          });
-          if (response.status !== 200) {
-            throw new Error(
-              `Login via API failed with status ${response.status}, but expected 200`
-            );
-          } else {
+          if (!(await testSubjects.exists('loginUsername', { timeout: 1000 }))) {
+            await this.navigateToLoginForm();
+
+            await testSubjects.setValue('loginUsername', config.get('servers.kibana.username'));
+            await testSubjects.setValue('loginPassword', config.get('servers.kibana.password'));
+            await testSubjects.click('loginSubmit');
+          }
+
+          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+            log.debug('userMenuButton is found, logged in passed');
             return true;
+          } else {
+            throw new Error(`Failed to login to Kibana via UI`);
           }
         },
         async () => {
-          log.debug('Waiting 2000 ms before retry');
-          await delay(2000);
-        }
-      );
-
-      await retry.waitForWithTimeout('Login to Kibana via UI', 90_000, async () => {
-        await pageObjects.common.navigateToUrl('login');
-        // ensure welcome screen won't be shown. This is relevant for environments which don't allow
-        // to use the yml setting, e.g. cloud
-        await browser.setLocalStorageItem('home:welcome:show', 'false');
-
-        log.debug('Waiting for Login Form to appear.');
-        await retry.waitForWithTimeout('login form', 10_000, async () => {
-          return await pageObjects.security.isLoginFormVisible();
-        });
-
-        await testSubjects.setValue('loginUsername', config.get('servers.kibana.username'));
-        await testSubjects.setValue('loginPassword', config.get('servers.kibana.password'));
-        await testSubjects.click('loginSubmit');
-
-        if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
-          return true;
-        } else {
           // Sometimes authentication fails and user is redirected to Cloud login page
           // [plugins.security.authentication] Authentication attempt failed: UNEXPECTED_SESSION_ERROR
           const currentUrl = await browser.getCurrentUrl();
-          throw new Error(`Failed to login, currentUrl=${currentUrl}`);
+          if (currentUrl.startsWith('https://cloud.elastic.co')) {
+            log.debug(
+              'Probably authentication attempt failed, we are at Cloud login page. Retrying from scratch'
+            );
+          } else {
+            const authError = await testSubjects.exists('promptPage', { timeout: 2500 });
+            if (authError) {
+              log.debug('Probably SAML callback page, doing logout again');
+              await pageObjects.security.forceLogout({ waitForLoginPage: false });
+            } else {
+              const isOnLoginPage = await testSubjects.exists('loginUsername', { timeout: 1000 });
+              if (isOnLoginPage) {
+                log.debug(
+                  'Probably ES user profile activation failed, waiting 2 seconds and pressing Login button again'
+                );
+                await delay(2000);
+                await testSubjects.click('loginSubmit');
+              } else {
+                log.debug('New behaviour, trying to navigate and login again');
+              }
+            }
+          }
         }
-      });
+      );
+      log.debug('Logged in successfully');
     },
 
     async forceLogout() {
       await pageObjects.security.forceLogout({ waitForLoginPage: false });
+      log.debug('Logged out successfully');
     },
 
     async assertProjectHeaderExists() {
