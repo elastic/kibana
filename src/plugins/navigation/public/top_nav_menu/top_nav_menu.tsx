@@ -110,6 +110,9 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   function renderItems(): ReactElement[] | null {
     if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
+      if (menuItem.component) {
+        return menuItem.component();
+      }
       return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
     });
   }

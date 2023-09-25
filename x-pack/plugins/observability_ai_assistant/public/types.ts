@@ -39,6 +39,7 @@ import type {
   RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -105,6 +106,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  navigation: NavigationPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;

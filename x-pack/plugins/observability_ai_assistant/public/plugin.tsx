@@ -27,6 +27,13 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 
+import {
+  ObservabilityAIAssistantActionMenuItem
+} from './components/action_menu_item/action_menu_item';
+import {
+  ObservabilityAIAssistantProvider
+} from './context/observability_ai_assistant_provider';
+
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -46,6 +53,29 @@ export class ObservabilityAIAssistantPlugin
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
   ): ObservabilityAIAssistantPluginSetup {
+
+    const showAssistant = {
+      id: 'showAIAssistant',
+      label: 'Show AI Assistant',
+      description: 'AI Assistant',
+      run: () => {},
+      tooltip: () => {
+        return 'AI Assistant'
+      },
+      testId: 'showAIAssistantButton',
+      component: () => {
+        return (
+          <ObservabilityAIAssistantProvider
+            value={this.service}
+          >
+            <ObservabilityAIAssistantActionMenuItem />
+          </ObservabilityAIAssistantProvider>
+        )
+      }
+    };
+
+    pluginsSetup.navigation.registerMenuItem(showAssistant);
+
     coreSetup.application.register({
       id: 'observabilityAIAssistant',
       title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
