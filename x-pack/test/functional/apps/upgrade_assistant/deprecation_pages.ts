@@ -19,7 +19,8 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe('Deprecation pages', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/167090
+  describe.skip('Deprecation pages', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {

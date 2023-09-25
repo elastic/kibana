@@ -10,7 +10,8 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 import {
@@ -43,7 +44,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
-    visit(TIMELINES_URL);
+    visitWithTimeRange(TIMELINES_URL);
   });
 
   it('correctly loads SIEM data view', () => {
@@ -108,7 +109,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
     beforeEach(() => {
       login();
-      visit(TIMELINES_URL);
+      visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
     });
 

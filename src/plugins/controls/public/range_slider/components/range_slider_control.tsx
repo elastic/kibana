@@ -17,6 +17,7 @@ import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { ControlError } from '../../control_group/component/control_error_component';
 
 import './range_slider.scss';
+import { MIN_POPOVER_WIDTH } from '../../constants';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -153,6 +154,9 @@ export const RangeSliderControl: FC = () => {
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
+        inputPopoverProps={{
+          panelMinWidth: MIN_POPOVER_WIDTH,
+        }}
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
