@@ -42,8 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
@@ -82,8 +82,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
       await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
