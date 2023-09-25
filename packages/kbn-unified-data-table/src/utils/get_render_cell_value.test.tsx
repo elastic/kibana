@@ -215,11 +215,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="string"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -237,11 +232,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="number"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -259,11 +249,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="string"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -292,114 +277,6 @@ describe('Unified data table cell rendering', function () {
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
-  });
-
-  it('renders _source column with custom column types correctly', () => {
-    const DataTableCellValue = getRenderCellValueFn({
-      dataView: dataViewMock,
-      rows: rowsSource.map(build),
-      useNewFieldsApi: false,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
-      closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 3,
-      columnTypes: { extension: 'murmur3', bytes: 'string' }, // custom override
-    });
-    const component = shallow(
-      <DataTableCellValue
-        rowIndex={0}
-        colIndex={0}
-        columnId="_source"
-        isDetails={false}
-        isExpanded={false}
-        isExpandable={true}
-        setCellProps={jest.fn()}
-      />
-    );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            type="murmur3"
-          />
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            extension
-          </span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": ".gz",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            type="string"
-          />
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            bytesDisplayName
-          </span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            _index
-          </span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          <span
-            className="unifiedDataTable__descriptionListName"
-          >
-            and 1 more field
-          </span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "",
             }
           }
         />
@@ -513,11 +390,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="string"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -537,11 +409,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="number"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -561,11 +428,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="string"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >
@@ -632,11 +494,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="string"
-          />
           <span
             className="unifiedDataTable__descriptionListName"
           >

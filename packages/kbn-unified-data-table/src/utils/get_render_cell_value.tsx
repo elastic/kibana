@@ -27,9 +27,7 @@ import type {
   ShouldShowFieldInTableHandler,
   FormattedHit,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue, formatHit, isNestedFieldParent } from '@kbn/discover-utils';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
-import type { DataTableColumnTypes } from '../types';
+import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
@@ -45,7 +43,6 @@ export const getRenderCellValueFn = ({
   fieldFormats,
   maxEntries,
   externalCustomRenderers,
-  columnTypes,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -58,11 +55,7 @@ export const getRenderCellValueFn = ({
     string,
     (props: EuiDataGridCellValueElementProps) => React.ReactNode
   >;
-  columnTypes?: DataTableColumnTypes;
 }) => {
-  // same icons across all rows
-  const fieldTokensCache = new Map<string, React.ReactNode>();
-
   return ({
     rowIndex,
     columnId,
@@ -151,32 +144,17 @@ export const getRenderCellValueFn = ({
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value, fieldName]) => {
-            let fieldToken = null;
-
-            // only for "Document" column
-            if (field?.type === '_source') {
-              if (fieldTokensCache.has(key)) {
-                fieldToken = fieldTokensCache.get(key);
-              } else {
-                fieldToken = renderFieldToken({ dataView, fieldName, columnTypes });
-                fieldTokensCache.set(key, fieldToken);
-              }
-            }
-
-            return (
-              <Fragment key={key}>
-                <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                  {fieldToken}
-                  <span className="unifiedDataTable__descriptionListName">{key}</span>
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription
-                  className="unifiedDataTable__descriptionListDescription"
-                  dangerouslySetInnerHTML={{ __html: value }}
-                />
-              </Fragment>
-            );
-          })}
+          {pairs.map(([fieldDisplayName, value]) => (
+            <Fragment key={fieldDisplayName}>
+              <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                <span className="unifiedDataTable__descriptionListName">{fieldDisplayName}</span>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                className="unifiedDataTable__descriptionListDescription"
+                dangerouslySetInnerHTML={{ __html: value }}
+              />
+            </Fragment>
+          ))}
         </EuiDescriptionList>
       );
     }
@@ -211,44 +189,6 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
     ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
     : row.raw;
   return json as Record<string, unknown>;
-}
-
-function renderFieldToken({
-  dataView,
-  fieldName,
-  columnTypes,
-}: {
-  dataView: DataView;
-  fieldName: string | null;
-  columnTypes?: DataTableColumnTypes;
-}) {
-  if (!fieldName) {
-    return null;
-  }
-
-  // for text-based searches
-  if (columnTypes) {
-    return columnTypes[fieldName] && columnTypes[fieldName] !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={columnTypes[fieldName]} className="unifiedDataTable__descriptionListToken" />
-    ) : null;
-  }
-
-  const dataViewField = dataView.getFieldByName(fieldName);
-
-  if (dataViewField) {
-    return (
-      <FieldIcon
-        {...getFieldIconProps(dataViewField)}
-        className="unifiedDataTable__descriptionListToken"
-      />
-    );
-  }
-
-  if (isNestedFieldParent(fieldName, dataView)) {
-    return <FieldIcon type="nested" className="unifiedDataTable__descriptionListToken" />;
-  }
-
-  return null;
 }
 
 /**

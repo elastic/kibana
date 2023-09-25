@@ -130,16 +130,6 @@
   margin-inline: 0 0;
   padding-inline: 0;
   background: transparent;
-  white-space: nowrap; // to don't separate tokens from names
-}
-
-.unifiedDataTable__descriptionListToken {
-  vertical-align: text-bottom;
-  width: $euiSize;
-  height: $euiSize;
-  overflow: hidden;
-  content-visibility: auto;
-  margin-inline-end: $euiSizeXS;
 }
 
 .unifiedDataTable__descriptionListName {
