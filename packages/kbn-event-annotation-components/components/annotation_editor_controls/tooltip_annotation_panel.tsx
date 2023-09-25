@@ -182,6 +182,7 @@ export function TooltipSection({
               data-test-subj={`lnsXY-annotation-tooltip-${index}`}
             >
               <FieldPicker
+                compressed
                 selectedOptions={
                   value
                     ? [
