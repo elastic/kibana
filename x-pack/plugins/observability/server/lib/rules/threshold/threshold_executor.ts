@@ -56,7 +56,7 @@ export type MetricThresholdAlertState = AlertState; // no specific instance stat
 
 export interface MetricThresholdAlertContext extends Record<string, unknown> {
   alertDetailsUrl: string;
-  groupings?: object;
+  group?: object;
   reason?: string;
   timestamp: string; // ISO string
   value?: Array<number | null> | null;
@@ -306,7 +306,7 @@ export const createMetricThresholdExecutor = ({
             alertsLocator,
             basePath.publicBaseUrl
           ),
-          groupings: groupByKeysObjectMapping[group],
+          group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
           value: alertResults.map((result, index) => {
@@ -347,7 +347,7 @@ export const createMetricThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        groupings: groupByKeysObjectForRecovered[recoveredAlertId],
+        group: groupByKeysObjectForRecovered[recoveredAlertId],
         timestamp: startedAt.toISOString(),
         ...additionalContext,
       });
