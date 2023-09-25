@@ -7,7 +7,15 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../types';
 
-import { collectContainers, collectHosts, collectPods, collectServices } from '../collectors';
+import {
+  collectContainers,
+  collectK8sNodes,
+  collectCloudHosts,
+  collectHostsById,
+  collectHostsByName,
+  collectPods,
+  collectServices,
+} from '../collectors';
 import { CollectorRunner } from './collector_runner';
 
 export interface ImplicitCollectionOptions {
@@ -20,8 +28,11 @@ export interface ImplicitCollectionOptions {
 
 export function startImplicitCollection(options: ImplicitCollectionOptions): () => void {
   const runner = new CollectorRunner(options);
+  runner.registerCollector('hosts-k8s', collectK8sNodes);
+  runner.registerCollector('hosts-cloud', collectCloudHosts);
+  runner.registerCollector('hosts-by-id', collectHostsById);
+  runner.registerCollector('hosts-by-name', collectHostsByName);
   runner.registerCollector('containers', collectContainers);
-  runner.registerCollector('hosts', collectHosts);
   runner.registerCollector('pods', collectPods);
   runner.registerCollector('services', collectServices);
 

@@ -60,7 +60,7 @@ export async function collectPods({ client, from, to, sourceIndices, afterKey }:
 
     const pod: Asset = {
       '@timestamp': new Date().toISOString(),
-      'asset.kind': 'pod',
+      'asset.kind': 'container_group',
       'asset.id': podUid,
       'asset.ean': `pod:${podUid}`,
       'asset.parents': [`host:${nodeName}`],
