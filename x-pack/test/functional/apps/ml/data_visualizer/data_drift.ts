@@ -9,14 +9,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { farequoteDataViewTestDataWithQuery } from '../../aiops/test_data';
 import { TestData } from '../../aiops/types';
 
-export default function ({ getPageObject, getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
 
   function runTests(testData: TestData) {
-    it(`${testData.suiteTitle} loads the source data in log rate analysis`, async () => {
+    it(`${testData.suiteTitle} loads the source data in data drift`, async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep(
@@ -24,7 +24,9 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
       );
       await ml.navigation.navigateToDataDrift();
 
-      await ml.testExecution.logTestStep(`${testData.suiteTitle} loads the log rate analysis page`);
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} loads the data drift index or saved search select page`
+      );
       await ml.jobSourceSelection.selectSourceForDataDrift(testData.sourceIndexOrSavedSearch);
     });
 
@@ -96,7 +98,7 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
         });
 
-        it(`${testData.suiteTitle} loads the log rate analysis page`, async () => {
+        it(`${testData.suiteTitle} loads the ml page`, async () => {
           // Start navigation from the base of the ML app.
           await ml.navigation.navigateToMl();
           await elasticChart.setNewChartUiDebugFlag(true);
