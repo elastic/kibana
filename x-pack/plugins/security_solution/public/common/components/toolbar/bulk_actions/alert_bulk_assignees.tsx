@@ -63,6 +63,10 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
 
     const assigneesToAddArray = updatedIds.filter((uid) => !existingIds.includes(uid));
     const assigneesToRemoveArray = existingIds.filter((uid) => !updatedIds.includes(uid));
+    if (assigneesToAddArray.length === 0 && assigneesToRemoveArray.length === 0) {
+      closePopoverMenu();
+      return;
+    }
 
     const ids = alertItems.map((item) => item._id);
     const assignees = {
@@ -105,7 +109,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   );
 
   return (
-    <>
+    <div data-test-subj="alert-assignees-selectable-menu">
       <UserProfilesSelectable
         onChange={handleSelectedAssignees}
         selectedStatusMessage={selectedStatusMessage}
@@ -127,7 +131,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
       >
         {i18n.ALERT_ASSIGNEES_APPLY_BUTTON_MESSAGE}
       </EuiButton>
-    </>
+    </div>
   );
 };
 

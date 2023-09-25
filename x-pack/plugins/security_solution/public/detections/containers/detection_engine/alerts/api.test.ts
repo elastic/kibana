@@ -13,9 +13,11 @@ import {
   mockSignalIndex,
   mockUserPrivilege,
   mockHostIsolation,
+  mockUserProfiles,
 } from './mock';
 import {
   fetchQueryAlerts,
+  fetchUserProfiles,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
@@ -262,6 +264,29 @@ describe('Detections Alerts API', () => {
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
       expect(hostIsolationResponse).toEqual(mockHostIsolation);
+    });
+  });
+
+  describe('fetchUserProfiles', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(mockUserProfiles);
+    });
+
+    test('check parameter url', async () => {
+      await fetchUserProfiles();
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/signals/user_profiles',
+        expect.objectContaining({
+          method: 'GET',
+          version: '2023-10-31',
+        })
+      );
+    });
+
+    test('happy path', async () => {
+      const alertsResp = await fetchUserProfiles();
+      expect(alertsResp).toEqual(mockUserProfiles);
     });
   });
 });
