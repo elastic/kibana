@@ -385,6 +385,11 @@ export const serviceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
+        params: t.partial({
+          query: t.partial({
+            dashboardId: t.string,
+          }),
+        }),
       },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,

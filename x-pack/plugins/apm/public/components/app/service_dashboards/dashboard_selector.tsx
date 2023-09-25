@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useHistory } from 'react-router';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { MergedServiceDashboard } from '.';
+import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 interface Props {
   serviceDashboards: MergedServiceDashboard[];
@@ -22,6 +23,32 @@ export function DashboardSelector({
   currentDashboard,
   handleOnChange,
 }: Props) {
+  const history = useHistory();
+
+  console.log('currentDashboard', currentDashboard);
+
+  useEffect(
+    () =>
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          dashboardId: currentDashboard?.id,
+        }),
+      }),
+    []
+  );
+
+  const onChange = (newDashboardId?: string) => {
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        dashboardId: newDashboardId,
+      }),
+    }),
+      handleOnChange();
+  };
   return (
     <EuiComboBox
       compressed
@@ -55,7 +82,7 @@ export function DashboardSelector({
             ]
           : []
       }
-      onChange={([newItem]) => handleOnChange(newItem.value)}
+      onChange={([newItem]) => onChange(newItem.value)}
       isClearable={false}
     />
   );

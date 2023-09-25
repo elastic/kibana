@@ -42,7 +42,7 @@ export interface MergedServiceDashboard extends SavedServiceDashboard {
 export function ServiceDashboards() {
   const {
     path: { serviceName },
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
   } = useApmParams('/services/{serviceName}/dashboards');
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<
@@ -50,10 +50,7 @@ export function ServiceDashboards() {
   >([]);
   const [currentDashboard, setCurrentDashboard] =
     useState<MergedServiceDashboard>();
-  const { data: allAvailableDashboards, status: dashboardsFetcherStatus } =
-    useDashboardFetcher();
-
-  console.log('allAvailableDashboards', allAvailableDashboards);
+  const { data: allAvailableDashboards } = useDashboardFetcher();
 
   const { dataView } = useApmDataView();
 
@@ -73,8 +70,6 @@ export function ServiceDashboards() {
     [serviceName]
   );
 
-  console.log('serviceDashboards', serviceDashboards);
-
   useEffect(() => {
     const serviceDashboards = (data?.serviceDashboards ?? []).reduce(
       (result, dashboard) => {
@@ -83,7 +78,7 @@ export function ServiceDashboards() {
         );
         if (matchedDashboard) {
           result.push({
-            title: matchedDashboard.attributes.title ?? dashboard.id,
+            title: matchedDashboard.attributes.title,
             ...dashboard,
           });
         }
@@ -93,13 +88,15 @@ export function ServiceDashboards() {
     );
 
     setServiceDashboards(serviceDashboards);
-    // preselect dashboard
-    setCurrentDashboard(
-      serviceDashboards?.length > 0 ? serviceDashboards[0] : undefined
-    );
-  }, [allAvailableDashboards, data]);
 
-  console.log('current', currentDashboard);
+    const preselectedDashboard =
+      serviceDashboards.find(
+        ({ dashboardSavedObjectId }) => dashboardSavedObjectId === dashboardId
+      ) ?? serviceDashboards[0];
+
+    // preselect dashboard
+    setCurrentDashboard(preselectedDashboard);
+  }, [allAvailableDashboards, data]);
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
