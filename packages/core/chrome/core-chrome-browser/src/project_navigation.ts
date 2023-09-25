@@ -91,11 +91,6 @@ export interface ChromeProjectNavigationNode {
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
-
-  /**
-   *  Optional badge, displayed on the right side if the navigation label
-   */
-  badge?: BadgeType;
 }
 
 /** @public */
@@ -163,9 +158,6 @@ export interface NodeDefinition<
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
-
-  // Optional badge, displayed on the right side if the navigation label
-  badge?: BadgeType;
 }
 
 /**

@@ -15,7 +15,4 @@ export const getI18nStrings = () => ({
       defaultMessage: 'Recent',
     }
   ),
-  betaBadge: i18n.translate('sharedUXPackages.chrome.sideNavigation.badge.beta', {
-    defaultMessage: 'Beta',
-  }),
 });

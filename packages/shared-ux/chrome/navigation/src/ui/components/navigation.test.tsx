@@ -734,10 +734,6 @@ describe('<Navigation />', () => {
         'euiSideNavItemButton-isSelected'
       );
     });
-
-    test('should show a beta badge', async () => {
-      // TODO:
-    });
   });
 
   describe('cloud links', () => {

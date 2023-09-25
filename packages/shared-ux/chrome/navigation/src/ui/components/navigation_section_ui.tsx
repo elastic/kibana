@@ -8,10 +8,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import {
-  EuiBetaBadge,
   EuiCollapsibleNavGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiSideNav,
@@ -25,19 +22,8 @@ import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
 import { isAbsoluteLink } from '../../utils';
 import { GroupAsLink } from './group_as_link';
-import { getI18nStrings } from '../i18n_strings';
 
 type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
-
-const getBadgeLabel = (badge: ChromeProjectNavigationNodeEnhanced['badge']) => {
-  const i18strings = getI18nStrings();
-  switch (badge) {
-    case 'beta':
-      return i18strings.betaBadge;
-    default:
-      return '';
-  }
-};
 
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
@@ -69,21 +55,7 @@ const navigationNodeToEuiItem = (
 
   return {
     id,
-    name: (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>{item.title}</EuiFlexItem>
-        {item.badge && (
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              color="hollow"
-              size="s"
-              alignment="middle"
-              label={getBadgeLabel(item.badge)}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    name: item.title,
     isSelected,
     onClick:
       href !== undefined

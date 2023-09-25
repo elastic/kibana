@@ -146,7 +146,6 @@ const navigationTree: NavigationTreeDefinition = {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
                   },
-                  badge: 'beta',
                 },
               ],
             },
