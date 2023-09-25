@@ -15,6 +15,8 @@ import { ToastInput } from '@kbn/core-notifications-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+export const DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON = 'pageReloadButton';
+
 /**
  * Utility function for returning a {@link ToastInput} for displaying a prompt for reloading the page.
  * @param theme The {@link ThemeServiceStart} contract.
@@ -32,7 +34,7 @@ export const reloadPageToast = (theme: ThemeServiceStart, i18nStart: I18nStart):
           <EuiButton
             size="s"
             onClick={() => window.location.reload()}
-            data-test-subj="windowReloadButton"
+            data-test-subj={DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON}
           >
             {i18n.translate('management.settings.form.requiresPageReloadToastButtonLabel', {
               defaultMessage: 'Reload page',

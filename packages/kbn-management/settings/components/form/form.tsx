@@ -12,9 +12,8 @@ import type { FieldDefinition } from '@kbn/management-settings-types';
 import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { BottomBar } from './bottom_bar';
-import { useServices } from './services';
+import { useSave } from './use_save';
 
 /**
  * Props for a {@link Form} component.
@@ -32,7 +31,6 @@ export interface FormProps {
  */
 export const Form = (props: FormProps) => {
   const { fields, isSavingEnabled } = props;
-  const { saveChanges, showError, showReloadPagePrompt } = useServices();
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<
     Record<string, UnsavedFieldChange<SettingType>>
@@ -43,32 +41,16 @@ export const Form = (props: FormProps) => {
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
-  const saveAll = async () => {
-    setIsLoading(true);
-    if (isEmpty(unsavedChanges)) {
-      return;
-    }
-    try {
-      await saveChanges(unsavedChanges);
-      clearAllUnsaved();
-      const requiresReload = fields.some(
-        (setting) => unsavedChanges.hasOwnProperty(setting.id) && setting.requiresPageReload
-      );
-      if (requiresReload) {
-        showReloadPagePrompt();
-      }
-    } catch (e) {
-      showError(
-        i18n.translate('management.settings.form.saveErrorMessage', {
-          defaultMessage: 'Unable to save',
-        })
-      );
-    }
-    setIsLoading(false);
-  };
-
   const clearAllUnsaved = () => {
     setUnsavedChanges({});
+  };
+
+  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved });
+
+  const saveAll = async () => {
+    setIsLoading(true);
+    await saveChanges(unsavedChanges);
+    setIsLoading(false);
   };
 
   const onChange: RowOnChangeFn<SettingType> = (id, change) => {
@@ -92,8 +74,8 @@ export const Form = (props: FormProps) => {
       <div>{fieldRows}</div>
       {!isEmpty(unsavedChanges) && (
         <BottomBar
-          saveAll={saveAll}
-          clearAllUnsaved={clearAllUnsaved}
+          onSaveAll={saveAll}
+          onClearAllUnsaved={clearAllUnsaved}
           hasInvalidChanges={hasInvalidChanges}
           isLoading={isLoading}
           unsavedChangesCount={unsavedChangesCount}

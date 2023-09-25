@@ -27,8 +27,8 @@ export const DATA_TEST_SUBJ_CANCEL_BUTTON = 'settings-cancel-button';
  * Props for a {@link BottomBar} component.
  */
 export interface BottomBarProps {
-  saveAll: () => void;
-  clearAllUnsaved: () => void;
+  onSaveAll: () => void;
+  onClearAllUnsaved: () => void;
   hasInvalidChanges: boolean;
   isLoading: boolean;
   unsavedChangesCount: number;
@@ -38,8 +38,8 @@ export interface BottomBarProps {
  * Component for displaying the bottom bar of a {@link Form}.
  */
 export const BottomBar = ({
-  saveAll,
-  clearAllUnsaved,
+  onSaveAll,
+  onClearAllUnsaved,
   hasInvalidChanges,
   isLoading,
   unsavedChangesCount,
@@ -64,7 +64,7 @@ export const BottomBar = ({
             color="ghost"
             size="s"
             iconType="cross"
-            onClick={clearAllUnsaved}
+            onClick={onClearAllUnsaved}
             data-test-subj={DATA_TEST_SUBJ_CANCEL_BUTTON}
           >
             {i18n.translate('management.settings.form.cancelButtonLabel', {
@@ -88,7 +88,7 @@ export const BottomBar = ({
               fill
               size="s"
               iconType="check"
-              onClick={saveAll}
+              onClick={onSaveAll}
               isLoading={isLoading}
               data-test-subj={DATA_TEST_SUBJ_SAVE_BUTTON}
             >

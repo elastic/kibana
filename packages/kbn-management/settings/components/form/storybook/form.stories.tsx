@@ -9,9 +9,11 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
-import { FormProvider } from '../services';
-import { getFormStory } from './get_form_story';
+import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
+import { getSettingsMock, uiSettingsClientMock } from '../mocks';
 import { Form as Component } from '../form';
+import { FormProvider } from '../services';
 
 export default {
   title: `Settings/Form/Form`,
@@ -43,4 +45,23 @@ export default {
   ],
 } as ComponentMeta<typeof Component>;
 
-export const Form = getFormStory();
+interface FormStoryProps {
+  /** True if saving settings is enabled, false otherwise. */
+  isSavingEnabled: boolean;
+  /** True if settings require page reload, false otherwise. */
+  requirePageReload: boolean;
+}
+
+export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => {
+  const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+    getSettingsMock(requirePageReload),
+    uiSettingsClientMock
+  );
+
+  return <Component {...{ fields, isSavingEnabled }} />;
+};
+
+Form.args = {
+  isSavingEnabled: true,
+  requirePageReload: false,
+};

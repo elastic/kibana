@@ -6,24 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { useEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
  * A React hook that provides stateful `css` classes for the {@link Form} component.
  */
 export const useFormStyles = () => {
+  const euiTheme = useEuiTheme();
+  const { size, colors } = euiTheme.euiTheme;
+
   return {
     cssFormButton: css`
       width: 100%;
     `,
     cssFormUnsavedCount: css`
-      @include euiBreakpoint('xs') {
+      ${euiBreakpoint(euiTheme, ['xs'])} {
         display: none;
       }
     `,
     cssFormUnsavedCountMessage: css`
-      box-shadow: -$euiSizeXS 0 $euiColorWarning;
-      padding-left: $euiSizeS;
+      box-shadow: -${size.xs} 0 ${colors.warning};
+      padding-left: ${size.s};
     `,
   };
 };

@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiTextColor } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormStyles } from '../form.styles';
 
@@ -25,19 +25,17 @@ interface UnsavedCountProps {
 export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
   const { cssFormUnsavedCountMessage } = useFormStyles();
   return (
-    <p id="aria-describedby.countOfUnsavedSettings">
-      <EuiTextColor css={cssFormUnsavedCountMessage} color="ghost">
-        <FormattedMessage
-          id="management.settings.form.countOfSettingsChanged"
-          defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
+    <EuiText size="s" color="ghost" css={cssFormUnsavedCountMessage}>
+      <FormattedMessage
+        id="management.settings.form.countOfSettingsChanged"
+        defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
               one {setting}
               other {settings}
             }"
-          values={{
-            unsavedCount,
-          }}
-        />
-      </EuiTextColor>
-    </p>
+        values={{
+          unsavedCount,
+        }}
+      />
+    </EuiText>
   );
 };

@@ -8,12 +8,6 @@
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
 
-const defaults = {
-  requiresPageReload: false,
-  readonly: false,
-  category: ['category'],
-};
-
 type Settings = {
   [key in SettingType]: KnownTypeToMetadata<key>;
 };
@@ -23,9 +17,12 @@ type Settings = {
  * @param requirePageReload The value of the `requirePageReload` param for all settings.
  */
 export const getSettingsMock = (requirePageReload: boolean = false): Settings => {
-  if (requirePageReload) {
-    defaults.requiresPageReload = true;
-  }
+  const defaults = {
+    requiresPageReload: requirePageReload,
+    readonly: false,
+    category: ['category'],
+  };
+
   return {
     array: {
       description: 'Description for Array test setting',

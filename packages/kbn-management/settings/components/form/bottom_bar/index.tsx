@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { BottomBar, DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
+export { BottomBar } from './bottom_bar';
