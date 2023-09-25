@@ -30,7 +30,7 @@ export interface Props extends DivProps {
   onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 
-const Item = React.forwardRef<HTMLDivElement, Props>(
+export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       expandedPanelId,
