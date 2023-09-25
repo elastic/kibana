@@ -18,7 +18,8 @@ import {
   searchForExceptionList,
   clearSearchSelection,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const EXCEPTION_LIST_NAME = 'My test list';
@@ -60,7 +61,7 @@ describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
     // Create exception list not used by any rules
     createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
   });
 
   it('Filters exception lists on search', () => {

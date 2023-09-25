@@ -89,18 +89,16 @@ function AnimatedTransitionsWizard({ children }: Props) {
             duration={TRANSITION_DURATION}
             transition={transition}
           >
-            <FilmstripFrame position="left">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'back' ? <TransitionComponent.current /> : null
+            <FilmstripFrame
+              position={
+                transition === 'ready'
+                  ? 'center'
+                  : transition === 'back'
+                  ? 'left'
+                  : 'right'
               }
-            </FilmstripFrame>
-            <FilmstripFrame position="center">{children}</FilmstripFrame>
-            <FilmstripFrame position="right">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'next' ? <TransitionComponent.current /> : null
-              }
+            >
+              {children}
             </FilmstripFrame>
           </FilmstripTransition>
         </EuiFlexItem>

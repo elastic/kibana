@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import { DESCRIPTION_TITLE_TEST_ID, RULE_SUMMARY_BUTTON_TEST_ID } from './test_ids';
 import { Description } from './description';
 import { RightPanelContext } from '../context';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { PreviewPanelKey } from '../../preview';

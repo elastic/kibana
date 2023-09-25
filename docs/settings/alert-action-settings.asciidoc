@@ -234,7 +234,7 @@ Specifies the maximum number of actions that can be queued. Default: 1000000
 [[preconfigured-connector-settings]]
 === Preconfigured connector settings
 
-These settings vary depending on which type of <<pre-configured-connectors,preconfigured connector>> you're adding.
+These settings vary depending on which type of preconfigured connector you're adding.
 For example:
 
 [source,yaml]
@@ -244,6 +244,8 @@ xpack.actions.preconfigured:
     name: preconfigured-server-log-connector-type
     actionTypeId: .server-log
 ----------------------------------------
+
+For more examples, go to <<pre-configured-connectors>>.
 
 `xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
 Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
@@ -258,16 +260,28 @@ For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.sla
 `xpack.actions.preconfigured.<connector-id>.config`::
 The configuration details, which are specific to the type of preconfigured connector.
 
+`xpack.actions.preconfigured.<connector-id>.config.apiProvider`::
+For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+
 `xpack.actions.preconfigured.<connector-id>.config.apiUrl`::
 A configuration URL that varies by connector:
 +
 --
+* For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.appId`::
+An application ID that varies by connector:
++
+--
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies a {swimlane} application identifier.
 --
 
 `xpack.actions.preconfigured.<connector-id>.config.clientId`::
@@ -306,6 +320,9 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 `xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
 
+`xpack.actions.preconfigured.<connector-id>.config.defaultModel`::
+For a <<gen-ai-action-type,generative AI connector>>, specifies the default model to use for requests. It is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
 For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
 
@@ -332,6 +349,37 @@ For an <<email-action-type,email connector>>, specifies the host name of the ser
 
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies field mappings.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the alert identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case comments.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case description.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the rule name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies a field mapping for the severity.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
 
 `xpack.actions.preconfigured.<connector-id>.config.method`::
 For a <<webhook-action-type,webhook connector>>, specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
@@ -384,6 +432,9 @@ For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HT
 `xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
 
+`xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl`::
+For a <<torq-action-type,Torq connector>>, specifies the endpoint URL of the Elastic Security integration in Torq.
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
 
@@ -396,6 +447,7 @@ TIP: Sensitive properties, such as passwords, should be stored in the <<creating
 An API key secret that varies by connector:
 +
 --
+* For a <<gen-ai-action-type,generative AI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
 --
 
@@ -406,7 +458,7 @@ For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication
 For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key secret for HTTP basic authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.apiToken`::
-For a <<jira-action-type,Jira connector>>, specifies the API authentication token for HTTP basic authentication.
+For a <<jira-action-type,Jira>> or <<swimlane-action-type,{swimlane} connector>>, specifies the API authentication token for HTTP basic authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.clientSecret`::
 A client secret that varies by connector:
@@ -443,6 +495,7 @@ A token secret that varies by connector:
 --
 * For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
 * For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
+* For a <<torq-action-type,Torq connector>>, specifies the secret of the webhook authentication header.
 --
 
 `xpack.actions.preconfigured.<connector-id>.secrets.user`::

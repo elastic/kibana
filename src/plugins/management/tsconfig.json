@@ -25,7 +25,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/core-application-browser",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/serverless"
   ],
   "exclude": [
     "target/**/*"

@@ -3183,19 +3183,7 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsPitParams",
-                    "text": "SavedObjectsPitParams"
-                  },
-                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortOrder?: ",
-                  "SortOrder",
-                  " | undefined; searchAfter?: ",
-                  "SortResults",
-                  " | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
+                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3211,7 +3199,19 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+                  "[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsPitParams",
+                    "text": "SavedObjectsPitParams"
+                  },
+                  " | undefined; sortOrder?: ",
+                  "SortOrder",
+                  " | undefined; searchAfter?: ",
+                  "SortResults",
+                  " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -16049,7 +16049,9 @@
         "type": "Function",
         "tags": [],
         "label": "isErrorResponse",
-        "description": [],
+        "description": [
+          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
+        ],
         "signature": [
           "(response?: ",
           {
@@ -28017,6 +28019,23 @@
             ],
             "signature": [
               "RawResponse"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              "ConnectionRequestParams",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
