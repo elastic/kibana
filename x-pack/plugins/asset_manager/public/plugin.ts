@@ -17,8 +17,9 @@ export class Plugin implements AssetManagerPluginClass {
   }
 
   setup(core: CoreSetup, pluginsSetup: AssetManagerSetupDeps) {
+    const publicAssetsClient = new PublicAssetsClient(core.http);
     return {
-      PublicAssetsClient,
+      publicAssetsClient,
     };
   }
 
