@@ -42,7 +42,13 @@ describe('8.10.3 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  meta: { license: '', cloud: false, cluster_uuid: 'qwe', cluster_name: 'clusterName',  ...meta },
+                  meta: {
+                    license: '',
+                    cloud: false,
+                    cluster_uuid: 'qwe',
+                    cluster_name: 'clusterName',
+                    ...meta,
+                  },
                   windows: {},
                   mac: {},
                   linux: {},
