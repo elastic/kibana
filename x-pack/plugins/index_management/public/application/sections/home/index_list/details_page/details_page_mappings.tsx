@@ -20,17 +20,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useLoadIndexMappings, documentationService } from '../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
-export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
-  match: {
-    params: { indexName },
-  },
-}) => {
+export const DetailsPageMappings: FunctionComponent<{ indexName: string }> = ({ indexName }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(indexName);
 
   useEffect(() => {
