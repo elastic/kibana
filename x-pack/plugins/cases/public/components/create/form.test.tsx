@@ -14,7 +14,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { connectorsMock } from '../../containers/mock';
+import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { CreateCaseFormProps } from './form';
@@ -45,6 +45,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   assignees: [],
+  customFields: {},
 };
 
 const casesFormProps: CreateCaseFormProps = {
@@ -216,6 +217,30 @@ describe('CreateCaseForm', () => {
     const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
     expect(titleInput).toHaveValue('');
     expect(descriptionInput).toHaveValue('');
+  });
+
+  it('should render custom fields when available', () => {
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: customFieldsConfigurationMock,
+      },
+    }));
+
+    const result = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(result.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+    for (const item of customFieldsConfigurationMock) {
+      expect(
+        result.getByTestId(`${item.key}-${item.type}-create-custom-field`)
+      ).toBeInTheDocument();
+    }
   });
 
   it('should prefill the form when provided with initialValue', () => {
