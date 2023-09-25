@@ -3866,6 +3866,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-contracts-server@link:packages/core/plugins/core-plugins-contracts-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugins-server-internal@link:packages/core/plugins/core-plugins-server-internal":
   version "0.0.0"
   uid ""

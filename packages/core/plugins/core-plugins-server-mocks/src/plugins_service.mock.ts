@@ -10,22 +10,25 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   PluginsService,
   type InternalPluginsServiceSetup,
+  type InternalPluginsServiceStart,
 } from '@kbn/core-plugins-server-internal';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
-const createSetupContractMock = (): InternalPluginsServiceSetup => ({
+const createInternalSetupContractMock = (): InternalPluginsServiceSetup => ({
   contracts: new Map(),
   initialized: true,
 });
-const createStartContractMock = () => ({ contracts: new Map() });
+const createInternalStartContractMock = (): InternalPluginsServiceStart => ({
+  contracts: new Map(),
+});
 
 const createServiceMock = (): PluginsServiceMock => ({
   discover: jest.fn(),
   getExposedPluginConfigsToUsage: jest.fn(),
   preboot: jest.fn(),
-  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
-  start: jest.fn().mockResolvedValue(createStartContractMock()),
+  setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
+  start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
   stop: jest.fn(),
 });
 
@@ -39,7 +42,7 @@ function createUiPlugins() {
 
 export const pluginServiceMock = {
   create: createServiceMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createInternalSetupContractMock,
+  createStartContract: createInternalStartContractMock,
   createUiPlugins,
 };
