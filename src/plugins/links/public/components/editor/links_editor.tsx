@@ -177,7 +177,6 @@ const LinksEditor = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSpacer size="m" />
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
