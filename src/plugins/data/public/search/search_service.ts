@@ -246,19 +246,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request, response, options) => {
-        //if (!options.disableWarningToasts) {
-          const { rawResponse } = response;
+        // if (!options.disableWarningToasts) {
+        const { rawResponse } = response;
 
-          handleWarnings({
-            request: request.body,
-            response: rawResponse,
-            theme,
-            sessionId: options.sessionId,
-            requestId: request.id,
-            inspector: options.inspector,
-            inspectorService: inspector,
-          });
-        //}
+        handleWarnings({
+          request: request.body,
+          response: rawResponse,
+          theme,
+          sessionId: options.sessionId,
+          requestId: request.id,
+          inspector: options.inspector,
+          inspectorService: inspector,
+        });
+        // }
         return response;
       },
       scriptedFieldsEnabled,

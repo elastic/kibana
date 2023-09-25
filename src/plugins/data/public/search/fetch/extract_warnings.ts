@@ -18,7 +18,7 @@ import { SearchResponseWarning } from '../types';
 export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
-  inspector?: IInspectorInfo,
+  inspector?: IInspectorInfo
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
@@ -54,20 +54,23 @@ export function extractWarnings(
             },
           },
       openInInspector: () => {
-        const adapter = inspector?.adapter
-          ? inspector.adapter
-          : new RequestAdapter();
+        const adapter = inspector?.adapter ? inspector.adapter : new RequestAdapter();
         if (!inspector?.adapter) {
-          const requestResponder = adapter.start(i18n.translate('data.search.searchSource.anonymousRequestTitle', {
-            defaultMessage: 'Request',
-          }));
+          const requestResponder = adapter.start(
+            i18n.translate('data.search.searchSource.anonymousRequestTitle', {
+              defaultMessage: 'Request',
+            })
+          );
           requestResponder.ok(rawResponse);
         }
-        
-        inspectorService.open({
-          requests: inspector.adapter
-        }, {});
-      }
+
+        inspectorService.open(
+          {
+            requests: inspector.adapter,
+          },
+          {}
+        );
+      },
     });
   }
 
