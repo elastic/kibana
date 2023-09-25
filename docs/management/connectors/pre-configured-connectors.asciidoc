@@ -118,12 +118,9 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-slack-configuration>>
-<<<<<<< HEAD
 * <<preconfigured-swimlane-configuration>>
 * <<preconfigured-torq-configuration>>
-=======
 * <<preconfigured-tines-configuration>>
->>>>>>> 07b87f0ab71 ([DOCS] Moves preconfigured Tines connector details)
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
