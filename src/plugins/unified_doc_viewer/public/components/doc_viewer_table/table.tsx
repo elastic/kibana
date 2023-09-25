@@ -40,7 +40,7 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
-import { useUnifiedDocViewerServices } from '../../hooks';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 
@@ -113,7 +113,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
-  const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;

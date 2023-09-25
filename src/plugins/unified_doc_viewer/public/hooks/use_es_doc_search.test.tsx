@@ -15,12 +15,12 @@ import {
   SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import { setUnifiedDocViewerServices } from '../plugin';
+import { UnifiedDocViewerServices } from './use_doc_viewer_services';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();
-const services = {
+setUnifiedDocViewerServices({
   data: {
     search: {
       search: jest.fn(() => {
@@ -35,7 +35,7 @@ const services = {
       }
     },
   },
-};
+} as unknown as UnifiedDocViewerServices);
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
@@ -230,9 +230,6 @@ describe('Test of <Doc /> helper / hook', () => {
 
     const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      ),
     });
 
     expect(hook.result.current.slice(0, 2)).toEqual([ElasticRequestState.Loading, null]);
@@ -254,9 +251,6 @@ describe('Test of <Doc /> helper / hook', () => {
 
     const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      ),
     });
 
     await act(async () => {
@@ -308,9 +302,6 @@ describe('Test of <Doc /> helper / hook', () => {
 
     const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      ),
     });
 
     expect(hook.result.current.slice(0, 2)).toEqual([

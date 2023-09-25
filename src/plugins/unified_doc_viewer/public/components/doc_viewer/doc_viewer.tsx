@@ -7,16 +7,11 @@
  */
 
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { DocViewer } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 export function UnifiedDocViewer(props: DocViewRenderProps) {
-  const services = getUnifiedDocViewerServices();
-  return (
-    <KibanaContextProvider services={services}>
-      <DocViewer docViews={services.unifiedDocViewer.getDocViews(props.hit)} {...props} />
-    </KibanaContextProvider>
-  );
+  const { unifiedDocViewer } = getUnifiedDocViewerServices();
+  return <DocViewer docViews={unifiedDocViewer.getDocViews(props.hit)} {...props} />;
 }

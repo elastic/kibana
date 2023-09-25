@@ -11,7 +11,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { UnifiedDocViewerStart } from '../plugin';
 
 export interface UnifiedDocViewerServices {
@@ -21,10 +20,4 @@ export interface UnifiedDocViewerServices {
   storage: Storage;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
-}
-
-export function useUnifiedDocViewerServices(): UnifiedDocViewerServices {
-  const { services } = useKibana<UnifiedDocViewerServices>();
-  const { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer } = services;
-  return { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
 }
