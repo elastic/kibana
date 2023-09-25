@@ -12,26 +12,23 @@ import {
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
-  goToExceptionsTab,
   openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
-import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../screens/lists';
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForListsIndex,
   waitForValueListsModalToBeLoaded,
-  selectValueListType,
-  selectValueListsFile,
-  uploadValueList,
   openValueListsModal,
   deleteValueListsFile,
-  closeValueListsModal,
+  importValueList,
+  KNOWN_VALUE_LIST_FILES,
 } from '../../../tasks/lists';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
@@ -44,32 +41,34 @@ import {
 } from '../../../screens/exceptions';
 
 const goToRulesAndOpenValueListModal = () => {
-  visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+  visit(RULES_MANAGEMENT_URL);
   waitForListsIndex();
   waitForValueListsModalToBeLoaded();
   openValueListsModal();
 };
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Flaky on serverless
 describe(
   'Use Value list in exception entry',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
-      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-      createRule({
-        ...getNewRule(),
-        query: 'user.name:*',
-        index: ['exceptions*'],
-        exceptions_list: [],
-        rule_id: '2',
-      });
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    });
-    beforeEach(() => {
       createListsIndex();
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+      importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
+
+      createRule(
+        getNewRule({
+          query: 'user.name:*',
+          index: ['exceptions*'],
+          exceptions_list: [],
+          rule_id: '2',
+          enabled: false,
+        })
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
     afterEach(() => {
@@ -80,24 +79,6 @@ describe(
       const ITEM_NAME = 'Exception item with value list';
       const ITEM_FIELD = 'agent.name';
 
-      goToRulesAndOpenValueListModal();
-
-      // Add new value list of type keyword
-      const listName = 'value_list.txt';
-      selectValueListType('keyword');
-      selectValueListsFile(listName);
-      uploadValueList();
-
-      cy.get(VALUE_LISTS_TABLE)
-        .find(VALUE_LISTS_ROW)
-        .should(($row) => {
-          expect($row.text()).to.contain(listName);
-          expect($row.text()).to.contain('Keywords');
-        });
-      closeValueListsModal();
-      goToRuleDetails();
-      goToExceptionsTab();
-
       // open add exception modal
       openExceptionFlyoutFromEmptyViewerPrompt();
 
@@ -107,7 +88,7 @@ describe(
       addExceptionEntryFieldValue(ITEM_FIELD, 0);
       addExceptionEntryOperatorValue('is in list', 0);
 
-      addExceptionEntryFieldMatchIncludedValue('value_list.txt', 0);
+      addExceptionEntryFieldMatchIncludedValue(KNOWN_VALUE_LIST_FILES.TEXT, 0);
 
       // The Close all alerts that match attributes in this exception option is disabled
       cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
@@ -128,7 +109,7 @@ describe(
       // Go back to value list to delete the existing one
       goToRulesAndOpenValueListModal();
 
-      deleteValueListsFile(listName);
+      deleteValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
 
       // Toast should be shown because of exception reference
       cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');

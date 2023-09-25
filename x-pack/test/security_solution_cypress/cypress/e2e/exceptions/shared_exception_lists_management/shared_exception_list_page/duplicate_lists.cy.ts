@@ -14,7 +14,8 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
   createExceptionList,
@@ -40,8 +41,9 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Flaky in serverless tests
-describe('Duplicate List', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();
@@ -105,7 +107,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless', '@brokenInServerless'
       ],
       expire_time: futureDate,
     });
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });
 

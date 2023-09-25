@@ -249,7 +249,7 @@ export interface SearchSourceSearchOptions extends ISearchOptions {
   inspector?: IInspectorInfo;
 
   /**
-   * Disable default warnings of shard failures
+   * Set to true to disable warning toasts and customize warning display
    */
-  disableShardFailureWarning?: boolean;
+  disableWarningToasts?: boolean;
 }

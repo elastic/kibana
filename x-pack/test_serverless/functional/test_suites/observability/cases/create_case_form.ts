@@ -15,11 +15,16 @@ import { navigateToCasesApp } from '../../../../shared/lib/cases';
 const owner = OBSERVABILITY_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  describe('Create case', function () {
+  describe('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
+    const svlCommonPage = getPageObject('svlCommonPage');
     const config = getService('config');
+
+    before(async () => {
+      await svlCommonPage.login();
+    });
 
     beforeEach(async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
@@ -27,6 +32,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout();
     });
 
     it('creates a case', async () => {

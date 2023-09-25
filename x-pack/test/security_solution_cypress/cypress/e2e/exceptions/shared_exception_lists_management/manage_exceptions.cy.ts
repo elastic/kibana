@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
@@ -19,7 +21,7 @@ import {
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -29,33 +31,31 @@ import {
   EXECPTION_ITEM_CARD_HEADER_TITLE,
   EMPTY_EXCEPTIONS_VIEWER,
 } from '../../../screens/exceptions';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToExceptionsTab } from '../../../tasks/rule_details';
 import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
+import { visitRuleDetailsPage } from '../../../tasks/rule_details';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
 describe(
   'Add, edit and delete exception',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+      createRule(getNewRule()).as('createdRule');
 
-      createRule(getNewRule());
-    });
-
-    beforeEach(() => {
       login();
-      visitWithoutDateRange(EXCEPTIONS_URL);
+      visit(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });
-    after(() => {
+
+    afterEach(() => {
       cy.task('esArchiverUnload', 'exceptions');
     });
 
@@ -87,11 +87,10 @@ describe(
 
         submitNewExceptionItem();
 
-        // Navigate to Rule page
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-        goToRuleDetails();
-
-        goToExceptionsTab();
+        // Navigate to Rule details page
+        cy.get<Cypress.Response<RuleResponse>>('@createdRule').then((rule) =>
+          visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' })
+        );
 
         // Only one Exception should generated
         cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -110,7 +109,7 @@ describe(
         cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
         // Go back to Shared Exception List
-        visitWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
 
         // Click on "Create shared exception list" button on the header
         // Click on "Create exception item"

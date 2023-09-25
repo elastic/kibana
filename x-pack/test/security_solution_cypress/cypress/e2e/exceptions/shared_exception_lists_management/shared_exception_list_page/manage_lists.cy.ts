@@ -10,7 +10,8 @@ import { expectedExportedExceptionList, getExceptionList } from '../../../../obj
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
@@ -47,10 +48,11 @@ const getExceptionList2 = () => ({
 
 let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165690
 describe(
   'Manage lists from "Shared Exception Lists" page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
@@ -81,7 +83,7 @@ describe(
 
       beforeEach(() => {
         login();
-        visitWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
         waitForExceptionsTableToBeLoaded();
       });
 
@@ -132,7 +134,7 @@ describe(
       });
 
       it('Deletes exception list with rule reference', () => {
-        waitForPageWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
         waitForExceptionsTableToBeLoaded();
 
         // Using cy.contains because we do not care about the exact text,

@@ -107,6 +107,8 @@ export type OverrideFieldGroupDetails = (
 
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 
+export type ButtonAddFieldVariant = 'primary' | 'toolbar';
+
 export type SearchMode = 'documents' | 'text-based';
 
 export interface UnifiedFieldListSidebarContainerCreationOptions {
@@ -116,7 +118,12 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
   originatingApp: string;
 
   /**
-   * Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+   * Pass `true` to enable the compressed view
+   */
+  compressed?: boolean;
+
+  /**
+   * Your app name: "discover", "lens", etc. If not provided, sections and sidebar toggle states would not be persisted.
    */
   localStorageKeyPrefix?: string;
 
@@ -124,6 +131,16 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
    * Pass `timefilter` only if you are not using search sessions for the global search
    */
   timeRangeUpdatesType?: TimeRangeUpdatesType;
+
+  /**
+   * Choose how the bottom "Add a field" button should look like. Default `primary`.
+   */
+  buttonAddFieldVariant?: ButtonAddFieldVariant;
+
+  /**
+   * Pass `true` to make the sidebar collapsible. Additionally, define `localStorageKeyPrefix` to persist toggle state.
+   */
+  showSidebarToggleButton?: boolean;
 
   /**
    * Pass `true` to skip auto fetching of fields existence info

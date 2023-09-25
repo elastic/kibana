@@ -10,12 +10,12 @@ import { getNewRule } from '../../../objects/rule';
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
   openEditException,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
@@ -47,8 +47,7 @@ import {
   FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { reload } from '../../../tasks/common';
+import { deleteAlertsAndRules, reload } from '../../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -57,6 +56,7 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../objects/exception';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue
 // https://github.com/elastic/kibana/issues/154994
 
@@ -65,7 +65,7 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
@@ -75,7 +75,11 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless'] }, () => {
     // Comment the Conflicts here as they are skipped
     // cy.task('esArchiverLoad',{ archiveName: 'conflicts_1' });
     // cy.task('esArchiverLoad',{ archiveName: 'conflicts_2' });
+  });
+
+  beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
         getNewRule({
@@ -90,18 +94,9 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless'] }, () => {
             },
           ],
         })
-      )
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }))
     );
-    login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
-    goToExceptionsTab();
   });
 
   after(() => {

@@ -6,7 +6,8 @@
  */
 
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { ALERTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../screens/alerts';
@@ -15,6 +16,7 @@ import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 import { cleanKibana } from '../../tasks/common';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Ransomware Prevention Alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -35,7 +37,7 @@ describe(
     describe('Ransomware display in Alerts Section', () => {
       beforeEach(() => {
         login();
-        visit(ALERTS_URL);
+        visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
 
@@ -59,7 +61,7 @@ describe(
     describe('Ransomware in Timelines', () => {
       beforeEach(() => {
         login();
-        visit(TIMELINES_URL);
+        visitWithTimeRange(TIMELINES_URL);
 
         createTimeline();
       });

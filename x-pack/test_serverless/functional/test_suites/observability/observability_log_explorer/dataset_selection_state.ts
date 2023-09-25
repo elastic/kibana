@@ -14,14 +14,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
 
-  describe('DatasetSelection initialization and update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/166016
+  describe.skip('DatasetSelection initialization and update', () => {
     describe('when the "index" query param does not exist', () => {
-      it('should initialize the "All log datasets" selection', async () => {
+      it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
         const datasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
-        expect(datasetSelectionTitle).to.be('All log datasets');
+        expect(datasetSelectionTitle).to.be('All logs');
       });
     });
 
@@ -41,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
 
-      it('should fallback to the "All log datasets" selection and notify the user of an invalid encoded index', async () => {
+      it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
         const invalidEncodedIndex = 'invalid-encoded-index';
         await PageObjects.observabilityLogExplorer.navigateTo({
           search: querystring.stringify({
@@ -53,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
         await PageObjects.observabilityLogExplorer.assertRestoreFailureToastExist();
-        expect(datasetSelectionTitle).to.be('All log datasets');
+        expect(datasetSelectionTitle).to.be('All logs');
       });
     });
 
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo();
         const allDatasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
-        expect(allDatasetSelectionTitle).to.be('All log datasets');
+        expect(allDatasetSelectionTitle).to.be('All logs');
 
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
@@ -81,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
-          expect(backNavigationDatasetSelectionTitle).to.be('All log datasets');
+          expect(backNavigationDatasetSelectionTitle).to.be('All logs');
         });
 
         // Go forward to previous page selection

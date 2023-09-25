@@ -13,24 +13,23 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import {
-  IndexDetailsPage,
-  IndexDetailsSection,
-} from '../../../public/application/sections/home/index_list/details_page';
+
+import { IndexDetailsSection } from '../../../common/constants';
+import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
-const testBedConfig: AsyncTestBedConfig = {
+const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
   memoryRouter: {
-    initialEntries: [`/indices/${testIndexName}`],
-    componentRoutePath: `/indices/:indexName/:indexDetailsSection?`,
+    initialEntries: [initialEntry ?? `/indices/index_details?indexName=${testIndexName}`],
+    componentRoutePath: `/indices/index_details`,
     onRouter: (router) => {
       routerMock = router;
     },
   },
   doMountAsync: true,
-};
+});
 
 export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
@@ -67,6 +66,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     errorSection: {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
+      noIndexNameMessageIsDisplayed: () => boolean;
     };
     stats: {
       getCodeBlockContent: () => string;
@@ -76,16 +76,27 @@ export interface IndexDetailsPageTestBed extends TestBed {
       indexStatsTabExists: () => boolean;
       isWarningDisplayed: () => boolean;
     };
+    overview: {
+      indexStatsContentExists: () => boolean;
+      indexDetailsContentExists: () => boolean;
+      addDocCodeBlockExists: () => boolean;
+      extensionSummaryExists: (index: number) => boolean;
+    };
   };
 }
 
-export const setup = async (
-  httpSetup: HttpSetup,
-  overridingDependencies: any = {}
-): Promise<IndexDetailsPageTestBed> => {
+export const setup = async ({
+  httpSetup,
+  dependencies = {},
+  initialEntry,
+}: {
+  httpSetup: HttpSetup;
+  dependencies?: any;
+  initialEntry?: string;
+}): Promise<IndexDetailsPageTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexDetailsPage, httpSetup, overridingDependencies),
-    testBedConfig
+    WithAppDependencies(IndexDetailsPage, httpSetup, dependencies),
+    getTestBedConfig(initialEntry)
   );
   const testBed = await initTestBed();
   const { find, component, exists } = testBed;
@@ -99,6 +110,9 @@ export const setup = async (
         find('indexDetailsReloadDetailsButton').simulate('click');
       });
       component.update();
+    },
+    noIndexNameMessageIsDisplayed: () => {
+      return exists('indexDetailsNoIndexNameError');
     },
   };
   const getHeader = () => {
@@ -114,6 +128,21 @@ export const setup = async (
 
   const getActiveTabContent = () => {
     return find('indexDetailsContent').text();
+  };
+
+  const overview = {
+    indexStatsContentExists: () => {
+      return exists('overviewTabIndexStats');
+    },
+    indexDetailsContentExists: () => {
+      return exists('overviewTabIndexDetails');
+    },
+    addDocCodeBlockExists: () => {
+      return exists('codeBlockControlsPanel');
+    },
+    extensionSummaryExists: (index: number) => {
+      return exists(`extensionsSummary-${index}`);
+    },
   };
 
   const mappings = {
@@ -258,6 +287,7 @@ export const setup = async (
       getActiveTabContent,
       mappings,
       settings,
+      overview,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,

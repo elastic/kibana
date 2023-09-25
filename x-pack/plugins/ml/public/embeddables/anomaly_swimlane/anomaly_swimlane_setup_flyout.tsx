@@ -19,6 +19,7 @@ import { mlApiServicesProvider } from '../../application/services/ml_api_service
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
+  isServerless: boolean,
   input?: AnomalySwimlaneEmbeddableInput
 ): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
   const { http, overlays, theme, i18n } = coreStart;
@@ -27,7 +28,7 @@ export async function resolveAnomalySwimlaneUserInput(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
+      const { jobIds } = await resolveJobSelection(coreStart, isServerless, input?.jobIds);
       const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
       const { jobs } = await getJobs({ jobId: jobIds.join(',') });
       const influencers = extractInfluencers(jobs);

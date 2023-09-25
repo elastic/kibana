@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
@@ -34,6 +35,7 @@ import {
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
+import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -41,6 +43,16 @@ import {
   submitNewExceptionItem,
 } from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
+import { visit } from './navigation';
+
+interface VisitRuleDetailsPageOptions {
+  tab?: RuleDetailsTabs;
+  role?: ROLES;
+}
+
+export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
+  visit(ruleDetailsUrl(ruleId, options?.tab), { role: options?.role });
+}
 
 export const enablesRule = () => {
   // Rules get enabled via _bulk_action endpoint
@@ -106,8 +118,8 @@ export const goToEndpointExceptionsTab = () => {
 };
 
 export const openEditException = (index = 0) => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
-  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click();
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click();
 };
 
 export const removeException = () => {

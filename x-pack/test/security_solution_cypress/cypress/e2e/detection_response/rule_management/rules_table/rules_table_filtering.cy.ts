@@ -6,7 +6,8 @@
  */
 
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
@@ -28,8 +29,9 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 // Flaky in serverless tests
-describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -42,6 +44,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInSer
     cy.task('esArchiverResetKibana');
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161540
   describe.skip('Last response filter', () => {
     // Flaky in serverless tests
     // @brokenInServerless tag is not working so a skip was needed
@@ -87,7 +90,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInSer
 
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       // Initial table state - before filtering by status
@@ -138,7 +141,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInSer
     });
 
     it('filter by different tags', () => {
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
 
       expectManagementTableRules(['Rule 1', 'Rule 2', 'Rule 3']);
 

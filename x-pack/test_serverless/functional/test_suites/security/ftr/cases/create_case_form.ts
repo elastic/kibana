@@ -15,18 +15,24 @@ import { navigateToCasesApp } from '../../../../../shared/lib/cases';
 const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  describe('Create case', function () {
+  describe('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
     const config = getService('config');
+    const svlCommonPage = getPageObject('svlCommonPage');
 
     beforeEach(async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
     });
 
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout();
     });
 
     it('creates a case', async () => {

@@ -7,12 +7,13 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -20,16 +21,17 @@ import {
   dismissCallOut,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../tasks/common/callouts';
+import { ruleDetailsUrl } from '../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
-  waitForPageWithoutDateRange(url, ROLES.reader);
+  visit(url, { role: ROLES.reader });
   waitForPageTitleToBeShown();
 };
 
 const loadPageAsPlatformEngineer = (url: string) => {
   login(ROLES.platform_engineer);
-  waitForPageWithoutDateRange(url, ROLES.platform_engineer);
+  visit(url, { role: ROLES.platform_engineer });
   waitForPageTitleToBeShown();
 };
 
@@ -42,12 +44,13 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', { tags: '@ess' }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login();
-    visitWithoutDateRange(ALERTS_URL);
+    visit(ALERTS_URL);
     waitForPageTitleToBeShown();
   });
 
@@ -75,10 +78,9 @@ describe('Detections > Callouts', { tags: '@ess' }, () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule());
-        loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
-        waitForPageTitleToBeShown();
-        goToRuleDetails();
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
+        );
       });
 
       afterEach(() => {
@@ -116,7 +118,7 @@ describe('Detections > Callouts', { tags: '@ess' }, () => {
     context('On Rules Management page', () => {
       beforeEach(() => {
         login(ROLES.platform_engineer);
-        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
+        loadPageAsPlatformEngineer(RULES_MANAGEMENT_URL);
       });
 
       it('We show no callout', () => {
@@ -126,10 +128,9 @@ describe('Detections > Callouts', { tags: '@ess' }, () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createRule(getNewRule());
-        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
-        waitForPageTitleToBeShown();
-        goToRuleDetails();
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
+        );
       });
 
       afterEach(() => {

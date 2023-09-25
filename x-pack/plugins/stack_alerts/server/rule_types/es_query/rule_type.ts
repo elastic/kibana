@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
@@ -18,9 +19,8 @@ import {
   EsQueryRuleParamsSchema,
   EsQueryRuleState,
 } from './rule_type_params';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
-import { ActionGroupId, ES_QUERY_ID } from './constants';
+import { ActionGroupId } from './constants';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
 
@@ -134,7 +134,7 @@ export function getRuleType(
   const actionVariableEsqlQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
     {
-      defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
+      defaultMessage: 'ES|QL query field used to fetch data from Elasticsearch.',
     }
   );
 

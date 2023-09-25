@@ -47,11 +47,21 @@ declare global {
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
+// Need a more complex logic for decimals percentiles
+function getAggIdPostFixForPercentile(percentile: string, decimals?: string) {
+  if (!percentile && !decimals) {
+    return '';
+  }
+  if (!decimals) {
+    return `.${percentile}`;
+  }
+  return `['${percentile}.${decimals}']`;
+}
 const updatePositionIndex = (currentId: string, newIndex: number) => {
-  const [fullId, percentile] = currentId.split('.');
+  const [fullId, percentile, percentileDecimals] = currentId.split('.');
   const idParts = fullId.split('-');
   idParts[1] = String(newIndex);
-  return idParts.join('-') + (percentile ? `.${percentile}` : '');
+  return idParts.join('-') + getAggIdPostFixForPercentile(percentile, percentileDecimals);
 };
 
 function getExpressionForLayer(

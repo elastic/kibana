@@ -35,7 +35,8 @@ export class AnomalySwimlaneEmbeddableFactory
   ];
 
   constructor(
-    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+    private isServerless: boolean
   ) {}
 
   public async isEditable() {
@@ -59,7 +60,7 @@ export class AnomalySwimlaneEmbeddableFactory
 
     try {
       const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
-      return await resolveAnomalySwimlaneUserInput(coreStart);
+      return await resolveAnomalySwimlaneUserInput(coreStart, this.isServerless);
     } catch (e) {
       return Promise.reject();
     }

@@ -12,12 +12,14 @@ import {
   importRulesWithOverwriteAll,
 } from '../../../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('Import rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -26,7 +28,7 @@ describe('Import rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
     login();
     deleteAlertsAndRules();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {
