@@ -45,12 +45,17 @@ jest.mock('../../../public/application/lib/ace', () => {
  */
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(() => {
     const mockEnvironment = setupEnvironment();
@@ -69,6 +74,12 @@ describe('<IndexManagementHome />', () => {
       const { component } = testBed;
 
       component.update();
+    });
+
+    test('updates the breadcrumbs to indices', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indices
+      );
     });
 
     test('toggles the include hidden button through URL hash correctly', () => {

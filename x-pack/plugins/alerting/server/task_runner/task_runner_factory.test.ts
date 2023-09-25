@@ -63,6 +63,7 @@ const ruleType: UntypedNormalizedRuleType = {
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 let fakeTimer: sinon.SinonFakeTimers;
 
