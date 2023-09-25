@@ -6,6 +6,7 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { DatasetSelection, DatasetSelectionChange } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
@@ -14,14 +15,13 @@ import {
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../hooks/use_integrations';
-import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
-import type { DatasetSelection, DatasetSelectionChange } from '../../utils/dataset_selection';
+import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from './constants';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */
   datasets: Dataset[] | null;
   /* Any error occurred to show when the user preview the generic data streams */
-  datasetsError?: Error | null;
+  datasetsError: Error | null;
   /* The current selection instance */
   datasetSelection: DatasetSelection;
   /* The integrations list, each integration includes its data streams */
@@ -31,6 +31,7 @@ export interface DatasetSelectorProps {
   /* Flags for loading/searching integrations or data streams*/
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;
+  isSearchingIntegrations: boolean;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when the user reload the list after an error */
@@ -50,10 +51,9 @@ export interface DatasetSelectorProps {
   onSelectionChange: DatasetSelectionChange;
 }
 
-export type PanelId =
-  | typeof INTEGRATION_PANEL_ID
-  | typeof UNMANAGED_STREAMS_PANEL_ID
-  | IntegrationId;
+export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;
+
+export type TabId = typeof INTEGRATIONS_TAB_ID | typeof UNCATEGORIZED_TAB_ID;
 
 export interface SearchParams {
   integrationId?: PanelId;

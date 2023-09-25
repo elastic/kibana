@@ -5,59 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { css } from '@emotion/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilitySharedStart } from '../../../plugin';
+import React from 'react';
+import { ProfilingEmbeddable, ProfilingEmbeddableProps } from './profiling_embeddable';
 import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
-interface Props {
-  data?: BaseFlameGraph;
-  height?: string;
-  isLoading: boolean;
-}
+type Props = Omit<ProfilingEmbeddableProps<BaseFlameGraph>, 'embeddableFactoryId'>;
 
-export function EmbeddableFlamegraph({ data, height, isLoading }: Props) {
-  const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
-  const [embeddable, setEmbeddable] = useState<any>();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    async function createEmbeddable() {
-      const factory = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH);
-      const input = { id: 'embeddable_profiling', data, isLoading };
-      const embeddableObject = await factory?.create(input);
-      setEmbeddable(embeddableObject);
-    }
-    createEmbeddable();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable, embeddableRoot]);
-
-  useEffect(() => {
-    if (embeddable) {
-      embeddable.updateInput({ data, isLoading });
-      embeddable.reload();
-    }
-  }, [data, embeddable, isLoading]);
-
-  return (
-    <div
-      css={css`
-        width: 100%;
-        height: ${height};
-        display: flex;
-        flex: 1 1 100%;
-        z-index: 1;
-        min-height: 0;
-      `}
-      ref={embeddableRoot}
-    />
-  );
+export function EmbeddableFlamegraph(props: Props) {
+  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FLAMEGRAPH} />;
 }

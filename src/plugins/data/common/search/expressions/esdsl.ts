@@ -126,7 +126,7 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse } = await lastValueFrom(
+        const finalResponse = await lastValueFrom(
           search(
             {
               params: {
@@ -141,14 +141,14 @@ export const getEsdslFn = ({
 
         const stats: RequestStatistics = {};
 
-        if (rawResponse?.took) {
+        if (finalResponse.rawResponse?.took) {
           stats.queryTime = {
             label: i18n.translate('data.search.es_search.queryTimeLabel', {
               defaultMessage: 'Query time',
             }),
             value: i18n.translate('data.search.es_search.queryTimeValue', {
               defaultMessage: '{queryTime}ms',
-              values: { queryTime: rawResponse.took },
+              values: { queryTime: finalResponse.rawResponse.took },
             }),
             description: i18n.translate('data.search.es_search.queryTimeDescription', {
               defaultMessage:
@@ -158,12 +158,12 @@ export const getEsdslFn = ({
           };
         }
 
-        if (rawResponse?.hits) {
+        if (finalResponse.rawResponse?.hits) {
           stats.hitsTotal = {
             label: i18n.translate('data.search.es_search.hitsTotalLabel', {
               defaultMessage: 'Hits (total)',
             }),
-            value: `${rawResponse.hits.total}`,
+            value: `${finalResponse.rawResponse.hits.total}`,
             description: i18n.translate('data.search.es_search.hitsTotalDescription', {
               defaultMessage: 'The number of documents that match the query.',
             }),
@@ -173,19 +173,19 @@ export const getEsdslFn = ({
             label: i18n.translate('data.search.es_search.hitsLabel', {
               defaultMessage: 'Hits',
             }),
-            value: `${rawResponse.hits.hits.length}`,
+            value: `${finalResponse.rawResponse.hits.hits.length}`,
             description: i18n.translate('data.search.es_search.hitsDescription', {
               defaultMessage: 'The number of documents returned by the query.',
             }),
           };
         }
 
-        request.stats(stats).ok({ json: rawResponse });
+        request.stats(stats).ok({ json: finalResponse });
         request.json(dsl);
 
         return {
           type: 'es_raw_response',
-          body: rawResponse,
+          body: finalResponse.rawResponse,
         };
       } catch (e) {
         request.error({ json: e });

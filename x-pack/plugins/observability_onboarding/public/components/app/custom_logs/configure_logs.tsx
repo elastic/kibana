@@ -92,10 +92,14 @@ export function ConfigureLogs() {
             resetOnCreation: false,
             errorOnFailedCleanup: false,
           },
-          fields: {
-            integrationName,
-            datasets: [{ name: datasetName, type: 'logs' as const }],
-          },
+          ...(integrationName !== undefined && datasetName !== undefined
+            ? {
+                fields: {
+                  integrationName,
+                  datasets: [{ name: datasetName, type: 'logs' as const }],
+                },
+              }
+            : {}),
           previouslyCreatedIntegration: lastCreatedIntegrationOptions,
         },
       }}
@@ -326,7 +330,7 @@ export function ConfigureLogsContent() {
                     color: euiTheme.colors.primaryText,
                     fontSize: xsFontSize,
                   },
-                  '.euiAccordion__iconButton svg': {
+                  '.euiAccordion__arrow svg': {
                     stroke: euiTheme.colors.primary,
                     width: euiTheme.size.m,
                     height: euiTheme.size.m,

@@ -147,13 +147,17 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    const isServerlessEnabled = !!this.config.serverless?.project_id;
+    const projectId = this.config.serverless?.project_id;
+    const isServerlessEnabled = !!projectId;
+    const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      deploymentId,
+      projectId,
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -165,7 +169,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
-      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
+      deploymentId,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
@@ -179,7 +183,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       },
       isServerlessEnabled,
       serverless: {
-        projectId: this.config.serverless?.project_id,
+        projectId,
         projectName: this.config.serverless?.project_name,
       },
     };
