@@ -68,6 +68,8 @@ const progressStyle = css`
   z-index: 2;
 `;
 
+const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
+
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -299,6 +301,7 @@ function DiscoverDocumentsComponent({
             >
               <DataGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
+                showColumnTokens
                 columns={currentColumns}
                 columnTypes={columnTypes}
                 expandedDoc={expandedDoc}
@@ -337,7 +340,7 @@ function DiscoverDocumentsComponent({
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
-                componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
+                componentsTourSteps={TOUR_STEPS}
               />
             </CellActionsProvider>
           </div>

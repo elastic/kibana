@@ -101,6 +101,10 @@ export interface UnifiedDataTableProps {
    */
   columnTypes?: DataTableColumnTypes;
   /**
+   * Field tokens could be rendered in column header next to the field name.
+   */
+  showColumnTokens?: boolean;
+  /**
    * If set, the given document is displayed in a flyout
    */
   expandedDoc?: DataTableRecord;
@@ -306,6 +310,7 @@ export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
   columnTypes,
+  showColumnTokens,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -620,6 +625,8 @@ export const UnifiedDataTable = ({
         onFilter,
         editField,
         visibleCellActions,
+        columnTypes,
+        showColumnTokens,
       }),
     [
       onFilter,
@@ -637,6 +644,8 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       editField,
       visibleCellActions,
+      columnTypes,
+      showColumnTokens,
     ]
   );
 

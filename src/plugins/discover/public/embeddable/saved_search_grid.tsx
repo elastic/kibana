@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
@@ -30,7 +30,7 @@ export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   savedSearchId?: string;
 }
 
-export const DataGridMemoized = memo(UnifiedDataTable);
+export const DataGridMemoized = React.memo(UnifiedDataTable);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
@@ -86,6 +86,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
         componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
+        showColumnTokens
       />
     </SavedSearchEmbeddableBase>
   );
