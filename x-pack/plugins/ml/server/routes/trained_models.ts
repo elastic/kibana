@@ -679,8 +679,9 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
         try {
+          // We assume that ML nodes in Cloud are always on linux-x86_64, even if other node types aren't.
           const isCloud = !!cloud.cloudId;
 
           const nodesInfoResponse =
