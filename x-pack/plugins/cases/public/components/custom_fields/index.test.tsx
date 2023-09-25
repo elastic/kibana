@@ -7,12 +7,15 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/dom';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFields } from '.';
+import * as i18n from './translations';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
@@ -70,5 +73,38 @@ describe('CustomFields', () => {
     appMockRender.render(<CustomFields {...props} />);
 
     expect(screen.getByTestId('case-experimental-badge')).toBeInTheDocument();
+  });
+
+  it('shows error when custom fields reaches the limit', async () => {
+    const customFields = [
+      ...customFieldsConfigurationMock,
+      {
+        key: 'third_field_key',
+        label: 'My third custom label',
+        type: CustomFieldTypes.TEXT,
+        required: false,
+      },
+      {
+        key: 'fourth_field_key',
+        label: 'My fourth custom label',
+        type: CustomFieldTypes.TOGGLE,
+        required: true,
+      },
+      {
+        key: 'fifth_field_key',
+        label: 'My fifth custom label',
+        type: CustomFieldTypes.TEXT,
+        required: true,
+      },
+    ];
+
+    appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
+
+    userEvent.click(screen.getByTestId('add-custom-field'));
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
+      expect(screen.getByTestId('add-custom-field')).toHaveAttribute('disabled');
+    });
   });
 });
