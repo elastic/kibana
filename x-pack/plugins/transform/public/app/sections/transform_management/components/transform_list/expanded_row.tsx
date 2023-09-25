@@ -85,7 +85,7 @@ const NoStatsFallbackTabContent = ({
   );
 };
 
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
   const { showNodeInfo } = useEnabledFeatures();
 
   const stateItems: Item[] = [];
