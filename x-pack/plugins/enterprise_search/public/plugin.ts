@@ -24,6 +24,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -39,6 +40,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { ClientConfigType, InitialAppData } from '../common/types';
+import { configureElserInferenceModel, elserInferenceModel } from '../common/ml_inference_pipeline';
 
 import { docLinks } from './applications/shared/doc_links';
 
@@ -65,6 +67,10 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+}
+
+export interface PluginsStartDependencies {
+  ml: MlPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -415,13 +421,17 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start(core: CoreStart) {
+  public async start(core: CoreStart, deps: PluginsStartDependencies) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    if(deps.ml.elasticModels != null) {
+      configureElserInferenceModel(deps.ml.elasticModels);
+    }
   }
 
   public stop() {}

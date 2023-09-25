@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ELSER_MODEL_ID } from '../../../../../../common/ml_inference_pipeline';
+import { elserInferenceModel } from '../../../../../../common/ml_inference_pipeline';
 import { Actions, createApiLogic } from '../../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../../shared/http';
 
@@ -16,7 +16,7 @@ export interface CreateTextExpansionModelResponse {
 }
 
 export const createTextExpansionModel = async (): Promise<CreateTextExpansionModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${ELSER_MODEL_ID}`;
+  const route = `/internal/enterprise_search/ml/models/${elserInferenceModel.modelId}`;
   return await HttpLogic.values.http.post<CreateTextExpansionModelResponse>(route, {
     body: undefined,
   });

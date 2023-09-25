@@ -11,6 +11,7 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticModels } from '@kbn/ml-plugin/public/application/services/elastic_models_service';
 
 import {
   SUPPORTED_PYTORCH_TASKS,
@@ -25,10 +26,31 @@ import {
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
-export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
-export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
-export const ML_INFERENCE_PREFIX = 'ml.inference.';
-export const ELSER_MODEL_ID = '.elser_model_1';
+const ML_INFERENCE_PREFIX = 'ml.inference.';
+
+class InferenceModel {
+  public taskType: string;
+  public friendlyTaskType: string;
+  public modelId: string;
+
+  constructor() {
+    this.taskType = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
+    this.friendlyTaskType = 'ELSER';
+    this.modelId = '';
+  }
+
+  public setModelId(modelId: string): void {
+    this.modelId = modelId;
+    console.log(this);
+  }
+}
+
+export const elserInferenceModel = new InferenceModel();
+
+export const configureElserInferenceModel = async (elasticModels: ElasticModels) => {
+  const elserModel = await elasticModels.getELSER({version :2});
+  elserInferenceModel.setModelId(elserModel.name);
+};
 
 export interface MlInferencePipelineParams {
   description?: string;

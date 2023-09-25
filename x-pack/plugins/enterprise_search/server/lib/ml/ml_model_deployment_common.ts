@@ -11,7 +11,9 @@ import {
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 
-export const acceptableModelNames = ['.elser_model_1', '.elser_model_1_SNAPSHOT'];
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
+
+export const acceptableModelNames = Object.keys(ELASTIC_MODEL_DEFINITIONS);
 
 export function isNotFoundExceptionError(error: unknown): boolean {
   return (
