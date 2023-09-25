@@ -17,7 +17,7 @@ import {
   PostActionsConnectorExecutePathParams,
 } from '../schemas/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
-import { executeCustomLlmChain } from '../lib/langchain/execute_custom_llm_chain';
+import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -48,7 +48,7 @@ export const postActionsConnectorExecuteRoute = (
           request.body.params.subActionParams.messages
         );
 
-        const langChainResponseBody = await executeCustomLlmChain({
+        const langChainResponseBody = await callAgentExecutor({
           actions,
           connectorId,
           esClient,

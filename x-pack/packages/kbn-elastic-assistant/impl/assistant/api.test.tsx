@@ -100,4 +100,64 @@ describe('fetchConnectorExecuteAction', () => {
 
     expect(result).toBe(API_ERROR);
   });
+
+  it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
+    const content = '```json\n{"action_input": "value from action_input"}\n```';
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({
+      status: 'ok',
+      data: content,
+    });
+
+    const testProps: FetchConnectorExecuteAction = {
+      assistantLangChain: true, // <-- requires response parsing
+      http: mockHttp,
+      messages,
+      apiConfig,
+    };
+
+    const result = await fetchConnectorExecuteAction(testProps);
+
+    expect(result).toBe('value from action_input');
+  });
+
+  it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
+    const content = '```json\n{"some_key": "some value"}\n```';
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({
+      status: 'ok',
+      data: content,
+    });
+
+    const testProps: FetchConnectorExecuteAction = {
+      assistantLangChain: true, // <-- requires response parsing
+      http: mockHttp,
+      messages,
+      apiConfig,
+    };
+
+    const result = await fetchConnectorExecuteAction(testProps);
+
+    expect(result).toBe(content);
+  });
+
+  it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
+    const content = 'plain text content';
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({
+      status: 'ok',
+      data: content,
+    });
+
+    const testProps: FetchConnectorExecuteAction = {
+      assistantLangChain: true, // <-- requires response parsing
+      http: mockHttp,
+      messages,
+      apiConfig,
+    };
+
+    const result = await fetchConnectorExecuteAction(testProps);
+
+    expect(result).toBe(content);
+  });
 });

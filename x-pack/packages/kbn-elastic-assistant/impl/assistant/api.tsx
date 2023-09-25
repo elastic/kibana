@@ -12,6 +12,7 @@ import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
+import { getFormattedMessageContent } from './helpers';
 
 export interface FetchConnectorExecuteAction {
   assistantLangChain: boolean;
@@ -75,7 +76,7 @@ export const fetchConnectorExecuteAction = async ({
       return API_ERROR;
     }
 
-    return response.data;
+    return assistantLangChain ? getFormattedMessageContent(response.data) : response.data;
   } catch (error) {
     return API_ERROR;
   }
