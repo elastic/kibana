@@ -51,7 +51,9 @@ export const useFlyoutActions = (navigationProps: UseNavigationProps) => {
     },
     {
       id: 'surroundingDocument',
-      enabled: Boolean(!viewSurroundingDocument.disabled && dataView.isTimeBased() && dataView.id),
+      enabled: Boolean(
+        !viewSurroundingDocument.disabled && dataView?.isTimeBased() && dataView?.id
+      ),
       Content: () => <SurroundingDocuments onClick={onOpenContextView} href={contextViewHref} />,
     },
     ...customActions,
