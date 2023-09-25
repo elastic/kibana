@@ -14,11 +14,19 @@ import type {
   IngestPipeline,
   IngestSimulateDocument,
   IngestSimulateRequest,
+  NodesInfoResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ELASTIC_MODEL_DEFINITIONS,
+  type GetElserOptions,
+  type ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
-export const modelsProvider = (client: IScopedClusterClient) => new ModelsProvider(client);
+export const modelsProvider = (client: IScopedClusterClient, cloud?: CloudSetup) =>
+  new ModelsProvider(client, cloud);
 
 interface ModelMapResult {
   ingestPipelines: Map<string, Record<string, PipelineDefinition> | null>;
@@ -36,10 +44,11 @@ interface ModelMapResult {
    */
   error: null | any;
 }
+
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _client: IScopedClusterClient) {}
+  constructor(private _client: IScopedClusterClient, private _cloud?: CloudSetup) {}
 
   private async initTransformData() {
     if (!this._transforms) {
@@ -405,5 +414,83 @@ export class ModelsProvider {
     await Promise.all(
       pipelinesIds.map((id) => this._client.asCurrentUser.ingest.deletePipeline({ id }))
     );
+  }
+
+  /**
+   * Returns a list of elastic curated models available for download.
+   */
+  async getModelDownloads(): Promise<ModelDefinitionResponse[]> {
+    // We assume that ML nodes in Cloud are always on linux-x86_64, even if other node types aren't.
+    const isCloud = !!this._cloud?.cloudId;
+
+    const nodesInfoResponse =
+      await this._client.asInternalUser.transport.request<NodesInfoResponseBase>({
+        method: 'GET',
+        path: `/_nodes/ml:true/os`,
+      });
+
+    let osName: string | undefined;
+    let arch: string | undefined;
+    // Indicates that all ML nodes have the same architecture
+    let sameArch = true;
+    for (const node of Object.values(nodesInfoResponse.nodes)) {
+      if (!osName) {
+        osName = node.os?.name;
+      }
+      if (!arch) {
+        arch = node.os?.arch;
+      }
+      if (node.os?.name !== osName || node.os?.arch !== arch) {
+        sameArch = false;
+        break;
+      }
+    }
+
+    const result = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+      const recommended =
+        (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
+        (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
+      return {
+        ...def,
+        name,
+        ...(recommended ? { recommended } : {}),
+      };
+    });
+
+    return result;
+  }
+
+  /**
+   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
+   * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
+   * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
+   * a portable version of the model is returned.
+   */
+  async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> | never {
+    const modelDownloadConfig = await this.getModelDownloads();
+
+    let requestedModel: ModelDefinitionResponse | undefined;
+    let recommendedModel: ModelDefinitionResponse | undefined;
+    let defaultModel: ModelDefinitionResponse | undefined;
+
+    for (const model of modelDownloadConfig) {
+      if (options?.version === model.version) {
+        requestedModel = model;
+        if (model.recommended) {
+          requestedModel = model;
+          break;
+        }
+      } else if (model.recommended) {
+        recommendedModel = model;
+      } else if (model.default) {
+        defaultModel = model;
+      }
+    }
+
+    if (!requestedModel && !defaultModel && !recommendedModel) {
+      throw new Error('Requested model not found');
+    }
+
+    return requestedModel || recommendedModel || defaultModel!;
   }
 }
