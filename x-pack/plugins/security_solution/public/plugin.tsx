@@ -63,6 +63,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The current Kibana branch. e.g. 'main'
    */
   readonly kibanaBranch: string;
+
+  /**
+   * enables ES|QL rule type
+   */
+  readonly enableEsqlRuleType: boolean;
+
   /**
    * The current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'
    */
@@ -95,6 +101,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
+    this.enableEsqlRuleType = this.config.enableEsqlRuleType;
     this.contract = new PluginContract();
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
@@ -277,6 +284,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kibanaBranch: this.kibanaBranch,
       kibanaVersion: this.kibanaVersion,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+      enableEsqlRuleType: this.enableEsqlRuleType,
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);

@@ -15,6 +15,7 @@ export class KibanaServices {
   private static kibanaBranch?: string;
   private static kibanaVersion?: string;
   private static prebuiltRulesPackageVersion?: string;
+  private static enableEsqlRuleType: boolean;
   private static services?: GlobalServices;
 
   public static init({
@@ -28,10 +29,12 @@ export class KibanaServices {
     uiSettings,
     notifications,
     expressions,
+    enableEsqlRuleType,
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
     prebuiltRulesPackageVersion?: string;
+    enableEsqlRuleType: boolean;
   }) {
     this.services = {
       application,
@@ -45,6 +48,7 @@ export class KibanaServices {
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
     this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
+    this.enableEsqlRuleType = enableEsqlRuleType;
   }
 
   public static get(): GlobalServices {
@@ -73,6 +77,10 @@ export class KibanaServices {
 
   public static getPrebuiltRulesPackageVersion(): string | undefined {
     return this.prebuiltRulesPackageVersion;
+  }
+
+  public static getEnableEsqlRuleType(): boolean {
+    return this.enableEsqlRuleType;
   }
 
   private static throwUninitializedError(): never {
