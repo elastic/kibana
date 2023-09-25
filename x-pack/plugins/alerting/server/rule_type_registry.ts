@@ -38,6 +38,7 @@ import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
+import { latestRuleVersion } from './saved_objects';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -92,8 +93,6 @@ const ruleTypeIdSchema = schema.string({
     }
   },
 });
-
-export const EXPECTED_RUNTIME_VERSION = 1;
 
 export type NormalizedRuleType<
   Params extends RuleTypeParams,
@@ -307,7 +306,7 @@ export class RuleTypeRegistry {
           consumer: schema.maybe(schema.string()),
         }),
         indirectParamsSchema: ruleType.validate.params,
-        expectedRuntimeVersion: EXPECTED_RUNTIME_VERSION,
+        latestTypeVersion: latestRuleVersion,
       },
     });
 

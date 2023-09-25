@@ -371,7 +371,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
-    const { paramsSchema, indirectParamsSchema, expectedRuntimeVersion } = this.definition;
+    const { paramsSchema, indirectParamsSchema, latestTypeVersion } = this.definition;
     let hasValidationError = false;
 
     // validate task params
@@ -389,14 +389,14 @@ export class TaskManagerRunner implements TaskRunner {
 
     if (this.task?.loadIndirectParams) {
       const { data } = await this.task.loadIndirectParams();
-      const runtimeVersion = data?.runtimeVersion;
       const indirectParams = data?.indirectParams;
+      const typeVersion = data?.typeVersion;
 
       // validate runtime version
-      if (runtimeVersion && expectedRuntimeVersion && runtimeVersion > expectedRuntimeVersion) {
+      if (typeVersion && latestTypeVersion && typeVersion > latestTypeVersion) {
         hasValidationError = true;
         this.logger.warn(
-          `Task (${taskType}/${id}) has a newer version(${runtimeVersion}) than expected((${expectedRuntimeVersion}))`
+          `Task (${taskType}/${id}) has a newer version(${typeVersion}) than expected((${latestTypeVersion}))`
         );
         if (numSkippedRuns < maxAttempts) {
           return {

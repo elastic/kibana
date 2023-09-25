@@ -13,7 +13,12 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import {
+  ALERTING_CASES_SAVED_OBJECT_INDEX,
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
+import { rawRuleSchema } from '../raw_rule_schema';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
@@ -47,7 +52,7 @@ export const AlertAttributesExcludedFromAAD = [
   'nextRun',
   'revision',
   'running',
-  'runtimeVersion',
+  'typeVersion',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -69,6 +74,40 @@ export type AlertAttributesExcludedFromAADType =
   | 'nextRun'
   | 'revision'
   | 'running';
+
+interface CustomSavedObjectsModelVersion extends SavedObjectsModelVersion {
+  minimumCompatibleVersion: (param: RawRule) => number;
+}
+
+interface CustomSavedObjectsModelVersionMap extends SavedObjectsModelVersionMap {
+  [modelVersion: string]: CustomSavedObjectsModelVersion;
+}
+
+export const modelVersions: CustomSavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      create: rawRuleSchema,
+    },
+    minimumCompatibleVersion: (rawRule) => 1,
+  },
+  '2': {
+    changes: [],
+    schemas: {
+      create: rawRuleSchema,
+    },
+    minimumCompatibleVersion: (rawRule) => 1,
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      create: rawRuleSchema,
+    },
+    minimumCompatibleVersion: (rawRule) => 1,
+  },
+};
+
+export const latestRuleVersion = Math.max(...Object.keys(modelVersions).map(Number));
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -107,6 +146,7 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
+    modelVersions,
   });
 
   savedObjects.registerType({

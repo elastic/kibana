@@ -64,13 +64,14 @@ describe('rule_loader', () => {
       ? { error }
       : {
           data: {
-            indirectParams: mockedRawRuleSO.attributes.params,
+            indirectParams: mockedRawRuleSO.attributes,
             rule: { ...mockedRule, params, enabled: ruleEnabled },
             rulesClient,
             version: '1',
             fakeRequest,
             apiKey: mockedRawRuleSO.attributes.apiKey,
-            runtimeVersion: 1,
+            typeVersion: 1,
+            latestTypeVersion: 1,
           },
         },
   });

@@ -76,7 +76,7 @@ export interface TaskRegisterDefinition {
 
   paramsSchema?: ObjectType;
   indirectParamsSchema?: Partial<ObjectType>;
-  expectedRuntimeVersion?: number;
+  latestTypeVersion?: number;
 }
 
 /**

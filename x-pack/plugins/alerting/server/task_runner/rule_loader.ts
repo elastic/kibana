@@ -12,6 +12,7 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
+import { latestRuleVersion, modelVersions } from '../saved_objects';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -29,7 +30,7 @@ export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectP
   indirectParams: Params;
   rule: SanitizedRule<Params>;
   version: string | undefined;
-  runtimeVersion: number;
+  typeVersion: number;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
   apiKey: string | null;
@@ -52,8 +53,6 @@ interface ValidateRuleParams<Params extends RuleTypeParams> {
   ruleData: RuleDataResult<RuleData<Params>>;
 }
 
-const INITIAL_RUNTIME_VERSION = 1;
-
 export function validateRule<Params extends RuleTypeParams>(
   params: ValidateRuleParams<Params>
 ): ValidatedRuleData<Params> {
@@ -63,7 +62,7 @@ export function validateRule<Params extends RuleTypeParams>(
 
   const {
     ruleData: {
-      data: { indirectParams, rule, fakeRequest, rulesClient, version, apiKey, runtimeVersion },
+      data: { indirectParams, rule, fakeRequest, rulesClient, version, apiKey, typeVersion },
     },
     ruleTypeRegistry,
     paramValidator,
@@ -100,7 +99,7 @@ export function validateRule<Params extends RuleTypeParams>(
   return {
     rule,
     indirectParams,
-    runtimeVersion,
+    typeVersion,
     fakeRequest,
     apiKey,
     rulesClient,
@@ -133,6 +132,10 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     omitGeneratedValues: false,
   });
 
+  const typeVersion = modelVersions[
+    String(rawRule.attributes.typeVersion || latestRuleVersion)
+  ].minimumCompatibleVersion(rawRule.attributes);
+
   return {
     rule,
     version: rawRule.version,
@@ -140,7 +143,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     fakeRequest,
     rulesClient,
     apiKey: rawRule.attributes.apiKey,
-    runtimeVersion: rawRule.attributes.runtimeVersion || INITIAL_RUNTIME_VERSION,
+    typeVersion,
   };
 }
 

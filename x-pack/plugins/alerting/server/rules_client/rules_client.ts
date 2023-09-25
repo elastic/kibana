@@ -70,7 +70,7 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'mapped_params',
   'snoozeSchedule',
   'activeSnoozes',
-  'runtimeVersion',
+  'typeVersion',
 ];
 
 export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([

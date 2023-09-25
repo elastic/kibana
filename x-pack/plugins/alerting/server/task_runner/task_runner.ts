@@ -38,7 +38,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateAlert } from '../saved_objects';
+import { latestRuleVersion, partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -51,11 +51,7 @@ import {
   SanitizedRule,
   RuleNotifyWhen,
 } from '../../common';
-import {
-  EXPECTED_RUNTIME_VERSION,
-  NormalizedRuleType,
-  UntypedNormalizedRuleType,
-} from '../rule_type_registry';
+import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
@@ -206,7 +202,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      runtimeVersion: number;
+      typeVersion: number;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -771,7 +767,7 @@ export class TaskRunner<
         nextRun,
         lastRun: lastRunToRaw(lastRun),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-        runtimeVersion: EXPECTED_RUNTIME_VERSION,
+        typeVersion: latestRuleVersion,
       });
     }
 
@@ -995,7 +991,7 @@ export class TaskRunner<
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
-      runtimeVersion: EXPECTED_RUNTIME_VERSION,
+      typeVersion: latestRuleVersion,
     });
   }
 }
