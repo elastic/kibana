@@ -24,10 +24,10 @@ function createDeepLinks(
     if (showMLNavMenu === false) {
       // in serverless the status needs to be "visible" rather than "default"
       // for the links to appear in the nav menu.
-      return showInServerless && visible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden;
+      return showInServerless && visible ? AppNavLinkStatus.visible : AppNavLinkStatus.disabled;
     }
 
-    return visible ? AppNavLinkStatus.default : AppNavLinkStatus.hidden;
+    return visible ? AppNavLinkStatus.default : AppNavLinkStatus.disabled;
   }
 
   return {
