@@ -722,10 +722,6 @@ export const UnifiedDataTable = ({
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
-  const gridStyle = useMemo(() => {
-    return gridStyleOverride ?? GRID_STYLE;
-  }, [gridStyleOverride]);
-
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightState,
     onUpdateRowHeight,
@@ -799,7 +795,7 @@ export const UnifiedDataTable = ({
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
             inMemory={inMemory}
-            gridStyle={gridStyle}
+            gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
           />
