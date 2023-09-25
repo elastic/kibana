@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { uniq } from 'lodash';
-import type { OpenApiDocument } from './openapi_types';
+import type { OpenApiDocument } from '../openapi_types';
+import { traverseObject } from './traverse_object';
 
 export interface ImportsMap {
   [importPath: string]: string[];
@@ -55,23 +57,11 @@ const hasRef = (obj: unknown): obj is { $ref: string } => {
 function findRefs(obj: unknown): string[] {
   const refs: string[] = [];
 
-  function search(element: unknown) {
-    if (typeof element === 'object' && element !== null) {
-      if (hasRef(element)) {
-        refs.push(element.$ref);
-      }
-
-      Object.values(element).forEach((value) => {
-        if (Array.isArray(value)) {
-          value.forEach(search);
-        } else {
-          search(value);
-        }
-      });
+  traverseObject(obj, (element) => {
+    if (hasRef(element)) {
+      refs.push(element.$ref);
     }
-  }
-
-  search(obj);
+  });
 
   return refs;
 }
