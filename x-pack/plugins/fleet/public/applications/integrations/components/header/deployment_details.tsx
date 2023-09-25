@@ -11,7 +11,7 @@ import { EuiPopover, EuiHeaderLink } from '@elastic/eui';
 import {
   DeploymentDetailsKibanaProvider,
   DeploymentDetails as DeploymentDetailsComponent,
-} from '@kbn/cloud/deployment-details';
+} from '@kbn/cloud/deployment_details';
 
 import { useStartServices } from '../../hooks';
 

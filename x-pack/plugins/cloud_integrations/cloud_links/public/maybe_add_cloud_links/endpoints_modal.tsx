@@ -12,7 +12,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   DeploymentDetailsKibanaProvider,
   DeploymentDetailsModal,
-} from '@kbn/cloud/deployment-details';
+} from '@kbn/cloud/deployment_details';
 
 interface Props {
   closeModal: () => void;
