@@ -41,7 +41,7 @@ export const migratePackagePolicyToV8110: SavedObjectModelDataBackfillFn<
 
       // 'advanced.api: bool' is superseded by 'advanced.api_call: { [string] : bool }'
       // If it was explictly false then propagate this value
-      if( policy.windows.advanced?.api == false ) {
+      if( policy.windows.advanced?.api === false ) {
         policy.windows.advanced.api_call = {etw_threat_intelligence: false, etw_win32k: false }
       }
     }
