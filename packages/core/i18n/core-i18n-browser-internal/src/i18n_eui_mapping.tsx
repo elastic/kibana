@@ -119,6 +119,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Breadcrumbs',
       description: 'Label on the breadcrumbs nav element',
     }),
+    'euiCallOut.dismissAriaLabel': i18n.translate('core.euiCallOut.dismissAriaLabel', {
+      defaultMessage: 'Dismiss this callout',
+    }),
     'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
       defaultMessage: 'Select',
       description: 'Displayed button text when a card option can be selected.',
