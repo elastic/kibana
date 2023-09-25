@@ -8,18 +8,11 @@
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
-import {
-  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  DashboardTypeEnum,
-  SavedServiceDashboard,
-} from '../../../common/service_dashboards';
-import { getServiceDashboards } from './get_service_dashboards';
+import { SavedServiceDashboard } from '../../../common/service_dashboards';
 import { deleteServiceDashboard } from './remove_service_dashboard';
-
-const linkToRt = t.union([
-  t.literal(DashboardTypeEnum.single),
-  t.literal(DashboardTypeEnum.multiple),
-]);
+import { getLinkedCustomDashboards } from './get_linked_custom_dashboards';
+import { getServicesWithDashboards } from './get_services_with_dashboards';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-dashboard',
@@ -32,11 +25,8 @@ const serviceDashboardSaveRoute = createApmServerRoute({
     ]),
     body: t.type({
       dashboardSavedObjectId: t.string,
-      dashboardTitle: t.string,
       kuery: t.union([t.string, t.undefined]),
-      serviceName: t.string,
       useContextFilter: t.boolean,
-      linkTo: linkToRt,
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
@@ -71,21 +61,23 @@ const serviceDashboardsRoute = createApmServerRoute({
     const { context, params } = resources;
     const { serviceName } = params.path;
 
-    const soPrefixServiceName = `${APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE}.attributes.serviceName`;
-    const soPrefixLinkTo = `${APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE}.attributes.linkTo`;
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
-    const [serviceDashboards] = await Promise.all([
-      getServiceDashboards({
-        savedObjectsClient,
-        filter: `${soPrefixServiceName}:${serviceName} AND ${soPrefixLinkTo}: ${DashboardTypeEnum.single} `,
-      }),
-    ]);
+    const allLinkedCustomDashboards = await getLinkedCustomDashboards({
+      savedObjectsClient,
+    });
 
-    return { serviceDashboards };
+    const servicesWithDashboards = await getServicesWithDashboards({
+      apmEventClient,
+      allLinkedCustomDashboards,
+      serviceName,
+    });
+
+    return { serviceDashboards: servicesWithDashboards };
   },
 });
 
