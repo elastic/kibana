@@ -13,7 +13,6 @@ import {
   EuiBadge,
   EuiTitle,
   EuiButton,
-  EuiSpacer,
   EuiSwitch,
   EuiFormRow,
   EuiToolTip,
