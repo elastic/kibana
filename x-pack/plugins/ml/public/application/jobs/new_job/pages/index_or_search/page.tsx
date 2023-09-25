@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useRef, Fragment } from 'react';
-import { EuiPageBody, EuiPanel, EuiButton } from '@elastic/eui';
+import React, { FC, useCallback } from 'react';
+import { EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
@@ -19,14 +20,11 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
-  const { contentManagement, uiSettings, dataViewEditor } = useMlKibana().services;
+  const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const onObjectSelection = useCallback(
-    (id: string, type: string) => {
+    (id: string, type: string, name?: string) => {
       navigateToPath(
         `${nextStepPath}?${
           type === 'index-pattern' ? 'index' : 'savedSearchId'
@@ -35,18 +33,6 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
     },
     [navigateToPath, nextStepPath]
   );
-
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onObjectSelection(dataView.id, 'index-pattern');
-        }
-      },
-
-      allowAdHocDataView: false,
-    });
-  }, [onObjectSelection, dataViewEditor]);
 
   return (
     <div data-test-subj="mlPageSourceSelection">
@@ -93,22 +79,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               uiSettings,
             }}
           >
-            {canEditDataView ? (
-              <EuiButton
-                onClick={createNewDataView}
-                fill
-                iconType="plusInCircle"
-                data-test-subj="newDataViewButton"
-                disabled={!canEditDataView}
-              >
-                <FormattedMessage
-                  id="xpack.ml.savedObjectFinder.createADataView"
-                  defaultMessage="Create a data view"
-                />
-              </EuiButton>
-            ) : (
-              <Fragment />
-            )}
+            <CreateDataViewButton onDataViewCreated={onObjectSelection} />
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>
