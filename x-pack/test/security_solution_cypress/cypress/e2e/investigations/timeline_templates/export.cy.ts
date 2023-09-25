@@ -6,7 +6,8 @@
  */
 
 import { exportTimeline } from '../../../tasks/timelines';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,
@@ -36,7 +37,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerles
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
     exportTimeline(this.templateId);
 
