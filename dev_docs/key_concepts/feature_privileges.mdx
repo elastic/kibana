@@ -159,21 +159,6 @@ Here we've added two routes, one which returns the current date-time in ISO 8601
 To do so, we need to modify the configuration object for our route to look like this:
 
 ```
-router.get(
-      {
-        path: '/internal/my_plugin/sensitive_action',
-        validate: false,
-        
-      },
-      async (context, request, response) => {
-        return response.ok({
-          body: {
-            time: new Date().toISOString(),
-          },
-        });
-      }
-    );
-
 public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
   // ...
   const router = core.http.createRouter();
@@ -318,7 +303,7 @@ A deep dive into every option for the Kibana Feature configuration and what they
 #### privileges
 
 - **Description**: Feature privilege definition. These are used to control what access the read/all roles will have when enabled for your application.
-- **Type**: Object
+- **Type**: [FeatureKibanaPrivileges](#featurekibanaprivileges-interface)
 - **Example**:
   ```js
   privileges: {
