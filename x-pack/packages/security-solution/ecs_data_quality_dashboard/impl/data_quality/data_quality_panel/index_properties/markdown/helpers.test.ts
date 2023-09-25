@@ -538,7 +538,7 @@ describe('helpers', () => {
           sizeInBytes: 28413,
         })
       ).toEqual(
-        '| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| 3 | 1 | 25 | 27.7KB | 57,410 |\n'
+        '| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| 3 | 1 | 25 | 27.7KB | 57,410 |\n'
       );
     });
 
@@ -554,7 +554,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n'
+        '| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n'
       );
     });
   });
@@ -572,7 +572,7 @@ describe('helpers', () => {
           sizeInBytes: 4294967296,
         })
       ).toEqual(
-        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| 4 | 2 | 30 | 4GB | 3,343,719 |\n\n'
+        '# Data quality\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| 4 | 2 | 30 | 4GB | 3,343,719 |\n\n'
       );
     });
 
@@ -588,7 +588,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n\n'
+        '# Data quality\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n\n'
       );
     });
   });
@@ -640,7 +640,7 @@ describe('helpers', () => {
           patternRollup: auditbeatWithAllResults,
         })
       ).toEqual(
-        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 19,127 |\n\n'
+        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 19,127 |\n\n'
       );
     });
 
@@ -652,7 +652,7 @@ describe('helpers', () => {
           patternRollup: auditbeatNoResults,
         })
       ).toEqual(
-        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | 0 | 3 | 17.9MB | 19,127 |\n\n'
+        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| -- | 0 | 3 | 17.9MB | 19,127 |\n\n'
       );
     });
 
@@ -669,7 +669,7 @@ describe('helpers', () => {
           patternRollup: noIlmExplainPhaseCounts,
         })
       ).toEqual(
-        '## auditbeat-*\n\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 19,127 |\n\n'
+        '## auditbeat-*\n\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 19,127 |\n\n'
       );
     });
 
@@ -686,7 +686,7 @@ describe('helpers', () => {
           patternRollup: noDocsCount,
         })
       ).toEqual(
-        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 0 |\n\n'
+        '## auditbeat-*\n`hot(1)` `unmanaged(2)`\n\n| Incompatible fields | Indices checked (Internal indices, patterns and kibana sample data are skipped) | Indices | Size | Docs |\n|---------------------|---------------------------------------------------------------------------------|---------|------|------|\n| 4 | 3 | 3 | 17.9MB | 0 |\n\n'
       );
     });
   });

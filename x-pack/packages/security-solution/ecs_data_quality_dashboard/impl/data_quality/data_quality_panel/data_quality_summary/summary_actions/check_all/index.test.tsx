@@ -21,6 +21,7 @@ import {
 } from '../../../../types';
 import { CheckAll } from '.';
 import { EMPTY_STAT } from '../../../../helpers';
+import { checkIsHiddenPattern, checkIsSkippedIndex } from './helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const mockFormatBytes = (value: number | undefined) =>
@@ -408,13 +409,18 @@ describe('CheckAll', () => {
     // test all the patterns
     Object.entries(patternIndexNames).forEach((pattern) => {
       const [patternName, indexNames] = pattern;
+      const isHiddenPattern = checkIsHiddenPattern(patternName);
 
       // test each index in the pattern
       indexNames.forEach((indexName) => {
+        const isSkippedIndex = checkIsSkippedIndex(indexName);
+
         test(`it invokes setIndexToCheck with the expected value for the '${patternName}' pattern's index, named '${indexName}'`, () => {
           expect(setIndexToCheck).toBeCalledWith({
             indexName,
             pattern: patternName,
+            isHiddenPattern,
+            isSkippedIndex,
           });
         });
       });

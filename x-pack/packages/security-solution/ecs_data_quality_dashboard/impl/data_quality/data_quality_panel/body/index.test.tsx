@@ -51,7 +51,33 @@ describe('IndexInvalidValues', () => {
   });
 
   describe('patterns', () => {
-    const patterns = ['.alerts-security.alerts-default', 'auditbeat-*', 'logs-*', 'packetbeat-*'];
+    const hiddenPatterns = ['.alerts-security.alerts-default'];
+    const patterns = ['auditbeat-*', 'logs-*', 'packetbeat-*'];
+
+    test(`it does not render the hidden pattern`, async () => {
+      render(
+        <TestProviders>
+          <Body
+            addSuccessToast={jest.fn()}
+            canUserCreateAndReadCases={jest.fn()}
+            formatBytes={formatBytes}
+            formatNumber={formatNumber}
+            getGroupByFieldsOnClick={jest.fn()}
+            ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
+            lastChecked={''}
+            openCreateCaseFlyout={jest.fn()}
+            patterns={hiddenPatterns}
+            setLastChecked={jest.fn()}
+            baseTheme={DARK_THEME}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(`${hiddenPatterns}PatternPanel`)).not.toBeInTheDocument();
+      });
+    });
 
     patterns.forEach((pattern) => {
       test(`it renders the '${pattern}' pattern`, async () => {

@@ -27,7 +27,8 @@ const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
 const ilmPhases = ['hot', 'warm', 'unmanaged'];
-const patterns = ['.alerts-security.alerts-default', 'auditbeat-*', 'packetbeat-*'];
+const hiddenPatterns = ['.alerts-security.alerts-default'];
+const patterns = ['auditbeat-*', 'packetbeat-*'];
 
 const patternRollups: Record<string, PatternRollup> = {
   '.alerts-security.alerts-default': alertIndexWithAllResults,
@@ -81,6 +82,10 @@ describe('IndicesDetails', () => {
   });
 
   describe('rendering patterns', () => {
+    test(`it does not render hidden patterns`, () => {
+      expect(screen.queryByTestId(`${hiddenPatterns}PatternPanel`)).not.toBeInTheDocument();
+    });
+
     patterns.forEach((pattern) => {
       test(`it renders the ${pattern} pattern`, () => {
         expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();

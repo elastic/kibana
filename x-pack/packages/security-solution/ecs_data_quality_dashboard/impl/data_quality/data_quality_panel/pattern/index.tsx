@@ -324,7 +324,7 @@ const PatternComponent: React.FC<Props> = ({
     toggleExpanded,
   ]);
 
-  return isHiddenPattern || items.length === 0 ? null : (
+  return isHiddenPattern ? null : (
     <EuiPanel data-test-subj={`${pattern}PatternPanel`} hasBorder={false} hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>

@@ -37,6 +37,8 @@ describe('helpers', () => {
       ).toEqual({
         indexName: 'auditbeat-custom-index-1',
         pattern: 'auditbeat-*',
+        isHiddenPattern: false,
+        isSkippedIndex: false,
       });
     });
   });
@@ -47,34 +49,50 @@ describe('helpers', () => {
         {
           indexName: '.internal.alerts-security.alerts-default-000001',
           pattern: '.alerts-security.alerts-default',
+          isHiddenPattern: true,
+          isSkippedIndex: true,
         },
         {
           indexName: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: 'auditbeat-7.17.9-2023.02.13-000001',
           pattern: 'auditbeat-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: '.ds-auditbeat-8.6.1-2023.02.13-000001',
           pattern: 'auditbeat-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: '.ds-logs-endpoint.events.process-default-2023.02.24-000001',
           pattern: 'logs-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: '.ds-logs-endpoint.alerts-default-2023.02.24-000001',
           pattern: 'logs-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           pattern: 'packetbeat-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
         {
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           pattern: 'packetbeat-*',
+          isHiddenPattern: false,
+          isSkippedIndex: false,
         },
       ]);
     });
