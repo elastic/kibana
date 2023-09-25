@@ -1776,7 +1776,7 @@ const services: RuleExecutorServicesMock &
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {
-    create: jest.fn(() => mockedSearchSource),
+    create: jest.fn(() => Promise.resolve(mockedSearchSource)),
   },
 };
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
