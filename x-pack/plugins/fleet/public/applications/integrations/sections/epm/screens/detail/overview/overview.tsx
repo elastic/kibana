@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo, useEffect, useState } from 'react';
+import type { MouseEventHandler } from 'react';
+import React, { memo, useMemo, useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiCallOut,
@@ -47,17 +48,14 @@ interface Item {
   name: string;
   items?: Item[];
   isSelected?: boolean;
+  onClick: MouseEventHandler<HTMLElement | HTMLButtonElement>;
   forceOpen: boolean;
-  // isSelected
-  // onClick: () => selectItem(name),
 }
 
-// const LeftColumn = styled(EuiFlexItem)`
-//   /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-//   &&& {
-//     margin-top: 77px;
-//   }
-// `;
+const LeftColumn = styled(EuiFlexItem)`
+  padding-top: 50px;
+  padding-left: 10px;
+`;
 
 const UnverifiedCallout: React.FC = () => {
   const { docLinks } = useStartServices();
@@ -142,7 +140,11 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
-    const [selectedItemName, setSelectedItem] = useState(null);
+    const [selectedItemName, setSelectedItem] = useState<string>(undefined);
+
+    const selectItem = (name: string) => {
+      setSelectedItem(name);
+    };
 
     const readmePath =
       integrationInfo && isIntegrationPolicyTemplate(integrationInfo) && integrationInfo?.readme
@@ -163,55 +165,83 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const getName = (heading: string) => heading.replace(/^#+\s*/, '');
 
-    const headingsToNavItems = (headings: string[]): any[] => {
-      const options = { forceOpen: true };
-      return headings.reduce((acc: any[], heading: string, index: number) => {
-        if (heading.startsWith('## ')) {
-          const name = getName(heading);
-          acc.push({ name, id: `${name}-${index}`, items: [], ...options });
-        } else if (heading.startsWith('### ')) {
-          const name = getName(heading);
-          const subGroup: Item = { name, id: `${name}-${index}`, items: [], ...options };
-          let i = index + 1;
-          while (i < headings.length && headings[i].startsWith('#### ')) {
-            const subGroupName = getName(headings[i]);
-            subGroup.items?.push({
-              name: subGroupName,
-              id: `${subGroupName}-${index}`,
-              items: [],
-              ...options,
-            });
-            i++;
-          }
-          acc[acc.length - 1].items.push(subGroup);
-        }
-        return acc;
-      }, []);
-    };
-
-    const headings = extractHeadings(markdown);
-    console.log(headings);
-    const navItems = headingsToNavItems(headings);
-    console.log('navItems', navItems);
-
-    const sideNavItems = [
-      {
-        name: 'Title',
-        id: 'title',
-        items: navItems,
+    const createItem = useCallback(
+      (name: string, index: number, options: any = {}): Item => {
+        // NOTE: Duplicate `name` values will cause `id` collisions
+        // some names are too long so they're trimmed at 8 characters long
+        const id = `${name.replaceAll(' ', '').toLowerCase().slice(0, 8)}-${index}`;
+        return {
+          id,
+          name,
+          isSelected: selectedItemName === name,
+          onClick: () => selectItem(name),
+          ...options,
+        };
       },
-    ];
+      [selectedItemName]
+    );
+
+    // function that gets the headings and creates a nested structure as requested by EuiSideNav
+    const headingsToNavItems = useCallback(
+      (headings: string[]): Item[] => {
+        const options = { forceOpen: true };
+        return headings.reduce((acc: Item[], heading: string, index: number) => {
+          if (heading.startsWith('## ')) {
+            const item = createItem(getName(heading), index, options);
+            acc.push(item);
+          } else if (heading.startsWith('### ')) {
+            const subGroup = createItem(getName(heading), index, options);
+            let i = index + 1;
+            while (i < headings.length && headings[i].startsWith('#### ')) {
+              const subGroupItem = createItem(getName(headings[i]), i, options);
+              if (!subGroup?.items) subGroup.items = [];
+              subGroup.items?.push(subGroupItem);
+              i++;
+            }
+            const prevIndex = acc.length - 1;
+            // const currentIndex = prevIndex >= 0 ? prevIndex : 0;
+            if (prevIndex >= 0) {
+              if (!acc[prevIndex]?.items) acc[prevIndex].items = [];
+              acc[prevIndex]?.items?.push(subGroup);
+            } else {
+              const fakeItem = createItem(getName(''), i, options);
+              acc.push(fakeItem);
+              if (!acc[0]?.items) acc[0].items = [];
+              acc[0]?.items?.push(subGroup);
+            }
+          }
+          return acc;
+        }, []);
+      },
+      [createItem]
+    );
+
+    const sideNavItems = useMemo(() => {
+      const headings = extractHeadings(markdown);
+      // console.log('headings', headings);
+      const navItems = headingsToNavItems(headings);
+      // console.log('navItems', navItems);
+      const h1 = headings.find((h) => h.startsWith('# '));
+      const title = h1 ? getName(h1) : '';
+      return [
+        {
+          name: `${title}`,
+          id: `${title}`,
+          items: navItems,
+        },
+      ];
+    }, [headingsToNavItems, markdown]);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
-        <EuiFlexItem grow={2}>
+        <LeftColumn grow={2}>
           <EuiSideNav
             mobileTitle="Nav Items"
             // toggleOpenOnMobile={toggleOpenOnMobile}
             // isOpenOnMobile={isSideNavOpenOnMobile}
             items={sideNavItems}
           />
-        </EuiFlexItem>
+        </LeftColumn>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
           {isPrerelease && (
