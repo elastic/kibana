@@ -5091,6 +5091,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
