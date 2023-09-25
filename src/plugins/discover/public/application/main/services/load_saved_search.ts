@@ -77,7 +77,7 @@ export const loadSavedSearch = async (
         internalStateContainer,
         savedSearch: nextSavedSearch,
       });
-      const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
+      const dataViewDifferentToAppState = stateDataView?.id !== savedSearchDataViewId;
       if (stateDataView && (dataViewDifferentToAppState || !savedSearchDataViewId)) {
         nextSavedSearch.searchSource.setField('index', stateDataView);
       }

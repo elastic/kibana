@@ -35,7 +35,7 @@ const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn =
   (
-    dataView: DataView,
+    dataView: DataView | undefined,
     rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
     shouldShowFieldHandler: ShouldShowFieldInTableHandler,
@@ -73,7 +73,7 @@ export const getRenderCellValueFn =
     }
     const row = rows ? rows[rowIndex] : undefined;
 
-    const field = dataView.fields.getByName(columnId);
+    const field = dataView?.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
@@ -196,7 +196,7 @@ function renderPopoverContent({
   row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
-  dataView: DataView;
+  dataView: DataView | undefined;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
@@ -266,7 +266,7 @@ function renderPopoverContent({
 function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
-  dataView: DataView,
+  dataView: DataView | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
@@ -275,13 +275,14 @@ function getTopLevelObjectPairs(
   const highlightPairs: Array<[string, string]> = [];
   const sourcePairs: Array<[string, string]> = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
-    const subField = dataView.getFieldByName(key);
-    const displayKey = dataView.fields.getByName
+    const subField = dataView?.getFieldByName(key);
+    const displayKey = dataView?.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatter = subField
-      ? dataView.getFormatterForField(subField)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
+    const formatter =
+      dataView && subField
+        ? dataView?.getFormatterForField(subField)
+        : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     const formatted = values
       .map((val: unknown) =>
         formatter.convert(val, 'html', {

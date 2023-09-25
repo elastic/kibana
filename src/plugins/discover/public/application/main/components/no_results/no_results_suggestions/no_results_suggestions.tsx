@@ -32,7 +32,7 @@ import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
 
 interface NoResultsSuggestionProps {
-  dataView: DataView;
+  dataView?: DataView;
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;

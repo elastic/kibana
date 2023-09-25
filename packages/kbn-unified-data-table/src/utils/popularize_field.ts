@@ -11,12 +11,12 @@ import type { DataViewsContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 async function popularizeField(
-  dataView: DataView,
+  dataView: DataView | undefined,
   fieldName: string,
   DataViewsService: DataViewsContract,
   capabilities: Capabilities
 ) {
-  if (!dataView.id || !capabilities?.indexPatterns?.save) return;
+  if (!dataView || !dataView.id || !capabilities?.indexPatterns?.save) return;
   const field = dataView.fields.getByName(fieldName);
   if (!field) {
     return;

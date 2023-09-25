@@ -15,7 +15,7 @@ import { getStateColumnActions } from '../components/actions/columns';
 
 interface UseColumnsProps {
   capabilities: Capabilities;
-  dataView: DataView;
+  dataView?: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: (state: { columns: string[]; sort?: string[][] }) => void;

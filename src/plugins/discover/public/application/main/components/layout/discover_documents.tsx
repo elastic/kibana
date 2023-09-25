@@ -86,7 +86,7 @@ function DiscoverDocumentsComponent({
   stateContainer,
   onFieldEdited,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
@@ -136,7 +136,7 @@ function DiscoverDocumentsComponent({
   // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading = !isTextBasedQuery && dataView.id && index !== dataView.id;
+  const isDataViewLoading = !isTextBasedQuery && dataView?.id && index !== dataView.id;
   const isEmptyDataResult =
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
@@ -194,8 +194,8 @@ function DiscoverDocumentsComponent({
       // for ES|QL we want to show the time column only when is on Document view
       (!isTextBasedQuery || !columns?.length) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
+      !!dataView?.timeFieldName,
+    [isTextBasedQuery, columns, uiSettings, dataView?.timeFieldName]
   );
 
   const renderDocumentView = useCallback(
@@ -244,7 +244,7 @@ function DiscoverDocumentsComponent({
           data-test-subj="dscInterceptedWarningsCallout"
         />
       )}
-      {isLegacy && rows && rows.length > 0 && (
+      {isLegacy && dataView && rows && rows.length > 0 && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized

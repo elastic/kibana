@@ -30,7 +30,7 @@ export const convertValueToString = ({
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
-  dataView: DataView;
+  dataView?: DataView;
   fieldFormats: FieldFormatsStart;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
@@ -44,7 +44,7 @@ export const convertValueToString = ({
   }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
-  const field = dataView.fields.getByName(columnId);
+  const field = dataView?.fields.getByName(columnId);
   const valuesArray = Array.isArray(value) ? value : [value];
   const disableMultiline = options?.compatibleWithCSV ?? false;
   const enableEscapingForValue = options?.compatibleWithCSV ?? false;

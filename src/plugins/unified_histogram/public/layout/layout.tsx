@@ -221,7 +221,7 @@ export const UnifiedHistogramLayout = ({
       onSuggestionChange,
     });
 
-  const chart = suggestionUnsupported ? undefined : originalChart;
+  const chart = dataView && suggestionUnsupported ? undefined : originalChart;
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []

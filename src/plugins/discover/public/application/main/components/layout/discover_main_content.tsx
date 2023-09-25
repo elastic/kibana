@@ -39,7 +39,7 @@ const DROP_PROPS = {
 };
 
 export interface DiscoverMainContentProps {
-  dataView: DataView;
+  dataView?: DataView;
   isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;

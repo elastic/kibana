@@ -70,7 +70,7 @@ export interface FieldStatisticsTableProps {
   /**
    * The used data view
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * Saved search description
    */
@@ -214,7 +214,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           DataVisualizerGridEmbeddableInput,
           DataVisualizerGridEmbeddableOutput
         >('data_visualizer_grid');
-        if (factory) {
+        if (factory && dataView) {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',

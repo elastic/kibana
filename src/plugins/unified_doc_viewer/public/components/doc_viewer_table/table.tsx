@@ -65,7 +65,10 @@ const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
 
-const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
+const getPinnedFields = (dataViewId: string | undefined, storage: Storage): string[] => {
+  if (!dataViewId) {
+    return [];
+  }
   const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
   if (
     typeof pinnedFieldsEntry === 'object' &&
@@ -76,7 +79,14 @@ const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   }
   return [];
 };
-const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storage: Storage) => {
+const updatePinnedFieldsState = (
+  newFields: string[],
+  dataViewId: string | undefined,
+  storage: Storage
+) => {
+  if (!dataViewId) {
+    return;
+  }
   let pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
   pinnedFieldsEntry =
     typeof pinnedFieldsEntry === 'object' && pinnedFieldsEntry !== null ? pinnedFieldsEntry : {};
@@ -115,7 +125,7 @@ export const DocViewerTable = ({
 
   const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const currentDataViewId = dataView.id!;
+  const currentDataViewId = dataView?.id;
   const isSingleDocView = !filter;
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
@@ -133,7 +143,10 @@ export const DocViewerTable = ({
     defaultMessage: 'Search field names',
   });
 
-  const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
+  const mapping = useCallback(
+    (name: string) => dataView?.fields.getByName(name),
+    [dataView?.fields]
+  );
 
   const onToggleColumn = useCallback(
     (field: string) => {

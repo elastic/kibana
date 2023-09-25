@@ -94,7 +94,7 @@ export interface UnifiedDataTableProps {
   /**
    * The used data view
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * Determines if data is currently loaded
    */
@@ -489,6 +489,7 @@ export const UnifiedDataTable = ({
   );
 
   const shouldShowFieldHandler = useMemo(() => {
+    if(!dataView) return () => false;
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
@@ -535,7 +536,7 @@ export const UnifiedDataTable = ({
 
   const editField = useMemo(
     () =>
-      onFieldEdited
+      onFieldEdited && dataView
         ? (fieldName: string) => {
             closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
               ctx: {
@@ -564,7 +565,7 @@ export const UnifiedDataTable = ({
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId && !isPlainRecord
+      cellActionsTriggerId && !isPlainRecord && dataView
         ? visibleColumns.map(
             (columnName) =>
               dataView.getFieldByName(columnName)?.toSpec() ?? {

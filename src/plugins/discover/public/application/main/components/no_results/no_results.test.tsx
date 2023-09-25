@@ -42,7 +42,7 @@ async function mountAndFindSubjects(
   >
 ) {
   const services = createDiscoverServicesMock();
-  const isTimeBased = props.dataView.isTimeBased();
+  const isTimeBased = props.dataView?.isTimeBased();
 
   let component: ReactWrapper;
 

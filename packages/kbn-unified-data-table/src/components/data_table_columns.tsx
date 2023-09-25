@@ -83,7 +83,7 @@ function buildEuiGridColumn({
 }: {
   columnName: string;
   columnWidth: number | undefined;
-  dataView: DataView;
+  dataView?: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
@@ -96,7 +96,7 @@ function buildEuiGridColumn({
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = dataView?.getFieldByName(columnName);
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -125,7 +125,7 @@ function buildEuiGridColumn({
     displayAsText: columnDisplayName,
     actions: {
       showHide:
-        defaultColumns || columnName === dataView.timeFieldName
+        defaultColumns || columnName === dataView?.timeFieldName
           ? false
           : {
               label: i18n.translate('unifiedDataTable.removeColumnLabel', {
@@ -158,7 +158,7 @@ function buildEuiGridColumn({
     visibleCellActions,
   };
 
-  if (column.id === dataView.timeFieldName) {
+  if (column.id === dataView?.timeFieldName) {
     const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
@@ -208,7 +208,7 @@ export function getEuiGridColumns({
   columnsCellActions?: EuiDataGridColumnCellAction[][];
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
-  dataView: DataView;
+  dataView?: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
@@ -244,8 +244,12 @@ export function getEuiGridColumns({
   );
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
-  const timeFieldName = dataView.timeFieldName;
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView | undefined,
+  showTimeCol: boolean
+) {
+  const timeFieldName = dataView?.timeFieldName;
 
   if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];

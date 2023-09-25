@@ -243,7 +243,7 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
+  const pauseAutoRefreshInterval = async (dataView?: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = globalStateContainer.get();
       if (state?.refreshInterval && !state.refreshInterval.pause) {
@@ -254,7 +254,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
-  const setDataView = (dataView: DataView) => {
+  const setDataView = (dataView: DataView | undefined) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);

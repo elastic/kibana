@@ -28,8 +28,8 @@ describe('getDataViewByTextBasedQueryLang', () => {
   it('creates an adhoc dataview if the current dataview is persistent and query has not changed', async () => {
     const query = { esql: 'from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewMock, services);
-    expect(dataView.isPersisted()).toEqual(false);
-    expect(dataView.timeFieldName).toBe('@timestamp');
+    expect(dataView?.isPersisted()).toEqual(false);
+    expect(dataView?.timeFieldName).toBe('@timestamp');
   });
 
   it('creates an adhoc dataview if the current dataview is ad hoc and query has changed', async () => {
@@ -42,7 +42,7 @@ describe('getDataViewByTextBasedQueryLang', () => {
     });
     const query = { esql: 'from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
-    expect(dataView.isPersisted()).toEqual(false);
-    expect(dataView.timeFieldName).toBeUndefined();
+    expect(dataView?.isPersisted()).toEqual(false);
+    expect(dataView?.timeFieldName).toBeUndefined();
   });
 });

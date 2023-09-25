@@ -27,7 +27,7 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  */
 export function formatHit(
   hit: DataTableRecord,
-  dataView: DataView,
+  dataView: DataView | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
@@ -49,7 +49,7 @@ export function formatHit(
   // put highlighted fields first in the document summary.
   Object.entries(flattened).forEach(([key, val]) => {
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const displayKey = dataView.fields.getByName(key)?.displayName;
+    const displayKey = dataView?.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field
     const formattedValue = formatFieldValue(
@@ -57,7 +57,7 @@ export function formatHit(
       hit.raw,
       fieldFormats,
       dataView,
-      dataView.fields.getByName(key)
+      dataView?.fields.getByName(key)
     );
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.

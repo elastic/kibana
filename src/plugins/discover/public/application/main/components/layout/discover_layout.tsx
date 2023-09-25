@@ -86,7 +86,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useInternalStateSelector((state) => state.dataView);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -103,7 +103,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   // representation of those documents does not have the time field that _field_caps
   // reports us.
   const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+    return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
   }, [dataView]);
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -136,6 +136,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+      if (!dataView) {
+        return;
+      }
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -152,7 +155,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }
-      if (!dataView.isPersisted()) {
+      if (!dataView?.isPersisted()) {
         await stateContainer.actions.updateAdHocDataViewId();
       }
       stateContainer.dataState.refetch$.next('reset');

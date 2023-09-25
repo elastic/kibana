@@ -12,7 +12,7 @@ import { EuiText, EuiCode } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export interface NoResultsSuggestionDefaultProps {
-  dataView: DataView;
+  dataView?: DataView;
 }
 
 export const NoResultsSuggestionDefault: React.FC<NoResultsSuggestionDefaultProps> = ({

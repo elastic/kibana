@@ -27,7 +27,7 @@ export type DocViewFilterFn = (
 
 export interface DocViewRenderProps {
   hit: DataTableRecord;
-  dataView: DataView;
+  dataView?: DataView;
   columns?: string[];
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];

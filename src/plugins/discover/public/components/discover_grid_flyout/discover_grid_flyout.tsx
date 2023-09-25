@@ -40,7 +40,7 @@ export interface DiscoverGridFlyoutProps {
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  dataView: DataView;
+  dataView?: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
@@ -165,7 +165,7 @@ export function DiscoverGridFlyout({
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                {dataView.isTimeBased() && dataView.id && (
+                {dataView?.id && dataView?.isTimeBased()  && (
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                     <EuiFlexItem grow={false}>
                       {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}

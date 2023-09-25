@@ -32,7 +32,10 @@ export const DocViewerLegacyTable = ({
   const { fieldFormats, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS), [uiSettings]);
 
-  const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
+  const mapping = useCallback(
+    (name: string) => dataView?.fields.getByName(name),
+    [dataView?.fields]
+  );
   const tableColumns = useMemo(() => {
     return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
   }, [filter]);

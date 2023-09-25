@@ -30,7 +30,7 @@ export interface EsDocSearchProps {
   /**
    * DataView entity
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
@@ -57,6 +57,9 @@ export function useEsDocSearch({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {
+    if (!dataView) {
+      return;
+    }
     const singleDocFetchingStartTime = window.performance.now();
     try {
       const result = await lastValueFrom(

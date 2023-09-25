@@ -118,7 +118,7 @@ export function useTextBasedQueryLanguage({
           prev.current.columns = nextColumns;
         }
         const nextState = {
-          ...(addDataViewToState && { index: dataViewObj.id }),
+          ...(addDataViewToState && { index: dataViewObj?.id }),
           ...(addColumnsToState && { columns: nextColumns }),
           ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),

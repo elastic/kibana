@@ -19,11 +19,11 @@ export const buildEditFieldButton = ({
   editField,
 }: {
   hasEditDataViewPermission: () => boolean;
-  dataView: DataView;
+  dataView: DataView | undefined;
   field: DataViewField;
   editField: (fieldName: string) => void;
 }) => {
-  if (field.name === '_source') {
+  if (field.name === '_source' || !dataView) {
     return null;
   }
 

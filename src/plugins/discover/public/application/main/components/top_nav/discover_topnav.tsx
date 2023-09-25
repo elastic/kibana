@@ -212,7 +212,7 @@ export const DiscoverTopNav = ({
     <SearchBar
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[dataView]}
+      indexPatterns={dataView ? [dataView] : []}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}

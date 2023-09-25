@@ -21,7 +21,7 @@ export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  dataView: DataView;
+  dataView?: DataView;
   onDisableFilters: () => void;
 }
 

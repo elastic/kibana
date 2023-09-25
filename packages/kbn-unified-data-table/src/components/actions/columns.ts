@@ -63,7 +63,7 @@ export function getStateColumnActions({
   defaultOrder,
 }: {
   capabilities: Capabilities;
-  dataView: DataView;
+  dataView?: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
@@ -94,7 +94,7 @@ export function getStateColumnActions({
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
     const actualColumns =
-      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
+      !hideTimeColumn && dataView?.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
 
