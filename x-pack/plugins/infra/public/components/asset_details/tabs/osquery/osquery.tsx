@@ -8,12 +8,11 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 
 export const Osquery = () => {
-  const { metadataResponse } = useAssetDetailsStateContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
 
-  const { metadataLoading, metadata } = metadataResponse;
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();

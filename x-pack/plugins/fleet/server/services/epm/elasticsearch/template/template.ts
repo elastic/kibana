@@ -534,9 +534,15 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
 /**
  * Given a data stream name, return the indexTemplate name
  */
-function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
-  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
-  return [type, dataset].join('-');
+async function getIndexTemplate(
+  esClient: ElasticsearchClient,
+  dataStreamName: string
+): Promise<string> {
+  const dataStream = await esClient.indices.getDataStream({
+    name: dataStreamName,
+    expand_wildcards: ['open', 'hidden'],
+  });
+  return dataStream.data_streams[0].template;
 }
 
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
@@ -757,9 +763,9 @@ const updateExistingDataStream = async ({
   let lifecycle: any;
 
   try {
-    const simulateResult = await retryTransientEsErrors(() =>
+    const simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
-        name: dataStreamNameToIndexTemplateName(dataStreamName),
+        name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 
@@ -776,7 +782,7 @@ const updateExistingDataStream = async ({
       delete mappings.properties.data_stream;
     }
 
-    logger.debug(`Updating mappings for ${dataStreamName}`);
+    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -789,9 +795,8 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.error(`Mappings update for ${dataStreamName} failed`);
-    logger.error(err);
-
+    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+    logger.info(`Triggering a rollover for ${dataStreamName}`);
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }

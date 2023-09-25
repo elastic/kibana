@@ -306,7 +306,7 @@
                 "section": "def-common.ConditionalType",
                 "text": "ConditionalType"
               },
-              "<true, boolean, never>; }>"
+              "<true, boolean, boolean>; }>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_config.ts",
             "deprecated": false,

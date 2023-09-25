@@ -9,8 +9,12 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
-import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+  TopNFunctionSortField,
+  topNFunctionSortFieldRt,
+} from '@kbn/profiling-utils';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
@@ -27,6 +31,7 @@ import { AddDataTabs, AddDataView } from '../views/add_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
+import { DeleteDataView } from '../views/delete_data_view';
 
 const routes = {
   '/': {
@@ -61,6 +66,9 @@ const routes = {
             selectedTab: AddDataTabs.Kubernetes,
           },
         },
+      },
+      '/delete_data_instructions': {
+        element: <DeleteDataView />,
       },
       '/': {
         children: {

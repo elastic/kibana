@@ -6,12 +6,27 @@
  */
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { getAlertsIndex } from '../../../../common/utils/risk_score_modules';
 import type { RiskEngineConfiguration } from '../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 
 export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+const getDefaultRiskEngineConfiguration = ({
+  namespace,
+}: {
+  namespace: string;
+}): RiskEngineConfiguration => ({
+  dataViewId: getAlertsIndex(namespace),
+  enabled: false,
+  filter: {},
+  identifierType: undefined,
+  interval: '1h',
+  pageSize: 10_000,
+  range: { start: 'now-30d', end: 'now' },
+});
 
 const getConfigurationSavedObject = async ({
   savedObjectsClient,
@@ -47,7 +62,7 @@ export const updateSavedObjectAttribute = async ({
   });
 
   if (!savedObjectConfiguration) {
-    throw new Error('There no saved object configuration for risk engine');
+    throw new Error('Risk engine configuration not found');
   }
 
   const result = await savedObjectsClient.update(
@@ -64,14 +79,19 @@ export const updateSavedObjectAttribute = async ({
   return result;
 };
 
-export const initSavedObjects = async ({ savedObjectsClient }: SavedObjectsClientArg) => {
+export const initSavedObjects = async ({
+  namespace,
+  savedObjectsClient,
+}: SavedObjectsClientArg & { namespace: string }) => {
   const configuration = await getConfigurationSavedObject({ savedObjectsClient });
   if (configuration) {
     return configuration;
   }
-  const result = await savedObjectsClient.create(riskEngineConfigurationTypeName, {
-    enabled: false,
-  });
+  const result = await savedObjectsClient.create(
+    riskEngineConfigurationTypeName,
+    getDefaultRiskEngineConfiguration({ namespace }),
+    {}
+  );
   return result;
 };
 

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
   ExpandRowColumn,
   toggleDetails,
@@ -206,6 +207,20 @@ export const TestRunsTable = ({
         show: false,
       },
     },
+    {
+      align: 'right' as const,
+      actions: [
+        {
+          'data-test-subj': 'syntheticsViewPingDocument',
+          isPrimary: true,
+          name: INSPECT_DOCUMENT,
+          description: INSPECT_DOCUMENT,
+          icon: 'inspect' as const,
+          type: 'button' as const,
+          render: (ping: Ping) => <ViewDocument ping={ping} />,
+        },
+      ],
+    },
     ...(!isBrowserMonitor
       ? [
           {
@@ -229,10 +244,17 @@ export const TestRunsTable = ({
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
+        const isTableRow =
+          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
+          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
+          targetElem?.classList.contains('euiTableCellContent') ||
+          targetElem?.classList.contains('euiBadge__text');
         // we dont want to capture image click event
         if (
+          isTableRow &&
           targetElem.tagName !== 'IMG' &&
           targetElem.tagName !== 'path' &&
+          targetElem.tagName !== 'BUTTON' &&
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
           if (item.monitor.type !== MONITOR_TYPES.BROWSER) {

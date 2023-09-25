@@ -7,7 +7,7 @@
 
 import { cloneDeep, get } from 'lodash';
 import { useRef, useCallback, useMemo } from 'react';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isCompleteResponse } from '@kbn/data-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
@@ -110,8 +110,6 @@ export function useCategorizeRequest() {
             next: (result) => {
               if (isCompleteResponse(result)) {
                 resolve(processCategoryResults(result, field, unwrap));
-              } else if (isErrorResponse(result)) {
-                reject(result);
               } else {
                 // partial results
                 // Ignore partial results for now.

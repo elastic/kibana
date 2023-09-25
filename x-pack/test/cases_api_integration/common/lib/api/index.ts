@@ -433,6 +433,7 @@ export const updateCase = async ({
 
   const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
     .expect(expectedHttpCode);
@@ -524,6 +525,7 @@ export const getCase = async ({
       `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
     )
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 

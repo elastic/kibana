@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRule())
           .expect(200);
 
@@ -76,7 +77,6 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           created_by: 'elastic',
           description: 'Simple Rule Query',
-          investigation_fields: [],
           enabled: true,
           false_positives: [],
           from: 'now-6m',
@@ -109,6 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(rule)
           .expect(200);
 
@@ -120,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRuleWithoutRuleId())
           .expect(200);
 
@@ -131,6 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleMlRule())
           .expect(403);
 
@@ -145,12 +148,14 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRule())
           .expect(200);
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRule())
           .expect(409);
 

@@ -31,6 +31,8 @@ paths:
     $ref: "paths/s@{spaceid}@api@slos@{sloid}@{disable}.yaml"
   "/s/{spaceId}/internal/observability/slos/_historical_summary":
     $ref: "paths/s@{spaceid}@api@slos@_historical_summary.yaml"
+  "/s/{spaceId}/api/observability/slos/_delete_instances":
+    $ref: "paths/s@{spaceid}@api@slos@_delete_instances.yaml"
 components:
   securitySchemes:
     basicAuth:

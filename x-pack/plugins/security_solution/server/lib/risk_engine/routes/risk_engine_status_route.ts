@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: RISK_ENGINE_STATUS_URL,

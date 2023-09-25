@@ -15,7 +15,7 @@ const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-defau
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
@@ -92,7 +92,15 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     async navigateToAction(actionTestSubject: string) {
-      await testSubjects.click(actionTestSubject);
+      return await retry.try(async () => {
+        await testSubjects.click(actionTestSubject);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
+
+        if (!result) {
+          throw new Error('Integration installation page not found');
+        }
+      });
     },
   });
 

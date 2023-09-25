@@ -64,7 +64,8 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": ["target/**/*"]
 }

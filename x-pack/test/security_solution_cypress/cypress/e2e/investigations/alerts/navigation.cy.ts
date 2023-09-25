@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { expandFirstAlert, waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -24,7 +23,7 @@ import { OPEN_ALERT_DETAILS_PAGE } from '../../../screens/alerts_details';
 
 // This is skipped as the details page POC will be removed in favor of the expanded alert flyout
 // https://github.com/elastic/kibana/issues/154477
-describe.skip('Alert Details Page Navigation', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Alert Details Page Navigation', { tags: ['@ess', '@serverless'] }, () => {
   describe('navigating to alert details page', () => {
     const rule = getNewRule();
     before(() => {

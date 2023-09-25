@@ -10,10 +10,15 @@ import { esArchiver } from './support/es_archiver';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
   defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless',
+    grepOmitFiltered: true,
+    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,

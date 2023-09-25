@@ -15,6 +15,7 @@ import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
+  CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -37,6 +38,8 @@ import {
   calculateDuration,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -74,6 +77,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('happy path', () => {
       it('should patch a case', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
           supertest,
@@ -96,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should closes the case correctly', async () => {
+      it('should close the case correctly', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
           supertest,
@@ -284,6 +302,62 @@ export default ({ getService }: FtrProviderContext): void => {
             type: '.jira',
             fields: { issueType: 'Task', priority: null, parent: null },
           },
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should patch a case with customFields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'test_custom_field_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                customFields: [
+                  {
+                    key: 'test_custom_field_1',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['this is a text field value'] },
+                  },
+                  {
+                    key: 'test_custom_field_2',
+                    type: CustomFieldTypes.TOGGLE,
+                    field: { value: [true] },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(data).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
           updated_by: defaultUser,
         });
       });
@@ -815,6 +889,76 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expectedHttpCode: 400,
           });
+        });
+      });
+
+      describe('customFields', async () => {
+        it('400s when trying to patch with duplicated custom field keys', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      field: { value: ['this is a text field value'] },
+                    },
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      field: { value: ['this is a text field value'] },
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      it('400s when trying to patch with a non existent custom field key', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                customFields: [
+                  {
+                    key: 'key_does_not_exist',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['this is a text field value'] },
+                  },
+                ],
+              },
+            ],
+          },
+          expectedHttpCode: 400,
         });
       });
     });

@@ -461,7 +461,6 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
       .then(() => {
-        this.loadUserMessages();
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -595,17 +594,6 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterAndSortUserMessages(
-      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
-    );
-  };
-
-  private _userMessages: UserMessage[] = [];
-
-  // loads all available user messages
-  private loadUserMessages() {
     const userMessages: UserMessage[] = [];
 
     userMessages.push(
@@ -672,8 +660,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    this._userMessages = userMessages;
-  }
+    return filterAndSortUserMessages(
+      [...userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters ?? {}
+    );
+  };
 
   private additionalUserMessages: Record<string, UserMessage> = {};
 
@@ -908,12 +900,7 @@ export class Embeddable
 
     this.activeData = newActiveData;
 
-    // Refresh messanges if info type is found as with active data
-    // these messages can be enriched
-    if (this._userMessages.some(({ severity }) => severity === 'info')) {
-      this.loadUserMessages();
-      this.renderUserMessages();
-    }
+    this.renderUserMessages();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -992,6 +979,7 @@ export class Embeddable
       return;
     }
     super.render(domNode as HTMLElement);
+
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -1196,7 +1184,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
-      disableShardWarnings: true,
+      disableWarningToasts: true,
     };
 
     if (input.query) {
@@ -1291,7 +1279,6 @@ export class Embeddable
 
       this.expression = ast;
 
-      this.loadUserMessages();
       this.reload();
     }
   };

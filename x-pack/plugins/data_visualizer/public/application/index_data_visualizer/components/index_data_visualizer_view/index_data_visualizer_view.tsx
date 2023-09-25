@@ -500,7 +500,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       grow={false}
       data-test-subj="dataVisualizerIndexPage"
       paddingSize="none"
-      panelled={true}
     >
       <EuiPageTemplate.Section>
         <EuiPageTemplate.Header data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>

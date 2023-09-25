@@ -183,13 +183,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a visualization to be edited`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });

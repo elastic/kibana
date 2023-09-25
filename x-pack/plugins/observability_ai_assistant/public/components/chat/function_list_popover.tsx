@@ -109,6 +109,7 @@ export function FunctionListPopover({
       anchorPosition="downLeft"
       button={
         <EuiButtonEmpty
+          data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
           iconType="arrowRight"
           iconSide="right"
           size="xs"

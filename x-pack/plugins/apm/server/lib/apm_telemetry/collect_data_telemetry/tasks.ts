@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -38,6 +39,7 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
@@ -56,10 +58,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
-import {
-  ApmIndicesConfig,
-  APM_AGENT_CONFIGURATION_INDEX,
-} from '../../../routes/settings/apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { TelemetryClient } from '../telemetry_client';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
@@ -76,7 +75,7 @@ interface TelemetryTask {
 
 export interface TelemetryTaskExecutorParams {
   telemetryClient: TelemetryClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   savedObjectsClient: ISavedObjectsClient;
 }
 
@@ -1483,6 +1482,50 @@ export const tasks: TelemetryTask[] = [
       });
       return {
         per_service: data,
+      };
+    },
+  },
+  {
+    name: 'top_traces',
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
+        index: [indices.transaction, indices.span, indices.error],
+        body: {
+          size: 0,
+          track_total_hits: false,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            top_traces: {
+              terms: {
+                field: TRACE_ID,
+                size: 100,
+              },
+            },
+            max: {
+              max_bucket: {
+                buckets_path: 'top_traces>_count',
+              },
+            },
+            median: {
+              percentiles_bucket: {
+                buckets_path: 'top_traces>_count',
+                percents: [50],
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        top_traces: {
+          max: response.aggregations?.max.value ?? 0,
+          median: response.aggregations?.median.values['50.0'] ?? 0,
+        },
       };
     },
   },

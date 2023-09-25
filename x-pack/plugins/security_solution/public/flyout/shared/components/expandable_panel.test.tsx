@@ -37,7 +37,6 @@ describe('<ExpandablePanel />', () => {
           <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
-      expect(getByTestId(TEST_ID)).toBeInTheDocument();
       expect(getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(TEST_ID))).toBeInTheDocument();
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toHaveTextContent(
         'test content'
@@ -104,7 +103,6 @@ describe('<ExpandablePanel />', () => {
           <ExpandablePanel {...expandableDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
-      expect(getByTestId(TEST_ID)).toBeInTheDocument();
       expect(getByTestId(EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID(TEST_ID))).toHaveTextContent(
         'test title'
       );
@@ -151,7 +149,6 @@ describe('<ExpandablePanel />', () => {
           <ExpandablePanel {...expandedDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
-      expect(getByTestId(TEST_ID)).toBeInTheDocument();
       expect(getByTestId(EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID(TEST_ID))).toHaveTextContent(
         'test title'
       );

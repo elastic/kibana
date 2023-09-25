@@ -893,6 +893,22 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.RuleDataClient.getReader",
             "type": "Function",
             "tags": [],
@@ -1719,7 +1735,7 @@
             "section": "def-common.RuleTypeState",
             "text": "RuleTypeState"
           },
-          " = never, InstanceState extends { [x: string]: unknown; } = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
+          " = never, InstanceState extends Record<string, any> = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1844,7 +1860,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ", TAlertInstanceState extends { [x: string]: unknown; }, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
+          ", TAlertInstanceState extends Record<string, any>, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1987,7 +2003,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; producer: string; validate: { params: ",
+          "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; producer: string; validate: { params: ",
           "RuleTypeParamsValidator",
           "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
@@ -2532,6 +2548,22 @@
             "type": "Function",
             "tags": [],
             "label": "isWriteEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
             "description": [],
             "signature": [
               "() => boolean"
@@ -3741,6 +3773,17 @@
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.isUsingDataStreams",
+            "type": "boolean",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3791,7 +3834,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string, never>, \"executor\"> & { executor: ",
+          "<TParams, TParams, TState, Record<string, any>, TAlertInstanceContext, string, string, never>, \"executor\"> & { executor: ",
           "AlertTypeExecutor",
           "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
@@ -3856,7 +3899,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never, never>"
+          "<TParams, TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never, never>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -4174,7 +4217,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never, never>, \"executor\"> & { executor: (options: ",
+          "<TParams, TParams, TState, Record<string, any>, TInstanceContext, TActionGroupIds, never, never>, \"executor\"> & { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4182,7 +4225,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
+          "<TParams, TState, Record<string, any>, TInstanceContext, ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4519,7 +4562,7 @@
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
-            ", TAlertInstanceState extends { [x: string]: unknown; }, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
+            ", TAlertInstanceState extends Record<string, any>, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
             {
               "pluginId": "ruleRegistry",
               "scope": "server",

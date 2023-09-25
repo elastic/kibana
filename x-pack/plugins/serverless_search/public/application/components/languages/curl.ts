@@ -24,6 +24,12 @@ export const curlDefinition: LanguageDefinition = {
   configureClient: ({ apiKey, url }) => `export ES_URL="${url}"
 export API_KEY="${apiKey}"`,
   docLink: docLinks.apiIntro,
+  github: {
+    link: 'https://github.com/curl/curl',
+    label: i18n.translate('xpack.serverlessSearch.languages.cURL.githubLabel', {
+      defaultMessage: 'curl',
+    }),
+  },
   iconType: 'curl.svg',
   id: Languages.CURL,
   ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\

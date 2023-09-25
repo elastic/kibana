@@ -6,16 +6,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
+import { EuiPageSection } from '@elastic/eui';
 import { parse } from 'query-string';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { useAppContext } from '../../app_context';
@@ -53,11 +52,11 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   };
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('templateCreate');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templateCreate);
   }, []);
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <TemplateForm
         title={
           isLegacy ? (
@@ -79,6 +78,6 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

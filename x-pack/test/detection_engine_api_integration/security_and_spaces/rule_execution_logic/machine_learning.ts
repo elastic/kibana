@@ -66,7 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145776
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -146,7 +147,6 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
-            investigation_fields: [],
           },
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,

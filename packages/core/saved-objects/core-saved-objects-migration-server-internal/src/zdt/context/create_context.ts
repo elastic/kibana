@@ -27,6 +27,7 @@ export const createContext = ({
   typeRegistry,
   serializer,
   nodeRoles,
+  esCapabilities,
 }: CreateContextOps): MigratorContext => {
   return {
     migrationConfig,
@@ -44,5 +45,6 @@ export const createContext = ({
     batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
     nodeRoles,
+    esCapabilities,
   };
 };

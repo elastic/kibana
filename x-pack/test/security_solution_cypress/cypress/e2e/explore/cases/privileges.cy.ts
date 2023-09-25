@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import type { TestCaseWithoutTimeline } from '../../../objects/case';
 import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
@@ -49,7 +48,7 @@ const testCase: TestCaseWithoutTimeline = {
   owner: 'securitySolution',
 };
 
-describe('Cases privileges', { tags: tag.ESS }, () => {
+describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);

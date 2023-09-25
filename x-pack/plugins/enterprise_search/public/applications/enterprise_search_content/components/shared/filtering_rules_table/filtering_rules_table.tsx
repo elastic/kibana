@@ -11,11 +11,7 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FilteringRule,
-  FilteringPolicy,
-  FilteringRuleRule,
-} from '../../../../../../common/types/connectors';
+import { FilteringRule, FilteringPolicy, FilteringRuleRule } from '@kbn/search-connectors';
 
 import { filteringPolicyToText, filteringRuleToText } from '../../../utils/filtering_rule_helpers';
 

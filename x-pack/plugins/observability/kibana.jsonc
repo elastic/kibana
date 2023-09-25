@@ -8,9 +8,11 @@
     "browser": true,
     "configPath": ["xpack", "observability"],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "dataViewEditor",

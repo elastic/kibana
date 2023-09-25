@@ -36,7 +36,7 @@ export const FLAG_OPTIONS: FlagOptions = {
   help: `
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
-    --esFrom             Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or "snapshot"
+    --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --include-tag        Tags that suites must include to be run, can be included multiple times
     --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
     --include            Files that must included to be run, can be included multiple times
@@ -74,7 +74,7 @@ export function parseFlags(flags: FlagsReader) {
     logsDir: flags.boolean('logToFile')
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
       : undefined,
-    esFrom: flags.enum('esFrom', ['snapshot', 'source']) ?? 'snapshot',
+    esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {

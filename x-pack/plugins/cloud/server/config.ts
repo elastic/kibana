@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
@@ -29,18 +29,18 @@ const configSchema = schema.object({
   users_and_roles_url: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
-  projects_url: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.string({ defaultValue: '/projects/' }),
-    schema.never()
-  ),
+  projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   serverless: schema.maybe(
-    schema.object({
-      project_id: schema.string(),
-    })
+    schema.object(
+      {
+        project_id: schema.string(),
+        project_name: schema.maybe(schema.string()),
+      },
+      // avoid future chicken-and-egg situation with the component populating the config
+      { unknowns: 'ignore' }
+    )
   ),
 });
 
@@ -62,6 +62,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     is_elastic_staff_owned: true,
     serverless: {
       project_id: true,
+      project_name: true,
     },
   },
   schema: configSchema,

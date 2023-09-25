@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+
 export const indexSettings = {
   settings: { index: { number_of_shards: '1' } },
   defaults: { index: { flush_after_merge: '512mb' } },
@@ -45,3 +47,31 @@ export const indexStats = {
     },
   },
 };
+
+export const createTestEnrichPolicy = (name: string, type: EnrichPolicyType) => ({
+  name,
+  type,
+  sourceIndices: ['users'],
+  matchField: 'email',
+  enrichFields: ['first_name', 'last_name', 'city'],
+  query: {
+    match_all: {},
+  },
+});
+
+export const getMatchingIndices = () => ({
+  indices: ['test-1', 'test-2', 'test-3', 'test-4', 'test-5'],
+});
+
+export const getFieldsFromIndices = () => ({
+  commonFields: [],
+  indices: [
+    {
+      index: 'test-1',
+      fields: [
+        { name: 'first_name', type: 'keyword', normalizedType: 'keyword' },
+        { name: 'age', type: 'long', normalizedType: 'number' },
+      ],
+    },
+  ],
+});

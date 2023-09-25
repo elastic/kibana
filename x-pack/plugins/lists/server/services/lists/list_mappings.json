@@ -1,6 +1,9 @@
 {
   "dynamic": "strict",
   "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
     "name": {
       "type": "keyword"
     },

@@ -32,51 +32,61 @@ import { validateGetClusterHealthRequest } from './get_cluster_health_request';
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
-        access: 'public', // must be public to enable "system" users to collect data
       },
-    },
-    async (context, request, response) => {
-      return handleClusterHealthRequest({
-        response,
-        resolveParameters: () => validateGetClusterHealthRequest({}),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
-        },
-      });
-    }
-  );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      async (context, request, response) => {
+        return handleClusterHealthRequest({
+          response,
+          resolveParameters: () => validateGetClusterHealthRequest({}),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      validate: {
-        body: buildRouteValidation(GetClusterHealthRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
-        access: 'public', // must be public to enable "system" users to collect data
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<GetClusterHealthResponse>> => {
-      return handleClusterHealthRequest({
-        response,
-        resolveParameters: () => validateGetClusterHealthRequest(request.body),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(GetClusterHealthRequestBody),
+          },
         },
-      });
-    }
-  );
+      },
+      async (context, request, response): Promise<IKibanaResponse<GetClusterHealthResponse>> => {
+        return handleClusterHealthRequest({
+          response,
+          resolveParameters: () => validateGetClusterHealthRequest(request.body),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 };
 
 interface ClusterHealthRouteDependencies {

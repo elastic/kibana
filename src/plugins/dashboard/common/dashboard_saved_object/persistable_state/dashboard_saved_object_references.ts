@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import semverGt from 'semver/functions/gt';
 
 import { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
@@ -21,10 +20,6 @@ import { DashboardAttributes, SavedDashboardPanel } from '../../content_manageme
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
-
-const isPre730Panel = (panel: Record<string, string>): boolean => {
-  return 'version' in panel && panel.version ? semverGt('7.3.0', panel.version) : true;
-};
 
 function parseDashboardAttributesWithType(
   attributes: DashboardAttributes
@@ -82,10 +77,6 @@ export function extractReferences(
 
   const panels = parsedAttributes.panels;
 
-  if ((Object.values(panels) as unknown as Array<Record<string, string>>).some(isPre730Panel)) {
-    return pre730ExtractReferences({ attributes, references });
-  }
-
   const panelMissingType = Object.values(panels).find((panel) => panel.type === undefined);
   if (panelMissingType) {
     throw new Error(
@@ -115,43 +106,5 @@ export function extractReferences(
   return {
     references: [...references, ...extractedReferences],
     attributes: newAttributes,
-  };
-}
-
-function pre730ExtractReferences({
-  attributes,
-  references = [],
-}: DashboardAttributesAndReferences): DashboardAttributesAndReferences {
-  if (typeof attributes.panelsJSON !== 'string') {
-    return { attributes, references };
-  }
-  const panelReferences: Reference[] = [];
-  const panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
-
-  panels.forEach((panel, i) => {
-    if (!panel.type) {
-      throw new Error(`"type" attribute is missing from panel "${i}"`);
-    }
-    if (!panel.id) {
-      // Embeddables are not required to be backed off a saved object.
-      return;
-    }
-
-    panel.panelRefName = `panel_${i}`;
-    panelReferences.push({
-      name: `panel_${i}`,
-      type: panel.type,
-      id: panel.id,
-    });
-    delete panel.type;
-    delete panel.id;
-  });
-
-  return {
-    references: [...references, ...panelReferences],
-    attributes: {
-      ...attributes,
-      panelsJSON: JSON.stringify(panels),
-    },
   };
 }

@@ -6,13 +6,13 @@
  */
 
 import { uniq } from 'lodash';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 
-export function getApmDataViewTitle(apmIndicesConfig: ApmIndicesConfig) {
+export function getApmDataViewTitle(apmIndices: APMIndices) {
   return uniq([
-    apmIndicesConfig.transaction,
-    apmIndicesConfig.span,
-    apmIndicesConfig.error,
-    apmIndicesConfig.metric,
+    apmIndices.transaction,
+    apmIndices.span,
+    apmIndices.error,
+    apmIndices.metric,
   ]).join(',');
 }

@@ -50,8 +50,8 @@ export function hostsRoutes<T extends RequestHandlerContext>({
 
       try {
         const response = await assetAccessor.getHosts({
-          from: datemath.parse(from)!.valueOf(),
-          to: datemath.parse(to)!.valueOf(),
+          from: datemath.parse(from)!.toISOString(),
+          to: datemath.parse(to)!.toISOString(),
           esClient,
         });
 

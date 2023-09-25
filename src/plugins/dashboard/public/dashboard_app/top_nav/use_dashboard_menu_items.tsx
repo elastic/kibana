@@ -48,11 +48,15 @@ export const useDashboardMenuItems = ({
    */
   const dashboard = useDashboardAPI();
 
+  const hasRunMigrations = dashboard.select(
+    (state) => state.componentState.hasRunClientsideMigrations
+  );
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -179,7 +183,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
+        disableButton: disableTopNav || !(hasRunMigrations || hasUnsavedChanges),
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -229,6 +233,7 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
+    hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
     showShare,
@@ -261,7 +266,7 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
-    const editMenuItem = showWriteControls ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
@@ -270,7 +275,7 @@ export const useDashboardMenuItems = ({
       resetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [menuItems, share, showWriteControls, resetChangesMenuItem, isLabsEnabled]);
+  }, [isLabsEnabled, menuItems, share, showWriteControls, managed, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
-  DATE_PICKER_END_DATE_POPOVER_BUTTON,
-  DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
+  GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
 } from '../../screens/date_picker';
 import { HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../../screens/hosts/main';
@@ -25,15 +23,13 @@ import {
   LOADING_INDICATOR,
   openNavigationPanel,
 } from '../../screens/security_header';
-import { TIMELINE_TITLE } from '../../screens/timeline';
+import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import {
+  updateDates,
   setStartDate,
   setEndDate,
-  updateDates,
-  setTimelineStartDate,
-  setTimelineEndDate,
   updateTimelineDates,
 } from '../../tasks/date_picker';
 import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
@@ -72,7 +68,7 @@ const ABSOLUTE_DATE = {
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
-describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -107,7 +103,11 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
       'title',
       ABSOLUTE_DATE.startTime
     );
-    cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).should('have.attr', 'title', ABSOLUTE_DATE.endTime);
+    cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
+      'have.attr',
+      'title',
+      ABSOLUTE_DATE.endTime
+    );
   });
 
   it('sets the url state when start and end date are set', () => {
@@ -139,12 +139,12 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     openTimelineUsingToggle();
 
-    cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
+    cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
       'have.attr',
       'title',
       ABSOLUTE_DATE.startTime
     );
-    cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).should(
+    cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
       'have.attr',
       'title',
       ABSOLUTE_DATE.endTime
@@ -158,16 +158,20 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
       'title',
       ABSOLUTE_DATE.startTime
     );
-    cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).should('have.attr', 'title', ABSOLUTE_DATE.endTime);
+    cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
+      'have.attr',
+      'title',
+      ABSOLUTE_DATE.endTime
+    );
 
     openTimelineUsingToggle();
 
-    cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
+    cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
       'have.attr',
       'title',
       ABSOLUTE_DATE.startTimeTimelineFormatted
     );
-    cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).should(
+    cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
       'have.attr',
       'title',
       ABSOLUTE_DATE.endTimeTimelineFormatted
@@ -177,9 +181,9 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
     visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
     openTimelineUsingToggle();
-    setTimelineStartDate(ABSOLUTE_DATE.newStartTimeTyped);
+    setStartDate(ABSOLUTE_DATE.newStartTimeTyped, TIMELINE_DATE_PICKER_CONTAINER);
     updateTimelineDates();
-    setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
+    setEndDate(ABSOLUTE_DATE.newEndTimeTyped, TIMELINE_DATE_PICKER_CONTAINER);
     updateTimelineDates();
 
     let startDate: string;
@@ -225,11 +229,12 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     navigateFromHeaderTo(HOSTS);
 
     openNavigationPanel(EXPLORE_PANEL_BTN);
-    cy.get(NETWORK).should(
-      'have.attr',
-      'href',
-      `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))`
-    );
+    cy.get(NETWORK)
+      .should('have.attr', 'href')
+      .and(
+        'contain',
+        `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))`
+      );
   });
 
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
@@ -239,40 +244,43 @@ describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     waitForAllHostsToBeLoaded();
 
     openNavigationPanel(EXPLORE_PANEL_BTN);
-    cy.get(HOSTS).should(
-      'have.attr',
-      'href',
-      `/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
-    );
-    cy.get(NETWORK).should(
-      'have.attr',
-      'href',
-      `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
-    );
+    cy.get(HOSTS)
+      .should('have.attr', 'href')
+      .and(
+        'contain',
+        `/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
+      );
+    cy.get(NETWORK)
+      .should('have.attr', 'href')
+      .and(
+        'contain',
+        `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
+      );
     cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
     openFirstHostDetails();
     clearSearchBar();
     kqlSearch('agent.type: "auditbeat" {enter}');
 
-    cy.get(ANOMALIES_TAB).should(
-      'have.attr',
-      'href',
-      "/app/security/hosts/name/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
-    );
+    cy.get(ANOMALIES_TAB)
+      .should('have.attr', 'href')
+      .and(
+        'contain',
+        "/app/security/hosts/name/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+      );
 
     cy.get(BREADCRUMBS)
       .eq(2)
-      .should(
-        'have.attr',
-        'href',
+      .should('have.attr', 'href')
+      .and(
+        'contain',
         `/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
       );
     cy.get(BREADCRUMBS)
       .eq(3)
-      .should(
-        'have.attr',
-        'href',
+      .should('have.attr', 'href')
+      .and(
+        'contain',
         `/app/security/hosts/name/siem-kibana?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
       );
   });

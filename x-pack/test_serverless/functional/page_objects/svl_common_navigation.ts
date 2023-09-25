@@ -104,13 +104,17 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async expectSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const isOpen = await this.isSectionOpen(sectionId);
-        expect(isOpen).to.be(true);
+        await retry.waitFor(`section ${sectionId} to be open`, async () => {
+          const isOpen = await this.isSectionOpen(sectionId);
+          return isOpen;
+        });
       },
       async expectSectionClosed(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const isOpen = await this.isSectionOpen(sectionId);
-        expect(isOpen).to.be(false);
+        await retry.waitFor(`section ${sectionId} to be closed`, async () => {
+          const isOpen = await this.isSectionOpen(sectionId);
+          return !isOpen;
+        });
       },
       async openSection(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
@@ -146,6 +150,25 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
             expect(await getByVisibleText('~breadcrumb', by.text)).not.be(null);
           });
         }
+      },
+      async expectBreadcrumbMissing(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          await retry.try(async () => {
+            expect(await getByVisibleText('~breadcrumb', by.text)).be(null);
+          });
+        }
+      },
+      async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+        await retry.try(async () => {
+          const breadcrumbsContainer = await testSubjects.find('breadcrumbs');
+          const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
+          breadcrumbs.shift(); // remove home
+          expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
+          const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
+          expect(expectedBreadcrumbTexts).to.eql(texts);
+        });
       },
     },
     search: new SvlNavigationSearchPageObject(ctx),
