@@ -398,7 +398,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: true,
+          is_max_amount_of_risk_engines_reached: false,
         });
 
         await riskEngineRoutes.enable();
