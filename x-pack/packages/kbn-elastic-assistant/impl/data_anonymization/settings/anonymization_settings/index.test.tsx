@@ -10,6 +10,15 @@ import { render, fireEvent } from '@testing-library/react';
 
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { AnonymizationSettings } from '.';
+import type { Props } from '.';
+
+const props: Props = {
+  defaultAllow: ['foo', 'bar', 'baz', '@baz'],
+  defaultAllowReplacement: ['bar'],
+  pageSize: 5,
+  setUpdatedDefaultAllow: jest.fn(),
+  setUpdatedDefaultAllowReplacement: jest.fn(),
+};
 
 const mockUseAssistantContext = {
   allSystemPrompts: [
@@ -47,14 +56,12 @@ jest.mock('../../../assistant_context', () => {
 });
 
 describe('AnonymizationSettings', () => {
-  const closeModal = jest.fn();
-
   beforeEach(() => jest.clearAllMocks());
 
   it('renders the editor', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AnonymizationSettings />
+        <AnonymizationSettings {...props} />
       </TestProviders>
     );
 
@@ -64,11 +71,11 @@ describe('AnonymizationSettings', () => {
   it('does NOT call `setDefaultAllow` when `Reset` is clicked, because only local state is reset until the user clicks save', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AnonymizationSettings />
+        <AnonymizationSettings {...props} />
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('reset'));
+    fireEvent.click(getByTestId('resetFields'));
 
     expect(mockUseAssistantContext.setDefaultAllow).not.toHaveBeenCalled();
   });
@@ -76,11 +83,11 @@ describe('AnonymizationSettings', () => {
   it('does NOT call `setDefaultAllowReplacement` when `Reset` is clicked, because only local state is reset until the user clicks save', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AnonymizationSettings />
+        <AnonymizationSettings {...props} />
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('reset'));
+    fireEvent.click(getByTestId('resetFields'));
 
     expect(mockUseAssistantContext.setDefaultAllowReplacement).not.toHaveBeenCalled();
   });
@@ -88,7 +95,7 @@ describe('AnonymizationSettings', () => {
   it('renders the expected allowed stat content', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AnonymizationSettings />
+        <AnonymizationSettings {...props} />
       </TestProviders>
     );
 
@@ -100,60 +107,12 @@ describe('AnonymizationSettings', () => {
   it('renders the expected anonymized stat content', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AnonymizationSettings />
+        <AnonymizationSettings {...props} />
       </TestProviders>
     );
 
     expect(getByTestId('anonymizedFieldsStat')).toHaveTextContent(
       `${mockUseAssistantContext.defaultAllowReplacement.length}Anonymized`
-    );
-  });
-
-  it('calls closeModal is called when the cancel button is clicked', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings closeModal={closeModal} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('cancel'));
-    expect(closeModal).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls closeModal is called when the save button is clicked', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings closeModal={closeModal} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('cancel'));
-    expect(closeModal).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls setDefaultAllow with the expected values when the save button is clicked', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings closeModal={closeModal} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('save'));
-
-    expect(mockUseAssistantContext.setDefaultAllow).toHaveBeenCalledWith(
-      mockUseAssistantContext.defaultAllow
-    );
-  });
-
-  it('calls setDefaultAllowReplacement with the expected values when the save button is clicked', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings closeModal={closeModal} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('save'));
-
-    expect(mockUseAssistantContext.setDefaultAllowReplacement).toHaveBeenCalledWith(
-      mockUseAssistantContext.defaultAllowReplacement
     );
   });
 });

@@ -9,6 +9,8 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
 
+export { SecurityPageName } from '@kbn/security-solution-navigation';
+
 /**
  * as const
  *
@@ -18,6 +20,7 @@ import * as i18n from './translations';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -77,80 +80,6 @@ export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
-
-export enum SecurityPageName {
-  administration = 'administration',
-  alerts = 'alerts',
-  blocklist = 'blocklist',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
-   */
-  case = 'cases', // must match `CasesDeepLinkId.cases`
-  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
-  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
-   */
-  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
-  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
-  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
-   */
-  cloudDefendPolicies = 'cloud_defend-policies',
-  dashboards = 'dashboards',
-  dataQuality = 'data_quality',
-  detections = 'detections',
-  detectionAndResponse = 'detection_response',
-  endpoints = 'endpoints',
-  eventFilters = 'event_filters',
-  exceptions = 'exceptions',
-  exploreLanding = 'explore',
-  hostIsolationExceptions = 'host_isolation_exceptions',
-  hosts = 'hosts',
-  hostsAnomalies = 'hosts-anomalies',
-  hostsRisk = 'hosts-risk',
-  hostsEvents = 'hosts-events',
-  investigate = 'investigate',
-  kubernetes = 'kubernetes',
-  landing = 'get_started',
-  network = 'network',
-  networkAnomalies = 'network-anomalies',
-  networkDns = 'network-dns',
-  networkEvents = 'network-events',
-  networkHttp = 'network-http',
-  networkTls = 'network-tls',
-  noPage = '',
-  overview = 'overview',
-  policies = 'policy',
-  responseActionsHistory = 'response_actions_history',
-  rules = 'rules',
-  rulesAdd = 'rules-add',
-  rulesCreate = 'rules-create',
-  rulesLanding = 'rules-landing',
-  sessions = 'sessions',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
-   */
-  threatIntelligenceIndicators = 'threat_intelligence-indicators',
-  timelines = 'timelines',
-  timelinesTemplates = 'timelines-templates',
-  trustedApps = 'trusted_apps',
-  uncommonProcesses = 'uncommon_processes',
-  users = 'users',
-  usersAnomalies = 'users-anomalies',
-  usersAuthentications = 'users-authentications',
-  usersEvents = 'users-events',
-  usersRisk = 'users-risk',
-  entityAnalytics = 'entity-analytics',
-  entityAnalyticsManagement = 'entity-analytics-management',
-  coverageOverview = 'coverage-overview',
-}
 
 export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
@@ -235,6 +164,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
+export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
@@ -282,7 +214,6 @@ export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/n
 /**
  * Exceptions management routes
  */
-
 export const SHARED_EXCEPTION_LIST_URL = `/api${EXCEPTIONS_PATH}/shared` as const;
 
 /**
@@ -305,6 +236,9 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+/**
+ * Internal Risk Score routes
+ */
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
@@ -316,15 +250,26 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-
-export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
-export const INTERNAL_TAGS_URL = `/internal/tags`;
-
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
+
+export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
+export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
+export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
+export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
+export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+
+/**
+ * Public Risk Score routes
+ */
+export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
+export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+
+export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
+export const INTERNAL_TAGS_URL = `/internal/tags`;
 
 /**
  * Internal detection engine routes
@@ -380,12 +325,12 @@ export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
 
-/*
+/**
   Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
 
-/*
+/**
   Machine Learning constants
  */
 export const ML_GROUP_ID = 'security' as const;
@@ -552,6 +497,7 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   ALERTS_PAGE: `${APP_ID}-alerts-page`,
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
+  RISK_INPUTS: `${APP_ID}-risk-inputs`,
 } as const;
 
 export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;

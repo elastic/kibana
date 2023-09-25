@@ -34,7 +34,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
@@ -43,7 +43,7 @@ import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
 
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import type {
   BaseHit,
   RuleAlertAction,
@@ -56,8 +56,8 @@ import type {
   BaseFieldsLatest,
   DetectionAlert,
   WrappedFieldsLatest,
-} from '../../../../common/detection_engine/schemas/alerts';
-import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/alerts';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 
@@ -136,6 +136,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

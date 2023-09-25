@@ -28,9 +28,6 @@ import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
 
-jest.mock('./policy_forms/components/policy_form_layout', () => ({
-  PolicyFormLayout: () => <></>,
-}));
 jest.mock('../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

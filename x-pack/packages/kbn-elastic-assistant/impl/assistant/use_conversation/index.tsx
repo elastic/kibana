@@ -11,6 +11,7 @@ import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { ELASTIC_AI_ASSISTANT, ELASTIC_AI_ASSISTANT_TITLE } from './translations';
+import { getDefaultSystemPrompt } from './helpers';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: i18n.DEFAULT_CONVERSATION_TITLE,
@@ -68,13 +69,14 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
-  const { setConversations } = useAssistantContext();
+  const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
   /**
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
     ({ conversationId, message }: AppendMessageProps): Message[] => {
+      assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
@@ -85,7 +87,6 @@ export const useConversation = (): UseConversation => {
             ...prevConversation,
             messages,
           };
-
           return {
             ...prev,
             [conversationId]: newConversation,
@@ -96,7 +97,7 @@ export const useConversation = (): UseConversation => {
       });
       return messages;
     },
-    [setConversations]
+    [assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(
@@ -135,10 +136,18 @@ export const useConversation = (): UseConversation => {
     (conversationId: string) => {
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
+        const defaultSystemPromptId = getDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation: prevConversation,
+        })?.id;
 
         if (prevConversation != null) {
-          const newConversation = {
+          const newConversation: Conversation = {
             ...prevConversation,
+            apiConfig: {
+              ...prevConversation.apiConfig,
+              defaultSystemPromptId,
+            },
             messages: [],
             replacements: undefined,
           };
@@ -152,7 +161,7 @@ export const useConversation = (): UseConversation => {
         }
       });
     },
-    [setConversations]
+    [allSystemPrompts, setConversations]
   );
 
   /**
@@ -160,8 +169,17 @@ export const useConversation = (): UseConversation => {
    */
   const createConversation = useCallback(
     ({ conversationId, messages }: CreateConversationProps): Conversation => {
+      const defaultSystemPromptId = getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: undefined,
+      })?.id;
+
       const newConversation: Conversation = {
         ...DEFAULT_CONVERSATION_STATE,
+        apiConfig: {
+          ...DEFAULT_CONVERSATION_STATE.apiConfig,
+          defaultSystemPromptId,
+        },
         id: conversationId,
         messages: messages != null ? messages : [],
       };
@@ -180,7 +198,7 @@ export const useConversation = (): UseConversation => {
       });
       return newConversation;
     },
-    [setConversations]
+    [allSystemPrompts, setConversations]
   );
 
   /**

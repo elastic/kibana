@@ -15,7 +15,9 @@ import {
   getIncompatibleFieldsMarkdownComment,
   getIncompatibleFieldsMarkdownTablesComment,
   getIncompatibleMappings,
+  getIncompatibleMappingsFields,
   getIncompatibleValues,
+  getIncompatibleValuesFields,
   showInvalidCallout,
 } from './helpers';
 import { EMPTY_STAT } from '../../../helpers';
@@ -109,6 +111,19 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
     test('it filters-out ECS complaint fields', () => {
       expect(getIncompatibleMappings(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
+  describe('getIncompatibleMappingsFields', () => {
+    test('it (only) returns the fields where type !== indexFieldType', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'host.name',
+        'source.ip',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
     });
   });
 
@@ -279,6 +294,18 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
     });
   });
 
+  describe('getIncompatibleValuesFields', () => {
+    test('it (only) returns the fields with indexInvalidValues', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'event.category',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
   describe('getIncompatibleFieldsMarkdownTablesComment', () => {
     test('it returns the expected comment when the index has `incompatibleMappings` and `incompatibleValues`', () => {
       expect(
@@ -322,6 +349,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatBytes,
           formatNumber,
           ilmPhase: 'unmanaged',
+          isILMAvailable: true,
           indexName: 'auditbeat-custom-index-1',
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
@@ -349,6 +377,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           partitionedFieldMetadata: emptyIncompatible,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
@@ -356,6 +385,32 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
       ).toEqual([
         '### auditbeat-custom-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | `unmanaged` | 27.7KB |\n\n',
+        '### **Incompatible fields** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        '\n\n\n',
+      ]);
+    });
+
+    test('it returns the expected comment when `isILMAvailable` is false', () => {
+      const emptyIncompatible: PartitionedFieldMetadata = {
+        ...mockPartitionedFieldMetadata,
+        incompatible: [], // <-- empty
+      };
+
+      expect(
+        getAllIncompatibleMarkdownComments({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: emptyIncompatible,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual([
+        '### auditbeat-custom-index-1\n',
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | 27.7KB |\n\n',
         '### **Incompatible fields** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
         '\n\n\n',
       ]);

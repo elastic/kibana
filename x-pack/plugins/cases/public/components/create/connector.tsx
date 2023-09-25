@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ActionConnector } from '../../../common/api';
+import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { schema } from './schema';
@@ -18,6 +18,7 @@ import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface Props {
   connectors: ActionConnector[];
@@ -30,6 +31,8 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
   const connector = getConnectorById(connectorId, connectors) ?? null;
   const { connector: configurationConnector } = useCaseConfigure();
   const { actions } = useApplicationCapabilities();
+  const { permissions } = useCasesContext();
+  const hasReadPermissions = permissions.connectors && actions.read;
 
   const defaultConnectorId = useMemo(() => {
     return connectors.some((c) => c.id === configurationConnector.id)
@@ -42,7 +45,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
     connectors,
   });
 
-  if (!actions.read) {
+  if (!hasReadPermissions) {
     return (
       <EuiText data-test-subj="create-case-connector-permissions-error-msg" size="s">
         <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>

@@ -1,0 +1,64 @@
+summary: The create rule API returns a JSON object that contains details about the rule.
+value:
+  id: 58148c70-407f-11ee-850e-c71febc4ca7f
+  enabled: true
+  name: my Elasticsearch query rule
+  tags: []
+  rule_type_id: .es-query
+  consumer: alerts
+  schedule:
+    interval: 1d
+  actions:
+    - group: query matched
+      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+      params:
+        level: info
+        message: "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+      connector_type_id: .server-log
+      frequency:
+        summary: true
+        notify_when: onThrottleInterval
+        throttle: "1d"
+      uuid: 53f3c2a3-e5d0-4cfa-af3b-6f0881385e78
+    - group: recovered
+      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+      params:
+        level: info
+        message: Recovered
+      connector_type_id: .server-log
+      frequency:
+        summary: false
+        notify_when: onActionGroupChange
+        throttle: null
+      uuid: 2324e45b-c0df-45c7-9d70-4993e30be758
+  params:
+    thresholdComparator: ">"
+    timeWindowSize: 1
+    timeWindowUnit: d
+    threshold:
+      - 100
+    size: 100
+    timeField: "@timestamp"
+    index:
+      - kibana_sample_data_logs
+    esQuery: '"""{"query":{"match_all" : {}}}"""'
+    excludeHitsFromPreviousRun: true
+    aggType: count
+    groupBy: all
+    searchType: esQuery
+  scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
+  created_by: elastic
+  updated_by: elastic
+  created_at: '2023-08-22T00:03:38.263Z'
+  updated_at: '2023-08-22T00:03:38.263Z'
+  api_key_owner: elastic
+  api_key_created_by_user: false
+  throttle: null
+  mute_all: false
+  notify_when: null
+  muted_alert_ids: []
+  execution_status:
+    status: pending
+    last_execution_date: '2023-08-22T00:03:38.263Z'
+  revision: 0
+  running: false

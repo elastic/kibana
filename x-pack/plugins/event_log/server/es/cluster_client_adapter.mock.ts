@@ -11,8 +11,6 @@ const createClusterClientMock = () => {
   const mock: jest.Mocked<IClusterClientAdapter> = {
     indexDocument: jest.fn(),
     indexDocuments: jest.fn(),
-    doesIlmPolicyExist: jest.fn(),
-    createIlmPolicy: jest.fn(),
     doesIndexTemplateExist: jest.fn(),
     createIndexTemplate: jest.fn(),
     doesDataStreamExist: jest.fn(),

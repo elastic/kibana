@@ -19,9 +19,11 @@ import {
   EuiCallOut,
   EuiButton,
   EuiText,
+  LEFT_ALIGNMENT,
+  CENTER_ALIGNMENT,
+  SortableProperties,
 } from '@elastic/eui';
 
-import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';

@@ -94,6 +94,8 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
   onClose: () => void;
+  start: string;
+  end: string;
 }
 
 const INITIAL_DATA = {
@@ -109,14 +111,19 @@ export function SpanFlyout({
   onClose,
   spanLinksCount,
   flyoutDetailTab,
+  start,
+  end,
 }: Props) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
-        params: { path: { traceId, spanId }, query: { parentTransactionId } },
+        params: {
+          path: { traceId, spanId },
+          query: { parentTransactionId, start, end },
+        },
       });
     },
-    [traceId, spanId, parentTransactionId]
+    [traceId, spanId, parentTransactionId, start, end]
   );
 
   const { span, parentTransaction } = data;

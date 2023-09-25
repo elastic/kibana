@@ -7,11 +7,11 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
+import { User } from '@kbn/cases-plugin/common/types/domain';
 import {
   PushedUserAction,
-  User,
   UserActionWithDeprecatedResponse,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const statusUserAction = userActions[1] as PushedUserAction;
+      const statusUserAction = userActions[1] as unknown as PushedUserAction;
 
       expect(userActions.length).to.eql(3);
       expect(statusUserAction.type).to.eql('status');

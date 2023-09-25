@@ -144,6 +144,10 @@ function syncUrlStateWithInitialContainerState(
     };
 
     stateContainer.set(newState);
+    urlStateStorage.set(urlStorageKey, stateContainer.get(), {
+      replace: true,
+    });
+    return;
   } else if (timefilterService.isTimeTouched()) {
     const { from, to } = timefilterService.getTime();
     const newState = {
@@ -151,7 +155,6 @@ function syncUrlStateWithInitialContainerState(
       rangeFrom: from,
       rangeTo: to,
     };
-
     stateContainer.set(newState);
   } else {
     // Reset the state container when no URL state or timefilter range is set to avoid accidentally

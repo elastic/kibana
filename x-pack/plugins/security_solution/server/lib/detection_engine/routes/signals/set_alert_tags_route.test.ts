@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSetAlertTagsRequestMock } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema.mock';
+import { getSetAlertTagsRequestMock } from '../../../../../common/api/detection_engine/alert_tags/mocks';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
@@ -100,7 +100,7 @@ describe('setAlertTagsRoute', () => {
         body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.bulk.mockRejectedValue(
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
         new Error('Test error')
       );
 

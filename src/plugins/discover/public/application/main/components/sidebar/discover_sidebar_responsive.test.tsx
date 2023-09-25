@@ -33,8 +33,8 @@ import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { type DataTableRecord } from '../../../../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
 
@@ -497,7 +497,7 @@ describe('discover responsive sidebar', function () {
     expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
   });
 
-  it('should render correctly in the sql mode', async () => {
+  it('should render correctly in the ES|QL mode', async () => {
     const propsWithTextBasedMode = {
       ...props,
       columns: ['extension', 'bytes'],
@@ -514,7 +514,7 @@ describe('discover responsive sidebar', function () {
       }) as DataDocuments$,
     };
     const compInTextBasedMode = await mountComponent(propsWithTextBasedMode, {
-      query: { sql: 'SELECT * FROM `index`' },
+      query: { esql: 'FROM `index`' },
     });
 
     await act(async () => {
@@ -747,6 +747,15 @@ describe('discover responsive sidebar', function () {
       await comp.update();
 
       expect(comp.find('[data-test-subj="custom-data-view-picker"]').exists()).toBe(true);
+    });
+
+    it('should allow to toggle sidebar', async function () {
+      const comp = await mountComponent(props);
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-collapse').simulate('click');
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
     });
   });
 });

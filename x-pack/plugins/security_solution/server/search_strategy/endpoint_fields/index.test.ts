@@ -16,6 +16,7 @@ import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
+import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
 
 describe('Endpoint fields', () => {
   const getFieldsForWildcardMock = jest.fn();
@@ -159,6 +160,20 @@ describe('Endpoint fields', () => {
 
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should throw when request body is invalid', async () => {
+      const request = {};
+
+      await expect(async () => {
+        await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request as unknown as IndexFieldsStrategyRequestByIndices,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
+      }).rejects.toThrowError(/invalid_type/);
     });
 
     it('should throw when invalid index', async () => {

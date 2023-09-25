@@ -14,6 +14,7 @@ import {
   createExploratoryViewUrl,
 } from '@kbn/exploratory-view-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';
@@ -78,13 +79,14 @@ export function UXActionMenu({
           color="primary"
           iconType="indexOpen"
           iconSide="left"
-          href={application.getUrlForApp('/home#/tutorial/apm')}
+          href={application.getUrlForApp('/apm/tutorial')}
         >
           {i18n.translate('xpack.ux.addDataButtonLabel', {
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
         <UxInspectorHeaderLink />
+        <ObservabilityAIAssistantActionMenuItem />
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

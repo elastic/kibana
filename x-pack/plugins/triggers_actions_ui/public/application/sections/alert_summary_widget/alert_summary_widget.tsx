@@ -34,7 +34,8 @@ export const AlertSummaryWidget = ({
     timeRange,
   });
 
-  if (isLoading) return <AlertSummaryWidgetLoader fullSize={fullSize} />;
+  if (isLoading)
+    return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;
 
   if (error) return <AlertSummaryWidgetError />;
 

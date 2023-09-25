@@ -144,6 +144,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
     );
     // Necessary to avoid async promise rejection warning

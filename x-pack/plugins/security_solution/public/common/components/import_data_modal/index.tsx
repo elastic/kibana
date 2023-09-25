@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
+import type { WarningSchema } from '../../../../common/api/detection_engine';
 
 import type {
   ImportDataResponse,

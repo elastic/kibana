@@ -51,5 +51,3 @@ export const LocationMonitorsType = t.type({
     })
   ),
 });
-
-export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;

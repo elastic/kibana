@@ -13,4 +13,3 @@ export * from './settings_defaults';
 export { QUERY } from './query';
 export * from './ui';
 export * from './rest_api';
-export * from './synthetics';

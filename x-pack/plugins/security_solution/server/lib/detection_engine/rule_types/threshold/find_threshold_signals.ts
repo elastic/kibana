@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEmpty } from 'lodash';
 
 import type {
   AlertInstanceContext,
@@ -17,7 +18,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   ThresholdNormalized,
   TimestampOverride,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { singleSearchAfter } from '../utils/single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
@@ -28,7 +29,7 @@ import type {
   ThresholdBucket,
   ThresholdSingleBucketAggregationResult,
 } from './types';
-import { shouldFilterByCardinality } from './utils';
+import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getMaxSignalsWarning } from '../utils/utils';
 
@@ -74,7 +75,6 @@ export const findThresholdSignals = async ({
   warnings: string[];
 }> => {
   // Leaf aggregations used below
-  let sortKeys;
   const buckets: ThresholdBucket[] = [];
   const searchAfterResults: SearchAfterResults = {
     searchDurations: [],
@@ -85,6 +85,7 @@ export const findThresholdSignals = async ({
   const includeCardinalityFilter = shouldFilterByCardinality(threshold);
 
   if (hasThresholdFields(threshold)) {
+    let sortKeys: Record<string, string | number | null> | undefined;
     do {
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: buildThresholdMultiBucketAggregation({
@@ -106,20 +107,22 @@ export const findThresholdSignals = async ({
         secondaryTimestamp,
       });
 
-      const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
-      if (!searchResultWithAggs.aggregations) {
+      searchAfterResults.searchDurations.push(searchDuration);
+      if (!isEmpty(searchErrors)) {
+        searchAfterResults.searchErrors.push(...searchErrors);
+        sortKeys = undefined; // this will eject us out of the loop
+        // if a search failure occurs on a secondary iteration,
+        // we will return early.
+      } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
+        const thresholdTerms = searchResult.aggregations?.thresholdTerms;
+        sortKeys = thresholdTerms?.after_key;
+
+        buckets.push(
+          ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
+        );
+      } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
-
-      searchAfterResults.searchDurations.push(searchDuration);
-      searchAfterResults.searchErrors.push(...searchErrors);
-
-      const thresholdTerms = searchResultWithAggs.aggregations?.thresholdTerms;
-      sortKeys = thresholdTerms.after_key;
-
-      buckets.push(
-        ...(searchResultWithAggs.aggregations.thresholdTerms.buckets as ThresholdBucket[])
-      );
     } while (sortKeys && buckets.length <= maxSignals);
   } else {
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
@@ -142,30 +145,32 @@ export const findThresholdSignals = async ({
       secondaryTimestamp,
     });
 
-    const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;
-    if (!searchResultWithAggs.aggregations) {
-      throw new Error('Aggregations were missing on threshold rule search result');
-    }
-
     searchAfterResults.searchDurations.push(searchDuration);
     searchAfterResults.searchErrors.push(...searchErrors);
 
-    const docCount = searchResultWithAggs.hits.total.value;
     if (
-      docCount >= threshold.value &&
-      (!includeCardinalityFilter ||
-        (searchResultWithAggs.aggregations.cardinality_count?.value ?? 0) >=
-          threshold.cardinality[0].value)
+      !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
+      isEmpty(searchErrors)
     ) {
-      buckets.push({
-        doc_count: docCount,
-        key: {},
-        max_timestamp: searchResultWithAggs.aggregations.max_timestamp,
-        min_timestamp: searchResultWithAggs.aggregations.min_timestamp,
-        ...(includeCardinalityFilter
-          ? { cardinality_count: searchResultWithAggs.aggregations.cardinality_count }
-          : {}),
-      });
+      throw new Error('Aggregations were missing on threshold rule search result');
+    } else if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
+      const docCount = searchResult.hits.total.value;
+      if (
+        docCount >= threshold.value &&
+        (!includeCardinalityFilter ||
+          (searchResult?.aggregations?.cardinality_count?.value ?? 0) >=
+            threshold.cardinality[0].value)
+      ) {
+        buckets.push({
+          doc_count: docCount,
+          key: {},
+          max_timestamp: searchResult.aggregations?.max_timestamp ?? { value: null },
+          min_timestamp: searchResult.aggregations?.min_timestamp ?? { value: null },
+          ...(includeCardinalityFilter
+            ? { cardinality_count: searchResult.aggregations?.cardinality_count }
+            : {}),
+        });
+      }
     }
   }
 

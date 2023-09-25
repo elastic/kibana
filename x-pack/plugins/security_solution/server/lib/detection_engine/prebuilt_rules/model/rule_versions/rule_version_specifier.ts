@@ -8,7 +8,7 @@
 import type {
   RuleSignatureId,
   RuleVersion,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface RuleVersionSpecifier {
   rule_id: RuleSignatureId;

@@ -7,7 +7,10 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "profiling"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": [
+      "spaces", 
+      "usageCollection"
+    ],
     "requiredPlugins": [
       "charts",
       "cloud",
@@ -18,12 +21,16 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityAIAssistant",
       "unifiedSearch",
-      "share"
+      "share",
+      "embeddable",
+      "profilingDataAccess"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
+      "observabilityAIAssistant"
     ]
   }
 }

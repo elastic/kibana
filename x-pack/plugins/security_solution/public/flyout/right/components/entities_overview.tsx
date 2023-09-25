@@ -6,25 +6,17 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { INSIGHTS_ENTITIES_NO_DATA_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
-import {
-  ENTITIES_HEADER_TEST_ID,
-  ENTITIES_CONTENT_TEST_ID,
-  ENTITIES_HOST_CONTENT_TEST_ID,
-  ENTITIES_USER_CONTENT_TEST_ID,
-  ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
-} from './test_ids';
-import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
-import { EntityPanel } from './entity_panel';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
-
-const USER_ICON = 'user';
-const HOST_ICON = 'storage';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
@@ -38,7 +30,10 @@ export const EntitiesOverview: React.FC = () => {
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: ENTITIES_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,
@@ -47,49 +42,52 @@ export const EntitiesOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  if (!eventId || (!userName && !hostName)) {
-    return null;
-  }
-
   return (
     <>
-      <EuiTitle size="xxs" data-test-subj={ENTITIES_HEADER_TEST_ID}>
-        <h5>{ENTITIES_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
-        {userName && (
-          <EuiFlexItem>
-            <EntityPanel
-              title={userName}
-              iconType={USER_ICON}
-              data-test-subj={ENTITIES_USER_CONTENT_TEST_ID}
-            >
-              <UserEntityOverview userName={userName} />
-            </EntityPanel>
-          </EuiFlexItem>
+      <ExpandablePanel
+        header={{
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.entitiesTitle"
+              defaultMessage="Entities"
+            />
+          ),
+          link: {
+            callback: goToEntitiesTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+                defaultMessage="Show all entities"
+              />
+            ),
+          },
+          iconType: 'arrowStart',
+        }}
+        data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
+      >
+        {userName || hostName ? (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {userName && (
+              <EuiFlexItem>
+                <UserEntityOverview userName={userName} />
+              </EuiFlexItem>
+            )}
+            <EuiSpacer size="s" />
+            {hostName && (
+              <EuiFlexItem>
+                <HostEntityOverview hostName={hostName} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <p data-test-subj={INSIGHTS_ENTITIES_NO_DATA_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.noDataDescription"
+              defaultMessage="Host and user information are unavailable for this alert."
+            />
+          </p>
         )}
-        {hostName && (
-          <EuiFlexItem>
-            <EntityPanel
-              title={hostName}
-              iconType={HOST_ICON}
-              data-test-subj={ENTITIES_HOST_CONTENT_TEST_ID}
-            >
-              <HostEntityOverview hostName={hostName} />
-            </EntityPanel>
-          </EuiFlexItem>
-        )}
-        <EuiButtonEmpty
-          onClick={goToEntitiesTab}
-          iconType="arrowStart"
-          iconSide="left"
-          size="s"
-          data-test-subj={ENTITIES_VIEW_ALL_BUTTON_TEST_ID}
-        >
-          {VIEW_ALL(ENTITIES_TEXT)}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+      </ExpandablePanel>
     </>
   );
 };

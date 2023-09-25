@@ -7,6 +7,7 @@
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import type { UserProfileAvatarData, UserProfileData } from './types';
 
 /**
  * IMPORTANT:
@@ -58,29 +59,6 @@ export interface UserProfileUserInfo {
    * Optional full name of the user.
    */
   full_name?: string;
-}
-
-/**
- * Placeholder for data stored in user profile.
- */
-export type UserProfileData = Record<string, unknown>;
-
-/**
- * Avatar stored in user profile.
- */
-export interface UserProfileAvatarData {
-  /**
-   * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
-   */
-  initials?: string;
-  /**
-   * Background color of the avatar when initials are used.
-   */
-  color?: string;
-  /**
-   * Base64 data URL for the user avatar image.
-   */
-  imageUrl?: string | null;
 }
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"

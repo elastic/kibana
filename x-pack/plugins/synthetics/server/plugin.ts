@@ -104,6 +104,7 @@ export class Plugin implements PluginType {
 
     if (this.server) {
       this.server.coreStart = coreStart;
+      this.server.pluginsStart = pluginsStart;
       this.server.security = pluginsStart.security;
       this.server.fleet = pluginsStart.fleet;
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;

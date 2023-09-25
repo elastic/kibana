@@ -7,7 +7,6 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader } from '../../router';
@@ -35,7 +34,6 @@ export const logCategorizationRouteFactory = (
       }),
     },
   ],
-  disabled: !AIOPS_ENABLED,
 });
 
 const PageWrapper: FC = () => {

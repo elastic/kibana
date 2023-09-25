@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'home', 'header']);
   const listingTable = getService('listingTable');
 
@@ -37,11 +37,19 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       await listingTable.waitUntilTableIsLoaded();
-      await listingTable.searchForItemWithName('Origin Time Delayed');
+      const items = await listingTable.getAllItemsNames();
+      const expectExists = [
+        `kibana_sample_data_flights`,
+        `[Flights] Airport Connections (Hover Over Airport)`,
+        `[Flights] Departures Count Map`,
+        `[Flights] Global Flight Dashboard`,
+        `[Flights] Origin Time Delayed`,
+        `[Flights] Flight Log`,
+      ];
 
-      await testSubjects.existOrFail(
-        `cm-msearch-tableListingTitleLink-[Flights]-Origin-Time-Delayed`
-      );
+      expectExists.forEach((item) => {
+        expect(items.includes(item)).to.be(true);
+      });
     });
   });
 }

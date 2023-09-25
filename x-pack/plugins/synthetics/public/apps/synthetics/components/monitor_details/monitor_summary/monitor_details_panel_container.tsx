@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   MonitorDetailsPanelProps,
   MonitorDetailsPanel,
@@ -24,10 +23,11 @@ export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelP
 
   const { monitor, loading } = useSelectedMonitor();
 
-  if (
-    (latestPing && latestPing?.config_id !== configId) ||
-    (monitor && monitor[ConfigKey.CONFIG_ID] !== configId)
-  ) {
+  const isPingRelevant =
+    latestPing?.config_id === monitor?.[ConfigKey.CONFIG_ID] ||
+    latestPing?.monitor?.id === monitor?.[ConfigKey.MONITOR_QUERY_ID];
+
+  if (!monitor || !isPingRelevant) {
     return <EuiSkeletonText lines={6} />;
   }
 
@@ -41,10 +41,3 @@ export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelP
     />
   );
 };
-
-export const WrapperStyle = euiStyled.div`
-  .euiDescriptionList.euiDescriptionList--column > *,
-  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;

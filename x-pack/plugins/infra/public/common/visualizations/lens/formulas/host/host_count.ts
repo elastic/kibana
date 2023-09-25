@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const hostCount: FormulaConfig = {
-  label: 'Hosts',
+export const hostCount: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.hostCount.hostsLabel', {
+    defaultMessage: 'Hosts',
+  }),
   value: 'unique_count(host.name)',
   format: {
     id: 'number',

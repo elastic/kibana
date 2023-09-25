@@ -11,10 +11,6 @@ export const LABEL = i18n.translate('xpack.securitySolution.markdown.insight.lab
   defaultMessage: 'Label',
 });
 
-export const INIGHT_UPSELL = i18n.translate('xpack.securitySolution.markdown.insight.upsell', {
-  defaultMessage: 'Upgrade to platinum to make use of insights in investigation guides',
-});
-
 export const INVESTIGATE = i18n.translate('xpack.securitySolution.markdown.insight.title', {
   defaultMessage: 'Investigate',
 });

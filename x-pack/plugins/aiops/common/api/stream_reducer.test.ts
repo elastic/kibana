@@ -14,7 +14,7 @@ import {
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
-} from './explain_log_rate_spikes';
+} from './log_rate_analysis';
 import { initialState, streamReducer } from './stream_reducer';
 
 describe('streamReducer', () => {

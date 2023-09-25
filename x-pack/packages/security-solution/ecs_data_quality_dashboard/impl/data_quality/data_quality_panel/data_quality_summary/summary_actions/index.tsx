@@ -32,6 +32,7 @@ import type {
   PatternRollup,
 } from '../../../types';
 import { getSizeInBytes } from '../../../helpers';
+import { useDataQualityContext } from '../../data_quality_context';
 
 const SummaryActionsFlexGroup = styled(EuiFlexGroup)`
   gap: ${({ theme }) => theme.eui.euiSizeS};
@@ -45,11 +46,13 @@ export const getResultsSortedByDocsCount = (
 export const getAllMarkdownCommentsFromResults = ({
   formatBytes,
   formatNumber,
+  isILMAvailable,
   patternIndexNames,
   patternRollup,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
+  isILMAvailable: boolean;
   patternIndexNames: Record<string, string[]>;
   patternRollup: PatternRollup;
 }): string[] => {
@@ -59,6 +62,7 @@ export const getAllMarkdownCommentsFromResults = ({
   const summaryTableItems = getSummaryTableItems({
     ilmExplain: patternRollup.ilmExplain,
     indexNames: patternIndexNames[patternRollup.pattern] ?? [],
+    isILMAvailable,
     pattern: patternRollup.pattern,
     patternDocsCount: patternRollup.docsCount ?? 0,
     results: patternRollup.results,
@@ -78,6 +82,7 @@ export const getAllMarkdownCommentsFromResults = ({
       ilmPhase: item.ilmPhase,
       indexName: item.indexName,
       incompatible: result?.incompatible,
+      isILMAvailable,
       patternDocsCount: patternRollup.docsCount ?? 0,
       sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
     }).trim();
@@ -85,7 +90,7 @@ export const getAllMarkdownCommentsFromResults = ({
 
   const initialComments: string[] =
     summaryTableMarkdownRows.length > 0
-      ? [getSummaryTableMarkdownHeader(), ...summaryTableMarkdownRows]
+      ? [getSummaryTableMarkdownHeader(isILMAvailable), ...summaryTableMarkdownRows]
       : [];
 
   return sortedResults.reduce<string[]>(
@@ -97,11 +102,13 @@ export const getAllMarkdownCommentsFromResults = ({
 export const getAllMarkdownComments = ({
   formatBytes,
   formatNumber,
+  isILMAvailable,
   patternIndexNames,
   patternRollups,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
+  isILMAvailable: boolean;
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
 }): string[] => {
@@ -123,6 +130,7 @@ export const getAllMarkdownComments = ({
       ...getAllMarkdownCommentsFromResults({
         formatBytes,
         formatNumber,
+        isILMAvailable,
         patternRollup: patternRollups[pattern],
         patternIndexNames,
       }),
@@ -178,6 +186,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
   totalIndicesChecked,
   sizeInBytes,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const [indexToCheck, setIndexToCheck] = useState<IndexToCheck | null>(null);
   const [checkAllIndiciesChecked, setCheckAllIndiciesChecked] = useState<number>(0);
   const [checkAllTotalIndiciesToCheck, setCheckAllTotalIndiciesToCheck] = useState<number>(0);
@@ -199,6 +208,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
       ...getAllMarkdownComments({
         formatBytes,
         formatNumber,
+        isILMAvailable,
         patternIndexNames,
         patternRollups,
       }),
@@ -213,6 +223,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
       errorSummary,
       formatBytes,
       formatNumber,
+      isILMAvailable,
       patternIndexNames,
       patternRollups,
       sizeInBytes,

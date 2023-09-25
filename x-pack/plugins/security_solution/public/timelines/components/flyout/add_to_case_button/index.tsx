@@ -17,7 +17,7 @@ import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../store/timeline/defaults';

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockVisualization, DatasourceMock, createMockDatasource } from './mocks';
 import { DatasourceSuggestion } from './types';
 import { suggestionsApi } from './lens_suggestions_api';
@@ -20,6 +20,23 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
   },
   keptLayerIds: [layerId],
 });
+
+const textBasedQueryColumns = [
+  {
+    id: 'field1',
+    name: 'field1',
+    meta: {
+      type: 'number',
+    },
+  },
+  {
+    id: 'field2',
+    name: 'field2',
+    meta: {
+      type: 'string',
+    },
+  },
+] as DatatableColumn[];
 
 describe('suggestionsApi', () => {
   let datasourceMap: Record<string, DatasourceMock>;
@@ -46,7 +63,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: ['field1', 'field2'],
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -93,7 +110,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: ['field1', 'field2'],
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -142,7 +159,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: ['field1', 'field2'],
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -184,7 +201,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: ['field1', 'field2'],
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },

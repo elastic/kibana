@@ -40,10 +40,10 @@ export function NodeDataFetcher(
      *
      * This gets the visible nodes that we haven't already requested or received data for
      */
-    const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state.analyzer.analyzerById[id])(
+    const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state.analyzer[id])(
       Number.POSITIVE_INFINITY
     );
-    const indices = selectors.eventIndices(state.analyzer.analyzerById[id]);
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
     if (newIDsToRequest.size <= 0) {
       return;
@@ -60,11 +60,9 @@ export function NodeDataFetcher(
 
     let results: SafeResolverEvent[] | undefined;
     try {
-      const detectedBounds = selectors.detectedBounds(state.analyzer.analyzerById[id]);
+      const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
       const timeRangeFilters =
-        detectedBounds !== undefined
-          ? undefined
-          : selectors.timeRangeFilters(state.analyzer.analyzerById[id]);
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
         timeRange: timeRangeFilters,

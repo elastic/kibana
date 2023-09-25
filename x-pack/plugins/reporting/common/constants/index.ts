@@ -6,8 +6,8 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
-import * as reportTypes from './report_types';
 import * as jobTypes from './job_types';
+import * as reportTypes from './report_types';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
@@ -27,10 +27,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'image/png',
   'text/plain',
 ];
-
-// Re-export type definitions here for convenience.
-export * from './report_types';
-export * from './job_types';
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
@@ -55,22 +51,12 @@ export const USES_HEADLESS_JOB_TYPES = [
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
 // Licenses
-export const LICENSE_TYPE_TRIAL = 'trial';
-export const LICENSE_TYPE_BASIC = 'basic';
-export const LICENSE_TYPE_CLOUD_STANDARD = 'standard';
-export const LICENSE_TYPE_GOLD = 'gold';
-export const LICENSE_TYPE_PLATINUM = 'platinum';
-export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
-
-// Routes
-export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
-export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
-export const API_LIST_URL = `${API_BASE_URL}/jobs`;
-export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
-
-export const API_GET_ILM_POLICY_STATUS = `${API_BASE_URL}/ilm_policy_status`;
-export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
-export const API_BASE_URL_V1 = '/api/reporting/v1'; //
+export const LICENSE_TYPE_TRIAL = 'trial' as const;
+export const LICENSE_TYPE_BASIC = 'basic' as const;
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
+export const LICENSE_TYPE_GOLD = 'gold' as const;
+export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
+export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
 export const ILM_POLICY_NAME = 'kibana-reporting';
 
@@ -111,6 +97,6 @@ export const REPORT_TABLE_ROW_ID = 'reportJobRow';
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
 
-// hacky endpoint: download CSV without queueing a report
-// FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
-export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
+export * from './job_types';
+export * from './report_types';
+export * from './routes';

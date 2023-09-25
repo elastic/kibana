@@ -14,15 +14,63 @@ import { ERROR_LOADING_STATS } from '../translations';
 import { useStats, UseStats } from '.';
 
 const mockHttpFetch = jest.fn();
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
+
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={true}
+  >
+    {children}
+  </DataQualityProvider>
+);
+
+const ContextWrapperILMNotAvailable: React.FC = ({ children }) => (
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={false}
+  >
+    {children}
+  </DataQualityProvider>
 );
 
 const pattern = 'auditbeat-*';
+const startDate = `now-7d`;
+const endDate = `now`;
+const params = {
+  pattern,
+};
 
 describe('useStats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('query with date range when ILM is not available', () => {
+    const queryParams = {
+      isILMAvailable: false,
+      startDate,
+      endDate,
+    };
+
+    beforeEach(async () => {
+      mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
+
+      const { waitForNextUpdate } = renderHook(() => useStats({ pattern, startDate, endDate }), {
+        wrapper: ContextWrapperILMNotAvailable,
+      });
+      await waitForNextUpdate();
+    });
+    test(`it calls the stats api with the expected params`, async () => {
+      expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
+    });
   });
 
   describe('successful response from the stats api', () => {
@@ -31,7 +79,7 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
       await waitForNextUpdate();
@@ -49,6 +97,10 @@ describe('useStats', () => {
     test('it returns a null error, because no errors occurred', async () => {
       expect(statsResult?.error).toBeNull();
     });
+
+    test(`it calls the stats api with the expected params`, async () => {
+      expect(mockHttpFetch.mock.calls[0][1].query).toEqual({ isILMAvailable: true });
+    });
   });
 
   describe('fetch rejects with an error', () => {
@@ -58,7 +110,7 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
       await waitForNextUpdate();

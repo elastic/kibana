@@ -6,7 +6,7 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
   getListMock,
@@ -555,6 +555,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -635,6 +636,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -659,6 +661,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -702,6 +705,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -754,6 +758,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -782,6 +787,95 @@ describe('helpers', () => {
         threat: getThreatMock(),
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
+        investigation_fields: { field_names: ['foo', 'bar'] },
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object if investigationFields is empty array', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        investigationFields: [],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        rule_name_override: undefined,
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
+        threat: getThreatMock(),
+        investigation_fields: undefined,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with investigation_fields', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        investigationFields: ['foo', 'bar'],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object if investigation_fields includes empty string', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        investigationFields: ['  '],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        investigation_fields: undefined,
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
       };
 
       expect(result).toEqual(expected);

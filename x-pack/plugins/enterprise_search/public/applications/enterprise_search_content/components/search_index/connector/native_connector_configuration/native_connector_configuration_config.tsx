@@ -11,7 +11,7 @@ import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } fr
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorStatus } from '../../../../../../../common/types/connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
@@ -75,8 +75,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage:
-                  'Your connector {name} has connected to Enterprise Search successfully.',
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
                 values: { name: nativeConnector.name },
               }
             )}

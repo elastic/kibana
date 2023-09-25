@@ -38,8 +38,8 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 export const LocationGeoCodec = t.interface({
-  lat: t.union([t.string, t.number]),
-  lon: t.union([t.string, t.number]),
+  lat: t.union([t.string, t.number, t.null]),
+  lon: t.union([t.string, t.number, t.null]),
 });
 
 export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
@@ -138,10 +138,16 @@ export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
 export type MonitorServiceLocation = t.TypeOf<typeof MonitorServiceLocationCodec>;
-export type MonitorServiceLocations = t.TypeOf<typeof MonitorServiceLocationsCodec>;
-export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;
 export type PublicLocation = t.TypeOf<typeof PublicLocationCodec>;
 export type PublicLocations = t.TypeOf<typeof PublicLocationsCodec>;
+
+export interface ServiceLocationErrorsResponse {
+  attributes: { message: string; errors: ServiceLocationErrors; id?: string };
+}
+
+// TODO: Remove if not needed
+// export type MonitorServiceLocations = t.TypeOf<typeof MonitorServiceLocationsCodec>;
+// export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;

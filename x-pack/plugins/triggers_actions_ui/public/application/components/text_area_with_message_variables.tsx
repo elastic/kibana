@@ -7,9 +7,8 @@
 
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 
 interface Props {
@@ -20,6 +19,7 @@ interface Props {
   isDisabled?: boolean;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
+  helpText?: string;
   errors?: string[];
 }
 
@@ -32,6 +32,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   editAction,
   label,
   errors,
+  helpText,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -64,6 +65,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
           paramsProperty={paramsProperty}
         />
       }
+      helpText={helpText}
     >
       <EuiTextArea
         disabled={isDisabled}

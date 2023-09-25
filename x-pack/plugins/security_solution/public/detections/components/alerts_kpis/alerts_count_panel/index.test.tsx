@@ -10,7 +10,7 @@ import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { AlertsCountPanel } from '.';
 
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';

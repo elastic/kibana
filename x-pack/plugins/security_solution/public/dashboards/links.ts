@@ -15,7 +15,6 @@ import {
   detectionResponseLinks,
   entityAnalyticsLinks,
   overviewLinks,
-  coverageOverviewDashboardLinks,
 } from '../overview/links';
 import { IconDashboards } from '../common/icons/dashboards';
 
@@ -27,7 +26,6 @@ const subLinks: LinkItem[] = [
   vulnerabilityDashboardLink,
   entityAnalyticsLinks,
   ecsDataQualityDashboardLinks,
-  coverageOverviewDashboardLinks,
 ].map((link) => ({ ...link, sideNavIcon: IconDashboards }));
 
 export const dashboardsLinks: LinkItem = {

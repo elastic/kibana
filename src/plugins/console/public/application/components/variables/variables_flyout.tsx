@@ -85,15 +85,14 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         defaultMessage: 'Variable name',
       }),
       render: (name, { id }) => {
-        // Avoid characters that get URL-encoded, because they'll result in unusable variable names.
-        const isInvalid = name && !name.match(/^[a-zA-Z0-9]+$/g);
+        const isInvalid = !utils.isValidVariableName(name);
         return (
           <EuiFormRow
             isInvalid={isInvalid}
             error={[
               <FormattedMessage
                 id="console.variablesPage.variablesTable.variableInputError.validCharactersText"
-                defaultMessage="Only letters and numbers are allowed"
+                defaultMessage="Only letters, numbers and underscores are allowed"
               />,
             ]}
             fullWidth={true}

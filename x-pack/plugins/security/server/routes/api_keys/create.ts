@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { CreateApiKeyValidationError } from '../../authentication/api_keys';
@@ -13,7 +16,27 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-const bodySchema = schema.object({
+/**
+ * Response of Kibana Create API key endpoint.
+ */
+export type CreateAPIKeyResult = estypes.SecurityCreateApiKeyResponse;
+
+/**
+ * Request body of Kibana Create API key endpoint.
+ */
+export type CreateAPIKeyParams =
+  | CreateRestAPIKeyParams
+  | CreateRestAPIKeyWithKibanaPrivilegesParams
+  | CreateCrossClusterAPIKeyParams;
+
+export type CreateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
+export type CreateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
+>;
+export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
+
+export const restApiKeySchema = schema.object({
+  type: schema.maybe(schema.literal('rest')),
   name: schema.string(),
   expiration: schema.maybe(schema.string()),
   role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
@@ -22,12 +45,11 @@ const bodySchema = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-const getBodySchemaWithKibanaPrivileges = (
-  getBasePrivilegeNames: () => { global: string[]; space: string[] }
+export const getRestApiKeyWithKibanaPrivilegesSchema = (
+  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>
-  schema.object({
-    name: schema.string(),
-    expiration: schema.maybe(schema.string()),
+  restApiKeySchema.extends({
+    role_descriptors: null,
     kibana_role_descriptors: schema.recordOf(
       schema.string(),
       schema.object({
@@ -35,15 +57,38 @@ const getBodySchemaWithKibanaPrivileges = (
         kibana: getKibanaRoleSchema(getBasePrivilegeNames),
       })
     ),
-    metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   });
+
+export const crossClusterApiKeySchema = restApiKeySchema.extends({
+  type: schema.literal('cross_cluster'),
+  role_descriptors: null,
+  access: schema.object(
+    {
+      search: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            names: schema.arrayOf(schema.string()),
+          })
+        )
+      ),
+      replication: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            names: schema.arrayOf(schema.string()),
+          })
+        )
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
+});
 
 export function defineCreateApiKeyRoutes({
   router,
   authz,
   getAuthenticationService,
 }: RouteDefinitionParams) {
-  const bodySchemaWithKibanaPrivileges = getBodySchemaWithKibanaPrivileges(() => {
+  const bodySchemaWithKibanaPrivileges = getRestApiKeyWithKibanaPrivilegesSchema(() => {
     const privileges = authz.privileges.get();
     return {
       global: Object.keys(privileges.global),
@@ -54,18 +99,28 @@ export function defineCreateApiKeyRoutes({
     {
       path: '/internal/security/api_key',
       validate: {
-        body: schema.oneOf([bodySchema, bodySchemaWithKibanaPrivileges]),
+        body: schema.oneOf([
+          restApiKeySchema,
+          bodySchemaWithKibanaPrivileges,
+          crossClusterApiKeySchema,
+        ]),
+      },
+      options: {
+        access: 'internal',
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const apiKey = await getAuthenticationService().apiKeys.create(request, request.body);
+        const createdApiKey = await getAuthenticationService().apiKeys.create(
+          request,
+          request.body
+        );
 
-        if (!apiKey) {
-          return response.badRequest({ body: { message: `API Keys are not available` } });
+        if (!createdApiKey) {
+          return response.badRequest({ body: { message: 'API Keys are not available' } });
         }
 
-        return response.ok({ body: apiKey });
+        return response.ok({ body: createdApiKey });
       } catch (error) {
         if (error instanceof CreateApiKeyValidationError) {
           return response.badRequest({ body: { message: error.message } });

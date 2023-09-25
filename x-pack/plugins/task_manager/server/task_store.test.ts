@@ -381,7 +381,9 @@ describe('TaskStore', () => {
         index: 'tasky',
         body: {
           size: 0,
-          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          query: {
+            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+          },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
       });
@@ -401,7 +403,11 @@ describe('TaskStore', () => {
           query: {
             bool: {
               must: [
-                { bool: { filter: [{ term: { type: 'task' } }] } },
+                {
+                  bool: {
+                    filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                  },
+                },
                 { term: { 'task.taskType': 'bar' } },
               ],
             },
@@ -420,7 +426,9 @@ describe('TaskStore', () => {
       expect(args).toMatchObject({
         body: {
           size: 0,
-          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          query: {
+            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+          },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
           runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
         },
@@ -692,7 +700,7 @@ describe('TaskStore', () => {
       const id = randomId();
       const result = await store.remove(id);
       expect(result).toBeUndefined();
-      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -727,10 +735,13 @@ describe('TaskStore', () => {
     test('removes the tasks with the specified ids', async () => {
       const result = await store.bulkRemove(tasksIdsToDelete);
       expect(result).toBeUndefined();
-      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-        { type: 'task', id: tasksIdsToDelete[0] },
-        { type: 'task', id: tasksIdsToDelete[1] },
-      ]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+        [
+          { type: 'task', id: tasksIdsToDelete[0] },
+          { type: 'task', id: tasksIdsToDelete[1] },
+        ],
+        { refresh: false }
+      );
     });
 
     test('pushes error from saved objects client to errors$', async () => {

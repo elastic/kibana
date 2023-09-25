@@ -16,7 +16,7 @@ import {
   ColorPicker,
   LineStyleSettings,
   TextDecorationSetting,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';

@@ -20,7 +20,7 @@ const commonLinkProperties: Partial<LinkItem> = {
 
 export const findingsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
-  globalNavPosition: 3,
+  globalNavPosition: 4,
   ...commonLinkProperties,
 };
 
@@ -37,7 +37,6 @@ export const cspDashboardLink: LinkItem = {
 };
 
 export const vulnerabilityDashboardLink: LinkItem = {
-  isBeta: true,
   ...getSecuritySolutionLink<SecurityPageName>('vulnerability_dashboard'),
   description: i18n.translate('xpack.securitySolution.appLinks.vulnerabilityDashboardDescription', {
     defaultMessage:
@@ -52,7 +51,7 @@ export const benchmarksLink: LinkItem = {
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
     {
-      defaultMessage: 'View benchmark rules.',
+      defaultMessage: 'View benchmark rules for Cloud Security Posture management.',
     }
   ),
   landingIcon: IconEndpoints,

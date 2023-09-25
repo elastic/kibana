@@ -13,8 +13,8 @@ import { GenericIndexPatternColumn } from '../../..';
 import { LensAppServices } from '../../../app_plugin/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { EuiFieldNumber } from '@elastic/eui';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { EuiComboBox, EuiFieldNumber } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -39,6 +39,7 @@ const bytesColumn: GenericIndexPatternColumn = {
 const getDefaultProps = () => ({
   onChange: jest.fn(),
   selectedColumn: bytesColumn,
+  docLinks: docLinksServiceMock.createStartContract(),
 });
 
 function createMockServices(): LensAppServices {
@@ -106,10 +107,10 @@ describe('FormatSelector', () => {
     });
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
   });
-  it('updates the suffix', async () => {
+  it('updates the suffix', () => {
     const props = getDefaultProps();
     const component = mountWithServices(<FormatSelector {...props} />);
-    await act(async () => {
+    act(() => {
       component
         .find('[data-test-subj="indexPattern-dimension-formatSuffix"]')
         .last()
@@ -119,5 +120,44 @@ describe('FormatSelector', () => {
     });
     component.update();
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
+  });
+
+  describe('Duration', () => {
+    it('hides the decimals and compact controls for humanize approximate output', () => {
+      const originalProps = getDefaultProps();
+      let component = mountWithServices(
+        <FormatSelector
+          {...{
+            ...originalProps,
+            selectedColumn: {
+              ...originalProps.selectedColumn,
+              params: { format: { id: 'duration' } },
+            },
+          }}
+        />
+      );
+
+      expect(component.exists('[data-test-subj="indexPattern-dimension-formatDecimals"]')).toBe(
+        false
+      );
+      expect(component.exists('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')).toBe(
+        false
+      );
+
+      act(() => {
+        component
+          .find('[data-test-subj="indexPattern-dimension-duration-end"]')
+          .find(EuiComboBox)
+          .prop('onChange')!([{ label: 'Hours', value: 'asHours' }]);
+      });
+      component = component.update();
+
+      expect(component.exists('[data-test-subj="indexPattern-dimension-formatDecimals"]')).toBe(
+        true
+      );
+      expect(component.exists('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')).toBe(
+        true
+      );
+    });
   });
 });

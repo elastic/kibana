@@ -42,10 +42,14 @@ export function useDeleteSlo() {
         });
         const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
+        // taking into account partitioned slo
+        const matchingSloCount =
+          previousData?.results?.filter((result) => result.id === slo.id)?.length ?? 0;
+
         const optimisticUpdate = {
           page: previousData?.page ?? 1,
           perPage: previousData?.perPage ?? 25,
-          total: previousData?.total ? previousData.total - 1 : 0,
+          total: previousData?.total ? previousData.total - matchingSloCount : 0,
           results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
         };
 
@@ -75,9 +79,6 @@ export function useDeleteSlo() {
             values: { name },
           })
         );
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
     }
   );

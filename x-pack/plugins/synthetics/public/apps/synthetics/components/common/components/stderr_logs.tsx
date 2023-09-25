@@ -30,7 +30,6 @@ import { Ping } from '../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const StdErrorLogs = ({
-  monitorId,
   checkGroup,
   timestamp,
   title,
@@ -38,7 +37,6 @@ export const StdErrorLogs = ({
   hideTitle = false,
   pageSize = 5,
 }: {
-  monitorId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
@@ -71,7 +69,7 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
+  const { items, loading } = useStdErrorLogs({ checkGroup });
 
   const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 

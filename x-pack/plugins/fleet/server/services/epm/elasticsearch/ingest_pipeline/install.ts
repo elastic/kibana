@@ -34,7 +34,7 @@ import {
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
   isTopLevelPipeline,
-  addCustomPipelineProcessor,
+  addCustomPipelineAndLocalRoutingRulesProcessor,
 } from './helpers';
 import type { PipelineInstall, RewriteSubstitution } from './types';
 
@@ -152,12 +152,9 @@ export async function installAllPipelines({
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
     : paths;
-  const pipelinesInfos: Array<{
-    nameForInstallation: string;
-    customIngestPipelineNameForInstallation?: string;
-    content: string;
-    extension: string;
-  }> = [];
+  const pipelinesInfos: Array<
+    Omit<PipelineInstall, 'contentForInstallation'> & { content: string }
+  > = [];
   const substitutions: RewriteSubstitution[] = [];
 
   let datastreamPipelineCreated = false;
@@ -177,6 +174,7 @@ export async function installAllPipelines({
       nameForInstallation,
       customIngestPipelineNameForInstallation:
         dataStream && isMainPipeline ? getCustomPipelineNameForDatastream(dataStream) : undefined,
+      dataStream,
       content,
       extension,
     });
@@ -203,6 +201,7 @@ export async function installAllPipelines({
     pipelinesToInstall.push({
       nameForInstallation,
       customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
+      dataStream,
       contentForInstallation: 'processors: []',
       extension: 'yml',
     });
@@ -234,7 +233,7 @@ async function installPipeline({
   });
 
   if (shouldAddCustomPipelineProcessor) {
-    pipelineToInstall = addCustomPipelineProcessor(pipelineToInstall);
+    pipelineToInstall = addCustomPipelineAndLocalRoutingRulesProcessor(pipelineToInstall);
   }
 
   const esClientParams = {

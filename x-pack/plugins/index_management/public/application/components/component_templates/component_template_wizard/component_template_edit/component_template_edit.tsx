@@ -9,13 +9,10 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { History } from 'history';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
   ComponentTemplateDeserialized,
@@ -65,7 +62,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
+  const { api, overlays } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
 
@@ -79,8 +76,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
 
   useEffect(() => {
-    breadcrumbs.setEditBreadcrumbs();
-  }, [breadcrumbs]);
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateEdit);
+  }, []);
 
   const onSave = async (updatedComponentTemplate: ComponentTemplateDeserialized) => {
     setIsSaving(true);
@@ -165,7 +162,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -192,6 +189,6 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
         clearSaveError={clearSaveError}
         isEditing={true}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

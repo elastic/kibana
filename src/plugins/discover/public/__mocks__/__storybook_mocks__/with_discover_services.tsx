@@ -20,8 +20,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
-} from '../../../common';
-import { SIDEBAR_CLOSED_KEY } from '../../application/main/components/layout/discover_layout';
+} from '@kbn/discover-utils';
 import { LocalStorageMock } from '../local_storage_mock';
 import { DiscoverServices } from '../../build_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -73,9 +72,7 @@ export const services = {
     docLinks: { links: { discover: {} } },
     theme,
   },
-  storage: new LocalStorageMock({
-    [SIDEBAR_CLOSED_KEY]: false,
-  }) as unknown as Storage,
+  storage: new LocalStorageMock({}) as unknown as Storage,
   data: {
     query: {
       timefilter: {

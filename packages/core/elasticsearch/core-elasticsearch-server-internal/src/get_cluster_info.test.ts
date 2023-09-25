@@ -21,7 +21,7 @@ describe('getClusterInfo', () => {
       number: '1.2.3',
       lucene_version: '1.2.3',
       build_date: 'DateString',
-      build_flavor: 'string',
+      build_flavor: 'default',
       build_hash: 'string',
       build_snapshot: true,
       build_type: 'string',
@@ -39,6 +39,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -52,6 +53,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -65,6 +67,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -72,6 +75,7 @@ describe('getClusterInfo', () => {
     `);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",

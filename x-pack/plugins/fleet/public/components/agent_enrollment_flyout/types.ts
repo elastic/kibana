@@ -16,13 +16,22 @@ export type K8sMode =
   | 'IS_KUBERNETES_MULTIPAGE';
 
 export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
+export type CloudSecurityIntegrationAwsAccountType = 'single-account' | 'organization-account';
 
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
+export interface CloudFormationProps {
+  templateUrl: string | undefined;
+  awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined;
+}
+
 export interface CloudSecurityIntegration {
   integrationType: CloudSecurityIntegrationType | undefined;
-  cloudformationUrl: string | undefined;
+  isLoading: boolean;
+  isCloudFormation: boolean;
+  cloudFormationProps?: CloudFormationProps;
+  cloudShellUrl: string | undefined;
 }
 
 export interface BaseProps {
@@ -65,5 +74,4 @@ export interface InstructionProps extends BaseProps {
   setSelectedAPIKeyId: (key?: string) => void;
   fleetServerHosts: string[];
   fleetProxy?: FleetProxy;
-  cloudFormationTemplateUrl?: string;
 }

@@ -10,6 +10,12 @@ import { navigatesToLandingPage } from '../tasks/navigation';
 
 describe('Serverless', () => {
   it('Should navigate to the landing page', () => {
+    cy.visit('/', {
+      auth: {
+        username: 'elastic_serverless',
+        password: 'changeme',
+      },
+    });
     navigatesToLandingPage();
     cy.get(LEFT_NAVIGATION).should('exist');
   });

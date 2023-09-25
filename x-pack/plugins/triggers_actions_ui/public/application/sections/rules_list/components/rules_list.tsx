@@ -39,6 +39,7 @@ import {
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
   RuleTableItem,
@@ -106,6 +107,7 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
+  filterConsumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -145,6 +147,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
+  filterConsumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -169,6 +172,7 @@ export const RulesList = ({
   setHeaderActions,
 }: RulesListProps) => {
   const history = useHistory();
+  const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
     application: { capabilities },
@@ -176,7 +180,7 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
-  } = useKibana().services;
+  } = kibanaServices;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -261,6 +265,7 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
+    filterConsumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -273,6 +278,7 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
+      filterConsumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
@@ -722,7 +728,7 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

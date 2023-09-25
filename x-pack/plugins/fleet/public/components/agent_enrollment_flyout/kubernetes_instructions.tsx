@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useGetSettings, useStartServices } from '../../hooks';
+import { useStartServices } from '../../hooks';
 
 import { agentPolicyRouteService } from '../../../common';
 
@@ -28,19 +28,28 @@ interface Props {
   enrollmentAPIKey?: string;
   onCopy?: () => void;
   onDownload?: () => void;
+  fleetServerHost?: string;
 }
+
+export const getManifestDownloadLink = (fleetServerHost?: string, enrollmentAPIKey?: string) => {
+  const searchParams = new URLSearchParams({
+    ...(fleetServerHost && { fleetServer: fleetServerHost }),
+    ...(enrollmentAPIKey && { enrolToken: enrollmentAPIKey }),
+  });
+
+  return `${agentPolicyRouteService.getK8sFullDownloadPath()}?${searchParams.toString()}`;
+};
 
 export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   onCopy,
   onDownload,
+  fleetServerHost,
 }) => {
   const core = useStartServices();
-  const settings = useGetSettings();
   const { notifications } = core;
 
   const [yaml, setYaml] = useState<string>('');
-  const [fleetServer, setFleetServer] = useState<string | ''>();
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
   const [downloadButtonClicked, setDownloadButtonClicked] = useState(false);
 
@@ -59,13 +68,10 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   useEffect(() => {
     async function fetchK8sManifest() {
       try {
-        const fleetServerHosts = settings.data?.item.fleet_server_hosts;
-        let host = '';
-        if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
-          setFleetServer(fleetServerHosts[0]);
-          host = fleetServerHosts[0];
-        }
-        const query = { fleetServer: host, enrolToken: enrollmentAPIKey };
+        const query = {
+          enrolToken: enrollmentAPIKey,
+          ...(fleetServerHost && { fleetServer: fleetServerHost }),
+        };
         const res = await sendGetK8sManifest(query);
         if (res.error) {
           throw res.error;
@@ -85,7 +91,7 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
       }
     }
     fetchK8sManifest();
-  }, [notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
+  }, [notifications.toasts, enrollmentAPIKey, fleetServerHost]);
 
   const downloadDescription = (
     <FormattedMessage
@@ -115,7 +121,7 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   );
 
   const downloadLink = core.http.basePath.prepend(
-    `${agentPolicyRouteService.getK8sFullDownloadPath()}?fleetServer=${fleetServer}&enrolToken=${enrollmentAPIKey}`
+    getManifestDownloadLink(fleetServerHost, enrollmentAPIKey)
   );
 
   const k8sDownloadYaml = (

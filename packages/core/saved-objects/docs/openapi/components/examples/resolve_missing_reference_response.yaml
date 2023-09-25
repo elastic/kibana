@@ -1,0 +1,20 @@
+summary: Resolve missing reference errors.
+value:
+  success: true
+  successCount: 3
+  successResults:
+    - id: my-vis
+      type: visualization
+      meta:
+        icon: visualizeApp
+        title: Look at my visualization
+    - id: my-search
+      type: search
+      meta:
+        icon: searchApp
+        title: Look at my search
+    - id: my-dashboard
+      type: dashboard
+      meta:
+        icon: dashboardApp
+        title: Look at my dashboard

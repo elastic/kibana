@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
@@ -36,15 +36,16 @@ export const renderApp = ({ element, services, profileRegistry, isDev }: RenderA
     });
   }
   const unmount = toMountPoint(
-    wrapWithTheme(
-      <DiscoverRouter
-        services={services}
-        profileRegistry={profileRegistry}
-        history={history}
-        isDev={isDev}
-      />,
-      core.theme.theme$
-    )
+    <DiscoverRouter
+      services={services}
+      profileRegistry={profileRegistry}
+      history={history}
+      isDev={isDev}
+    />,
+    {
+      theme: core.theme,
+      i18n: core.i18n,
+    }
   )(element);
 
   return () => {

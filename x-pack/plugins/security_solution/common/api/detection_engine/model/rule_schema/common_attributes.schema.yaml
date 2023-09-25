@@ -1,0 +1,244 @@
+openapi: 3.0.0
+info:
+  title: Common Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: false
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier
+
+    RuleObjectId:
+      type: string
+
+    RuleSignatureId:
+      type: string
+      description: Could be any string, not necessarily a UUID
+
+    RuleName:
+      type: string
+      minLength: 1
+
+    RuleDescription:
+      type: string
+      minLength: 1
+
+    RuleVersion:
+      type: string
+      format: version
+
+    IsRuleImmutable:
+      type: boolean
+
+    IsRuleEnabled:
+      type: boolean
+
+    RuleTagArray:
+      type: array
+      items:
+        type: string
+
+    RuleMetadata:
+      type: object
+      additionalProperties: true
+
+    RuleLicense:
+      type: string
+
+    RuleAuthorArray:
+      type: array
+      items:
+        type: string
+
+    RuleFalsePositiveArray:
+      type: array
+      items:
+        type: string
+
+    RuleReferenceArray:
+      type: array
+      items:
+        type: string
+
+    InvestigationGuide:
+      type: string
+
+    SetupGuide:
+      type: string
+
+    BuildingBlockType:
+      type: string
+
+    AlertsIndex:
+      type: string
+
+    AlertsIndexNamespace:
+      type: string
+
+    MaxSignals:
+      type: integer
+      minimum: 1
+
+    Subtechnique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Subtechnique ID
+        name:
+          type: string
+          description: Subtechnique name
+        reference:
+          type: string
+          description: Subtechnique reference
+      required:
+        - id
+        - name
+        - reference
+
+    Technique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Technique ID
+        name:
+          type: string
+          description: Technique name
+        reference:
+          type: string
+          description: Technique reference
+        subtechnique:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subtechnique'
+          description: Array containing more specific information on the attack technique
+      required:
+        - id
+        - name
+        - reference
+
+    Threat:
+      type: object
+      properties:
+        framework:
+          type: string
+          description: Relevant attack framework
+        tactic:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Tactic ID
+            name:
+              type: string
+              description: Tactic name
+            reference:
+              type: string
+              description: Tactic reference
+          required:
+            - id
+            - name
+            - reference
+        technique:
+          type: array
+          items:
+            $ref: '#/components/schemas/Technique'
+          description: Array containing information on the attack techniques (optional)
+      required:
+        - framework
+        - tactic
+
+    ThreatArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Threat' # Assuming a schema named 'Threat' is defined in the components section.
+
+    IndexPatternArray:
+      type: array
+      items:
+        type: string
+
+    DataViewId:
+      type: string
+
+    RuleQuery:
+      type: string
+
+    RuleFilterArray:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+
+    RuleNameOverride:
+      type: string
+
+    TimestampOverride:
+      type: string
+
+    TimestampOverrideFallbackDisabled:
+      type: boolean
+
+    RequiredField:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          minLength: 1
+        ecs:
+          type: boolean
+
+    RequiredFieldArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/RequiredField'
+
+    TimelineTemplateId:
+      type: string
+
+    TimelineTemplateTitle:
+      type: string
+
+    SavedObjectResolveOutcome:
+      type: string
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+
+    SavedObjectResolveAliasTargetId:
+      type: string
+
+    SavedObjectResolveAliasPurpose:
+      type: string
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+
+    RelatedIntegration:
+      type: object
+      properties:
+        package:
+          type: string
+          minLength: 1
+        version:
+          type: string
+          minLength: 1
+        integration:
+          type: string
+          minLength: 1
+      required:
+        - package
+        - version
+
+    RelatedIntegrationArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/RelatedIntegration'

@@ -10,16 +10,30 @@ import { useMemo, useState } from 'react';
 import type {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { DateRange } from '../../api';
 
 export const useFilters = () => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [logLevels, setLogLevels] = useState<LogLevel[]>([]);
   const [eventTypes, setEventTypes] = useState<RuleExecutionEventType[]>([]);
-
-  const state = useMemo(() => ({ logLevels, eventTypes }), [logLevels, eventTypes]);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    start: 'now-24h',
+    end: 'now',
+  });
+  const state = useMemo(
+    () => ({ searchTerm, logLevels, eventTypes, dateRange }),
+    [searchTerm, logLevels, eventTypes, dateRange]
+  );
 
   return useMemo(
-    () => ({ state, setLogLevels, setEventTypes }),
-    [state, setLogLevels, setEventTypes]
+    () => ({
+      state,
+      setSearchTerm,
+      setLogLevels,
+      setEventTypes,
+      setDateRange,
+    }),
+    [state, setSearchTerm, setLogLevels, setEventTypes, setDateRange]
   );
 };

@@ -19,10 +19,14 @@ import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 export interface Props {
   conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
   isNewConversation: boolean;
+  isSettingsModalVisible: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -34,16 +38,28 @@ const PreviewText = styled(EuiText)`
 
 const PromptEditorComponent: React.FC<Props> = ({
   conversation,
+  editingSystemPromptId,
   isNewConversation,
+  isSettingsModalVisible,
   promptContexts,
   promptTextPreview,
+  onSystemPromptSelectionChange,
   selectedPromptContexts,
+  setIsSettingsModalVisible,
   setSelectedPromptContexts,
 }) => {
   const commentBody = useMemo(
     () => (
       <>
-        {isNewConversation && <SystemPrompt conversation={conversation} />}
+        {isNewConversation && (
+          <SystemPrompt
+            conversation={conversation}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            isSettingsModalVisible={isSettingsModalVisible}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
+        )}
 
         <SelectedPromptContexts
           isNewConversation={isNewConversation}
@@ -59,10 +75,14 @@ const PromptEditorComponent: React.FC<Props> = ({
     ),
     [
       conversation,
+      editingSystemPromptId,
       isNewConversation,
+      isSettingsModalVisible,
+      onSystemPromptSelectionChange,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
+      setIsSettingsModalVisible,
       setSelectedPromptContexts,
     ]
   );

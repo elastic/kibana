@@ -29,6 +29,8 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
+const REGISTRY_SPEC_MAX_VERSION = '3.0';
+
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
@@ -43,6 +45,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       disableProxies: true,
       activeAgentsSoftLimit: true,
+      onlyAllowAgentUpgradeToKnownVersions: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -139,7 +142,6 @@ export const config: PluginConfigDescriptor = {
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
-      testSecretsIndex: schema.maybe(schema.string()),
     }),
     packageVerification: schema.object({
       gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -177,10 +179,50 @@ export const config: PluginConfigDescriptor = {
         fleetServerStandalone: schema.boolean({
           defaultValue: false,
         }),
+        onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
+          defaultValue: false,
+        }),
         activeAgentsSoftLimit: schema.maybe(
           schema.number({
             min: 0,
           })
+        ),
+        registry: schema.object(
+          {
+            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+            spec: schema.object(
+              {
+                min: schema.maybe(schema.string()),
+                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+              },
+              {
+                defaultValue: {
+                  max: REGISTRY_SPEC_MAX_VERSION,
+                },
+              }
+            ),
+            capabilities: schema.arrayOf(
+              schema.oneOf([
+                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                schema.literal('apm'),
+                schema.literal('enterprise_search'),
+                schema.literal('observability'),
+                schema.literal('security'),
+                schema.literal('serverless_search'),
+                schema.literal('uptime'),
+              ]),
+              { defaultValue: [] }
+            ),
+          },
+          {
+            defaultValue: {
+              kibanaVersionCheckEnabled: true,
+              capabilities: [],
+              spec: {
+                max: REGISTRY_SPEC_MAX_VERSION,
+              },
+            },
+          }
         ),
       })
     ),

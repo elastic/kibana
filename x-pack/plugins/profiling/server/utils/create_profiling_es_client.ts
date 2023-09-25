@@ -10,8 +10,8 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ProfilingStatusResponse, StackTraceResponse } from '@kbn/profiling-utils';
 import { withProfilingSpan } from './with_profiling_span';
-import { ProfilingStatusResponse, StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,

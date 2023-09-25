@@ -137,6 +137,7 @@ export const nextActionMap = (
         client,
         indexName: state.targetIndex,
         mappings: state.targetIndexMappings,
+        esCapabilities: state.esCapabilities,
       }),
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex({
@@ -144,6 +145,7 @@ export const nextActionMap = (
         indexName: state.tempIndex,
         aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
+        esCapabilities: state.esCapabilities,
       }),
     READY_TO_REINDEX_SYNC: () =>
       Actions.synchronizeMigrators({
@@ -194,7 +196,12 @@ export const nextActionMap = (
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToTarget) =>
-      Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
+      Actions.cloneIndex({
+        client,
+        source: state.tempIndex,
+        target: state.targetIndex,
+        esCapabilities: state.esCapabilities,
+      }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
@@ -281,6 +288,7 @@ export const nextActionMap = (
         client,
         indexName: state.sourceIndex.value,
         mappings: state.sourceIndexMappings.value,
+        esCapabilities: state.esCapabilities,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({

@@ -96,6 +96,19 @@ describe('format', () => {
     };
   });
 
+  it('leaves un-nested fields as is', () => {
+    const projectSourceContent = 'UUUUUUUIJLVIK';
+    formValues['source.project.content'] = projectSourceContent;
+    formValues['ssl.verification_mode'] = 'full';
+    formValues.type = 'browser';
+    expect(format(formValues)).toEqual(
+      expect.objectContaining({
+        ['source.project.content']: projectSourceContent,
+        ['ssl.verification_mode']: 'full',
+      })
+    );
+  });
+
   it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
     formValues.enabled = enabled;
     expect(format(formValues)).toEqual({

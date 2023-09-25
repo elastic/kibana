@@ -133,7 +133,10 @@ describe('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    global.localStorage = localStorageMock;
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
   });
 
   it('renders a no items message when no data is provided', async () => {

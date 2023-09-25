@@ -20,7 +20,7 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
 import { get, identity } from 'lodash';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
@@ -32,7 +32,7 @@ import {
 } from '../../../../../common/alerting/logs/log_threshold';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
-import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
+import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
 
@@ -44,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, logsShared } = useKibanaContextForPlugin().services;
+  const { logsShared, observabilityAIAssistant } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -70,7 +70,7 @@ const AlertDetailsAppSection = ({
   });
 
   const { hasAtLeast } = useLicense();
-  const hasLicenseForExplainLogSpike = hasAtLeast('platinum');
+  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -237,19 +237,19 @@ const AlertDetailsAppSection = ({
     );
   };
 
-  const getExplainLogRateSpikesSection = () => {
-    return hasLicenseForExplainLogSpike ? <ExplainLogRateSpikes rule={rule} alert={alert} /> : null;
+  const getLogRateAnalysisSection = () => {
+    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (
-    <CoPilotContextProvider value={observability.getCoPilotService()}>
+    <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
       <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
         {getLogRatioChart()}
         {getLogCountChart()}
-        {getExplainLogRateSpikesSection()}
+        {getLogRateAnalysisSection()}
         {getLogsHistoryChart()}
       </EuiFlexGroup>
-    </CoPilotContextProvider>
+    </ObservabilityAIAssistantProvider>
   );
 };
 

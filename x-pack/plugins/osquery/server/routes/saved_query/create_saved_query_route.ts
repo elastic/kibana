@@ -7,16 +7,16 @@
 
 import { isEmpty, pickBy, some, isBoolean } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
+import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
-import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
-import { createSavedQueryRequestSchema } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
+import { createSavedQueryRequestSchema } from '../../../common/api';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
-import { debounce } from 'lodash';
 import { useIsMutating } from '@tanstack/react-query';
-
+import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import {
-  FilterType,
-  SloListSearchFilterSortBar,
-  SortType,
-} from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
+import { SloListSearchFilterSortBar, SortField } from './slo_list_search_filter_sort_bar';
 
 export interface Props {
   autoRefresh: boolean;
@@ -24,16 +18,14 @@ export interface Props {
 
 export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
-
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType>('creationTime');
-  const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
+  const [sort, setSort] = useState<SortField | undefined>('status');
 
-  const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
+  const { isLoading, isRefetching, isError, sloList } = useFetchSloList({
     page: activePage + 1,
-    name: query,
+    kqlQuery: query,
     sortBy: sort,
-    indicatorTypes: indicatorTypeFilter,
+    sortDirection: 'desc',
     shouldRefetch: autoRefresh,
   });
 
@@ -46,41 +38,25 @@ export function SloList({ autoRefresh }: Props) {
 
   const handlePageClick = (pageNumber: number) => {
     setActivePage(pageNumber);
-    refetch();
   };
 
-  const handleChangeQuery = useMemo(
-    () =>
-      debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-      }, 300),
-    []
-  );
+  const handleChangeQuery = (newQuery: string) => {
+    setActivePage(0);
+    setQuery(newQuery);
+  };
 
-  const handleChangeSort = (newSort: SortType) => {
+  const handleChangeSort = (newSort: SortField | undefined) => {
+    setActivePage(0);
     setSort(newSort);
-  };
-
-  const handleChangeIndicatorTypeFilter = (newFilter: FilterType[]) => {
-    setIndicatorTypeFilter(newFilter);
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={
-            isInitialLoading ||
-            isLoading ||
-            isRefetching ||
-            isCreatingSlo ||
-            isCloningSlo ||
-            isUpdatingSlo ||
-            isDeletingSlo
-          }
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
-          onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
         />
       </EuiFlexItem>
 

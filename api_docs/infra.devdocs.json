@@ -445,6 +445,17 @@
           },
           {
             "parentPluginId": "infra",
+            "id": "def-server.InfraConfig.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
             "id": "def-server.InfraConfig.inventory",
             "type": "Object",
             "tags": [],
@@ -640,67 +651,6 @@
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
-          "id": "def-server.InfraPluginStart.getMetricIndices",
-          "type": "Function",
-          "tags": [],
-          "label": "getMetricIndices",
-          "description": [],
-          "signature": [
-            "(savedObjectsClient: ",
-            {
-              "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
-              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsClientContract",
-              "text": "SavedObjectsClientContract"
-            },
-            ", sourceId?: string | undefined) => Promise<string>"
-          ],
-          "path": "x-pack/plugins/infra/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.InfraPluginStart.getMetricIndices.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "savedObjectsClient",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-common.SavedObjectsClientContract",
-                  "text": "SavedObjectsClientContract"
-                }
-              ],
-              "path": "x-pack/plugins/infra/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "infra",
-              "id": "def-server.InfraPluginStart.getMetricIndices.$2",
-              "type": "string",
-              "tags": [],
-              "label": "sourceId",
-              "description": [],
-              "signature": [
-                "string | undefined"
-              ],
-              "path": "x-pack/plugins/infra/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",

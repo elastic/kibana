@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 
@@ -20,32 +21,25 @@ import type {
   Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { findLiveQueryRequestQuerySchema } from '../../../common/api';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
     .get({
       access: 'public',
       path: '/api/osquery/live_queries',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      options: { tags: ['api', `access:${PLUGIN_ID}-read`] },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object(
-              {
-                filterQuery: schema.maybe(schema.string()),
-                page: schema.maybe(schema.number()),
-                pageSize: schema.maybe(schema.number()),
-                sort: schema.maybe(schema.string()),
-                sortOrder: schema.maybe(
-                  schema.oneOf([schema.literal('asc'), schema.literal('desc')])
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
+            query: buildRouteValidation<
+              typeof findLiveQueryRequestQuerySchema,
+              FindLiveQueryRequestQuerySchema
+            >(findLiveQueryRequestQuerySchema),
           },
         },
       },
@@ -58,7 +52,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
                 factoryQueryType: OsqueryQueries.actions,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

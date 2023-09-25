@@ -14,11 +14,13 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
-import { riskScoreService } from '../risk_score_service';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './risk_score_preview_route';
 
 jest.mock('../risk_score_service');
+jest.mock('../get_risk_inputs_index');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -33,9 +35,15 @@ describe('POST risk_engine/preview route', () => {
     logger = loggerMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockRiskScoreService = riskScoreServiceMock.create();
+    (getRiskInputsIndex as jest.Mock).mockImplementationOnce(
+      async ({ dataViewId }: { dataViewId: string }) => ({
+        index: dataViewId,
+        runtimeMappings: {},
+      })
+    );
 
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
-    (riskScoreService as jest.Mock).mockReturnValue(mockRiskScoreService);
+    (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScorePreviewRoute(server.router, logger);
   });
@@ -44,50 +52,47 @@ describe('POST risk_engine/preview route', () => {
     requestMock.create({
       method: 'get',
       path: RISK_SCORE_PREVIEW_URL,
-      body,
+      body: {
+        data_view_id: 'default-dataview-id',
+        ...body,
+      },
     });
 
   describe('parameters', () => {
     describe('index / dataview', () => {
-      it('defaults to scoring the alerts index if no dataview is provided', async () => {
-        const request = buildRequest();
+      it('requires a parameter for the dataview', async () => {
+        const request = buildRequest({ data_view_id: undefined });
+        const result = await server.validate(request);
 
-        const response = await server.inject(request, requestContextMock.convertContext(context));
-
-        expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'default-alerts-index' })
+        expect(result.badRequest).toHaveBeenCalledWith(
+          'Invalid value "undefined" supplied to "data_view_id"'
         );
       });
 
       it('respects the provided dataview', async () => {
         const request = buildRequest({ data_view_id: 'custom-dataview-id' });
 
-        // mock call to get dataview title
-        clients.savedObjectsClient.get.mockResolvedValueOnce({
-          id: '',
-          type: '',
-          references: [],
-          attributes: { title: 'custom-dataview-index' },
-        });
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'custom-dataview-index' })
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ index: 'custom-dataview-id' })
         );
       });
 
-      it('returns a 404 if dataview is not found', async () => {
-        const request = buildRequest({ data_view_id: 'custom-dataview-id' });
+      it('uses an unknown dataview as index pattern', async () => {
+        const request = buildRequest({ data_view_id: 'unknown-dataview' });
+        (getRiskInputsIndex as jest.Mock).mockResolvedValue({
+          index: 'unknown-dataview',
+          runtimeMappings: {},
+        });
 
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
-        expect(response.status).toEqual(404);
-        expect(response.body.message).toEqual(
-          'The specified dataview (custom-dataview-id) was not found. Please use an existing dataview, or omit the parameter to use the default risk inputs.'
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ index: 'unknown-dataview', runtimeMappings: {} })
         );
-        expect(mockRiskScoreService.getScores).not.toHaveBeenCalled();
       });
     });
 
@@ -97,7 +102,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ range: { start: 'now-15d', end: 'now' } })
         );
       });
@@ -107,7 +112,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ range: { start: 'now-30d', end: 'now-20d' } })
         );
       });
@@ -142,7 +147,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({
             filter: {
               bool: {
@@ -166,7 +171,7 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.alerts,
+              value: RiskCategories.category_1,
               host: 0.1,
               user: 0.2,
             },
@@ -176,12 +181,12 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({
             weights: [
               {
                 type: RiskWeightTypes.riskCategory,
-                value: RiskCategories.alerts,
+                value: RiskCategories.category_1,
                 host: 0.1,
                 user: 0.2,
               },
@@ -195,7 +200,7 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.alerts,
+              value: RiskCategories.category_1,
               host: 1.1,
             },
           ],
@@ -232,7 +237,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ afterKeys: { host: afterKey } })
         );
       });

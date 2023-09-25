@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { UseQueryOptions } from '@tanstack/react-query';
-import type { ReviewRuleUpgradeResponseBody } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import type { ReviewRuleUpgradeResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 import * as i18n from '../translations';

@@ -17,7 +17,7 @@ export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
+  constructor(input: ContainerInput, embeddableServices: EmbeddableStart) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 
@@ -32,10 +32,7 @@ export class ListContainer extends Container<{}, ContainerInput> {
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    ReactDOM.render(
-      <ListContainerComponent embeddable={this} embeddableServices={this.embeddableServices} />,
-      node
-    );
+    ReactDOM.render(<ListContainerComponent embeddable={this} />, node);
   }
 
   public destroy() {

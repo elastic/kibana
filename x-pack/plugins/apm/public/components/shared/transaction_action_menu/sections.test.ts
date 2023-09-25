@@ -13,7 +13,10 @@ import {
   apmRouter as apmRouterBase,
   ApmRouter,
 } from '../../routing/apm_route_config';
-import { infraLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import {
+  infraLocatorsMock,
+  observabilityLogExplorerLocatorsMock,
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
   ...apmRouterBase,
@@ -22,6 +25,7 @@ const apmRouter = {
 } as ApmRouter;
 
 const infraLocators = infraLocatorsMock;
+const observabilityLogExplorerLocators = observabilityLogExplorerLocatorsMock;
 
 const expectInfraLocatorsToBeCalled = () => {
   expect(infraLocators.nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
@@ -61,7 +65,11 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        observabilityLogExplorerLocators,
         infraLinksAvailable: false,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -123,7 +131,11 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        observabilityLogExplorerLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -204,7 +216,11 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
+        observabilityLogExplorerLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [

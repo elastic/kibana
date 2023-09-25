@@ -8,7 +8,7 @@
 import type {
   RuleResponse,
   RuleUpdateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { omit, pickBy } from 'lodash';
 
 const propertiesToRemove = [

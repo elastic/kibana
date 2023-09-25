@@ -10,9 +10,11 @@ import {
   AppDeepLinkId,
   ChromeNavLink,
   ChromeProjectNavigationNode,
+  CloudLinkId,
 } from '@kbn/core-chrome-browser';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { CloudLinks } from '../../cloud_links';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
@@ -40,10 +42,38 @@ function getIdFromNavigationNode<
   return id;
 }
 
-function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNavLink }) {
+/**
+ * We don't have currently a way to know if a user has access to a Cloud section.
+ * TODO: This function will have to be revisited once we have an API from Cloud to know the user
+ * permissions.
+ */
+function hasUserAccessToCloudLink(): boolean {
+  return true;
+}
+
+function isNodeVisible(
+  {
+    link,
+    deepLink,
+    cloudLink,
+  }: {
+    link?: string;
+    deepLink?: ChromeNavLink;
+    cloudLink?: CloudLinkId;
+  },
+  { cloudLinks }: { cloudLinks: CloudLinks }
+) {
   if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
     return false;
+  }
+
+  if (cloudLink) {
+    if (!cloudLinks[cloudLink]) {
+      // Invalid cloudLinkId or link url has not been set in kibana.yml
+      return false;
+    }
+    return hasUserAccessToCloudLink();
   }
 
   if (deepLink) {
@@ -51,6 +81,47 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
   }
 
   return true;
+}
+
+function getTitleForNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
+  navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
+  { deepLink, cloudLinks }: { deepLink?: ChromeNavLink; cloudLinks: CloudLinks }
+): string {
+  const { children } = navNode;
+  if (navNode.title) {
+    return navNode.title;
+  }
+
+  if (typeof children === 'string') {
+    return children;
+  }
+
+  if (deepLink?.title) {
+    return deepLink.title;
+  }
+
+  if (navNode.cloudLink) {
+    return cloudLinks[navNode.cloudLink]?.title ?? '';
+  }
+
+  return '';
+}
+
+function validateNodeProps<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>({ link, href, cloudLink }: NodePropsEnhanced<LinkId, Id, ChildrenId>) {
+  if (link && cloudLink) {
+    throw new Error(`Only one of "link" or "cloudLink" can be provided.`);
+  }
+  if (href && cloudLink) {
+    throw new Error(`Only one of "href" or "cloudLink" can be provided.`);
+  }
 }
 
 function createInternalNavNode<
@@ -62,14 +133,16 @@ function createInternalNavNode<
   _navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null,
-  isActive: boolean
+  isActive: boolean,
+  { cloudLinks }: { cloudLinks: CloudLinks }
 ): ChromeProjectNavigationNodeEnhanced | null {
-  const { children, link, href, ...navNode } = _navNode;
-  const deepLink = deepLinks.find((dl) => dl.id === link);
-  const isVisible = isNodeVisible({ link, deepLink });
+  validateNodeProps(_navNode);
 
-  const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
-  const title = navNode.title ?? titleFromDeepLinkOrChildren;
+  const { children, link, cloudLink, ...navNode } = _navNode;
+  const deepLink = deepLinks.find((dl) => dl.id === link);
+  const isVisible = isNodeVisible({ link, deepLink, cloudLink }, { cloudLinks });
+  const title = getTitleForNode(_navNode, { deepLink, cloudLinks });
+  const href = cloudLink ? cloudLinks[cloudLink]?.href : _navNode.href;
 
   if (href && !isAbsoluteLink(href)) {
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
@@ -104,7 +177,8 @@ export const useInitNavNode = <
   Id extends string = string,
   ChildrenId extends string = Id
 >(
-  node: NodePropsEnhanced<LinkId, Id, ChildrenId>
+  node: NodePropsEnhanced<LinkId, Id, ChildrenId>,
+  { cloudLinks }: { cloudLinks: CloudLinks }
 ) => {
   const { isActive: isActiveControlled } = node;
 
@@ -150,8 +224,8 @@ export const useInitNavNode = <
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(id, node, deepLinks, nodePath, isActive),
-    [node, id, deepLinks, nodePath, isActive]
+    () => createInternalNavNode(id, node, deepLinks, nodePath, isActive, { cloudLinks }),
+    [node, id, deepLinks, nodePath, isActive, cloudLinks]
   );
 
   // Register the node on the parent whenever its properties change or whenever

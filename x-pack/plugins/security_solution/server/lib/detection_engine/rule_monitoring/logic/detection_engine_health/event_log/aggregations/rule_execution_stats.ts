@@ -15,12 +15,12 @@ import type {
   NumberOfLoggedMessages,
   RuleExecutionStats,
   TopMessages,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   RuleExecutionEventType,
   RuleExecutionStatus,
   LogLevel,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';

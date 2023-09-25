@@ -46,7 +46,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "magnifyWithPlus",
               "navigateTo": Object {
-                "appId": "enterpriseSearchEsre",
+                "appId": "enterpriseSearchAISearch",
               },
               "order": 4,
               "solution": "search",
@@ -169,8 +169,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "logstashInput",
               "navigateTo": Object {
-                "appId": "integrations",
-                "path": "/browse?q=log",
+                "appId": "observabilityOnboarding",
               },
               "order": 2,
               "solution": "observability",
@@ -196,8 +195,8 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "apmTrace",
               "navigateTo": Object {
-                "appId": "home",
-                "path": "#/tutorial/apm",
+                "appId": "apm",
+                "path": "/tutorial",
               },
               "order": 5,
               "solution": "observability",
@@ -289,6 +288,33 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "solution": "observability",
               "telemetryId": "onboarding--observability--synthetics",
               "title": "Create a Synthetic Monitor",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="5"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
+              "icon": "visBarHorizontal",
+              "navigateTo": Object {
+                "appId": "profiling",
+                "path": "/add-data-instructions",
+              },
+              "order": 15,
+              "solution": "observability",
+              "telemetryId": "onboarding--observability--profiling",
+              "title": "Optimize my workloads with Universal Profiling",
             }
           }
           guidesState={Array []}

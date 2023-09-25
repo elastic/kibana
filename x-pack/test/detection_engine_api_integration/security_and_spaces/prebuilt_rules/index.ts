@@ -12,7 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('detection engine api security and spaces enabled - Prebuilt Rules', function () {
     loadTestFile(require.resolve('./get_prebuilt_rules_status'));
     loadTestFile(require.resolve('./get_prebuilt_timelines_status'));
-    loadTestFile(require.resolve('./install_prebuilt_rules'));
+    loadTestFile(require.resolve('./install_and_upgrade_prebuilt_rules'));
     loadTestFile(require.resolve('./fleet_integration'));
   });
 };

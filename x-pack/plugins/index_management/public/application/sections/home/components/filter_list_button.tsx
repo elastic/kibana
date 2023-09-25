@@ -7,7 +7,13 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiFilterSelectItem } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterSelectItem,
+  useEuiTheme,
+} from '@elastic/eui';
 
 interface Filter {
   name: string;
@@ -24,6 +30,7 @@ export type Filters<T extends string> = {
 };
 
 export function FilterListButton<T extends string>({ onChange, filters }: Props<T>) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
@@ -74,7 +81,10 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
         panelPaddingSize="none"
         data-test-subj="filterList"
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {Object.entries(filters).map(([filter, item], index) => (
             <EuiFilterSelectItem
               checked={(item as Filter).checked}

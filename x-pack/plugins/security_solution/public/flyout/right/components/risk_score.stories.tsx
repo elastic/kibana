@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { RiskScore } from './risk_score';
 import { RightPanelContext } from '../context';
 
@@ -28,7 +28,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   const contextValue = {
     getFieldsData: () => {},
   } as unknown as RightPanelContext;

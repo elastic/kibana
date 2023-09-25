@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 export function PipelineEditorProvider({ getService }) {
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
 
   // test subject selectors
@@ -17,7 +17,6 @@ export function PipelineEditorProvider({ getService }) {
   const getContainerSubjForId = (id) => `~pipelineEdit-${id}`;
   const SUBJ_INPUT_ID = '~pipelineEdit > inputId';
   const SUBJ_INPUT_DESCRIPTION = '~pipelineEdit > inputDescription';
-  const SUBJ_UI_ACE_PIPELINE = '~pipelineEdit > acePipeline';
 
   const SUBJ_INPUT_WORKERS = '~pipelineEdit > inputWorkers';
   const SUBJ_INPUT_BATCH_SIZE = '~pipelineEdit > inputBatchSize';
@@ -64,7 +63,7 @@ export function PipelineEditorProvider({ getService }) {
       await testSubjects.setValue(SUBJ_INPUT_DESCRIPTION, value);
     }
     async setPipeline(value) {
-      await aceEditor.setValue(SUBJ_UI_ACE_PIPELINE, value);
+      await monacoEditor.setCodeEditorValue(value, 0);
     }
     async setWorkers(value) {
       await testSubjects.setValue(SUBJ_INPUT_WORKERS, value);
@@ -127,7 +126,7 @@ export function PipelineEditorProvider({ getService }) {
       const values = await Promise.all([
         testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
-        aceEditor.getValue(SUBJ_UI_ACE_PIPELINE),
+        monacoEditor.getCodeEditorValue(),
         testSubjects.getAttribute(SUBJ_INPUT_WORKERS, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
         testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),

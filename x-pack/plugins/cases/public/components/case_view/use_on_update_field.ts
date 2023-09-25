@@ -8,9 +8,7 @@
 import { useCallback, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { CaseConnector } from '../../../common/api';
-import type { CaseAttributes } from '../../../common/api/cases/case';
-import type { CaseStatuses } from '../../../common/api/cases/status';
+import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
 import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';

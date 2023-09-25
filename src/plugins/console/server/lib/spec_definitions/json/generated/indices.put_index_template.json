@@ -1,9 +1,11 @@
 {
   "indices.put_index_template": {
     "url_params": {
-      "create": "__flag__",
-      "cause": "",
-      "master_timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "create": "__flag__"
     },
     "methods": [
       "PUT",
@@ -12,6 +14,10 @@
     "patterns": [
       "_index_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

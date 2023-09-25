@@ -22,13 +22,13 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VERIFICATION_CODE_LENGTH } from '../common';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SingleCharsField } from './single_chars_field';
 import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useKibana } from './use_kibana';
+import { VERIFICATION_CODE_LENGTH } from '../common';
 
 export interface VerificationCodeFormValues {
   code: string;

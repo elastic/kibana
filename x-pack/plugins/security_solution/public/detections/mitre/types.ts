@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-export interface MitreOptions {
+export interface MitreTactic {
   id: string;
   name: string;
-  reference: string;
-  value: string;
+  reference: string; // A link to the tactic's page
+  value: string; // A camelCased version of the name we use to reference the tactic
+  label: string; // An i18n internationalized version of the name we use for rendering
 }
 
-export interface MitreTacticsOptions extends MitreOptions {
-  text: string;
+export interface MitreTechnique extends MitreTactic {
+  tactics: string[]; // Tactics this technique assigned to (lowercase dash separated)
 }
 
-export interface MitreTechniquesOptions extends MitreOptions {
-  label: string;
-  tactics: string;
-}
-
-export interface MitreSubtechniquesOptions extends MitreTechniquesOptions {
-  techniqueId: string;
+export interface MitreSubTechnique extends MitreTechnique {
+  techniqueId: string; // A technique id this subtechnique assigned to
 }

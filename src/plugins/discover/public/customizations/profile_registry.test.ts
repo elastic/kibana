@@ -6,25 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { createCustomizeFunction, createProfileRegistry } from './profile_registry';
+import { App, AppDeepLink, AppUpdater } from '@kbn/core/public';
+import { BehaviorSubject, combineLatest, map, take } from 'rxjs';
+import { createRegisterCustomizationProfile, createProfileRegistry } from './profile_registry';
 
 describe('createProfileRegistry', () => {
   it('should allow registering profiles', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     registry.set({
-      name: 'test2',
+      id: 'test2',
       customizationCallbacks: [],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('test2')).toEqual({
-      name: 'test2',
+      id: 'test2',
       customizationCallbacks: [],
     });
   });
@@ -32,20 +34,20 @@ describe('createProfileRegistry', () => {
   it('should allow overriding profiles', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     const callback = jest.fn();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
     });
   });
@@ -53,31 +55,80 @@ describe('createProfileRegistry', () => {
   it('should be case insensitive', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('tEsT')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
   });
 });
 
-describe('createCustomizeFunction', () => {
+describe('createRegisterCustomizationProfile', () => {
   test('should add a customization callback to the registry', () => {
     const registry = createProfileRegistry();
-    const customize = createCustomizeFunction(registry);
+    const registerCustomizationProfile = createRegisterCustomizationProfile(registry);
     const callback = jest.fn();
-    customize('test', callback);
+    registerCustomizationProfile('test', { customize: callback });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
+      deepLinks: [],
     });
     const callback2 = jest.fn();
-    customize('test', callback2);
+    registerCustomizationProfile('test', { customize: callback2 });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback, callback2],
+      deepLinks: [],
+    });
+  });
+});
+
+describe('profile.getContributedAppState$ observable', () => {
+  test('should notify subscribers with new app updates when a profile is registered', (done) => {
+    const registry = createProfileRegistry();
+    const callback = jest.fn();
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
+    const mockDeepLink: AppDeepLink = {
+      id: 'test-deepLink',
+      title: 'Test deep link',
+      path: '/test-deep-link',
+    };
+    let mockApp: App = { id: 'test-app', title: 'Test App', mount: () => () => {} };
+    const expectedApp: App = { ...mockApp, deepLinks: [mockDeepLink] };
+
+    const appStateUpdater$ = combineLatest([appUpdater$, registry.getContributedAppState$()]).pipe(
+      map(
+        ([appUpdater, registryContributor]): AppUpdater =>
+          (app) => ({ ...appUpdater(app), ...registryContributor(app) })
+      ),
+      take(3)
+    );
+
+    appStateUpdater$.subscribe({
+      next: (updater) => {
+        mockApp = { ...mockApp, ...updater(mockApp) };
+      },
+      complete: () => {
+        expect(mockApp).toEqual(expectedApp);
+        done();
+      },
+    });
+
+    // First update, no deepLinks set
+    registry.set({
+      id: 'test',
+      customizationCallbacks: [callback],
+    });
+
+    // Second update, deepLinks set to update app
+    registry.set({
+      id: 'test',
+      customizationCallbacks: [],
+      deepLinks: [mockDeepLink],
     });
   });
 });

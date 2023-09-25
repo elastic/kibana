@@ -6,22 +6,25 @@
  */
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { ConfigKey, SyntheticsMonitorWithSecrets } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitorWithSecretsAttributes,
+} from '../../../../common/runtime_types';
 import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
 
 export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
   return encryptedSavedObjects.createMigration<
-    SyntheticsMonitorWithSecrets,
-    SyntheticsMonitorWithSecrets
+    SyntheticsMonitorWithSecretsAttributes,
+    SyntheticsMonitorWithSecretsAttributes
   >({
     isMigrationNeededPredicate: function shouldBeMigrated(
       doc
-    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> {
+    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> {
       return true;
     },
     migration: (
-      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
-    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> => {
+      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>
+    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> => {
       const { attributes, id } = doc;
       return {
         ...doc,

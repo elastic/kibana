@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -23,6 +23,7 @@ export const deleteRule = async (
   const response = await supertest
     .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .expect(200);
 
   return response.body;

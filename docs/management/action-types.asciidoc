@@ -27,9 +27,9 @@ a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
-a| <<opsgenie-action-type,Opsgenie>>
+a| <<opsgenie-action-type,{opsgenie}>>
 
-| Create or close an alert in Opsgenie.
+| Create or close an alert in {opsgenie}.
 
 a| <<pagerduty-action-type,PagerDuty>>
 
@@ -158,6 +158,9 @@ action in the current space.
 
 For out-of-the-box and standardized connectors, refer to
 <<pre-configured-connectors,preconfigured connectors>>.
+
+TIP: You can also manage connectors as resources with the https://registry.terraform.io/providers/elastic/elasticstack/latest[Elasticstack provider] for Terraform.
+For more details, refer to the https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_action_connector[elasticstack_kibana_action_connector] resource.
 
 [float]
 [[importing-and-exporting-connectors]]

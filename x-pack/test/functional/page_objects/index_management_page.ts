@@ -26,6 +26,28 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async toggleRollupIndices() {
       await testSubjects.click('checkboxToggles-rollupToggle');
     },
+    async toggleHiddenIndices() {
+      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+    },
+
+    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
+      await policyDetailsLinks[indexOfRow].click();
+    },
+
+    async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const deleteButons = await testSubjects.findAll('deletePolicyButton');
+      await deleteButons[indexOfRow].click();
+    },
+
+    async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const executeButtons = await testSubjects.findAll('executePolicyButton');
+      await executeButtons[indexOfRow].click();
+    },
+
+    async clickConfirmModalButton(): Promise<void> {
+      await testSubjects.click('confirmModalConfirmButton');
+    },
 
     async clickDetailPanelTabAt(indexOfTab: number): Promise<void> {
       const tabList = await testSubjects.findAll('detailPanelTab');
@@ -33,7 +55,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await tabList[indexOfTab].click();
     },
 
-    async clickIndiceAt(indexOfRow: number): Promise<void> {
+    async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
       await retry.waitFor('detail panel title to show up', async () => {
@@ -84,13 +106,27 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async changeTabs(
-      tab: 'indicesTab' | 'data_streamsTab' | 'templatesTab' | 'component_templatesTab'
+      tab:
+        | 'indicesTab'
+        | 'data_streamsTab'
+        | 'templatesTab'
+        | 'component_templatesTab'
+        | 'enrich_policiesTab'
     ) {
       await testSubjects.click(tab);
     },
 
     async clickNextButton() {
       await testSubjects.click('nextButton');
+    },
+    indexDetailsPage: {
+      async openIndexDetailsPage(indexOfRow: number) {
+        const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+        await indexList[indexOfRow].click();
+        await retry.waitFor('index details page title to show up', async () => {
+          return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+        });
+      },
     },
   };
 }

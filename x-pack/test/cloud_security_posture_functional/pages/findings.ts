@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'findings']);
+  const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
@@ -95,8 +95,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  // Failing: See https://github.com/elastic/kibana/issues/159565
-  describe.skip('Findings Page', () => {
+  describe('Findings Page', function () {
+    this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;
@@ -122,6 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
+      pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -187,11 +188,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         return a.localeCompare(b);
       };
 
-      /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-      const sleep = (num: number) => {
-        return new Promise((res) => setTimeout(res, num));
-      };
-
       it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
@@ -207,7 +203,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          await sleep(1000);
+          pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values

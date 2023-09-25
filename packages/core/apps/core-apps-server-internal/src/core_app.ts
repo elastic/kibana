@@ -7,8 +7,8 @@
  */
 
 import { stringify } from 'querystring';
-import { Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
+import { Env, IConfigService } from '@kbn/config';
+import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -22,6 +22,8 @@ import type {
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { firstValueFrom, map, type Observable } from 'rxjs';
+import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
@@ -41,10 +43,16 @@ interface CommonRoutesParams {
 export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
+  private readonly configService: IConfigService;
+  private readonly config$: Observable<CoreAppConfig>;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
     this.env = core.env;
+    this.configService = core.configService;
+    this.config$ = this.configService
+      .atPath<CoreAppConfigType>(CoreAppPath)
+      .pipe(map((rawCfg) => new CoreAppConfig(rawCfg)));
   }
 
   preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -57,9 +65,10 @@ export class CoreAppsService {
     }
   }
 
-  setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
+    const config = await firstValueFrom(this.config$);
+    this.registerDefaultRoutes(coreSetup, uiPlugins, config);
     this.registerStaticDirs(coreSetup);
   }
 
@@ -88,23 +97,30 @@ export class CoreAppsService {
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(
+    coreSetup: InternalCoreSetup,
+    uiPlugins: UiPlugins,
+    config: CoreAppConfig
+  ) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
-    router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const { uiSettings } = await context.core;
-      const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
-      const basePath = httpSetup.basePath.get(req);
-      const url = `${basePath}${defaultRoute}`;
+    router.get(
+      { path: '/', validate: false, options: { access: 'public' } },
+      async (context, req, res) => {
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const basePath = httpSetup.basePath.get(req);
+        const url = `${basePath}${defaultRoute}`;
 
-      return res.redirected({
-        headers: {
-          location: url,
-        },
-      });
-    });
+        return res.redirected({
+          headers: {
+            location: url,
+          },
+        });
+      }
+    );
 
     this.registerCommonDefaultRoutes({
       basePath: coreSetup.http.basePath,
@@ -144,6 +160,51 @@ export class CoreAppsService {
         }
       }
     );
+
+    if (config.allowDynamicConfigOverrides) {
+      this.registerInternalCoreSettingsRoute(router);
+    }
+  }
+
+  /**
+   * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
+   * @param router {@link IRouter}
+   * @private
+   */
+  private registerInternalCoreSettingsRoute(router: IRouter) {
+    router.versioned
+      .put({
+        path: '/internal/core/_settings',
+        access: 'internal',
+        options: {
+          tags: ['access:updateDynamicConfig'],
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: {
+              body: schema.recordOf(schema.string(), schema.any()),
+            },
+            response: {
+              '200': { body: schema.object({ ok: schema.boolean() }) },
+            },
+          },
+        },
+        async (context, req, res) => {
+          try {
+            this.configService.setDynamicConfigOverrides(req.body);
+          } catch (err) {
+            if (err instanceof ValidationError) {
+              return res.badRequest({ body: err });
+            }
+            throw err;
+          }
+
+          return res.ok({ body: { ok: true } });
+        }
+      );
   }
 
   private registerCommonDefaultRoutes({

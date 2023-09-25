@@ -11,7 +11,7 @@ import { timelineDefaults } from '../timelines/store/timeline/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
 import { TimelineId } from '../../common/types/timeline';
-import { TimelineType } from '../../common/types/timeline/api';
+import { TimelineType } from '../../common/api/timeline';
 import { useDeepEqualSelector } from '../common/hooks/use_selector';
 import { useKibana } from '../common/lib/kibana';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';

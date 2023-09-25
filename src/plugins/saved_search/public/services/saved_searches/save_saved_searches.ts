@@ -8,10 +8,13 @@
 
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SavedSearchAttributes } from '../../../common';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
@@ -19,29 +22,36 @@ export interface SaveSavedSearchOptions {
   copyOnSave?: boolean;
 }
 
-const hasDuplicatedTitle = async (
-  title: string,
+export const saveSearchSavedObject = async (
+  id: string | undefined,
+  attributes: SavedSearchAttributes,
+  references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
-): Promise<boolean | void> => {
-  if (!title) {
-    return;
-  }
+) => {
+  const resp = id
+    ? await contentManagement.update<
+        SavedSearchCrudTypes['UpdateIn'],
+        SavedSearchCrudTypes['UpdateOut']
+      >({
+        contentTypeId: SAVED_SEARCH_TYPE,
+        id,
+        data: attributes,
+        options: {
+          references,
+        },
+      })
+    : await contentManagement.create<
+        SavedSearchCrudTypes['CreateIn'],
+        SavedSearchCrudTypes['CreateOut']
+      >({
+        contentTypeId: SAVED_SEARCH_TYPE,
+        data: attributes,
+        options: {
+          references,
+        },
+      });
 
-  const response = await contentManagement.search<
-    SavedSearchCrudTypes['SearchIn'],
-    SavedSearchCrudTypes['SearchOut']
-  >({
-    contentTypeId: SAVED_SEARCH_TYPE,
-    query: {
-      text: `"${title}"`,
-    },
-    options: {
-      searchFields: ['title'],
-      fields: ['title'],
-    },
-  });
-
-  return response.hits.some((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+  return resp.item.id;
 };
 
 /** @internal **/
@@ -53,14 +63,15 @@ export const saveSavedSearch = async (
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;
 
-  if (savedSearch.title) {
-    if (
-      isNew &&
-      !options.isTitleDuplicateConfirmed &&
-      options.onTitleDuplicate &&
-      (await hasDuplicatedTitle(savedSearch.title, contentManagement))
-    ) {
-      options.onTitleDuplicate();
+  if (isNew) {
+    try {
+      await checkForDuplicateTitle({
+        title: savedSearch.title,
+        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
+        onTitleDuplicate: options.onTitleDuplicate,
+        contentManagement,
+      });
+    } catch {
       return;
     }
   }
@@ -69,28 +80,11 @@ export const saveSavedSearch = async (
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
     : originalReferences;
-  const resp = isNew
-    ? await contentManagement.create<
-        SavedSearchCrudTypes['CreateIn'],
-        SavedSearchCrudTypes['CreateOut']
-      >({
-        contentTypeId: SAVED_SEARCH_TYPE,
-        data: toSavedSearchAttributes(savedSearch, searchSourceJSON),
-        options: {
-          references,
-        },
-      })
-    : await contentManagement.update<
-        SavedSearchCrudTypes['UpdateIn'],
-        SavedSearchCrudTypes['UpdateOut']
-      >({
-        contentTypeId: SAVED_SEARCH_TYPE,
-        id: savedSearch.id!,
-        data: toSavedSearchAttributes(savedSearch, searchSourceJSON),
-        options: {
-          references,
-        },
-      });
 
-  return resp.item.id;
+  return saveSearchSavedObject(
+    isNew ? undefined : savedSearch.id,
+    toSavedSearchAttributes(savedSearch, searchSourceJSON),
+    references,
+    contentManagement
+  );
 };

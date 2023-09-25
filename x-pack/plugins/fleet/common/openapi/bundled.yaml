@@ -772,11 +772,17 @@ paths:
       operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: boolean
+          name: force
+          description: delete package even if policies used by agents
+          in: query
       requestBody:
         content:
           application/json:
             schema:
               type: object
+              deprecated: true
               properties:
                 force:
                   type: boolean
@@ -3363,7 +3369,6 @@ components:
       name: kuery
       in: query
       required: false
-      deprecated: true
       schema:
         type: string
     show_inactive:
@@ -4959,6 +4964,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -4990,6 +5002,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5038,10 +5055,8 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_buffer_size:
+        required_acks:
           type: number
-        broker_ack_reliability:
-          type: string
       required:
         - name
         - type
@@ -5223,6 +5238,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -5254,6 +5276,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5302,9 +5329,7 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_ack_reliability:
-          type: string
-        broker_buffer_size:
+        required_acks:
           type: number
       required:
         - name
@@ -5392,6 +5417,12 @@ components:
           type: string
         host:
           type: string
+        proxy_id:
+          description: >-
+            The ID of the proxy to use for this download source. See the proxies
+            API for more information.
+          type: string
+          nullable: true
       required:
         - is_default
         - name

@@ -41,7 +41,7 @@ export const Settings: React.FC = () => {
         description: (
           <FormattedMessage
             id="xpack.enterpriseSearch.content.settings.description"
-            defaultMessage="These settings apply to all new Elasticsearch indices created by Enterprise Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}."
+            defaultMessage="These settings apply to all new Elasticsearch indices created by Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}."
             values={{
               link: (
                 <EuiLink href={docLinks.ingestPipelines} target="_blank">

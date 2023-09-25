@@ -7,19 +7,9 @@
     "id": "savedSearch",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "contentManagement",
-      "expressions"
-    ],
-    "optionalPlugins": [
-      "spaces",
-      "savedObjectsTaggingOss"
-    ],
-    "requiredBundles": [
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredPlugins": ["data", "contentManagement", "embeddable", "expressions"],
+    "optionalPlugins": ["spaces", "savedObjectsTaggingOss"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

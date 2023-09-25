@@ -8,12 +8,12 @@
 
 import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 
-export interface SavedSearchesAttributes extends SavedObjectCommon {
+export interface SavedSearchesAttributes extends FinderAttributes {
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
 }
 
-export const showSavedObject = (savedObject: SavedObjectCommon<FinderAttributes>) => {
-  const so = savedObject as unknown as SavedObjectCommon<SavedSearchesAttributes>;
+export const showSavedObject = (savedObject: SavedObjectCommon) => {
+  const so = savedObject as SavedObjectCommon<SavedSearchesAttributes>;
   return !so.attributes.isTextBasedQuery && !so.attributes.usesAdHocDataView;
 };

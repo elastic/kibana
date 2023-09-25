@@ -6,7 +6,7 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,
@@ -44,8 +44,8 @@ export const updateAlertStatus = ({
   signal,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
-    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ items }) => ({
-      updated: items.length,
+    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
+      updated: updated ?? 0,
       version_conflicts: 0,
     }));
   } else if (query) {

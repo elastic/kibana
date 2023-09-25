@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -20,10 +20,12 @@ import {
   getCaseConnectors,
   getCasesWebhookConnector,
 } from '../../../../common/lib/api';
+import { noCasesConnectors } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const actionsRemover = new ActionsRemover(supertest);
 
   describe('get_connectors', () => {
@@ -183,6 +185,14 @@ export default ({ getService }: FtrProviderContext): void => {
           referencedByCount: 0,
         },
       ]);
+    });
+
+    it('should return 403 when the user does not have access to the case connectors', async () => {
+      await getCaseConnectors({
+        supertest: supertestWithoutAuth,
+        auth: { user: noCasesConnectors, space: null },
+        expectedHttpCode: 403,
+      });
     });
   });
 };

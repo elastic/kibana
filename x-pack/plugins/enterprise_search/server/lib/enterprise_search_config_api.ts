@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
