@@ -26,8 +26,6 @@ import { saveArchiveEntries } from '../archive/storage';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 
-import { restartInstallation } from './install';
-
 jest.mock('../elasticsearch/template/template');
 jest.mock('../kibana/assets/install');
 jest.mock('../kibana/index_pattern/install');
@@ -43,7 +41,7 @@ import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../common/constants';
 
-import { installIndexTemplatesAndPipelines } from './install';
+import { installIndexTemplatesAndPipelines, restartInstallation } from './install';
 
 import { _installPackage } from './_install_package';
 
@@ -267,7 +265,10 @@ describe('_installPackage', () => {
             disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
-            capabilities: [],
+            registry: {
+              kibanaVersionCheckEnabled: true,
+              capabilities: [],
+            },
           },
         })
       );
