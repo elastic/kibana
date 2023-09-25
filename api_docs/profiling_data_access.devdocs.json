@@ -47,6 +47,16 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
+          ">; fetchFunction: ({ esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
+          "FetchFunctionsParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
+          },
           ">; }; }"
         ],
         "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",

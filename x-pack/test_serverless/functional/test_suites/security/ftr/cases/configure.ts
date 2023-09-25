@@ -16,7 +16,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
 
-  describe('Configure Case', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/166551
+  describe.skip('Configure Case', function () {
     before(async () => {
       await svlCommonPage.login();
 
