@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiPanel,
   EuiDescribedFormGroup,
   EuiSpacer,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFieldsList } from './custom_fields_list';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
@@ -27,24 +28,28 @@ export interface Props {
   disabled: boolean;
   isLoading: boolean;
   handleAddCustomField: () => void;
+  handleDeleteCustomField: (key: string) => void;
 }
 const CustomFieldsComponent: React.FC<Props> = ({
   disabled,
   isLoading,
   handleAddCustomField,
+  handleDeleteCustomField,
   customFields,
 }) => {
   const { permissions } = useCasesContext();
   const canAddCustomFields = permissions.create && permissions.update;
+  const [error, setError] = useState<boolean>(false);
 
-  const renderBody = customFields?.length ? (
-    <CustomFieldsList customFields={customFields} />
-  ) : (
-    <>
-      <EuiSpacer size="m" />
-      {i18n.NO_CUSTOM_FIELDS}
-    </>
-  );
+  const onAddCustomField = useCallback(() => {
+    if (customFields.length === 5 && !error) {
+      setError(true);
+      return;
+    }
+
+    handleAddCustomField();
+    setError(false);
+  }, [handleAddCustomField, setError, customFields, error]);
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
@@ -57,40 +62,51 @@ const CustomFieldsComponent: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      description={
-        <>
-          <p>{i18n.DESCRIPTION}</p>
-        </>
-      }
+      description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="custom-fields-form-group"
     >
-      <EuiEmptyPrompt
-        color="subdued"
-        className="eui-fullWidth"
-        css={css`
-          max-width: 580px;
-          .euiEmptyPrompt__main {
-            padding: 0px;
-            padding-bottom: 16px;
-          }
-          .euiEmptyPrompt__contentInner {
-            max-width: none;
-          }
-        `}
-        body={renderBody}
-        actions={
-          <EuiButtonEmpty
-            isLoading={isLoading}
-            isDisabled={disabled}
-            size="s"
-            onClick={handleAddCustomField}
-            iconType="plusInCircle"
-            data-test-subj="add-custom-field"
-          >
-            {i18n.ADD_CUSTOM_FIELD}
-          </EuiButtonEmpty>
-        }
-      />
+      <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
+        {customFields.length ? (
+          <>
+            <CustomFieldsList
+              customFields={customFields}
+              onDeleteCustomField={handleDeleteCustomField}
+            />
+            {error ? (
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText color="danger">
+                    {i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
+          </>
+        ) : null}
+        <EuiSpacer size="m" />
+        {!customFields.length ? (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              {i18n.NO_CUSTOM_FIELDS}
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              isLoading={isLoading}
+              isDisabled={disabled || error}
+              size="s"
+              onClick={onAddCustomField}
+              iconType="plusInCircle"
+              data-test-subj="add-custom-field"
+            >
+              {i18n.ADD_CUSTOM_FIELD}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiDescribedFormGroup>
   ) : null;
 };

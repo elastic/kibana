@@ -7,9 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
@@ -17,6 +20,7 @@ interface Props {
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfiguration }) => {
+  const { euiTheme } = useEuiTheme();
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(customFieldsConfiguration),
     [customFieldsConfiguration]
@@ -41,6 +45,15 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfigu
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiText
+        size="m"
+        css={css`
+          font-weight: ${euiTheme.font.weight.bold};
+        `}
+      >
+        {i18n.ADDITIONAL_FIELDS}
+      </EuiText>
+      <EuiSpacer size="xs" />
       <EuiFlexItem data-test-subj="create-case-custom-fields">{customFieldsComponents}</EuiFlexItem>
     </EuiFlexGroup>
   );

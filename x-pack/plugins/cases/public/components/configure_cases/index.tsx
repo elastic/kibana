@@ -242,6 +242,28 @@ export const ConfigureCases: React.FC = React.memo(() => {
     setAddFieldFlyoutVisibility(true);
   }, [setAddFieldFlyoutVisibility]);
 
+  const onDeleteCustomField = useCallback(
+    (key: string) => {
+      const remainingCustomFields = customFields.filter((field) => field.key !== key);
+
+      persistCaseConfigure({
+        connector,
+        customFields: [...remainingCustomFields],
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      persistCaseConfigure,
+    ]
+  );
+
   const onCloseAddFieldFlyout = useCallback(() => {
     setAddFieldFlyoutVisibility(false);
   }, [setAddFieldFlyoutVisibility]);
@@ -341,6 +363,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 isLoading={loadingCaseConfigure || isPersistingConfiguration}
                 disabled={isPersistingConfiguration || loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}
+                handleDeleteCustomField={onDeleteCustomField}
               />
             </EuiFlexItem>
           </SectionWrapper>

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -106,9 +106,11 @@ export const FormContext: React.FC<Props> = ({
 
       for (const [key, value] of Object.entries(customFields)) {
         const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
-        const fieldValue = isEmpty(value) ? null : [value];
 
         if (configCustomField) {
+          const fieldValue =
+            configCustomField.type === CustomFieldTypes.TEXT && isEmpty(value) ? null : [value];
+          
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,

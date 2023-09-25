@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -16,23 +16,45 @@ import {
   EuiSpacer,
   EuiText,
   EuiIcon,
+  EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
+import { DeleteConfirmationModal } from '../delete_confirmation_modal';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;
+  onDeleteCustomField: (key: string) => void;
 }
 
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
-  const { customFields } = props;
+  const { customFields, onDeleteCustomField } = props;
+  const { euiTheme } = useEuiTheme();
+  const [showDeletionModal, setShowDeletionModal] = useState<{
+    field?: { key: string; label: string };
+    showModal: boolean;
+  }>({ showModal: false });
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
 
     return createdBuilder && createdBuilder().label;
   };
+
+  const onConfirm = useCallback(() => {
+    if (showDeletionModal.field?.key) {
+      onDeleteCustomField(showDeletionModal.field.key);
+    }
+
+    setShowDeletionModal({ showModal: false });
+  }, [onDeleteCustomField, setShowDeletionModal, showDeletionModal]);
+
+  const onCancel = useCallback(() => {
+    setShowDeletionModal({ showModal: false });
+  }, []);
 
   return (
     <>
@@ -64,9 +86,29 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
-                                <h4>{label}</h4>
+                                <EuiText
+                                  css={css`
+                                    font-weight: ${euiTheme.font.weight.bold};
+                                  `}
+                                >
+                                  {label}
+                                </EuiText>
                               </EuiFlexItem>
                               <EuiText color="subdued">{renderTypeLabel(type)}</EuiText>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  data-test-subj={`${key}-custom-field-delete`}
+                                  iconType="minusInCircle"
+                                  color="danger"
+                                  onClick={() =>
+                                    setShowDeletionModal({ field: { key, label }, showModal: true })
+                                  }
+                                />
+                              </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -78,6 +120,13 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
             </EuiDragDropContext>
           ) : null}
         </EuiFlexItem>
+        {showDeletionModal.showModal && showDeletionModal.field ? (
+          <DeleteConfirmationModal
+            label={showDeletionModal.field.label}
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+          />
+        ) : null}
       </EuiFlexGroup>
     </>
   );

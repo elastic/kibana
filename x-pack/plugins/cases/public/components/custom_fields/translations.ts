@@ -77,3 +77,26 @@ export const NO_CUSTOM_FIELD_SET = (customFieldLabel: string) =>
     values: { customFieldLabel },
     defaultMessage: 'No "{customFieldLabel}" added',
   });
+
+export const MAX_CUSTOM_FIELD_LIMIT = (maxCustomFields: number) =>
+  i18n.translate('xpack.cases.customFields.maxCustomFieldLimit', {
+    values: { maxCustomFields },
+    defaultMessage: 'Maximum number of {maxCustomFields} custom fields reached.',
+  });
+
+export const DELETE_FIELD_TITLE = (fieldName: string) =>
+  i18n.translate('xpack.cases.customFields.deleteField', {
+    values: { fieldName },
+    defaultMessage: 'Delete field "{fieldName}"?',
+  });
+
+export const DELETE_FIELD_DESCRIPTION = i18n.translate(
+  'xpack.cases.customFields.deleteFieldDescription',
+  {
+    defaultMessage: 'The field will no longer be visible in Cases. However the field will continue to be accessible as read only vai the Cases API.',
+  }
+);
+
+export const DELETE = i18n.translate('xpack.cases.customFields.fieldOptions.Delete', {
+  defaultMessage: 'Delete',
+});
