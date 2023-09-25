@@ -97,7 +97,7 @@ export const FormContext: React.FC<Props> = ({
   };
 
   const transformCustomFieldsData = useCallback(
-    (customFields?: Record<string, string | boolean>) => {
+    (customFields: Record<string, string | boolean>) => {
       const transformedCustomFields: CaseUI['customFields'] = [];
 
       if (!customFields || !customFieldsConfiguration.length) {
