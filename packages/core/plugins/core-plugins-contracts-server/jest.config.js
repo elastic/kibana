@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-} from './src';
-
-export { SharedGlobalConfigKeys } from './src';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/plugins/core-plugins-contracts-server'],
+};

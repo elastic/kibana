@@ -13,7 +13,7 @@ import type {
   PluginContractResolverResponse,
   PluginContractMap,
   PluginContractResolverResponseItem,
-} from '@kbn/core-plugins-server';
+} from '@kbn/core-plugins-contracts-server';
 
 export type IRuntimePluginContractResolver = PublicMethodsOf<RuntimePluginContractResolver>;
 

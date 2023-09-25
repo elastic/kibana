@@ -7,18 +7,10 @@
  */
 
 export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-} from './src';
-
-export { SharedGlobalConfigKeys } from './src';
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginContractMap,
+  PluginContractResolver,
+  PluginContractResolverResponse,
+  PluginContractResolverResponseItem,
+} from './src/contracts';
