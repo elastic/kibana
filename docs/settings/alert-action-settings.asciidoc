@@ -420,7 +420,7 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 A configuration URL that varies by connector:
 +
 --
-* For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security API request URL.
+* For a <<d3security-action-type,D3 Security connector>>, specifies the D3 Security API request URL.
 * For a <<tines-action-type,Tines connector>>, specifies the Tines tenant URL.
 * For a <<webhook-action-type,webhook connector>>, specifies the web service request URL.
 
