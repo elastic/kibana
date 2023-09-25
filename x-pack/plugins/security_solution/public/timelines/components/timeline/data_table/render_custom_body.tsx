@@ -6,7 +6,7 @@
  */
 import type { EuiDataGridColumn, EuiDataGridCustomBodyProps } from '@elastic/eui';
 import { logicalCSS } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
 
