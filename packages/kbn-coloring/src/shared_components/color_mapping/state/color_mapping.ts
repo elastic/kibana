@@ -150,9 +150,24 @@ export const colorMappingSlice = createSlice({
       }
       const steps = [...state.colorMode.steps];
       steps.splice(action.payload, 1);
+
+      // this maintain the correct sort direciton depending on which step
+      // gets removed from the array when only 2 steps are left.
+      const sort =
+        state.colorMode.steps.length === 2
+          ? state.colorMode.sort === 'desc'
+            ? action.payload === 0
+              ? 'asc'
+              : 'desc'
+            : action.payload === 0
+            ? 'desc'
+            : 'asc'
+          : state.colorMode.sort;
+
       state.colorMode = {
         ...state.colorMode,
         steps: [...steps],
+        sort,
       };
     },
     addGradientColorStep: (

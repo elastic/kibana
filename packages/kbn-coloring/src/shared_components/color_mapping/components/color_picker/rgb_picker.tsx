@@ -74,7 +74,7 @@ export function RGBPicker({
           color={customColorHex}
           display="inline"
           swatches={[]}
-          showAlpha
+          secondaryInputDisplay="bottom"
         />
       </EuiFlexItem>
 
@@ -90,19 +90,7 @@ export function RGBPicker({
           }}
         >
           {i18n.translate('coloring.colorMapping.colorPicker.useColorButtonLabel', {
-            defaultMessage: 'Use this color',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={0}>
-        <EuiButton
-          size="s"
-          onClick={() => {
-            close();
-          }}
-        >
-          {i18n.translate('coloring.colorMapping.colorPicker.closePickerButtonLabel', {
-            defaultMessage: 'Close',
+            defaultMessage: 'Select color',
           })}
         </EuiButton>
       </EuiFlexItem>

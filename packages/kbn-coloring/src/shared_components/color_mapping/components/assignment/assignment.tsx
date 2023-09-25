@@ -10,6 +10,8 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   removeAssignment,
   updateAssignmentColor,
@@ -53,7 +55,12 @@ export function Assignment({
   const dispatch = useDispatch();
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="s"
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+    >
       <EuiFlexItem grow={0}>
         <ColorSwatch
           forType="assignment"
@@ -119,6 +126,20 @@ export function Assignment({
               defaultMessage: 'Delete this assignment',
             }
           )}
+          color="danger"
+          css={
+            !disableDelete
+              ? css`
+                  color: ${euiThemeVars.euiTextSubduedColor};
+                  transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+                  transition-property: color;
+                  &:hover,
+                  &:focus {
+                    color: ${euiThemeVars.euiColorDangerText};
+                  }
+                `
+              : undefined
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

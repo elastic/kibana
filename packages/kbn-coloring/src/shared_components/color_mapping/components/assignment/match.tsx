@@ -46,7 +46,7 @@ export const Match: React.FC<{
   });
 
   return (
-    <EuiFlexItem style={{ minWidth: 1 }}>
+    <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         isDisabled={!editable}
@@ -79,6 +79,7 @@ export const Match: React.FC<{
           }
         }}
         isClearable={false}
+        compressed
       />
     </EuiFlexItem>
   );

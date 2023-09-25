@@ -13,11 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
+  EuiHorizontalRule,
   EuiPanel,
-  EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { Assignment } from '../assignment/assignment';
 import { SpecialAssignment } from '../assignment/special_assignment';
 import { PaletteSelector } from '../palette_selector/palette_selector';
@@ -84,46 +86,65 @@ export function Container(props: {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormLabel>Assignments</EuiFormLabel>
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem>
+            <EuiFormLabel>
+              {i18n.translate('coloring.colorMapping.container.mappingAssignmentHeader', {
+                defaultMessage: 'Mapping assignments',
+              })}
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <EuiSwitch
+              data-test-subj="lns-colorMapping-autoAssignSwitch"
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('coloring.colorMapping.container.autoAssignLabel', {
+                    defaultMessage: 'Auto assign',
+                  })}
+                </EuiText>
+              }
+              checked={autoAssignmentMode}
+              compressed
+              onChange={() => {
+                if (autoAssignmentMode) {
+                  dispatch(assignStatically(assignments));
+                } else {
+                  dispatch(assignAutomatically());
+                }
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiSwitch
-          data-test-subj="lns-colorMapping-autoAssignSwitch"
-          label={i18n.translate('coloring.colorMapping.container.autoAssignLabel', {
-            defaultMessage: 'Auto assign categories to colors',
-          })}
-          checked={autoAssignmentMode}
-          compressed
-          onChange={() => {
-            if (autoAssignmentMode) {
-              dispatch(assignStatically(assignments));
-            } else {
-              dispatch(assignAutomatically());
-            }
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="s">
+          <div
+            css={css`
+              display: grid;
+              grid-template-columns: ${colorMode.type === 'gradient' ? '[gradient] 16px' : ''} [assignment] auto;
+              gap: 8px;
+            `}
+          >
             {colorMode.type !== 'gradient' ? null : (
-              <EuiFlexItem
-                grow={0}
-                style={{
-                  margin: '10px 0',
-                }}
-              >
-                <Gradient
-                  colorMode={colorMode}
-                  getPaletteFn={getPaletteFn}
-                  isDarkMode={props.isDarkMode}
-                  paletteId={palette.id}
-                />
-              </EuiFlexItem>
+              <Gradient
+                colorMode={colorMode}
+                getPaletteFn={getPaletteFn}
+                isDarkMode={props.isDarkMode}
+                paletteId={palette.id}
+                assignmentsSize={assignments.length}
+              />
             )}
-            <EuiFlexItem data-test-subj="lns-colorMapping-assignmentsList">
-              {assignments.map((assignment, i) => {
-                return (
+            {assignments.map((assignment, i) => {
+              return (
+                <div
+                  css={css`
+                    position: relative;
+                    grid-column: ${colorMode.type === 'gradient' ? 2 : 1};
+                    grid-row: ${i + 1};
+                    width: 100%;
+                  `}
+                >
                   <Assignment
                     key={i}
                     data={props.data}
@@ -139,74 +160,79 @@ export function Container(props: {
                     disableDelete={assignments.length <= 1 || autoAssignmentMode}
                     specialTokens={props.specialTokens}
                   />
-                );
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </div>
+              );
+            })}
+          </div>
+
+          <EuiHorizontalRule margin="xs" />
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem data-test-subj="lns-colorMapping-specialAssignmentsList">
-              {props.data.type === 'categories' && (
-                <>
-                  <EuiSpacer size="xs" />
-                  {specialAssignments.map((assignment, i) => {
-                    return (
-                      <SpecialAssignment
-                        key={i}
-                        index={i}
-                        palette={palette}
-                        isDarkMode={props.isDarkMode}
-                        getPaletteFn={getPaletteFn}
-                        assignment={assignment}
-                        total={specialAssignments.length}
-                      />
-                    );
-                  })}
-                </>
-              )}
+              {props.data.type === 'categories' &&
+                specialAssignments.map((assignment, i) => {
+                  return (
+                    <SpecialAssignment
+                      key={i}
+                      index={i}
+                      palette={palette}
+                      isDarkMode={props.isDarkMode}
+                      getPaletteFn={getPaletteFn}
+                      assignment={assignment}
+                      total={specialAssignments.length}
+                    />
+                  );
+                })}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ display: 'block' }}>
-        <EuiButtonEmpty
-          data-test-subj="lns-colorMapping-addNewAssignment"
-          iconType="plusInCircleFilled"
-          size="xs"
-          onClick={() => {
-            dispatch(
-              addNewAssignment({
-                rule:
-                  props.data.type === 'categories'
-                    ? {
-                        type: 'matchExactly',
-                        values: [],
-                      }
-                    : { type: 'range', min: 0, max: 0, minInclusive: true, maxInclusive: true },
-                color: getUnusedColorForNewAssignment(palette, colorMode, assignments),
-                touched: false,
-              })
-            );
-          }}
-          disabled={!canAddNewAssignment}
-        >
-          {i18n.translate('coloring.colorMapping.container.addAssignmentButtonLabel', {
-            defaultMessage: 'Add assignment',
-          })}
-        </EuiButtonEmpty>
-        {colorMode.type === 'gradient' && (
-          <EuiButtonEmpty
-            data-test-subj="lns-colorMapping-invertGradient"
-            iconType={colorMode.sort === 'asc' ? 'sortAscending' : 'sortDescending'}
-            size="xs"
-            onClick={() => {
-              dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
-            }}
-          >
-            {i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
-              defaultMessage: 'Invert gradient',
-            })}
-          </EuiButtonEmpty>
-        )}
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem style={{ display: 'block' }}>
+            <EuiButtonEmpty
+              data-test-subj="lns-colorMapping-addNewAssignment"
+              iconType="plusInCircleFilled"
+              size="xs"
+              flush="both"
+              onClick={() => {
+                dispatch(
+                  addNewAssignment({
+                    rule:
+                      props.data.type === 'categories'
+                        ? {
+                            type: 'matchExactly',
+                            values: [],
+                          }
+                        : { type: 'range', min: 0, max: 0, minInclusive: true, maxInclusive: true },
+                    color: getUnusedColorForNewAssignment(palette, colorMode, assignments),
+                    touched: false,
+                  })
+                );
+              }}
+              disabled={!canAddNewAssignment}
+              css={css`
+                margin-right: 8px;
+              `}
+            >
+              {i18n.translate('coloring.colorMapping.container.addAssignmentButtonLabel', {
+                defaultMessage: 'Add assignment',
+              })}
+            </EuiButtonEmpty>
+            {colorMode.type === 'gradient' && (
+              <EuiButtonEmpty
+                flush="both"
+                data-test-subj="lns-colorMapping-invertGradient"
+                iconType="sortable"
+                size="xs"
+                onClick={() => {
+                  dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
+                }}
+              >
+                {i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
+                  defaultMessage: 'Invert gradient',
+                })}
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

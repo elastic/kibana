@@ -33,7 +33,7 @@ export function SpecialAssignment({
   const dispatch = useDispatch();
   const canPickColor = true;
   return (
-    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiFlexItem grow={0}>
         <ColorSwatch
           forType="specialAssignment"
@@ -56,7 +56,11 @@ export function SpecialAssignment({
           }}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem
+        style={{
+          marginRight: 32,
+        }}
+      >
         <EuiFieldText
           compressed
           fullWidth

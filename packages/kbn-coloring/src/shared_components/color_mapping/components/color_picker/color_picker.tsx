@@ -7,7 +7,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopoverTitle,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
@@ -40,20 +47,34 @@ export function ColorPicker({
   );
 
   return (
-    <div style={{ width: 200 }}>
-      <EuiTabs size="s" expand>
-        <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
-          {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
-            defaultMessage: 'Palette',
-          })}
-        </EuiTab>
-        <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
-          {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
-            defaultMessage: 'Custom',
-          })}
-        </EuiTab>
-      </EuiTabs>
-      <EuiSpacer size="m" />
+    <div style={{ width: 168 }}>
+      <EuiPopoverTitle
+        paddingSize="none"
+        style={{
+          borderBottom: 'none',
+        }}
+      >
+        <EuiTabs size="m" expand>
+          <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
+            <EuiTitle size="xxxs">
+              <span>
+                {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
+                  defaultMessage: 'Colors',
+                })}
+              </span>
+            </EuiTitle>
+          </EuiTab>
+          <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
+            <EuiTitle size="xxxs">
+              <span>
+                {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
+                  defaultMessage: 'Custom',
+                })}
+              </span>
+            </EuiTitle>
+          </EuiTab>
+        </EuiTabs>
+      </EuiPopoverTitle>
       {tab === 'palette' ? (
         <PaletteColors
           color={color}
@@ -74,18 +95,21 @@ export function ColorPicker({
       )}
       {deleteStep ? (
         <>
-          <EuiSpacer size="m" />
-          <EuiButton
+          <EuiHorizontalRule margin="xs" />
+          <EuiButtonEmpty
+            color="danger"
+            size="xs"
             iconType="trash"
             onClick={() => {
               close();
               deleteStep();
             }}
+            style={{ paddingBottom: 8 }}
           >
             {i18n.translate('coloring.colorMapping.colorPicker.removeGradientColorButtonLabel', {
-              defaultMessage: 'Remove from gradient',
+              defaultMessage: 'Remove color step',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </>
       ) : null}
     </div>

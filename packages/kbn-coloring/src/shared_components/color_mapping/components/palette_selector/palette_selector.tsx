@@ -16,8 +16,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import scaleCategoricalIcon from './scale_categorical.svg';
+import scaleSequentialIcon from './scale_sequential.svg';
+
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
@@ -174,11 +176,11 @@ export function PaletteSelector({
     <>
       {preserveChangesModal}
       {colorScaleModal}
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('coloring.colorMapping.paletteSelector.paletteLabel', {
-              defaultMessage: `Palette`,
+              defaultMessage: `Color palette`,
             })}
           >
             <EuiColorPalettePicker
@@ -207,10 +209,11 @@ export function PaletteSelector({
               }}
               valueOfSelected={model.paletteId}
               selectionDisplay={'palette'}
+              compressed={true}
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={0}>
           <EuiFormRow
             label={i18n.translate('coloring.colorMapping.paletteSelector.scaleLabel', {
               defaultMessage: `Scale`,
@@ -225,12 +228,14 @@ export function PaletteSelector({
                   label: i18n.translate('coloring.colorMapping.paletteSelector.categoricalLabel', {
                     defaultMessage: `Categorical`,
                   }),
+                  iconType: scaleCategoricalIcon,
                 },
                 {
                   id: `gradient`,
                   label: i18n.translate('coloring.colorMapping.paletteSelector.sequentialLabel', {
                     defaultMessage: `Sequential`,
                   }),
+                  iconType: scaleSequentialIcon,
                 },
               ]}
               isFullWidth
@@ -248,6 +253,7 @@ export function PaletteSelector({
                   updateColorMode(id as 'gradient' | 'categorical', false);
                 }
               }}
+              isIconOnly
             />
           </EuiFormRow>
         </EuiFlexItem>

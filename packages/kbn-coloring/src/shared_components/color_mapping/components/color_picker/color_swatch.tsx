@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiColorPickerSwatch, EuiPopover } from '@elastic/eui';
+import {
+  EuiColorPickerSwatch,
+  EuiPopover,
+  euiShadowSmall,
+  isColorDark,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import { css } from '@emotion/react';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
@@ -18,6 +26,8 @@ import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';
 import { colorPickerVisibility, hideColorPickerVisibility } from '../../state/ui';
+import { getValidColor } from '../../color/color_math';
+
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
   assignmentColor:
@@ -60,34 +70,58 @@ export const ColorSwatch = ({
     index,
     total
   );
-
+  const colorIsDark = isColorDark(...getValidColor(colorHex).rgb());
+  const euiTheme = useEuiTheme();
   return canPickColor && assignmentColor.type !== 'gradient' ? (
     <EuiPopover
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       isOpen={colorPickerVisible}
       repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
       anchorPosition="upLeft"
       button={
-        <EuiColorPickerSwatch
-          color={colorHex}
-          aria-label={i18n.translate('coloring.colorMapping.colorPicker.pickAColorAriaLabel', {
-            defaultMessage: 'Pick a color',
-          })}
-          data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
-          onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
-          style={{
-            ...(swatchShape === 'round' ? { borderRadius: '50%', width: 15, height: 15 } : {}),
-            // the color swatch doesn't work here...
-            backgroundColor: colorHex,
-            cursor: canPickColor ? 'pointer' : 'not-allowed',
-          }}
-          className={
-            swatchShape === 'round'
-              ? 'colorMappingColorSwatchEditableRound'
-              : 'colorMappingColorSwatchEditable'
-          }
-        />
+        swatchShape === 'round' ? (
+          <button
+            aria-label={i18n.translate('coloring.colorMapping.colorPicker.pickAColorAriaLabel', {
+              defaultMessage: 'Pick a color',
+            })}
+            data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
+            onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
+            css={css`
+              background: ${colorHex};
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              top: 8px;
+              border: 3px solid white;
+              ${euiShadowSmall(euiTheme)};
+              backgroundcolor: ${colorHex};
+              cursor: ${canPickColor ? 'pointer' : 'not-allowed'};
+            `}
+          />
+        ) : (
+          <EuiColorPickerSwatch
+            color={colorHex}
+            aria-label={i18n.translate('coloring.colorMapping.colorPicker.pickAColorAriaLabel', {
+              defaultMessage: 'Pick a color',
+            })}
+            data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
+            onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
+            style={{
+              width: 32,
+              height: 32,
+              // the color swatch can't pickup colors written in rgb/css standard
+              backgroundColor: colorHex,
+              cursor: canPickColor ? 'pointer' : 'not-allowed',
+            }}
+            className={classNames(
+              'colorMappingColorSwatchEditable',
+              colorIsDark
+                ? 'colorMappingColorSwatchEditableWhite'
+                : 'colorMappingColorSwatchEditableBlack'
+            )}
+          />
+        )
       }
     >
       <ColorPicker
@@ -106,7 +140,7 @@ export const ColorSwatch = ({
           onColorChange(color);
         }}
         deleteStep={
-          colorMode.type === 'gradient' && index > 0
+          colorMode.type === 'gradient' && total > 1
             ? () => dispatch(removeGradientColorStep(index))
             : undefined
         }
@@ -119,7 +153,9 @@ export const ColorSwatch = ({
         defaultMessage: 'Select a new color',
       })}
       style={{
-        ...(swatchShape === 'round' ? { borderRadius: '50%', width: 15, height: 15 } : {}),
+        ...(swatchShape === 'round'
+          ? { borderRadius: '50%', width: 15, height: 15 }
+          : { width: 32, height: 32 }),
         // the color swatch doesn't work here...
         backgroundColor: colorHex,
         cursor: canPickColor ? 'pointer' : 'not-allowed',
