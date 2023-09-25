@@ -3075,6 +3075,28 @@
       }
     }
   },
+  "apm-service-dashboard": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "dashboardTitle": {
+        "type": "text"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "useContextFilter": {
+        "type": "boolean"
+      },
+      "linkTo": {
+        "type": "keyword"
+      },
+      "serviceName": {
+        "type": "keyword"
+      }
+    }
+  },
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
