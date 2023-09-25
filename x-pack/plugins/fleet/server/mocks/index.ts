@@ -72,6 +72,7 @@ export const createAppContextStartContractMock = (
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     experimentalFeatures: {
+      agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
