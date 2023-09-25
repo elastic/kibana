@@ -7,9 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
   useDeleteIndexAndTargetIndex,
   useDeleteTransforms,
@@ -33,7 +34,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
 
   const isBulkAction = items.length > 1;
   const shouldForceDelete = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
+    () => items.some((i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.FAILED),
     [items]
   );
 
@@ -59,10 +60,10 @@ export const useDeleteAction = (forceDisable: boolean) => {
     // else, force delete only when the item user picks has failed
     const forceDelete = isBulkAction
       ? shouldForceDelete
-      : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
+      : items[0] && items[0] && items[0].stats?.state === TRANSFORM_STATE.FAILED;
 
     deleteTransforms({
-      transformsInfo: items.map((i) => ({
+      transformsInfo: items.filter(isTransformListRowWithStats).map((i) => ({
         id: i.config.id,
         state: i.stats.state,
       })),
@@ -87,11 +88,15 @@ export const useDeleteAction = (forceDisable: boolean) => {
             canDeleteTransform,
             disabled: isDeleteActionDisabled([item], forceDisable),
             isBulkAction: false,
+            items: [item],
+            forceDisable,
           }}
         />
       ),
       enabled: (item: TransformListRow) =>
-        !isDeleteActionDisabled([item], forceDisable) && canDeleteTransform,
+        isTransformListRowWithStats(item) &&
+        !isDeleteActionDisabled([item], forceDisable) &&
+        canDeleteTransform,
       description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',
