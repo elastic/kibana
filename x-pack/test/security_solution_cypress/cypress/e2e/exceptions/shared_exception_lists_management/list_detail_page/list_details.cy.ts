@@ -8,7 +8,8 @@
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {
@@ -70,11 +71,11 @@ describe(
 
     beforeEach(() => {
       login();
-      visitWithoutDateRange(EXCEPTIONS_URL);
+      visit(EXCEPTIONS_URL);
     });
 
     it('Should edit list details', () => {
-      visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
       waitForExceptionListDetailToBeLoaded();
       // Check list details are loaded
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
@@ -91,7 +92,7 @@ describe(
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
 
       // Ensure that list details changes persisted
-      visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
 
@@ -102,7 +103,7 @@ describe(
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
 
       // Ensure description removal persisted
-      visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
     });
 

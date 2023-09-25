@@ -1,16 +1,13 @@
 .optionsList--filterGroup {
   width: 100%;
-  height: $euiSizeXXL;
+  box-shadow: none;
   background-color: transparent;
 
-  box-shadow: none;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top-right-radius: $euiBorderRadius - 1px;
-  border-bottom-right-radius: $euiBorderRadius - 1px;
+  .optionsList__inputButtonOverride {
+    max-inline-size: none; // overwrite the default `max-inline-size` that's coming from EUI
+  }
 
   .optionsList--filterBtn {
-    border-radius: 0 !important;
     height: $euiButtonHeight;
 
     &.optionsList--filterBtnPlaceholder {
