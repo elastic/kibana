@@ -19,7 +19,7 @@ import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetManagerConfig, configSchema } from './types';
-import { AssetClient } from './lib/asset_accessor';
+import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
