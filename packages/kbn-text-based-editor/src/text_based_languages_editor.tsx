@@ -453,7 +453,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     scrollBeyondLastLine: false,
     quickSuggestions: true,
     minimap: { enabled: false },
-    wordWrap: isWordWrapped ? 'on' : 'off',
+    wordWrap: 'on',
     lineNumbers: showLineNumbers ? 'on' : 'off',
     theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,
