@@ -8,17 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const POPOVER_ID = 'dataset-selector-popover';
-export const INTEGRATION_PANEL_ID = 'integrations_panel';
-export const UNMANAGED_STREAMS_PANEL_ID = 'unmanaged_streams_panel';
+export const INTEGRATIONS_PANEL_ID = 'dataset-selector-integrations-panel';
+export const INTEGRATIONS_TAB_ID = 'dataset-selector-integrations-tab';
+export const UNCATEGORIZED_PANEL_ID = 'dataset-selector-uncategorized-panel';
+export const UNCATEGORIZED_TAB_ID = 'dataset-selector-uncategorized-tab';
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
-export const contextMenuStyles = { maxHeight: 440 };
-
-export const selectDatasetLabel = i18n.translate(
-  'xpack.logExplorer.datasetSelector.selectDataset',
-  { defaultMessage: 'Select dataset' }
-);
+export const showAllLogsLabel = i18n.translate('xpack.logExplorer.datasetSelector.showAllLogs', {
+  defaultMessage: 'Show all logs',
+});
 
 export const integrationsLabel = i18n.translate('xpack.logExplorer.datasetSelector.integrations', {
   defaultMessage: 'Integrations',

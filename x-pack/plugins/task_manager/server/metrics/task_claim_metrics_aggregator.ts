@@ -9,9 +9,8 @@ import { JsonObject } from '@kbn/utility-types';
 import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRun } from '../task_events';
-import { SimpleHistogram } from './simple_histogram';
+import { type SerializedHistogram, SimpleHistogram, MetricCounterService } from './lib';
 import { ITaskMetricsAggregator } from './types';
-import { MetricCounterService } from './counter/metric_counter_service';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
@@ -26,10 +25,7 @@ interface TaskClaimCounts extends JsonObject {
 }
 
 export type TaskClaimMetric = TaskClaimCounts & {
-  duration: {
-    counts: number[];
-    values: number[];
-  };
+  duration: SerializedHistogram;
 };
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
@@ -47,7 +43,7 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
   public collect(): TaskClaimMetric {
     return {
       ...this.counter.collect(),
-      duration: this.serializeHistogram(),
+      duration: this.durationHistogram.serialize(),
     };
   }
 
@@ -67,17 +63,5 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
       const durationInMs = taskEvent.timing.stop - taskEvent.timing.start;
       this.durationHistogram.record(durationInMs);
     }
-  }
-
-  private serializeHistogram() {
-    const counts: number[] = [];
-    const values: number[] = [];
-
-    for (const { count, value } of this.durationHistogram.get(true)) {
-      counts.push(count);
-      values.push(value);
-    }
-
-    return { counts, values };
   }
 }
