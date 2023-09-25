@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { ASSET_MANAGER_API_BASE } from '../constants';
+import { ASSET_MANAGER_API_BASE } from '../../common/constants_routes';
 import { getSampleAssetDocs, sampleAssets } from '../lib/sample_assets';
 import { writeAssets } from '../lib/write_assets';
 import { SetupRouteOptions } from './types';

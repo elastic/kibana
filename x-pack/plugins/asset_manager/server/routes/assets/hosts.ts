@@ -11,23 +11,16 @@ import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-se
 import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../../common/types_api';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
-import { ASSET_MANAGER_API_BASE } from '../../constants';
+import * as routePaths from '../../../common/constants_routes';
 import { getClientsFromContext } from '../utils';
 
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
-  console.log(
-    'Verifying existence of assetClient in server',
-    typeof assetClient,
-    Object.keys(assetClient)
-  );
-
-  // GET /assets/hosts
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets/hosts`,
+      path: routePaths.GET_HOSTS,
       validate: {
         query: createRouteValidationFunction(getHostAssetsQueryOptionsRT),
       },

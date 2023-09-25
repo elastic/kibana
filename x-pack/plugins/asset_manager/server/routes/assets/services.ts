@@ -17,7 +17,7 @@ import {
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
-import { ASSET_MANAGER_API_BASE } from '../../constants';
+import { ASSET_MANAGER_API_BASE } from '../../../common/constants_routes';
 import { getClientsFromContext } from '../utils';
 
 const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);

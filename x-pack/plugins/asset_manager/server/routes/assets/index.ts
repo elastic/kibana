@@ -17,7 +17,7 @@ import {
 } from '@kbn/io-ts-utils';
 import { debug } from '../../../common/debug_log';
 import { assetTypeRT, assetKindRT, relationRT } from '../../../common/types_api';
-import { ASSET_MANAGER_API_BASE } from '../../constants';
+import { GET_ASSETS, GET_RELATED_ASSETS, GET_ASSETS_DIFF } from '../../../common/constants_routes';
 import { getAssets } from '../../lib/get_assets';
 import { getAllRelatedAssets } from '../../lib/get_all_related_assets';
 import { SetupRouteOptions } from '../types';
@@ -82,7 +82,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   // GET /assets
   router.get<unknown, GetAssetsQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets`,
+      path: GET_ASSETS,
       validate: {
         query: createRouteValidationFunction(getAssetsQueryOptionsRT),
       },
@@ -120,7 +120,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   // GET assets/related
   router.get<unknown, GetRelatedAssetsQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets/related`,
+      path: GET_RELATED_ASSETS,
       validate: {
         query: createRouteValidationFunction(getRelatedAssetsQueryOptionsRT),
       },
@@ -165,7 +165,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   // GET /assets/diff
   router.get<unknown, GetAssetsDiffQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
+      path: GET_ASSETS_DIFF,
       validate: {
         query: createRouteValidationFunction(getAssetsDiffQueryOptionsRT),
       },

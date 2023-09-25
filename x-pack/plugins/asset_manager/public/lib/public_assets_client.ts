@@ -8,13 +8,14 @@
 import { HttpStart } from '@kbn/core/public';
 import { GetHostsOptionsPublic } from '../../common/types_client';
 import { GetHostAssetsResponse } from '../../common/types_api';
+import { GET_HOSTS } from '../../common/constants_routes';
 import { IPublicAssetsClient } from '../types';
 
 export class PublicAssetsClient implements IPublicAssetsClient {
   constructor(private readonly http: HttpStart) {}
 
   async getHosts(options: GetHostsOptionsPublic) {
-    const results = await this.http.get<GetHostAssetsResponse>('/api/asset-manager/assets/hosts', {
+    const results = await this.http.get<GetHostAssetsResponse>(GET_HOSTS, {
       query: {
         ...options,
       },
