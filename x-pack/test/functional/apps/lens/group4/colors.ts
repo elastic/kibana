@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticBrandPalette } from '@kbn/coloring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -58,11 +59,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
-        palette: { mode: 'colorMapping', id: 'pastel' },
+        palette: { mode: 'colorMapping', id: ElasticBrandPalette.id },
         keepOpen: true,
       });
 
-      await PageObjects.lens.assertPalette('pastel', false);
+      await PageObjects.lens.assertPalette(ElasticBrandPalette.id, false);
     });
 
     it('should carry over palette to the pie chart', async () => {
@@ -70,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsPie_sliceByDimensionPanel > lns-dimensionTrigger'
       );
-      await PageObjects.lens.assertPalette('pastel', false);
+      await PageObjects.lens.assertPalette(ElasticBrandPalette.id, false);
     });
 
     it('should carry palette back to the bar chart', async () => {
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
       );
-      await PageObjects.lens.assertPalette('pastel', false);
+      await PageObjects.lens.assertPalette(ElasticBrandPalette.id, false);
     });
   });
 }

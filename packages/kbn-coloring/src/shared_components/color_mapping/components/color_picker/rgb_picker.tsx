@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 import { ColorMapping } from '../../config';
 
 import { getColorContrast } from '../../color/color_math';
@@ -46,8 +47,19 @@ export function RGBPicker({
 
   const lightContrast = getColorContrast(customColorHex, false);
   const darkContrast = getColorContrast(customColorHex, true);
+
+  // debounce setting the color from the rgb picker by 500ms
+  useDebounce(
+    () => {
+      if (color !== customColor) {
+        selectColor(customColor);
+      }
+    },
+    500,
+    [color, customColor]
+  );
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ padding: 8 }}>
       <EuiFlexItem>
         <EuiText size="xs">
           <strong>Light Theme Contrast:</strong>{' '}
@@ -74,25 +86,8 @@ export function RGBPicker({
           color={customColorHex}
           display="inline"
           swatches={[]}
-          secondaryInputDisplay="bottom"
         />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={0}>
-        <EuiButton
-          size="s"
-          onClick={() => {
-            if (color !== customColor) {
-              selectColor(customColor);
-            } else {
-              close();
-            }
-          }}
-        >
-          {i18n.translate('coloring.colorMapping.colorPicker.useColorButtonLabel', {
-            defaultMessage: 'Select color',
-          })}
-        </EuiButton>
+        <EuiTextInpu />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
