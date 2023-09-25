@@ -2,32 +2,19 @@
 
 exports[`SSL Certificate component renders 1`] = `
 Array [
-  .c0.c0.c0 {
-  width: 30%;
-  max-width: 250px;
-}
-
-<dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal-s"
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
   >
     TLS Certificate
   </dt>,
-  <div
-    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-  />,
   .c0.c0.c0 {
-  width: 70%;
-  overflow-wrap: anywhere;
-}
-
-.c1.c1.c1 {
   margin: 0 0 0 4px;
   display: inline-block;
   color: inherit;
 }
 
 <dd
-    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"
@@ -44,7 +31,7 @@ Array [
             data-euiicon-type="lock"
           />
           <h4
-            class="c1"
+            class="c0"
           >
             Expires in 2 months
           </h4>
@@ -57,26 +44,13 @@ Array [
 
 exports[`SSL Certificate component renders null if invalid date 1`] = `
 Array [
-  .c0.c0.c0 {
-  width: 30%;
-  max-width: 250px;
-}
-
-<dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal-s"
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
   >
     TLS Certificate
   </dt>,
-  <div
-    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-  />,
-  .c0.c0.c0 {
-  width: 70%;
-  overflow-wrap: anywhere;
-}
-
-<dd
-    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"
