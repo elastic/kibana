@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               index: DATA_VIEW_ID,
             },
-            groupBy: ['host.name'],
+            groupBy: ['host.name', 'container.id'],
           },
           actions: [
             {
@@ -125,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
                     host: '{{context.host}}',
+                    group: '{{context.group}}',
                   },
                 ],
               },
@@ -180,7 +181,10 @@ export default function ({ getService }: FtrProviderContext) {
           'custom_threshold.fired'
         );
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', 'host-0');
+        expect(resp.hits.hits[0]._source).property(
+          'kibana.alert.instance.id',
+          'host-0,container-0'
+        );
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
@@ -192,6 +196,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('container.id', 'container-0');
         expect(resp.hits.hits[0]._source).property('container.name', 'container-name');
         expect(resp.hits.hits[0]._source).not.property('container.cpu');
+
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.group')
+          .eql([
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+            {
+              field: 'container.id',
+              value: 'container-0',
+            },
+          ]);
 
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
@@ -209,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
-            groupBy: ['host.name'],
+            groupBy: ['host.name', 'container.id'],
           });
       });
 
@@ -231,11 +248,14 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'
+          'Custom equation is 0.8 in the last 1 min for host-0,container-0. Alert when >= 0.2.'
         );
         expect(resp.hits.hits[0]._source?.value).eql('0.8');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
+        );
+        expect(resp.hits.hits[0]._source?.group).eql(
+          '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"}'
         );
       });
     });
