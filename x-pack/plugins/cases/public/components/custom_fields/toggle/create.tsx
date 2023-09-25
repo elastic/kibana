@@ -11,14 +11,13 @@ import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CustomFieldType } from '../types';
 
 const CreateComponent: CustomFieldType['Create'] = ({ customFieldConfiguration, isLoading }) => {
-  const { key, label, type } = customFieldConfiguration;
+  const { key, label } = customFieldConfiguration;
 
   return (
     <UseField
       path={`customFields.${key}`}
       component={ToggleField}
       defaultValue={false}
-      type={type}
       key={key}
       label={label}
       componentProps={{

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty } from 'lodash';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
@@ -95,22 +96,24 @@ export const FormContext: React.FC<Props> = ({
   };
 
   const transformCustomFieldsData = useCallback(
-    (customFields: { [x: `customFields.${string}`]: string | boolean }) => {
-      const transformedCustomFields = [];
+    (customFields?: Record<string, string | boolean>) => {
+      const transformedCustomFields: CaseUI['customFields'] = [];
 
-      if (!customFields || !customFieldsConfiguration.length || isLoadingCaseConfiguration) {
+      if (!customFields || !customFieldsConfiguration.length) {
         return [];
       }
 
       for (const [key, value] of Object.entries(customFields)) {
         const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
+        const fieldValue = isEmpty(value) ? null : [value];
 
         if (configCustomField) {
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,
             field: {
-              value: [value],
+              // @ts-ignore
+              value: fieldValue,
             },
           });
         }
@@ -118,7 +121,7 @@ export const FormContext: React.FC<Props> = ({
 
       return transformedCustomFields;
     },
-    [customFieldsConfiguration, isLoadingCaseConfiguration]
+    [customFieldsConfiguration]
   );
 
   const submitCase = useCallback(
@@ -152,7 +155,7 @@ export const FormContext: React.FC<Props> = ({
             connector: connectorToUpdate,
             settings: { syncAlerts },
             owner: selectedOwner ?? defaultOwner,
-            customFields: transformedCustomFields as CaseUI['customFields'],
+            customFields: transformedCustomFields,
           },
         });
 
