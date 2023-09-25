@@ -105,28 +105,29 @@ export function ServiceDashboards() {
         timeRange: { from: rangeFrom, to: rangeTo },
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
     if (!dashboard) return;
 
     dashboard.updateInput({
-      timeRange: { from: rangeFrom, to: rangeTo },
-      query: { query: kuery, language: 'kuery' },
-    });
-  }, [kuery, dashboard, rangeFrom, rangeTo]);
-
-  useEffect(() => {
-    if (!dashboard || !dataView) return;
-
-    dashboard.updateInput({
       filters:
         dataView && currentDashboard?.useContextFilter
           ? getFilters(serviceName, environment, dataView)
           : [],
+      timeRange: { from: rangeFrom, to: rangeTo },
+      query: { query: kuery, language: 'kuery' },
     });
-  }, [dataView, serviceName, environment, dashboard, currentDashboard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataView,
+    serviceName,
+    environment,
+    kuery,
+    dashboard,
+    rangeFrom,
+    rangeTo,
+  ]);
 
   const handleOnChange = (selectedId?: string) => {
     setCurrentDashboard(

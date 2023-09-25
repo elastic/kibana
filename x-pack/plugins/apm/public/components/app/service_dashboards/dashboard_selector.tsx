@@ -46,8 +46,8 @@ export function DashboardSelector({
         ...toQuery(location.search),
         dashboardId: newDashboardId,
       }),
-    }),
-      handleOnChange();
+    });
+    handleOnChange();
   }
   return (
     <EuiComboBox
