@@ -144,13 +144,6 @@ export const ilmBannerExtension = (indices: Index[]) => {
   };
 };
 
-export const ilmSummaryExtension = (
-  index: Index,
-  getUrlForApp: ApplicationStart['getUrlForApp']
-) => {
-  return <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />;
-};
-
 export const ilmFilterExtension = (indices: Index[]) => {
   const hasIlm = some(indices, (index) => index.ilm && index.ilm.managed);
   if (!hasIlm) {
@@ -231,6 +224,6 @@ export const addAllExtensions = (
   extensionsService.addAction(addLifecyclePolicyActionExtension);
 
   extensionsService.addBanner(ilmBannerExtension);
-  extensionsService.addSummary(ilmSummaryExtension);
+  extensionsService.addSummary(IndexLifecycleSummary);
   extensionsService.addFilter(ilmFilterExtension);
 };
