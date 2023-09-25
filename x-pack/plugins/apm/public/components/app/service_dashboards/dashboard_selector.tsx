@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedServiceDashboard } from '../../../../common/service_dashboards';
 import { MergedServiceDashboard } from '.';
 
 interface Props {

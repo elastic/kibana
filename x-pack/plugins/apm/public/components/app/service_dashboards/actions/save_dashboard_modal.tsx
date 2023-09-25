@@ -27,7 +27,6 @@ import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { SavedServiceDashboard } from '../../../../../common/service_dashboards';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { MergedServiceDashboard } from '..';
 
