@@ -17,7 +17,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { useDataSource, useEnabledFeatures } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
@@ -33,7 +33,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const dataSourceContext = useDataSource();
-  const { showNodeInfo } = useEnabledFeatures();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -138,7 +137,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
                 apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
-                showFrozenDataTierChoice={showNodeInfo}
               />
             </EuiFlexItem>
             <EuiFlexItem />

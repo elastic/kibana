@@ -72,10 +72,6 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   apiPath?: SetFullTimeRangeApiPath;
-  /**
-   * Optional flag to disable the frozen data tier choice.
-   */
-  showFrozenDataTierChoice?: boolean;
 }
 
 /**
@@ -96,7 +92,6 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     disabled,
     callback,
     apiPath,
-    showFrozenDataTierChoice: showFrozenDataTierChoiceProp = true,
   } = props;
   const {
     http,
@@ -113,9 +108,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        showFrozenDataTierChoice && showFrozenDataTierChoiceProp
-          ? frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE
-          : false,
+        showFrozenDataTierChoice ? frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE : false,
         apiPath
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
@@ -138,7 +131,6 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     http,
     query,
     showFrozenDataTierChoice,
-    showFrozenDataTierChoiceProp,
     frozenDataPreference,
     apiPath,
     callback,
@@ -229,7 +221,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {showFrozenDataTierChoice && showFrozenDataTierChoiceProp ? (
+      {showFrozenDataTierChoice ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
