@@ -6,13 +6,21 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiDescribedFormGroup,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { CustomFieldsList } from './custom_fields_list';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;
@@ -41,7 +49,14 @@ const CustomFieldsComponent: React.FC<Props> = ({
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
       fullWidth
-      title={<h3>{i18n.TITLE}</h3>}
+      title={
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>{i18n.TITLE}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ExperimentalBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       description={
         <>
           <p>{i18n.DESCRIPTION}</p>
