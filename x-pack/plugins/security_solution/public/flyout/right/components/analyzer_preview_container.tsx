@@ -64,7 +64,17 @@ export const AnalyzerPreviewContainer: React.FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToAnalyzerTab }),
+        ...(isEnabled && {
+          link: {
+            callback: goToAnalyzerTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
+                defaultMessage="Show analyzer graph"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
