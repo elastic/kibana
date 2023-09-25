@@ -14,7 +14,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
   goToAlertsTab,
@@ -23,6 +23,7 @@ import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   removeException,
   searchForExceptionItem,
+  visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 import {
@@ -36,7 +37,6 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -121,7 +121,7 @@ describe(
               ],
               rule_id: '2',
             })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+          ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
         });
       });
 
@@ -259,7 +259,7 @@ describe(
             interval: '10s',
             rule_id: 'rule_testing',
           })
-        ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+        ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
       });
 
       afterEach(() => {
