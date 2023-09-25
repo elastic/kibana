@@ -123,6 +123,9 @@ async function _verifyPackageSignature({
 }): Promise<VerificationResult> {
   const signature = await openpgp.readSignature({
     armoredSignature: pkgArchiveSignature,
+    config: {
+      preferredHashAlgorithm: openpgp.enums.hash.sha256,
+    },
   });
 
   const message = await openpgp.createMessage({
@@ -133,6 +136,9 @@ async function _verifyPackageSignature({
     verificationKeys: verificationKey,
     signature,
     message,
+    config: {
+      preferredHashAlgorithm: openpgp.enums.hash.sha256,
+    },
   });
 
   const signatureVerificationResult = verificationResult.signatures[0];
