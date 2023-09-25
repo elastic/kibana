@@ -44,7 +44,7 @@ This is a code block
 
 This text is loa`}
         loading
-        onRunQueryClick={async () => {}}
+        onActionClick={async () => {}}
       />
     ),
   },
@@ -56,7 +56,7 @@ export const ContentLoaded: ComponentStoryObj<typeof Component> = {
       <MessageText
         content={`This response has fully loaded.`}
         loading={false}
-        onRunQueryClick={async () => {}}
+        onActionClick={async () => {}}
       />
     ),
   },
@@ -68,7 +68,7 @@ export const ContentFailed: ComponentStoryObj<typeof Component> = {
       <MessageText
         content={`This is a partial re`}
         loading={false}
-        onRunQueryClick={async () => {}}
+        onActionClick={async () => {}}
       />
     ),
     error: new Error(),
@@ -96,7 +96,7 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
     
     Please note that all times are in UTC.`)}
         loading={false}
-        onRunQueryClick={async () => {}}
+        onActionClick={async () => {}}
       />
     ),
   },
@@ -108,7 +108,7 @@ export const Controls: ComponentStoryObj<typeof Component> = {
       <MessageText
         content={`This is a partial re`}
         loading={false}
-        onRunQueryClick={async () => {}}
+        onActionClick={async () => {}}
       />
     ),
     error: new Error(),

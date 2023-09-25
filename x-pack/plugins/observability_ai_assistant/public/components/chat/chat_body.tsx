@@ -189,9 +189,9 @@ export function ChatBody({
                 onFeedback={timeline.onFeedback}
                 onRegenerate={timeline.onRegenerate}
                 onStopGenerating={timeline.onStopGenerating}
-                onRunQuery={(query) => {
+                onActionClick={(payload) => {
                   setStickToBottom(true);
-                  return timeline.onRunQuery(query);
+                  return timeline.onActionClick(payload);
                 }}
               />
             </EuiPanel>

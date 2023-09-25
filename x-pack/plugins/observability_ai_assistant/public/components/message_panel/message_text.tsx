@@ -16,12 +16,13 @@ import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
+import { ChatActionClickHandler } from '../chat/types';
 import { EsqlCodeBlock } from './esql_code_block';
 
 interface Props {
   content: string;
   loading: boolean;
-  onRunQueryClick: (query: string) => Promise<void>;
+  onActionClick: ChatActionClickHandler;
 }
 
 const ANIMATION_TIME = 1;
@@ -107,14 +108,14 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-export function MessageText({ loading, content, onRunQueryClick: onRunQueryClickProp }: Props) {
+export function MessageText({ loading, content, onActionClick }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
 
-  const onRunQueryClickRef = useRef(onRunQueryClickProp);
+  const onActionClickRef = useRef(onActionClick);
 
-  onRunQueryClickRef.current = onRunQueryClickProp;
+  onActionClickRef.current = onActionClick;
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -132,7 +133,7 @@ export function MessageText({ loading, content, onRunQueryClick: onRunQueryClick
             <EsqlCodeBlock
               value={props.value}
               actionsDisabled={loading}
-              onRunQueryClick={onRunQueryClickRef.current}
+              onActionClick={onActionClickRef.current}
             />
             <EuiSpacer size="m" />
           </>

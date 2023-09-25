@@ -24,13 +24,14 @@ import { getRoleTranslation } from '../../utils/get_role_translation';
 import type { Feedback } from '../feedback_buttons';
 import { Message } from '../../../common';
 import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
+import { ChatActionClickHandler } from './types';
 
 export interface ChatItemProps extends ChatTimelineItem {
   onEditSubmit: (message: Message) => Promise<void>;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
-  onRunQueryClick: (query: string) => Promise<void>;
+  onActionClick: ChatActionClickHandler;
 }
 
 const normalMessageClassName = css`
@@ -77,7 +78,7 @@ export function ChatItem({
   onFeedbackClick,
   onRegenerateClick,
   onStopGeneratingClick,
-  onRunQueryClick,
+  onActionClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -130,7 +131,7 @@ export function ChatItem({
         functionCall={functionCall}
         loading={loading}
         onSubmit={handleInlineEditSubmit}
-        onRunQueryClick={onRunQueryClick}
+        onActionClick={onActionClick}
       />
     ) : null;
 

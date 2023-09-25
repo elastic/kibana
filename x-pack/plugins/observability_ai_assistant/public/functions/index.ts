@@ -16,7 +16,7 @@ import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
-import { registerQueryFunction } from './query';
+import { registerEsqlFunction } from './esql';
 
 export async function registerFunctions({
   registerFunction,
@@ -55,28 +55,18 @@ export async function registerFunctions({
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
 
         If a function call fails, do not execute it again with the same input. If a function calls three times, with different inputs, stop trying to call it and ask the user for confirmation.
-        `
-      );
-
-      if (isReady) {
-        description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
-
-        Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database.
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
         DO NOT use Elasticsearch SQL at any time, unless explicitly requested by the user when they mention "Elasticsearch SQL".
 
-        Right: the user asks to show or execute a query. you call an external service by using the "show_query" function.
-        Wrong: the user asks to show or execute a query. You attempt to answer it yourself.
+        Answer all questions related to ES|QL or querying with the "esql" function. Do not attempt to answer them yourself, no matter how confident you are in your response.`
+      );
 
-        When using the "recall" function for an ES|QL query, use the following approach: 
+      if (isReady) {
+        description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
 
-        Input: "For service.name, what are the top 5 values by doc count in \`metrics-apm*\`
-        Output: { "queries": [ "ES|QL query, COUNT, FROM, SORT, LIMIT, STATS" ], "contexts": [ ] }
-        
-        Input: "How many unique values do I have for \`labels.userId\` in \`user-sessions\`?
-        Output: { "queries": [ "ES|QL query, UNIQUE, FROM" ], "contexts": [  ] }`;
+        Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database.`;
 
         description += `Here are principles you MUST adhere to, in order:
 
@@ -86,12 +76,12 @@ export async function registerFunctions({
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
-        registerQueryFunction({ service, registerFunction });
       } else {
         description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }
 
       registerElasticsearchFunction({ service, registerFunction });
+      registerEsqlFunction({ service, registerFunction });
       registerKibanaFunction({ service, registerFunction, coreStart });
       registerAlertsFunction({ service, registerFunction });
 

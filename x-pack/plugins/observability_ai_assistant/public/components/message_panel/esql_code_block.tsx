@@ -15,15 +15,16 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ChatActionClickHandler, ChatActionClickType } from '../chat/types';
 
 export function EsqlCodeBlock({
   value,
   actionsDisabled,
-  onRunQueryClick,
+  onActionClick,
 }: {
   value: string;
   actionsDisabled: boolean;
-  onRunQueryClick: (query: string) => void;
+  onActionClick: ChatActionClickHandler;
 }) {
   const theme = useEuiTheme();
 
@@ -58,7 +59,9 @@ export function EsqlCodeBlock({
                 data-test-subj="observabilityAiAssistantEsqlCodeBlockRunThisQueryButton"
                 size="xs"
                 iconType="play"
-                onClick={() => onRunQueryClick(value)}
+                onClick={() =>
+                  onActionClick({ type: ChatActionClickType.executeEsqlQuery, query: value })
+                }
                 disabled={actionsDisabled}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.runThisQuery', {

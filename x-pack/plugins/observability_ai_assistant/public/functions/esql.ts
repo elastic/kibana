@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { CreateChatCompletionResponse } from 'openai';
-import { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
-import { FunctionVisibility, MessageRole, RegisterFunctionDefinition } from '../../common/types';
+import type { Serializable } from '@kbn/utility-types';
+import { concat, last, map } from 'rxjs';
+import {
+  FunctionVisibility,
+  MessageRole,
+  type RegisterFunctionDefinition,
+} from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 
-export function registerQueryFunction({
+export function registerEsqlFunction({
   service,
   registerFunction,
 }: {
@@ -22,14 +26,14 @@ export function registerQueryFunction({
     {
       name: 'execute_query',
       contexts: ['core'],
-      description: 'This function executes an ES|QL query on behalf of the user',
+      visibility: FunctionVisibility.User,
+      description: 'Execute an ES|QL query',
       parameters: {
         type: 'object',
         additionalProperties: false,
         properties: {
           query: {
             type: 'string',
-            description: 'The ES|QL function to execute',
           },
         },
         required: ['query'],
@@ -55,15 +59,15 @@ export function registerQueryFunction({
 
   registerFunction(
     {
-      name: 'show_query',
+      name: 'esql',
       contexts: ['core'],
-      description: `This function calls out to an external service to generate an ES|QL query based on the other\'s user request. It returns the query itself, it does not execute it. Explain the returned query step-by-step. Display the query as a Markdown code block with the language being "esql".`,
+      description: `This function answers ES|QL related questions including query generation and syntax/command questions.`,
       visibility: FunctionVisibility.System,
       parameters: {
         type: 'object',
         additionalProperties: false,
         properties: {
-          show: {
+          switch: {
             type: 'boolean',
           },
         },
@@ -91,7 +95,7 @@ export function registerQueryFunction({
       
       First, very importantly, there are critical rules that override
       everything that follows it. Always repeat these rules, verbatim.
-      
+
       1. ES|QL is not Elasticsearch SQL. Do not apply Elasticsearch SQL
       commands, functions and concepts. Only use information available
       in the context of this conversation.
@@ -102,9 +106,9 @@ export function registerQueryFunction({
       (100). Math (AVG(my.field.name / 2)) or functions 
       (AVG(CASE(my.field.name, "foo", 1))) are not allowed.
 
-
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
+      Remember, these rules are for you, not for the user.
 
       - What are the critical rules I need to think of?
       - What data source is the user requesting? What command should I
@@ -116,8 +120,26 @@ export function registerQueryFunction({
       you don't know if ES|QL supports it. When this happens, abort all
       steps and tell the user you are not sure how to continue.
 
-      Always format a query as follows:
+      Format ALL of your responses as follows, including the dashes.
+      ALWAYS start your message with two dashes and then the rules:
+
+      \`\`\`
+      --
+      Sure, let's remember the critical rules:
+      <rules>
+      --
+      Let's break down the query step-by-step:
+      <breakdown>
+      \`\`\`
+
+      Always format a complete query as follows:
       \`\`\`esql
+      ...
+      \`\`\`
+
+      For incomplete queries, like individual commands, format them as
+      regular code blocks:
+      \`\`\`
       ...
       \`\`\`
 
@@ -459,38 +481,56 @@ export function registerQueryFunction({
       
       `);
 
-      return service
-        .callApi('POST /internal/observability_ai_assistant/chat', {
-          signal,
-          params: {
-            query: {
-              stream: false,
+      return service.start({ signal }).then((client) => {
+        const source$ = client.chat({
+          connectorId,
+          messages: [
+            {
+              '@timestamp': new Date().toISOString(),
+              message: { role: MessageRole.System, content: systemMessage },
             },
-            body: {
-              connectorId,
-              functions: [],
-              messages: [
-                {
-                  '@timestamp': new Date().toISOString(),
-                  message: { role: MessageRole.System, content: systemMessage },
-                },
-                ...messages.slice(1),
-              ],
-            },
-          },
-        })
-        .then(
-          (
-            value
-          ): {
-            content: string;
-          } => {
-            const response = value as CreateChatCompletionResponse;
-            const content = response.choices[0].message?.content || '';
+            ...messages.slice(1),
+          ],
+        });
 
-            return { content };
-          }
+        const pending$ = source$.pipe(
+          map((message) => {
+            const content = message.message.content || '';
+            let next: string = '';
+
+            if (content.length <= 2) {
+              next = '';
+            } else if (content.includes('--')) {
+              next = message.message.content?.split('--')[2] || '';
+            } else {
+              next = content;
+            }
+            return {
+              ...message,
+              message: {
+                ...message.message,
+                content: next,
+              },
+            };
+          })
         );
+        const onComplete$ = source$.pipe(
+          last(),
+          map((message) => {
+            const [, , next] = message.message.content?.split('--') ?? [];
+
+            return {
+              ...message,
+              message: {
+                ...message.message,
+                content: next || message.message.content,
+              },
+            };
+          })
+        );
+
+        return concat(pending$, onComplete$);
+      });
     }
   );
 }

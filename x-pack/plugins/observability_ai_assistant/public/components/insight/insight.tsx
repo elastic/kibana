@@ -114,7 +114,7 @@ function ChatContent({
           <MessageText
             content={lastMessage?.message.content ?? ''}
             loading={loading}
-            onRunQueryClick={async () => {}}
+            onActionClick={async () => {}}
           />
         }
         error={pendingMessage?.error}
