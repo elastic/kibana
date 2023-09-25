@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import {
   openAddFilterPopover,
   fillAddFilterForm,
@@ -19,14 +20,14 @@ import {
 } from '../../screens/search_bar';
 import { getHostIpFilter } from '../../objects/filter';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { hostsUrl } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165637
 describe('SearchBar', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
   });
 
