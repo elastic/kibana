@@ -51,7 +51,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
     setError(false);
   }, [handleAddCustomField, setError, customFields, error]);
 
-  if(customFields.length < MAX_CUSTOM_FIELDS_PER_CASE && error) {
+  if (customFields.length < MAX_CUSTOM_FIELDS_PER_CASE && error) {
     setError(false);
   }
 
