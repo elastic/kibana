@@ -84,12 +84,6 @@ export const NO_CUSTOM_FIELD_SET = (customFieldLabel: string) =>
     defaultMessage: 'No "{customFieldLabel}" added',
   });
 
-export const MAX_CUSTOM_FIELD_LIMIT = (maxCustomFields: number) =>
-  i18n.translate('xpack.cases.customFields.maxCustomFieldLimit', {
-    values: { maxCustomFields },
-    defaultMessage: 'Maximum number of {maxCustomFields} custom fields reached.',
-  });
-
 export const DELETE_FIELD_TITLE = (fieldName: string) =>
   i18n.translate('xpack.cases.customFields.deleteField', {
     values: { fieldName },
