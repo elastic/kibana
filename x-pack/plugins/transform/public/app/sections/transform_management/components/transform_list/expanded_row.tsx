@@ -9,15 +9,24 @@ import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 import moment from 'moment-timezone';
 
-import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
+  EuiTabbedContent,
+  EuiFlexGroup,
+  useEuiTheme,
+  EuiCallOut,
+  EuiFlexItem,
+} from '@elastic/eui';
 
-import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEnabledFeatures } from '../../../../serverless_context';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import { TransformListRow } from '../../../../common';
@@ -42,47 +51,48 @@ type Item = SectionItem;
 interface Props {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
+  transformsStatsLoading: boolean;
 }
 
-type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
+const NoStatsFallbackTabContent = ({
+  transformsStatsLoading,
+}: {
+  transformsStatsLoading: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const content = transformsStatsLoading ? (
+    <EuiLoadingSpinner />
+  ) : (
+    <EuiFlexItem grow={true}>
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="iInCircle"
+        title={
+          <FormattedMessage
+            id="xpack.transform.transformList.noStatsAvailable"
+            defaultMessage="No stats available for this transform."
+          />
+        }
+      />
+    </EuiFlexItem>
+  );
+  return (
+    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxxxl }}>
+      {content}
+    </EuiFlexGroup>
+  );
+};
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const { showNodeInfo } = useEnabledFeatures();
 
-  const stateValues: StateValues = { ...item.stats };
-  delete stateValues.stats;
-  delete stateValues.checkpointing;
-
   const stateItems: Item[] = [];
-  stateItems.push(
-    {
-      title: 'ID',
-      description: item.id,
-    },
-    {
-      title: 'state',
-      description: item.stats.state,
-    }
-  );
-  if (showNodeInfo && item.stats.node !== undefined) {
-    stateItems.push({
-      title: 'node.name',
-      description: item.stats.node.name,
-    });
-  }
-  if (item.stats.health !== undefined) {
-    stateItems.push({
-      title: 'health',
-      description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
-    });
-  }
-
-  const state: SectionConfig = {
-    title: 'State',
-    items: stateItems,
-    position: 'right',
-  };
-
+  stateItems.push({
+    title: 'ID',
+    description: item.id,
+  });
   const configItems = useMemo(() => {
     const configs: Item[] = [
       {
@@ -130,219 +140,252 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.config]);
 
-  const general: SectionConfig = {
-    title: 'General',
-    items: configItems,
-    position: 'left',
-  };
-
-  const checkpointingItems: Item[] = [];
-  if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
-    checkpointingItems.push({
-      title: 'changes_last_detected_at',
-      description: formatHumanReadableDateTimeSeconds(
-        item.stats.checkpointing.changes_last_detected_at
-      ),
+  if (isTransformListRowWithStats(item)) {
+    stateItems.push({
+      title: 'state',
+      description: item.stats.state,
     });
-  }
-
-  if (item.stats.checkpointing.last !== undefined) {
-    checkpointingItems.push({
-      title: 'last.checkpoint',
-      description: item.stats.checkpointing.last.checkpoint,
-    });
-    if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
-      checkpointingItems.push({
-        title: 'last.timestamp',
-        description: formatHumanReadableDateTimeSeconds(
-          item.stats.checkpointing.last.timestamp_millis
-        ),
-      });
-      checkpointingItems.push({
-        title: 'last.timestamp_millis',
-        description: item.stats.checkpointing.last.timestamp_millis,
+    if (showNodeInfo && item.stats.node !== undefined) {
+      stateItems.push({
+        title: 'node.name',
+        description: item.stats.node.name,
       });
     }
-  }
-
-  if (item.stats.checkpointing.last_search_time !== undefined) {
-    checkpointingItems.push({
-      title: 'last_search_time',
-      description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
-    });
-  }
-
-  if (item.stats.checkpointing.next !== undefined) {
-    checkpointingItems.push({
-      title: 'next.checkpoint',
-      description: item.stats.checkpointing.next.checkpoint,
-    });
-    if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
-      checkpointingItems.push({
-        title: 'next.checkpoint_progress.total_docs',
-        description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
-      });
-      checkpointingItems.push({
-        title: 'next.checkpoint_progress.docs_remaining',
-        description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
-      });
-      checkpointingItems.push({
-        title: 'next.checkpoint_progress.percent_complete',
-        description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
+    if (item.stats.health !== undefined) {
+      stateItems.push({
+        title: 'health',
+        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
       });
     }
-  }
 
-  if (item.stats.checkpointing.operations_behind !== undefined) {
-    checkpointingItems.push({
-      title: 'operations_behind',
-      description: item.stats.checkpointing.operations_behind,
-    });
-  }
-
-  const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
-    return {
-      title: (
-        <EuiButtonEmpty
-          iconType={'documentEdit'}
-          iconSide={'left'}
-          onClick={() => {
-            onAlertEdit(rule);
-          }}
-          flush="left"
-          size={'xs'}
-          iconSize={'s'}
-        >
-          {rule.name}
-        </EuiButtonEmpty>
-      ),
-      description: rule.executionStatus.status,
+    const state: SectionConfig = {
+      title: 'State',
+      items: stateItems,
+      position: 'right',
     };
-  });
 
-  const checkpointing: SectionConfig = {
-    title: 'Checkpointing',
-    items: checkpointingItems,
-    position: 'right',
-  };
+    const general: SectionConfig = {
+      title: 'General',
+      items: configItems,
+      position: 'left',
+    };
 
-  const alertingRules: SectionConfig = {
-    title: i18n.translate('xpack.transform.transformList.transformDetails.alertRulesTitle', {
-      defaultMessage: 'Alert rules',
-    }),
-    items: alertRuleItems!,
-    position: 'right',
-  };
+    const checkpointingItems: Item[] = [];
+    if (isTransformListRowWithStats(item)) {
+      if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
+        checkpointingItems.push({
+          title: 'changes_last_detected_at',
+          description: formatHumanReadableDateTimeSeconds(
+            item.stats.checkpointing.changes_last_detected_at
+          ),
+        });
+      }
 
-  const stats: SectionConfig = {
-    title: 'Stats',
-    items: Object.entries(item.stats.stats).map((s) => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
-    }),
-    position: 'left',
-  };
-
-  const tabId = stringHash(item.id);
-
-  const tabs = [
-    {
-      id: `transform-details-tab-${tabId}`,
-      'data-test-subj': 'transformDetailsTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformDetailsLabel',
-        {
-          defaultMessage: 'Details',
-        }
-      ),
-      content: (
-        <ExpandedRowDetailsPane
-          sections={[
-            general,
-            state,
-            checkpointing,
-            ...(alertingRules.items ? [alertingRules] : []),
-          ]}
-          dataTestSubj={'transformDetailsTabContent'}
-        />
-      ),
-    },
-    {
-      id: `transform-stats-tab-${tabId}`,
-      'data-test-subj': 'transformStatsTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
-        {
-          defaultMessage: 'Stats',
-        }
-      ),
-      content: (
-        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
-      ),
-    },
-    {
-      id: `transform-json-tab-${tabId}`,
-      'data-test-subj': 'transformJsonTab',
-      name: 'JSON',
-      content: <ExpandedRowJsonPane json={item.config} />,
-    },
-    ...(item.stats.health
-      ? [
-          {
-            id: `transform-health-tab-${tabId}`,
-            'data-test-subj': 'transformHealthTab',
-            name: i18n.translate(
-              'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
-              {
-                defaultMessage: 'Health',
-              }
+      if (item.stats.checkpointing.last !== undefined) {
+        checkpointingItems.push({
+          title: 'last.checkpoint',
+          description: item.stats.checkpointing.last.checkpoint,
+        });
+        if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
+          checkpointingItems.push({
+            title: 'last.timestamp',
+            description: formatHumanReadableDateTimeSeconds(
+              item.stats.checkpointing.last.timestamp_millis
             ),
-            content: <ExpandedRowHealthPane health={item.stats.health} />,
-          },
-        ]
-      : []),
-    {
-      id: `transform-messages-tab-${tabId}`,
-      'data-test-subj': 'transformMessagesTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
-        {
-          defaultMessage: 'Messages',
+          });
+          checkpointingItems.push({
+            title: 'last.timestamp_millis',
+            description: item.stats.checkpointing.last.timestamp_millis,
+          });
         }
-      ),
-      content: <ExpandedRowMessagesPane transformId={item.id} />,
-    },
-    {
-      id: `transform-preview-tab-${tabId}`,
-      'data-test-subj': 'transformPreviewTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',
-        {
-          defaultMessage: 'Preview',
-        }
-      ),
-      content: <ExpandedRowPreviewPane transformConfig={item.config} />,
-    },
-  ];
+      }
 
-  // Using `expand=false` here so the tabs themselves don't spread
-  // across the full width. The 100% width is used so the bottom line
-  // as well as the tab content spans across the full width,
-  // even if the tab content wouldn't extend to the full width.
-  return (
-    <EuiTabbedContent
-      size="s"
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      onTabClick={() => {}}
-      expand={false}
-      css={css`
-        width: 100%;
+      if (item.stats.checkpointing.last_search_time !== undefined) {
+        checkpointingItems.push({
+          title: 'last_search_time',
+          description: formatHumanReadableDateTimeSeconds(
+            item.stats.checkpointing.last_search_time
+          ),
+        });
+      }
 
-        .euiTable {
-          background-color: transparent;
+      if (item.stats.checkpointing.next !== undefined) {
+        checkpointingItems.push({
+          title: 'next.checkpoint',
+          description: item.stats.checkpointing.next.checkpoint,
+        });
+        if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
+          checkpointingItems.push({
+            title: 'next.checkpoint_progress.total_docs',
+            description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
+          });
+          checkpointingItems.push({
+            title: 'next.checkpoint_progress.docs_remaining',
+            description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
+          });
+          checkpointingItems.push({
+            title: 'next.checkpoint_progress.percent_complete',
+            description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
+          });
         }
-      `}
-      data-test-subj="transformExpandedRowTabbedContent"
-    />
-  );
+      }
+
+      if (item.stats.checkpointing.operations_behind !== undefined) {
+        checkpointingItems.push({
+          title: 'operations_behind',
+          description: item.stats.checkpointing.operations_behind,
+        });
+      }
+    }
+
+    const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
+      return {
+        title: (
+          <EuiButtonEmpty
+            iconType={'documentEdit'}
+            iconSide={'left'}
+            onClick={() => {
+              onAlertEdit(rule);
+            }}
+            flush="left"
+            size={'xs'}
+            iconSize={'s'}
+          >
+            {rule.name}
+          </EuiButtonEmpty>
+        ),
+        description: rule.executionStatus.status,
+      };
+    });
+
+    const checkpointing: SectionConfig = {
+      title: 'Checkpointing',
+      items: checkpointingItems,
+      position: 'right',
+    };
+
+    const alertingRules: SectionConfig = {
+      title: i18n.translate('xpack.transform.transformList.transformDetails.alertRulesTitle', {
+        defaultMessage: 'Alert rules',
+      }),
+      items: alertRuleItems!,
+      position: 'right',
+    };
+
+    const stats: SectionConfig = {
+      title: 'Stats',
+      items: isTransformListRowWithStats(item)
+        ? Object.entries(item.stats.stats).map((s) => {
+            return { title: s[0].toString(), description: getItemDescription(s[1]) };
+          })
+        : [],
+      position: 'left',
+    };
+
+    const tabId = stringHash(item.id);
+
+    const tabs = [
+      {
+        id: `transform-details-tab-${tabId}`,
+        'data-test-subj': 'transformDetailsTab',
+        name: i18n.translate(
+          'xpack.transform.transformList.transformDetails.tabs.transformDetailsLabel',
+          {
+            defaultMessage: 'Details',
+          }
+        ),
+        content: (
+          <ExpandedRowDetailsPane
+            sections={[
+              general,
+              state,
+              checkpointing,
+              ...(alertingRules.items ? [alertingRules] : []),
+            ]}
+            dataTestSubj={'transformDetailsTabContent'}
+          />
+        ),
+      },
+      {
+        id: `transform-stats-tab-${tabId}`,
+        'data-test-subj': 'transformStatsTab',
+        name: i18n.translate(
+          'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
+          {
+            defaultMessage: 'Stats',
+          }
+        ),
+        content: isTransformListRowWithStats(item) ? (
+          <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+        ) : (
+          <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />
+        ),
+      },
+      {
+        id: `transform-json-tab-${tabId}`,
+        'data-test-subj': 'transformJsonTab',
+        name: 'JSON',
+        content: <ExpandedRowJsonPane json={item.config} />,
+      },
+      ...(item.stats?.health
+        ? [
+            {
+              id: `transform-health-tab-${tabId}`,
+              'data-test-subj': 'transformHealthTab',
+              name: i18n.translate(
+                'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
+                {
+                  defaultMessage: 'Health',
+                }
+              ),
+              content: <ExpandedRowHealthPane health={item.stats.health} />,
+            },
+          ]
+        : []),
+      {
+        id: `transform-messages-tab-${tabId}`,
+        'data-test-subj': 'transformMessagesTab',
+        name: i18n.translate(
+          'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
+          {
+            defaultMessage: 'Messages',
+          }
+        ),
+        content: <ExpandedRowMessagesPane transformId={item.id} />,
+      },
+      {
+        id: `transform-preview-tab-${tabId}`,
+        'data-test-subj': 'transformPreviewTab',
+        name: i18n.translate(
+          'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',
+          {
+            defaultMessage: 'Preview',
+          }
+        ),
+        content: <ExpandedRowPreviewPane transformConfig={item.config} />,
+      },
+    ];
+
+    // Using `expand=false` here so the tabs themselves don't spread
+    // across the full width. The 100% width is used so the bottom line
+    // as well as the tab content spans across the full width,
+    // even if the tab content wouldn't extend to the full width.
+    return (
+      <EuiTabbedContent
+        size="s"
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        onTabClick={() => {}}
+        expand={false}
+        css={css`
+          width: 100%;
+
+          .euiTable {
+            background-color: transparent;
+          }
+        `}
+        data-test-subj="transformExpandedRowTabbedContent"
+      />
+    );
+  }
 };
