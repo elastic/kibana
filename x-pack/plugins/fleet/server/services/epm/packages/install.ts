@@ -300,6 +300,8 @@ interface InstallRegistryPackageParams {
   ignoreConstraints?: boolean;
   prerelease?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -356,6 +358,8 @@ async function installPackageFromRegistry({
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
+  ignoreMappingUpdateErrors = false,
+  skipDataStreamRollover = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -429,6 +433,8 @@ async function installPackageFromRegistry({
       paths,
       verificationResult,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
   } catch (e) {
     sendEvent({
@@ -464,6 +470,8 @@ async function installPackageCommon(options: {
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }): Promise<InstallResult> {
   const {
     pkgName,
@@ -479,6 +487,8 @@ async function installPackageCommon(options: {
     paths,
     verificationResult,
     authorizationHeader,
+    ignoreMappingUpdateErrors,
+    skipDataStreamRollover,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -568,6 +578,8 @@ async function installPackageCommon(options: {
       installSource,
       authorizationHeader,
       force,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     })
       .then(async (assets) => {
         await removeOldAssets({

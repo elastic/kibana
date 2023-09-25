@@ -143,6 +143,8 @@ export const InstallPackageFromRegistryRequestSchema = {
     schema.object({
       force: schema.boolean({ defaultValue: false }),
       ignore_constraints: schema.boolean({ defaultValue: false }),
+      ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+      skipDataStreamRollover: schema.boolean({ defaultValue: false }),
     })
   ),
 };

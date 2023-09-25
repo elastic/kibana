@@ -392,6 +392,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.body?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.body?.skipDataStreamRollover,
   });
 
   if (!res.error) {

@@ -1294,6 +1294,44 @@ describe('EPM template', () => {
 
       expect(esClient.indices.rollover).toHaveBeenCalled();
     });
+    it('should skip rollover on expected error when flag is on', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        {
+          skipDataStreamRollover: true,
+        }
+      );
+
+      expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
     it('should not rollover on unexpected error', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -1320,6 +1358,37 @@ describe('EPM template', () => {
       } catch (err) {
         // noop
       }
+
+      expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
+    it('should not throw on unexpected error when flag is on', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new Error();
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        {
+          ignoreMappingUpdateErrors: true,
+        }
+      );
 
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
