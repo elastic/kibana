@@ -18,8 +18,9 @@ export interface ChromeNavControl {
 /** @public */
 export interface ChromeHelpMenuLink {
   title: string;
-  href: string;
+  href?: string;
   iconType?: string;
+  onClick?: () => void;
 }
 
 /**
