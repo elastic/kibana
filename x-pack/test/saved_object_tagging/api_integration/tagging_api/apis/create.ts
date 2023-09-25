@@ -60,8 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-      await supertest
-        .delete(`/api/saved_objects_tagging/tags/${newTagId}`);
+      await supertest.delete(`/api/saved_objects_tagging/tags/${newTagId}`);
     });
 
     it('should return an error with details when validation failed', async () => {
