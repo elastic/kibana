@@ -27,11 +27,8 @@ import {
   enableRelatedIntegrations,
 } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
-import {
-  login,
-  visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
-} from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
@@ -41,9 +38,12 @@ import {
   disableAutoRefresh,
   openIntegrationsPopover,
 } from '../../../../tasks/alerts_detection_rules';
-import { ruleDetailsUrl } from '../../../../urls/navigation';
-import { enablesRule, waitForPageToBeLoaded } from '../../../../tasks/rule_details';
 import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
+import {
+  enablesRule,
+  visitRuleDetailsPage,
+  waitForPageToBeLoaded,
+} from '../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -85,7 +85,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   describe('integrations not installed', () => {
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -153,7 +153,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -243,7 +243,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -283,7 +283,7 @@ function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): 
 function visitFirstInstalledPrebuiltRuleDetailsPage(): void {
   cy.get<Cypress.Response<PerformRuleInstallationResponseBody>>(
     `@${INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS}`
-  ).then((response) => visitWithoutDateRange(ruleDetailsUrl(response.body.results.created[0].id)));
+  ).then((response) => visitRuleDetailsPage(response.body.results.created[0].id));
 }
 
 interface IntegrationDefinition {
@@ -406,14 +406,3 @@ const AWS_PACKAGE_POLICY: PackagePolicyWithoutAgentPolicyId = {
     },
   },
 };
-
-const createValidJsonStringArray = (jsonStringArray: string[]) =>
-  jsonStringArray.map((jsonString, index) => {
-    if (index === 0) {
-      return `${jsonString}}`;
-    } else if (index === jsonStringArray.length - 1) {
-      return `{${jsonString}`;
-    } else {
-      return `{${jsonString}}`;
-    }
-  });

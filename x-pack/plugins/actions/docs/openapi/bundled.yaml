@@ -55,6 +55,7 @@ paths:
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
                 - $ref: '#/components/schemas/create_connector_request_teams'
                 - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_torq'
                 - $ref: '#/components/schemas/create_connector_request_webhook'
                 - $ref: '#/components/schemas/create_connector_request_xmatters'
               discriminator:
@@ -208,6 +209,7 @@ paths:
                 - $ref: '#/components/schemas/create_connector_request_swimlane'
                 - $ref: '#/components/schemas/create_connector_request_teams'
                 - $ref: '#/components/schemas/create_connector_request_tines'
+                - $ref: '#/components/schemas/create_connector_request_torq'
                 - $ref: '#/components/schemas/create_connector_request_webhook'
                 - $ref: '#/components/schemas/create_connector_request_xmatters'
               discriminator:
@@ -264,6 +266,7 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
                 - $ref: '#/components/schemas/update_connector_request_teams'
+                - $ref: '#/components/schemas/update_connector_request_torq'
                 - $ref: '#/components/schemas/update_connector_request_webhook'
                 - $ref: '#/components/schemas/update_connector_request_xmatters'
             examples:
@@ -1916,6 +1919,51 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_tines'
+    config_properties_torq:
+      title: Connector request properties for a Torq connector
+      description: Defines properties for connectors when type is `.torq`.
+      type: object
+      required:
+        - webhookIntegrationUrl
+      properties:
+        webhookIntegrationUrl:
+          description: The endpoint URL of the Elastic Security integration in Torq.
+          type: string
+    secrets_properties_torq:
+      title: Connector secrets properties for a Torq connector
+      description: Defines secrets for connectors when type is `.torq`.
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          description: The secret of the webhook authentication header.
+          type: string
+    create_connector_request_torq:
+      title: Create Torq connector request
+      description: |
+        The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .torq
+          example: .torq
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_torq'
     config_properties_webhook:
       title: Connector request properties for a Webhook connector
       description: Defines properties for connectors when type is `.webhook`.
@@ -2626,6 +2674,38 @@ components:
         name:
           type: string
           description: The display name for the connector.
+    connector_response_properties_torq:
+      title: Connector response properties for a Torq connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .torq
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
+        name:
+          type: string
+          description: The display name for the connector.
     connector_response_properties_webhook:
       title: Connector response properties for a Webhook connector
       type: object
@@ -2711,6 +2791,7 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_swimlane'
         - $ref: '#/components/schemas/connector_response_properties_teams'
         - $ref: '#/components/schemas/connector_response_properties_tines'
+        - $ref: '#/components/schemas/connector_response_properties_torq'
         - $ref: '#/components/schemas/connector_response_properties_webhook'
         - $ref: '#/components/schemas/connector_response_properties_xmatters'
       discriminator:
@@ -2922,6 +3003,21 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_teams'
+    update_connector_request_torq:
+      title: Update Torq connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_torq'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_torq'
     update_connector_request_webhook:
       title: Update Webhook connector request
       type: object
@@ -2975,6 +3071,7 @@ components:
         - .swimlane
         - .teams
         - .tines
+        - .torq
         - .webhook
         - .xmatters
       example: .server-log
