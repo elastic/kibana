@@ -97,7 +97,7 @@ export default function (ctx: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
 
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/saved_query_management/feature_controls/security'
+          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
         );
 
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -112,7 +112,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.security.forceLogout();
 
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/saved_query_management/feature_controls/security'
+          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
         );
 
         await kibanaServer.savedObjects.cleanStandardList();
