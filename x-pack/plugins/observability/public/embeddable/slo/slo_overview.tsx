@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -48,22 +48,26 @@ export function SloOverview({ sloId, sloInstanceId, startTime, endTime }: Embedd
 
   const sloSummary = slo?.summary;
   const sloStatus = sloSummary?.status;
+  const healthyColor = useEuiBackgroundColor('success');
+  const noDataColor = useEuiBackgroundColor('subdued');
+  const degradingColor = useEuiBackgroundColor('warning');
+  const violatedColor = useEuiBackgroundColor('danger');
   let color;
   switch (sloStatus) {
     case 'HEALTHY':
-      color = '#e6f9f7';
+      color = healthyColor;
       break;
     case 'NO_DATA':
-      color = '#f7f8fc';
+      color = noDataColor;
       break;
     case 'DEGRADING':
-      color = '#fff9e8';
+      color = degradingColor;
       break;
     case 'VIOLATED':
-      color = '#f8e9e9';
+      color = violatedColor;
       break;
     default:
-      color = '#f7f8fc';
+      color = noDataColor;
   }
 
   if (isRefetching) {
