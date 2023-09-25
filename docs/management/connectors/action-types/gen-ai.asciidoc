@@ -22,10 +22,11 @@ image::management/connectors/images/gen-ai-connector.png[Generative AI connector
 
 Generative AI connectors have the following configuration properties:
 
-Name::      The name of the connector.
-API Provider::   The OpenAI API provider, either OpenAI or Azure OpenAI.
-API URL::   The OpenAI request URL.
-API Key::   The OpenAI or Azure OpenAI API key for authentication.
+Name:: The name of the connector.
+OpenAI provider:: The OpenAI API provider, either OpenAI or Azure OpenAI.
+URL:: The OpenAI request URL.
+Default model:: (optional) The default model to use for requests. This option is available only when the provider is `OpenAI`.
+API key:: The OpenAI or Azure OpenAI API key for authentication.
 
 [float]
 [[preconfigured-gen-ai-configuration]]
