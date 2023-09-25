@@ -8,6 +8,7 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import type { JSONSchema } from 'json-schema-to-ts';
 import React from 'react';
+import { Observable } from 'rxjs';
 
 export enum MessageRole {
   System = 'system',
@@ -15,6 +16,12 @@ export enum MessageRole {
   User = 'user',
   Function = 'function',
   Elastic = 'elastic',
+}
+
+export interface PendingMessage {
+  message: Message['message'];
+  aborted?: boolean;
+  error?: any;
 }
 
 export interface Message {
@@ -74,21 +81,30 @@ export interface ContextDefinition {
   description: string;
 }
 
-interface FunctionResponse {
-  content?: any;
-  data?: any;
+type FunctionResponse =
+  | {
+      content?: any;
+      data?: any;
+    }
+  | Observable<PendingMessage>;
+
+export enum FunctionVisibility {
+  System = 'system',
+  User = 'user',
+  All = 'all',
 }
 
 interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
   name: string;
   description: string;
-  descriptionForUser: string;
+  visibility?: FunctionVisibility;
+  descriptionForUser?: string;
   parameters: TParameters;
   contexts: string[];
 }
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
-  options: { arguments: TArguments; messages: Message[] },
+  options: { arguments: TArguments; messages: Message[]; connectorId: string },
   signal: AbortSignal
 ) => Promise<TResponse>;
 
@@ -100,7 +116,7 @@ type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: 
 export interface FunctionDefinition {
   options: FunctionOptions;
   respond: (
-    options: { arguments: any; messages: Message[] },
+    options: { arguments: any; messages: Message[]; connectorId: string },
     signal: AbortSignal
   ) => Promise<FunctionResponse>;
   render?: RenderFunction<any, any>;

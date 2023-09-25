@@ -11,7 +11,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -21,8 +20,10 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { paths } from '../../../../common/locators/paths';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
@@ -30,14 +31,12 @@ import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import type { RulesParams } from '../../../locators/rules';
-import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   transformCreateSLOFormToCreateSLOInput,
   transformSloResponseToCreateSloForm,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloBadges } from './badges/slo_badges';
-import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloSummary } from './slo_summary';
 
 export interface SloListItemProps {
@@ -79,15 +78,14 @@ export function SloListItem({
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const sloDetailsUrl = basePath.prepend(
+    paths.observability.sloDetails(
+      slo.id,
+      slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+    )
+  );
   const handleViewDetails = () => {
-    navigateToUrl(
-      basePath.prepend(
-        paths.observability.sloDetails(
-          slo.id,
-          slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
-        )
-      )
-    );
+    navigateToUrl(sloDetailsUrl);
   };
 
   const handleEdit = () => {
@@ -142,9 +140,9 @@ export function SloListItem({
                 <EuiFlexItem>
                   <EuiText size="s">
                     {slo.summary ? (
-                      <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
                         {slo.name}
-                      </EuiLink>
+                      </a>
                     ) : (
                       <span>{slo.name}</span>
                     )}

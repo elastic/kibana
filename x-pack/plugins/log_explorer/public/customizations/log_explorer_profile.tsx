@@ -33,11 +33,12 @@ export const createLogExplorerProfileCustomizations =
     const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
       await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
 
-    const datasetsService = new DatasetsService().start({
+    const datasetsClient = new DatasetsService().start({
       http: core.http,
-    });
+    }).client;
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
+      datasetsClient,
       stateContainer,
       toasts: core.notifications.toasts,
     });
@@ -70,7 +71,7 @@ export const createLogExplorerProfileCustomizations =
       id: 'search_bar',
       CustomDataViewPicker: () => (
         <LazyCustomDatasetSelector
-          datasetsClient={datasetsService.client}
+          datasetsClient={datasetsClient}
           logExplorerProfileStateService={logExplorerProfileStateService}
         />
       ),
@@ -91,6 +92,19 @@ export const createLogExplorerProfileCustomizations =
         newItem: { disabled: true },
         openItem: { disabled: true },
         saveItem: { disabled: true },
+      },
+    });
+
+    /**
+     * Hide flyout actions to prevent rendering hard-coded actions.
+     */
+    customizations.set({
+      id: 'flyout',
+      actions: {
+        defaultActions: {
+          viewSingleDocument: { disabled: true },
+          viewSurroundingDocument: { disabled: true },
+        },
       },
     });
 

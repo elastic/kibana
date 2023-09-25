@@ -17,7 +17,6 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
-    "public/management/cypress_endpoint.config.ts",
     "public/management/cypress.config.ts"
   ],
   "kbn_references": [
@@ -171,9 +170,10 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/security-solution-features",
-    "@kbn/handlebars",
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
+    "@kbn/subscription-tracking",
+    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer"
   ]

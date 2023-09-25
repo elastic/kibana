@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { BaseMessage } from 'langchain/schema';
 
 import { mockActionResultData } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
 
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
-  executeCustomLlmChain: jest.fn().mockImplementation(
+  callAgentExecutor: jest.fn().mockImplementation(
     async ({
       connectorId,
     }: {
       actions: ActionsPluginStart;
       connectorId: string;
+      esClient: ElasticsearchClient;
       langChainMessages: BaseMessage[];
+      logger: Logger;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       request: KibanaRequest<unknown, unknown, any, any>;
     }) => {
@@ -42,9 +46,15 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
 }));
 
 const mockContext = {
-  elasticAssistant: async () => ({
+  elasticAssistant: {
     actions: jest.fn(),
-  }),
+    logger: loggingSystemMock.createLogger(),
+  },
+  core: {
+    elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+  },
 };
 
 const mockRequest = {

@@ -18,7 +18,6 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
 
     cy.getByTestSubj('obltOnboardingLogFilePath-0')
       .find('input')
-      .first()
       .type('mylogs.log');
 
     cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
@@ -147,9 +146,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         it('autoDownloadConfig flag is added to installation script', () => {
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfig'
-          )
-            .first()
-            .click();
+          ).click();
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfigCallout'
           ).should('exist');
@@ -161,9 +158,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         it('Download config button is disabled', () => {
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfig'
-          )
-            .first()
-            .click();
+          ).click();
           cy.getByTestSubj(
             'obltOnboardingConfigureElasticAgentStepDownloadConfig'
           ).should('be.disabled');
@@ -623,12 +618,12 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         .should('exist');
     });
 
-    it('when user clicks on Explore Logs it navigates to discover', () => {
+    it('when user clicks on Explore Logs it navigates to observability log explorer', () => {
       cy.wait('@checkOnboardingProgress');
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
-      cy.url().should('include', '/app/discover');
 
-      cy.get('button[title="logs-*"]').should('exist');
+      cy.url().should('include', '/app/observability-log-explorer');
+      cy.get('button').contains('[Mylogs] mylogs').should('exist');
     });
   });
 });
