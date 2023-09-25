@@ -257,7 +257,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], true);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
@@ -331,7 +331,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], true);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -416,7 +416,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], true);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
@@ -461,7 +461,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], true);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
