@@ -94,7 +94,7 @@ export const DELETE_FIELD_DESCRIPTION = i18n.translate(
   'xpack.cases.customFields.deleteFieldDescription',
   {
     defaultMessage:
-      'The field will no longer be visible in Cases. However the field will continue to be accessible as read only vai the Cases API.',
+      'The field will be removed from all cases.',
   }
 );
 
