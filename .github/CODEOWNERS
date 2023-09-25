@@ -845,6 +845,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
 /x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
