@@ -16,7 +16,7 @@ import { getNoneConnector, normalizeActionConnector } from '../configure_cases/u
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import type { CaseUI } from '../../containers/types';
+import type { CaseUI, CaseUICustomField } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -113,10 +113,9 @@ export const FormContext: React.FC<Props> = ({
             key: configCustomField.key,
             type: configCustomField.type,
             field: {
-              // @ts-ignore
               value: fieldValue,
             },
-          });
+          } as CaseUICustomField);
         }
       }
 
