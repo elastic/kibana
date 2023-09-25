@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DashboardTypeEnum } from '@kbn/apm-plugin/common/service_dashboards';
 import { ApmApiClient } from '../../common/config';
 
 export async function getServiceDashboardApi(apmApiClient: ApmApiClient, serviceName: string) {
@@ -19,21 +18,15 @@ export async function getServiceDashboardApi(apmApiClient: ApmApiClient, service
 
 export async function getLinkServiceDashboardApi({
   dashboardSavedObjectId,
-  dashboardTitle,
   apmApiClient,
   serviceDashboardId,
-  serviceName,
   kuery,
-  linkTo,
   useContextFilter,
 }: {
   apmApiClient: ApmApiClient;
   dashboardSavedObjectId: string;
-  dashboardTitle: string;
   serviceDashboardId?: string;
-  serviceName: string;
   kuery: string;
-  linkTo: DashboardTypeEnum;
   useContextFilter: boolean;
 }) {
   const response = await apmApiClient.writeUser({
@@ -44,11 +37,8 @@ export async function getLinkServiceDashboardApi({
       },
       body: {
         dashboardSavedObjectId,
-        dashboardTitle,
         kuery,
-        serviceName,
         useContextFilter,
-        linkTo,
       },
     },
   });
