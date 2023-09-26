@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../types';
+import { AssetManagerConfig } from '../../../common/config';
 import { Asset } from '../../../common/types_api';
 
 export const QUERY_MAX_SIZE = 10000;

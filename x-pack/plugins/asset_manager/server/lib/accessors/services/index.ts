@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { AssetClientDependencies } from '../../../types';
 import { GetServicesOptionsPublic } from '../../../../common/types_client';
-import { AssetClientDependencies, OptionsWithInjectedValues } from '..';
+import { OptionsWithInjectedValues } from '..';
 
 export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;
 export type GetServicesOptionsInjected = OptionsWithInjectedValues<GetServicesOptions>;
