@@ -18,7 +18,7 @@ describe('Public assets client', () => {
 
   describe('class instantiation', () => {
     it('should successfully instantiate', () => {
-      const client = new PublicAssetsClient(http);
+      new PublicAssetsClient(http);
     });
   });
 

@@ -7,19 +7,11 @@
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import {
-  AssetManagerSetupExports,
-  AssetManagerStartExports,
-  AssetManagerSetupDeps,
-  AssetManagerStartDeps,
-} from './types';
+import { AssetManagerSetupExports, AssetManagerStartExports } from './types';
 
-export const plugin: PluginInitializer<
-  AssetManagerSetupExports,
-  AssetManagerStartExports,
-  AssetManagerSetupDeps,
-  AssetManagerStartDeps
-> = (context: PluginInitializerContext) => {
+export const plugin: PluginInitializer<AssetManagerSetupExports, AssetManagerStartExports> = (
+  context: PluginInitializerContext
+) => {
   return new Plugin(context);
 };
 
