@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/repo-info';
 import { uniq } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import semverGt from 'semver/functions/gt';
-import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-
-import { appContextService } from '../../services';
-
-const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -363,36 +352,10 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
-  const config = await appContextService.getConfig();
-  let versionsToDisplay: string[] = [];
-
-  const kibanaVersion = appContextService.getKibanaVersion();
-
   try {
-    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
-
-    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-    // De-dup and sort in descending order
-    const data: string[] = JSON.parse(file);
-
-    const versions = data
-      .map((item: any) => semverCoerce(item)?.version || '')
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-    versionsToDisplay = uniq(versions) as string[];
-
-    if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
-      // Add current version if not already present
-      const hasCurrentVersion = versionsToDisplay.some((v) => v === kibanaVersion);
-
-      versionsToDisplay = !hasCurrentVersion
-        ? [kibanaVersion].concat(versionsToDisplay)
-        : versionsToDisplay;
-    }
-    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    const availableVersions = await AgentService.getAvailableVersions({});
+    const body: GetAvailableVersionsResponse = { items: availableVersions };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

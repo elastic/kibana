@@ -9,6 +9,7 @@ import mockFs from 'mock-fs';
 
 import { existsSync } from 'fs';
 import { stat } from 'fs/promises';
+import { basename } from 'path';
 
 import {
   DOCKER_IMG,
@@ -22,15 +23,22 @@ import {
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
   stopServerlessCluster,
   teardownServerlessClusterSync,
   verifyDockerInstalled,
+  getESp12Volume,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
-import { ESS_RESOURCES_PATHS } from '../paths';
+import {
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+} from '../paths';
+import * as waitClusterUtil from './wait_until_cluster_ready';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -40,6 +48,10 @@ jest.mock('@elastic/elasticsearch', () => {
   };
 });
 
+jest.mock('./wait_until_cluster_ready', () => ({
+  waitUntilClusterReady: jest.fn(),
+}));
+
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
@@ -48,6 +60,8 @@ const KIBANA_ROOT = process.cwd();
 const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
+
+const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -68,9 +82,23 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  acc.push(`${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+
+  return acc;
+}, []);
+
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(2);
-  expect(volumeCmd).toEqual(expect.arrayContaining(['--volume', `${baseEsPath}:/objectstore:z`]));
+  expect(volumeCmd).toHaveLength(20);
+  expect(volumeCmd).toEqual(
+    expect.arrayContaining([
+      ...getESp12Volume(),
+      ...serverlessResources,
+      `${baseEsPath}:/objectstore:z`,
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
+    ])
+  );
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
@@ -341,13 +369,10 @@ describe('resolveEsArgs()', () => {
     `);
   });
 
-  test('should add SSL args and enable security when SSL is passed', () => {
-    const esArgs = resolveEsArgs([...defaultEsArgs, ['xpack.security.enabled', 'false']], {
-      ssl: true,
-    });
+  test('should add SSL args when SSL is passed', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
 
-    expect(esArgs).toHaveLength(20);
-    expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
+    expect(esArgs).toHaveLength(10);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -355,21 +380,11 @@ describe('resolveEsArgs()', () => {
         "--env",
         "qux=zip",
         "--env",
-        "xpack.security.enabled=true",
-        "--env",
         "xpack.security.http.ssl.enabled=true",
         "--env",
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
-        "--env",
-        "xpack.security.transport.ssl.enabled=true",
-        "--env",
-        "xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
-        "--env",
-        "xpack.security.transport.ssl.verification_mode=certificate",
-        "--env",
-        "xpack.security.operator_privileges.enabled=true",
       ]
     `);
   });
@@ -418,7 +433,11 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
 
-    const requiredPaths = [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS];
+    const requiredPaths = [
+      `${baseEsPath}:/objectstore:z`,
+      ES_P12_PATH,
+      ...SERVERLESS_RESOURCES_PATHS,
+    ];
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
@@ -432,7 +451,7 @@ describe('runServerlessEsNode()', () => {
   const node = {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
-    image: SERVERLESS_IMG,
+    image: ES_SERVERLESS_DEFAULT_IMAGE,
   };
 
   test('should call the correct Docker command', async () => {
@@ -443,7 +462,7 @@ describe('runServerlessEsNode()', () => {
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        SERVERLESS_IMG,
+        ES_SERVERLESS_DEFAULT_IMAGE,
         ...node.params,
         '--name',
         node.name,
@@ -470,24 +489,18 @@ describe('runServerlessCluster()', () => {
     // setupDocker execa calls then run three nodes and attach logger
     expect(execa.mock.calls).toHaveLength(8);
   });
-  describe('waitForReady', () => {
-    test('should wait for serverless nodes to be ready to serve requests', async () => {
-      mockFs({
-        [baseEsPath]: {},
-      });
-      execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-      const health = jest.fn();
-      jest
-        .requireMock('@elastic/elasticsearch')
-        .Client.mockImplementation(() => ({ cluster: { health } }));
 
-      health.mockImplementationOnce(() => Promise.reject()); // first call fails
-      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
-      health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
+  test(`should wait for serverless nodes to return 'green' status`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-      await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
-      expect(health).toHaveBeenCalledTimes(3);
-    }, 10000);
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
   });
 });
 
@@ -517,7 +530,9 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+    );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
   });
 
@@ -556,8 +571,7 @@ describe('resolveDockerCmd()', () => {
 describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-
-    await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
+    await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // setupDocker execa calls then run container
     expect(execa.mock.calls).toHaveLength(5);
   });

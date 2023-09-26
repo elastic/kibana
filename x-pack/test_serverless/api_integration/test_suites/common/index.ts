@@ -35,5 +35,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./scripts_tests'));
     loadTestFile(require.resolve('./search_oss'));
     loadTestFile(require.resolve('./search_xpack'));
+    loadTestFile(require.resolve('./elasticsearch_api'));
   });
 }

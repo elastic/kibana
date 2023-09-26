@@ -24,7 +24,7 @@ const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.1';
+  private taskVersion = '1.1.3';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -80,7 +80,11 @@ export class FleetUsageSender {
       if (!usageData) {
         return;
       }
-      const { agents_per_version: agentsPerVersion, ...fleetUsageData } = usageData;
+      const {
+        agents_per_version: agentsPerVersion,
+        agents_per_output_type: agentsPerOutputType,
+        ...fleetUsageData
+      } = usageData;
       appContextService
         .getLogger()
         .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
@@ -92,6 +96,15 @@ export class FleetUsageSender {
         .debug('Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
       agentsPerVersion.forEach((byVersion) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { agents_per_version: byVersion });
+      });
+
+      appContextService
+        .getLogger()
+        .debug('Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
+      agentsPerOutputType.forEach((byOutputType) => {
+        core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
+          agents_per_output_type: byOutputType,
+        });
       });
     } catch (error) {
       appContextService

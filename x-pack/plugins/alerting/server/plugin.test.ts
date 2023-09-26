@@ -37,6 +37,7 @@ jest.mock('./alerts_service/alerts_service', () => ({
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
@@ -73,8 +74,9 @@ describe('Alerting Plugin', () => {
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
           unifiedSearch: autocompletePluginMock.createSetupContract(),
-          // serverless setup is currently empty, and there is no mock
-          ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+          ...(useDataStreamForAlerts
+            ? { serverless: serverlessPluginMock.createSetupContract() }
+            : {}),
         };
 
         let plugin: AlertingPlugin;
@@ -242,7 +244,9 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
               unifiedSearch: autocompletePluginMock.createSetupContract(),
-              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+              ...(useDataStreamForAlerts
+                ? { serverless: serverlessPluginMock.createSetupContract() }
+                : {}),
             });
 
             const startContract = plugin.start(coreMock.createStart(), {
@@ -292,7 +296,9 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
               unifiedSearch: autocompletePluginMock.createSetupContract(),
-              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+              ...(useDataStreamForAlerts
+                ? { serverless: serverlessPluginMock.createSetupContract() }
+                : {}),
             });
 
             const startContract = plugin.start(coreMock.createStart(), {
@@ -353,7 +359,9 @@ describe('Alerting Plugin', () => {
             data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
             features: featuresPluginMock.createSetup(),
             unifiedSearch: autocompletePluginMock.createSetupContract(),
-            ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+            ...(useDataStreamForAlerts
+              ? { serverless: serverlessPluginMock.createSetupContract() }
+              : {}),
           });
 
           const startContract = plugin.start(coreMock.createStart(), {

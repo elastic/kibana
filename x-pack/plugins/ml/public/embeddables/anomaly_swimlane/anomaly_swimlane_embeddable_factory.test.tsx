@@ -27,7 +27,7 @@ describe('AnomalySwimlaneEmbeddableFactory', () => {
     const [coreStart, pluginsStart] = await getStartServices();
 
     // act
-    const factory = new AnomalySwimlaneEmbeddableFactory(getStartServices);
+    const factory = new AnomalySwimlaneEmbeddableFactory(getStartServices, false);
 
     await factory.create({
       jobIds: ['test-job'],

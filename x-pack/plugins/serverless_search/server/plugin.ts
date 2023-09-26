@@ -13,6 +13,7 @@ import type {
   CoreSetup,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
@@ -70,7 +71,7 @@ export class ServerlessSearchPlugin
       registerIndicesRoutes(dependencies);
     });
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: false });
+    pluginsSetup.serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
     return {};
   }
 

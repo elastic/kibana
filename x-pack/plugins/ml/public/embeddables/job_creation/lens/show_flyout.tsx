@@ -20,7 +20,8 @@ export async function showLensVisToADJobFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart,
   lens: LensPublicStart,
-  dashboardService: DashboardStart
+  dashboardService: DashboardStart,
+  isServerless: boolean
 ): Promise<void> {
   return createFlyout(
     LensLayerSelectionFlyout,
@@ -29,6 +30,7 @@ export async function showLensVisToADJobFlyout(
     share,
     data,
     dashboardService,
+    isServerless,
     lens
   );
 }
