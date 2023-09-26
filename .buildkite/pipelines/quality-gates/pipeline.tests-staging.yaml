@@ -21,6 +21,14 @@ steps:
         NAME_PREFIX: ci_test_kibana-promotion_
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
+  - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
+    soft_fail: true # Remove this before release or when tests stabilize
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
+
   - wait: ~
 
   - label: ":judge::seedling: Trigger Manual Tests Phase"
