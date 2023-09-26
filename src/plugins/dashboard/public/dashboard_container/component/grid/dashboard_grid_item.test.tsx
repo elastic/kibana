@@ -43,7 +43,7 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
       explicitInput: { id: '2' },
     },
   };
-  const dashboardContainer = buildMockDashboard({ panels });
+  const dashboardContainer = buildMockDashboard({ overrides: { panels } });
 
   const component = mountWithIntl(
     <DashboardContainerContext.Provider value={dashboardContainer}>
