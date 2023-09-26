@@ -77,7 +77,7 @@ describe('getTemplateUrlFromPackageInfo', () => {
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'template1',
-      'cloud_formation_template_url'
+      'cloud_formation_template'
     );
     expect(result).toBe('cloud_formation_template_url');
   });

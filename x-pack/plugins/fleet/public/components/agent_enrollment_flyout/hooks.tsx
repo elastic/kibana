@@ -129,7 +129,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       ? getTemplateUrlFromPackageInfo(
           packageInfoData.item,
           integrationType,
-          'cloud_formation_template_url'
+          'cloud_formation_template'
         )
       : cloudFormationTemplateFromAgentPolicy;
 
