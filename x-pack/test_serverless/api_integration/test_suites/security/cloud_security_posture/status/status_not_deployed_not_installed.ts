@@ -6,7 +6,10 @@
  */
 import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { createPackagePolicy } from '../../../../../../test/api_integration/apis/cloud_security_posture/helper';
 
