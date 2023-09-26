@@ -6,8 +6,8 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
 import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
-import { RuleAttributes } from '../../../../data/rule/types';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
 import { defaultTagsPerPage } from '../../../../../common/routes/rule/apis/tags/constants/latest';
 import { RulesClientContext } from '../../../../rules_client/types';
@@ -57,20 +57,19 @@ export async function getRuleTags(
         ])
       : authorizationFilter;
 
-  const response = await context.unsecuredSavedObjectsClient.find<
-    RuleAttributes,
-    RuleTagsAggregationResult
-  >({
-    filter,
-    type: 'alert',
-    aggs: {
-      tags: {
-        terms: {
-          field: 'alert.attributes.tags',
-          order: {
-            _key: 'asc',
+  const response = await findRulesSo<RuleTagsAggregationResult>({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsFindOptions: {
+      filter,
+      aggs: {
+        tags: {
+          terms: {
+            field: 'alert.attributes.tags',
+            order: {
+              _key: 'asc',
+            },
+            size: MAX_TAGS,
           },
-          size: MAX_TAGS,
         },
       },
     },
