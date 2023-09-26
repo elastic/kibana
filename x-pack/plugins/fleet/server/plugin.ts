@@ -533,7 +533,6 @@ export class FleetPlugin
           )
           .toPromise();
 
-
         // Retry Fleet setup indefinitely w/ backoff
         // TODO: limit to only Serverless?
         await backoff(
@@ -553,6 +552,10 @@ export class FleetPlugin
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
                 summary: `Fleet is retrying setup attempt ${attemptCount} after error: ${error}`,
+                meta: {
+                  attemptCount,
+                  error
+                }
               })
               return true;
             }
