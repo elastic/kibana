@@ -6,7 +6,7 @@
  */
 
 import { run, type RunContext } from '@kbn/dev-cli-runner';
-import { cyan } from 'chalk';
+import { cyan, gray } from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
@@ -15,18 +15,23 @@ import { ES_RESOURCES } from '../common/roles_users/serverless';
 export const cli = async () => {
   return run(
     async (cliContext: RunContext) => {
+      const exeScript = join(REPO_ROOT, 'scripts', 'es');
       const callingArgs = process.argv.slice(2);
 
       if (!callingArgs.includes('serverless')) {
         callingArgs.unshift('serverless');
       }
 
-      const additionalArgs: string[] = Object.values(ES_RESOURCES).reduce((acc, resourcePath) => {
-        acc.push('--resources', resourcePath);
-        return acc;
-      }, [] as string[]);
+      callingArgs.push(
+        ...Object.values(ES_RESOURCES).reduce((acc, resourcePath) => {
+          acc.push('--resources', resourcePath);
+          return acc;
+        }, [] as string[])
+      );
 
-      await execa.node(join(REPO_ROOT, 'scripts', 'es'), [...callingArgs, ...additionalArgs], {
+      cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
+
+      await execa.node(exeScript, callingArgs, {
         stderr: 'inherit',
         stdout: 'inherit',
       });
