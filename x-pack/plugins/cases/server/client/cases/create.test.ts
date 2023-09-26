@@ -528,8 +528,8 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 5."`
       );
     });
 
@@ -554,7 +554,9 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+      );
     });
 
     it('throws error when customFields keys are not present in configuration', async () => {
@@ -573,26 +575,30 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow('Failed to create case: Error: Invalid custom field keys: missing_key');
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Invalid custom field keys: missing_key"`
+      );
     });
 
-    it('throws when a required customFields is missing', async () => {
+    it('throws error when custom fields are missing', async () => {
       await expect(
         create(
           {
             ...theCase,
             customFields: [
               {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                field: { value: [true] },
+                key: 'first_key',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['this is a text field value', 'this is second'] },
               },
             ],
           },
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow('Error: Missing required custom fields: first_key');
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing custom field keys: second_key"`
+      );
     });
 
     it('throws when the customField types do not match the configuration', async () => {
@@ -616,8 +622,8 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The following custom fields have the wrong type in the request: first_key,second_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
       );
     });
   });

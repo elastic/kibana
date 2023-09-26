@@ -1077,7 +1077,7 @@ describe('update', () => {
       );
     });
 
-    it('throws when a required customFields is missing', async () => {
+    it('throws error when custom fields are missing', async () => {
       await expect(
         update(
           {
@@ -1099,7 +1099,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: first_key"`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing custom field keys: first_key"`
       );
     });
 

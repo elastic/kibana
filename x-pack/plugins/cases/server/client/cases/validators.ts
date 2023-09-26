@@ -18,12 +18,11 @@ interface CustomFieldValidationParams {
 export const validateCustomFields = (params: CustomFieldValidationParams) => {
   validateDuplicatedCustomFieldKeysInRequest(params);
   validateCustomFieldKeysAgainstConfiguration(params);
-  validateRequiredCustomFields(params);
   validateCustomFieldTypesInRequest(params);
 };
 
 /**
- * Returns a list of custom fields where the type doesn't match the configuration.
+ * Throws if the type doesn't match the configuration.
  */
 export function validateCustomFieldTypesInRequest({
   requestCustomFields,
@@ -62,13 +61,13 @@ export function validateCustomFieldTypesInRequest({
 }
 
 /**
- * Returns a list of custom fields in the request where the key doesn't match the configuration.
+ * Throws if the key doesn't match the configuration or is missing
  */
 export const validateCustomFieldKeysAgainstConfiguration = ({
   requestCustomFields,
   customFieldsConfiguration,
 }: CustomFieldValidationParams) => {
-  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+  if (!Array.isArray(requestCustomFields)) {
     return;
   }
 
@@ -82,38 +81,18 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
     (requestVal, configurationVal) => requestVal.key === configurationVal.key
   ).map((e) => e.key);
 
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
-  }
-};
-
-/**
- * Returns a list of required custom fields missing from the request
- */
-export const validateRequiredCustomFields = ({
-  requestCustomFields,
-  customFieldsConfiguration,
-}: CustomFieldValidationParams) => {
-  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return;
-  }
-
-  if (customFieldsConfiguration === undefined) {
-    throw Boom.badRequest('No custom fields configured.');
-  }
-
-  const requiredCustomFields = customFieldsConfiguration.filter(
-    (customField) => customField.required
-  );
-
-  const invalidCustomFieldKeys = differenceWith(
-    requiredCustomFields,
+  const missingCustomFieldKeys = differenceWith(
+    customFieldsConfiguration,
     requestCustomFields,
-    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
+    (configurationVal, requestVal) => configurationVal.key === requestVal.key
   ).map((e) => e.key);
 
   if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
+    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
+  }
+
+  if (missingCustomFieldKeys.length) {
+    throw Boom.badRequest(`Missing custom field keys: ${missingCustomFieldKeys}`);
   }
 };
 

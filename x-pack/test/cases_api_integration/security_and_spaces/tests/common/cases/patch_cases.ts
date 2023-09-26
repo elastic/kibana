@@ -961,7 +961,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when trying to create case with a missing required custom field', async () => {
+        it('400s when trying to create case with a missing custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -971,7 +971,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     key: 'test_custom_field',
                     label: 'text',
                     type: CustomFieldTypes.TEXT,
-                    required: true,
+                    required: false,
                   },
                 ],
               },
