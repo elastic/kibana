@@ -292,13 +292,70 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
     indices: string[];
     fields: Array<{ name: string; description: string; type: string }>;
   }> => {
-    const client = await resources.service.getClient({ request: resources.request });
 
-    if (!client) {
-      throw notImplemented();
+    const esClient =  (
+      await resources.context.core
+    ).elasticsearch.client.asCurrentUser;
+
+    const savedObjectsClient = (
+      await resources.context.core
+    ).savedObjects.getClient();
+
+    const index = resources.params.body.index;
+
+    let indices: string[] = [];
+
+    try {
+      const body = await esClient.indices.resolveIndex({
+        name: index === '' ? '*' : index,
+        expand_wildcards: 'open',
+      });
+      indices = body.indices.map((i) => i.name);
+    } catch (e) {
+      indices = [];
     }
 
-    return client.get_dataset_info(resources.params.body.index);
+    if (index === '') {
+      return {
+        indices,
+        fields: [],
+      };
+    }
+
+    if (indices.length === 0) {
+      try {
+        const body = await esClient.indices.resolveIndex({
+          name: '*',
+          expand_wildcards: 'open',
+        });
+        indices = body.indices.map((i) => i.name);
+      } catch (e) {
+        indices = [];
+      }
+
+      return {
+        indices,
+        fields: [],
+      };
+    }
+
+    const dataViews = await (await resources.plugins.dataViews.start()).dataViewsServiceFactory(savedObjectsClient, esClient)
+
+    const fields = await dataViews.getFieldsForWildcard({
+      pattern: index,
+    });
+
+    // else get all the fields for the found dataview
+    return {
+      indices: [index],
+      fields: fields.map((field) => {
+        return {
+          name: field.name,
+          description: field.customLabel || '',
+          type: field.type,
+        };
+      }),
+    };
   },
 });
 

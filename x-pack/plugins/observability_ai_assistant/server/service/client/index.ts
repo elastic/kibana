@@ -8,7 +8,6 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IncomingMessage } from 'http';
@@ -40,7 +39,6 @@ export class ObservabilityAIAssistantClient {
       namespace: string;
       esClient: ElasticsearchClient;
       resources: ObservabilityAIAssistantResourceNames;
-      dataviews: DataViewsService;
       logger: Logger;
       user: {
         id?: string;
@@ -385,67 +383,6 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry,
     });
-  };
-
-  get_dataset_info = async (
-    index: string
-  ): Promise<{
-    indices: string[];
-    fields: Array<{ name: string; description: string; type: string }>;
-  }> => {
-    // if empty dataview, get list of all dataviews
-
-    let indices: string[] = [];
-
-    try {
-      const body = await this.dependencies.esClient.indices.resolveIndex({
-        name: index === '' ? '*' : index,
-        expand_wildcards: 'open',
-      });
-      indices = body.indices.map((i) => i.name);
-    } catch (e) {
-      indices = [];
-    }
-
-    if (index === '') {
-      return {
-        indices,
-        fields: [],
-      };
-    }
-
-    if (indices.length === 0) {
-      try {
-        const body = await this.dependencies.esClient.indices.resolveIndex({
-          name: '*',
-          expand_wildcards: 'open',
-        });
-        indices = body.indices.map((i) => i.name);
-      } catch (e) {
-        indices = [];
-      }
-
-      return {
-        indices,
-        fields: [],
-      };
-    }
-
-    const fields = await this.dependencies.dataviews.getFieldsForWildcard({
-      pattern: index,
-    });
-
-    // else get all the fields for the found dataview
-    return {
-      indices: [index],
-      fields: fields.map((field) => {
-        return {
-          name: field.name,
-          description: field.customLabel || '',
-          type: field.type,
-        };
-      }),
-    };
   };
 
   getKnowledgeBaseStatus = () => {
