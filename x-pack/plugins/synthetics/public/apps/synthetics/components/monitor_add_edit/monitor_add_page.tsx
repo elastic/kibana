@@ -40,7 +40,7 @@ export const MonitorAddPage = () => {
   }
 
   return locationsLoaded ? (
-    <MonitorForm space={space?.id}>
+    <MonitorForm space={space?.id} canUsePublicLocations={false}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
   ) : (
