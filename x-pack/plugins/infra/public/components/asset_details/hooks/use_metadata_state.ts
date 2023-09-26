@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -22,13 +22,17 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
   const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
 
-  const { loading, error, metadata } = useMetadata(
+  const { loading, error, metadata, reload } = useMetadata(
     asset.id,
     assetType,
     inventoryModel.requiredMetrics,
     sourceId,
     getDateRangeInTimestamp()
   );
+
+  const refresh = useCallback(() => {
+    reload();
+  }, [reload]);
 
   useEffect(() => {
     if (metadata?.name) {
@@ -40,6 +44,7 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     loading,
     error,
     metadata,
+    refresh,
   };
 }
 

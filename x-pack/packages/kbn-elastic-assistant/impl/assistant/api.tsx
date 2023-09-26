@@ -7,11 +7,12 @@
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import type { Message } from '../assistant_context/types';
-import { Conversation } from '../assistant_context/types';
+import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+
+import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
+import { getFormattedMessageContent } from './helpers';
 
 export interface FetchConnectorExecuteAction {
   assistantLangChain: boolean;
@@ -78,11 +79,130 @@ export const fetchConnectorExecuteAction = async ({
 
     if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
       const result = data.choices[0].message.content.trim();
-      return result;
+
+      return assistantLangChain ? getFormattedMessageContent(result) : result;
     } else {
       return API_ERROR;
     }
   } catch (error) {
     return API_ERROR;
+  }
+};
+
+export interface GetKnowledgeBaseStatusParams {
+  http: HttpSetup;
+  resource?: string;
+  signal?: AbortSignal | undefined;
+}
+
+export interface GetKnowledgeBaseStatusResponse {
+  elser_exists: boolean;
+  esql_exists?: boolean;
+  index_exists: boolean;
+  pipeline_exists: boolean;
+}
+
+/**
+ * API call for getting the status of the Knowledge Base. Provide
+ * a resource to include the status of that specific resource.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} [options.resource] - Resource to get the status of, otherwise status of overall KB
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<GetKnowledgeBaseStatusResponse | IHttpFetchError>}
+ */
+export const getKnowledgeBaseStatus = async ({
+  http,
+  resource,
+  signal,
+}: GetKnowledgeBaseStatusParams): Promise<GetKnowledgeBaseStatusResponse | IHttpFetchError> => {
+  try {
+    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const response = await http.fetch(path, {
+      method: 'GET',
+      signal,
+    });
+
+    return response as GetKnowledgeBaseStatusResponse;
+  } catch (error) {
+    return error as IHttpFetchError;
+  }
+};
+
+export interface PostKnowledgeBaseParams {
+  http: HttpSetup;
+  resource?: string;
+  signal?: AbortSignal | undefined;
+}
+
+export interface PostKnowledgeBaseResponse {
+  success: boolean;
+}
+
+/**
+ * API call for setting up the Knowledge Base. Provide a resource to set up a specific resource.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} [options.resource] - Resource to be added to the KB, otherwise sets up the base KB
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<PostKnowledgeBaseResponse | IHttpFetchError>}
+ */
+export const postKnowledgeBase = async ({
+  http,
+  resource,
+  signal,
+}: PostKnowledgeBaseParams): Promise<PostKnowledgeBaseResponse | IHttpFetchError> => {
+  try {
+    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const response = await http.fetch(path, {
+      method: 'POST',
+      signal,
+    });
+
+    return response as PostKnowledgeBaseResponse;
+  } catch (error) {
+    return error as IHttpFetchError;
+  }
+};
+
+export interface DeleteKnowledgeBaseParams {
+  http: HttpSetup;
+  resource?: string;
+  signal?: AbortSignal | undefined;
+}
+
+export interface DeleteKnowledgeBaseResponse {
+  success: boolean;
+}
+
+/**
+ * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} [options.resource] - Resource to be deleted from the KB, otherwise delete the entire KB
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<DeleteKnowledgeBaseResponse | IHttpFetchError>}
+ */
+export const deleteKnowledgeBase = async ({
+  http,
+  resource,
+  signal,
+}: DeleteKnowledgeBaseParams): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
+  try {
+    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const response = await http.fetch(path, {
+      method: 'DELETE',
+      signal,
+    });
+
+    return response as DeleteKnowledgeBaseResponse;
+  } catch (error) {
+    return error as IHttpFetchError;
   }
 };
