@@ -47,7 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const TEST_PASSWORD = 'changeme';
 
     before('initialize saved object archive', async () => {
-
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
