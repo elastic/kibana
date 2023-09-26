@@ -18,6 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
@@ -107,10 +108,27 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   return { rightSideItems };
 };
 
+const useFeatureFlagTabs = () => {
+  const { featureFlags } = usePluginConfig();
+  const featureFlagTabs: Partial<Record<ContentTabIds, { isEnabled: () => boolean }>> = useMemo(
+    () => ({
+      [ContentTabIds.OSQUERY]: {
+        isEnabled: () => featureFlags.osqueryEnabled,
+      },
+    }),
+    [featureFlags.osqueryEnabled]
+  );
+
+  return {
+    featureFlagTabs,
+  };
+};
+
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { euiTheme } = useEuiTheme();
+  const { featureFlagTabs } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -148,20 +166,22 @@ const useTabs = (tabs: Tab[]) => {
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs.map(({ name, ...tab }) => {
-        if (tab.id === ContentTabIds.LINK_TO_APM) {
-          return getTabToApmTraces(name);
-        }
+      tabs
+        .filter((tab) => featureFlagTabs[tab.id]?.isEnabled() ?? true)
+        .map(({ name, ...tab }) => {
+          if (tab.id === ContentTabIds.LINK_TO_APM) {
+            return getTabToApmTraces(name);
+          }
 
-        return {
-          ...tab,
-          'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
-          onClick: () => onTabClick(tab.id),
-          isSelected: tab.id === activeTabId,
-          label: name,
-        };
-      }),
-    [activeTabId, getTabToApmTraces, onTabClick, tabs]
+          return {
+            ...tab,
+            'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
+            onClick: () => onTabClick(tab.id),
+            isSelected: tab.id === activeTabId,
+            label: name,
+          };
+        }),
+    [activeTabId, featureFlagTabs, getTabToApmTraces, onTabClick, tabs]
   );
 
   return { tabEntries };
