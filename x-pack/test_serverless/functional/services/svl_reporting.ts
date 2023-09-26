@@ -33,7 +33,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const security = getService('security');
 
   return {
-
     async createReportingUser(
       username = REPORTING_USER_USERNAME,
       password = REPORTING_USER_PASSWORD
