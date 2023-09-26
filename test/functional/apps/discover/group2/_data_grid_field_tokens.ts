@@ -12,7 +12,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'dashboard',
+    'unifiedFieldList',
+    'header',
+  ]);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -22,6 +29,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
   };
+
+  async function findFirstColumnTokens() {
+    const header = await testSubjects.find('euiDataGridBody > dataGridHeader');
+    return await findFirstFieldIcons(header);
+  }
+
+  async function findFirstDocViewerTokens() {
+    await dataGrid.clickRowToggle({ rowIndex: 0 });
+    const docViewer = await testSubjects.find('docTableDetailsFlyout');
+    return await findFirstFieldIcons(docViewer);
+  }
 
   async function findFirstFieldIcons(element: WebElementWrapper) {
     const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
@@ -41,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async function () {
@@ -50,12 +69,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    it('should render field tokens correctly', async function () {
+    it('should not render field tokens when Document column is visible', async function () {
       expect(await PageObjects.discover.getHitCount()).to.be('14,004');
 
-      // check the first grid row
-      const cell = await dataGrid.getCellElement(0, 3);
-      expect(await findFirstFieldIcons(cell)).to.eql([
+      expect(await findFirstColumnTokens()).to.eql([]);
+
+      expect(await findFirstDocViewerTokens()).to.eql([
+        'Keyword',
+        'Keyword',
+        'Number',
         'Text',
         'Text',
         'Date',
@@ -63,15 +85,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Number',
         'IP address',
         'Text',
-        'Geo point',
-        'Keyword',
-        'Keyword',
       ]);
+    });
 
-      // check in the doc viewer
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const docViewer = await testSubjects.find('docTableDetailsFlyout');
-      expect(await findFirstFieldIcons(docViewer)).to.eql([
+    it('should render field tokens correctly when columns are selected', async function () {
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
+
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'IP address', 'Geo point']);
+
+      expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
         'Keyword',
         'Number',
@@ -88,26 +113,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should render field tokens correctly for ES|QL', async function () {
       await PageObjects.discover.selectTextBaseLang();
       expect(await PageObjects.discover.getHitCount()).to.be('10');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
-      // check the first grid row
-      const cell = await dataGrid.getCellElement(0, 3);
-      expect(await findFirstFieldIcons(cell)).to.eql([
-        'String',
-        'String',
-        'Date',
-        'String',
-        'Number',
-        'String',
-        'String',
-        'String',
-        'String',
-        'String',
-      ]);
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'String']);
 
-      // check in the doc viewer
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const docViewer = await testSubjects.find('docTableDetailsFlyout');
-      expect(await findFirstFieldIcons(docViewer)).to.eql([
+      expect(await findFirstDocViewerTokens()).to.eql([
         'String',
         'String',
         'Date',
@@ -122,14 +136,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render field tokens correctly on Dashboard', async function () {
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd(
+        'relatedContent.article:modified_time'
+      );
+      await PageObjects.discover.saveSearch('With columns');
+
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.addSavedSearch('A Saved Search');
+      await dashboardAddPanel.addSavedSearch('With columns');
 
-      // check the first grid row
-      const cell = await dataGrid.getCellElement(0, 3);
-      expect(await findFirstFieldIcons(cell)).to.eql([
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'Geo Point', 'Date']);
+
+      expect(await findFirstDocViewerTokens()).to.eql([
+        'Keyword',
+        'Keyword',
+        'Number',
         'Text',
         'Text',
         'Date',
@@ -137,26 +162,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Number',
         'IP address',
         'Text',
-        'Geo point',
-        'Keyword',
-        'Keyword',
       ]);
+    });
 
-      // check in the doc viewer
+    it('should render field tokens correctly on Surrounding Documents page', async function () {
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+
+      // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const docViewer = await testSubjects.find('docTableDetailsFlyout');
-      expect(await findFirstFieldIcons(docViewer)).to.eql([
-        'Keyword',
-        'Keyword',
-        'Number',
-        'Text',
-        'Text',
-        'Date',
-        'Text',
-        'Number',
-        'IP address',
-        'Text',
-      ]);
+      const [, surroundingActionEl] = await dataGrid.getRowActions({
+        isAnchorRow: false,
+        rowIndex: 0,
+      });
+      await surroundingActionEl.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text']);
     });
   });
 }
