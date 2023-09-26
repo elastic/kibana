@@ -189,10 +189,7 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
   if (!policyTemplateInputs) return '';
-
-  console.log(policyTemplateInputs);
 
   const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
     if (!input.vars) return acc;

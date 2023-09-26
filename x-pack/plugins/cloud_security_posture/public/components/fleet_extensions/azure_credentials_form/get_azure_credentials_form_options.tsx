@@ -7,6 +7,7 @@
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { AzureCredentialsType } from '../../../../common/types';
 
 export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
@@ -41,7 +42,9 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {},
   },
   manual: {
-    label: 'Manual',
+    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
+      defaultMessage: 'Manual',
+    }),
     info: [],
     fields: {},
   },

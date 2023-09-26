@@ -27,6 +27,7 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
@@ -138,7 +139,7 @@ const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
-    disabled: false,
+    disabled: true,
     tooltip: i18n.translate(
       'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
       {
@@ -325,6 +326,10 @@ const AzureAccountTypeSelect = ({
         getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
             value: AZURE_SINGLE_ACCOUNT,
+            type: 'text',
+          },
+          'azure.credentials.type': {
+            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
             type: 'text',
           },
         })

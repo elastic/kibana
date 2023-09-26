@@ -19,6 +19,9 @@ interface AzureSetupInfoContentProps {
   integrationLink: string;
 }
 
+export const AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE = 'arm_template';
+export const AZURE_MANUAL_CREDENTIAL_TYPE = 'manual';
+
 const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
   return (
     <>
@@ -54,11 +57,11 @@ const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) 
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: 'arm_template',
+    id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
     label: 'ARM Template',
   },
   {
-    id: 'manual',
+    id: AZURE_MANUAL_CREDENTIAL_TYPE,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -174,7 +177,7 @@ export const AzureCredentialsForm = ({
 
   useEffect(() => {
     if (!setupFormat) {
-      onSetupFormatChange('arm_template');
+      onSetupFormatChange(AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE);
     }
   }, [setupFormat, onSetupFormatChange]);
 
@@ -191,7 +194,7 @@ export const AzureCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === 'arm_template' && (
+      {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
       <EuiSpacer />

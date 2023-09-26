@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getArmTemplateUrlFromCspmPackage,
@@ -100,7 +101,7 @@ export const useAzureCredentialsForm = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
-    getAzureCredentialsType(input) || 'arm_template';
+    getAzureCredentialsType(input) || AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE;
 
   const options = getAzureCredentialsFormOptions();
 
@@ -114,7 +115,8 @@ export const useAzureCredentialsForm = ({
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    const isInvalid = setupFormat === 'arm_template' && !hasArmTemplateUrl;
+    const isInvalid = setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && !hasArmTemplateUrl;
+    console.log({ isInvalid, newPolicy });
 
     setIsValid(!isInvalid);
 
@@ -135,7 +137,7 @@ export const useAzureCredentialsForm = ({
   });
 
   const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
-    if (newSetupFormat === 'arm_template') {
+    if (newSetupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE) {
       fieldsSnapshot.current = Object.fromEntries(
         fields?.map((field) => [field.id, { value: field.value }])
       );
@@ -145,7 +147,7 @@ export const useAzureCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.credentials.type': {
-            value: 'arm_template',
+            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
             type: 'text',
           },
           ...Object.fromEntries(fields?.map((field) => [field.id, { value: undefined }])),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudSecurityIntegrationAwsAccountType } from '../components/agent_enrollment_flyout/types';
+import type { CloudSecurityIntegrationAzureAccountType } from '../components/agent_enrollment_flyout/types';
 import type { PackagePolicy } from '../types';
 import type { AzureArmTemplateProps } from '../components/agent_enrollment_flyout/types';
 
@@ -18,15 +18,15 @@ const AZURE_ACCOUNT_TYPE = 'azure.account_type';
 export const getAzureArmPropsFromPackagePolicy = (
   packagePolicy?: PackagePolicy
 ): AzureArmTemplateProps => {
-  const templateUrl: CloudSecurityIntegrationAwsAccountType | undefined =
+  const templateUrl: CloudSecurityIntegrationAzureAccountType | undefined =
     packagePolicy?.inputs?.find((input) => input.enabled)?.config?.arm_template_url?.value;
 
-  const azureAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
+  const azureAccountType: CloudSecurityIntegrationAzureAccountType | undefined =
     packagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE]
       ?.value;
 
   return {
-    templateUrl: templateUrl !== '' ? templateUrl : undefined,
+    templateUrl,
     azureAccountType,
   };
 };

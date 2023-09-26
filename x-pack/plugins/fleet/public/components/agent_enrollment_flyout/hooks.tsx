@@ -165,7 +165,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       },
       isAzureArmTemplate: Boolean(azureArmTemplateFromAgentPolicy),
       azureArmTemplateProps: {
-        awsAccountType: azureArmTemplateAccountType,
+        azureAccountType: azureArmTemplateAccountType,
         templateUrl: azureArmTemplateUrl,
       },
       cloudShellUrl,
