@@ -83,6 +83,6 @@ describe('computeChi2PValue()', () => {
         percentage: 1,
       },
     ];
-    expect(computeChi2PValue(referenceTerms, productionTerms)).toStrictEqual(0);
+    expect(computeChi2PValue(referenceTerms, productionTerms)).toStrictEqual(0.000001);
   });
 });
