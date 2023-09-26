@@ -636,6 +636,8 @@ async function installPackageByUpload({
   spaceId,
   version,
   authorizationHeader,
+  ignoreMappingUpdateErrors,
+  skipDataStreamRollover,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -684,6 +686,8 @@ async function installPackageByUpload({
       packageInfo,
       paths,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
   } catch (e) {
     return {
