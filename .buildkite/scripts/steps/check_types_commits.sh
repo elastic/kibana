@@ -5,8 +5,8 @@ set -euo pipefail
 
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
-  
-  sha1="${GITHUB_PR_TARGET_BRANCH-}"
+
+  sha1=$(git merge-base $GITHUB_PR_TARGET_BRANCH $GITHUB_PR_TRIGGERED_SHA)
   sha2="${GITHUB_PR_TRIGGERED_SHA-}"
 else
   # Script take between 0 and 2 arguments representing two commit SHA's:
