@@ -34,6 +34,7 @@ echo docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
 docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
 echo linux/arm64 image pulled, with digest: $ARM_64_DIGEST
 
+echo docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
 docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
 echo linux/amd64 image pulled, with digest: $AMD_64_DIGEST
 
@@ -42,6 +43,8 @@ docker tag "$SOURCE_IMAGE@$AMD_64_DIGEST" "$TARGET_IMAGE-amd64"
 
 docker push "$TARGET_IMAGE-arm64"
 docker push "$TARGET_IMAGE-amd64"
+
+docker manifest rm "$TARGET_IMAGE" || echo "Nothing to delete"
 
 docker manifest create "$TARGET_IMAGE" \
 --amend "$TARGET_IMAGE-arm64" \
