@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-export { bulkDeleteRulesRequestParamsSchema } from './schemas/latest';
-export { bulkDeleteRulesRequestParamsSchema as bulkDeleteRulesRequestParamsSchemaV1 } from './schemas/v1';
+export { bulkDeleteRulesRequestBodySchema } from './schemas/latest';
+export { bulkDeleteRulesRequestBodySchema as bulkDeleteRulesRequestBodySchemaV1 } from './schemas/v1';
 
 export type {
   BulkDeleteRulesResponse,
   BulkOperationError,
-  BulkDeleteRulesRequestParams,
+  BulkDeleteRulesRequestBody,
 } from './types/latest';
 export type {
   BulkDeleteRulesResponse as BulkDeleteRulesResponseV1,
   BulkOperationError as BulkOperationErrorV1,
-  BulkDeleteRulesRequestParams as BulkDeleteRulesRequestParamsV1,
+  BulkDeleteRulesRequestBody as BulkDeleteRulesRequestBodyV1,
 } from './types/v1';
 
 export { validateCommonBulkOptions } from './validation/latest';

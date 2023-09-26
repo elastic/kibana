@@ -10,7 +10,8 @@ import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  bulkDeleteRulesRequestParamsSchemaV1,
+  bulkDeleteRulesRequestBodySchemaV1,
+  BulkDeleteRulesRequestBodyV1,
   BulkDeleteRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
@@ -28,14 +29,16 @@ export const bulkDeleteRulesRoute = ({
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
       validate: {
-        body: bulkDeleteRulesRequestParamsSchemaV1,
+        body: bulkDeleteRulesRequestBodySchemaV1,
       },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const rulesClient = (await context.alerting).getRulesClient();
-          const { filter, ids } = req.body;
+
+          const body: BulkDeleteRulesRequestBodyV1 = req.body;
+          const { filter, ids } = body;
 
           try {
             const bulkDeleteResults = await rulesClient.bulkDeleteRules({

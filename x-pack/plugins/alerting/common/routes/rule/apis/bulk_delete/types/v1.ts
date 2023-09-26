@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { bulkDeleteRulesRequestParamsSchemaV1 } from '..';
+import { bulkDeleteRulesRequestBodySchemaV1 } from '..';
 import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export interface BulkOperationError {
@@ -17,7 +17,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkDeleteRulesRequestParams = TypeOf<typeof bulkDeleteRulesRequestParamsSchemaV1>;
+export type BulkDeleteRulesRequestBody = TypeOf<typeof bulkDeleteRulesRequestBodySchemaV1>;
 
 export interface BulkDeleteRulesResponse<Params extends RuleParamsV1 = never> {
   body: {

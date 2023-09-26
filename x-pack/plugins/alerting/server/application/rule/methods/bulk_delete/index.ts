@@ -6,4 +6,4 @@
  */
 
 export { bulkDeleteRules } from './bulk_delete_rules';
-export type { BulkDeleteRulesResult, BulkDeleteRulesRequestParams } from './types';
+export type { BulkDeleteRulesResult, BulkDeleteRulesRequestBody } from './types';

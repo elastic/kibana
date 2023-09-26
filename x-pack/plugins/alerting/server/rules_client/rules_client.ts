@@ -38,7 +38,7 @@ import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import {
   bulkDeleteRules,
-  BulkDeleteRulesRequestParams,
+  BulkDeleteRulesRequestBody,
 } from '../application/rule/methods/bulk_delete';
 import {
   bulkEditRules,
@@ -141,7 +141,7 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
-  public bulkDeleteRules = (options: BulkDeleteRulesRequestParams) =>
+  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);

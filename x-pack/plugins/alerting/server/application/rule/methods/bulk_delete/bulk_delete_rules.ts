@@ -27,7 +27,7 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
   BulkOperationError,
   BulkDeleteRulesResult,
-  BulkDeleteRulesRequestParams,
+  BulkDeleteRulesRequestBody,
 } from './types';
 import { validateCommonBulkOptions } from './validation';
 import type { RuleAttributes } from '../../../../data/rule/types';
@@ -39,7 +39,7 @@ import type { RawRule, SanitizedRule } from '../../../../types';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestParams
+  options: BulkDeleteRulesRequestBody
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     validateCommonBulkOptions(options);
