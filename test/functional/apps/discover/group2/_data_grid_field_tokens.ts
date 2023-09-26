@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch('With columns');
 
-      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'Geo Point', 'Date']);
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'Geo point', 'Date']);
 
       expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
