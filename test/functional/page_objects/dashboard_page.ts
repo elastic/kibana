@@ -186,7 +186,7 @@ export class DashboardPageObject extends FtrService {
       async () => {
         const actualTitle = await this.globalNav.getLastBreadcrumb();
         this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
-        return actualTitle === expectedTitle;
+        return actualTitle === expectedTitle || actualTitle === `Editing ${actualTitle}`;
       }
     );
   }
