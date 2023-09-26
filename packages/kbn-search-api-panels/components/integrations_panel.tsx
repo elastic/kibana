@@ -35,20 +35,19 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
-        <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+        <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoLogstash" size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashTitle', {
                   defaultMessage: 'Logstash',
                 })}
               </h3>
             </EuiTitle>
-
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="s" />
             <EuiText size="s">
               <p>
                 {i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashDescription', {
@@ -57,16 +56,16 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
                 })}
               </p>
             </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="l">
+              <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   <EuiLink href={docLinks.logstash} target="_blank">
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <GithubLink
                   href="https://github.com/elastic/logstash"
                   label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashLink', {
@@ -79,39 +78,39 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
-        <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+        <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoBeats" size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsTitle', {
                   defaultMessage: 'Beats',
                 })}
               </h3>
             </EuiTitle>
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsDescription', {
                 defaultMessage:
                   'Lightweight, single-purpose data shippers for Elasticsearch. Use Beats to send operational data from your servers.',
               })}
             </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="l">
+              <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   <EuiLink href={docLinks.beats} target="_blank">
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <GithubLink
                   href="https://github.com/elastic/beats"
                   label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsLink', {
-                    defaultMessage: 'beats',
+                    defaultMessage: 'Beats',
                   })}
                   assetBasePath={assetBasePath}
                 />
@@ -119,36 +118,36 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoEnterpriseSearch" size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsTitle', {
                   defaultMessage: 'Connector Client',
                 })}
               </h3>
             </EuiTitle>
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsDescription', {
                 defaultMessage:
                   'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic Connectors to sync content from a range of databases and object stores.',
               })}
             </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="l">
+              <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   <EuiLink href={docLinks.connectors} target="_blank">
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <GithubLink
                   href="https://github.com/elastic/connectors-python"
                   label={i18n.translate(
