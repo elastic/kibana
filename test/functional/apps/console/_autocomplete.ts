@@ -217,6 +217,7 @@ GET _search
         for (const keyPress of keyPresses) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key', keyPress);
+          // @ts-ignore
           await PageObjects.console[keyPress]();
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
         }
@@ -257,7 +258,7 @@ GET _search
           for (const char of [method.at(-1), ' ', '_']) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
-            await PageObjects.console.enterText(char); // e.g. 'Post ' -> 'Post _'
+            await PageObjects.console.enterText(char ?? ''); // e.g. 'Post ' -> 'Post _'
           }
 
           await retry.waitFor('autocomplete to be visible', () =>
