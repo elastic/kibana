@@ -154,9 +154,6 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
         AZURE_ACCOUNT_TYPE
       ]?.value;
 
-    console.log(Boolean(cloudFormationTemplateFromAgentPolicy));
-    console.log(cloudFormationTemplateUrl);
-
     const cloudShellUrl = getCloudShellUrlFromAgentPolicy(agentPolicy);
     return {
       isLoading,

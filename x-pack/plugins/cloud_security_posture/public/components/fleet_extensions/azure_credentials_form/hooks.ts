@@ -17,11 +17,11 @@ import {
   DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE,
   getAzureCredentialsFormOptions,
   getInputVarsFields,
-} from './get_aws_credentials_form_options';
+} from './get_azure_credentials_form_options';
 import { CLOUDBEAT_AZURE } from '../../../../common/constants';
 import { AzureCredentialsType } from '../../../../common/types';
 
-export type SetupFormat = 'arm_template' | 'manual';
+export type SetupFormat = AzureCredentialsType;
 
 const getAzureCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
@@ -100,13 +100,13 @@ export const useAzureCredentialsForm = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
-    getAzureCredentialsType(input) || DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE;
+    getAzureCredentialsType(input) || 'arm_template';
 
   const options = getAzureCredentialsFormOptions();
 
   const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
 
-  const setupFormat = getAzureCredentialsType(input);
+  const setupFormat = azureCredentialsType;
 
   const group = options[azureCredentialsType];
   const fields = getInputVarsFields(input, group.fields);

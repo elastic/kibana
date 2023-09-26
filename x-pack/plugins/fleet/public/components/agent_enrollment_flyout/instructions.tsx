@@ -79,11 +79,10 @@ export const Instructions = (props: InstructionProps) => {
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
-  console.log({ t: props.cloudSecurityIntegration });
-
   useEffect(() => {
     // If we detect a CloudFormation integration, we want to hide the selection type
     if (
+      props.cloudSecurityIntegration?.isAzureArmTemplate ||
       props.cloudSecurityIntegration?.isCloudFormation ||
       props.cloudSecurityIntegration?.cloudShellUrl
     ) {

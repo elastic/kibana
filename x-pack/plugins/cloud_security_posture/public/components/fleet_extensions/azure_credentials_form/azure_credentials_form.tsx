@@ -11,7 +11,7 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { NewPackagePolicyPostureInput } from '../utils';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 
@@ -26,7 +26,7 @@ const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) 
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="xpack.csp.awsIntegration.setupInfoContentTitle"
+            id="xpack.csp.azureIntegration.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>
@@ -34,13 +34,13 @@ const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) 
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
+          id="xpack.csp.azureIntegration.gettingStarted.setupInfoContent"
           defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={integrationLink} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started guide"
                 />
               </EuiLink>
@@ -52,7 +52,7 @@ const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) 
   );
 };
 
-const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
+const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: 'arm_template',
     label: 'ARM Template',
@@ -62,7 +62,7 @@ const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    disabled: false,
+    disabled: true,
     tooltip: i18n.translate(
       'xpack.csp.azureIntegration.setupFormatOptions.manual.disabledTooltip',
       { defaultMessage: 'Coming Soon' }
@@ -72,7 +72,7 @@ const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
 
 interface Props {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   onChange: any;

@@ -38,6 +38,7 @@ export interface CloudSecurityIntegration {
   integrationType: CloudSecurityIntegrationType | undefined;
   isLoading: boolean;
   isCloudFormation: boolean;
+  isAzureArmTemplate: boolean;
   cloudFormationProps?: CloudFormationProps;
   azureArmTemplateProps?: AzureArmTemplateProps;
   cloudShellUrl: string | undefined;

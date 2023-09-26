@@ -44,9 +44,9 @@ export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
       size="m"
       isLoading={isLoading || cloudSecurityIntegration?.isLoading}
       contentAriaLabel={i18n.translate(
-        'xpack.fleet.agentEnrollment.cloudFormation.loadingAriaLabel',
+        'xpack.fleet.agentEnrollment.azureArmTemplate.loadingAriaLabel',
         {
-          defaultMessage: 'Loading CloudFormation instructions',
+          defaultMessage: 'Loading ARM Template instructions',
         }
       )}
     >
@@ -64,8 +64,8 @@ export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
         href={azureArmTemplateUrl}
       >
         <FormattedMessage
-          id="xpack.fleet.agentEnrollment.cloudFormation.launchButton"
-          defaultMessage="Launch CloudFormation"
+          id="xpack.fleet.agentEnrollment.azureArmTemplate.launchButton"
+          defaultMessage="Launch ARM Template"
         />
       </EuiButton>
     </EuiSkeletonText>
