@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { backoff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -532,9 +533,30 @@ export class FleetPlugin
           )
           .toPromise();
 
-        await setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
+
+        // Retry Fleet setup indefinitely w/ backoff
+        // TODO: limit to only Serverless?
+        await backoff(
+          async () => {
+            await setupFleet(
+              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.elasticsearch.client.asInternalUser
+            );
+          },
+          {
+            numOfAttempts: Infinity,
+            startingDelay: 250, // 250ms
+            maxDelay: 60000,    // 60s
+            timeMultiple: 2,
+            jitter: 'full',
+            retry: (error: any, attemptCount: number) =>{
+              this.fleetStatus$.next({
+                level: ServiceStatusLevels.available,
+                summary: `Fleet is retrying setup attempt ${attemptCount} after error: ${error}`,
+              })
+              return true;
+            }
+          }
         );
 
         this.fleetStatus$.next({
