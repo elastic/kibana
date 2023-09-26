@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { FunctionComponent, Fragment, useState } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,34 +82,20 @@ interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
-interface State {
-  showStackPopover: boolean;
-  showPhaseExecutionPopover: boolean;
-}
 
-export class IndexLifecycleSummary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      showStackPopover: false,
-      showPhaseExecutionPopover: false,
-    };
-  }
-  toggleStackPopover = () => {
-    this.setState({ showStackPopover: !this.state.showStackPopover });
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+  const [showPhaseExecutionPopover, setShowPhaseExecutionPopover] = useState<boolean>(false);
+  const { ilm } = index;
+
+  const togglePhaseExecutionPopover = () => {
+    setShowPhaseExecutionPopover(!showPhaseExecutionPopover);
   };
-  closeStackPopover = () => {
-    this.setState({ showStackPopover: false });
+  const closePhaseExecutionPopover = () => {
+    setShowPhaseExecutionPopover(false);
   };
-  togglePhaseExecutionPopover = () => {
-    this.setState({ showPhaseExecutionPopover: !this.state.showPhaseExecutionPopover });
-  };
-  closePhaseExecutionPopover = () => {
-    this.setState({ showPhaseExecutionPopover: false });
-  };
-  renderPhaseExecutionPopoverButton(ilm: IndexLifecyclePolicy) {
+  const renderPhaseExecutionPopoverButton = () => {
     const button = (
-      <EuiLink onClick={this.togglePhaseExecutionPopover}>
+      <EuiLink onClick={togglePhaseExecutionPopover}>
         <FormattedMessage
           defaultMessage="Show definition"
           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
@@ -131,8 +117,8 @@ export class IndexLifecycleSummary extends Component<Props, State> {
             key="phaseExecutionPopover"
             id="phaseExecutionPopover"
             button={button}
-            isOpen={this.state.showPhaseExecutionPopover}
-            closePopover={this.closePhaseExecutionPopover}
+            isOpen={showPhaseExecutionPopover}
+            closePopover={closePhaseExecutionPopover}
           >
             <EuiPopoverTitle>
               <FormattedMessage
@@ -147,11 +133,8 @@ export class IndexLifecycleSummary extends Component<Props, State> {
         </EuiDescriptionListDescription>
       </Fragment>
     );
-  }
-  buildRows() {
-    const {
-      index: { ilm },
-    } = this.props;
+  };
+  const buildRows = () => {
     const headers = getHeaders();
     const rows: {
       left: JSX.Element[];
@@ -168,7 +151,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       } else if (fieldName === 'policy') {
         content = (
           <EuiLink
-            href={this.props.getUrlForApp('management', {
+            href={getUrlForApp('management', {
               path: `data/index_lifecycle_management/${getPolicyEditPath(value)}`,
             })}
           >
@@ -196,72 +179,67 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       }
     });
     if (ilm.phase_execution) {
-      rows.right.push(this.renderPhaseExecutionPopoverButton(ilm));
+      rows.right.push(renderPhaseExecutionPopoverButton());
     }
     return rows;
-  }
+  };
 
-  render() {
-    const {
-      index: { ilm },
-    } = this.props;
-    if (!ilm.managed) {
-      return null;
-    }
-    const { left, right } = this.buildRows();
-    return (
-      <>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              defaultMessage="Index lifecycle management"
-              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
-            />
-          </h3>
-        </EuiTitle>
-        {ilm.step_info && ilm.step_info.type ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              color="danger"
-              title={
-                <FormattedMessage
-                  defaultMessage="Index lifecycle error"
-                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
-                />
-              }
-              iconType="cross"
-            >
-              {ilm.step_info.type}: {ilm.step_info.reason}
-            </EuiCallOut>
-          </>
-        ) : null}
-        {ilm.step_info && ilm.step_info!.message ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              color="primary"
-              title={
-                <FormattedMessage
-                  defaultMessage="Action status"
-                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
-                />
-              }
-            >
-              {ilm.step_info!.message}
-            </EuiCallOut>
-          </>
-        ) : null}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{left}</EuiDescriptionList>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{right}</EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
+  if (!ilm.managed) {
+    return null;
   }
-}
+  const { left, right } = buildRows();
+  return (
+    <>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            defaultMessage="Index lifecycle management"
+            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
+          />
+        </h3>
+      </EuiTitle>
+      {ilm.step_info && ilm.step_info.type ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="danger"
+            title={
+              <FormattedMessage
+                defaultMessage="Index lifecycle error"
+                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+              />
+            }
+            iconType="cross"
+          >
+            {ilm.step_info.type}: {ilm.step_info.reason}
+          </EuiCallOut>
+        </>
+      ) : null}
+      {ilm.step_info && ilm.step_info!.message ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="primary"
+            title={
+              <FormattedMessage
+                defaultMessage="Action status"
+                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
+              />
+            }
+          >
+            {ilm.step_info!.message}
+          </EuiCallOut>
+        </>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList type="column">{left}</EuiDescriptionList>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiDescriptionList type="column">{right}</EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
