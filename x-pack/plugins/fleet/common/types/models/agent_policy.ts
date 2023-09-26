@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
@@ -77,15 +79,7 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
-export interface FullAgentPolicyOutputPermissions {
-  [packagePolicyName: string]: {
-    cluster?: string[];
-    indices?: Array<{
-      names: string[];
-      privileges: string[];
-    }>;
-  };
-}
+export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;
