@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 import {
   FIELD_TYPES,
@@ -37,6 +37,7 @@ import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
+import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
@@ -68,11 +69,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const { defaultTimezone, isBrowser } = useDefaultTimezone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
+
+    const hasSetInitialCategories = useRef<boolean>(isEditMode);
+
     const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
       useCreateMaintenanceWindow();
     const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
       useUpdateMaintenanceWindow();
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
+
+    const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
@@ -164,6 +170,26 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
       return m;
     }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
+
+    const availableCategories = useMemo(() => {
+      if (!ruleTypes) {
+        return [];
+      }
+      return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
+    }, [ruleTypes]);
+
+    useEffect(() => {
+      if (!ruleTypes) {
+        return;
+      }
+      if (hasSetInitialCategories.current) {
+        return;
+      }
+
+      setFieldValue('categoryIds', [...new Set(ruleTypes.map((ruleType) => ruleType.category))]);
+      hasSetInitialCategories.current = true;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ruleTypes]);
 
     return (
       <Form form={form}>
@@ -269,9 +295,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <UseField path="categoryIds">
-              {() => (
+              {(field) => (
                 <MaintenanceWindowCategorySelection
                   selectedCategories={categoryIds}
+                  availableCategories={availableCategories}
+                  isLoading={isLoadingRuleTypes}
+                  errors={field.errors.map((error) => error.message)}
                   onChange={onCategoryIdsChange}
                 />
               )}

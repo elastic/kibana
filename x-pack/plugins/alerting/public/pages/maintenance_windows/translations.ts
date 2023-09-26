@@ -158,6 +158,13 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
+export const CREATE_FORM_CATEGORY_IDS_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.required',
+  {
+    defaultMessage: 'A category is required.',
+  }
+);
+
 export const CREATE_FORM_CATEGORY_SELECTION_TITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.title',
   {
@@ -177,6 +184,27 @@ export const CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE = i18n.transl
   'xpack.alerting.maintenanceWindows.createForm.categorySelection.checkboxGroupTitle',
   {
     defaultMessage: 'Select the categories this should affect',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_OBSERVABILITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.observabilityRules',
+  {
+    defaultMessage: 'Observability rules',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_SECURITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.securityRules',
+  {
+    defaultMessage: 'Security rules',
+  }
+);
+
+export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoryIds.stackRules',
+  {
+    defaultMessage: 'Stack rules',
   }
 );
 

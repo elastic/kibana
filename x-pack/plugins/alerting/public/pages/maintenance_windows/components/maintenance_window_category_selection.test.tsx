@@ -6,74 +6,56 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
 const mockOnChange = jest.fn();
-
-jest.mock('../../../utils/kibana_react');
-jest.mock('../../../services/alert_api', () => ({
-  loadRuleTypes: jest.fn(),
-}));
-
-const { loadRuleTypes } = jest.requireMock('../../../services/alert_api');
-const { useKibana } = jest.requireMock('../../../utils/kibana_react');
 
 describe('maintenanceWindowCategorySelection', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    loadRuleTypes.mockResolvedValue([
-      { category: 'observability' },
-      { category: 'management' },
-      { category: 'securitySolution' },
-    ]);
-
-    useKibana.mockReturnValue({
-      services: {
-        notifications: {
-          toasts: {
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
-          },
-        },
-      },
-    });
-
     appMockRenderer = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
     appMockRenderer.render(
-      <MaintenanceWindowCategorySelection selectedCategories={[]} onChange={mockOnChange} />
+      <MaintenanceWindowCategorySelection
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        onChange={mockOnChange}
+      />
     );
 
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId('checkbox-observability')).not.toBeDisabled();
+    expect(screen.getByTestId('checkbox-securitySolution')).not.toBeDisabled();
+    expect(screen.getByTestId('checkbox-management')).not.toBeDisabled();
+  });
 
-    expect(screen.getByTestId('checkbox-observability')).toBeInTheDocument();
-    expect(screen.getByTestId('checkbox-securitySolution')).toBeInTheDocument();
-    expect(screen.getByTestId('checkbox-management')).toBeInTheDocument();
+  it('should disable options if option is not in the available categories array', () => {
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        selectedCategories={[]}
+        availableCategories={[]}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(screen.getByTestId('checkbox-observability')).toBeDisabled();
+    expect(screen.getByTestId('checkbox-securitySolution')).toBeDisabled();
+    expect(screen.getByTestId('checkbox-management')).toBeDisabled();
   });
 
   it('can initialize checkboxes with initial values from props', async () => {
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={['securitySolution', 'management']}
+        availableCategories={['observability', 'management', 'securitySolution']}
         onChange={mockOnChange}
       />
     );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
 
     expect(screen.getByTestId('checkbox-observability')).not.toBeChecked();
     expect(screen.getByTestId('checkbox-securitySolution')).toBeChecked();
@@ -84,15 +66,10 @@ describe('maintenanceWindowCategorySelection', () => {
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
         selectedCategories={['observability']}
+        availableCategories={['observability', 'management', 'securitySolution']}
         onChange={mockOnChange}
       />
     );
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
 
     const managementCheckbox = screen.getByTestId('checkbox-management');
     const securityCheckbox = screen.getByTestId('checkbox-securitySolution');
@@ -106,24 +83,27 @@ describe('maintenanceWindowCategorySelection', () => {
     expect(mockOnChange).toHaveBeenLastCalledWith('securitySolution', expect.anything());
   });
 
-  it('disables option if user does not have the capability for a rule type', async () => {
-    loadRuleTypes.mockResolvedValue([{ category: 'observability' }, { category: 'management' }]);
-
+  it('should display loading spinner if isLoading is true', () => {
     appMockRenderer.render(
       <MaintenanceWindowCategorySelection
-        selectedCategories={['observability']}
+        isLoading
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
         onChange={mockOnChange}
       />
     );
+    expect(screen.getByTestId('maintenanceWindowCategorySelectionLoading')).toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    const securityCheckbox = screen.getByTestId('checkbox-securitySolution');
-
-    expect(securityCheckbox).toBeDisabled();
+  it('should display error message if it exists', () => {
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        errors={['test error']}
+        onChange={mockOnChange}
+      />
+    );
+    expect(screen.getByText('test error')).toBeInTheDocument();
   });
 });

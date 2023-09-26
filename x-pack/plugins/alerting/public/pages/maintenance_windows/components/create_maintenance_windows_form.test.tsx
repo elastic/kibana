@@ -115,7 +115,7 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
-          categoryIds: ['observability', 'management'],
+          categoryIds: [],
         }}
       />
     );
@@ -145,7 +145,7 @@ describe('CreateMaintenanceWindowForm', () => {
     ).getByTestId('checkbox-management');
 
     expect(observabilityInput).toBeChecked();
-    expect(securityInput).not.toBeChecked();
+    expect(securityInput).toBeChecked();
     expect(managementInput).toBeChecked();
     expect(titleInput).toHaveValue('test');
     expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
@@ -173,17 +173,21 @@ describe('CreateMaintenanceWindowForm', () => {
       result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-management');
 
-    fireEvent.click(observabilityInput);
-
     expect(observabilityInput).toBeChecked();
-    expect(securityInput).not.toBeChecked();
-    expect(managementInput).not.toBeChecked();
+    expect(securityInput).toBeChecked();
+    expect(managementInput).toBeChecked();
 
-    fireEvent.click(securityInput);
     fireEvent.click(observabilityInput);
 
     expect(observabilityInput).not.toBeChecked();
     expect(securityInput).toBeChecked();
-    expect(managementInput).not.toBeChecked();
+    expect(managementInput).toBeChecked();
+
+    fireEvent.click(securityInput);
+    fireEvent.click(observabilityInput);
+
+    expect(observabilityInput).toBeChecked();
+    expect(securityInput).not.toBeChecked();
+    expect(managementInput).toBeChecked();
   });
 });
