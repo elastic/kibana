@@ -515,6 +515,9 @@
                     "$ref": "#/components/schemas/update_connector_request_teams"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_tines"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_torq"
                   },
                   {
@@ -2798,13 +2801,34 @@
         "title": "Connector request properties for a Tines connector",
         "description": "Defines properties for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "description": "The Tines tenant URL. If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.\n",
+            "type": "string"
+          }
+        }
       },
       "secrets_properties_tines": {
         "title": "Connector secrets properties for a Tines connector",
         "description": "Defines secrets for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "email",
+          "token"
+        ],
+        "properties": {
+          "email": {
+            "description": "The email used to sign in to Tines.",
+            "type": "string"
+          },
+          "token": {
+            "description": "The Tines API token.",
+            "type": "string"
+          }
+        }
       },
       "create_connector_request_tines": {
         "title": "Create Tines connector request",
@@ -4334,6 +4358,27 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_teams"
+          }
+        }
+      },
+      "update_connector_request_tines": {
+        "title": "Update Tines connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_tines"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_tines"
           }
         }
       },
