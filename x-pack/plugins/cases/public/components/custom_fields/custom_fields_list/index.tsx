@@ -20,7 +20,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
 import { DeleteConfirmationModal } from '../delete_confirmation_modal';
@@ -85,12 +84,8 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
-                                <EuiText
-                                  css={css`
-                                    font-weight: ${euiTheme.font.weight.bold};
-                                  `}
-                                >
-                                  {customField.label}
+                                <EuiText>
+                                  <h4>{customField.label}</h4>
                                 </EuiText>
                               </EuiFlexItem>
                               <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
