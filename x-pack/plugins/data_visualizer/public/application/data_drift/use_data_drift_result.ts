@@ -17,11 +17,14 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
+import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -39,12 +42,13 @@ import {
   Result,
   isNumericDriftData,
   Feature,
-  DataComparisonField,
+  DataDriftField,
   TimeRange,
+  ComparisonHistogram,
 } from './types';
-import { computeChi2PValue } from './data_comparison_utils';
+import { computeChi2PValue } from './data_drift_utils';
 
-export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
+export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {
     case 'number':
       return DATA_COMPARISON_TYPE.NUMERIC;
@@ -58,6 +62,41 @@ export const getDataComparisonType = (kibanaType: string): DataComparisonField['
 
 type UseDataSearch = ReturnType<typeof useDataSearch>;
 
+const computeDomain = (comparisonDistribution: Histogram[] | ComparisonHistogram[]) => {
+  const domain: NonNullable<Feature['domain']> = {
+    x: { min: 0, max: 0 },
+    percentage: { min: 0, max: 0 },
+    doc_count: { min: 0, max: 0 },
+  };
+
+  comparisonDistribution.forEach((dist) => {
+    if (isDefined<number>(dist.percentage)) {
+      if (dist.percentage >= domain.percentage.max) {
+        domain.percentage.max = dist.percentage;
+      } else {
+        domain.percentage.min = dist.percentage;
+      }
+    }
+
+    if (isDefined<number>(dist.doc_count)) {
+      if (dist.doc_count >= domain.doc_count.max) {
+        domain.doc_count.max = dist.doc_count;
+      } else {
+        domain.doc_count.min = dist.doc_count;
+      }
+    }
+
+    const parsedKey = typeof dist.key === 'number' ? dist.key : parseFloat(dist.key);
+    if (!isNaN(parsedKey)) {
+      if (parsedKey >= domain.x.max) {
+        domain.x.max = parsedKey;
+      } else {
+        domain.x.min = parsedKey;
+      }
+    }
+  });
+  return domain;
+};
 export const useDataSearch = <T>() => {
   const { data } = useDataVisualizerKibana().services;
 
@@ -130,10 +169,16 @@ const processDataComparisonResult = (
 ): Feature[] => {
   return Object.entries(result).map(([featureName, data]) => {
     if (isNumericDriftData(data)) {
-      // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
+      // normalize data.referenceHistogram and data.comparisonHistogram to use frequencies instead of counts
       const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
-      const productionHistogram: Histogram[] = normalizeHistogram(data.productionHistogram);
+      const comparisonHistogram: Histogram[] = normalizeHistogram(data.comparisonHistogram);
 
+      const comparisonDistribution: ComparisonHistogram[] = [
+        ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+        ...comparisonHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
+      ];
+
+      const domain = computeDomain(comparisonHistogram);
       return {
         featureName,
         secondaryType: data.secondaryType,
@@ -141,11 +186,9 @@ const processDataComparisonResult = (
         driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
         similarityTestPValue: data.pValue,
         referenceHistogram: referenceHistogram ?? [],
-        productionHistogram: productionHistogram ?? [],
-        comparisonDistribution: [
-          ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-          ...productionHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
-        ],
+        comparisonHistogram: comparisonHistogram ?? [],
+        comparisonDistribution,
+        domain,
       };
     }
 
@@ -163,12 +206,12 @@ const processDataComparisonResult = (
       (acc, term) => acc + term.doc_count,
       data.baselineSumOtherDocCount
     );
-    const productionTotalDocCount: number = data.driftedTerms.reduce(
+    const comparisonTotalDocCount: number = data.driftedTerms.reduce(
       (acc, term) => acc + term.doc_count,
       data.driftedSumOtherDocCount
     );
 
-    // Sort the categories (allKeys) by the following metric: Math.abs(productionDocCount-referenceDocCount)/referenceDocCount
+    // Sort the categories (allKeys) by the following metric: Math.abs(comparisonDocCount-referenceDocCount)/referenceDocCount
     const sortedKeys = allKeys
       .map((k) => {
         const key = k.toString();
@@ -176,11 +219,11 @@ const processDataComparisonResult = (
         const driftedTerm = data.driftedTerms.find((t) => t.key === key);
         if (baselineTerm && driftedTerm) {
           const referencePercentage = baselineTerm.doc_count / referenceTotalDocCount;
-          const productionPercentage = driftedTerm.doc_count / productionTotalDocCount;
+          const comparisonPercentage = driftedTerm.doc_count / comparisonTotalDocCount;
           return {
             key,
             relative_drift:
-              Math.abs(productionPercentage - referencePercentage) / referencePercentage,
+              Math.abs(comparisonPercentage - referencePercentage) / referencePercentage,
           };
         }
         return {
@@ -199,10 +242,14 @@ const processDataComparisonResult = (
     const { normalizedTerms: normalizedDriftedTerms } = normalizeTerms(
       data.driftedTerms,
       sortedKeys,
-      productionTotalDocCount
+      comparisonTotalDocCount
     );
 
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
+    const comparisonDistribution = [
+      ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+      ...normalizedDriftedTerms.map((h) => ({ ...h, g: COMPARISON_LABEL })),
+    ];
     return {
       featureName,
       secondaryType: data.secondaryType,
@@ -210,11 +257,9 @@ const processDataComparisonResult = (
       driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
       similarityTestPValue: pValue,
       referenceHistogram: normalizedBaselineTerms ?? [],
-      productionHistogram: normalizedDriftedTerms ?? [],
-      comparisonDistribution: [
-        ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-        ...normalizedDriftedTerms.map((h) => ({ ...h, g: COMPARISON_LABEL })),
-      ],
+      comparisonHistogram: normalizedDriftedTerms ?? [],
+      comparisonDistribution,
+      domain: computeDomain(comparisonDistribution),
     };
   });
 };
@@ -259,13 +304,13 @@ const getDataComparisonQuery = ({
     }
   }
 
-  const refDataQuery: NonNullable<estypes.SearchRequest['body']> = {
+  const queryAndRuntimeMappings: NonNullable<estypes.SearchRequest['body']> = {
     query,
   };
   if (runtimeFields) {
-    refDataQuery.runtime_mappings = runtimeFields;
+    queryAndRuntimeMappings.runtime_mappings = runtimeFields;
   }
-  return refDataQuery;
+  return queryAndRuntimeMappings;
 };
 
 const fetchReferenceBaselineData = async ({
@@ -277,7 +322,7 @@ const fetchReferenceBaselineData = async ({
 }: {
   baseRequest: EsRequestParams;
   dataSearch: UseDataSearch;
-  fields: DataComparisonField[];
+  fields: DataDriftField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
 }) => {
@@ -332,7 +377,7 @@ const fetchComparisonDriftedData = async ({
 }: {
   baseRequest: EsRequestParams;
   dataSearch: UseDataSearch;
-  fields: DataComparisonField[];
+  fields: DataDriftField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
   baselineResponseAggs: object;
@@ -411,7 +456,7 @@ const fetchHistogramData = async ({
 }: {
   baseRequest: EsRequestParams;
   dataSearch: UseDataSearch;
-  fields: DataComparisonField[];
+  fields: DataDriftField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
   baselineResponseAggs: Record<string, estypes.AggregationsStatsAggregate>;
@@ -504,14 +549,14 @@ export const fetchInParallelChunks = async <
   asyncFetchFn,
   errorMsg,
 }: {
-  fields: DataComparisonField[];
+  fields: DataDriftField[];
   randomSamplerWrapper: RandomSamplerWrapper;
-  asyncFetchFn: (chunkedFields: DataComparisonField[]) => Promise<ReturnedRespFromFetchFn>;
+  asyncFetchFn: (chunkedFields: DataDriftField[]) => Promise<ReturnedRespFromFetchFn>;
   errorMsg?: string;
 }): Promise<ReturnedRespFromFetchFn | ReturnedError> => {
   const { unwrap } = randomSamplerWrapper;
   const results = await Promise.allSettled(
-    chunk(fields, 30).map((chunkedFields: DataComparisonField[]) => asyncFetchFn(chunkedFields))
+    chunk(fields, 30).map((chunkedFields: DataDriftField[]) => asyncFetchFn(chunkedFields))
   );
 
   const mergedResults = results
@@ -532,7 +577,7 @@ export const fetchInParallelChunks = async <
       // eslint-disable-next-line no-console
       console.error(error);
       return {
-        error: errorMsg ?? 'An error occurred fetching data comparison data',
+        error: errorMsg ?? 'An error occurred fetching data drift data',
         errorBody: error.reason.message,
       };
     }
@@ -551,22 +596,29 @@ const initialState = {
   error: undefined,
   errorBody: undefined,
 };
+
+export interface InitialSettings {
+  index: string;
+  comparison: string;
+  reference: string;
+  timeField: string;
+}
+
 export const useFetchDataComparisonResult = (
   {
     fields,
+    initialSettings,
     currentDataView,
     timeRanges,
-    searchQuery,
     searchString,
+    searchQueryLanguage,
     lastRefresh,
-    randomSampler,
   }: {
     lastRefresh: number;
-    randomSampler?: RandomSampler;
-    fields?: DataComparisonField[];
+    initialSettings?: InitialSettings;
+    fields?: DataDriftField[];
     currentDataView?: DataView;
-    timeRanges?: { reference: TimeRange; production: TimeRange };
-    searchQuery?: estypes.QueryDslQueryContainer;
+    timeRanges?: { reference: TimeRange; comparison: TimeRange };
     searchString?: Query['query'];
     searchQueryLanguage?: SearchQueryLanguage;
   } = { lastRefresh: 0 }
@@ -576,6 +628,13 @@ export const useFetchDataComparisonResult = (
   const [loaded, setLoaded] = useState<number>(0);
   const [progressMessage, setProgressMessage] = useState<string | undefined>();
   const abortController = useRef(new AbortController());
+  const {
+    uiSettings,
+    data: { query: queryManager },
+  } = useDataVisualizerKibana().services;
+
+  const { reference: referenceStateManager, comparison: comparisonStateManager } =
+    useDataDriftStateManagerContext();
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
@@ -588,9 +647,12 @@ export const useFetchDataComparisonResult = (
   useEffect(
     () => {
       const doFetchEsRequest = async function () {
-        if (!randomSampler) return;
+        const randomSampler = referenceStateManager.randomSampler;
+        const randomSamplerProd = comparisonStateManager.randomSampler;
+        if (!randomSampler || !randomSamplerProd) return;
 
         const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
+        const prodRandomSamplerWrapper = randomSamplerProd.createRandomSamplerWrapper();
 
         setLoaded(0);
         setResult({
@@ -600,7 +662,7 @@ export const useFetchDataComparisonResult = (
         });
 
         setProgressMessage(
-          i18n.translate('xpack.dataVisualizer.dataComparison.progress.started', {
+          i18n.translate('xpack.dataVisualizer.dataDrift.progress.started', {
             defaultMessage: `Ready to fetch data for comparison.`,
           })
         );
@@ -611,19 +673,35 @@ export const useFetchDataComparisonResult = (
         setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
 
         // Place holder for when there might be difference data views in the future
-        const referenceIndex = currentDataView?.getIndexPattern();
-        const productionIndex = referenceIndex;
+        const referenceIndex = initialSettings
+          ? initialSettings.reference
+          : currentDataView?.getIndexPattern();
+        const comparisonIndex = initialSettings ? initialSettings.comparison : referenceIndex;
 
         const runtimeFields = currentDataView?.getRuntimeMappings();
 
         setProgressMessage(
-          i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedFields', {
+          i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedFields', {
             defaultMessage: `Loaded fields from index '{referenceIndex}' to analyze.`,
             values: { referenceIndex },
           })
         );
+
+        const kqlQuery =
+          searchString !== undefined && searchQueryLanguage !== undefined
+            ? { query: searchString, language: searchQueryLanguage }
+            : undefined;
+
         const refDataQuery = getDataComparisonQuery({
-          searchQuery,
+          searchQuery: createMergedEsQuery(
+            kqlQuery,
+            mapAndFlattenFilters([
+              ...queryManager.filterManager.getFilters(),
+              ...(referenceStateManager.filters ?? []),
+            ]),
+            currentDataView,
+            uiSettings
+          ),
           datetimeField: currentDataView?.timeFieldName,
           runtimeFields,
           timeRange: timeRanges?.reference,
@@ -633,7 +711,7 @@ export const useFetchDataComparisonResult = (
           const fieldsCount = fields.length;
 
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingReference', {
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingReference', {
               defaultMessage: `Loading reference data for {fieldsCount} fields.`,
               values: { fieldsCount },
             })
@@ -673,45 +751,54 @@ export const useFetchDataComparisonResult = (
           }
 
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedReference', {
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedReference', {
               defaultMessage: `Loaded reference data.`,
             })
           );
           setLoaded(0.25);
 
           const prodDataQuery = getDataComparisonQuery({
-            searchQuery,
+            searchQuery: createMergedEsQuery(
+              kqlQuery,
+              mapAndFlattenFilters([
+                ...queryManager.filterManager.getFilters(),
+                ...(comparisonStateManager.filters ?? []),
+              ]),
+              currentDataView,
+              uiSettings
+            ),
             datetimeField: currentDataView?.timeFieldName,
             runtimeFields,
-            timeRange: timeRanges?.production,
+            timeRange: timeRanges?.comparison,
           });
 
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingComparison', {
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingComparison', {
               defaultMessage: `Loading comparison data for {fieldsCount} fields.`,
               values: { fieldsCount },
             })
           );
 
           const driftedRequest: EsRequestParams = {
-            index: productionIndex,
+            index: comparisonIndex,
             body: {
               size: 0,
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
               ...prodDataQuery,
             },
           };
+
           const driftedRespAggs = await fetchInParallelChunks({
             fields,
-            randomSamplerWrapper,
+            randomSamplerWrapper: prodRandomSamplerWrapper,
 
-            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+            asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchComparisonDriftedData({
                 dataSearch,
                 baseRequest: driftedRequest,
                 baselineResponseAggs,
                 fields: chunkedFields,
-                randomSamplerWrapper,
+                randomSamplerWrapper: prodRandomSamplerWrapper,
                 signal,
               }),
           });
@@ -727,7 +814,7 @@ export const useFetchDataComparisonResult = (
 
           setLoaded(0.5);
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedComparison', {
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedComparison', {
               defaultMessage: `Loaded comparison data. Now loading histogram data.`,
             })
           );
@@ -745,7 +832,7 @@ export const useFetchDataComparisonResult = (
             fields,
             randomSamplerWrapper,
 
-            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+            asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchHistogramData({
                 dataSearch,
                 baseRequest: referenceHistogramRequest,
@@ -769,16 +856,13 @@ export const useFetchDataComparisonResult = (
 
           setLoaded(0.75);
           setProgressMessage(
-            i18n.translate(
-              'xpack.dataVisualizer.dataComparison.progress.loadedReferenceHistogram',
-              {
-                defaultMessage: `Loaded histogram data for reference data set.`,
-              }
-            )
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedReferenceHistogram', {
+              defaultMessage: `Loaded histogram data for reference data set.`,
+            })
           );
 
-          const productionHistogramRequest: EsRequestParams = {
-            index: productionIndex,
+          const comparisonHistogramRequest: EsRequestParams = {
+            index: comparisonIndex,
             body: {
               size: 0,
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
@@ -786,14 +870,14 @@ export const useFetchDataComparisonResult = (
             },
           };
 
-          const productionHistogramRespAggs = await fetchInParallelChunks({
+          const comparisonHistogramRespAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
 
-            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+            asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchHistogramData({
                 dataSearch,
-                baseRequest: productionHistogramRequest,
+                baseRequest: comparisonHistogramRequest,
                 baselineResponseAggs,
                 driftedRespAggs,
                 fields: chunkedFields,
@@ -802,12 +886,12 @@ export const useFetchDataComparisonResult = (
               }),
           });
 
-          if (isReturnedError(productionHistogramRespAggs)) {
+          if (isReturnedError(comparisonHistogramRespAggs)) {
             setResult({
               data: undefined,
               status: FETCH_STATUS.FAILURE,
-              error: productionHistogramRespAggs.error,
-              errorBody: productionHistogramRespAggs.errorBody,
+              error: comparisonHistogramRespAggs.error,
+              errorBody: comparisonHistogramRespAggs.errorBody,
             });
             return;
           }
@@ -818,14 +902,14 @@ export const useFetchDataComparisonResult = (
               type === DATA_COMPARISON_TYPE.NUMERIC &&
               driftedRespAggs[`${field}_ks_test`] &&
               referenceHistogramRespAggs[`${field}_histogram`] &&
-              productionHistogramRespAggs[`${field}_histogram`]
+              comparisonHistogramRespAggs[`${field}_histogram`]
             ) {
               data[field] = {
                 secondaryType,
                 type: DATA_COMPARISON_TYPE.NUMERIC,
                 pValue: driftedRespAggs[`${field}_ks_test`].two_sided,
                 referenceHistogram: referenceHistogramRespAggs[`${field}_histogram`].buckets,
-                productionHistogram: productionHistogramRespAggs[`${field}_histogram`].buckets,
+                comparisonHistogram: comparisonHistogramRespAggs[`${field}_histogram`].buckets,
               };
             }
             if (
@@ -846,7 +930,7 @@ export const useFetchDataComparisonResult = (
           }
 
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedHistogramData', {
+            i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedHistogramData', {
               defaultMessage: `Loaded histogram data for comparison data set.`,
             })
           );
@@ -862,7 +946,7 @@ export const useFetchDataComparisonResult = (
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
-            error: 'An error occurred while fetching data comparison data',
+            error: 'An error occurred while fetching data drift data',
             errorBody: extractErrorMessage(e),
           });
         }
@@ -872,6 +956,8 @@ export const useFetchDataComparisonResult = (
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      referenceStateManager,
+      comparisonStateManager,
       dataSearch,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({
