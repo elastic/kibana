@@ -24,9 +24,21 @@ echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-docker pull "$SOURCE_IMAGE"
-docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
-docker push "$TARGET_IMAGE"
+
+ARM_64_DIGEST=$(docker pull --platform linux/arm64 "$SOURCE_IMAGE" | grep Digest: | sed 's/Digest: //')
+AMD_64_DIGEST=$(docker pull --platform linux/amd64 "$SOURCE_IMAGE" | grep Digest: | sed 's/Digest: //')
+
+docker tag "$SOURCE_IMAGE@$ARM_64_DIGEST" "$TARGET_IMAGE-arm64"
+docker tag "$SOURCE_IMAGE@$AMD_64_DIGEST" "$TARGET_IMAGE-amd64"
+
+docker push "$TARGET_IMAGE-arm64"
+docker push "$TARGET_IMAGE-amd64"
+
+docker manifest create "$TARGET_IMAGE" \
+--amend "$TARGET_IMAGE-arm64" \
+--amend "$TARGET_IMAGE-amd64" \
+
+docker manifest push "$TARGET_IMAGE"
 
 ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
 ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
