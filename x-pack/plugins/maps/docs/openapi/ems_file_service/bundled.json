@@ -1,0 +1,533 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Elastic Maps File Service",
+    "description": "OpenAPI schema for the Elastic Maps File Service manifest endpoint",
+    "version": "0.1",
+    "contact": {
+      "name": "Presentation Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://vector.maps.elastic.co",
+      "description": "Production"
+    },
+    {
+      "url": "https://storage.googleapis.com/elastic-bekitzur-emsfiles-vector-dev",
+      "description": "Staging"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "ems",
+      "description": "Elastic Maps Service."
+    }
+  ],
+  "paths": {
+    "/latest/manifest": {
+      "get": {
+        "operationId": "getFileManifest",
+        "tags": [
+          "ems"
+        ],
+        "summary": "Manifest of the EMS File Service",
+        "description": "Describes the layers available with formats and other metadata",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Manifest is returned",
+            "content": {
+              "application/json": {
+                "example": {
+                  "version": "2023-10-31",
+                  "layers": [
+                    {
+                      "layer_id": "world_countries",
+                      "created_at": "2020-10-28T16:16:08.720286",
+                      "attribution": [
+                        {
+                          "label": {
+                            "en": "Made with NaturalEarth"
+                          },
+                          "url": {
+                            "en": "http://www.naturalearthdata.com/about/terms-of-use"
+                          }
+                        },
+                        {
+                          "label": {
+                            "en": "OpenStreetMap contributors"
+                          },
+                          "url": {
+                            "en": "https://www.openstreetmap.org/copyright"
+                          }
+                        },
+                        {
+                          "label": {
+                            "en": "Elastic Maps Service"
+                          },
+                          "url": {
+                            "en": "https://www.elastic.co/elastic-maps-service"
+                          }
+                        }
+                      ],
+                      "formats": [
+                        {
+                          "type": "topojson",
+                          "url": "/files/world_countries_v7.topo.json",
+                          "legacy_default": true,
+                          "meta": {
+                            "feature_collection_path": "data"
+                          }
+                        },
+                        {
+                          "type": "geojson",
+                          "url": "/files/world_countries_v7.geo.json",
+                          "legacy_default": false
+                        }
+                      ],
+                      "fields": [
+                        {
+                          "type": "id",
+                          "id": "iso2",
+                          "label": {
+                            "en": "ISO 3166-1 alpha-2 code",
+                            "af": "landkode (ISO 3166-1 alpha-2)",
+                            "ar": "أيزو 3166-1 حرفي-2"
+                          },
+                          "regex": "^[A-Z]{2}$",
+                          "alias": [
+                            "(geo\\.){0,}country_iso_code$",
+                            "(country|countries)"
+                          ],
+                          "values": [
+                            "AD",
+                            "AE",
+                            "ZW"
+                          ]
+                        },
+                        {
+                          "type": "id",
+                          "id": "iso3",
+                          "label": {
+                            "en": "ISO 3166-1 alpha-3 code",
+                            "af": "landkode (ISO 3166-1 alpha-3)",
+                            "ar": "أيزو 3166-1 حرفي-3"
+                          },
+                          "regex": "^[A-Z]{3}$",
+                          "values": [
+                            "AND",
+                            "ARE",
+                            "ZWE"
+                          ]
+                        },
+                        {
+                          "type": "id",
+                          "id": "iso_numeric",
+                          "label": {
+                            "en": "ISO 3166-1 numeric code",
+                            "af": "landkode (ISO 3166-1 numeries)",
+                            "ar": "رمز إيزو الرقمي 3166-1"
+                          }
+                        },
+                        {
+                          "type": "property",
+                          "id": "name",
+                          "label": {
+                            "en": "name",
+                            "am": "ስም"
+                          },
+                          "alias": [
+                            "(country|countries)"
+                          ]
+                        }
+                      ],
+                      "legacy_ids": [
+                        "World Countries"
+                      ],
+                      "layer_name": {
+                        "en": "World Countries",
+                        "zh-tw": "國家"
+                      }
+                    },
+                    {
+                      "layer_id": "administrative_regions_lvl2",
+                      "created_at": "2020-07-06T22:19:49.290894",
+                      "attribution": [
+                        {
+                          "label": {
+                            "en": "Made with NaturalEarth"
+                          },
+                          "url": {
+                            "en": "http://www.naturalearthdata.com/about/terms-of-use"
+                          }
+                        },
+                        {
+                          "label": {
+                            "en": "OpenStreetMap contributors"
+                          },
+                          "url": {
+                            "en": "https://www.openstreetmap.org/copyright"
+                          }
+                        },
+                        {
+                          "label": {
+                            "en": "Elastic Maps Service"
+                          },
+                          "url": {
+                            "en": "https://www.elastic.co/elastic-maps-service"
+                          }
+                        }
+                      ],
+                      "formats": [
+                        {
+                          "type": "topojson",
+                          "url": "/files/admin_regions_lvl2_v2.topo.json",
+                          "legacy_default": true,
+                          "meta": {
+                            "feature_collection_path": "data"
+                          }
+                        },
+                        {
+                          "type": "geojson",
+                          "url": "/files/admin_regions_lvl2_v2.geo.json",
+                          "legacy_default": false
+                        }
+                      ],
+                      "fields": [
+                        {
+                          "type": "id",
+                          "id": "region_iso_code",
+                          "label": {
+                            "en": "Region ISO code"
+                          },
+                          "regex": "^[A-Z]{2}-[A-Z0-9]{1,3}~?$",
+                          "alias": [
+                            "(geo\\.){0,}region_iso_code"
+                          ],
+                          "values": [
+                            "AD-02",
+                            "AD-03",
+                            "AD-04"
+                          ]
+                        },
+                        {
+                          "type": "property",
+                          "id": "region_name",
+                          "label": {
+                            "en": "Region name"
+                          }
+                        },
+                        {
+                          "type": "property",
+                          "id": "country_iso2_code",
+                          "label": {
+                            "en": "Country ISO2 code"
+                          }
+                        },
+                        {
+                          "type": "property",
+                          "id": "country_iso3_code",
+                          "label": {
+                            "en": "Country ISO3 code"
+                          }
+                        },
+                        {
+                          "type": "property",
+                          "id": "country_name",
+                          "label": {
+                            "en": "Country name"
+                          }
+                        }
+                      ],
+                      "legacy_ids": [
+                        "Administrative regions"
+                      ],
+                      "layer_name": {
+                        "en": "Administrative regions",
+                        "zh-sg": "行政领土实体",
+                        "zh-tw": "行政領土實體"
+                      }
+                    },
+                    {
+                      "layer_id": "albania_counties",
+                      "created_at": "2019-08-06T22:16:16.377Z",
+                      "attribution": [
+                        {
+                          "label": {
+                            "en": "OpenStreetMap contributors"
+                          },
+                          "url": {
+                            "en": "https://www.openstreetmap.org/copyright"
+                          }
+                        },
+                        {
+                          "label": {
+                            "en": "Elastic Maps Service"
+                          },
+                          "url": {
+                            "en": "https://www.elastic.co/elastic-maps-service"
+                          }
+                        }
+                      ],
+                      "formats": [
+                        {
+                          "type": "geojson",
+                          "url": "/files/albania_counties_v1.geo.json",
+                          "legacy_default": true
+                        }
+                      ],
+                      "fields": [
+                        {
+                          "type": "id",
+                          "id": "iso_3166_2",
+                          "label": {
+                            "en": "ISO 3166-2 code",
+                            "af": "ISO 3166-2",
+                            "ar": "أيزو 3166-2"
+                          },
+                          "values": [
+                            "AL-05",
+                            "AL-01",
+                            "AL-12"
+                          ]
+                        },
+                        {
+                          "type": "property",
+                          "id": "label_en",
+                          "label": {
+                            "en": "name (en)",
+                            "am": "ስም (en)",
+                            "ar": "الاسم (en)"
+                          }
+                        },
+                        {
+                          "type": "property",
+                          "id": "label_sq",
+                          "label": {
+                            "en": "name (sq)",
+                            "am": "ስም (sq)",
+                            "ar": "الاسم (sq)"
+                          }
+                        }
+                      ],
+                      "legacy_ids": [
+                        "Albania Counties"
+                      ],
+                      "layer_name": {
+                        "en": "Albania Counties",
+                        "zh-sg": "阿尔巴尼亚行政区划",
+                        "zh-tw": "阿爾巴尼亞行政區劃"
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "description": "Version of the API as a date in YYYY-MM-DD format"
+                    },
+                    "layers": {
+                      "type": "array",
+                      "description": "An array of layer descriptions offered by the service",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "layer_id",
+                          "created_at",
+                          "attribution",
+                          "formats",
+                          "fields",
+                          "legacy_ids",
+                          "layer_name"
+                        ],
+                        "properties": {
+                          "layer_id": {
+                            "type": "string",
+                            "description": "Identifier of the layers"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "Date of the creation of the layer"
+                          },
+                          "attribution": {
+                            "$ref": "#/components/schemas/attribution"
+                          },
+                          "formats": {
+                            "type": "array",
+                            "description": "The dataset can be offered in one or more different formats",
+                            "minItems": 1,
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "type",
+                                "url"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Data layers can be stored in topojson or geojson format",
+                                  "enum": [
+                                    "topojson",
+                                    "geojson"
+                                  ]
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "description": "The relative path to the data"
+                                },
+                                "legacy_default": {
+                                  "type": "boolean",
+                                  "description": "Is this the default format to offer?"
+                                },
+                                "meta": {
+                                  "type": "object",
+                                  "description": "Additional metadata needed to parse the file",
+                                  "additionalProperties": true
+                                }
+                              }
+                            }
+                          },
+                          "fields": {
+                            "type": "array",
+                            "description": "Metadata of the fields available on the dataset",
+                            "minItems": 1,
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "type",
+                                "id",
+                                "label"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Fields can be identifiers to join with other datasets or data properties",
+                                  "enum": [
+                                    "id",
+                                    "property"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "description": "A unique identifier for the dataset"
+                                },
+                                "label": {
+                                  "type": "object",
+                                  "description": "A name for the dataset in different languages",
+                                  "additionalProperties": true,
+                                  "required": [
+                                    "en"
+                                  ],
+                                  "properties": {
+                                    "en": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "regex": {
+                                  "type": "string",
+                                  "description": "A regex that matches the values of the property"
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "description": "The actual values of this property",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "alias": {
+                                  "type": "array",
+                                  "description": "Alternative names for this property",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "legacy_ids": {
+                            "type": "array",
+                            "description": "Identifier used by older versions of the spec",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "layer_name": {
+                            "type": "object",
+                            "description": "A human readable descriptor of the dataset in different languages",
+                            "additionalProperties": true,
+                            "required": [
+                              "en"
+                            ],
+                            "properties": {
+                              "en": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Manifest not found",
+            "content": {
+              "application/xml": {
+                "example": "<?xml version='1.0' encoding='UTF-8'?><Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message></Error>\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "attribution": {
+        "type": "array",
+        "description": "The attribution of this data",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "object",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "description": "English attribution label"
+                }
+              }
+            },
+            "url": {
+              "type": "object",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "description": "Attribution details URL",
+                  "format": "URL"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+type: array
+description: The attribution of this data
+minItems: 1
+items:
+  type: object
+  properties:
+    label:
+      type: object
+      properties:
+        en:
+          type: string
+          description: English attribution label
+    url:
+      type: object
+      properties:
+        en:
+          type: string
+          description: Attribution details URL
+          format: URL

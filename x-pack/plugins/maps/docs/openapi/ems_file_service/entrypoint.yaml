@@ -1,0 +1,152 @@
+openapi: 3.0.1
+info:
+  title: Elastic Maps File Service
+  description: OpenAPI schema for the Elastic Maps File Service manifest endpoint
+  version: '0.1'
+  contact:
+    name: Presentation Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: ems
+    description: Elastic Maps Service.
+servers:
+  - url: 'https://vector.maps.elastic.co'
+    description: Production
+  - url: 'https://storage.googleapis.com/elastic-bekitzur-emsfiles-vector-dev'
+    description: Staging
+security: []
+paths:
+   '/latest/manifest':
+     get:
+      operationId: getFileManifest
+      tags: ['ems']
+      summary: "Manifest of the EMS File Service"
+      description: "Describes the layers available with formats and other metadata"
+      parameters: []
+      responses:
+        "404":
+          description: "Manifest not found"
+          content:
+            application/xml:
+              example:
+                $ref: ../components/examples/file_service_404.xml
+              schema:
+                type: string
+        "200":
+          description: "Manifest is returned"
+          content:
+            application/json:
+              example:
+                $ref: ../components/examples/file_service_200.json
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    description: "Version of the API as a date in YYYY-MM-DD format"
+                  layers:
+                    type: array
+                    description: An array of layer descriptions offered by the service
+                    minItems: 1
+                    items:
+                      type: object
+                      required:
+                        - layer_id
+                        - created_at
+                        - attribution
+                        - formats
+                        - fields
+                        - legacy_ids
+                        - layer_name
+                      properties:
+                        layer_id:
+                          type: string
+                          description: Identifier of the layers
+                        created_at:
+                          type: string
+                          description: Date of the creation of the layer
+                        attribution:
+                          $ref: ../components/attribution.yaml
+                        formats:
+                          type: array
+                          description: The dataset can be offered in one or more different formats
+                          minItems: 1
+                          items:
+                            type: object
+                            required:
+                              - type
+                              - url
+                            properties:
+                              type:
+                                type: string
+                                description: Data layers can be stored in topojson or geojson format
+                                enum: [ 'topojson', 'geojson']
+                              url:
+                                type: string
+                                description: The relative path to the data
+                              legacy_default:
+                                type: boolean
+                                description: Is this the default format to offer?
+                              meta:
+                                type: object
+                                description: Additional metadata needed to parse the file
+                                additionalProperties: true
+                        fields:
+                          type: array
+                          description: Metadata of the fields available on the dataset
+                          minItems: 1
+                          items:
+                            type: object
+                            required:
+                              - type
+                              - id
+                              - label
+                            properties:
+                              type:
+                                type: string
+                                description: Fields can be identifiers to join with other datasets or data properties
+                                enum: ['id', 'property']
+                              id:
+                                type: string
+                                description: A unique identifier for the dataset
+                              label:
+                                type: object
+                                description: A name for the dataset in different languages
+                                additionalProperties: true
+                                required:
+                                  - en
+                                properties:
+                                  en:
+                                    type: string
+                              regex:
+                                type: string
+                                description: A regex that matches the values of the property
+                              values:
+                                type: array
+                                description: The actual values of this property
+                                items:
+                                  type: string
+                              alias:
+                                type: array
+                                description: Alternative names for this property
+                                items:
+                                  type: string
+                        legacy_ids:
+                          type: array
+                          description: Identifier used by older versions of the spec
+                          items:
+                            type: string
+                        layer_name:
+                          type: object
+                          description: A human readable descriptor of the dataset in different languages
+                          additionalProperties: true
+                          required:
+                            - en
+                          properties:
+                            en:
+                              type: string
+
+
+

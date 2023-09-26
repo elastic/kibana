@@ -1,0 +1,195 @@
+openapi: 3.0.1
+info:
+  title: Elastic Maps Tile Service
+  description: OpenAPI schema for the Elastic Maps Tile Service manifest endpoint
+  version: '0.1'
+  contact:
+    name: Presentation Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: https://tiles.maps.elastic.co
+    description: Production
+  - url: https://tiles.maps.elastic.dev
+    description: Staging
+security: []
+tags:
+  - name: ems
+    description: Elastic Maps Service.
+paths:
+  /latest/manifest:
+    get:
+      operationId: getTileManifest
+      tags:
+        - ems
+      summary: Manifest of the EMS Tile Service
+      description: Describes the basemap styles available
+      parameters: []
+      responses:
+        '200':
+          description: Manifest is returned
+          content:
+            application/json:
+              example:
+                version: '2023-10-31'
+                services:
+                  - id: road_map
+                    name:
+                      en: Classic
+                    attribution:
+                      - label:
+                          en: OpenStreetMap contributors
+                        url:
+                          en: https://www.openstreetmap.org/copyright
+                      - label:
+                          en: OpenMapTiles
+                        url:
+                          en: https://openmaptiles.org
+                      - label:
+                          en: Elastic Maps Service
+                        url:
+                          en: https://www.elastic.co/elastic-maps-service
+                    formats:
+                      - locale: en
+                        format: vector
+                        url: /2023-10-31/styles/osm-bright/style.json
+                      - locale: en
+                        format: raster
+                        url: /2023-10-31/styles/osm-bright.json
+                  - id: road_map_desaturated
+                    name:
+                      en: Light
+                    attribution:
+                      - label:
+                          en: OpenStreetMap contributors
+                        url:
+                          en: https://www.openstreetmap.org/copyright
+                      - label:
+                          en: OpenMapTiles
+                        url:
+                          en: https://openmaptiles.org
+                      - label:
+                          en: Elastic Maps Service
+                        url:
+                          en: https://www.elastic.co/elastic-maps-service
+                    formats:
+                      - locale: en
+                        format: vector
+                        url: /2023-10-31/styles/osm-bright-desaturated/style.json
+                      - locale: en
+                        format: raster
+                        url: /2023-10-31/styles/osm-bright-desaturated.json
+                  - id: dark_map
+                    name:
+                      en: Dark
+                    attribution:
+                      - label:
+                          en: OpenStreetMap contributors
+                        url:
+                          en: https://www.openstreetmap.org/copyright
+                      - label:
+                          en: OpenMapTiles
+                        url:
+                          en: https://openmaptiles.org
+                      - label:
+                          en: Elastic Maps Service
+                        url:
+                          en: https://www.elastic.co/elastic-maps-service
+                    formats:
+                      - locale: en
+                        format: vector
+                        url: /2023-10-31/styles/dark-matter/style.json
+                      - locale: en
+                        format: raster
+                        url: /2023-10-31/styles/dark-matter.json
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    description: Version of the API as a date in YYYY-MM-DD format
+                  services:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - attribution
+                        - formats
+                      properties:
+                        id:
+                          type: string
+                          description: Identifier of the style
+                        name:
+                          type: object
+                          description: A human readable label for the style
+                          required:
+                            - en
+                          properties:
+                            en:
+                              type: string
+                        attribution:
+                          $ref: '#/components/schemas/attribution'
+                        formats:
+                          type: array
+                          description: The different formats for this tile service
+                          items:
+                            type: object
+                            required:
+                              - locale
+                              - format
+                              - url
+                            properties:
+                              locale:
+                                type: string
+                              format:
+                                type: string
+                                description: The service can offer vector or raster tiles
+                                enum:
+                                  - raster
+                                  - vector
+                              url:
+                                type: string
+                                description: Relative path to the MapBox style specification
+        '404':
+          description: Manifest is not found
+          content:
+            text/html:
+              example: |
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                <meta charset="utf-8">
+                <title>Error</title>
+                </head>
+                <body>
+                <pre>Cannot GET /snthstn</pre>
+                </body>
+                </html>
+              schema:
+                type: string
+components:
+  schemas:
+    attribution:
+      type: array
+      description: The attribution of this data
+      minItems: 1
+      items:
+        type: object
+        properties:
+          label:
+            type: object
+            properties:
+              en:
+                type: string
+                description: English attribution label
+          url:
+            type: object
+            properties:
+              en:
+                type: string
+                description: Attribution details URL
+                format: URL
