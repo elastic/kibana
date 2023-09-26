@@ -10,6 +10,7 @@ import {
   EuiCodeBlock,
   EuiLink,
   EuiTableHeaderCell,
+  EuiTable,
   EuiTableRow,
   EuiTableRowCell,
   EuiIcon,
@@ -35,57 +36,63 @@ const CODE_LANGUAGE_OVERRIDES: Record<string, string> = {
 };
 
 export const markdownRenderers: TransformOptions['components'] = {
-  table: ({ children }) => <table className="euiTable euiTable--responsive">{children}</table>,
+  table: ({ children }) => (
+    <EuiTable className="euiEuiTable euiTable--responsive">{children}</EuiTable>
+  ),
   tr: ({ children }) => <EuiTableRow>{children}</EuiTableRow>,
   th: ({ children }) => <EuiTableHeaderCell>{children}</EuiTableHeaderCell>,
   td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
   // the headings used in markdown don't match our page so mapping them to the appropriate one
-  h1: ({ children }) => <h3>{children}</h3>,
-  h2: ({ children }) => (
-    <h4>
-      {children}
-      &nbsp;
-      <EuiLink href={`#${getAnchorId(children[0]?.toString(), 1)}`}>
-        <EuiIcon type="link" aria-label="anchor-h4" />
-      </EuiLink>
-    </h4>
-  ),
-  h3: ({ children }) => (
-    <h5>
-      {children}
-      &nbsp;
-      <EuiLink href="#/navigation/link">
-        <EuiIcon type="link" aria-label="anchor-h5" />
-      </EuiLink>
-    </h5>
-  ),
-  h4: ({ children }) => (
-    <h6>
-      {children}
-      &nbsp;
-      <EuiLink href="#/navigation/link">
-        <EuiIcon type="link" aria-label="anchor-h6" />
-      </EuiLink>
-    </h6>
-  ),
-  h5: ({ children }) => (
-    <h6>
-      {children}
-      &nbsp;
-      <EuiLink href="#/navigation/link">
-        <EuiIcon type="link" aria-label="anchor-h6" />
-      </EuiLink>
-    </h6>
-  ),
-  h6: ({ children }) => (
-    <h6>
-      {children}
-      &nbsp;
-      <EuiLink href="#/navigation/link">
-        <EuiIcon type="link" aria-label="anchor-h6" />
-      </EuiLink>
-    </h6>
-  ),
+  h1: ({ children }) => {
+    const id = getAnchorId(children[0]?.toString());
+    return (
+      <h3 id={id}>
+        {children}
+        &nbsp;
+        <a href={`#${id}`}>
+          <EuiIcon type="link" aria-label="anchor-h4" />
+        </a>
+      </h3>
+    );
+  },
+  h2: ({ children }) => {
+    const id = getAnchorId(children[0]?.toString());
+    return (
+      <h4 id={id}>
+        {children}
+        &nbsp;
+        <a href={`#${id}`}>
+          <EuiIcon type="link" aria-label="anchor-h4" />
+        </a>
+      </h4>
+    );
+  },
+  h3: ({ children }) => {
+    const id = getAnchorId(children[0]?.toString());
+    return (
+      <h5 id={id}>
+        {children}
+        &nbsp;
+        <a href={`#${id}`}>
+          <EuiIcon type="link" aria-label="anchor-h5" />
+        </a>
+      </h5>
+    );
+  },
+  h4: ({ children }) => {
+    const id = getAnchorId(children[0]?.toString());
+    return (
+      <h6 id={id}>
+        {children}
+        &nbsp;
+        <a href={`#${id}`}>
+          <EuiIcon type="link" aria-label="anchor-h5" />
+        </a>
+      </h6>
+    );
+  },
+  h5: ({ children }) => <h6>{children}</h6>,
+  h6: ({ children }) => <h6>{children}</h6>,
   link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
     <EuiLink href={href} target="_blank" rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}>
       {children}

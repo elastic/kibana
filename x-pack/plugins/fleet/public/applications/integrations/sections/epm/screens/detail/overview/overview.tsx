@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MouseEventHandler } from 'react';
 import React, { memo, useMemo, useEffect, useState, useCallback } from 'react';
+
 import styled from 'styled-components';
 import {
   EuiCallOut,
@@ -47,8 +47,7 @@ interface Item {
   id: string;
   name: string;
   items?: Item[];
-  isSelected?: boolean;
-  onClick: MouseEventHandler<HTMLElement | HTMLButtonElement>;
+  href: string;
   forceOpen: boolean;
 }
 
@@ -134,8 +133,9 @@ const PrereleaseCallout: React.FC<{
   );
 };
 
-export const getAnchorId = (name: string, index: number) =>
-  `${name.replaceAll(' ', '').toLowerCase().slice(0, 8)}-${index}`;
+// some names are too long so they're trimmed at 12 characters long
+export const getAnchorId = (name: string) =>
+  `${name.replaceAll(' ', '-').toLowerCase().slice(0, 12)}`;
 
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
@@ -147,13 +147,9 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
-    const [selectedItemName, setSelectedItem] = useState<string>(undefined);
 
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
 
-    const selectItem = (name: string) => {
-      setSelectedItem(name);
-    };
     const toggleOpenOnMobile = () => {
       setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
     };
@@ -177,22 +173,16 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const getName = (heading: string) => heading.replace(/^#+\s*/, '');
 
-    const createItem = useCallback(
-      (name: string, index: number, options: any = {}): Item => {
-        // NOTE: Duplicate `name` values will cause `id` collisions
-        // some names are too long so they're trimmed at 8 characters long
-        const id = getAnchorId(name, index);
-        return {
-          id,
-          name,
-          isSelected: selectedItemName === id,
-          onClick: () => selectItem(id),
-          ...options,
-        };
-      },
-      [selectedItemName]
-    );
-    console.log(selectedItemName);
+    const createItem = useCallback((name: string, index: number, options: any = {}): Item => {
+      // NOTE: Duplicate `name` values will cause `id` collisions
+      const id = getAnchorId(name);
+      return {
+        id,
+        name,
+        href: `#${id}`,
+        ...options,
+      };
+    }, []);
     // get the headings and creates a nested structure as requested by EuiSideNav
     const headingsToNavItems = useCallback(
       (headings: string[]): Item[] => {
@@ -231,15 +221,13 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const sideNavItems = useMemo(() => {
       const headings = extractHeadings(markdown);
-      // console.log('headings', headings);
       const navItems = headingsToNavItems(headings);
-      // console.log('navItems', navItems);
       const h1 = headings.find((h) => h.startsWith('# '));
       const title = h1 ? getName(h1) : '';
       return [
         {
           name: `${title}`,
-          id: getAnchorId(title, 0),
+          id: getAnchorId(title),
           items: navItems,
         },
       ];
@@ -248,12 +236,14 @@ export const OverviewPage: React.FC<Props> = memo(
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
         <LeftColumn grow={2}>
-          <EuiSideNav
-            mobileTitle="Nav Items"
-            toggleOpenOnMobile={toggleOpenOnMobile}
-            isOpenOnMobile={isSideNavOpenOnMobile}
-            items={sideNavItems}
-          />
+          {sideNavItems ? (
+            <EuiSideNav
+              mobileTitle="Nav Items"
+              toggleOpenOnMobile={toggleOpenOnMobile}
+              isOpenOnMobile={isSideNavOpenOnMobile}
+              items={sideNavItems}
+            />
+          ) : null}
         </LeftColumn>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
@@ -269,7 +259,6 @@ export const OverviewPage: React.FC<Props> = memo(
               markdown={markdown}
               packageName={packageInfo.name}
               version={packageInfo.version}
-              // selectedItemName
             />
           ) : null}
         </EuiFlexItem>
