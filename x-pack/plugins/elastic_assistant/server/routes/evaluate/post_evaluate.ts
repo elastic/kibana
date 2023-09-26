@@ -39,7 +39,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
       const resp = buildResponse(response);
       const logger: Logger = (await context.elasticAssistant).logger;
 
-      const { evalModel, evaluationType, outputIndex } = request.query;
+      const { evalModel, evaluationType } = request.query;
       const { dataset, evalPrompt } = request.body;
 
       const connectorIds = request.query.models?.split(',') || [];
