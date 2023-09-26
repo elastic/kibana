@@ -31,7 +31,7 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
-import { DashboardTitleBadges } from '../../components/title_badges';
+import { DashboardContainerContextProvider } from '../../context/dashboard_container_context';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -55,7 +55,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const { indexPattern } = useSourcererDataView();
 
-  const { show: canReadDashboard, showWriteControls } =
+  const { show: canReadDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
   const errorState = useMemo(
     () => (canReadDashboard ? null : DashboardViewPromptState.NoReadPermission),
@@ -73,8 +73,6 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     setViewMode(mode);
   }, []);
 
-  const shouldShowEditToolBar = dashboardContainer && showWriteControls;
-
   return (
     <>
       <FiltersGlobal>
@@ -88,30 +86,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            <HeaderPage
-              border
-              title={
-                dashboardContainer && (
-                  <DashboardTitle
-                    dashboardContainer={dashboardContainer}
-                    onTitleLoaded={setDashboardTitle}
+            {dashboardContainer && (
+              <DashboardContainerContextProvider dashboardContainer={dashboardContainer}>
+                <>
+                  <HeaderPage
+                    border
+                    title={<DashboardTitle onTitleLoaded={setDashboardTitle} />}
+                    subtitle={<DashboardToolBar onLoad={onDashboardToolBarLoad} />}
                   />
-                )
-              }
-              subtitle={
-                dashboardContainer && (
-                  <DashboardTitleBadges dashboardContainer={dashboardContainer} />
-                )
-              }
-              subtitle2={
-                shouldShowEditToolBar && (
-                  <DashboardToolBar
-                    dashboardContainer={dashboardContainer}
-                    onLoad={onDashboardToolBarLoad}
-                  />
-                )
-              }
-            />
+                </>
+              </DashboardContainerContextProvider>
+            )}
           </EuiFlexItem>
           {!errorState && (
             <EuiFlexItem grow>

@@ -122,6 +122,7 @@ export class EditPanelAction implements Action<ActionContext> {
   public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
+
     if (app && path) {
       if (this.currentAppId) {
         const originatingPath = this.getOriginatingPath?.();

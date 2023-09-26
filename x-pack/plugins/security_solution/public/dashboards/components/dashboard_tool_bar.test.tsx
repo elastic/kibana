@@ -17,12 +17,17 @@ import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-nav
 import { TestProviders } from '../../common/mock';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { DashboardContainerContextProvider } from '../context/dashboard_container_context';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 
 jest.mock('../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../common/lib/kibana');
-  return { ...actual, useNavigateTo: jest.fn() };
+  return {
+    ...actual,
+    useNavigateTo: jest.fn(),
+    useCapabilities: jest.fn(() => ({ showWriteControls: true })),
+  };
 });
 jest.mock('../../common/components/link_to', () => ({ useGetSecuritySolutionUrl: jest.fn() }));
 jest.mock('@kbn/dashboard-plugin/public', () => ({
@@ -31,69 +36,44 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn(({ url }: { url: string }) => url);
 const mockGetSecuritySolutionUrl = jest.fn();
+const mockDashboardContainer = {
+  select: jest.fn(),
+} as unknown as DashboardAPI;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
-    <NavigationProvider core={mockCore}>{children}</NavigationProvider>
+    <DashboardContainerContextProvider dashboardContainer={mockDashboardContainer}>
+      <NavigationProvider core={mockCore}>{children}</NavigationProvider>
+    </DashboardContainerContextProvider>
   </TestProviders>
 );
 
 describe('DashboardToolBar', () => {
+  const mockOnLoad = jest.fn();
+
   beforeAll(() => {
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
     (useGetSecuritySolutionUrl as jest.Mock).mockReturnValue(mockGetSecuritySolutionUrl);
   });
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-  it('should render the DashboardToolBar component', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+    render(<DashboardToolBar onLoad={mockOnLoad} />, {
       wrapper,
     });
-
+  });
+  it('should render the DashboardToolBar component', () => {
     expect(screen.getByTestId('dashboard-top-nav')).toBeInTheDocument();
   });
 
   it('should render the DashboardToolBar component with the correct props for view mode', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
-
     expect(mockOnLoad).toHaveBeenCalledWith(ViewMode.VIEW);
   });
 
   it('should render the DashboardTopNav component with the correct redirect to listing url', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
-
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'listing' });
   });
 
   it('should render the DashboardTopNav component with the correct breadcrumb', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
     expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
       SecurityPageName.landing
     );
@@ -101,15 +81,6 @@ describe('DashboardToolBar', () => {
   });
 
   it('should render the DashboardTopNav component with the correct redirect to create dashboard url', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
-
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'dashboard' });
 
     expect(mockGetSecuritySolutionUrl.mock.calls[2][0].deepLinkId).toEqual(
@@ -119,15 +90,7 @@ describe('DashboardToolBar', () => {
   });
 
   it('should render the DashboardTopNav component with the correct redirect to edit dashboard url', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
     const mockDashboardId = 'dashboard123';
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
 
     mockDashboardTopNav.mock.calls[0][0].redirectTo({
       destination: 'dashboard',
@@ -140,27 +103,16 @@ describe('DashboardToolBar', () => {
   });
 
   it('should render the DashboardTopNav component with the correct props', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
-      wrapper,
-    });
-
     expect(mockDashboardTopNav.mock.calls[0][0].embedSettings).toEqual(
       expect.objectContaining({
-        editingToolBarCss: expect.any(Object),
         forceHideDatePicker: true,
         forceHideFilterBar: true,
         forceHideQueryInput: true,
         forceShowTopNavMenu: true,
-        showBackgroundColor: false,
+        setHeaderActionMenu: undefined,
         showBorderBottom: false,
         showDatePicker: false,
         showQueryInput: false,
-        showStickyTopNav: false,
       })
     );
   });

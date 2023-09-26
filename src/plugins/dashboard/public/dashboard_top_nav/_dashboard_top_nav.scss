@@ -3,8 +3,6 @@
   @if $showBackgroundColor {
     background: $euiPageBackgroundColor;
 
-  } @else {
-    background: transparent;
   }
 }
 
@@ -14,21 +12,9 @@
     position: sticky;
     z-index: $euiZLevel2;
     top: var(--euiFixedHeadersOffset, 0);
-    background: $euiPageBackgroundColor;
+    background: transparent;
 
     @include getBackgroundColor($showBackgroundColor: true);
-
-    &-right {
-      text-align: right;
-    }
-
-    &.dashboardTopNav-noBackgroundColor {
-      @include getBackgroundColor($showBackgroundColor: false);
-    }
-
-    &.dashboardTopNav-noSticky {
-      position: static;
-    }
   }
 
 }

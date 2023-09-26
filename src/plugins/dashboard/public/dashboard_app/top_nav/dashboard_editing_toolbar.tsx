@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { css, SerializedStyles } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -25,10 +24,8 @@ import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_das
 
 export function DashboardEditingToolbar({
   originatingApp = DASHBOARD_APP_ID,
-  wrapperCss,
 }: {
   originatingApp?: string;
-  wrapperCss?: SerializedStyles;
 }) {
   const {
     usageCollection,
@@ -124,17 +121,12 @@ export function DashboardEditingToolbar({
     extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
   }
 
-  const wrapperStyles = useMemo(
-    () =>
-      css({
-        padding: `0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s}`,
-        ...(wrapperCss ?? {}),
-      }),
-    [euiTheme.size.s, wrapperCss]
-  );
-
   return (
-    <div css={wrapperStyles}>
+    <div
+      css={css`
+        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+      `}
+    >
       <Toolbar>
         {{
           primaryButton: (

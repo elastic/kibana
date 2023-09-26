@@ -6,27 +6,22 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
-import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { useNavigateTo } from '../../common/lib/kibana';
+import { useCapabilities, useKibana, useNavigateTo } from '../../common/lib/kibana';
 
 import { APP_NAME, APP_UI_ID } from '../../../common/constants';
+import { useDashboardContainerContext } from '../context/dashboard_container_context';
 
-const DashboardToolBarComponent = ({
-  dashboardContainer,
-  onLoad,
-}: {
-  dashboardContainer: DashboardAPI;
-  onLoad: (mode: ViewMode) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
+const DashboardToolBarComponent = ({ onLoad }: { onLoad?: (mode: ViewMode) => void }) => {
+  const dashboardContainer = useDashboardContainerContext();
+  const { setHeaderActionMenu } = useKibana().services;
+
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
   const managed = dashboardContainer.select((state) => state.componentState.managed);
@@ -72,7 +67,7 @@ const DashboardToolBarComponent = ({
   );
 
   useEffect(() => {
-    onLoad(viewMode);
+    onLoad?.(viewMode);
   }, [onLoad, viewMode]);
 
   const embedSettings = useMemo(
@@ -84,17 +79,13 @@ const DashboardToolBarComponent = ({
       showDatePicker: false,
       forceHideDatePicker: true,
       showBorderBottom: false,
-      showFullScreenButton: false,
-      showBackgroundColor: false,
-      showStickyTopNav: false,
-      editingToolBarCss: css`
-        padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
-      `,
+      setHeaderActionMenu,
     }),
-    [euiTheme.size.s]
+    [setHeaderActionMenu]
   );
+  const { showWriteControls } = useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
-  return !managed ? (
+  return !managed && showWriteControls ? (
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
       redirectTo={redirectTo}

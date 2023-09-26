@@ -37,13 +37,3 @@ export const createTag = ({
   savedObjectsTaggingClient: ITagsClient;
   tag: TagAttributes;
 }): Promise<TagResponse> => savedObjectsTaggingClient.create(tag);
-
-export const fetchTags = ({
-  savedObjectsTaggingClient,
-  tagIds,
-}: {
-  savedObjectsTaggingClient: ITagsClient;
-  tagIds: string[];
-}) => {
-  return Promise.all(tagIds.map((tagId) => savedObjectsTaggingClient.get(tagId)));
-};

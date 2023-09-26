@@ -131,6 +131,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       services={{
         appName: APP_NAME,
         ...services,
+        setHeaderActionMenu,
       }}
     >
       <CloudProvider>

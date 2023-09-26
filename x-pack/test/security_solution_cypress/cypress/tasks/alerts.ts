@@ -328,7 +328,6 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 
 export const clickAlertsHistogramLegend = () => {
   cy.get(ALERTS_HISTOGRAM_LEGEND).click();
-  cy.get('.euiContextMenu').should('exist');
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {

@@ -16,7 +16,6 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SerializedStyles } from '@emotion/react';
 import classNames from 'classnames';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
@@ -246,8 +245,6 @@ export function InternalDashboardTopNav({
     const showSearchBar = showQueryBar || showFilterBar;
     const showBorderBottom = embedSettings?.showBorderBottom ?? true;
     const showBackgroundColor = embedSettings?.showBackgroundColor ?? true;
-    const editingToolBarCss = embedSettings?.editingToolBarCss ?? ({} as SerializedStyles);
-    const showStickyTopNav = embedSettings?.showStickyTopNav ?? true;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -256,8 +253,6 @@ export function InternalDashboardTopNav({
       showDatePicker,
       showBorderBottom,
       showBackgroundColor,
-      editingToolBarCss,
-      showStickyTopNav,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
@@ -318,7 +313,6 @@ export function InternalDashboardTopNav({
     <div
       className={classNames('dashboardTopNav', {
         'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
-        'dashboardTopNav-noSticky': !visibilityProps.showStickyTopNav,
       })}
     >
       <h1
@@ -336,9 +330,13 @@ export function InternalDashboardTopNav({
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}
         showSaveQuery={showSaveQuery}
-        appName={LEGACY_DASHBOARD_APP_ID}
+        appName={originatingApp ?? LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
-        setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
+        setMenuMountPoint={
+          embedSettings || fullScreenMode
+            ? embedSettings?.setHeaderActionMenu ?? undefined
+            : setHeaderActionMenu
+        }
         className={classNames({
           'kbnTopNavMenu-isFullScreen': fullScreenMode,
         })}
@@ -364,10 +362,7 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar
-          wrapperCss={visibilityProps.editingToolBarCss}
-          originatingApp={originatingApp}
-        />
+        <DashboardEditingToolbar originatingApp={originatingApp} />
       ) : null}
       {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

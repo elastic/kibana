@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializedStyles } from '@emotion/react';
 import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
+import { MountPoint } from '@kbn/core/public';
 
 export interface DashboardEmbedSettings {
   forceHideDatePicker?: boolean;
@@ -18,8 +18,7 @@ export interface DashboardEmbedSettings {
   showDatePicker?: boolean;
   showBorderBottom?: boolean;
   showBackgroundColor?: boolean;
-  editingToolBarCss?: SerializedStyles;
-  showStickyTopNav?: boolean;
+  setHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
 }
 
 export interface DashboardMountContextProps {
