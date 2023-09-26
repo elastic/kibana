@@ -18,7 +18,6 @@ export interface DashboardEmbedSettings {
   showDatePicker?: boolean;
   showBorderBottom?: boolean;
   showBackgroundColor?: boolean;
-  showFullScreenButton?: boolean;
   editingToolBarCss?: SerializedStyles;
   showStickyTopNav?: boolean;
 }

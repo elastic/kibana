@@ -26,12 +26,10 @@ export const useDashboardMenuItems = ({
   redirectTo,
   isLabsShown,
   setIsLabsShown,
-  showFullScreenButton = true,
 }: {
   redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
-  showFullScreenButton?: boolean;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -266,13 +264,12 @@ export const useDashboardMenuItems = ({
    */
   const viewModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const fullScreenMenuItem = showFullScreenButton ? [menuItems.fullScreen] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
     const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     return [
       ...labsMenuItem,
-      ...fullScreenMenuItem,
+      menuItems.fullScreen,
       ...shareMenuItem,
       ...cloneMenuItem,
       resetChangesMenuItem,
@@ -285,7 +282,6 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.clone,
     menuItems.edit,
-    showFullScreenButton,
     share,
     showWriteControls,
     managed,

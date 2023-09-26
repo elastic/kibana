@@ -43,6 +43,7 @@ export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  originatingApp?: string;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -51,6 +52,7 @@ export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
   redirectTo,
+  originatingApp,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -244,7 +246,6 @@ export function InternalDashboardTopNav({
     const showSearchBar = showQueryBar || showFilterBar;
     const showBorderBottom = embedSettings?.showBorderBottom ?? true;
     const showBackgroundColor = embedSettings?.showBackgroundColor ?? true;
-    const showFullScreenButton = embedSettings?.showFullScreenButton ?? true;
     const editingToolBarCss = embedSettings?.editingToolBarCss ?? ({} as SerializedStyles);
     const showStickyTopNav = embedSettings?.showStickyTopNav ?? true;
     return {
@@ -255,7 +256,6 @@ export function InternalDashboardTopNav({
       showDatePicker,
       showBorderBottom,
       showBackgroundColor,
-      showFullScreenButton,
       editingToolBarCss,
       showStickyTopNav,
     };
@@ -265,7 +265,6 @@ export function InternalDashboardTopNav({
     redirectTo,
     isLabsShown,
     setIsLabsShown,
-    showFullScreenButton: visibilityProps.showFullScreenButton,
   });
 
   UseUnmount(() => {
@@ -365,7 +364,10 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar wrapperCss={visibilityProps.editingToolBarCss} />
+        <DashboardEditingToolbar
+          wrapperCss={visibilityProps.editingToolBarCss}
+          originatingApp={originatingApp}
+        />
       ) : null}
       {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

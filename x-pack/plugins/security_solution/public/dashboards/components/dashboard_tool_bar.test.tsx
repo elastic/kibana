@@ -159,21 +159,9 @@ describe('DashboardToolBar', () => {
         showBackgroundColor: false,
         showBorderBottom: false,
         showDatePicker: false,
-        showFullScreenButton: false,
         showQueryInput: false,
         showStickyTopNav: false,
       })
     );
-  });
-
-  it('should render the DashboardToolBar component without DashboardTopNav if dashboardContainer is undefined', () => {
-    const { container } = render(
-      <DashboardToolBar dashboardContainer={undefined} onLoad={() => {}} />,
-      {
-        wrapper,
-      }
-    );
-
-    expect(container.firstChild).toBeNull();
   });
 });

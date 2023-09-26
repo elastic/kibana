@@ -17,7 +17,7 @@ import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
-import { APP_NAME } from '../../../common/constants';
+import { APP_NAME, APP_UI_ID } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
@@ -100,6 +100,7 @@ const DashboardToolBarComponent = ({
       redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
       embedSettings={embedSettings}
+      originatingApp={APP_UI_ID}
     />
   ) : null;
 };

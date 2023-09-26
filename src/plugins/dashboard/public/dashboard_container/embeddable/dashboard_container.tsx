@@ -107,7 +107,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
-  public currentAppId?: string;
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
@@ -139,7 +138,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   ) {
     const {
       embeddable: { getEmbeddableFactory },
-      application,
     } = pluginServices.getServices();
 
     super(
@@ -164,9 +162,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.dashboardCreationStartTime = dashboardCreationStartTime;
-    application.currentAppId$.subscribe((appId) => {
-      this.currentAppId = appId;
-    });
 
     // start diffing dashboard state
     const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
