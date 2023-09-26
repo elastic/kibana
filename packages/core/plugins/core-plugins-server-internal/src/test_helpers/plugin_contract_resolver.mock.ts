@@ -11,6 +11,7 @@ import type { IRuntimePluginContractResolver } from '../plugin_contract_resolver
 export const createRuntimePluginContractResolverMock =
   (): jest.Mocked<IRuntimePluginContractResolver> => {
     return {
+      setDependencyMap: jest.fn(),
       onSetup: jest.fn(),
       onStart: jest.fn(),
       resolveSetupRequests: jest.fn(),

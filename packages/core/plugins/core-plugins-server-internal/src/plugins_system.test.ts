@@ -52,6 +52,7 @@ function createPlugin(
       type,
       requiredPlugins: required,
       optionalPlugins: optional,
+      runtimePluginDependencies: [],
       requiredBundles: [],
       server,
       ui,
