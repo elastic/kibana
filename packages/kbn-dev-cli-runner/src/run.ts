@@ -50,6 +50,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     usage: options.usage,
     flagHelp: options.flags?.help,
     defaultLogLevel: options.log?.defaultLevel,
+    examples: options.flags?.examples,
   });
 
   if (flags.help) {

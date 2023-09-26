@@ -22,7 +22,6 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -31,7 +30,7 @@ import {
   APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
-  ESRE_PLUGIN,
+  AI_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -66,7 +65,6 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  user: AuthenticatedUser;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -102,8 +100,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloudSetup && (pluginsStart as PluginsStart).cloud
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
-    const user = (await (pluginsStart as PluginsStart).security.authc.getCurrentUser()) || null;
-    const plugins = { ...pluginsStart, cloud, user } as PluginsStart;
+    const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
     coreStart.chrome
       .getChromeStyle$()
@@ -216,25 +213,25 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ESRE_PLUGIN.URL,
+      appRoute: AI_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ESRE_PLUGIN.LOGO,
-      id: ESRE_PLUGIN.ID,
+      euiIconType: AI_SEARCH_PLUGIN.LOGO,
+      id: AI_SEARCH_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ESRE_PLUGIN.NAME);
+        chrome.docTitle.change(AI_SEARCH_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchEsre } = await import('./applications/esre');
+        const { EnterpriseSearchAISearch } = await import('./applications/ai_search');
 
-        return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
       },
       navLinkStatus: AppNavLinkStatus.hidden,
-      title: ESRE_PLUGIN.NAV_TITLE,
+      title: AI_SEARCH_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({

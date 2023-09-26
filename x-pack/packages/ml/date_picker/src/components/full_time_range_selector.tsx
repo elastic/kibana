@@ -98,6 +98,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     apiPath,
     hideFrozenDataTierChoice = false,
   } = props;
+
   const {
     http,
     notifications: { toasts },

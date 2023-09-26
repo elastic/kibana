@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import {
   APP_WRAPPER_CLASS,
   PageLoading,
@@ -47,6 +48,10 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
   const redirectTo = useRedirectPath(history);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplates);
+  }, []);
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
 

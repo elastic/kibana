@@ -30,7 +30,7 @@ export async function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse
 ): Promise<CoverageOverviewDashboard> {
   const mitreConfig = await lazyMitreConfiguration();
-  const { tactics, technique: techniques, subtechniques } = mitreConfig;
+  const { tactics, techniques, subtechniques } = mitreConfig;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {

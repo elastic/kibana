@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { KpiHostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiHostsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: HostsKpiHostsRequestOptions) => {
+}: KpiHostsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
