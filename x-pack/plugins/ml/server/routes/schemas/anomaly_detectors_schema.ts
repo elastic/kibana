@@ -211,3 +211,10 @@ export const forceQuerySchema = schema.object({
   /** force close */
   force: schema.maybe(schema.boolean()),
 });
+
+export const jobForCloningSchema = schema.object({
+  /** Snapshot ID */
+  retainCreatedBy: schema.maybe(schema.boolean()),
+  /** Job ID */
+  jobId: schema.string(),
+});
