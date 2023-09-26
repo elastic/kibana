@@ -51,7 +51,16 @@ export function registerGetDatasetInfoFunction({
           },
           signal,
         })
-        .then((response) => ({ content: response as unknown as Serializable }));
+        .then((response) => {
+          return {
+            content: {
+              indices: response.indices,
+              fields: ['fieldName,fieldType', ...response.fields.map((field) => {
+                return `${field.name},${field.type}`;
+              })]
+            } as unknown as Serializable
+          };
+        });
     }
   );
 }
