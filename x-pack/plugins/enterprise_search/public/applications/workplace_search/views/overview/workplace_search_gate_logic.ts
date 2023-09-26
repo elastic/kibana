@@ -12,7 +12,7 @@ interface WorkplaceSearchGateValues {
   feature: string;
   featuresOther?: string;
   isFormSubmitted: boolean;
-  participateInUXLabs?: boolean;
+  participateInUXLabs?: string;
 }
 interface WorkplaceSearchGateActions {
   setAdditionalFeedback(additionalFeedback: string): { additionalFeedback: string };
@@ -58,11 +58,10 @@ export const WorkplaceSearchGateLogic = kea<
       },
     ],
     participateInUXLabs: [
-      false,
+      '',
       {
         setParticipateInUXLabs: (_, { participateInUXLabs }) => participateInUXLabs,
       },
     ],
   },
-
 });

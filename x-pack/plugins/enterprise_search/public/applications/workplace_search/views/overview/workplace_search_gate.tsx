@@ -53,7 +53,7 @@ const getFeature = (id: string) => {
 const featuresList = {
   analytics: {
     actionLabel: 'Start with Behavioral Analytics',
-    actionLink: '/app/enterprise_search/analytics ',
+    actionLink: './analytics ',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
@@ -76,7 +76,7 @@ const featuresList = {
         defaultMessage: 'Use a connector ',
       }
     ),
-    actionLink: '/app/enterprise_search/content/search_indices/new_index/select_connector',
+    actionLink: './content/search_indices/new_index/select_connector',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
 
@@ -103,7 +103,7 @@ const featuresList = {
         defaultMessage: 'Use a connector ',
       }
     ),
-    actionLink: '/app/enterprise_search/content/search_indices/new_index/select_connector',
+    actionLink: './content/search_indices/new_index/select_connector',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
@@ -146,7 +146,7 @@ const featuresList = {
   },
   searchApplication: {
     actionLabel: 'Create a Search Application',
-    actionLink: '/app/enterprise_search/content/search_indices/new_index/select_connector',
+    actionLink: './applications/search_applications',
     addOnLearnMoreLabel: 'Search UI',
     addOnLearnMoreUrl: 'https://www.elastic.co/guide/en/enterprise-search/current/search-ui.html  ',
     description: i18n.translate(
@@ -237,6 +237,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                 </EuiButton>
               </EuiFlexItem>
             )}
+
             <EuiFlexItem grow={false}>
               <EuiLink href={feature.learnMore} target="_blank">
                 {i18n.translate(
@@ -251,6 +252,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
             {feature.addOnLearnMoreLabel !== undefined && feature.addOnLearnMoreUrl !== undefined && (
               <EuiFlexItem grow={false}>
                 <EuiLink type="button" href={feature.addOnLearnMoreUrl} target="_blank" external>
+                  <EuiSpacer />
                   {feature.addOnLearnMoreLabel}
                 </EuiLink>
               </EuiFlexItem>
@@ -290,7 +292,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.title',
               {
-                defaultMessage: 'Content Sources',
+                defaultMessage: 'Content sources',
               }
             )}
           </strong>
@@ -310,7 +312,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
       inputDisplay: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.inputDisplay',
         {
-          defaultMessage: 'Content Sources',
+          defaultMessage: 'Content ources',
         }
       ),
       value: i18n.translate(
@@ -327,7 +329,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentExtraction.title',
               {
-                defaultMessage: 'Content Extraction',
+                defaultMessage: 'Content extraction',
               }
             )}
           </strong>
@@ -347,7 +349,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
       inputDisplay: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentExtraction.inputDisplay',
         {
-          defaultMessage: 'Content Extraction',
+          defaultMessage: 'Content extraction',
         }
       ),
       value: i18n.translate(
@@ -542,7 +544,8 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
   const { setFormSubmitted, setAdditionalFeedback, setParticipateInUXLabs, setFeature } =
     useActions(WorkplaceSearchGateLogic);
 
-  const { feature } = useValues(WorkplaceSearchGateLogic);
+  const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
+
   return (
     <WorkplaceSearchGatePageTemplate
       pageChrome={[]}
@@ -580,7 +583,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
             <EuiFlexItem grow={false}>
               <EuiFormLabel>
                 {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.features.Label', {
-                  defaultMessage: 'What features are you looking to use',
+                  defaultMessage: 'What Workplace Search feature are you looking to use?',
                 })}
               </EuiFormLabel>
             </EuiFlexItem>
@@ -633,7 +636,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
                 <EuiText color="subdued" size="xs">
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.features.optional',
+                      'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.optional',
                       {
                         defaultMessage: 'Optional',
                       }
@@ -655,7 +658,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.gateForm.description"
+                  id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
                   defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
                     using the details you provide above. See {privacyStatementLink} for more
                     details or to opt-out at any time."
@@ -663,7 +666,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
                     contact: (
                       <EuiLink href="#">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.contact"
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
                           defaultMessage="Contact You"
                         />
                       </EuiLink>
@@ -671,7 +674,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
                     privacyStatementLink: (
                       <EuiLink href="#">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.readDataPrivacyStatementLink"
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
                           defaultMessage="Elastic’s Privacy Statement"
                         />
                       </EuiLink>
@@ -679,7 +682,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
                     termsOfService: (
                       <EuiLink href="#">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.readTermsOfService"
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
                           defaultMessage="Terms of Service"
                         />
                       </EuiLink>
@@ -706,7 +709,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
                 <EuiText color="subdued" size="xs">
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.features.optional',
+                      'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.optional',
                       {
                         defaultMessage: 'Optional',
                       }
@@ -724,6 +727,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
               { text: 'No', value: 'no' },
             ]}
             onChange={(e) => setParticipateInUXLabs(e.target.value)}
+            value={participateInUXLabs}
           />
           <EuiSpacer />
           <EuiFlexGroup justifyContent="flexEnd">
