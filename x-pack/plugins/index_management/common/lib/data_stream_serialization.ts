@@ -70,4 +70,3 @@ export const splitSizeAndUnits = (field: string): { size: string; unit: string }
     unit,
   };
 };
-
