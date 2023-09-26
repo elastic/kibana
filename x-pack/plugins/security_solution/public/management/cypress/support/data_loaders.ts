@@ -246,9 +246,11 @@ export const dataLoadersForRealEndpoints = (
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
-      const { kbnClient, log } = await stackServicesPromise;
+      const { kbnClient, log, fleetServer } = await stackServicesPromise;
+      console.log({ fleetServer });
       return createAndEnrollEndpointHost({
         useClosestVersionMatch: true,
+        hosnName: fleetServer.hostname,
         ...options,
         log,
         kbnClient,

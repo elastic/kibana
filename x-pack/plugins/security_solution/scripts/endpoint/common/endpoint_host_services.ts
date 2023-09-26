@@ -88,6 +88,7 @@ CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse
     createVagrantVm({
       vmName,
       log,
+      hostname,
       cachedAgentDownload: agentDownload.cache as DownloadedAgentInfo,
     }),
 
@@ -168,6 +169,7 @@ const createVagrantVm = async ({
   vmName,
   cachedAgentDownload,
   log,
+  hostname,
 }: CreateVagrantVmOptions): Promise<CreateVmResponse> => {
   try {
     await execa.command(`vagrant destroy -f`, {
@@ -184,6 +186,7 @@ const createVagrantVm = async ({
         VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
         VAGRANT_CWD,
         VMNAME: vmName,
+        HOSTNAME: hostname,
         CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
         CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
