@@ -143,6 +143,7 @@ export const DashboardLinkDestinationPicker = ({
           onDestinationPicked(undefined);
         }
       }}
+      data-test-subj="links--linkEditor--dashboardLink--comboBox"
     />
   );
 };

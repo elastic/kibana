@@ -200,6 +200,7 @@ const LinksEditor = ({
                     <EuiDroppable
                       className="linksDroppableLinksArea"
                       droppableId="linksDroppableLinksArea"
+                      data-test-subj="links--panelEditor--linksAreaDroppable"
                     >
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
@@ -229,6 +230,7 @@ const LinksEditor = ({
                     size="s"
                     iconType="plusInCircle"
                     onClick={() => addOrEditLink()}
+                    data-test-subj="links--panelEditor--addLinkBtn"
                   >
                     {LinksStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>

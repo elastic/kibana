@@ -29,6 +29,7 @@ export const DashboardDrilldownOptionsComponent = ({
           label={dashboardDrilldownConfigStrings.component.getUseCurrentFiltersLabel()}
           checked={options.useCurrentFilters}
           onChange={() => onOptionChange({ useCurrentFilters: !options.useCurrentFilters })}
+          data-test-subj="dashboardDrillDownOptions--useCurrentFilters--checkbox"
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
@@ -37,6 +38,7 @@ export const DashboardDrilldownOptionsComponent = ({
           label={dashboardDrilldownConfigStrings.component.getUseCurrentDateRange()}
           checked={options.useCurrentDateRange}
           onChange={() => onOptionChange({ useCurrentDateRange: !options.useCurrentDateRange })}
+          data-test-subj="dashboardDrillDownOptions--useCurrentDateRange--checkbox"
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
@@ -45,6 +47,7 @@ export const DashboardDrilldownOptionsComponent = ({
           label={dashboardDrilldownConfigStrings.component.getOpenInNewTab()}
           checked={options.openInNewTab}
           onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
+          data-test-subj="dashboardDrillDownOptions--openInNewTab--checkbox"
         />
       </EuiFormRow>
     </>

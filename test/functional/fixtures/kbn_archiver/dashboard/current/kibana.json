@@ -2751,28 +2751,41 @@
   "namespaces": [
     "default"
   ],
-  "updated_at": "2023-09-25T16:40:49.785Z",
-  "created_at": "2023-09-25T16:39:26.070Z",
-  "version": "WzEyMzgsMV0=",
+  "updated_at": "2023-09-26T17:43:44.844Z",
+  "created_at": "2023-09-26T16:30:45.296Z",
+  "version": "WzIxMDEsMV0=",
   "attributes": {
     "links": [
       {
+        "label": "links 001 - filters",
         "type": "dashboardLink",
-        "id": "link01",
+        "id": "link001",
+        "options": {
+          "openInNewTab": false,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": true
+        },
         "order": 0,
-        "destinationRefName": "link_link01_dashboard"
+        "destinationRefName": "link_link001_dashboard"
       },
       {
+        "label": "links 002 - date range",
         "type": "dashboardLink",
-        "id": "link02",
+        "id": "link002",
+        "options": {
+          "openInNewTab": false,
+          "useCurrentDateRange": true,
+          "useCurrentFilters": false
+        },
         "order": 1,
-        "destinationRefName": "link_link02_dashboard"
+        "destinationRefName": "link_link002_dashboard"
       },
       {
+        "label": "links 003 - external",
         "type": "dashboardLink",
-        "id": "link03",
+        "id": "link003",
         "order": 2,
-        "destinationRefName": "link_link03_dashboard"
+        "destinationRefName": "link_link003_dashboard"
       }
     ],
     "layout": "horizontal",
@@ -2781,17 +2794,17 @@
   },
   "references": [
     {
-      "name": "link_link01_dashboard",
+      "name": "link_link001_dashboard",
       "type": "dashboard",
       "id": "0930f310-5bc2-11ee-9a85-7b86504227bc"
     },
     {
-      "name": "link_link02_dashboard",
+      "name": "link_link002_dashboard",
       "type": "dashboard",
       "id": "24751520-5bc2-11ee-9a85-7b86504227bc"
     },
     {
-      "name": "link_link03_dashboard",
+      "name": "link_link003_dashboard",
       "type": "dashboard",
       "id": "27398c50-5bc2-11ee-9a85-7b86504227bc"
     }
@@ -2806,21 +2819,32 @@
   "namespaces": [
     "default"
   ],
-  "updated_at": "2023-09-25T16:39:42.362Z",
-  "created_at": "2023-09-25T16:39:42.362Z",
-  "version": "WzEyMzMsMV0=",
+  "updated_at": "2023-09-26T17:51:54.615Z",
+  "created_at": "2023-09-26T17:51:54.615Z",
+  "version": "WzIxMDksMV0=",
   "attributes": {
     "version": 1,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"disabled\":false,\"negate\":false,\"alias\":\"This filter should not pass from links001 to links002\",\"key\":\"geo.dest\",\"field\":\"geo.dest\",\"params\":{\"query\":\"CA\"},\"type\":\"phrase\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"geo.dest\":\"CA\"}},\"$state\":{\"store\":\"appState\"}}]}"
     },
     "description": "",
-    "timeRestore": false,
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
     "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
     "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"26533acc-3516-445c-9c05-3b0e18686f38\"},\"panelIndex\":\"26533acc-3516-445c-9c05-3b0e18686f38\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_26533acc-3516-445c-9c05-3b0e18686f38\"}]",
-    "title": "links 001"
+    "timeFrom": "2018-10-31T00:00:00.000Z",
+    "title": "links 001",
+    "timeTo": "2018-11-01T00:00:00.000Z"
   },
   "references": [
+    {
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c"
+    },
     {
       "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
       "type": "links",
@@ -2843,21 +2867,32 @@
   "namespaces": [
     "default"
   ],
-  "updated_at": "2023-09-25T16:39:48.850Z",
-  "created_at": "2023-09-25T16:39:48.850Z",
-  "version": "WzEyMzQsMV0=",
+  "updated_at": "2023-09-26T17:52:24.244Z",
+  "created_at": "2023-09-26T17:52:24.244Z",
+  "version": "WzIxMTAsMV0=",
   "attributes": {
     "version": 1,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      "searchSourceJSON": "{\"query\":{\"query\":\"extension: \\\"links002 filter\\\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"disabled\":false,\"negate\":false,\"alias\":\"This filter should only pass from links002 to links001\",\"key\":\"machine.os\",\"field\":\"machine.os\",\"params\":{\"query\":\"ios\"},\"type\":\"phrase\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"machine.os\":\"ios\"}},\"$state\":{\"store\":\"appState\"}}]}"
     },
     "description": "",
-    "timeRestore": false,
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
     "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
     "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"26533acc-3516-445c-9c05-3b0e18686f38\"},\"panelIndex\":\"26533acc-3516-445c-9c05-3b0e18686f38\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_26533acc-3516-445c-9c05-3b0e18686f38\"}]",
-    "title": "links 002"
+    "timeFrom": "2018-10-31T00:00:00.000Z",
+    "title": "links 002",
+    "timeTo": "2018-11-01T00:00:00.000Z"
   },
   "references": [
+    {
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c"
+    },
     {
       "name": "26533acc-3516-445c-9c05-3b0e18686f38:panel_26533acc-3516-445c-9c05-3b0e18686f38",
       "type": "links",
@@ -2880,9 +2915,9 @@
   "namespaces": [
     "default"
   ],
-  "updated_at": "2023-09-25T16:42:56.124Z",
-  "created_at": "2023-09-25T16:42:56.124Z",
-  "version": "WzEyMzksMV0=",
+  "updated_at": "2023-09-26T16:30:45.296Z",
+  "created_at": "2023-09-26T16:30:45.296Z",
+  "version": "WzIwOTEsMV0=",
   "attributes": {
     "version": 1,
     "kibanaSavedObjectMeta": {

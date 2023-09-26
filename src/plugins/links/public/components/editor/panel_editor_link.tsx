@@ -143,6 +143,7 @@ export const PanelEditorLink = ({
             paddingSize="none"
             {...dragHandleProps}
             aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
+            data-test-subj="panelEditorLink--dragHandle"
           >
             <EuiIcon type="grab" />
           </EuiPanel>
