@@ -13,7 +13,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { downloadToDisk } from '../../lib';
 
 const ARTIFACTS_URL = 'https://artifacts.elastic.co/';
-const GPG_KEY_NAME = 'GPG-KEY-elasticsearch';
+const GPG_KEY_NAME = 'GPG-KEY-elasticsearch.sha1';
 const GPG_KEY_SHA512 =
   '84ee193cc337344d9a7da9021daf3f5ede83f5f1ab049d169f3634921529dcd096abf7a91eec7f26f3a6913e5e38f88f69a5e2ce79ad155d46edc75705a648c6';
 
