@@ -62,7 +62,7 @@ export function SloEditForm({ slo }: Props) {
     sloIds: slo?.id ? [slo.id] : undefined,
   });
 
-  const sloFormValuesUrlState = useParseUrlState();
+  const sloFormValuesFromUrlState = useParseUrlState();
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
@@ -73,7 +73,7 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesUrlState),
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesFromUrlState),
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
