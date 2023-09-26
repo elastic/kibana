@@ -22,6 +22,22 @@ const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
   return enabledInput?.streams[0].vars;
 };
 
+const getEnabledIsSetupAutomatic = (packagePolicy: PackagePolicy) => {
+  const enabledInput = packagePolicy.inputs.find((input) => input.enabled);
+  if (
+    enabledInput?.type === 'cloudbeat/cis_aws' ||
+    enabledInput?.type === 'cloudbeat/vuln_mgmt_aws'
+  )
+    return enabledInput?.config?.cloud_formation_template_url?.value ? true : false;
+
+  if (enabledInput?.type === 'cloudbeat/cis_gcp')
+    return enabledInput?.config?.cloud_shell_url?.value ? true : false;
+
+  if (enabledInput?.type === 'cloudbeat/cis_azure') return false;
+
+  return false;
+};
+
 const getAccountTypeField = (
   packagePolicy: PackagePolicy
 ): CloudSecurityInstallationStats['account_type'] => {
@@ -57,6 +73,7 @@ const getInstalledPackagePolicies = (
         agent_policy_id: packagePolicy.policy_id,
         agent_count: agentCounts,
         account_type: getAccountTypeField(packagePolicy),
+        is_setup_automatic: getEnabledIsSetupAutomatic(packagePolicy),
       };
     }
   );

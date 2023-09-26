@@ -88,19 +88,6 @@ export interface KSPMAccountsStats {
   pods_count: number;
 }
 
-interface VulnMgmtAccountsStats {
-  vulnerability_id: string;
-  vulnerability_score: number;
-  cloud_service_name: string;
-  cloud_machine_type: string;
-  cloud_machine_image: string;
-  cloud_region: string;
-  critical_severity_count: number;
-  high_severity_count: number;
-  medium_severity_count: number;
-  low_severity_count: number;
-}
-
 export interface CspmAccountsStats {
   account_id: string;
   posture_score: number;
@@ -138,6 +125,7 @@ export interface CloudSecurityInstallationStats {
   deployment_mode: string;
   created_at: string;
   agent_count: number;
+  is_setup_automatic: boolean;
   account_type?: 'single-account' | 'organization-account';
 }
 

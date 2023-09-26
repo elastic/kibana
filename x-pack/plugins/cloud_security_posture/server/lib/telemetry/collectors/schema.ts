@@ -154,6 +154,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       created_at: { type: 'date' },
       agent_count: { type: 'long' },
       account_type: { type: 'keyword' },
+      is_setup_automatic: { type: 'boolean' },
     },
   },
   alerts_stats: {
