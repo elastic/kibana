@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { PackageInfo } from '../types';
+
 import { getTemplateUrlFromPackageInfo } from './get_template_url_from_package_info';
 
 describe('getTemplateUrlFromPackageInfo', () => {
@@ -14,8 +16,7 @@ describe('getTemplateUrlFromPackageInfo', () => {
   });
 
   test('returns undefined when packageInfo has no policy_templates', () => {
-    const packageInfo = { inputs: [] };
-    // @ts-expect-error
+    const packageInfo = { inputs: [] } as unknown as PackageInfo;
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'test',
@@ -25,8 +26,9 @@ describe('getTemplateUrlFromPackageInfo', () => {
   });
 
   test('returns undefined when integrationType is not found in policy_templates', () => {
-    const packageInfo = { policy_templates: [{ name: 'template1' }, { name: 'template2' }] };
-    // @ts-expect-error
+    const packageInfo = {
+      policy_templates: [{ name: 'template1' }, { name: 'template2' }],
+    } as PackageInfo;
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'nonExistentTemplate',
@@ -46,8 +48,8 @@ describe('getTemplateUrlFromPackageInfo', () => {
           ],
         },
       ],
-    };
-    // @ts-expect-error
+    } as unknown as PackageInfo;
+
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'template1',
@@ -70,8 +72,8 @@ describe('getTemplateUrlFromPackageInfo', () => {
           ],
         },
       ],
-    };
-    // @ts-expect-error
+    } as unknown as PackageInfo;
+
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'template1',
@@ -94,7 +96,8 @@ describe('getTemplateUrlFromPackageInfo', () => {
           ],
         },
       ],
-    };
+    } as unknown as PackageInfo;
+
     const result = getTemplateUrlFromPackageInfo(packageInfo, 'template1', 'arm_template_url');
     expect(result).toBe('arm_template_url_value');
   });
