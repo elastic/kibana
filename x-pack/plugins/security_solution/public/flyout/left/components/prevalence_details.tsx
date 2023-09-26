@@ -88,7 +88,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     render: (values: string[]) => (
       <EuiFlexGroup direction="column" gutterSize="none">
         {values.map((value) => (
-          <EuiFlexItem>
+          <EuiFlexItem key={value}>
             <EuiText size="xs">{value}</EuiText>
           </EuiFlexItem>
         ))}
