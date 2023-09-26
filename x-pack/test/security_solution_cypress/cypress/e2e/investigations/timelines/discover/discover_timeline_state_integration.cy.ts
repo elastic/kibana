@@ -115,7 +115,7 @@ describe(
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
-    context.only('save/restore', () => {
+    context('save/restore', () => {
       it('should be able create an empty timeline with default discover state', () => {
         addNameToTimeline('Timerange timeline');
         createNewTimeline();
