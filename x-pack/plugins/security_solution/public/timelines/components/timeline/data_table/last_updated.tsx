@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -40,30 +39,3 @@ const FixedWidthLastUpdated = styled.span<{ compact?: boolean }>`
 `;
 
 FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
-
-interface HeightProp {
-  height: number;
-}
-
-const FooterContainer = styled(EuiFlexGroup).attrs<HeightProp>(({ height }) => ({
-  style: {
-    height: `${height}px`,
-  },
-}))<HeightProp>`
-  flex: 0 0 auto;
-`;
-
-FooterContainer.displayName = 'FooterContainer';
-
-const FooterFlexGroup = styled(EuiFlexGroup)`
-  height: 35px;
-  width: 100%;
-`;
-
-FooterFlexGroup.displayName = 'FooterFlexGroup';
-
-const LoadingPanelContainer = styled.div`
-  padding-top: 3px;
-`;
-
-LoadingPanelContainer.displayName = 'LoadingPanelContainer';

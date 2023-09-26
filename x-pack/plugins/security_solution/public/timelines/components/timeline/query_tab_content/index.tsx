@@ -18,6 +18,7 @@ import { InPortal } from 'react-reverse-portal';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -363,24 +364,26 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
           <EventDetailsWidthProvider>
-            <TimelineDataTable
-              columns={columnsHeader}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              sort={sort}
-              events={rows}
-              refetch={refetch}
-              dataLoadingState={dataLoadingState}
-              totalCount={totalCount}
-              onEventClosed={onEventClosed}
-              expandedDetail={expandedDetail}
-              showExpandedDetails={showExpandedDetails}
-              onChangePage={loadPage}
-              activeTab={activeTab}
-              updatedAt={updatedAt}
-            />
+            <RootDragDropProvider>
+              <TimelineDataTable
+                columns={columnsHeader}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                sort={sort}
+                events={rows}
+                refetch={refetch}
+                dataLoadingState={dataLoadingState}
+                totalCount={totalCount}
+                onEventClosed={onEventClosed}
+                expandedDetail={expandedDetail}
+                showExpandedDetails={showExpandedDetails}
+                onChangePage={loadPage}
+                activeTab={activeTab}
+                updatedAt={updatedAt}
+              />
+            </RootDragDropProvider>
             {showExpandedDetails && (
               <>
                 <ScrollableFlexItem grow={1}>

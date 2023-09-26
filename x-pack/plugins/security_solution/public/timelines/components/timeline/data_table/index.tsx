@@ -10,7 +10,12 @@ import {
   type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
   type EuiDataGridProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -24,6 +29,11 @@ import { UnifiedDataTable, useColumns, DataLoadingState } from '@kbn/unified-dat
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DropType } from '@kbn/dom-drag-drop';
+import { DragDrop, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
+import type { UnifiedFieldListSidebarContainerProps } from '@kbn/unified-field-list';
+import { FieldsGroupNames, UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
+import { i18n } from '@kbn/i18n';
 import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ExpandedDetailTimeline,
@@ -64,6 +74,56 @@ import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
 import CustomGridBodyControls from './render_custom_body';
 import RowDetails from './row_details';
+import { DRAG_DROP_FIELD } from './translations';
+
+const DROP_PROPS = {
+  value: {
+    id: 'dscDropZoneTable',
+    humanData: {
+      label: DRAG_DROP_FIELD,
+    },
+  },
+  order: [1, 0, 0, 0],
+  types: ['field_add'] as DropType[],
+};
+
+const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
+  return {
+    originatingApp: 'security_solution',
+    localStorageKeyPrefix: 'examples',
+    timeRangeUpdatesType: 'timefilter',
+    compressed: true,
+    showSidebarToggleButton: true,
+    disablePopularFields: true,
+    buttonAddFieldToWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+        defaultMessage: 'Add field as column',
+      }),
+    },
+    buttonRemoveFieldFromWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+        defaultMessage: 'Remove field from table',
+      }),
+    },
+    onOverrideFieldGroupDetails: (groupName) => {
+      if (groupName === FieldsGroupNames.AvailableFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
+            defaultMessage: 'Fields available for display in the table.',
+          }),
+        };
+      }
+    },
+    dataTestSubj: {
+      fieldListAddFieldButtonTestSubj: 'dataView-add-field_btn',
+      fieldListSidebarDataTestSubj: 'discover-sidebar',
+      fieldListItemStatsDataTestSubj: 'dscFieldStats',
+      fieldListItemDndDataTestSubjPrefix: 'dscFieldListPanelField',
+      fieldListItemPopoverDataTestSubj: 'discoverFieldListPanelPopover',
+      fieldListItemPopoverHeaderDataTestSubjPrefix: 'discoverFieldListPanel',
+    },
+  };
+};
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -107,6 +167,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   updatedAt,
 }) => {
   const dispatch = useDispatch();
+  const { euiTheme } = useEuiTheme();
+
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: timelineId,
@@ -126,8 +188,34 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       application: { capabilities },
       theme,
       data: dataPluginContract,
+      uiActions,
+      charts,
+      core,
     },
   } = useKibana();
+
+  const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
+    () => ({
+      fieldFormats,
+      dataViews,
+      storage,
+      dataViewFieldEditor,
+      data: dataPluginContract,
+      uiActions,
+      charts,
+      core,
+    }),
+    [
+      charts,
+      core,
+      dataPluginContract,
+      dataViewFieldEditor,
+      dataViews,
+      fieldFormats,
+      storage,
+      uiActions,
+    ]
+  );
 
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const [fetchedPage, setFechedPage] = useState<number>(0);
@@ -446,7 +534,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [discoverGridRows, enabledRowRenderers, onToggleShowNotes, showNotes, timelineId]
   );
   const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
-  const { onSetColumns } = useColumns({
+  const { onSetColumns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     dataView: dataView!,
@@ -522,6 +610,36 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [discoverGridRows, handleOnEventDetailPanelOpened]
   );
 
+  const [{ dragging }] = useDragDropContext();
+  const draggingFieldName = dragging?.id;
+
+  const onToggleColumn = useCallback(
+    (columnId: string) => {
+      dispatch(
+        timelineActions.upsertColumn({
+          column: getColumnHeader(columnId, defaultHeaders),
+          id: timelineId,
+          index: 1,
+        })
+      );
+    },
+    [dispatch, timelineId]
+  );
+
+  const isDropAllowed = useMemo(() => {
+    if (!draggingFieldName || defaultColumns.includes(draggingFieldName)) {
+      return false;
+    }
+    return true;
+  }, [draggingFieldName, defaultColumns]);
+
+  const onDropFieldToTable = useCallback(() => {
+    if (draggingFieldName) {
+      onAddColumn(draggingFieldName);
+      onToggleColumn(draggingFieldName);
+    }
+  }, [draggingFieldName, onAddColumn, onToggleColumn]);
+
   const tableSettings = useMemo(
     () => ({
       columns: columns.reduce((v, s) => {
@@ -570,73 +688,135 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [columns, timelineId, updatedAt]
   );
 
+  const onAddFieldToWorkspace = useCallback(
+    (field: DataViewField) => {
+      onAddColumn(field.name);
+      onToggleColumn(field.name);
+    },
+    [onAddColumn, onToggleColumn]
+  );
+
+  const onRemoveFieldFromWorkspace = useCallback(
+    (field: DataViewField) => {
+      if (columns.some(({ id }) => id === field.name)) {
+        dispatch(
+          timelineActions.removeColumn({
+            columnId: field.name,
+            id: timelineId,
+          })
+        );
+      }
+      onRemoveColumn(field.name);
+    },
+    [columns, dispatch, onRemoveColumn, timelineId]
+  );
+
   if (!dataView) {
     return null;
   }
   return (
-    <StyledTimelineUnifiedDataTable>
-      {dataLoadingState !== DataLoadingState.loaded && (
-        <EuiProgress
-          data-test-subj="discoverDataGridUpdating"
-          size="xs"
-          color="accent"
-          css={progressStyle}
-        />
-      )}
-      <StatefulEventContext.Provider value={activeStatefulEventContext}>
-        <DataGridMemoized
-          ariaLabelledBy="timelineDocumentsAriaLabel"
-          className={'udtTimeline'}
-          columns={defaultColumns}
-          expandedDoc={expandedDoc}
+    <EuiFlexGroup gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <UnifiedFieldListSidebarContainer
+          // ref={initializeUnifiedFieldListSidebarContainerApi}
+          variant="responsive"
+          getCreationOptions={getCreationOptions}
+          services={fieldListSidebarServices}
           dataView={dataView}
-          loadingState={dataLoadingState}
-          onFilter={onAddFilter as DocViewFilterFn}
-          onResize={onResizeDataGrid}
-          onSetColumns={onSetColumns}
-          onSort={!isTextBasedQuery ? onSort : undefined}
-          rows={discoverGridRows}
-          sampleSize={SAMPLE_SIZE_SETTING}
-          setExpandedDoc={onSetExpandedDoc}
-          settings={tableSettings}
-          showTimeCol={showTimeCol}
-          isSortEnabled={true}
-          sort={sortingColumns}
-          rowHeightState={3}
-          onUpdateRowHeight={() => {}}
-          isPlainRecord={isTextBasedQuery}
-          rowsPerPageState={itemsPerPage}
-          onUpdateRowsPerPage={onChangeItemsPerPage}
-          // onFieldEdited={() => refetch()}
-          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-          services={{
-            theme,
-            fieldFormats,
-            storage,
-            toastNotifications: toastsService,
-            uiSettings,
-            dataViewFieldEditor,
-            data: dataPluginContract,
-          }}
-          visibleCellActions={3}
-          externalCustomRenderers={customRenderers}
-          renderDocumentView={renderDetailsPanel}
-          externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
-          externalAdditionalControls={additionalControls}
-          // trailingControlColumns={trailingControlColumns}
-          // renderCustomGridBody={renderCustomGridBody}
-          rowsPerPageOptions={itemsPerPageOptions}
-          showFullScreenButton={false}
-          useNewFieldsApi={true}
-          maxDocFieldsDisplayed={50}
-          consumer="timeline"
-          totalHits={totalCount}
-          onFetchMoreRecords={handleChangePageClick}
-          configRowHeight={3}
-          showMultiFields={true}
+          allFields={dataView.fields}
+          workspaceSelectedFieldNames={defaultColumns}
+          onAddFieldToWorkspace={onAddFieldToWorkspace}
+          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+          onAddFilter={onAddFilter}
+          onFieldEdited={async (options) => await refetch()}
         />
-      </StatefulEventContext.Provider>
-    </StyledTimelineUnifiedDataTable>
+      </EuiFlexItem>
+      <EuiHideFor sizes={['xs', 's']}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            border-right: ${euiTheme.border.thin};
+          `}
+        />
+      </EuiHideFor>
+      <EuiFlexItem>
+        <StyledTimelineUnifiedDataTable>
+          {dataLoadingState !== DataLoadingState.loaded && (
+            <EuiProgress
+              data-test-subj="discoverDataGridUpdating"
+              size="xs"
+              color="accent"
+              css={progressStyle}
+            />
+          )}
+          <StatefulEventContext.Provider value={activeStatefulEventContext}>
+            <DragDrop
+              draggable={false}
+              dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
+              value={DROP_PROPS.value}
+              order={DROP_PROPS.order}
+              onDrop={onDropFieldToTable}
+            >
+              <DropOverlayWrapper isVisible={isDropAllowed}>
+                <DataGridMemoized
+                  ariaLabelledBy="timelineDocumentsAriaLabel"
+                  className={'udtTimeline'}
+                  columns={defaultColumns}
+                  expandedDoc={expandedDoc}
+                  dataView={dataView}
+                  loadingState={dataLoadingState}
+                  onFilter={onAddFilter as DocViewFilterFn}
+                  onResize={onResizeDataGrid}
+                  onSetColumns={onSetColumns}
+                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  rows={discoverGridRows}
+                  sampleSize={SAMPLE_SIZE_SETTING}
+                  setExpandedDoc={onSetExpandedDoc}
+                  settings={tableSettings}
+                  showTimeCol={showTimeCol}
+                  isSortEnabled={true}
+                  sort={sortingColumns}
+                  rowHeightState={3}
+                  onUpdateRowHeight={() => {}}
+                  isPlainRecord={isTextBasedQuery}
+                  rowsPerPageState={itemsPerPage}
+                  onUpdateRowsPerPage={onChangeItemsPerPage}
+                  onFieldEdited={() => refetch()}
+                  cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+                  services={{
+                    theme,
+                    fieldFormats,
+                    storage,
+                    toastNotifications: toastsService,
+                    uiSettings,
+                    dataViewFieldEditor,
+                    data: dataPluginContract,
+                  }}
+                  visibleCellActions={3}
+                  externalCustomRenderers={customRenderers}
+                  renderDocumentView={renderDetailsPanel}
+                  externalControlColumns={
+                    leadingControlColumns as unknown as EuiDataGridControlColumn[]
+                  }
+                  externalAdditionalControls={additionalControls}
+                  // trailingControlColumns={trailingControlColumns}
+                  // renderCustomGridBody={renderCustomGridBody}
+                  rowsPerPageOptions={itemsPerPageOptions}
+                  showFullScreenButton={false}
+                  useNewFieldsApi={true}
+                  maxDocFieldsDisplayed={50}
+                  consumer="timeline"
+                  totalHits={totalCount}
+                  onFetchMoreRecords={handleChangePageClick}
+                  configRowHeight={3}
+                  showMultiFields={true}
+                />
+              </DropOverlayWrapper>
+            </DragDrop>
+          </StatefulEventContext.Provider>
+        </StyledTimelineUnifiedDataTable>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

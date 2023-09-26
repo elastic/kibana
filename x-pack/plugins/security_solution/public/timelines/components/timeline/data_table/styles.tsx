@@ -32,7 +32,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   .udtTimeline .siemEventsTable__trSupplement--summary {
-    background-color: #f7f8fc;
     border-radius: 8px;
   }
 

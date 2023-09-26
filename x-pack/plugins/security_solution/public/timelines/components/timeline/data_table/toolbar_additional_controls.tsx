@@ -97,38 +97,18 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({
     dispatch(timelineActions.updateColumns({ id: timelineId, columns }));
   }, [columns, dispatch, timelineId]);
 
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      if (columns.some(({ id }) => id === columnId)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId,
-            id: timelineId,
-          })
-        );
-      } else {
-        dispatch(
-          timelineActions.upsertColumn({
-            column: getColumnHeader(columnId, defaultHeaders),
-            id: timelineId,
-            index: 1,
-          })
-        );
-      }
-    },
-    [columns, dispatch, timelineId]
-  );
-
-  return (
-    <>
-      {' '}
-      {triggersActionsUi.getFieldBrowser({
+  /*
+  {triggersActionsUi.getFieldBrowser({
         browserFields,
         columnIds: defaultColumns ?? [],
         onResetColumns,
         onToggleColumn,
         options: fieldBrowserOptions,
-      })}
+      })}*/
+
+  return (
+    <>
+      {' '}
       <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={timelineId} />
       <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">

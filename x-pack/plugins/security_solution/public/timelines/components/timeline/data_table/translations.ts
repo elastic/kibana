@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DRAG_DROP_FIELD = i18n.translate('discover.dropZoneTableLabel', {
+  defaultMessage: 'Drop zone to add field as a column to the table',
+});
+
 export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
   defaultMessage: 'Enter fullscreen',
 });

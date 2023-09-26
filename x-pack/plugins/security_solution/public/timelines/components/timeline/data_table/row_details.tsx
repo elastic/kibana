@@ -100,7 +100,20 @@ export const RowDetailsComponent: React.FC<Props> = ({
           toggleShowAddNote={() => onToggleShowNotes(event)}
         />
       </EventsTrSupplement>
-      
+      <EuiFlexGroup gutterSize="none" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EventsTrSupplement>
+            <StatefulRowRenderer
+              ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
+              containerRef={containerRef}
+              event={event as unknown as TimelineItem}
+              lastFocusedAriaColindex={rowIndex - 1}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
+          </EventsTrSupplement>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

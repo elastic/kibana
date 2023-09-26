@@ -198,6 +198,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         telemetry: this.telemetry.start(),
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
+        charts: startPlugins.charts,
+        core: coreStart,
       };
       return services;
     };
