@@ -292,14 +292,9 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
     indices: string[];
     fields: Array<{ name: string; description: string; type: string }>;
   }> => {
+    const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
 
-    const esClient =  (
-      await resources.context.core
-    ).elasticsearch.client.asCurrentUser;
-
-    const savedObjectsClient = (
-      await resources.context.core
-    ).savedObjects.getClient();
+    const savedObjectsClient = (await resources.context.core).savedObjects.getClient();
 
     const index = resources.params.body.index;
 
@@ -339,7 +334,9 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
       };
     }
 
-    const dataViews = await (await resources.plugins.dataViews.start()).dataViewsServiceFactory(savedObjectsClient, esClient)
+    const dataViews = await (
+      await resources.plugins.dataViews.start()
+    ).dataViewsServiceFactory(savedObjectsClient, esClient);
 
     const fields = await dataViews.getFieldsForWildcard({
       pattern: index,
