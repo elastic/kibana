@@ -551,20 +551,20 @@ export class FleetPlugin
             timeMultiple: 2,
             // avoid HA contention with other Kibana instances
             jitter: 'full',
-            retry: (error: any, attemptCount: number) =>{
+            retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.debug(summary, { error: { message: error }});
+              logger.debug(summary, { error: { message: error } });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
                 summary,
                 meta: {
                   attemptCount,
-                  error
-                }
-              })
+                  error,
+                },
+              });
               return true;
-            }
+            },
           }
         );
 
@@ -573,7 +573,7 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed', { error: { message: error }});
+        logger.warn('Fleet setup failed', { error: { message: error } });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
