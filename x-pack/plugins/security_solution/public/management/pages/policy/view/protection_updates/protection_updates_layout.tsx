@@ -412,9 +412,8 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         </EuiPanel>
         <ProtectionUpdatesBottomBar
           isUpdating={isUpdating}
-          saveButtonEnabled={saveButtonEnabled}
+          saveButtonDisabled={!canWritePolicyManagement || !saveButtonEnabled}
           onSave={onSave}
-          canWritePolicyManagement={canWritePolicyManagement}
         />
       </>
     );

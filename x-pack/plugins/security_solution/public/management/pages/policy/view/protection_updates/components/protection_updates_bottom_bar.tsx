@@ -22,14 +22,13 @@ import { getPoliciesPath } from '../../../../../common/routing';
 import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 
 interface ProtectionUpdatesBottomBarProps {
-  saveButtonEnabled: boolean;
+  saveButtonDisabled: boolean;
   isUpdating: boolean;
-  canWritePolicyManagement: boolean;
   onSave: () => void;
 }
 
 export const ProtectionUpdatesBottomBar = React.memo<ProtectionUpdatesBottomBarProps>(
-  ({ isUpdating, onSave, canWritePolicyManagement, saveButtonEnabled }) => {
+  ({ isUpdating, onSave, saveButtonDisabled }) => {
     const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
     const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
     const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
@@ -74,7 +73,7 @@ export const ProtectionUpdatesBottomBar = React.memo<ProtectionUpdatesBottomBarP
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={true}
-              disabled={!canWritePolicyManagement || !saveButtonEnabled}
+              disabled={saveButtonDisabled}
               iconType="save"
               data-test-subj="protectionUpdatesSaveButton"
               onClick={onSave}
