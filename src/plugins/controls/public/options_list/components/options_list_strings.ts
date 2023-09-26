@@ -12,7 +12,7 @@ export const OptionsListStrings = {
   control: {
     getSeparator: () =>
       i18n.translate('controls.optionsList.control.separator', {
-        defaultMessage: ', ',
+        defaultMessage: '; ',
       }),
     getPlaceholder: () =>
       i18n.translate('controls.optionsList.control.placeholder', {

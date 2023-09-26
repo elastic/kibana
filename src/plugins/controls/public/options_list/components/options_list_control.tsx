@@ -135,7 +135,9 @@ export const OptionsListControl = ({
                 <span>
                   {validSelections
                     .map((value) => fieldFormatter(value))
-                    .join(OptionsListStrings.control.getSeparator())}
+                    .join(
+                      fieldSpec?.type === 'date' ? '; ' : OptionsListStrings.control.getSeparator()
+                    )}
                 </span>
               )}
               {invalidSelections && (
@@ -150,7 +152,14 @@ export const OptionsListControl = ({
         </>
       ),
     };
-  }, [exclude, existsSelected, validSelections, invalidSelections, fieldFormatter]);
+  }, [
+    exclude,
+    existsSelected,
+    validSelections,
+    invalidSelections,
+    fieldFormatter,
+    fieldSpec?.type,
+  ]);
 
   const button = (
     <EuiFilterButton
