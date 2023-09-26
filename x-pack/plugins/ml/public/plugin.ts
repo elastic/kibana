@@ -48,6 +48,11 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import {
+  getMlSharedServices,
+  MlSharedServices,
+} from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -57,6 +62,7 @@ import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constan
 import type { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
+  dataViewEditor: DataViewEditorStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
@@ -103,6 +109,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | MlLocator;
+
+  private sharedMlServices: MlSharedServices | undefined;
+
   private isServerless: boolean = false;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -110,6 +119,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+    this.sharedMlServices = getMlSharedServices(core.http);
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -128,6 +139,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dataViewEditor: pluginsStart.dataViewEditor,
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
@@ -249,6 +261,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices?.elasticModels,
     };
   }
 
