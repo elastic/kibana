@@ -6,19 +6,29 @@
  */
 
 import { run, type RunContext } from '@kbn/dev-cli-runner';
-import { run as runEs } from '@kbn/es';
 import { cyan } from 'chalk';
+import execa from 'execa';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { join } from 'path';
 import { ES_RESOURCES } from '../common/roles_users/serverless';
 
 export const cli = async () => {
   return run(
     async (cliContext: RunContext) => {
-      if (!process.argv.includes('serverless')) {
-        process.argv.splice(2, 1, 'serverless', process.argv[2] ?? '');
+      const callingArgs = process.argv.slice(2);
+
+      if (!callingArgs.includes('serverless')) {
+        callingArgs.unshift('serverless');
       }
 
-      return runEs({
-        resources: Object.values(ES_RESOURCES),
+      const additionalArgs: string[] = Object.values(ES_RESOURCES).reduce((acc, resourcePath) => {
+        acc.push('--resources', resourcePath);
+        return acc;
+      }, [] as string[]);
+
+      await execa.node(join(REPO_ROOT, 'scripts', 'es'), [...callingArgs, ...additionalArgs], {
+        stderr: 'inherit',
+        stdout: 'inherit',
       });
     },
     {
