@@ -111,7 +111,6 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
-    console.log({ formatted: validSelections?.map(fieldFormatter) });
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
       validSelectionsCount: validSelections?.length,
