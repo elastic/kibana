@@ -27,7 +27,7 @@ import {
   throwIfCustomFieldTypesInvalid,
   throwIfDuplicatedCustomFieldKeysInRequest,
   throwIfMissingRequiredCustomField,
-} from './validation';
+} from './validators';
 
 async function validateCustomFieldsInRequest({
   data,

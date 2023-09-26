@@ -12,9 +12,9 @@ import {
   validateRequiredCustomFields,
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
-} from './validation';
+} from './validators';
 
-describe('validation', () => {
+describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
     beforeEach(() => {
       jest.clearAllMocks();

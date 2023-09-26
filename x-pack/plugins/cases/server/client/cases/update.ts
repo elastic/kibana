@@ -60,7 +60,7 @@ import {
   throwIfCustomFieldTypesInvalidForMultipleCases,
   throwIfDuplicatedCustomFieldKeysInRequestForMultipleCases,
   throwIfMissingRequiredCustomFieldForMultipleCases,
-} from './validation';
+} from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
