@@ -9,18 +9,14 @@ import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { GetKnowledgeBaseStatusResponse } from '@kbn/elastic-assistant';
+import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { GetKnowledgeBaseStatusPathParams } from '../../schemas/knowledge_base/get_knowledge_base_status';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import {
-  ELSER_MODEL_ID,
-  ESQL_DOCS_LOADED_QUERY,
-  ESQL_RESOURCE,
-  KNOWLEDGE_BASE_INDEX_PATTERN,
-} from './constants';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -28,7 +24,8 @@ import {
  * @param router IRouter for registering routes
  */
 export const getKnowledgeBaseStatusRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  trainedModels: MlPluginSetup['trainedModelsProvider']
 ) => {
   router.get(
     {
@@ -56,7 +53,9 @@ export const getKnowledgeBaseStatusRoute = (
 
         const indexExists = await esStore.indexExists();
         const pipelineExists = await esStore.pipelineExists();
-        const modelExists = await esStore.isModelInstalled(ELSER_MODEL_ID);
+
+        const elserId = (await trainedModels(request, esClient).getELSER()).name;
+        const modelExists = await esStore.isModelInstalled(elserId);
 
         const body: GetKnowledgeBaseStatusResponse = {
           elser_exists: modelExists,

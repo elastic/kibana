@@ -9,7 +9,8 @@
     "browser": false,
     "requiredPlugins": [
       "actions",
-      "data"
+      "data",
+      "ml"
     ]
   }
 }

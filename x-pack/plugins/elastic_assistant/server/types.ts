@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import { CustomRequestHandlerContext, Logger } from '@kbn/core/server';
+import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -23,6 +24,7 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
+  ml: MlPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;

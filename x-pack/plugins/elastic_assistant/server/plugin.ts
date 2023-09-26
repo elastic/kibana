@@ -73,7 +73,7 @@ export class ElasticAssistantPlugin
     );
 
     deleteKnowledgeBaseRoute(router);
-    getKnowledgeBaseStatusRoute(router);
+    getKnowledgeBaseStatusRoute(router, plugins.ml.trainedModelsProvider);
     postKnowledgeBaseRoute(router);
     postActionsConnectorExecuteRoute(router);
     return {
