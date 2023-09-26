@@ -11,8 +11,9 @@ import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import type { PluginWrapper } from './plugin';
+import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /**
  * Provides a plugin-specific context passed to the plugin's constructor. This is currently
@@ -66,9 +67,11 @@ export function createPluginSetupContext<
 >({
   deps,
   plugin,
+  runtimeResolver,
 }: {
   deps: PluginsServiceSetupDeps;
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreSetup {
   return {
     analytics: deps.analytics,
@@ -84,6 +87,10 @@ export function createPluginSetupContext<
     uiSettings: deps.uiSettings,
     settings: deps.settings,
     theme: deps.theme,
+    plugins: {
+      onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
     getStartServices: () => plugin.startDependencies,
   };
 }
@@ -106,9 +113,11 @@ export function createPluginStartContext<
 >({
   deps,
   plugin,
+  runtimeResolver,
 }: {
   deps: PluginsServiceStartDeps;
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  runtimeResolver: IRuntimePluginContractResolver;
 }): CoreStart {
   return {
     analytics: deps.analytics,
@@ -134,5 +143,8 @@ export function createPluginStartContext<
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
+    plugins: {
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
   };
 }

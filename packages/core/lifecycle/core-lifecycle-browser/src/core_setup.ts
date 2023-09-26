@@ -15,6 +15,7 @@ import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-bro
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ApplicationSetup } from '@kbn/core-application-browser';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -53,6 +54,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   executionContext: ExecutionContextSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
+  /** {@link PluginsServiceSetup} */
+  plugins: PluginsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }

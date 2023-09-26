@@ -16,6 +16,7 @@ import {
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
+import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -41,6 +42,7 @@ export interface InternalPluginsServiceStart {
 export class PluginsService
   implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
 {
+  private readonly runtimeResolver = new RuntimePluginContractResolver();
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
@@ -82,6 +84,9 @@ export class PluginsService
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<InternalPluginsServiceSetup> {
+    const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
+    this.runtimeResolver.setDependencyMap(runtimeDependencies);
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -103,6 +108,8 @@ export class PluginsService
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
+
+    this.runtimeResolver.resolveSetupRequests(contracts);
 
     // Expose setup contracts
     return { contracts };
@@ -130,6 +137,8 @@ export class PluginsService
       contracts.set(pluginName, contract);
     }
 
+    this.runtimeResolver.resolveStartRequests(contracts);
+
     // Expose start contracts
     return { contracts };
   }
@@ -141,3 +150,18 @@ export class PluginsService
     }
   }
 }
+
+const buildPluginRuntimeDependencyMap = (
+  pluginMap: Map<PluginName, PluginWrapper>
+): Map<PluginName, Set<PluginName>> => {
+  const runtimeDependencies = new Map<PluginName, Set<PluginName>>();
+  for (const [pluginName, pluginWrapper] of pluginMap.entries()) {
+    const pluginRuntimeDeps = new Set([
+      ...pluginWrapper.optionalPlugins,
+      ...pluginWrapper.requiredPlugins,
+      ...pluginWrapper.runtimePluginDependencies,
+    ]);
+    runtimeDependencies.set(pluginName, pluginRuntimeDeps);
+  }
+  return runtimeDependencies;
+};

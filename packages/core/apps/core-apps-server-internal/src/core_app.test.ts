@@ -135,6 +135,7 @@ describe('CoreApp', () => {
         optionalPlugins: [],
         requiredBundles: [],
         requiredPlugins: [],
+        runtimePluginDependencies: [],
       });
     });
     it('calls `registerBundleRoutes` with the correct options', () => {
