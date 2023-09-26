@@ -81,7 +81,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
       defaultMessage:
-        'Identify, analyze, and process areas of interest in your data using advanced data analysis techniques.',
+        'Identify, analyze, and process areas of interest in your data using advanced analysis techniques.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
