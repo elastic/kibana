@@ -37,7 +37,7 @@ echo "Image push to $TARGET_IMAGE successful."
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
 
 MANIFEST_UPLOAD_PATH="Skipped"
-if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
+if [[ "${UPLOAD_MANIFEST:-}" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
   echo "--- Uploading latest-verified manifest to GCS"
   cat << EOT >> $MANIFEST_FILE_NAME
 {
@@ -58,10 +58,12 @@ EOT
   gsutil acl ch -u AllUsers:R "gs://$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME"
   MANIFEST_UPLOAD_PATH="<a href=\"https://storage.googleapis.com/$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME\">$MANIFEST_FILE_NAME</a>"
 
-elif [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ ]]; then
+elif [[ "${UPLOAD_MANIFEST:-}" =~ ^(1|true)$ ]]; then
   echo "--- Skipping upload of latest-verified manifest to GCS, ES Serverless build tag is not pointing to a hash"
 elif [[ "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
   echo "--- Skipping upload of latest-verified manifest to GCS, flag was not provided"
+else
+  echo "--- Skipping upload of latest-verified manifest to GCS, no flag and hash provided"
 fi
 
 echo "--- Annotating build with info"
