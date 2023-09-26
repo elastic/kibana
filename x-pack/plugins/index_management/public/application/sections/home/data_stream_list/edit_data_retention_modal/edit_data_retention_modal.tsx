@@ -253,6 +253,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               <EuiCallOut
                 color="warning"
                 iconType="warning"
+                data-test-subj="configuredByILMWarning"
                 title={i18n.translate(
                   'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.configuredByILMWarningTitle',
                   {
@@ -300,7 +301,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             }}
           />
 
-          <UseField path="infiniteRetentionPeriod" component={ToggleField} />
+          <UseField
+            path="infiniteRetentionPeriod"
+            component={ToggleField}
+            data-test-subj="infiniteRetentionPeriod"
+          />
 
           <EuiSpacer />
         </EuiModalBody>

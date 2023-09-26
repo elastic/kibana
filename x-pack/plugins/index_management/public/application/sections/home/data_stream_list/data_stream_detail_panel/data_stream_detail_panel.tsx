@@ -292,6 +292,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       fill
       iconType="arrowDown"
       iconSide="right"
+      data-test-subj="manageDataStreamButton"
       onClick={() => setManagePopOver(!isManagePopOverOpen)}
     >
       <FormattedMessage
@@ -312,6 +313,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
             defaultMessage: 'Edit data retention',
           }),
+          'data-test-subj': 'editDataRetentionButton',
           icon: <EuiIcon type="pencil" size="m" />,
           onClick: () => {
             closePopover();

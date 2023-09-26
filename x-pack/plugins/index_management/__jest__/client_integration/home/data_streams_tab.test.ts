@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import {
   breadcrumbService,
@@ -15,6 +16,7 @@ import {
 import { API_BASE_PATH } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
+import { notificationService } from '../../../public/application/services/notification';
 
 import {
   DataStreamsTabTestBed,
@@ -134,6 +136,8 @@ describe('Data Streams tab', () => {
   });
 
   describe('when there are data streams', () => {
+    const notificationsServiceMock = notificationServiceMock.createStartContract();
+
     beforeEach(async () => {
       const {
         setLoadIndicesResponse,
@@ -169,7 +173,13 @@ describe('Data Streams tab', () => {
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
       setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
-      testBed = await setup(httpSetup, { history: createMemoryHistory() });
+      notificationService.setup(notificationsServiceMock);
+      testBed = await setup(httpSetup, {
+        history: createMemoryHistory(),
+        services: {
+          notificationService,
+        },
+      });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
@@ -327,6 +337,64 @@ describe('Data Streams tab', () => {
         );
       });
 
+      describe('update data retention', () => {
+        test('can set data retention period', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+            success: true,
+          });
+
+          // set data retention value
+          testBed.form.setInputValue('policyNameField', '7');
+          // Set data retention unit
+          testBed.find('show-filters-button').simulate('click');
+          testBed.find('filter-option-h').simulate('click');
+
+          await act(async () => {
+            testBed.find('saveButton').simulate('click');
+          });
+          testBed.component.update();
+
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({ dataRetention: '7h' }) })
+          );
+        });
+
+        test('allows to set infinite retention period', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+            success: true,
+          });
+
+          testBed.form.toggleEuiSwitch('infiniteRetentionPeriod.input');
+
+          await act(async () => {
+            testBed.find('saveButton').simulate('click');
+          });
+          testBed.component.update();
+
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({}) })
+          );
+        });
+      });
+
       test('clicking index template name navigates to the index template details', async () => {
         const {
           actions: { clickNameAt, clickDetailPanelIndexTemplateLink },
@@ -421,6 +489,33 @@ describe('Data Streams tab', () => {
       const { actions, findDetailPanelIlmPolicyLink } = testBed;
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
+    });
+
+    test('with ILM updating data retention should show a warning callout', async () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
+        ilmPolicyName: 'my_ilm_policy',
+      });
+
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+
+      testBed = await setup(httpSetup, {
+        history: createMemoryHistory(),
+        url: urlServiceMock,
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+
+      const { actions } = testBed;
+      await actions.clickNameAt(0);
+
+      actions.clickEditDataRetentionButton();
+      expect(testBed.find('configuredByILMWarning').exists()).toBeTruthy();
     });
 
     test('with an ILM url locator and no ILM policy', async () => {
@@ -618,6 +713,7 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
         await clickNameAt(1);
 
+        find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeTruthy();
       });
 
