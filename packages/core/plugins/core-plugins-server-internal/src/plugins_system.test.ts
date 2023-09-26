@@ -10,6 +10,7 @@ import {
   mockCreatePluginPrebootSetupContext,
   mockCreatePluginSetupContext,
   mockCreatePluginStartContext,
+  runtimeResolverMock,
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -74,6 +75,10 @@ let env: Env;
 let coreContext: CoreContext;
 
 beforeEach(() => {
+  runtimeResolverMock.setDependencyMap.mockReset();
+  runtimeResolverMock.resolveSetupRequests.mockReset();
+  runtimeResolverMock.resolveStartRequests.mockReset();
+
   logger = loggingSystemMock.create();
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
@@ -196,6 +201,31 @@ test('`setupPlugins` ignores missing optional dependency', async () => {
       ],
     ]
   `);
+});
+
+test('`setupPlugins` setups the runtimeResolver', async () => {
+  const pluginA = createPlugin('pluginA', { required: [] });
+  const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
+
+  jest.spyOn(pluginA, 'setup').mockReturnValue('contractA');
+  jest.spyOn(pluginB, 'setup').mockReturnValue('contractB');
+
+  pluginsSystem.addPlugin(pluginA);
+  pluginsSystem.addPlugin(pluginB);
+
+  await pluginsSystem.setupPlugins(setupDeps);
+
+  expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledTimes(1);
+  expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledWith(expect.any(Map));
+
+  expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledTimes(1);
+  expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledWith(expect.any(Map));
+  expect(
+    Object.fromEntries([...runtimeResolverMock.resolveSetupRequests.mock.calls[0][0].entries()])
+  ).toEqual({
+    pluginA: 'contractA',
+    pluginB: 'contractB',
+  });
 });
 
 test('correctly orders plugins and returns exposed values for "setup" and "start"', async () => {
@@ -634,6 +664,32 @@ describe('start', () => {
     await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+  });
+
+  it('setups the runtimeResolver', async () => {
+    const pluginA = createPlugin('pluginA', { required: [] });
+    const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
+
+    jest.spyOn(pluginA, 'setup').mockReturnValue({});
+    jest.spyOn(pluginB, 'setup').mockReturnValue({});
+
+    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    jest.spyOn(pluginB, 'start').mockReturnValue('contractB');
+
+    pluginsSystem.addPlugin(pluginA);
+    pluginsSystem.addPlugin(pluginB);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+
+    expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledTimes(1);
+    expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledWith(expect.any(Map));
+    expect(
+      Object.fromEntries([...runtimeResolverMock.resolveStartRequests.mock.calls[0][0].entries()])
+    ).toEqual({
+      pluginA: 'contractA',
+      pluginB: 'contractB',
+    });
   });
 });
 
