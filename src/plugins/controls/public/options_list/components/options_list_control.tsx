@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
-import useMount from 'react-use/lib/useMount';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
