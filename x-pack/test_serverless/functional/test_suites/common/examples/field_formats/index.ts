@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();
-      await PageObjects.svlCommonPage.navigateToApp('fieldFormatsExample');
+      await PageObjects.common.navigateToApp('fieldFormatsExample');
     });
 
     it('renders field formats example 1', async () => {

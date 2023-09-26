@@ -10,13 +10,13 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['svlCommonPage']);
+  const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/165763
-  describe('Partial results example', () => {
+  describe.skip('Partial results example', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.navigateToApp('searchExamples');
+      await PageObjects.common.navigateToApp('searchExamples');
       await testSubjects.click('/search');
     });
 

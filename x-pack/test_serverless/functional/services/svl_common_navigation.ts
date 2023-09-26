@@ -13,12 +13,12 @@ export function SvlCommonNavigationServiceProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async navigateToKibanaHome() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.svlCommonPage.navigateToApp('home');
+        await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
     },

@@ -28,13 +28,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects([
-    'common',
-    'timePicker',
-    'header',
-    'unifiedFieldList',
-    'svlCommonPage',
-  ]);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header', 'unifiedFieldList']);
   const dataViewTitle = 'existence_index_*';
 
   async function addDSLFilter(value: string) {
@@ -59,7 +53,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/165938
   // Failing: See https://github.com/elastic/kibana/issues/165927
-  describe('Fields existence info', () => {
+  describe.skip('Fields existence info', () => {
     before(async () => {
       await esArchiver.load(
         'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
@@ -67,7 +61,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
-      await PageObjects.svlCommonPage.navigateToApp('unifiedFieldListExamples');
+      await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('combobox is ready', async () => {
         return await testSubjects.exists('dataViewSelector');

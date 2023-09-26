@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
-      await pageObjects.svlCommonPage.navigateToApp('indexManagement');
+      await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();

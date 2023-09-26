@@ -13,12 +13,12 @@ export function SvlObltNavigationServiceProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['svlCommonPage']);
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.svlCommonPage.navigateToApp('landingPage');
+        await PageObjects.common.navigateToApp('landingPage');
         await testSubjects.existOrFail('obltOnboardingHomeTitle', { timeout: 2000 });
       });
     },

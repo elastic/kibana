@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     function testSearchExample() {
       before(async function () {
-        await PageObjects.svlCommonPage.navigateToApp(appId, { insertTimestamp: false });
+        await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
         await comboBox.setCustom('dataViewSelector', 'logstash-*');
         await comboBox.set('searchBucketField', 'geo.src');
         await comboBox.set('searchMetricField', 'memory');

@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.login();
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.svlCommonPage.navigateToApp('indexManagement');
+      await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab
       await pageObjects.indexManagement.changeTabs('enrich_policiesTab');

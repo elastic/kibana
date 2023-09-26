@@ -12,12 +12,12 @@ export function SvlSearchNavigationServiceProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['svlCommonPage']);
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.svlCommonPage.navigateToApp('landingPage');
+        await PageObjects.common.navigateToApp('landingPage');
         // The getting started page is currently empty, so there's nothing we could
         // assert on. Once something exists here, we should add back a check.
         // await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });

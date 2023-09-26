@@ -28,7 +28,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.svlCommonPage.navigateToApp('home');
+      await PageObjects.common.navigateToApp('home');
       const currentUrl = await browser.getCurrentUrl();
       const customizationUrl =
         currentUrl.substring(0, currentUrl.indexOf('/app/home')) +

@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await PageObjects.svlCommonPage.navigateToApp('dashboards');
+      await PageObjects.common.navigateToApp('dashboards');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await elasticChart.setNewChartUiDebugFlag(true);

@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'svlCommonPage']);
+  const pageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const retry = getService('retry');
 
   // Skip until we enable the Advanced settings app in serverless
   describe.skip('Search advanced settings', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.navigateToApp('advancedSettings');
+      await pageObjects.common.navigateToApp('advancedSettings');
     });
 
     it('renders the page', async () => {
