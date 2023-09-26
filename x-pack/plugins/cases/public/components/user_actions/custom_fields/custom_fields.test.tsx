@@ -76,7 +76,7 @@ describe('createCustomFieldsUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('changed My test label 1 to an empty value')).toBeInTheDocument();
+    expect(screen.getByText('changed My test label 1 to "None"')).toBeInTheDocument();
   });
 
   it('renders correctly when a custom field is updated to an empty value: empty array', () => {
@@ -105,7 +105,7 @@ describe('createCustomFieldsUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('changed My test label 1 to an empty value')).toBeInTheDocument();
+    expect(screen.getByText('changed My test label 1 to "None"')).toBeInTheDocument();
   });
 
   it('renders correctly the label when the configuration is not found', () => {

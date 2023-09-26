@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiIcon,
   EuiButtonIcon,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
@@ -31,7 +30,6 @@ export interface Props {
 
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
   const { customFields, onDeleteCustomField } = props;
-  const { euiTheme } = useEuiTheme();
   const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {

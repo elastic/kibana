@@ -13,6 +13,7 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
+import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
@@ -736,124 +737,6 @@ describe('create', () => {
           profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
           username: 'damaged_raccoon',
         },
-      });
-      it('does not throw if all required custom fields are in the request', async () => {
-        const customFields = [
-          {
-            key: 'first_key',
-            type: CustomFieldTypes.TEXT as const,
-            field: { value: ['this is a text field value', 'this is second'] },
-          },
-          {
-            key: 'second_key',
-            type: CustomFieldTypes.TOGGLE as const,
-            field: { value: null },
-          },
-        ];
-
-        casesClient.configure.get = jest.fn().mockResolvedValue([
-          {
-            owner: mockCases[0].attributes.owner,
-            customFields: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'foo',
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-              },
-            ],
-          },
-        ]);
-
-        await expect(
-          throwIfMissingRequiredCustomField({
-            casePostRequest: {
-              customFields,
-            } as unknown as CasePostRequest,
-            casesClient,
-          })
-        ).resolves.not.toThrow();
-      });
-
-      it('does not throw if there are only optional custom fields in configuration', async () => {
-        casesClient.configure.get = jest.fn().mockResolvedValue([
-          {
-            owner: mockCases[0].attributes.owner,
-            customFields: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'foo',
-                required: false,
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: false,
-              },
-            ],
-          },
-        ]);
-
-        await expect(
-          throwIfMissingRequiredCustomField({
-            casePostRequest: {} as unknown as CasePostRequest,
-            casesClient,
-          })
-        ).resolves.not.toThrow();
-      });
-
-      it('does not throw if no configuration found', async () => {
-        casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
-        await expect(
-          throwIfMissingRequiredCustomField({
-            casePostRequest: {} as unknown as CasePostRequest,
-            casesClient,
-          })
-        ).resolves.not.toThrow();
-      });
-
-      it('throws if the request has missing required custom fields', async () => {
-        casesClient.configure.get = jest.fn().mockResolvedValue([
-          {
-            owner: mockCases[0].attributes.owner,
-            customFields: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'foo',
-                required: true,
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: true,
-              },
-            ],
-          },
-        ]);
-
-        await expect(
-          throwIfMissingRequiredCustomField({
-            casePostRequest: {
-              customFields: [
-                {
-                  key: 'second_key',
-                  type: CustomFieldTypes.TOGGLE,
-                  label: 'foo',
-                },
-              ],
-            } as unknown as CasePostRequest,
-            casesClient,
-          })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
       });
     });
   });
