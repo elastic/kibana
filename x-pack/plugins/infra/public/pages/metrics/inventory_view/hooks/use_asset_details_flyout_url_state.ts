@@ -25,7 +25,6 @@ export const useAssetDetailsFlyoutState = (): [
     defaultState: {
       ...GET_DEFAULT_PROPERTIES,
     },
-
     decodeUrlState,
     encodeUrlState,
     urlStateKey: ASSET_DETAILS_FLYOUT_URL_STATE_KEY,

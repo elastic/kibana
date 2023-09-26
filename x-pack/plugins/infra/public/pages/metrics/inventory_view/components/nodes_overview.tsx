@@ -66,6 +66,9 @@ export const NodesOverview = ({
   const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
 
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
+  const handleCreateRuleClick = () => {
+    setIsAlertFlyoutVisible(true);
+  };
 
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -154,9 +157,11 @@ export const NodesOverview = ({
             />
           )}
           <AssetDetailsFlyout
-            setIsAlertFlyoutVisible={setIsAlertFlyoutVisible}
+            onCreateRuleClick={handleCreateRuleClick}
             closeFlyout={closeFlyout}
             assetName={detailsItemId}
+            assetType={nodeType}
+            currentTime={currentTime}
           />
         </>
       )}

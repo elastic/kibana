@@ -6,39 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { orderedFlyoutTabs } from './flyout_tabs';
 
 interface Props {
   assetName: string;
+  assetType: InventoryItemType;
   closeFlyout: () => void;
-  setIsAlertFlyoutVisible: Dispatch<SetStateAction<boolean>>;
+  onCreateRuleClick: () => void;
+  currentTime: number;
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
 
-export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVisible }: Props) => {
+export const AssetDetailsFlyout = ({
+  assetName,
+  assetType,
+  closeFlyout,
+  onCreateRuleClick,
+  currentTime,
+}: Props) => {
   const { source } = useSourceContext();
-  const { currentTime } = useWaffleTimeContext();
-
-  const currentDateRange = {
-    from: new Date(currentTime - ONE_HOUR).toISOString(),
-    to: new Date(currentTime).toISOString(),
-  };
 
   return source ? (
     <AssetDetails
       asset={{ id: assetName, name: assetName }}
-      assetType="host"
+      assetType={assetType}
       overrides={{
         metadata: {
           showActionsColumn: false,
         },
         alertRule: {
-          onCreateRuleClick: () => setIsAlertFlyoutVisible(true),
+          onCreateRuleClick,
           inventoryRuleLabel: i18n.translate('xpack.infra.infra.nodeDetails.createAlertLink', {
             defaultMessage: 'Create inventory rule',
           }),
@@ -51,7 +53,10 @@ export const AssetDetailsFlyout = ({ assetName, closeFlyout, setIsAlertFlyoutVis
         closeFlyout,
       }}
       metricAlias={source.configuration.metricAlias}
-      dateRange={currentDateRange}
+      dateRange={{
+        from: new Date(currentTime - ONE_HOUR).toISOString(),
+        to: new Date(currentTime).toISOString(),
+      }}
     />
   ) : null;
 };
