@@ -52,7 +52,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
         <div>
           <FormattedMessage
             id="xpack.ml.newJobAwaitingNodeWarning.noMLNodesAvailableDescription"
-            defaultMessage="There are currently no nodes that can run the job, therefore it will remain in OPENING state until an appropriate node becomes available."
+            defaultMessage="There are currently no nodes that can run the job, therefore it will remain in OPENING state until autoscaling increases ML capacity. Please wait up to 5 minutes for this to happen."
           />
         </div>
       </EuiCallOut>

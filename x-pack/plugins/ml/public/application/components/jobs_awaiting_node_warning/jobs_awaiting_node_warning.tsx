@@ -37,7 +37,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.noMLNodesAvailableDescription"
-            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
+            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for autoscaling to add ML capacity. Please wait up to 5 minutes for this to happen."
             values={{
               jobCount,
             }}
