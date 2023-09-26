@@ -59,21 +59,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.EnterpriseSearchPluginStart",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterpriseSearchPluginStart",
-        "description": [],
-        "signature": [
-          "PluginStart"
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
