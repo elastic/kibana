@@ -20,9 +20,7 @@ export const startTextExpansionModel = async ({
   modelId,
 }: StartTextExpansionModelArgs): Promise<StartTextExpansionModelResponse> => {
   const route = `/internal/enterprise_search/ml/models/${modelId}/deploy`;
-  return await HttpLogic.values.http.post<StartTextExpansionModelResponse>(route, {
-    body: undefined,
-  });
+  return await HttpLogic.values.http.post<StartTextExpansionModelResponse>(route);
 };
 
 export const StartTextExpansionModelApiLogic = createApiLogic(

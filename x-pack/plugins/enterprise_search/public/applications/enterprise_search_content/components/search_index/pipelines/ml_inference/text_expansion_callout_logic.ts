@@ -36,9 +36,11 @@ const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seco
 interface TextExpansionCalloutActions {
   clearTextExpansionModelPollingId: () => void;
   createTextExpansionModel: () => void;
+  createTextExpansionModelMakeRequest: CreateTextExpansionModelApiLogicActions['makeRequest'];
   createTextExpansionModelPollingTimeout: (duration: number) => { duration: number };
   createTextExpansionModelSuccess: CreateTextExpansionModelApiLogicActions['apiSuccess'];
   fetchTextExpansionModel: () => void;
+  fetchTextExpansionModelMakeRequest: FetchTextExpansionModelApiLogicActions['makeRequest'];
   fetchTextExpansionModelError: FetchTextExpansionModelApiLogicActions['apiError'];
   fetchTextExpansionModelSuccess: FetchTextExpansionModelApiLogicActions['apiSuccess'];
   setTextExpansionModelPollingId: (pollTimeoutId: ReturnType<typeof setTimeout>) => {
@@ -46,6 +48,7 @@ interface TextExpansionCalloutActions {
   };
   startPollingTextExpansionModel: () => void;
   startTextExpansionModel: () => void;
+  startTextExpansionModelMakeRequest: StartTextExpansionModelApiLogicActions['makeRequest'];
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
   stopPollingTextExpansionModel: () => void;
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
@@ -142,13 +145,22 @@ export const TextExpansionCalloutLogic = kea<
     actions: [
       CreateTextExpansionModelApiLogic,
       [
+        'makeRequest as createTextExpansionModelMakeRequest',
         'apiSuccess as createTextExpansionModelSuccess',
         'apiError as createTextExpansionModelError',
       ],
       FetchTextExpansionModelApiLogic,
-      ['apiSuccess as fetchTextExpansionModelSuccess', 'apiError as fetchTextExpansionModelError'],
+      [
+        'makeRequest as fetchTextExpansionModelMakeRequest',
+        'apiSuccess as fetchTextExpansionModelSuccess',
+        'apiError as fetchTextExpansionModelError',
+      ],
       StartTextExpansionModelApiLogic,
-      ['apiSuccess as startTextExpansionModelSuccess', 'apiError as startTextExpansionModelError'],
+      [
+        'makeRequest as startTextExpansionModelMakeRequest',
+        'apiSuccess as startTextExpansionModelSuccess',
+        'apiError as startTextExpansionModelError',
+      ],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
@@ -178,12 +190,9 @@ export const TextExpansionCalloutLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
-    createTextExpansionModel: () =>
-      CreateTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
-    fetchTextExpansionModel: () =>
-      FetchTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
-    startTextExpansionModel: () =>
-      StartTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    createTextExpansionModel: () => actions.createTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
+    fetchTextExpansionModel: () => actions.fetchTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
+    startTextExpansionModel: () => actions.startTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
     createTextExpansionModelPollingTimeout: ({ duration }) => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);

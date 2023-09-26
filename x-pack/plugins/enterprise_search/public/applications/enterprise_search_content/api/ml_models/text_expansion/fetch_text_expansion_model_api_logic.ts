@@ -20,9 +20,7 @@ export interface FetchTextExpansionModelResponse {
 }
 
 export const fetchTextExpansionModelStatus = async ({ modelId }: FetchTextExpansionModelArgs) => {
-  return await HttpLogic.values.http.get<FetchTextExpansionModelResponse>(
-    `/internal/enterprise_search/ml/models/${modelId}`
-  );
+  return await HttpLogic.values.http.get<FetchTextExpansionModelResponse>(`/internal/enterprise_search/ml/models/${modelId}`);
 };
 
 export const FetchTextExpansionModelApiLogic = createApiLogic(
