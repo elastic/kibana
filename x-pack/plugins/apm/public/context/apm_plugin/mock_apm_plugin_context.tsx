@@ -131,8 +131,11 @@ export const infraLocatorsMock: InfraLocators = {
   logsLocator: sharePluginMock.createLocator(),
   nodeLogsLocator: sharePluginMock.createLocator(),
 };
-export const observabilityLogExplorerAllDatasetsLocatorMock =
-  sharePluginMock.createLocator();
+
+export const observabilityLogExplorerLocatorsMock = {
+  allDatasetsLocator: sharePluginMock.createLocator(),
+  singleDatasetLocator: sharePluginMock.createLocator(),
+};
 
 const mockCorePlugins = {
   embeddable: {},

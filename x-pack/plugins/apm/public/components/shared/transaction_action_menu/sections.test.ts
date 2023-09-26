@@ -15,7 +15,7 @@ import {
 } from '../../routing/apm_route_config';
 import {
   infraLocatorsMock,
-  observabilityLogExplorerAllDatasetsLocatorMock,
+  observabilityLogExplorerLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
@@ -25,7 +25,7 @@ const apmRouter = {
 } as ApmRouter;
 
 const infraLocators = infraLocatorsMock;
-const allDatasetsLocator = observabilityLogExplorerAllDatasetsLocatorMock;
+const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
 
 const expectInfraLocatorsToBeCalled = () => {
   expect(infraLocators.nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
