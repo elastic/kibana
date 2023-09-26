@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react'
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -72,12 +74,13 @@ export function ClustersHealth({ clusters }: Props) {
       </EuiFlexGroup>
 
       <div
-        style={{
-          background: getHeathBarLinearGradient(successful, partial, skipped, failed),
-          borderRadius: '8px',
-          height: '8px',
-          marginTop: '4px',
-        }}
+        css={css`
+          background: ${getHeathBarLinearGradient(successful, partial, skipped, failed)};
+          border-radius: ${euiThemeVars.euiBorderRadiusSmall};
+          height: ${euiThemeVars.euiSizeS};
+          margin-top: ${euiThemeVars.euiSizeXS};
+          margin-bottom: ${euiThemeVars.euiSizeS};
+        `}
       />
     </>
   );
