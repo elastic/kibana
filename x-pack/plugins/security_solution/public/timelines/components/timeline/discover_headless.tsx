@@ -17,11 +17,29 @@ const timelineSearchParams = {
   activeTab: 'discover',
 };
 
+const discoverUrlKeys = {
+  global: '_g',
+  application: '_a',
+};
+
 export const useHeadlessRoutes = () => {
   const { application } = useKibana().services;
   if (application !== undefined) {
     const { hash, search } = window.location;
     const currentSearchParams = new URLSearchParams(search);
+    const hashToSearch = new URLSearchParams(hash.slice(2));
+
+    const globalUrlHashState = hashToSearch.get(discoverUrlKeys.global);
+    const applicationUrlHashState = hashToSearch.get(discoverUrlKeys.application);
+
+    if (globalUrlHashState) {
+      currentSearchParams.set(discoverUrlKeys.global, globalUrlHashState);
+    }
+
+    if (applicationUrlHashState) {
+      currentSearchParams.set(discoverUrlKeys.application, applicationUrlHashState);
+    }
+
     currentSearchParams.set('timeline', encode(timelineSearchParams));
     const searchString = decodeURIComponent(currentSearchParams.toString());
     const pathWithSearchAndHash = hash ? `?${searchString}#${hash}` : `?${searchString}`;
