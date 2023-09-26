@@ -13,4 +13,6 @@ export type {
   PluginContractResolver,
   PluginContractResolverResponse,
   PluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  NotFoundPluginContractResolverResponseItem,
 } from './src/contracts';
