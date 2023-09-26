@@ -223,7 +223,6 @@ export const vulnerabilitiesLatestMock = [
 
 export const scoresVulnerabilitiesMock = [
   {
-    // '@timestamp': '2023-09-03T11:36:58.441344Z',
     critical: 0,
     high: 1,
     medium: 1,
@@ -241,7 +240,6 @@ export const scoresVulnerabilitiesMock = [
     },
   },
   {
-    // '@timestamp': '2023-09-03T11:36:58.441344Z',
     critical: 0,
     high: 1,
     medium: 1,

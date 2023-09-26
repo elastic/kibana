@@ -61,7 +61,6 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
 
         return response.customError({
           body: { message: error.message },
-          // statusCode: error.statusCode,
           statusCode: 500,
         });
       }
