@@ -38,7 +38,7 @@ export const defineLogCategorizationRoutes = (
       async (context, request, response) => {
         const { headers } = request;
         trackAIOpsRouteUsage(
-          AIOPS_TELEMETRY_ID.LOG_PATTERN_ANALYSIS_RUN,
+          `POST ${AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION}`,
           headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
           usageCounter
         );

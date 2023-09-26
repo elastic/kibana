@@ -14,8 +14,8 @@ export function trackAIOpsRouteUsage(
 ) {
   if (usageCounter && typeof source === 'string') {
     usageCounter.incrementCounter({
-      counterName: source,
-      counterType: analysisType,
+      counterName: analysisType,
+      counterType: `run_via_${source}`,
       incrementBy: 1,
     });
   }

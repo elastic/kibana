@@ -65,7 +65,7 @@ export interface LogRateAnalysisContentProps {
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Identifier to indicate the plugin utilizing the component */
-  source: string;
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
@@ -78,7 +78,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
-  source,
+  embeddingOrigin,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
@@ -175,7 +175,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           onAnalysisCompleted={onAnalysisCompleted}
-          source={source}
+          embeddingOrigin={embeddingOrigin}
         />
       )}
       {windowParameters === undefined && (

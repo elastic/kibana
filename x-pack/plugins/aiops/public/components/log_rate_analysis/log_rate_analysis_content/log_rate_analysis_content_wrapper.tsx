@@ -60,7 +60,7 @@ export interface LogRateAnalysisContentWrapperProps {
   /** Optional flag to indicate whether kibana is running in serverless */
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
-  source: string;
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
@@ -75,7 +75,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barHighlightColorOverride,
   onAnalysisCompleted,
   isServerless = false,
-  source,
+  embeddingOrigin,
 }) => {
   if (!dataView) return null;
 
@@ -107,7 +107,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
-                  source={source}
+                  embeddingOrigin={embeddingOrigin}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

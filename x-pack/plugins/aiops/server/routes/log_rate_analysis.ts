@@ -91,7 +91,7 @@ export const defineLogRateAnalysisRoute = (
         const { headers } = request;
 
         trackAIOpsRouteUsage(
-          AIOPS_TELEMETRY_ID.LOG_RATE_ANALYSIS_RUN,
+          `POST ${AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS}`,
           headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
           usageCounter
         );

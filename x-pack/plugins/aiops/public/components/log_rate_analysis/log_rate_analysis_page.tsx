@@ -152,7 +152,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             setGlobalState={setGlobalState}
             esSearchQuery={searchQuery}
             stickyHistogram={stickyHistogram}
-            source={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
+            embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
           />
         </EuiFlexGroup>
       </EuiPageSection>

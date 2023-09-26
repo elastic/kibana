@@ -18,6 +18,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
@@ -70,6 +71,7 @@ export async function showCategorizeFlyout(
                     savedSearch={null}
                     selectedField={field}
                     onClose={onFlyoutClose}
+                    embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>
