@@ -60,7 +60,6 @@ export {
   TextField,
   SelectField,
   ToggleField,
-  TextField,
   NumericField,
   JsonEditorField,
   ComboBoxField,
