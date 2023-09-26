@@ -26,6 +26,10 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
+    "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
