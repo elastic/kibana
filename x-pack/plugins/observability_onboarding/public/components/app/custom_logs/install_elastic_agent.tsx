@@ -68,7 +68,7 @@ export function InstallElasticAgent() {
   async function onContinue() {
     await singleDatasetLocator!.navigate({
       integration,
-      dataset: enforcedDatasetName,
+      dataset: enforcedDatasetName!,
     });
   }
 
@@ -109,7 +109,11 @@ export function InstallElasticAgent() {
         customConfigurations,
         logFilePaths,
       } = getState();
-      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+      if (
+        !hasAlreadySavedFlow(getState()) &&
+        monitoringRole?.hasPrivileges &&
+        datasetName
+      ) {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
