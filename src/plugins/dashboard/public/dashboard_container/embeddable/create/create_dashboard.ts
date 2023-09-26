@@ -135,7 +135,7 @@ export const initializeDashboard = async ({
   controlGroup?: ControlGroupContainer;
 }) => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     embeddable: { getEmbeddableFactory },
     data: {
       query: queryService,
@@ -174,7 +174,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   const initialViewMode = loadDashboardReturn.dashboardCreated
     ? ViewMode.EDIT
-    : dashboardSessionStorage.getViewMode();
+    : dashboardBackup.getViewMode();
   const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
@@ -201,7 +201,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Store view mode in local storage to keep all Dashboards in the same view mode.
   // --------------------------------------------------------------------------------------
-  dashboardSessionStorage.storeViewMode(initialInput.viewMode);
+  dashboardBackup.storeViewMode(initialInput.viewMode);
 
   // managed Dashboards are always in view mode - but we don't want to store this.
   if (loadDashboardReturn.managed) {
@@ -212,7 +212,7 @@ export const initializeDashboard = async ({
         dashboard
           .getInput$()
           .pipe(distinctUntilKeyChanged('viewMode'))
-          .subscribe(({ viewMode }) => dashboardSessionStorage.storeViewMode(viewMode))
+          .subscribe(({ viewMode }) => dashboardBackup.storeViewMode(viewMode))
       );
     });
   }

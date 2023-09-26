@@ -23,7 +23,7 @@ import { DashboardCrudTypes } from '../../../common/content_management';
 import { DashboardScreenshotModeService } from '../screenshot_mode/types';
 import { DashboardInitializerContextService } from '../initializer_context/types';
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
-import { DashboardSessionStorageServiceType } from '../dashboard_session_storage/types';
+import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 
 export interface DashboardContentManagementRequiredServices {
@@ -31,10 +31,10 @@ export interface DashboardContentManagementRequiredServices {
   spaces: DashboardSpacesService;
   embeddable: DashboardEmbeddableService;
   notifications: DashboardNotificationsService;
+  dashboardBackup: DashboardBackupServiceType;
   screenshotMode: DashboardScreenshotModeService;
   initializerContext: DashboardInitializerContextService;
   savedObjectsTagging: DashboardSavedObjectsTaggingService;
-  dashboardSessionStorage: DashboardSessionStorageServiceType;
 }
 
 export interface DashboardContentManagementService {

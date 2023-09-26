@@ -7,12 +7,11 @@
  */
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardSessionStorageServiceType } from './types';
+import { DashboardBackupServiceType } from './types';
 
-type DashboardSessionStorageServiceFactory =
-  PluginServiceFactory<DashboardSessionStorageServiceType>;
+type DashboardBackupServiceFactory = PluginServiceFactory<DashboardBackupServiceType>;
 
-export const dashboardSessionStorageServiceFactory: DashboardSessionStorageServiceFactory = () => {
+export const dashboardBackupServiceFactory: DashboardBackupServiceFactory = () => {
   return {
     clearState: jest.fn(),
     getState: jest.fn().mockReturnValue(undefined),

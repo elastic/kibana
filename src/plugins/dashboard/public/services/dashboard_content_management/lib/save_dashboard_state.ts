@@ -62,9 +62,9 @@ type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
   embeddable: DashboardContentManagementRequiredServices['embeddable'];
   notifications: DashboardContentManagementRequiredServices['notifications'];
+  dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
   initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
-  dashboardSessionStorage: DashboardContentManagementRequiredServices['dashboardSessionStorage'];
 };
 
 export const saveDashboardState = async ({
@@ -73,9 +73,9 @@ export const saveDashboardState = async ({
   lastSavedId,
   saveOptions,
   currentState,
+  dashboardBackup,
   contentManagement,
   savedObjectsTagging,
-  dashboardSessionStorage,
   notifications: { toasts },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
@@ -201,7 +201,7 @@ export const saveDashboardState = async ({
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
        */
       if (newId !== lastSavedId) {
-        dashboardSessionStorage.clearState(lastSavedId);
+        dashboardBackup.clearState(lastSavedId);
         return { redirectRequired: true, id: newId };
       }
     }

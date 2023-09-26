@@ -70,9 +70,7 @@ describe('ShowShareModal', () => {
   const getPropsAndShare = (
     unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardSessionStorage.getState = jest
-      .fn()
-      .mockReturnValue(unsavedState);
+    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue(unsavedState);
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),

@@ -15,7 +15,7 @@ import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/p
 
 import { DashboardSpacesService } from '../spaces/types';
 import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardSessionStorageServiceType } from './types';
+import type { DashboardBackupServiceType } from './types';
 import type { DashboardContainerInput } from '../../../common';
 import { DashboardNotificationsService } from '../notifications/types';
 import { panelStorageErrorStrings } from '../../dashboard_container/_dashboard_container_strings';
@@ -24,25 +24,25 @@ export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
-interface DashboardSessionStorageRequiredServices {
+interface DashboardBackupRequiredServices {
   notifications: DashboardNotificationsService;
   spaces: DashboardSpacesService;
 }
 
-export type DashboardSessionStorageServiceFactory = KibanaPluginServiceFactory<
-  DashboardSessionStorageServiceType,
+export type DashboardBackupServiceFactory = KibanaPluginServiceFactory<
+  DashboardBackupServiceType,
   DashboardStartDependencies,
-  DashboardSessionStorageRequiredServices
+  DashboardBackupRequiredServices
 >;
 
-class DashboardSessionStorageService implements DashboardSessionStorageServiceType {
+class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
   private localStorage: Storage;
   private notifications: DashboardNotificationsService;
   private spaces: DashboardSpacesService;
 
-  constructor(requiredServices: DashboardSessionStorageRequiredServices) {
+  constructor(requiredServices: DashboardBackupRequiredServices) {
     ({ notifications: this.notifications, spaces: this.spaces } = requiredServices);
     this.sessionStorage = new Storage(sessionStorage);
     this.localStorage = new Storage(localStorage);
@@ -140,9 +140,9 @@ class DashboardSessionStorageService implements DashboardSessionStorageServiceTy
   }
 }
 
-export const dashboardSessionStorageServiceFactory: DashboardSessionStorageServiceFactory = (
+export const dashboardBackupServiceFactory: DashboardBackupServiceFactory = (
   core,
   requiredServices
 ) => {
-  return new DashboardSessionStorageService(requiredServices);
+  return new DashboardBackupService(requiredServices);
 };

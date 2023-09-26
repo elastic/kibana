@@ -9,7 +9,7 @@
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardContainerInput } from '../../../common';
 
-export interface DashboardSessionStorageServiceType {
+export interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
   getState: (id: string | undefined) => Partial<DashboardContainerInput> | undefined;
   setState: (id: string | undefined, newState: Partial<DashboardContainerInput>) => void;
