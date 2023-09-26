@@ -28,11 +28,13 @@ export interface Props {
   disabled: boolean;
   isLoading: boolean;
   handleAddCustomField: () => void;
+  handleDeleteCustomField: (key: string) => void;
 }
 const CustomFieldsComponent: React.FC<Props> = ({
   disabled,
   isLoading,
   handleAddCustomField,
+  handleDeleteCustomField,
   customFields,
 }) => {
   const { permissions } = useCasesContext();
@@ -40,7 +42,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
-    if (customFields.length === 5 && !error) {
+    if (customFields.length === MAX_CUSTOM_FIELDS_PER_CASE && !error) {
       setError(true);
       return;
     }
@@ -48,6 +50,10 @@ const CustomFieldsComponent: React.FC<Props> = ({
     handleAddCustomField();
     setError(false);
   }, [handleAddCustomField, setError, customFields, error]);
+
+  if (customFields.length < MAX_CUSTOM_FIELDS_PER_CASE && error) {
+    setError(false);
+  }
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
@@ -60,17 +66,16 @@ const CustomFieldsComponent: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      description={
-        <>
-          <p>{i18n.DESCRIPTION}</p>
-        </>
-      }
+      description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="custom-fields-form-group"
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {customFields.length ? (
           <>
-            <CustomFieldsList customFields={customFields} />
+            <CustomFieldsList
+              customFields={customFields}
+              onDeleteCustomField={handleDeleteCustomField}
+            />
             {error ? (
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>

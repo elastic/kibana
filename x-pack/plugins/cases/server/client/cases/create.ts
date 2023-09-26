@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { differenceWith } from 'lodash';
 import type { Case } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
@@ -57,6 +58,43 @@ export async function throwIfCustomFieldKeysInvalid({
 }
 
 /**
+ * Throws if there are required custom fields missing in the request.
+ */
+export async function throwIfMissingRequiredCustomField({
+  casePostRequest,
+  casesClient,
+}: {
+  casePostRequest: CasePostRequest;
+  casesClient: CasesClient;
+}) {
+  const requestCustomFields = casePostRequest.customFields;
+
+  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+    return;
+  }
+
+  const configuration = await casesClient.configure.get({ owner: casePostRequest.owner });
+
+  if (configuration.length === 0) {
+    return;
+  }
+
+  const requiredCustomFields = configuration[0].customFields.filter(
+    (customField) => customField.required
+  );
+
+  const invalidCustomFieldKeys = differenceWith(
+    requiredCustomFields,
+    requestCustomFields,
+    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
+  ).map((e) => e.key);
+
+  if (invalidCustomFieldKeys.length) {
+    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
+  }
+}
+
+/**
  * Creates a new case.
  *
  * @ignore
@@ -78,6 +116,7 @@ export const create = async (
 
     throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: query.customFields });
     await throwIfCustomFieldKeysInvalid({ casePostRequest: query, casesClient });
+    await throwIfMissingRequiredCustomField({ casePostRequest: query, casesClient });
 
     const savedObjectID = SavedObjectsUtils.generateId();
 

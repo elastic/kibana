@@ -106,9 +106,9 @@ export const FormContext: React.FC<Props> = ({
 
       for (const [key, value] of Object.entries(customFields)) {
         const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
-        const fieldValue = isEmpty(value) ? null : [value];
 
         if (configCustomField) {
+          const fieldValue = isEmpty(value) && typeof value !== 'boolean' ? null : [value];
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,

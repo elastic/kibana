@@ -34,6 +34,7 @@ export interface ObservabilitySharedStart {
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
 export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;
+export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
 
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
