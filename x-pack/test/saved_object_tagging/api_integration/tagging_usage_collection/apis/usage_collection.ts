@@ -15,6 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('saved_object_tagging usage collector data', () => {
     beforeEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
       );
@@ -46,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       })) as any;
 
       const taggingStats = telemetryStats.stack_stats.kibana.plugins.saved_objects_tagging;
+      console.log('taggingStats', taggingStats);
       expect(taggingStats).to.eql({
         usedTags: 4,
         taggedObjects: 5,

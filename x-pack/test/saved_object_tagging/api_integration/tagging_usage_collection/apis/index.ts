@@ -9,10 +9,7 @@ import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('saved objects tagging API', function () {
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./bulk_assign'));
+  describe('saved objects tagging API Usage Collection', function () {
+    loadTestFile(require.resolve('./usage_collection'));
   });
 }
