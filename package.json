@@ -16,9 +16,9 @@
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
+    "date": "2023-05-15T23:12:09+0000",
     "number": 8467,
-    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
-    "date": "2023-05-15T23:12:09+0000"
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
@@ -66,7 +66,8 @@
     "test:ftr:runner": "node scripts/functional_test_runner",
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
-    "test:jest_integration": "node scripts/jest_integration"
+    "test:jest_integration": "node scripts/jest_integration",
+    "test:type_check": "node scripts/type_check"
   },
   "repository": {
     "type": "git",
@@ -77,6 +78,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
+    "**/@hello-pangea/dnd": "16.2.0",
     "**/@types/node": "18.17.1",
     "**/@typescript-eslint/utils": "5.62.0",
     "**/chokidar": "^3.5.3",
@@ -100,7 +102,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",
     "@elastic/ems-client": "8.4.0",
-    "@elastic/eui": "88.2.0",
+    "@elastic/eui": "88.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
@@ -125,7 +127,7 @@
     "@hapi/hoek": "^9.2.1",
     "@hapi/inert": "^6.0.4",
     "@hapi/wreck": "^17.1.0",
-    "@hello-pangea/dnd": "^16.3.0",
+    "@hello-pangea/dnd": "16.2.0",
     "@juggle/resize-observer": "^3.4.0",
     "@kbn/aad-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/aad",
     "@kbn/ace": "link:packages/kbn-ace",
@@ -401,6 +403,7 @@
     "@kbn/eso-plugin": "link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
     "@kbn/event-annotation-common": "link:packages/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:packages/kbn-event-annotation-components",
+    "@kbn/event-annotation-listing-plugin": "link:src/plugins/event_annotation_listing",
     "@kbn/event-annotation-plugin": "link:src/plugins/event_annotation",
     "@kbn/event-log-fixture-plugin": "link:x-pack/test/plugin_api_integration/plugins/event_log",
     "@kbn/event-log-plugin": "link:x-pack/plugins/event_log",
@@ -923,7 +926,7 @@
     "jsonwebtoken": "^9.0.0",
     "jsts": "^1.6.2",
     "kea": "^2.4.2",
-    "langchain": "^0.0.132",
+    "langchain": "^0.0.151",
     "launchdarkly-js-client-sdk": "^2.22.1",
     "launchdarkly-node-server-sdk": "^6.4.2",
     "load-json-file": "^6.2.0",
@@ -1203,6 +1206,7 @@
     "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
     "@kbn/management-storybook-config": "link:packages/kbn-management/storybook/config",
+    "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
     "@kbn/peggy": "link:packages/kbn-peggy",
@@ -1446,7 +1450,7 @@
     "cssnano": "^5.1.12",
     "cssnano-preset-default": "^5.2.12",
     "csstype": "^3.0.2",
-    "cypress": "^12.13.0",
+    "cypress": "^12.17.4",
     "cypress-axe": "^1.4.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
