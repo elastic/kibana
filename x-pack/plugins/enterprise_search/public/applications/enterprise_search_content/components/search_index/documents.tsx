@@ -156,7 +156,7 @@ export const SearchIndexDocuments: React.FC = () => {
               <p>
                 {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
                   defaultMessage:
-                    "An Access Control Index won't be created until you run your first access control sync, after enabling document-level security.",
+                    "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
                 })}
               </p>
             </EuiCallOut>
