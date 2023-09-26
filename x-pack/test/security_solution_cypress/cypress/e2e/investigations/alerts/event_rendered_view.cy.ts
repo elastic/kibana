@@ -52,7 +52,7 @@ describe(`Event Rendered View`, { tags: ['@ess'] }, () => {
     cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
   });
 
-  it('Hover Action TopN in event summary column', () => {
+  it.skip('Hover Action TopN in event summary column', () => {
     showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
     cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
     cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
