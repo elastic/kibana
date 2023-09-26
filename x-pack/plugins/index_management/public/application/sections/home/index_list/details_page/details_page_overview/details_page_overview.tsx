@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -26,7 +26,9 @@ import {
 } from '@kbn/search-api-panels';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
+import { ExtensionsSummary } from './extensions_summary';
 
 interface Props {
   indexDetails: Index;
@@ -43,6 +45,10 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     aliases,
   } = indexDetails;
   const { config, core, plugins } = useAppContext();
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
+  }, []);
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
 
@@ -151,6 +157,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       </EuiFlexGroup>
 
       <EuiSpacer />
+
+      <ExtensionsSummary index={indexDetails} />
 
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

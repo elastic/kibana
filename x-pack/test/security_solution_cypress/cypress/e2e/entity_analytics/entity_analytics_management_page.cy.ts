@@ -19,7 +19,8 @@ import {
 
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
