@@ -15,8 +15,6 @@ export const useCheckIlmPolicyStatus = (
   const {
     services: { http },
   } = useKibana();
-
-  return statefulSettings
-    ? useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' })
-    : useRequest(http, { path: '', method: 'get' });
-};
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return statefulSettings ?  useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' }) : useRequest(http, { path: '', method: 'get' }); 
+}
