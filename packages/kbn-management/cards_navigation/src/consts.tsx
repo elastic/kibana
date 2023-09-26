@@ -46,7 +46,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       'management.landing.withCardNavigation.indexmanagementDescription',
       {
         defaultMessage:
-          'Configure and maintain your Elasticsearch indices for optimal data storage and retrieval.',
+          'Configure and maintain your Elasticsearch indices for data storage and retrieval.',
       }
     ),
     icon: <EuiIcon size="l" type="indexSettings" />,
@@ -54,8 +54,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.TRANSFORM]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.transformDescription', {
-      defaultMessage:
-        'Pivot your data or copy the latest documents into an entity-centric index, so you can analyze it in new ways.',
+      defaultMessage: 'Pivot your data or copy the latest documents into an entity-centric index.',
     }),
     icon: <EuiIcon size="l" type="indexFlush" />,
   },
@@ -64,8 +63,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate(
       'management.landing.withCardNavigation.ingestPipelinesDescription',
       {
-        defaultMessage:
-          'Remove fields, extract values, and perform other transformations on your data before indexing.',
+        defaultMessage: 'Remove fields, extract values, and perform transformations on your data.',
       }
     ),
     icon: <EuiIcon size="l" type="logstashInput" />,
@@ -80,8 +78,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.ML]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
-      defaultMessage:
-        'Identify, analyze, and process areas of interest in your data using advanced data analysis techniques.',
+      defaultMessage: 'Identify, analyze, and process your data using advanced data analysis.',
     }),
     icon: <EuiIcon size="l" type="indexMapping" />,
   },
@@ -89,7 +86,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.ingestDescription', {
       defaultMessage:
-        'Manage and view the Logstash event processing pipeline from inputs to filters to outputs.',
+        'Manage and view the Logstash event processing pipeline from inputs to outputs.',
     }),
     icon: <EuiIcon size="l" type="logstashQueue" />,
   },
@@ -97,16 +94,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
-      defaultMessage:
-        'Define rules, which detect conditions in apps across Kibana and trigger actions when the conditions are met.',
+      defaultMessage: 'Detect conditions in apps across Kibana and trigger actions.',
     }),
     icon: <EuiIcon size="l" type="editorChecklist" />,
   },
   [appIds.CONNECTORS]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
-      defaultMessage:
-        'Manage your connections with third party systems, which route rule action data to log files, messaging tools, and more.',
+      defaultMessage: 'Configure connections to third party systems for use in cases and rules.',
     }),
     icon: <EuiIcon size="l" type="desktop" />,
   },
@@ -125,8 +120,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
-      defaultMessage:
-        'Manage and share your saved dashboards, visualizations, maps, data views, Canvas workpads, and more.',
+      defaultMessage: 'Manage your saved dashboards, maps, data views, and Canvas workloads.',
     }),
     icon: <EuiIcon size="l" type="save" />,
   },
@@ -140,16 +134,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage:
-        'Monitor the generation of PDF, PNG, and CSV reports across apps, and then open or download them.',
+      defaultMessage: 'Monitor the generation of PDF, PNG and CSV reports.',
     }),
     icon: <EuiIcon size="l" type="visPie" />,
   },
   [appIds.TAGS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.tagsDescription', {
-      defaultMessage:
-        'Assign labels to saved objects so that you can organize, search, and filter them based on specific criteria.',
+      defaultMessage: 'Organize, search, and filter your saved objects by specific criteria.',
     }),
     icon: <EuiIcon size="l" type="tag" />,
   },
