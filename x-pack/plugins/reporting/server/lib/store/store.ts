@@ -86,8 +86,8 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  private ilmPolicyManager?: IlmPolicyManager;
   config: ReportingCore['config'];
+  ilmPolicyManager?: IlmPolicyManager;
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
     this.config = reportingCore.getConfig();
