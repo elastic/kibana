@@ -42,12 +42,7 @@ const StyledItem = styled(EuiFlexItem)`
   flex-direction: row;
   &:before {
     content: '•';
-    width: 5px;
-    height: 5px;
-    margin: 0 20px 0 16px;
-  }
-  > a {
-    min-width: 100%;
+    margin-right: 20px;
   }
 `;
 
@@ -327,40 +322,52 @@ export function Home() {
                     )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="none">
-                      <EuiLink
-                        onClick={handleClickSampleData}
-                        data-test-subj="obltOnboardingHomeUseSampleData"
-                      >
-                        {i18n.translate(
-                          'xpack.observability_onboarding.card.integrations.sampleData',
-                          { defaultMessage: 'Use sample data' }
-                        )}
-                      </EuiLink>
-                      <StyledItem>
+                    <EuiFlexGroup
+                      style={{ flexWrap: 'nowrap' }}
+                      alignItems="flexStart"
+                    >
+                      <EuiFlexItem grow={false}>
                         <EuiLink
-                          onClick={handleClickUploadFile}
-                          data-test-subj="obltOnboardingHomeUploadAFile"
+                          onClick={handleClickSampleData}
+                          data-test-subj="obltOnboardingHomeUseSampleData"
                         >
                           {i18n.translate(
-                            'xpack.observability_onboarding.card.integrations.uploadFile',
-                            { defaultMessage: 'Upload a file' }
+                            'xpack.observability_onboarding.card.integrations.sampleData',
+                            { defaultMessage: 'Use sample data' }
                           )}
                         </EuiLink>
-                      </StyledItem>
-                      <StyledItem>
-                        <EuiLink
-                          data-test-subj="observabilityOnboardingHomeAwsFirehoseLink"
-                          href="https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html"
-                          target="_blank"
-                          external
-                        >
-                          {i18n.translate(
-                            'xpack.observability_onboarding.card.integrations.awsFirehose',
-                            { defaultMessage: 'AWS Firehose' }
-                          )}
-                        </EuiLink>
-                      </StyledItem>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <StyledItem>
+                          <EuiLink
+                            onClick={handleClickUploadFile}
+                            data-test-subj="obltOnboardingHomeUploadAFile"
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.card.integrations.uploadFile',
+                              { defaultMessage: 'Upload a file' }
+                            )}
+                          </EuiLink>
+                        </StyledItem>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <StyledItem>
+                          <EuiLink
+                            data-test-subj="observabilityOnboardingHomeAwsFirehoseLink"
+                            href="https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html"
+                            target="_blank"
+                            external
+                            style={{
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.card.integrations.awsFirehose',
+                              { defaultMessage: 'AWS Firehose' }
+                            )}
+                          </EuiLink>
+                        </StyledItem>
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
