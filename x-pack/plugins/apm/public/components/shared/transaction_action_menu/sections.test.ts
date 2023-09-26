@@ -25,7 +25,7 @@ const apmRouter = {
 } as ApmRouter;
 
 const infraLocators = infraLocatorsMock;
-const observabilityLogExplorerLocators = observabilityLogExplorerLocatorsMock;
+const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
 
 const expectInfraLocatorsToBeCalled = () => {
   expect(infraLocators.nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
@@ -65,7 +65,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
-        observabilityLogExplorerLocators,
+        allDatasetsLocator,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -131,7 +131,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
-        observabilityLogExplorerLocators,
+        allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -216,7 +216,7 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         infraLocators,
-        observabilityLogExplorerLocators,
+        allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
