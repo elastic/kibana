@@ -10799,8 +10799,6 @@
     "xpack.cases.getCurrentUser.unknownUser": "未知",
     "xpack.cases.header.badge.betaDesc": "此功能当前为公测版。如果遇到任何错误或有任何反馈，请报告问题或访问我们的论坛。",
     "xpack.cases.header.badge.betaLabel": "公测版",
-    "xpack.cases.header.badge.experimentalDesc": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.cases.header.badge.experimentalLabel": "技术预览",
     "xpack.cases.header.editableTitle.cancel": "取消",
     "xpack.cases.header.editableTitle.save": "保存",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "添加可视化",
