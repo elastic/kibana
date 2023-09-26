@@ -18,7 +18,7 @@ export const GithubLink: React.FC<{
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type={`${assetBasePath}github.svg`} />
+        <EuiIcon size="s" type={`${assetBasePath}/github.svg`} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">
