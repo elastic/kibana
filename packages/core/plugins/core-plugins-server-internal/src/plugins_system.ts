@@ -92,6 +92,9 @@ export class PluginsSystem<T extends PluginType> {
       return contracts;
     }
 
+    const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
+    this.runtimeResolver.setDependencyMap(runtimeDependencies);
+
     const sortedPlugins = new Map(
       [...this.getTopologicallySortedPluginNames()]
         .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
@@ -270,6 +273,7 @@ export class PluginsSystem<T extends PluginType> {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
       (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
+    const filterUiPlugins = (pluginName: string) => uiPluginNames.includes(pluginName);
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
       uiPluginNames.map((pluginName) => {
         const plugin = this.plugins.get(pluginName)!;
@@ -279,12 +283,10 @@ export class PluginsSystem<T extends PluginType> {
             id: pluginName,
             type: plugin.manifest.type,
             configPath: plugin.manifest.configPath,
-            requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
-              uiPluginNames.includes(p)
-            ),
-            optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
-              uiPluginNames.includes(p)
-            ),
+            requiredPlugins: plugin.manifest.requiredPlugins.filter(filterUiPlugins),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter(filterUiPlugins),
+            runtimePluginDependencies:
+              plugin.manifest.runtimePluginDependencies.filter(filterUiPlugins),
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
@@ -375,4 +377,19 @@ const buildReverseDependencyMap = (
     reverseMap.set(pluginName, []);
   }
   return reverseMap;
+};
+
+const buildPluginRuntimeDependencyMap = (
+  pluginMap: Map<PluginName, PluginWrapper>
+): Map<PluginName, Set<PluginName>> => {
+  const runtimeDependencies = new Map<PluginName, Set<PluginName>>();
+  for (const [pluginName, pluginWrapper] of pluginMap.entries()) {
+    const pluginRuntimeDeps = new Set([
+      ...pluginWrapper.optionalPlugins,
+      ...pluginWrapper.requiredPlugins,
+      ...pluginWrapper.runtimePluginDependencies,
+    ]);
+    runtimeDependencies.set(pluginName, pluginRuntimeDeps);
+  }
+  return runtimeDependencies;
 };

@@ -9,7 +9,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginName } from '@kbn/core-base-common';
 import type {
-  PluginContractResolver,
   PluginContractResolverResponse,
   PluginContractMap,
   PluginContractResolverResponseItem,
@@ -18,42 +17,79 @@ import type {
 export type IRuntimePluginContractResolver = PublicMethodsOf<RuntimePluginContractResolver>;
 
 export class RuntimePluginContractResolver {
+  private dependencyMap?: Map<PluginName, Set<PluginName>>;
   private setupContracts?: Map<PluginName, unknown>;
   private startContracts?: Map<PluginName, unknown>;
 
   private readonly setupRequestQueue: PluginContractRequest[] = [];
   private readonly startRequestQueue: PluginContractRequest[] = [];
 
-  onSetup: PluginContractResolver = <T extends PluginContractMap>(
-    ...pluginNames: Array<keyof T>
+  setDependencyMap(depMap: Map<PluginName, Set<PluginName>>) {
+    this.dependencyMap = new Map(depMap.entries());
+  }
+
+  onSetup = <T extends PluginContractMap>(
+    pluginName: PluginName,
+    dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
+    if (!this.dependencyMap) {
+      throw new Error('onSetup cannot be called before setDependencyMap');
+    }
+
+    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
+    const notDependencyPlugins = dependencyNames.filter(
+      (name) => !dependencyList.has(name as PluginName)
+    );
+    if (notDependencyPlugins.length) {
+      throw new Error(
+        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
+          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
+      );
+    }
+
     if (this.setupContracts) {
       const response = createContractRequestResponse(
-        pluginNames as PluginName[],
+        dependencyNames as PluginName[],
         this.setupContracts
       );
       return Promise.resolve(response as PluginContractResolverResponse<T>);
     } else {
       const setupContractRequest = createPluginContractRequest<PluginContractResolverResponse<T>>(
-        pluginNames as PluginName[]
+        dependencyNames as PluginName[]
       );
       this.setupRequestQueue.push(setupContractRequest as PluginContractRequest);
       return setupContractRequest.contractPromise;
     }
   };
 
-  onStart: PluginContractResolver = <T extends PluginContractMap>(
-    ...pluginNames: Array<keyof T>
+  onStart = <T extends PluginContractMap>(
+    pluginName: PluginName,
+    dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
+    if (!this.dependencyMap) {
+      throw new Error('onStart cannot be called before setDependencyMap');
+    }
+
+    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
+    const notDependencyPlugins = dependencyNames.filter(
+      (name) => !dependencyList.has(name as PluginName)
+    );
+    if (notDependencyPlugins.length) {
+      throw new Error(
+        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
+          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
+      );
+    }
+
     if (this.startContracts) {
       const response = createContractRequestResponse(
-        pluginNames as PluginName[],
+        dependencyNames as PluginName[],
         this.startContracts
       );
       return Promise.resolve(response as PluginContractResolverResponse<T>);
     } else {
       const startContractRequest = createPluginContractRequest<PluginContractResolverResponse<T>>(
-        pluginNames as PluginName[]
+        dependencyNames as PluginName[]
       );
       this.startRequestQueue.push(startContractRequest as PluginContractRequest);
       return startContractRequest.contractPromise;

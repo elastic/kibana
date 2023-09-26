@@ -276,8 +276,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
     },
     plugins: {
-      onSetup: runtimeResolver.onSetup,
-      onStart: runtimeResolver.onStart,
+      onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
   };
 }
@@ -348,7 +348,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     coreUsageData: deps.coreUsageData,
     plugins: {
-      onStart: runtimeResolver.onStart,
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
   };
 }

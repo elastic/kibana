@@ -58,6 +58,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
+    runtimePluginDependencies: ['some-runtime-dep'],
     server: true,
     ui: true,
     owner: { name: 'Core' },
@@ -114,6 +115,7 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.source).toBe('external'); // see below for test cases for non-external sources (OSS and X-Pack)
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
+  expect(plugin.runtimePluginDependencies).toEqual(['some-runtime-dep']);
 });
 
 describe('`constructor` correctly sets non-external source', () => {

@@ -40,6 +40,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: {

@@ -21,13 +21,26 @@ const toMap = (record: Record<string, unknown>): Map<string, unknown> => {
 const pluginAContract = Symbol();
 
 describe('RuntimePluginContractResolver', () => {
+  const SOURCE_PLUGIN = 'sourcePlugin';
   let resolver: RuntimePluginContractResolver;
 
   beforeEach(() => {
     resolver = new RuntimePluginContractResolver();
+
+    const dependencyMap = new Map<string, Set<string>>();
+    dependencyMap.set(SOURCE_PLUGIN, new Set(['pluginA', 'pluginB', 'pluginC']));
+    resolver.setDependencyMap(dependencyMap);
   });
 
   describe('setup contracts', () => {
+    it('throws if onSetup is called before setDependencyMap', () => {
+      resolver = new RuntimePluginContractResolver();
+
+      expect(() => resolver.onSetup(SOURCE_PLUGIN, ['pluginA'])).toThrowErrorMatchingInlineSnapshot(
+        `"onSetup cannot be called before setDependencyMap"`
+      );
+    });
+
     it('throws if resolveSetupRequests is called multiple times', async () => {
       resolver.resolveSetupRequests(
         toMap({
@@ -46,7 +59,7 @@ describe('RuntimePluginContractResolver', () => {
 
     it('resolves a single request', async () => {
       const handler = jest.fn();
-      resolver.onSetup('pluginA').then((contracts) => handler(contracts));
+      resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
 
       await fewTicks();
 
@@ -74,9 +87,11 @@ describe('RuntimePluginContractResolver', () => {
       const handler2 = jest.fn();
       const handler3 = jest.fn();
 
-      resolver.onSetup('pluginA').then((contracts) => handler1(contracts));
-      resolver.onSetup('pluginB').then((contracts) => handler2(contracts));
-      resolver.onSetup('pluginA', 'pluginB').then((contracts) => handler3(contracts));
+      resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
+      resolver.onSetup(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
+      resolver
+        .onSetup(SOURCE_PLUGIN, ['pluginA', 'pluginB'])
+        .then((contracts) => handler3(contracts));
 
       await fewTicks();
 
@@ -128,8 +143,8 @@ describe('RuntimePluginContractResolver', () => {
 
       const handler1 = jest.fn();
       const handler2 = jest.fn();
-      resolver.onSetup('pluginA').then((contracts) => handler1(contracts));
-      resolver.onSetup('pluginB').then((contracts) => handler2(contracts));
+      resolver.onSetup(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
+      resolver.onSetup(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
 
       await fewTicks();
 
@@ -148,9 +163,38 @@ describe('RuntimePluginContractResolver', () => {
         },
       });
     });
+
+    it('throws when requesting a contract not defined in the dependency map', async () => {
+      expect(() =>
+        resolver.onSetup(SOURCE_PLUGIN, ['undeclaredPlugin'])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin"`
+      );
+    });
+
+    it('throws when requesting a mixed defined/undefined dependencies', async () => {
+      expect(() =>
+        resolver.onSetup(SOURCE_PLUGIN, [
+          'pluginA',
+          'undeclaredPlugin1',
+          'pluginB',
+          'undeclaredPlugin2',
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2"`
+      );
+    });
   });
 
   describe('start contracts', () => {
+    it('throws if onStart is called before setDependencyMap', () => {
+      resolver = new RuntimePluginContractResolver();
+
+      expect(() => resolver.onStart(SOURCE_PLUGIN, ['pluginA'])).toThrowErrorMatchingInlineSnapshot(
+        `"onStart cannot be called before setDependencyMap"`
+      );
+    });
+
     it('throws if resolveStartRequests is called multiple times', async () => {
       resolver.resolveStartRequests(
         toMap({
@@ -169,7 +213,7 @@ describe('RuntimePluginContractResolver', () => {
 
     it('resolves a single request', async () => {
       const handler = jest.fn();
-      resolver.onStart('pluginA').then((contracts) => handler(contracts));
+      resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler(contracts));
 
       await fewTicks();
 
@@ -197,9 +241,11 @@ describe('RuntimePluginContractResolver', () => {
       const handler2 = jest.fn();
       const handler3 = jest.fn();
 
-      resolver.onStart('pluginA').then((contracts) => handler1(contracts));
-      resolver.onStart('pluginB').then((contracts) => handler2(contracts));
-      resolver.onStart('pluginA', 'pluginB').then((contracts) => handler3(contracts));
+      resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
+      resolver.onStart(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
+      resolver
+        .onStart(SOURCE_PLUGIN, ['pluginA', 'pluginB'])
+        .then((contracts) => handler3(contracts));
 
       await fewTicks();
 
@@ -251,8 +297,8 @@ describe('RuntimePluginContractResolver', () => {
 
       const handler1 = jest.fn();
       const handler2 = jest.fn();
-      resolver.onStart('pluginA').then((contracts) => handler1(contracts));
-      resolver.onStart('pluginB').then((contracts) => handler2(contracts));
+      resolver.onStart(SOURCE_PLUGIN, ['pluginA']).then((contracts) => handler1(contracts));
+      resolver.onStart(SOURCE_PLUGIN, ['pluginB']).then((contracts) => handler2(contracts));
 
       await fewTicks();
 
@@ -270,6 +316,27 @@ describe('RuntimePluginContractResolver', () => {
           found: false,
         },
       });
+    });
+
+    it('throws when requesting a contract not defined in the dependency map', async () => {
+      expect(() =>
+        resolver.onStart(SOURCE_PLUGIN, ['undeclaredPlugin'])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin"`
+      );
+    });
+
+    it('throws when requesting a mixed defined/undefined dependencies', async () => {
+      expect(() =>
+        resolver.onStart(SOURCE_PLUGIN, [
+          'pluginA',
+          'undeclaredPlugin1',
+          'pluginB',
+          'undeclaredPlugin2',
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.Undeclared dependencies: undeclaredPlugin1, undeclaredPlugin2"`
+      );
     });
   });
 });
