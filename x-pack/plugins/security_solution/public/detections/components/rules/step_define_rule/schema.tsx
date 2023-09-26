@@ -17,12 +17,11 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
-  isEqlRule,
+  isEsqlRule,
   isNewTermsRule,
   isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
-  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -35,13 +34,13 @@ import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { esqlValidator } from '../../../../detection_engine/rule_creation/logic/esql_validator';
 import {
   CUSTOM_QUERY_REQUIRED,
-  EQL_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
 } from './translations';
+import { getQueryRequiredMessage } from './utils';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -155,7 +154,7 @@ export const schema: FormSchema<DefineStepRule> = {
             // https://github.com/elastic/kibana/issues/159060
             return undefined;
           }
-          const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
+          const message = getQueryRequiredMessage(formData.ruleType);
           return { code: 'ERR_FIELD_MISSING', path, message };
         },
       },

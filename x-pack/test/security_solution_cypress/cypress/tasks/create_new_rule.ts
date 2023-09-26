@@ -15,6 +15,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -48,6 +49,8 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
+  ESQL_TYPE,
+  ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
@@ -133,9 +136,13 @@ export const createAndEnableRule = () => {
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
-export const createRuleWithoutEnabling = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+export const pressRuleCreateBtn = () => {
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
+};
+
+export const createRuleWithoutEnabling = () => {
+  pressRuleCreateBtn();
   cy.get(BACK_TO_RULES_TABLE).click({ force: true });
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
@@ -491,6 +498,23 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
+export const clearEsqlQueryBar = () => {
+  // monaco editor under the hood is quite complex in matter to clear it
+  // underlying textarea holds just the last character of query displayed in search bar
+  // in order to clear it - it requires to select all text within editor and type in it
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
+};
+
+export const fillEsqlQueryBar = (query: string) => {
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query);
+};
+
+export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
+  fillEsqlQueryBar(rule.query);
+
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+};
+
 /**
  * Fills in the indicator match rows for tests by giving it an optional rowNumber,
  * a indexField, a indicatorIndexField, and an optional validRows which indicates
@@ -671,6 +695,10 @@ export const selectThresholdRuleType = () => {
 
 export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
+};
+
+export const selectEsqlRuleType = () => {
+  cy.get(ESQL_TYPE).click();
 };
 
 export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {

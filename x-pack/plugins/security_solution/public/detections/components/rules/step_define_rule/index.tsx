@@ -640,7 +640,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         path="queryBar"
         config={esqlQueryBarConfig}
         component={QueryBarDefineRule}
-        componentProps={queryBarProps}
+        componentProps={{
+          ...queryBarProps,
+          dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
+          idAria: 'detectionEngineStepDefineRuleEsqlQueryBar',
+        }}
       />
     ),
     [queryBarProps, esqlQueryBarConfig]

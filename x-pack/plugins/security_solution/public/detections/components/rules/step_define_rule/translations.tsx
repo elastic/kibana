@@ -21,6 +21,13 @@ export const EQL_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const ESQL_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
+  {
+    defaultMessage: 'An ES|QL query is required.',
+  }
+);
+
 export const INVALID_CUSTOM_QUERY = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
   {
