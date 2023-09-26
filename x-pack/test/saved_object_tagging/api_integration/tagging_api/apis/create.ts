@@ -88,5 +88,25 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
     });
+
+    it('cannot create a new tag with existing name', async () => {
+      const existingName = 'tag-1';
+      await supertest
+        .post(`/api/saved_objects_tagging/tags/create`)
+        .send({
+          name: existingName,
+          description: 'some desc',
+          color: '#000000',
+        })
+        .expect(409)
+        .then(({ body }) => {
+          console.log(body);
+          expect(body).to.eql({
+            statusCode: 409,
+            error: 'Conflict',
+            message: `A tag with the name "${existingName}" already exists.`,
+          });
+        });
+    });
   });
 }
