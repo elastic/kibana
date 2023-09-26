@@ -65,7 +65,8 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
     "@kbn/serverless",
-    "@kbn/no-data-page-plugin"
+    "@kbn/no-data-page-plugin",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }
