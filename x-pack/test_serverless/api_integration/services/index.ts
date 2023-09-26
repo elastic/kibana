@@ -19,7 +19,6 @@ export const services = {
   // deployment agnostic FTR services
   ...deploymentAgnosticSharedServices,
 
-
   // serverless FTR services
   ...svlSharedServices,
   alertingApi: AlertingApiProvider,

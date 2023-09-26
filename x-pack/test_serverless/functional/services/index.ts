@@ -26,5 +26,4 @@ export const services = {
   svlSecNavigation: SvlSecNavigationServiceProvider,
   svlCommonScreenshots: SvlCommonScreenshotsProvider,
   svlReportingAPI: SvlReportingServiceProvider,
-
 };
