@@ -259,10 +259,7 @@ describe('_installPackage', () => {
             disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
-            registry: {
-              kibanaVersionCheckEnabled: true,
-              capabilities: [],
-            },
+            capabilities: [],
           },
         })
       );
