@@ -136,7 +136,7 @@ const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
 const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
   {
     id: AZURE_ORGANIZATION_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
+    label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
     disabled: true,
@@ -149,7 +149,7 @@ const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+    label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
   },

@@ -11378,7 +11378,6 @@
     "xpack.csp.cspmIntegration.awsOption.nameTitle": "Amazon Web Services",
     "xpack.csp.cspmIntegration.azureOption.benchmarkTitle": "CIS Azure",
     "xpack.csp.cspmIntegration.azureOption.nameTitle": "Azure",
-    "xpack.csp.cspmIntegration.azureOption.tooltipContent": "即将推出",
     "xpack.csp.cspmIntegration.gcpOption.benchmarkTitle": "CIS GCP",
     "xpack.csp.cspmIntegration.gcpOption.nameTitle": "GCP",
     "xpack.csp.cspmIntegration.integration.nameTitle": "云安全态势管理",
