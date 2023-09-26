@@ -186,11 +186,7 @@ const featuresList = {
   },
 };
 
-interface FeatureCalloutProps {
-  featureContent: string;
-}
-
-const EducationPanel: React.FC<FeatureCalloutProps> = ({ featureContent }) => {
+const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }) => {
   const feature = getFeature(featureContent);
   const { setFeaturesOther } = useActions(WorkplaceSearchGateLogic);
   if (feature) {
@@ -285,7 +281,7 @@ const EducationPanel: React.FC<FeatureCalloutProps> = ({ featureContent }) => {
     );
   }
 };
-export const WorkplaceSearchGate: React.FC = () => {
+export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
   const options = [
     {
       dropdownDisplay: (
@@ -576,6 +572,7 @@ export const WorkplaceSearchGate: React.FC = () => {
         }),
       }}
       pageViewTelemetry="Workplace Search Gate form"
+      isLoading={isLoading}
     >
       <EuiPanel hasShadow={false}>
         <EuiForm component="form" fullWidth>

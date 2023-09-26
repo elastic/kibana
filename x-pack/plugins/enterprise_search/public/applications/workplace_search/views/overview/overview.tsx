@@ -77,6 +77,6 @@ export const Overview: React.FC = () => {
       <RecentActivity />
     </WorkplaceSearchPageTemplate>
   ) : (
-    <WorkplaceSearchGate />
+    <WorkplaceSearchGate isLoading={dataLoading} />
   );
 };

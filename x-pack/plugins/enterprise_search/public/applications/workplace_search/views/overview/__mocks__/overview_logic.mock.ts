@@ -20,6 +20,7 @@ export const mockOverviewValues = {
   privateSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
+  // kibanaUIsEnabled: true,
 };
 
 export const mockActions = {
