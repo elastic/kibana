@@ -25,7 +25,6 @@ interface SLOListParams {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
-  search?: string;
 }
 
 export interface UseFetchSloListResponse {
