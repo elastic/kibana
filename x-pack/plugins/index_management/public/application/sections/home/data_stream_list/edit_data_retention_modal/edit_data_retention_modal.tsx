@@ -279,7 +279,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               fullWidth: false,
               euiFieldProps: {
                 disabled: formData.infiniteRetentionPeriod,
-                'data-test-subj': `policyNameField`,
+                'data-test-subj': `dataRetentionValue`,
                 min: 1,
                 append: (
                   <UnitField

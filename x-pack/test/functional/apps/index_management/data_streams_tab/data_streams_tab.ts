@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Data streams tab', function () {
     before(async () => {
-      await log.debug('Creating required index and enrich policy');
+      await log.debug('Creating required data stream');
       try {
         await dataStreams.createDataStream(
           TEST_DS_NAME,
@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Disable infinite retention
       await testSubjects.click('infiniteRetentionPeriod > input');
       // Set the retention to 7 hours
-      await testSubjects.setValue('policyNameField', '7');
+      await testSubjects.setValue('dataRetentionValue', '7');
       await testSubjects.click('show-filters-button');
       await testSubjects.click('filter-option-h');
 

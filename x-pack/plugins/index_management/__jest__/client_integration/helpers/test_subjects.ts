@@ -94,6 +94,7 @@ export type TestSubjects =
   | 'requestBody'
   | 'errorWhenCreatingCallout'
   | 'manageDataStreamButton'
+  | 'dataRetentionValue'
   | 'policyNameField'
   | 'configuredByILMWarning'
   | 'show-filters-button'

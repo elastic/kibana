@@ -352,7 +352,7 @@ describe('Data Streams tab', () => {
           });
 
           // set data retention value
-          testBed.form.setInputValue('policyNameField', '7');
+          testBed.form.setInputValue('dataRetentionValue', '7');
           // Set data retention unit
           testBed.find('show-filters-button').simulate('click');
           testBed.find('filter-option-h').simulate('click');
