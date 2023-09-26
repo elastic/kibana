@@ -50,6 +50,15 @@ const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
+const TRUNCATE_MAX_LINES = 3;
+const cssMultiLineTruncation = css`
+  display: -webkit-box;
+  line-clamp: ${TRUNCATE_MAX_LINES};
+  -webkit-line-clamp: ${TRUNCATE_MAX_LINES};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
 interface LogRateAnalysisResultsTableProps {
   significantTerms: SignificantTerm[];
   dataView: DataView;
@@ -135,19 +144,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         defaultMessage: 'Field value',
       }),
       render: (_, { fieldValue }) => {
-        return (
-          <div
-            css={css`
-              display: -webkit-box;
-              line-clamp: 3;
-              -webkit-line-clamp: 3;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
-            `}
-          >
-            {String(fieldValue)}
-          </div>
-        );
+        return <div css={cssMultiLineTruncation}>{String(fieldValue)}</div>;
       },
       sortable: true,
       textOnly: true,
