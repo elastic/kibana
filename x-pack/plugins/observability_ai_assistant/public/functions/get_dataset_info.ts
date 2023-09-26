@@ -55,10 +55,13 @@ export function registerGetDatasetInfoFunction({
           return {
             content: {
               indices: response.indices,
-              fields: ['fieldName,fieldType', ...response.fields.map((field) => {
-                return `${field.name},${field.type}`;
-              })]
-            } as unknown as Serializable
+              fields: [
+                'fieldName,fieldType',
+                ...response.fields.map((field) => {
+                  return `${field.name},${field.type}`;
+                }),
+              ],
+            } as unknown as Serializable,
           };
         });
     }
