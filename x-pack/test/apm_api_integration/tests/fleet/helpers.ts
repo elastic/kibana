@@ -11,15 +11,23 @@ export function setupFleet(bettertest: BetterTest) {
   return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
 }
 
-export async function createAgentPolicy(bettertest: BetterTest, id?: string) {
+export async function createAgentPolicy({
+  bettertest,
+  id,
+  name = 'test_agent_policy',
+}: {
+  bettertest: BetterTest;
+  id?: string;
+  name?: string;
+}) {
   const agentPolicyResponse = await bettertest<{ item: AgentPolicy }>({
     pathname: '/api/fleet/agent_policies',
     method: 'post',
     query: { sys_monitoring: true },
     body: {
-      name: 'test_agent_policy',
-      description: '',
       id,
+      name,
+      description: '',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     },
@@ -28,11 +36,17 @@ export async function createAgentPolicy(bettertest: BetterTest, id?: string) {
   return agentPolicyResponse.body.item.id;
 }
 
-export async function createPackagePolicy(
-  bettertest: BetterTest,
-  agentPolicyId: string,
-  id?: string
-) {
+export async function createPackagePolicy({
+  bettertest,
+  agentPolicyId,
+  id,
+  name = 'apm-integration-test-policy',
+}: {
+  bettertest: BetterTest;
+  agentPolicyId: string;
+  id?: string;
+  name?: string;
+}) {
   // Get version of available APM package
   const apmPackageResponse = await bettertest<{ item: any }>({
     pathname: `/api/fleet/epm/packages/apm`,
@@ -44,7 +58,7 @@ export async function createPackagePolicy(
     pathname: '/api/fleet/package_policies',
     method: 'post',
     body: {
-      name: 'apm-integration-test-policy',
+      name,
       description: '',
       namespace: 'default',
       policy_id: agentPolicyId,
@@ -81,4 +95,37 @@ export async function getPackagePolicy(
     pathname: `/api/fleet/package_policies/${packagePolicyId}`,
   });
   return res.body.item;
+}
+
+async function getAgentPolicyByName(bettertest: BetterTest, name: string): Promise<PackagePolicy> {
+  const res = await bettertest<{ items: PackagePolicy[] }>({
+    pathname: `/api/fleet/agent_policies`,
+    query: {
+      full: true,
+      kuery: `name:"${name}"`,
+    },
+  });
+  return res.body.items[0];
+}
+
+export async function deleteAgentPolicyAndPackagePolicyByName({
+  bettertest,
+  agentPolicyName,
+  packagePolicyName,
+}: {
+  bettertest: BetterTest;
+  agentPolicyName: string;
+  packagePolicyName: string;
+}) {
+  const agentPolicy = await getAgentPolicyByName(bettertest, agentPolicyName);
+
+  const agentPolicyId = agentPolicy.id;
+  // @ts-expect-error
+  const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
+  const packagePolicyId = packagePolicies.find(
+    (packagePolicy) => packagePolicy.name === packagePolicyName
+  )!.id;
+
+  await deleteAgentPolicy(bettertest, agentPolicyId);
+  await deletePackagePolicy(bettertest, packagePolicyId);
 }
