@@ -11,7 +11,7 @@ import { screen, waitFor } from '@testing-library/dom';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFields } from '.';
@@ -19,25 +19,12 @@ import * as i18n from './translations';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
-  const customFieldsMock: CustomFieldsConfiguration = [
-    {
-      key: 'random_custom_key',
-      label: 'Summary',
-      type: CustomFieldTypes.TEXT,
-      required: true,
-    },
-    {
-      key: 'random_custom_key_2',
-      label: 'Maintenance',
-      type: CustomFieldTypes.TOGGLE,
-      required: false,
-    },
-  ];
 
   const props = {
     disabled: false,
     isLoading: false,
     handleAddCustomField: jest.fn(),
+    handleDeleteCustomField: jest.fn(),
     customFields: [],
   };
 
@@ -54,7 +41,9 @@ describe('CustomFields', () => {
   });
 
   it('renders custom fields correctly', () => {
-    appMockRender.render(<CustomFields {...{ ...props, customFields: customFieldsMock }} />);
+    appMockRender.render(
+      <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
+    );
 
     expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
     expect(screen.getByTestId('droppable')).toBeInTheDocument();
@@ -88,7 +77,7 @@ describe('CustomFields', () => {
 
   it('shows error when custom fields reaches the limit', async () => {
     const customFields = [
-      ...customFieldsMock,
+      ...customFieldsConfigurationMock,
       {
         key: 'third_field_key',
         label: 'My third custom label',
