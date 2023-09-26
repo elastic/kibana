@@ -31,7 +31,7 @@ import {
   NumericField,
 } from '../../../../../shared_imports';
 
-import { splitSizeAndUnits } from '../../../../../../common/lib/component_template_serialization';
+import { splitSizeAndUnits } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
