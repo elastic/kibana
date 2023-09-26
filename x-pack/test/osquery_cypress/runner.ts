@@ -7,6 +7,7 @@
 
 import Url from 'url';
 
+import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
@@ -28,6 +29,9 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   });
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
+
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
 
   await startRuntimeServices({
     log,

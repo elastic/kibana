@@ -27,7 +27,6 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
-import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { renderSummaryTable } from './print_run';
 import { isSkipped, parseTestFileConfig } from './utils';
 import { getFTRConfig } from './get_ftr_config';
@@ -224,9 +223,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         _.pull(kibanaPorts, kibanaPort);
         _.pull(fleetServerPorts, fleetServerPort);
       };
-
-      await verifyDockerInstalled(log);
-      await maybeCreateDockerNetwork(log);
 
       await pMap(
         files,
