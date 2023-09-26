@@ -86,14 +86,14 @@ export const SearchIndexIndexMappings: React.FC = () => {
                   size="m"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
-                    { defaultMessage: 'Access Control Index does not exist yet' }
+                    { defaultMessage: 'Access Control Index not found' }
                   )}
                   iconType="iInCircle"
                 >
                   <p>
                     {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.noIndex', {
                       defaultMessage:
-                        "Access Control Index doesn't exist yet. Access Control Index will be created for you when first Document Level Security sync is finished.",
+                        "An Access Control Index won't be created until you run your first access control sync, after enabling document-level security.",
                     })}
                   </p>
                 </EuiCallOut>
