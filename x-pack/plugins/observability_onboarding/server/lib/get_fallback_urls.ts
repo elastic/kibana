@@ -11,7 +11,8 @@ import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 export function getFallbackKibanaUrl({ http }: CoreStart) {
   const basePath = http.basePath;
   const { protocol, hostname, port } = http.getServerInfo();
-  return `${protocol}://${hostname}:${port}${basePath
+  // return `${protocol}://${hostname}:${port}${basePath
+  return `${protocol}://192.168.1.98:${port}${basePath
     // Prepending on '' removes the serverBasePath
     .prepend('/')
     .slice(0, -1)}`;

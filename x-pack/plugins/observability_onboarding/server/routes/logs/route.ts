@@ -40,8 +40,16 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
   }> {
-    const { core, plugins } = resources;
+    const { core, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
+
+    const fleetPluginStart = await plugins.fleet.start();
+    const agentClient = fleetPluginStart.agentService.asInternalUser;
+
+    const includeCurrentVersion = !kibanaVersion.endsWith('-SNAPSHOT');
+
+    const elasticAgentVersion =
+      await agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);
 
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
@@ -53,7 +61,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     return {
       apiEndpoint,
       scriptDownloadUrl,
-      elasticAgentVersion: '8.9.1',
+      elasticAgentVersion,
     };
   },
 });
