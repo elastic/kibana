@@ -13,11 +13,10 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
-import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { create, throwIfCustomFieldKeysInvalid, throwIfMissingRequiredCustomField } from './create';
+import { create } from './create';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -431,7 +430,7 @@ describe('create', () => {
             key: 'first_key',
             type: CustomFieldTypes.TEXT,
             label: 'foo',
-            required: false,
+            required: true,
           },
           {
             key: 'second_key',
@@ -529,8 +528,8 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 5."`
       );
     });
 
@@ -555,278 +554,77 @@ describe('create', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
-    });
-  });
-
-  describe('throwIfCustomFieldKeysInvalid', () => {
-    const casesClient = createCasesClientMock();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+      );
     });
 
-    it('does not throw if all custom fields are in configuration', async () => {
-      const customFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT as const,
-          field: { value: ['this is a text field value', 'this is second'] },
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TEXT as const,
-          field: { value: null },
-        },
-      ];
-
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
+    it('throws error when customFields keys are not present in configuration', async () => {
       await expect(
-        throwIfCustomFieldKeysInvalid({
-          casePostRequest: {
-            customFields,
-          } as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if no custom fields are in request', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casePostRequest: {} as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if no configuration found but no custom fields are in request', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casePostRequest: {} as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('throws if the request has invalid custom field keys', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casePostRequest: {
+        create(
+          {
+            ...theCase,
             customFields: [
               {
-                key: 'invalid_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: false,
+                key: 'missing_key',
+                type: CustomFieldTypes.TEXT,
+                field: { value: null },
               },
             ],
-          } as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Invalid custom field keys: missing_key"`
+      );
     });
 
-    it('throws if no configuration found when trying to create custom fields', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
+    it('throws error when custom fields are missing', async () => {
       await expect(
-        throwIfCustomFieldKeysInvalid({
-          casePostRequest: {
+        create(
+          {
+            ...theCase,
             customFields: [
               {
-                key: 'invalid_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: false,
+                key: 'first_key',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['this is a text field value', 'this is second'] },
               },
             ],
-          } as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
-    });
-  });
-
-  describe('throwIfMissingRequiredCustomField', () => {
-    const casesClient = createCasesClientMock();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing custom field keys: second_key"`
+      );
     });
 
-    it('does not throw if all required custom fields are in the request', async () => {
-      const customFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT as const,
-          field: { value: ['this is a text field value', 'this is second'] },
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TOGGLE as const,
-          field: { value: null },
-        },
-      ];
-
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-            },
-          ],
-        },
-      ]);
-
+    it('throws when the customField types do not match the configuration', async () => {
       await expect(
-        throwIfMissingRequiredCustomField({
-          casePostRequest: {
-            customFields,
-          } as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if there are only optional custom fields in configuration', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfMissingRequiredCustomField({
-          casePostRequest: {} as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if no configuration found', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        throwIfMissingRequiredCustomField({
-          casePostRequest: {} as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('throws if the request has missing required custom fields', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: true,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: true,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfMissingRequiredCustomField({
-          casePostRequest: {
+        create(
+          {
+            ...theCase,
             customFields: [
+              {
+                key: 'first_key',
+                type: CustomFieldTypes.TOGGLE,
+                field: { value: [true] },
+              },
               {
                 key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
+                type: CustomFieldTypes.TEXT,
+                field: { value: ['foobar'] },
               },
             ],
-          } as unknown as CasePostRequest,
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
+      );
     });
   });
 });

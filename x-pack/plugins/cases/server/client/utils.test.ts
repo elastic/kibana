@@ -18,7 +18,6 @@ import {
   constructQueryOptions,
   constructSearch,
   convertSortField,
-  throwIfDuplicatedCustomFieldKeysInRequest,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -883,49 +882,6 @@ describe('utils', () => {
       expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
         undefined
       );
-    });
-  });
-
-  describe('throwIfDuplicatedCustomFieldKeysInRequest', () => {
-    it('throws if customFields in request have duplicated keys', () => {
-      expect(() =>
-        throwIfDuplicatedCustomFieldKeysInRequest({
-          customFieldsInRequest: [
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'duplicated_key',
-            },
-            {
-              key: 'duplicated_key',
-            },
-          ],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated custom field keys in request: triplicated_key,duplicated_key"`
-      );
-    });
-
-    it('does not throw if customFields in request has no duplicated keys', () => {
-      expect(() =>
-        throwIfDuplicatedCustomFieldKeysInRequest({
-          customFieldsInRequest: [
-            {
-              key: '1',
-            },
-            {
-              key: '2',
-            },
-          ],
-        })
-      ).not.toThrowError();
     });
   });
 });
