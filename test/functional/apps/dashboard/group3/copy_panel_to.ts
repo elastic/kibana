@@ -85,9 +85,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await label.click();
 
-      await testSubjects.setValue('dashboardPickerInput', fewPanelsTitle);
+      await testSubjects.click('open-dashboard-picker');
+      await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
       await testSubjects.existOrFail(`dashboard-picker-option-few-panels`);
-      await find.clickByButtonText(fewPanelsTitle);
+      await testSubjects.click(`dashboard-picker-option-few-panels`);
       await testSubjects.click('confirmCopyToButton');
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -113,7 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await label.click();
 
-      await testSubjects.setValue('dashboardPickerInput', fewPanelsTitle);
+      await testSubjects.click('open-dashboard-picker');
+      await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
       await testSubjects.missingOrFail(`dashboard-picker-option-few-panels`);
 
       await testSubjects.click('cancelCopyToButton');
