@@ -17,7 +17,6 @@ export interface DashboardEmbedSettings {
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   showBorderBottom?: boolean;
-  showBackgroundColor?: boolean;
   setHeaderActionMenu?: (menuMount: MountPoint<HTMLElement> | undefined) => void;
 }
 

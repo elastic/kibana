@@ -94,7 +94,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       showQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
       showDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
       forceHideFilterBar: routeParams[dashboardUrlParams.hideFilterBar] === 'true',
-      showBackgroundColor: true,
     };
   };
 

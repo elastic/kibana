@@ -244,7 +244,6 @@ export function InternalDashboardTopNav({
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
     const showBorderBottom = embedSettings?.showBorderBottom ?? true;
-    const showBackgroundColor = embedSettings?.showBackgroundColor ?? true;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -252,7 +251,6 @@ export function InternalDashboardTopNav({
       showQueryInput,
       showDatePicker,
       showBorderBottom,
-      showBackgroundColor,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
@@ -310,11 +308,7 @@ export function InternalDashboardTopNav({
   }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
 
   return (
-    <div
-      className={classNames('dashboardTopNav', {
-        'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
-      })}
-    >
+    <div>
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
