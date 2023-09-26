@@ -1222,7 +1222,6 @@
     "dashboard.panel.clonedToast": "克隆的面板",
     "dashboard.panel.clonePanel": "克隆面板",
     "dashboard.panel.copyToDashboard.cancel": "取消",
-    "dashboard.panel.copyToDashboard.description": "选择目标仪表板。",
     "dashboard.panel.copyToDashboard.existingDashboardOptionLabel": "现有仪表板",
     "dashboard.panel.copyToDashboard.goToDashboard": "复制并前往仪表板",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "新仪表板",
