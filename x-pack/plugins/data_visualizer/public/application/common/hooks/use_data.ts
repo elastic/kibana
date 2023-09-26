@@ -70,70 +70,76 @@ export const useData = (
         reference: DocumentStatsSearchStrategyParams | undefined;
         comparison: DocumentStatsSearchStrategyParams | undefined;
       }
-    | undefined = useMemo(() => {
-    const searchQuery =
-      searchString !== undefined && searchQueryLanguage !== undefined
-        ? { query: searchString, language: searchQueryLanguage }
-        : undefined;
+    | undefined = useMemo(
+    () => {
+      const searchQuery =
+        searchString !== undefined && searchQueryLanguage !== undefined
+          ? { query: searchString, language: searchQueryLanguage }
+          : undefined;
 
-    const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
-    if (timefilterActiveBounds !== undefined) {
-      _timeBuckets.setInterval('auto');
-      _timeBuckets.setBounds(timefilterActiveBounds);
-      _timeBuckets.setBarTarget(barTarget);
-      const query = {
-        earliest: timefilterActiveBounds.min?.valueOf(),
-        latest: timefilterActiveBounds.max?.valueOf(),
-        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-        timeFieldName: selectedDataView.timeFieldName,
-        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
-      };
+      const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
+      if (timefilterActiveBounds !== undefined) {
+        _timeBuckets.setInterval('auto');
+        _timeBuckets.setBounds(timefilterActiveBounds);
+        _timeBuckets.setBarTarget(barTarget);
+        const query = {
+          earliest: timefilterActiveBounds.min?.valueOf(),
+          latest: timefilterActiveBounds.max?.valueOf(),
+          intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
+          timeFieldName: selectedDataView.timeFieldName,
+          runtimeFieldMap: selectedDataView.getRuntimeMappings(),
+        };
 
-      const refQuery = createMergedEsQuery(
-        searchQuery,
-        mapAndFlattenFilters([
-          ...queryManager.filterManager.getFilters(),
-          ...(referenceStateManager.filters ?? []),
-        ]),
-        selectedDataView,
-        uiSettings
-      );
+        const refQuery = createMergedEsQuery(
+          searchQuery,
+          mapAndFlattenFilters([
+            ...queryManager.filterManager.getFilters(),
+            ...(referenceStateManager.filters ?? []),
+          ]),
+          selectedDataView,
+          uiSettings
+        );
 
-      const compQuery = createMergedEsQuery(
-        searchQuery,
-        mapAndFlattenFilters([
-          ...queryManager.filterManager.getFilters(),
-          ...(comparisonStateManager.filters ?? []),
-        ]),
-        selectedDataView,
-        uiSettings
-      );
+        const compQuery = createMergedEsQuery(
+          searchQuery,
+          mapAndFlattenFilters([
+            ...queryManager.filterManager.getFilters(),
+            ...(comparisonStateManager.filters ?? []),
+          ]),
+          selectedDataView,
+          uiSettings
+        );
 
-      return {
-        reference: {
-          ...query,
-          searchQuery: refQuery,
-          index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
-        },
-        comparison: {
-          ...query,
-          searchQuery: compQuery,
-          index: initialSettings ? initialSettings.comparison : selectedDataView.getIndexPattern(),
-        },
-      };
-    }
+        return {
+          reference: {
+            ...query,
+            searchQuery: refQuery,
+            index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
+          },
+          comparison: {
+            ...query,
+            searchQuery: compQuery,
+            index: initialSettings
+              ? initialSettings.comparison
+              : selectedDataView.getIndexPattern(),
+          },
+        };
+      }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    lastRefresh,
-    JSON.stringify({
+    [
+      lastRefresh,
       searchString,
       searchQueryLanguage,
-      timeRange,
-      globalFilters: queryManager.filterManager.getFilters(),
-      compFilters: comparisonStateManager?.filters,
-      refFilters: referenceStateManager?.filters,
-    }),
-  ]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({
+        timeRange,
+        globalFilters: queryManager.filterManager.getFilters(),
+        compFilters: comparisonStateManager?.filters,
+        refFilters: referenceStateManager?.filters,
+      }),
+    ]
+  );
 
   const documentStats = useDocumentCountStats(
     docCountRequestParams?.reference,
