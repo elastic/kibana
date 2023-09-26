@@ -19,7 +19,7 @@ import {
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
-import { useIsServerless } from '../../../../serverless_context';
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
@@ -36,7 +36,7 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
-  const hideNodeInfo = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -99,7 +99,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
       render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
       sortable: true,
     },
-    ...(!hideNodeInfo
+    ...(showNodeInfo
       ? [
           {
             field: 'node_name',
@@ -121,7 +121,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
           defaultMessage: 'Message',
         }
       ),
-      width: !hideNodeInfo ? '50%' : '70%',
+      width: showNodeInfo ? '50%' : '70%',
     },
   ];
 
