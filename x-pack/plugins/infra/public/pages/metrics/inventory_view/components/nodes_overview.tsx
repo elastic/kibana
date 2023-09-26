@@ -132,6 +132,7 @@ export const NodesOverview = ({
       <Map
         nodeType={nodeType}
         nodes={nodes}
+        detailsItemId={detailsItemId}
         options={options}
         formatter={formatter}
         currentTime={currentTime}

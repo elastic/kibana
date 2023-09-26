@@ -21,7 +21,7 @@ import { InventoryItemType } from '../../../../../../common/inventory_models/typ
 
 import { NodeContextMenu } from './node_context_menu';
 import { NodeSquare } from './node_square';
-import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';
+import { type AssetDetailsFlyoutPropertiesUpdater } from '../../hooks/use_asset_details_flyout_url_state';
 
 interface Props {
   squareSize: number;
@@ -31,6 +31,8 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
+  setProperties: AssetDetailsFlyoutPropertiesUpdater;
+  detailsItemId: string | null;
 }
 
 export const Node = ({
@@ -41,10 +43,12 @@ export const Node = ({
   bounds,
   formatter,
   currentTime,
+  setProperties,
+  detailsItemId,
 }: Props) => {
   const [isToolTipOpen, { off: hideToolTip, on: showToolTip }] = useBoolean(false);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-  const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
+  // const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
 
   const metric = first(node.metrics);
   const rawValue = (metric && metric.value) || 0;
@@ -59,6 +63,9 @@ export const Node = ({
     }
   };
 
+  const nodeBorder =
+    detailsItemId === node.name || isPopoverOpen ? { border: 'solid 4px #000' } : undefined;
+
   const nodeSquare = (
     <NodeSquare
       squareSize={squareSize}
@@ -68,7 +75,7 @@ export const Node = ({
       color={color}
       nodeName={node.name}
       value={value}
-      isOverlayOpen={!!(detailsItemId && node.name === detailsItemId)}
+      nodeBorder={nodeBorder}
     />
   );
 

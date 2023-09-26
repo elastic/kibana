@@ -6,7 +6,7 @@
  */
 
 import { darken, readableColor } from 'polished';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -103,7 +103,7 @@ export const NodeSquare = ({
   color,
   nodeName,
   value,
-  isOverlayOpen,
+  nodeBorder,
 }: {
   squareSize: number;
   togglePopover: DispatchWithOptionalAction<boolean>;
@@ -112,7 +112,7 @@ export const NodeSquare = ({
   color: string;
   nodeName: string;
   value: string;
-  isOverlayOpen: boolean;
+  nodeBorder?: CSSProperties;
 }) => {
   const valueMode = squareSize > 70;
   const ellipsisMode = squareSize > 30;
@@ -120,7 +120,6 @@ export const NodeSquare = ({
     defaultMessage: '{nodeName}, click to open menu',
     values: { nodeName },
   });
-  const nodeBorder = isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
   return valueMode || ellipsisMode ? (
     <NodeContainer
