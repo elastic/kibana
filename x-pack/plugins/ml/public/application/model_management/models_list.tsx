@@ -155,6 +155,11 @@ export const ModelsList: FC<Props> = ({
     []
   );
 
+  // List of downloaded/existing models
+  const existingModels = useMemo(() => {
+    return items.filter((i) => !i.putModelConfig);
+  }, [items]);
+
   /**
    * Checks if the model download complete.
    */
@@ -218,7 +223,26 @@ export const ModelsList: FC<Props> = ({
       // TODO combine fetching models definitions and stats into a single function
       await fetchModelsStats(newItems);
 
-      setItems(newItems);
+      let resultItems = newItems;
+      // don't add any of the built in models (e.g. elser) if NLP is disabled
+      if (isNLPEnabled) {
+        const idSet = new Set(resultItems.map((i) => i.model_id));
+        const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
+        const notDownloaded: ModelItem[] = forDownload
+          .filter(({ name, hidden }) => !idSet.has(name) && !hidden)
+          .map<ModelItem>((modelDefinition) => {
+            return {
+              model_id: modelDefinition.name,
+              type: [ELASTIC_MODEL_TYPE],
+              tags: [ELASTIC_MODEL_TAG],
+              putModelConfig: modelDefinition.config,
+              description: modelDefinition.description,
+            } as ModelItem;
+          });
+        resultItems = [...resultItems, ...notDownloaded];
+      }
+
+      setItems(resultItems);
 
       if (expandedItemsToRefresh.length > 0) {
         await fetchModelsStats(expandedItemsToRefresh);
@@ -241,7 +265,7 @@ export const ModelsList: FC<Props> = ({
     setIsInitialized(true);
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemIdToExpandedRowMap]);
+  }, [itemIdToExpandedRowMap, isNLPEnabled]);
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -256,13 +280,13 @@ export const ModelsList: FC<Props> = ({
     return {
       total: {
         show: true,
-        value: items.length,
+        value: existingModels.length,
         label: i18n.translate('xpack.ml.trainedModels.modelsList.totalAmountLabel', {
           defaultMessage: 'Total trained models',
         }),
       },
     };
-  }, [items]);
+  }, [existingModels]);
 
   /**
    * Fetches models stats and update the original object
@@ -324,7 +348,7 @@ export const ModelsList: FC<Props> = ({
    * Unique inference types from models
    */
   const inferenceTypesOptions = useMemo(() => {
-    const result = items.reduce((acc, item) => {
+    const result = existingModels.reduce((acc, item) => {
       const type = item.inference_config && Object.keys(item.inference_config)[0];
       if (type) {
         acc.add(type);
@@ -338,13 +362,16 @@ export const ModelsList: FC<Props> = ({
         value: v,
         name: v,
       }));
-  }, [items]);
+  }, [existingModels]);
 
   const modelAndDeploymentIds = useMemo(
     () => [
-      ...new Set([...items.flatMap((v) => v.deployment_ids), ...items.map((i) => i.model_id)]),
+      ...new Set([
+        ...existingModels.flatMap((v) => v.deployment_ids),
+        ...existingModels.map((i) => i.model_id),
+      ]),
     ],
-    [items]
+    [existingModels]
   );
 
   /**
@@ -584,29 +611,6 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
-  const resultItems = useMemo<ModelItem[]>(() => {
-    if (isNLPEnabled === false) {
-      // don't add any of the built in models (e.g. elser) if NLP is disabled
-      return items;
-    }
-
-    const idSet = new Set(items.map((i) => i.model_id));
-    const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
-      .filter(([modelId]) => !idSet.has(modelId))
-      .map(([modelId, modelDefinition]) => {
-        return {
-          model_id: modelId,
-          type: [ELASTIC_MODEL_TYPE],
-          tags: [ELASTIC_MODEL_TAG],
-          putModelConfig: modelDefinition.config,
-          description: modelDefinition.description,
-        } as ModelItem;
-      });
-    const result = [...items, ...notDownloaded];
-
-    return result;
-  }, [isNLPEnabled, items]);
-
   if (!isInitialized) return null;
 
   return (
@@ -630,7 +634,7 @@ export const ModelsList: FC<Props> = ({
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={resultItems}
+          items={items}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}

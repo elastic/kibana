@@ -48,6 +48,7 @@ export const ELASTIC_MODEL_TAG = 'elastic';
 
 export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
   '.elser_model_1': {
+    hidden: true,
     version: 1,
     config: {
       input: {
@@ -94,6 +95,7 @@ export interface ModelDefinition {
   arch?: string;
   default?: boolean;
   recommended?: boolean;
+  hidden?: boolean;
 }
 
 export type ModelDefinitionResponse = ModelDefinition & {
