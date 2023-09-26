@@ -108,8 +108,7 @@ export const useDiscoverInTimelineActions = (
     (savedSearch: SavedSearch) => {
       const { appState } = getAppStateFromSavedSearch(savedSearch);
       if (!appState) return;
-      // should not use appState.set as it is not 100% reliable
-      discoverStateContainer.current?.appState.replaceUrlState(appState);
+      discoverStateContainer.current?.appState.set(appState);
       const timeRangeFromSavedSearch = savedSearch.timeRange;
       discoverStateContainer.current?.globalState.set({
         ...discoverStateContainer.current?.globalState.get(),
@@ -124,7 +123,7 @@ export const useDiscoverInTimelineActions = (
    *
    * */
   const resetDiscoverAppState = useCallback(() => {
-    discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
     discoverStateContainer.current?.globalState.set({
       ...discoverStateContainer.current?.globalState.get(),
       time: defaultDiscoverTimeRange,

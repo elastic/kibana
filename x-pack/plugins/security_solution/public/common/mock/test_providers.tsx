@@ -80,9 +80,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <UpsellingProviderMock>
             <ReduxStoreProvider store={store}>
               <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <MockDiscoverInTimelineContext>
-                  <MockAssistantProvider>
-                    <QueryClientProvider client={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <MockDiscoverInTimelineContext>
+                    <MockAssistantProvider>
                       <ExpandableFlyoutProvider>
                         <ConsoleManager>
                           <CellActionsProvider
@@ -92,9 +92,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
                           </CellActionsProvider>
                         </ConsoleManager>
                       </ExpandableFlyoutProvider>
-                    </QueryClientProvider>
-                  </MockAssistantProvider>
-                </MockDiscoverInTimelineContext>
+                    </MockAssistantProvider>
+                  </MockDiscoverInTimelineContext>
+                </QueryClientProvider>
               </ThemeProvider>
             </ReduxStoreProvider>
           </UpsellingProviderMock>
