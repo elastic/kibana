@@ -103,18 +103,30 @@ export async function _installPackage({
   try {
     // if some installation already exists
     if (installedPkg) {
+      const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
+      const hasExceededTimeout =
+        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
+        MAX_TIME_COMPLETE_INSTALL;
+
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
-      if (
-        installedPkg.attributes.install_status === 'installing' &&
-        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
-          MAX_TIME_COMPLETE_INSTALL
-      ) {
-        throw new ConcurrentInstallOperationError(
-          `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
-            pkgVersion || 'unknown'
-          } detected, aborting.`
-        );
+      if (isStatusInstalling && hasExceededTimeout) {
+        // If this is a forced installation, ignore the timeout and restart the installation anyway
+        if (force) {
+          await restartInstallation({
+            savedObjectsClient,
+            pkgName,
+            pkgVersion,
+            installSource,
+            verificationResult,
+          });
+        } else {
+          throw new ConcurrentInstallOperationError(
+            `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+              pkgVersion || 'unknown'
+            } detected, aborting.`
+          );
+        }
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed

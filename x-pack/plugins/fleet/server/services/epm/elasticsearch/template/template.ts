@@ -11,6 +11,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
 import type { Field, Fields } from '../../fields/field';
@@ -739,16 +740,23 @@ const updateAllDataStreams = async (
     skipDataStreamRollover?: boolean;
   }
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
-    return updateExistingDataStream({
-      esClient,
-      logger,
-      dataStreamName: templateEntry.dataStreamName,
-      options,
-    });
-  });
-  await Promise.all(updatedataStreamPromises);
+  await pMap(
+    indexNameWithTemplates,
+    (templateEntry) => {
+      return updateExistingDataStream({
+        esClient,
+        logger,
+        dataStreamName: templateEntry.dataStreamName,
+        options,
+      });
+    },
+    {
+      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
+      concurrency: 20,
+    }
+  );
 };
+
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
