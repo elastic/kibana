@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'tag-3',
               name: 'tag-3',
               description: 'Last but not least',
-              color: '#000000'
+              color: '#000000',
             },
           });
         });
