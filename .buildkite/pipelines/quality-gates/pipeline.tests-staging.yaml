@@ -27,6 +27,8 @@ steps:
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: staging
+        EC_REGION: aws-us-east-1
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
   - wait: ~
