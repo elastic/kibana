@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=2`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=3`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
