@@ -595,7 +595,7 @@ describe('create', () => {
       ).rejects.toThrow('Error: Missing required custom fields: first_key');
     });
 
-    it('throws when the customField types dont match the configuration', async () => {
+    it('throws when the customField types do not match the configuration', async () => {
       await expect(
         create(
           {

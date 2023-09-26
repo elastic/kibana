@@ -1010,8 +1010,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 5."`
       );
     });
 
@@ -1041,8 +1041,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The case with case id mock-id-1 has the following duplicated custom field keys: duplicated_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid duplicated custom field keys in request: duplicated_key"`
       );
     });
 
@@ -1072,8 +1072,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The case with case id mock-id-1 has the following invalid custom field keys: missing_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid custom field keys: missing_key"`
       );
     });
 
@@ -1098,8 +1098,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The case with case id mock-id-1 has the following missing required custom field: first_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: first_key"`
       );
     });
 
@@ -1129,8 +1129,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The case with case id mock-id-1 has invalid types for the following custom field: first_key,second_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
       );
     });
   });

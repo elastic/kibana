@@ -55,12 +55,7 @@ import type {
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
-import {
-  throwIfCustomFieldKeysDoNotExistForMultipleCases,
-  throwIfCustomFieldTypesInvalidForMultipleCases,
-  throwIfDuplicatedCustomFieldKeysInRequestForMultipleCases,
-  throwIfMissingRequiredCustomFieldForMultipleCases,
-} from './validators';
+import { validateCustomFields } from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -70,7 +65,7 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
 
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
+    throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -112,21 +107,21 @@ async function validateCustomFieldsInRequest({
   casesClient: CasesClient;
 }) {
   const configurations = await casesClient.configure.get({});
-  const customFieldsConfigurationMap: Record<string, CustomFieldsConfiguration> = {};
+  const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+    configurations.map((conf) => [conf.owner, conf.customFields])
+  );
 
-  throwIfDuplicatedCustomFieldKeysInRequestForMultipleCases({ casesToUpdate });
+  casesToUpdate.forEach(({ updateReq, originalCase }) => {
+    if (updateReq.customFields) {
+      const owner = originalCase.attributes.owner;
+      const customFieldsConfiguration = customFieldsConfigurationMap.get(owner);
 
-  configurations.forEach((conf) => {
-    if (!(conf.owner in customFieldsConfigurationMap)) {
-      customFieldsConfigurationMap[conf.owner] = conf.customFields;
+      validateCustomFields({
+        requestCustomFields: updateReq.customFields,
+        customFieldsConfiguration,
+      });
     }
   });
-
-  const customFieldsValidationParams = { casesToUpdate, customFieldsConfigurationMap };
-
-  throwIfCustomFieldKeysDoNotExistForMultipleCases(customFieldsValidationParams);
-  throwIfCustomFieldTypesInvalidForMultipleCases(customFieldsValidationParams);
-  throwIfMissingRequiredCustomFieldForMultipleCases(customFieldsValidationParams);
 }
 
 /**

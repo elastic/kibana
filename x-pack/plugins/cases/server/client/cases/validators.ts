@@ -9,70 +9,28 @@ import { differenceWith, intersectionWith } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CaseRequestCustomFields } from '../../../common/types/api';
-import type { UpdateRequestWithOriginalCase } from './update';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
   customFieldsConfiguration?: CustomFieldsConfiguration;
 }
 
-interface CustomFieldValidationParamsMultipleCases {
-  casesToUpdate: UpdateRequestWithOriginalCase[];
-  customFieldsConfigurationMap: Record<string, CustomFieldsConfiguration>;
-}
+export const validateCustomFields = (params: CustomFieldValidationParams) => {
+  validateDuplicatedCustomFieldKeysInRequest(params);
+  validateCustomFieldKeysAgainstConfiguration(params);
+  validateRequiredCustomFields(params);
+  validateCustomFieldTypesInRequest(params);
+};
 
 /**
- * Throws if the custom field types in the request dont match the configuration.
- */
-export function throwIfCustomFieldTypesInvalid(validationParams: CustomFieldValidationParams) {
-  const invalidCustomFieldKeys = validateCustomFieldTypesInRequest(validationParams);
-
-  if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(
-      `The following custom fields have the wrong type in the request: ${invalidCustomFieldKeys}`
-    );
-  }
-}
-
-/**
- * Throws if the custom field types in multiple requests dont match the corresponding configuration.
- */
-export function throwIfCustomFieldTypesInvalidForMultipleCases({
-  casesToUpdate,
-  customFieldsConfigurationMap,
-}: CustomFieldValidationParamsMultipleCases) {
-  const invalidKeysPerCase: Record<string, string[]> = {};
-
-  casesToUpdate.forEach(({ updateReq, originalCase }) => {
-    if (updateReq.customFields) {
-      const owner = originalCase.attributes.owner;
-      const customFieldsConfiguration = customFieldsConfigurationMap[owner] ?? [];
-
-      invalidKeysPerCase[originalCase.id] = validateCustomFieldTypesInRequest({
-        requestCustomFields: updateReq.customFields,
-        customFieldsConfiguration,
-      });
-    }
-  });
-
-  Object.keys(invalidKeysPerCase).forEach((caseId) => {
-    if (invalidKeysPerCase[caseId].length) {
-      throw Boom.badRequest(
-        `The case with case id ${caseId} has invalid types for the following custom field: ${invalidKeysPerCase[caseId]}`
-      );
-    }
-  });
-}
-
-/**
- * Returns a list of custom fields where the type doesnt match the configuration.
+ * Returns a list of custom fields where the type doesn't match the configuration.
  */
 export function validateCustomFieldTypesInRequest({
   requestCustomFields,
   customFieldsConfiguration,
 }: CustomFieldValidationParams) {
   if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return [];
+    return;
   }
 
   if (customFieldsConfiguration === undefined) {
@@ -80,6 +38,7 @@ export function validateCustomFieldTypesInRequest({
   }
 
   let invalidCustomFieldKeys: string[] = [];
+
   const validCustomFields = intersectionWith(
     customFieldsConfiguration,
     requestCustomFields,
@@ -95,112 +54,38 @@ export function validateCustomFieldTypesInRequest({
     ).map((e) => e.key);
   }
 
-  return invalidCustomFieldKeys;
-}
-
-/**
- * Throws if any of the custom field keys in the request does not exist in the case configuration.
- */
-export function throwIfCustomFieldKeysDoNotExist(validationParams: CustomFieldValidationParams) {
-  const invalidCustomFieldKeys = validateCustomFieldKeysAgainstConfiguration(validationParams);
-
   if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
+    throw Boom.badRequest(
+      `The following custom fields have the wrong type in the request: ${invalidCustomFieldKeys}`
+    );
   }
 }
 
 /**
- * Throws if any of the custom field keys in multiple request does not exist in the corresponding case configuration.
- */
-export function throwIfCustomFieldKeysDoNotExistForMultipleCases({
-  casesToUpdate,
-  customFieldsConfigurationMap,
-}: CustomFieldValidationParamsMultipleCases) {
-  const invalidKeysPerCase: Record<string, string[]> = {};
-
-  casesToUpdate.forEach(({ updateReq, originalCase }) => {
-    if (updateReq.customFields) {
-      const owner = originalCase.attributes.owner;
-      const customFieldsConfiguration = customFieldsConfigurationMap[owner] ?? [];
-
-      invalidKeysPerCase[originalCase.id] = validateCustomFieldKeysAgainstConfiguration({
-        requestCustomFields: updateReq.customFields,
-        customFieldsConfiguration,
-      });
-    }
-  });
-
-  Object.keys(invalidKeysPerCase).forEach((caseId) => {
-    if (invalidKeysPerCase[caseId].length) {
-      throw Boom.badRequest(
-        `The case with case id ${caseId} has the following invalid custom field keys: ${invalidKeysPerCase[caseId]}`
-      );
-    }
-  });
-}
-
-/**
- * Returns a list of custom fields in the request where the key doesnt match the configuration.
+ * Returns a list of custom fields in the request where the key doesn't match the configuration.
  */
 export const validateCustomFieldKeysAgainstConfiguration = ({
   requestCustomFields,
   customFieldsConfiguration,
-}: CustomFieldValidationParams): string[] => {
+}: CustomFieldValidationParams) => {
   if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return [];
+    return;
   }
 
   if (customFieldsConfiguration === undefined) {
     throw Boom.badRequest('No custom fields configured.');
   }
 
-  return differenceWith(
+  const invalidCustomFieldKeys = differenceWith(
     requestCustomFields,
     customFieldsConfiguration,
     (requestVal, configurationVal) => requestVal.key === configurationVal.key
   ).map((e) => e.key);
-};
-
-/**
- * Throws if there are required custom fields missing in the request.
- */
-export function throwIfMissingRequiredCustomField(validationParams: CustomFieldValidationParams) {
-  const invalidCustomFieldKeys = validateRequiredCustomFields(validationParams);
 
   if (invalidCustomFieldKeys.length) {
-    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
+    throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
   }
-}
-
-/**
- * Throws if there are required custom fields missing in a request for multiple cases.
- */
-export function throwIfMissingRequiredCustomFieldForMultipleCases({
-  casesToUpdate,
-  customFieldsConfigurationMap,
-}: CustomFieldValidationParamsMultipleCases) {
-  const invalidKeysPerCase: Record<string, string[]> = {};
-
-  casesToUpdate.forEach(({ updateReq, originalCase }) => {
-    if (updateReq.customFields) {
-      const owner = originalCase.attributes.owner;
-      const customFieldsConfiguration = customFieldsConfigurationMap[owner] ?? [];
-
-      invalidKeysPerCase[originalCase.id] = validateRequiredCustomFields({
-        requestCustomFields: updateReq.customFields,
-        customFieldsConfiguration,
-      });
-    }
-  });
-
-  Object.keys(invalidKeysPerCase).forEach((caseId) => {
-    if (invalidKeysPerCase[caseId].length) {
-      throw Boom.badRequest(
-        `The case with case id ${caseId} has the following missing required custom field: ${invalidKeysPerCase[caseId]}`
-      );
-    }
-  });
-}
+};
 
 /**
  * Returns a list of required custom fields missing from the request
@@ -208,9 +93,9 @@ export function throwIfMissingRequiredCustomFieldForMultipleCases({
 export const validateRequiredCustomFields = ({
   requestCustomFields,
   customFieldsConfiguration,
-}: CustomFieldValidationParams): string[] => {
+}: CustomFieldValidationParams) => {
   if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
-    return [];
+    return;
   }
 
   if (customFieldsConfiguration === undefined) {
@@ -227,51 +112,9 @@ export const validateRequiredCustomFields = ({
     (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
   ).map((e) => e.key);
 
-  return invalidCustomFieldKeys;
-};
-
-/**
- * Throws an error if the request has custom fields with duplicated keys.
- */
-export const throwIfDuplicatedCustomFieldKeysInRequest = ({
-  requestCustomFields = [],
-}: {
-  requestCustomFields?: Array<{ key: string }>;
-}) => {
-  const duplicatedKeys = validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields });
-
-  if (duplicatedKeys.length) {
-    throw Boom.badRequest(
-      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
-    );
+  if (invalidCustomFieldKeys.length) {
+    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
   }
-};
-
-/**
- * Throws an error if the request has custom fields with duplicated keys.
- */
-export const throwIfDuplicatedCustomFieldKeysInRequestForMultipleCases = ({
-  casesToUpdate,
-}: {
-  casesToUpdate: UpdateRequestWithOriginalCase[];
-}) => {
-  const invalidKeysPerCase: Record<string, string[]> = {};
-
-  casesToUpdate.forEach(({ updateReq, originalCase }) => {
-    if (updateReq.customFields) {
-      invalidKeysPerCase[originalCase.id] = validateDuplicatedCustomFieldKeysInRequest({
-        requestCustomFields: updateReq.customFields,
-      });
-    }
-  });
-
-  Object.keys(invalidKeysPerCase).forEach((caseId) => {
-    if (invalidKeysPerCase[caseId].length) {
-      throw Boom.badRequest(
-        `The case with case id ${caseId} has the following duplicated custom field keys: ${invalidKeysPerCase[caseId]}`
-      );
-    }
-  });
 };
 
 /**
@@ -281,9 +124,9 @@ export const validateDuplicatedCustomFieldKeysInRequest = ({
   requestCustomFields = [],
 }: {
   requestCustomFields?: Array<{ key: string }>;
-}): string[] => {
-  const uniqueKeys = new Set();
-  const duplicatedKeys = new Set();
+}) => {
+  const uniqueKeys = new Set<string>();
+  const duplicatedKeys = new Set<string>();
 
   requestCustomFields.forEach((item) => {
     if (uniqueKeys.has(item.key)) {
@@ -293,5 +136,9 @@ export const validateDuplicatedCustomFieldKeysInRequest = ({
     }
   });
 
-  return Array.from(duplicatedKeys.values()) as string[];
+  if (duplicatedKeys.size > 0) {
+    throw Boom.badRequest(
+      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
+    );
+  }
 };

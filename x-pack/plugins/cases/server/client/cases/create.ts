@@ -22,39 +22,11 @@ import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
-import {
-  throwIfCustomFieldKeysDoNotExist,
-  throwIfCustomFieldTypesInvalid,
-  throwIfDuplicatedCustomFieldKeysInRequest,
-  throwIfMissingRequiredCustomField,
-} from './validators';
-
-async function validateCustomFieldsInRequest({
-  data,
-  casesClient,
-}: {
-  data: CasePostRequest;
-  casesClient: CasesClient;
-}) {
-  const requestCustomFields = data.customFields;
-
-  throwIfDuplicatedCustomFieldKeysInRequest({ requestCustomFields });
-
-  const configurations = await casesClient.configure.get({ owner: data.owner });
-  const customFieldsValidationParams = {
-    requestCustomFields,
-    ...(configurations.length && { customFieldsConfiguration: configurations[0].customFields }),
-  };
-
-  throwIfCustomFieldKeysDoNotExist(customFieldsValidationParams);
-  throwIfMissingRequiredCustomField(customFieldsValidationParams);
-  throwIfCustomFieldTypesInvalid(customFieldsValidationParams);
-}
+import { validateCustomFields } from './validators';
 
 /**
  * Creates a new case.
  *
- * @ignore
  */
 export const create = async (
   data: CasePostRequest,
@@ -70,8 +42,14 @@ export const create = async (
 
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const configurations = await casesClient.configure.get({ owner: data.owner });
 
-    await validateCustomFieldsInRequest({ data, casesClient });
+    const customFieldsValidationParams = {
+      requestCustomFields: data.customFields,
+      ...(configurations.length && { customFieldsConfiguration: configurations[0].customFields }),
+    };
+
+    validateCustomFields(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 

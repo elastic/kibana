@@ -20,8 +20,8 @@ describe('validators', () => {
       jest.clearAllMocks();
     });
 
-    it('returns an empty array if all custom fields types in request match the configuration', () => {
-      expect(
+    it('does not throw if all custom fields types in request match the configuration', () => {
+      expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
             {
@@ -50,11 +50,11 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if no custom fields are in request', () => {
-      expect(
+    it('does not throw if no custom fields are in request', () => {
+      expect(() =>
         validateCustomFieldTypesInRequest({
           customFieldsConfiguration: [
             {
@@ -71,15 +71,15 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if the configuration is undefined but no custom fields are in request', () => {
-      expect(validateCustomFieldTypesInRequest({})).toEqual([]);
+    it('does not throw if the configuration is undefined but no custom fields are in request', () => {
+      expect(() => validateCustomFieldTypesInRequest({})).not.toThrow();
     });
 
-    it('returns a single custom fields with invalid type', () => {
-      expect(
+    it('throws for a single invalid type', () => {
+      expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
             {
@@ -93,6 +93,7 @@ describe('validators', () => {
               field: { value: [true] },
             },
           ],
+
           customFieldsConfiguration: [
             {
               key: 'first_key',
@@ -108,11 +109,13 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual(['first_key']);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: first_key"`
+      );
     });
 
-    it('returns multiple custom fields with invalid types', () => {
-      expect(
+    it('throws for multiple custom fields with invalid types', () => {
+      expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
             {
@@ -131,6 +134,7 @@ describe('validators', () => {
               field: { value: ['abc'] },
             },
           ],
+
           customFieldsConfiguration: [
             {
               key: 'first_key',
@@ -152,7 +156,9 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual(['first_key', 'second_key', 'third_key']);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: first_key,second_key,third_key"`
+      );
     });
 
     it('throws if configuration is missing and request has custom fields', () => {
@@ -175,8 +181,8 @@ describe('validators', () => {
       jest.clearAllMocks();
     });
 
-    it('returns an empty array if all custom fields are in configuration', () => {
-      expect(
+    it('does not throw if all custom fields are in configuration', () => {
+      expect(() =>
         validateCustomFieldKeysAgainstConfiguration({
           requestCustomFields: [
             {
@@ -205,11 +211,11 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if no custom fields are in request', () => {
-      expect(
+    it('does not throw if no custom fields are in request', () => {
+      expect(() =>
         validateCustomFieldKeysAgainstConfiguration({
           customFieldsConfiguration: [
             {
@@ -226,15 +232,15 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if no configuration found but no custom fields are in request', () => {
-      expect(validateCustomFieldKeysAgainstConfiguration({})).toEqual([]);
+    it('does not throw if no configuration found but no custom fields are in request', () => {
+      expect(() => validateCustomFieldKeysAgainstConfiguration({})).not.toThrow();
     });
 
-    it('returns invalid custom field keys', () => {
-      expect(
+    it('throws if there are invalid custom field keys', () => {
+      expect(() =>
         validateCustomFieldKeysAgainstConfiguration({
           requestCustomFields: [
             {
@@ -252,7 +258,7 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual(['invalid_key']);
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
     });
 
     it('throws if configuration is missing and request has custom fields', () => {
@@ -272,7 +278,7 @@ describe('validators', () => {
 
   describe('validateDuplicatedCustomFieldKeysInRequest', () => {
     it('returns customFields in request that have duplicated keys', () => {
-      expect(
+      expect(() =>
         validateDuplicatedCustomFieldKeysInRequest({
           requestCustomFields: [
             {
@@ -292,11 +298,13 @@ describe('validators', () => {
             },
           ],
         })
-      ).toEqual(['triplicated_key', 'duplicated_key']);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated custom field keys in request: triplicated_key,duplicated_key"`
+      );
     });
 
-    it('returns an empty array if no customFields in request have duplicated keys', () => {
-      expect(
+    it('does not throw if no customFields in request have duplicated keys', () => {
+      expect(() =>
         validateDuplicatedCustomFieldKeysInRequest({
           requestCustomFields: [
             {
@@ -307,7 +315,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
   });
 
@@ -316,8 +324,8 @@ describe('validators', () => {
       jest.clearAllMocks();
     });
 
-    it('returns an empty array if all required custom fields are in the request', () => {
-      expect(
+    it('does not throw if all required custom fields are in the request', () => {
+      expect(() =>
         validateRequiredCustomFields({
           requestCustomFields: [
             {
@@ -336,19 +344,21 @@ describe('validators', () => {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
               label: 'foo',
+              required: true,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
               label: 'foo',
+              required: true,
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if there are only optional custom fields in configuration', () => {
-      expect(
+    it('does not throw if there are only optional custom fields in configuration', () => {
+      expect(() =>
         validateRequiredCustomFields({
           customFieldsConfiguration: [
             {
@@ -365,15 +375,15 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).not.toThrow();
     });
 
-    it('returns an empty array if the configuration is undefined but no custom fields are in request', () => {
-      expect(validateRequiredCustomFields({})).toEqual([]);
+    it('does not throw if the configuration is undefined but no custom fields are in request', () => {
+      expect(() => validateRequiredCustomFields({})).not.toThrow();
     });
 
-    it('returns missing required custom fields', () => {
-      expect(
+    it('throws if required custom fields are not in the request', () => {
+      expect(() =>
         validateRequiredCustomFields({
           requestCustomFields: [
             {
@@ -397,7 +407,7 @@ describe('validators', () => {
             },
           ] as CustomFieldsConfiguration,
         })
-      ).toEqual(['first_key']);
+      ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
     });
 
     it('throws if configuration is missing and request has custom fields', () => {
