@@ -6,11 +6,7 @@
  */
 import React from 'react';
 import { MetricItem } from './metric_item';
-import {
-  useLast50DurationChart,
-  useLocationName,
-  useStatusByLocationOverview,
-} from '../../../../hooks';
+import { useLast50DurationChart, useStatusByLocationOverview } from '../../../../hooks';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
 export interface FlyoutParamProps {
@@ -27,9 +23,10 @@ export const OverviewGridItem = ({
   monitor: MonitorOverviewItem;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const locationName = useLocationName(monitor);
-
-  const { timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
+  const { timestamp } = useStatusByLocationOverview({
+    configId: monitor.configId,
+    locationId: monitor.location.id,
+  });
 
   const { data, medianDuration, maxDuration, avgDuration, minDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,
