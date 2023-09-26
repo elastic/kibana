@@ -35,7 +35,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { isSkipped, parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -44,7 +44,8 @@ import { parseTestFileConfig } from './utils';
 const retrieveIntegrations = (
   /** Pattern passed to globby to find spec files. */ specPattern: string[]
 ) => {
-  const integrationsPaths = globby.sync(specPattern);
+  const iintegrationsPaths = globby.sync(specPattern);
+  const integrationsPaths = iintegrationsPaths.filter((filePath) => !isSkipped(filePath));
 
   if (process.env.RUN_ALL_TESTS === 'true') {
     return integrationsPaths;
@@ -478,11 +479,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           return result;
         },
         {
-          concurrency: (argv.concurrency as number | undefined)
-            ? (argv.concurrency as number)
-            : !isOpen
-            ? 2
-            : 1,
+          concurrency: 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
