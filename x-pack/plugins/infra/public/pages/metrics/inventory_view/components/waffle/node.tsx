@@ -68,7 +68,7 @@ export const Node = ({
       color={color}
       nodeName={node.name}
       value={value}
-      isOverlayOpen={!!detailsItemId}
+      isOverlayOpen={!!(detailsItemId && node.name === detailsItemId)}
     />
   );
 
