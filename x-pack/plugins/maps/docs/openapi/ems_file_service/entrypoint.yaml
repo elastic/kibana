@@ -81,7 +81,7 @@ paths:
                             properties:
                               type:
                                 type: string
-                                description: Data layers can be stored in topojson or geojson format
+                                description: Data layers can be stored in the `topojson` or `geojson` format
                                 enum: [ 'topojson', 'geojson']
                               url:
                                 type: string
