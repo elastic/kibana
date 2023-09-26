@@ -14,16 +14,15 @@ import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+export interface User {
+  username: string;
+  password: string;
+  description?: string;
+  roles: string[];
+}
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
-
-  interface User {
-    username: string;
-    password: string;
-    description?: string;
-    roles: string[];
-  }
 
   const superUser: User = {
     username: 'superuser',

@@ -12,4 +12,7 @@ import type { Services } from '../services';
 export const mockServices: Services = {
   ...coreMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
+  // TODO: contact @machadoum Pablo Machado
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  licensing: undefined as any,
 };

@@ -8,7 +8,7 @@
 import { pick } from 'lodash';
 import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { login, ROLE } from '../../../tasks/login';
+import { login, ROLE, type ROLE_KEYS } from '../../../tasks/login';
 import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
@@ -63,7 +63,7 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are very similar with exception of one page
-    (['t1_analyst', `t2_analyst`] as ROLE[]).forEach((roleName) => {
+    (['t1_analyst', `t2_analyst`] as ROLE_KEYS[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
@@ -350,7 +350,7 @@ describe(
       });
     });
 
-    (['platform_engineer', 'endpoint_policy_manager'] as ROLE[]).forEach((roleName) => {
+    (['platform_engineer', 'endpoint_policy_manager'] as ROLE_KEYS[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,
