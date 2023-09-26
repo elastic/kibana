@@ -27,7 +27,7 @@ describe('AnomalyChartsEmbeddableFactory', () => {
     const [coreStart, pluginsStart] = await getStartServices();
 
     // act
-    const factory = new AnomalyChartsEmbeddableFactory(getStartServices);
+    const factory = new AnomalyChartsEmbeddableFactory(getStartServices, false);
 
     await factory.create({
       jobIds: ['test-job'],

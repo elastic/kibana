@@ -13,9 +13,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // const find = getService('find');
   // const testSubjects = getService('testSubjects');
   const screenshotDirectories = ['response_ops_docs', 'stack_connectors'];
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
 
   describe('connectors', function () {
+    before(async () => {
+      await pageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
     it('connectors list screenshot', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
