@@ -56,7 +56,7 @@ export const GroupOfNodes = React.memo<Props>(
     detailsItemId,
   }) => {
     const width = group.width > 200 ? group.width : 200;
-    const [_, setProperties] = useAssetDetailsFlyoutState();
+    const [_, setFlyoutUrlState] = useAssetDetailsFlyoutState();
 
     return (
       <GroupOfNodesContainer style={{ width }}>
@@ -74,7 +74,7 @@ export const GroupOfNodes = React.memo<Props>(
                 nodeType={nodeType}
                 currentTime={currentTime}
                 detailsItemId={detailsItemId}
-                setProperties={setProperties}
+                setFlyoutUrlState={setFlyoutUrlState}
               />
             ))
           ) : (

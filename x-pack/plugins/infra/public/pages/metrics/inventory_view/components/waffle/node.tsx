@@ -31,7 +31,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InventoryItemType;
   currentTime: number;
-  setProperties: AssetDetailsFlyoutPropertiesUpdater;
+  setFlyoutUrlState: AssetDetailsFlyoutPropertiesUpdater;
   detailsItemId: string | null;
 }
 
@@ -43,12 +43,11 @@ export const Node = ({
   bounds,
   formatter,
   currentTime,
-  setProperties,
+  setFlyoutUrlState,
   detailsItemId,
 }: Props) => {
   const [isToolTipOpen, { off: hideToolTip, on: showToolTip }] = useBoolean(false);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-  // const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
 
   const metric = first(node.metrics);
   const rawValue = (metric && metric.value) || 0;
@@ -57,7 +56,7 @@ export const Node = ({
 
   const toggleAssetPopover = () => {
     if (nodeType === 'host') {
-      setProperties({ detailsItemId: node.name });
+      setFlyoutUrlState({ detailsItemId: node.name });
     } else {
       togglePopover();
     }

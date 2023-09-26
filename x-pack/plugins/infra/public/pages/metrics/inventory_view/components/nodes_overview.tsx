@@ -61,11 +61,14 @@ export const NodesOverview = ({
   showLoading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId }, setProperties] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
 
   const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
 
-  const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
+  const closeFlyout = useCallback(
+    () => setFlyoutUrlState({ detailsItemId: null }),
+    [setFlyoutUrlState]
+  );
   const handleCreateRuleClick = () => {
     setIsAlertFlyoutVisible(true);
   };

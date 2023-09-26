@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ContentTabIds, type Tab } from '../../../../../components/asset_details/types';
+import { ContentTabIds, type Tab } from '../../components/asset_details/types';
 
-export const orderedFlyoutTabs: Tab[] = [
+export const commonFlyoutTabs: Tab[] = [
   {
     id: ContentTabIds.OVERVIEW,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
@@ -43,12 +43,6 @@ export const orderedFlyoutTabs: Tab[] = [
     id: ContentTabIds.OSQUERY,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
       defaultMessage: 'Osquery',
-    }),
-  },
-  {
-    id: ContentTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.linkToApm', {
-      defaultMessage: 'APM',
     }),
   },
 ];

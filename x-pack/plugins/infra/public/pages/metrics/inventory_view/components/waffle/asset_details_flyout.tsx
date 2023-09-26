@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import AssetDetails from '../../../../../components/asset_details/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { orderedFlyoutTabs } from './flyout_tabs';
+import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
   assetName: string;
@@ -21,6 +22,16 @@ interface Props {
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
+
+const flyoutTabs = [
+  ...commonFlyoutTabs,
+  {
+    id: ContentTabIds.LINK_TO_APM,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.linkToApm', {
+      defaultMessage: 'APM',
+    }),
+  },
+];
 
 export const AssetDetailsFlyout = ({
   assetName,
@@ -46,7 +57,7 @@ export const AssetDetailsFlyout = ({
           }),
         },
       }}
-      tabs={orderedFlyoutTabs}
+      tabs={flyoutTabs}
       links={['alertRule', 'nodeDetails']}
       renderMode={{
         mode: 'flyout',
