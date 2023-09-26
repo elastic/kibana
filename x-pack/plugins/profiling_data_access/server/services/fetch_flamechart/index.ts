@@ -17,7 +17,7 @@ export interface FetchFlamechartParams {
   rangeFromMs: number;
   rangeToMs: number;
   kuery: string;
-  useESStackTracesAPI?: boolean;
+  useLegacyFlamegraphAPI?: boolean;
 }
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
@@ -26,7 +26,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     rangeFromMs,
     rangeToMs,
     kuery,
-    useESStackTracesAPI = false,
+    useLegacyFlamegraphAPI = false,
   }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
@@ -37,7 +37,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     const totalSeconds = rangeToSecs - rangeFromSecs;
 
     // Use legacy stack traces API to fetch the flamegraph
-    if (useESStackTracesAPI) {
+    if (useLegacyFlamegraphAPI) {
       const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
         await searchStackTraces({
           client: profilingEsClient,

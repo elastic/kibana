@@ -30,6 +30,7 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingUseLegacyFlamegraphAPI,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -369,6 +370,15 @@ export const uiSettings: Record<string, UiSettings> = {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
       defaultMessage: 'Enable Universal Profiling integration in APM',
+    }),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [profilingUseLegacyFlamegraphAPI]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingUseLegacyFlamegraphAPI', {
+      defaultMessage: 'Use profiling legacy Flamegraph API',
     }),
     value: false,
     schema: schema.boolean(),
