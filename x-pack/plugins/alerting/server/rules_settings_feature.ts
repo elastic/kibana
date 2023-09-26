@@ -14,6 +14,8 @@ import {
   ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
   API_PRIVILEGES,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+  READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
 } from '../common';
 
 export const rulesSettingsFeature: KibanaFeatureConfig = {
@@ -82,6 +84,43 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
                 read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
               },
               ui: ['readFlappingSettingsUI'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.alerting.feature.queryDelaySettingsSubFeatureName', {
+        defaultMessage: 'Query delay',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'mutually_exclusive',
+          privileges: [
+            {
+              api: [
+                API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS,
+                API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS,
+              ],
+              name: 'All',
+              id: ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+              includeIn: 'all',
+              savedObject: {
+                all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                read: [],
+              },
+              ui: ['writeQueryDelaySettingsUI', 'readQueryDelaySettingsUI'],
+            },
+            {
+              api: [API_PRIVILEGES.READ_QUERY_DELAY_SETTINGS],
+              name: 'Read',
+              id: READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+              },
+              ui: ['readQueryDelaySettingsUI'],
             },
           ],
         },

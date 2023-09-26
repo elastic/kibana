@@ -17,7 +17,9 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_SAVED_OBJECT_ID,
+  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../common';
+import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 
 export interface RulesSettingsClientConstructorOptions {
   readonly logger: Logger;
@@ -30,6 +32,7 @@ export class RulesSettingsClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly getUserName: () => Promise<string | null>;
   private readonly _flapping: RulesSettingsFlappingClient;
+  private readonly _queryDelay: RulesSettingsQueryDelayClient;
 
   constructor(options: RulesSettingsClientConstructorOptions) {
     this.logger = options.logger;
@@ -37,6 +40,13 @@ export class RulesSettingsClient {
     this.getUserName = options.getUserName;
 
     this._flapping = new RulesSettingsFlappingClient({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      getOrCreate: this.getOrCreate.bind(this),
+      getModificationMetadata: this.getModificationMetadata.bind(this),
+    });
+
+    this._queryDelay = new RulesSettingsQueryDelayClient({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       getOrCreate: this.getOrCreate.bind(this),
@@ -79,6 +89,10 @@ export class RulesSettingsClient {
             ...DEFAULT_FLAPPING_SETTINGS,
             ...modificationMetadata,
           },
+          queryDelay: {
+            ...DEFAULT_QUERY_DELAY_SETTINGS,
+            ...modificationMetadata,
+          },
         },
         {
           id: RULES_SETTINGS_SAVED_OBJECT_ID,
@@ -110,5 +124,9 @@ export class RulesSettingsClient {
 
   public flapping(): RulesSettingsFlappingClient {
     return this._flapping;
+  }
+
+  public queryDelay(): RulesSettingsQueryDelayClient {
+    return this._queryDelay;
   }
 }
