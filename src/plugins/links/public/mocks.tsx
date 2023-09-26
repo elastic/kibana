@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { setKibanaServices } from './services/kibana_services';
 
 export const setStubKibanaServices = () => {
@@ -19,5 +20,6 @@ export const setStubKibanaServices = () => {
     dashboard: dashboardPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     contentManagement: contentManagementMock.createStartContract(),
+    presentationUtil: presentationUtilPluginMock.createStartContract(core),
   });
 };
