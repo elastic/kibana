@@ -5,32 +5,33 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup } from '../../../common';
+import { schema } from '@kbn/config-schema';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { RecoveredActionGroup } from '../../../../../common';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
-  defaultRule,
-  enabledRule1,
-  enabledRule2,
-  returnedRule1,
-  returnedRule2,
-  siemRule1,
-} from './test_helpers';
-import { schema } from '@kbn/config-schema';
-import { migrateLegacyActions } from '../lib';
+  enabledRuleForBulkDelete1,
+  enabledRuleForBulkDelete2,
+  enabledRuleForBulkDelete3,
+  returnedRuleForBulkDelete1,
+  returnedRuleForBulkDelete2,
+  returnedRuleForBulkDelete3,
+  siemRuleForBulkDelete1,
+} from '../../../../rules_client/tests/test_helpers';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
 
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };
@@ -41,7 +42,7 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   resultedReferences: [],
 });
 
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
@@ -91,36 +92,6 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   },
 });
 
-export const enabledRule3 = {
-  ...defaultRule,
-  id: 'id3',
-  attributes: {
-    ...defaultRule.attributes,
-    enabled: true,
-    scheduledTaskId: 'id3',
-    apiKey: Buffer.from('789:ghi').toString('base64'),
-    apiKeyCreatedByUser: true,
-  },
-};
-
-export const returnedRule3 = {
-  actions: [],
-  alertTypeId: 'fakeType',
-  apiKey: 'Nzg5OmdoaQ==',
-  apiKeyCreatedByUser: true,
-  consumer: 'fakeConsumer',
-  enabled: true,
-  id: 'id3',
-  name: 'fakeName',
-  notifyWhen: undefined,
-  params: undefined,
-  schedule: {
-    interval: '5m',
-  },
-  scheduledTaskId: 'id3',
-  snoozeSchedule: [],
-};
-
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   jest.clearAllMocks();
@@ -132,7 +103,13 @@ describe('bulkDelete', () => {
   let rulesClient: RulesClient;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [enabledRule1, enabledRule2, enabledRule3] }
+    response = {
+      saved_objects: [
+        enabledRuleForBulkDelete1,
+        enabledRuleForBulkDelete2,
+        enabledRuleForBulkDelete3,
+      ],
+    }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -198,11 +175,13 @@ describe('bulkDelete', () => {
     const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-      enabledRule1,
-      enabledRule2,
-      enabledRule3,
-    ]);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+      [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2, enabledRuleForBulkDelete3].map(
+        ({ id }) => ({ id, type: 'alert' })
+      ),
+      undefined
+    );
+
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -212,7 +191,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRule1, returnedRule3],
+      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -242,25 +221,25 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1, enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete2] };
         },
       });
 
@@ -276,7 +255,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRule1],
+      rules: [returnedRuleForBulkDelete1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -306,19 +285,19 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1, enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete1, enabledRuleForBulkDelete2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkDelete2] };
         },
       });
 
@@ -334,7 +313,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRule1, returnedRule2],
+      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete2],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -482,15 +461,21 @@ describe('bulkDelete', () => {
         .mockResolvedValueOnce({
           close: jest.fn(),
           find: function* asyncGenerator() {
-            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1] };
+            yield {
+              saved_objects: [
+                enabledRuleForBulkDelete1,
+                enabledRuleForBulkDelete2,
+                siemRuleForBulkDelete1,
+              ],
+            };
           },
         });
 
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
-          { id: enabledRule1.id, type: 'alert', success: true },
-          { id: enabledRule2.id, type: 'alert', success: true },
-          { id: siemRule1.id, type: 'alert', success: true },
+          { id: enabledRuleForBulkDelete1.id, type: 'alert', success: true },
+          { id: enabledRuleForBulkDelete2.id, type: 'alert', success: true },
+          { id: siemRuleForBulkDelete1.id, type: 'alert', success: true },
         ],
       });
 
@@ -498,19 +483,19 @@ describe('bulkDelete', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRule1.id,
+        ruleId: enabledRuleForBulkDelete1.id,
         skipActionsValidation: true,
-        attributes: enabledRule1.attributes,
+        attributes: enabledRuleForBulkDelete1.attributes,
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRule2.id,
+        ruleId: enabledRuleForBulkDelete2.id,
         skipActionsValidation: true,
-        attributes: enabledRule2.attributes,
+        attributes: enabledRuleForBulkDelete2.attributes,
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: siemRule1.id,
+        ruleId: siemRuleForBulkDelete1.id,
         skipActionsValidation: true,
-        attributes: siemRule1.attributes,
+        attributes: siemRuleForBulkDelete1.attributes,
       });
     });
   });
