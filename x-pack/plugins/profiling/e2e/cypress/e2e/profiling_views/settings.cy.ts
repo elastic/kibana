@@ -34,7 +34,7 @@ describe('Settings page', () => {
     cy.contains('Advanced Settings');
     cy.contains('CO2');
     cy.contains('Regional Carbon Intensity (ton/kWh)');
-    cy.contains('Data Centre PUE');
+    cy.contains('Data Center PUE');
     cy.contains('Per Core Watts');
   });
 
