@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { getTraceItems } from './get_trace_items';
 import {
   SearchParamsMock,
@@ -26,6 +27,7 @@ describe('trace queries', () => {
         apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
+        logger: loggerMock.create(),
       })
     );
 

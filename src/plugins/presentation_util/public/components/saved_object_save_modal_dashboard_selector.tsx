@@ -22,9 +22,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import DashboardPicker, { DashboardPickerProps } from './dashboard_picker';
-
-import './saved_object_save_modal_dashboard.scss';
+import DashboardPicker, { DashboardPickerProps } from './dashboard_picker/dashboard_picker';
 
 export interface SaveModalDashboardSelectorProps {
   copyOnSave: boolean;
