@@ -109,6 +109,7 @@ import {
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
+  INVESTIGATIONS_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -126,11 +127,15 @@ import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
+export const createAndEnableRuleOnly = () => {
+  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
+};
+
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
@@ -292,6 +297,23 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
   return referenceUrls;
+};
+
+export const fillCustomInvestigationFields = (
+  fields: string[] = ruleFields.investigationFields.field_names
+) => {
+  fields.forEach((field) => {
+    cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
+  });
+  return fields;
+};
+
+export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
+  cy.get(RULE_NAME_INPUT).clear();
+  cy.get(RULE_NAME_INPUT).type(rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).clear();
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  getAboutContinueButton().should('exist').click();
 };
 
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {

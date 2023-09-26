@@ -1222,7 +1222,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
-
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_details @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 
@@ -1285,6 +1285,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_actions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_creation @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_edit @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/value_lists @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine

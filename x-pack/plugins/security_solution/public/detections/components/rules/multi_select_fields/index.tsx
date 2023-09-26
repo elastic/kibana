@@ -19,6 +19,7 @@ interface MultiSelectAutocompleteProps {
   field: FieldHook;
   fullWidth?: boolean;
   disabledText?: string;
+  dataTestSubj?: string;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
@@ -31,6 +32,7 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
   isDisabled,
   field,
   fullWidth = false,
+  dataTestSubj,
 }: MultiSelectAutocompleteProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
@@ -45,7 +47,12 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
     [browserFields, isDisabled, fullWidth]
   );
   const fieldComponent = (
-    <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />
+    <Field
+      field={field}
+      idAria={fieldDescribedByIds}
+      euiFieldProps={fieldEuiFieldProps}
+      data-test-subj={dataTestSubj}
+    />
   );
   return isDisabled ? (
     <EuiToolTip position="right" content={disabledText}>
