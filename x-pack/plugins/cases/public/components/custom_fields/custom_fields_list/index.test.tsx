@@ -75,9 +75,7 @@ describe('CustomFieldsList', () => {
       within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
   });
 
   it('calls onDeleteCustomField when confirm', async () => {
@@ -89,12 +87,12 @@ describe('CustomFieldsList', () => {
       within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
     userEvent.click(screen.getByText('Delete'));
+
     await waitFor(() => {
+      expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
       expect(onDeleteCustomField).toHaveBeenCalledWith(customFieldsConfigurationMock[0].key);
     });
   });
@@ -108,12 +106,12 @@ describe('CustomFieldsList', () => {
       within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
     userEvent.click(screen.getByText('Cancel'));
+
     await waitFor(() => {
+      expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
       expect(onDeleteCustomField).not.toHaveBeenCalledWith();
     });
   });
