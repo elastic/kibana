@@ -4875,6 +4875,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-components-form@link:packages/kbn-management/settings/components/form":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-field-definition@link:packages/kbn-management/settings/field_definition":
   version "0.0.0"
   uid ""
@@ -13972,7 +13976,7 @@ d3-brush@^3.0.0:
     d3-selection "3"
     d3-transition "3"
 
-d3-cloud@1.2.5, d3-cloud@^1.2.5:
+d3-cloud@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/d3-cloud/-/d3-cloud-1.2.5.tgz#3e91564f2d27fba47fcc7d812eb5081ea24c603d"
   integrity sha512-4s2hXZgvs0CoUIw31oBAGrHt9Kt/7P9Ik5HIVzISFiWkD0Ga2VLAuO/emO/z1tYIpE7KG2smB4PhMPfFMJpahw==
