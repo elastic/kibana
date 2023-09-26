@@ -47,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
       })) as any;
 
       const taggingStats = telemetryStats.stack_stats.kibana.plugins.saved_objects_tagging;
-      console.log('taggingStats', taggingStats);
       expect(taggingStats).to.eql({
         usedTags: 4,
         taggedObjects: 5,

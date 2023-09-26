@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./tests')],
     servers: apiIntegrationConfig.get('servers'),
     services,
     junit: {
