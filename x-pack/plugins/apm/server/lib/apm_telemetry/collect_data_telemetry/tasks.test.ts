@@ -164,6 +164,66 @@ describe('data telemetry collection tasks', () => {
     });
   });
 
+  describe('global_labels', () => {
+    const task = tasks.find((t) => t.name === 'global_labels');
+
+    it('returns count of global labels when present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [
+          '.ds-metrics-apm.service_destination.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_summary.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_transaction.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.transaction.1m-default-2023.09.26-000005',
+        ],
+        fields: {
+          'labels.telemetry_auto_version': {
+            keyword: {
+              type: 'keyword',
+              metadata_field: false,
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+          labels: {
+            object: {
+              type: 'object',
+              metadata_field: false,
+              searchable: false,
+              aggregatable: false,
+            },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 1,
+          },
+        },
+      });
+    });
+
+    it('returns 0 count of global labels when not present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [],
+        fields: {},
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 0,
+          },
+        },
+      });
+    });
+  });
+
   describe('cloud', () => {
     const task = tasks.find((t) => t.name === 'cloud');
 

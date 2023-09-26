@@ -590,6 +590,43 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
+    name: 'global_labels',
+    executor: async ({ telemetryClient }) => {
+      const metricConsistingGlobalLabels = [
+        'service_summary',
+        'service_transaction',
+        'transaction',
+        'service_destination',
+      ];
+
+      const index = metricConsistingGlobalLabels
+        .map((metric) => `metrics-apm.${metric}*`)
+        .join(',');
+
+      const response = await telemetryClient.fieldCaps({
+        index,
+        fields: 'labels.*',
+        expand_wildcards: 'all',
+        index_filter: range1d,
+      });
+
+      const globalLabelCount = Object.keys(response.fields).length;
+
+      // Skip the top level Labels field which is sometimes present in the response
+      const count = response.fields?.labels
+        ? globalLabelCount - 1
+        : globalLabelCount;
+
+      return {
+        counts: {
+          global_labels: {
+            '1d': count,
+          },
+        },
+      };
+    },
+  },
+  {
     name: 'services',
     executor: async ({ indices, telemetryClient }) => {
       const servicesPerAgent = await AGENT_NAMES.reduce(
