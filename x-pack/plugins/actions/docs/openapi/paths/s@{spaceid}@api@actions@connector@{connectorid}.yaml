@@ -118,6 +118,7 @@ post:
             - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
             - $ref: '../components/schemas/create_connector_request_teams.yaml'
             - $ref: '../components/schemas/create_connector_request_tines.yaml'
+            - $ref: '../components/schemas/create_connector_request_torq.yaml'
             - $ref: '../components/schemas/create_connector_request_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_xmatters.yaml'
           discriminator:
@@ -161,8 +162,8 @@ put:
           oneOf:
             - $ref: '../components/schemas/update_connector_request_cases_webhook.yaml'
             - $ref: '../components/schemas/update_connector_request_d3security.yaml'
-#            - $ref: '../components/schemas/update_connector_request_email.yaml'
-#            - $ref: '../components/schemas/create_connector_request_genai.yaml'
+            - $ref: '../components/schemas/update_connector_request_email.yaml'
+            - $ref: '../components/schemas/create_connector_request_genai.yaml'
             - $ref: '../components/schemas/update_connector_request_index.yaml'  
             - $ref: '../components/schemas/update_connector_request_jira.yaml'
             - $ref: '../components/schemas/update_connector_request_opsgenie.yaml'
@@ -175,8 +176,9 @@ put:
             - $ref: '../components/schemas/update_connector_request_slack_webhook.yaml'
             - $ref: '../components/schemas/update_connector_request_swimlane.yaml' 
             - $ref: '../components/schemas/update_connector_request_teams.yaml'
-#            - $ref: '../components/schemas/update_connector_request_tines.yaml'
-#            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
+            - $ref: '../components/schemas/update_connector_request_tines.yaml'
+            - $ref: '../components/schemas/update_connector_request_torq.yaml'
+            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
             - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
         examples:
           updateIndexConnectorRequest:
