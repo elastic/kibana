@@ -218,6 +218,7 @@ export function getRuleType(
       services,
       params,
       logger,
+      getTimeRange,
     } = options;
     const { alertsClient, scopedClusterClient } = services;
 
@@ -236,7 +237,8 @@ export function getRuleType(
     }
 
     const esClient = scopedClusterClient.asCurrentUser;
-    const date = new Date().toISOString();
+    const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
       index: params.index,
@@ -246,8 +248,8 @@ export function getRuleType(
       groupBy: params.groupBy,
       termField: params.termField,
       termSize: params.termSize,
-      dateStart: date,
-      dateEnd: date,
+      dateStart,
+      dateEnd,
       timeWindowSize: params.timeWindowSize,
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
@@ -268,6 +270,7 @@ export function getRuleType(
           TIME_SERIES_BUCKET_SELECTOR_FIELD
         ),
       },
+      useCalculatedDateRange: false,
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
@@ -308,7 +311,7 @@ export function getRuleType(
       )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         group: alertId,
         value,
         conditions: humanFn,
@@ -337,7 +340,7 @@ export function getRuleType(
       const alertId = recoveredAlert.getId();
       logger.debug(`setting context for recovered alert ${alertId}`);
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         value: unmetGroupValues[alertId] ?? 'unknown',
         group: alertId,
         conditions: `${agg} is NOT ${getHumanReadableComparator(

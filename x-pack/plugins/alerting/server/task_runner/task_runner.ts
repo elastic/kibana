@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -996,9 +997,22 @@ export class TaskRunner<
     });
   }
 
-  private getTimeRange(timeWindow: number, queryDelaySettings: RulesSettingsQueryDelayProperties) {
-    const date = Date.now();
+  private getTimeRange(window: string, queryDelaySettings: RulesSettingsQueryDelayProperties) {
+    let timeWindow: number;
+    try {
+      timeWindow = parseDuration(window);
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
+          defaultMessage: 'Invalid format for windowSize: "{window}"',
+          values: {
+            window,
+          },
+        })
+      );
+    }
 
+    const date = Date.now();
     const dateStart = new Date(date - (timeWindow + queryDelaySettings.delay)).toISOString();
     const dateEnd = new Date(date - queryDelaySettings.delay).toISOString();
 

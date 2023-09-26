@@ -117,7 +117,7 @@ describe('es_query executor', () => {
       state: { latestTimestamp: undefined },
       spaceId: 'default',
       logger,
-      getTimeRange: (timeWindow: number) => {
+      getTimeRange: () => {
         const date = new Date(Date.now()).toISOString();
         return { dateStart: date, dateEnd: date };
       },

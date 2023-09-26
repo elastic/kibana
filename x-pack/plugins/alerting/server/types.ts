@@ -139,7 +139,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
-  getTimeRange: (timeWindow: number) => { dateStart: string; dateEnd: string };
+  getTimeRange: (timeWindow: string) => { dateStart: string; dateEnd: string };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

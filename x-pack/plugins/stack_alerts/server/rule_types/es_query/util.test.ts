@@ -6,9 +6,8 @@
  */
 
 import { OnlyEsQueryRuleParams } from './types';
-import { EsQueryRuleParams } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
-import { getParsedQuery, getTimeWindow } from './util';
+import { getParsedQuery } from './util';
 
 describe('es_query utils', () => {
   const defaultProps = {
@@ -47,18 +46,6 @@ describe('es_query utils', () => {
           esQuery: '{ "someProperty": "test-query" }',
         } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "{ "someProperty": "test-query" }" - query must be JSON');
-    });
-  });
-
-  describe('getTimeWindow', () => {
-    it('should throw invalid window size error', () => {
-      expect(() =>
-        getTimeWindow({
-          ...defaultProps,
-          timeWindowSize: 5,
-          timeWindowUnit: 'r',
-        } as EsQueryRuleParams)
-      ).toThrow('invalid format for windowSize: "5r"');
     });
   });
 });

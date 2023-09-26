@@ -20,6 +20,11 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 
 let fakeTimer: sinon.SinonFakeTimers;
 
+function getTimeRange() {
+  const date = new Date(Date.now()).toISOString();
+  return { dateStart: date, dateEnd: date };
+}
+
 describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
   const data = {
@@ -224,6 +229,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
@@ -321,6 +327,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -389,6 +396,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -456,6 +464,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

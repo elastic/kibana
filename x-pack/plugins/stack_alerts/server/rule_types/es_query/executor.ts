@@ -27,7 +27,7 @@ import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { getTimeWindow, isEsqlQueryRule, isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
@@ -61,8 +61,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const timeWindow = getTimeWindow(params);
-  const { dateStart, dateEnd } = getTimeRange(timeWindow);
+  const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
   const { parsedResults, link } = searchSourceRule
     ? await fetchSearchSourceQuery({
