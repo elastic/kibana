@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { SearchRequest } from '..';
@@ -19,6 +18,7 @@ import {
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
+import { ViewWarningButton } from './view_warning_button';
 
 /**
  * @internal
@@ -61,18 +61,11 @@ export function handleWarnings({
   getNotifications().toasts.addWarning({
     title: incompleteWarning.message,
     text: (
-      <EuiButton
-        color="warning"
-        size="s"
-        onClick={incompleteWarning.openInInspector}
-        data-test-subj="openInInspector"
-      >
-        <FormattedMessage
-          id="data.search.searchSource.fetch.incompleteResultsWarning.viewDetails"
-          defaultMessage="View details"
-          description="Open inspector to show details"
+      <EuiTextAlign textAlign="right">
+        <ViewWarningButton
+          onClick={incompleteWarning.openInInspector}
         />
-      </EuiButton>
+      </EuiTextAlign>
     ),
   });
 }

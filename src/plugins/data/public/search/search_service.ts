@@ -66,7 +66,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import { handleWarnings } from './fetch/handle_warnings';
+import { handleWarnings } from './warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
