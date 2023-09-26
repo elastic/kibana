@@ -166,9 +166,13 @@ export const selectCloseSingleAlerts = () => {
 export const addExceptionConditions = (exception: Exception) => {
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
+  if (exception.operator === 'is one of') {
+    addExceptionEntryFieldMatchAnyValue(exception.values, 0);
+  } else {
+    exception.values.forEach((value) => {
+      cy.get(VALUES_INPUT).type(`${value}{enter}`);
+    });
+  }
 };
 
 export const validateExceptionConditionField = (value: string) => {
