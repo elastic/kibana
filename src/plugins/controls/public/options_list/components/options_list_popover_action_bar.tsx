@@ -51,26 +51,22 @@ export const OptionsListPopoverActionBar = ({
 
   return (
     <div className="optionsList__actions">
-      <EuiFormRow fullWidth>
-        <EuiFlexGroup className="optionsList__searchSortRow" gutterSize="xs" responsive={false}>
-          {fieldSpec?.type !== 'date' && (
-            <EuiFlexItem grow={true}>
-              <EuiFieldSearch
-                isInvalid={!searchString.valid}
-                compressed
-                disabled={showOnlySelected}
-                fullWidth
-                onChange={(event) => updateSearchString(event.target.value)}
-                value={searchString.value}
-                data-test-subj="optionsList-control-search-input"
-                placeholder={OptionsListStrings.popover.searchPlaceholder[
-                  searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
-                ].getPlaceholderText()}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFormRow>
+      {fieldSpec?.type !== 'date' && (
+        <EuiFormRow className="optionsList__searchRow" fullWidth>
+          <EuiFieldSearch
+            isInvalid={!searchString.valid}
+            compressed
+            disabled={showOnlySelected}
+            fullWidth
+            onChange={(event) => updateSearchString(event.target.value)}
+            value={searchString.value}
+            data-test-subj="optionsList-control-search-input"
+            placeholder={OptionsListStrings.popover.searchPlaceholder[
+              searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
+            ].getPlaceholderText()}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow className="optionsList__actionsRow" fullWidth>
         <EuiFlexGroup
           justifyContent="spaceBetween"

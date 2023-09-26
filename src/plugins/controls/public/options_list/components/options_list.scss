@@ -52,10 +52,13 @@
 
 .optionsList__popover {
   .optionsList__actions {
-    padding: $euiSizeS;
-    padding-bottom: 0;
+    padding: 0 $euiSizeS;
     border-bottom: $euiBorderThin;
     border-color: darken($euiColorLightestShade, 2%);
+
+    .optionsList__searchRow {
+      padding-top: $euiSizeS
+    }
 
     .optionsList__actionsRow {
       margin: ($euiSizeS / 2) 0 !important;
