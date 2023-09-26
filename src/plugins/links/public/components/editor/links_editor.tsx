@@ -53,10 +53,12 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
     id: LINKS_VERTICAL_LAYOUT,
     label: LinksLayoutInfo[LINKS_VERTICAL_LAYOUT].displayName,
+    'data-test-subj': `links--panelEditor--${LINKS_VERTICAL_LAYOUT}LayoutBtn`,
   },
   {
     id: LINKS_HORIZONTAL_LAYOUT,
     label: LinksLayoutInfo[LINKS_HORIZONTAL_LAYOUT].displayName,
+    'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];
 

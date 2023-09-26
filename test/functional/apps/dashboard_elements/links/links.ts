@@ -23,7 +23,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const deployment = getService('deployment');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['dashboardControls', 'dashboard', 'common', 'header']);
+  const PageObjects = getPageObjects([
+    'dashboardControls',
+    'dashboard',
+    'common',
+    'header',
+    'timePicker',
+  ]);
 
   // TODO much of this could be added to a new PageObjects
 
@@ -89,13 +95,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await addExternalLink(`${deployment.getHostPort()}/app/bar`, false, true);
 
     await addDashboardLink(DASHBOARD_NAME);
-    await addDashboardLink('im empty', false, true, false, 'Does not pass filters');
-    await addDashboardLink('im empty too', true, false, false, 'Does not pass date range');
-    await addDashboardLink('couple panels', true, true, true, 'Opens in new tab');
+    await addDashboardLink('links 001', false, true, false, 'Does not pass filters');
+    await addDashboardLink('links 002', true, false, false, 'Does not pass date range');
+    await addDashboardLink('links 003', true, true, true, 'Opens in new tab');
   }
 
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
+
+  const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
+  const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
 
   describe('links panel', () => {
     before(async () => {
@@ -116,9 +125,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.setTime({
-        from: 'Oct 22, 2018 @ 00:00:00.000',
-        to: 'Dec 3, 2018 @ 00:00:00.000',
+        from: FROM_TIME,
+        to: TO_TIME,
       });
+
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     after(async () => {
@@ -134,12 +149,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('creation and editing', async () => {
       it('can create a new by-reference links panel', async () => {
         // TODO this test takes a long time to run. Maybe we don't need to add so many links?
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
-
+        await PageObjects.dashboard.loadSavedDashboard(DASHBOARD_NAME);
+        await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAddNewEmbeddableLink('links');
 
@@ -154,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.exists('addObjectToDashboardSuccess');
 
         expect(await testSubjects.existOrFail('links--component'));
-        await PageObjects.dashboard.clearUnsavedChanges();
+        await PageObjects.dashboard.clickDiscardChanges();
       });
 
       it('can create a new by-value links panel', async () => {});
@@ -193,21 +204,68 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // The second link in the component should be the link we moved
         const listGroup = await testSubjects.find('links--component--listGroup');
         const listItem = await listGroup.findByCssSelector(`li:nth-child(2)`);
-        expect(await listItem.getVisibleText()).to.equal('links 003');
+        expect(await listItem.getVisibleText()).to.equal('links 003 - external');
       });
     });
 
     describe('embeddable panel', () => {
-      // TODO complete this test
-      it.skip('adds links panel to top of dashboard', async () => {
+      afterEach(async () => {
+        await PageObjects.dashboard.clickDiscardChanges();
+      });
+
+      it('adds links panel to top of dashboard', async () => {
         await PageObjects.dashboard.loadSavedDashboard('links 003');
         await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.addEmbeddable('a few links', 'links');
-        // how do I check that the panel is the top one?
+        const topPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+        expect(topPanelTitle).to.equal('a few links');
+      });
+
+      it('sets panel dimensions for horizontal layout', async () => {
+        await PageObjects.dashboard.loadSavedDashboard(DASHBOARD_NAME);
+        await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await testSubjects.click('links--panelEditor--horizontalLayoutBtn');
+        await createSomeLinks();
+        await testSubjects.setEuiSwitch('links--panelEditor--saveByReferenceSwitch', 'uncheck');
+        await testSubjects.clickWhenNotDisabled('links--panelEditor--saveBtn');
+        await testSubjects.exists('addObjectToDashboardSuccess');
+
+        expect(await testSubjects.existOrFail('links--component'));
+        const { width, height } = (await PageObjects.dashboard.getPanelDimensions())[0];
+        expect(width).to.equal(1584);
+        expect(height).to.equal(104);
+      });
+
+      it('sets panel dimensions for vertical layout', async () => {
+        await PageObjects.dashboard.loadSavedDashboard(DASHBOARD_NAME);
+        await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+        await testSubjects.click('links--panelEditor--verticalLayoutBtn');
+        await createSomeLinks();
+        await testSubjects.setEuiSwitch('links--panelEditor--saveByReferenceSwitch', 'uncheck');
+        await testSubjects.clickWhenNotDisabled('links--panelEditor--saveBtn');
+        await testSubjects.exists('addObjectToDashboardSuccess');
+
+        expect(await testSubjects.existOrFail('links--component'));
+        const { width, height } = (await PageObjects.dashboard.getPanelDimensions())[0];
+        expect(width).to.equal(257);
+        expect(height).to.equal(272);
       });
     });
 
     describe('dashboard links', () => {
+      afterEach(async () => {
+        // close any new tabs that were opened
+        const windowHandlers = await browser.getAllWindowHandles();
+        if (windowHandlers.length > 1) {
+          await browser.closeCurrentWindow();
+          await browser.switchToWindow(windowHandlers[0]);
+        }
+      });
+
       it('useCurrentFilters should pass filter pills and query', async () => {
         /**
          * dashboard links002 has a saved filter and query bar.
@@ -215,6 +273,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * so the link should pass the filters and query to dashboard links001
          * but should not override the date range.
          */
+        await PageObjects.dashboard.loadSavedDashboard('links 002');
+        await testSubjects.click('dashboardLink--link001');
+        expect(await PageObjects.dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+          '0930f310-5bc2-11ee-9a85-7b86504227bc'
+        );
+        // Should pass the filters
+        expect(await filterBar.getFilterCount()).to.equal(2);
+        const filterLabels = await filterBar.getFiltersLabel();
+        expect(
+          filterLabels.includes('This filter should only pass from links002 to links001')
+        ).to.equal(true);
+        expect(
+          filterLabels.includes('This filter should not pass from links001 to links002')
+        ).to.equal(true);
+
+        // Should not pass the date range
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
+        expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
+
+        await PageObjects.dashboard.clickDiscardChanges();
       });
 
       it('useCurrentDateRange should pass date range', async () => {
@@ -230,7 +309,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
         );
-        // TODO check the date range and filters
+        // Should pass the date range
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
+        expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
+
+        // Should not pass the filters
+        expect(await filterBar.getFilterCount()).to.equal(1);
+        const filterLabels = await filterBar.getFiltersLabel();
+        expect(
+          filterLabels.includes('This filter should only pass from links002 to links001')
+        ).to.equal(true);
+        expect(
+          filterLabels.includes('This filter should not pass from links001 to links002')
+        ).to.equal(false);
+
+        await PageObjects.dashboard.clickDiscardChanges();
       });
 
       it('openInNewTab should create an external link', async () => {
@@ -240,6 +334,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * Other dashboards should not pass their filters or date range
          * to dashboard links003.
          */
+        await PageObjects.dashboard.loadSavedDashboard('links 001');
+        await testSubjects.click('dashboardLink--link003');
+
+        // Should have opened another tab
+        const windowHandlers = await browser.getAllWindowHandles();
+        expect(windowHandlers.length).to.equal(2);
+        await browser.switchToWindow(windowHandlers[1]);
+        expect(await PageObjects.dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+          '27398c50-5bc2-11ee-9a85-7b86504227bc'
+        );
+
+        // Should not pass any filters
+        expect((await filterBar.getFiltersLabel()).length).to.equal(0);
+
+        // Should not pass any date range
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Dec 24, 2018 @ 00:00:00.000');
+        expect(time.end).to.be('Dec 26, 2018 @ 00:00:00.000');
       });
     });
 

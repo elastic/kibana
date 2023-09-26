@@ -2784,6 +2784,11 @@
         "label": "links 003 - external",
         "type": "dashboardLink",
         "id": "link003",
+        "options": {
+          "openInNewTab": true,
+          "useCurrentDateRange": false,
+          "useCurrentFilters": false
+        },
         "order": 2,
         "destinationRefName": "link_link003_dashboard"
       }
@@ -2883,9 +2888,9 @@
     "timeRestore": true,
     "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
     "panelsJSON": "[{\"type\":\"links\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"26533acc-3516-445c-9c05-3b0e18686f38\"},\"panelIndex\":\"26533acc-3516-445c-9c05-3b0e18686f38\",\"embeddableConfig\":{\"disabledActions\":[\"OPEN_FLYOUT_ADD_DRILLDOWN\"],\"enhancements\":{}},\"panelRefName\":\"panel_26533acc-3516-445c-9c05-3b0e18686f38\"}]",
-    "timeFrom": "2018-10-31T00:00:00.000Z",
+    "timeFrom": "2018-11-11T00:00:00.000Z",
     "title": "links 002",
-    "timeTo": "2018-11-01T00:00:00.000Z"
+    "timeTo": "2018-11-12T00:00:00.000Z"
   },
   "references": [
     {
@@ -2924,10 +2929,12 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
     },
     "description": "",
-    "timeRestore": false,
+    "timeRestore": true,
     "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
     "panelsJSON": "[{\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":3,\"i\":\"12e3dea4-44cc-405e-99de-408c5879ab55\"},\"panelIndex\":\"12e3dea4-44cc-405e-99de-408c5879ab55\",\"embeddableConfig\":{\"savedVis\":{\"id\":\"\",\"title\":\"\",\"description\":\"\",\"type\":\"markdown\",\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"This panel appears at the top\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}},\"enhancements\":{}}}]",
-    "title": "links 003"
+    "timeFrom": "2018-12-24T00:00:00.000Z",
+    "title": "links 003",
+    "timeTo": "2018-12-26T00:00:00.000Z"
   },
   "references": [
     {
