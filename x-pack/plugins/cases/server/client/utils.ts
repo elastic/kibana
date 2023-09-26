@@ -524,29 +524,3 @@ export const constructSearch = (
 
   return { search };
 };
-
-/**
- * Throws an error if the request has custom fields with duplicated keys.
- */
-export const throwIfDuplicatedCustomFieldKeysInRequest = ({
-  customFieldsInRequest = [],
-}: {
-  customFieldsInRequest?: Array<{ key: string }>;
-}) => {
-  const uniqueKeys = new Set();
-  const duplicatedKeys = new Set();
-
-  customFieldsInRequest.forEach((item) => {
-    if (uniqueKeys.has(item.key)) {
-      duplicatedKeys.add(item.key);
-    } else {
-      uniqueKeys.add(item.key);
-    }
-  });
-
-  if (duplicatedKeys.size) {
-    throw badRequest(
-      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
-    );
-  }
-};
