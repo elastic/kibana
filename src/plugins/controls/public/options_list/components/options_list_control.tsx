@@ -58,7 +58,7 @@ export const OptionsListControl = ({
   /**
    * derive field formatter from fieldSpec and dataViewId
    */
-  useMount(() => {
+  useEffect(() => {
     (async () => {
       if (!dataViewId || !fieldSpec) return;
       // dataViews are cached, and should always be available without having to hit ES.
@@ -69,7 +69,7 @@ export const OptionsListControl = ({
           ((toFormat: string) => toFormat)
       );
     })();
-  });
+  }, [dataViewId, fieldSpec, getDataViewById]);
 
   useEffect(() => {
     return () => {
@@ -111,6 +111,7 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+    console.log({ formatted: validSelections?.map(fieldFormatter) });
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
       validSelectionsCount: validSelections?.length,

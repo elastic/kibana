@@ -255,9 +255,7 @@ export class OptionsListEmbeddable
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
       const field = this.dataView.getFieldByName(fieldName);
       if (field) {
-        this.field = field.toSpec({
-          getFormatterForField: this.dataView.getFormatterForField.bind(this.dataView),
-        });
+        this.field = field.toSpec();
         this.dispatch.setField(this.field);
       } else {
         this.dispatch.setErrorMessage(
