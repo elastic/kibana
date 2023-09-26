@@ -38513,7 +38513,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editButtonTooltip": "编辑",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel": "低于配置的最小时间间隔",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle": "低于配置的最小时间间隔",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle": "上次运行的开始时间。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle": "上次响应",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle": "名称",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle": "通知",
