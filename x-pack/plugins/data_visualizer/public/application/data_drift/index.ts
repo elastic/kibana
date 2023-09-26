@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  DataComparisonDetectionAppState,
-  type DataComparisonSpec,
-} from './data_comparison_app_state';
-export { type DataComparisonSpec };
+import { DataDriftDetectionAppState, type DataDriftSpec } from './data_drift_app_state';
+export { type DataDriftSpec };
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default DataComparisonDetectionAppState;
+export default DataDriftDetectionAppState;
