@@ -62,9 +62,7 @@ export function handleWarnings({
     title: incompleteWarning.message,
     text: (
       <EuiTextAlign textAlign="right">
-        <ViewWarningButton
-          onClick={incompleteWarning.openInInspector}
-        />
+        <ViewWarningButton onClick={incompleteWarning.openInInspector} />
       </EuiTextAlign>
     ),
   });

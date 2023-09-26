@@ -7,12 +7,10 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SearchResponseInterceptedWarning } from '../types';
 import { ViewWarningButton } from '@kbn/data-plugin/public';
+import type { SearchResponseInterceptedWarning } from '../types';
 
 /**
  * Intercepts warnings for a search source request

@@ -28,12 +28,7 @@ export default function ViewWarningButton({
   const Component = isButtonEmpty ? EuiLink : EuiButton;
 
   return (
-    <Component
-      color={color}
-      size={size}
-      onClick={onClick}
-      data-test-subj="viewWarningBtn"
-    >
+    <Component color={color} size={size} onClick={onClick} data-test-subj="viewWarningBtn">
       <FormattedMessage
         id="data.search.searchSource.warning.viewDetailsButtonLabel"
         defaultMessage="View details"
