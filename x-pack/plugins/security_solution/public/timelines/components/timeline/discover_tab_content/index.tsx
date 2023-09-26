@@ -234,9 +234,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
-        next: (state) => {
-          setDiscoverAppState(state);
-        },
+        next: setDiscoverAppState,
       });
 
       const internalStateSubscription = stateContainer.internalState.state$.subscribe({
@@ -266,15 +264,15 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       discoverTimerangeSubscription.current = timeRangeSub;
     },
     [
-      setDiscoverStateContainer,
-      savedSearchById,
       discoverAppState,
-      setDiscoverInternalState,
-      discoverDataService.query.timefilter.timefilter,
-      getAppStateFromSavedSearch,
-      dataView,
-      setDiscoverAppState,
       setDiscoverSavedSearchState,
+      setDiscoverInternalState,
+      setDiscoverAppState,
+      dataView,
+      setDiscoverStateContainer,
+      getAppStateFromSavedSearch,
+      savedSearchById,
+      discoverDataService.query.timefilter.timefilter,
     ]
   );
 
