@@ -91,7 +91,7 @@ export const DeployModel = ({
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
-                    onClick={() => createTextExpansionModel(undefined)}
+                    onClick={() => createTextExpansionModel()}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
