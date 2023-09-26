@@ -137,7 +137,6 @@ export const TextExpansionCalloutLogic = kea<
     createTextExpansionModel: true,
     fetchTextExpansionModel: true,
     startTextExpansionModel: true,
-
   },
   connect: {
     actions: [
@@ -147,15 +146,9 @@ export const TextExpansionCalloutLogic = kea<
         'apiError as createTextExpansionModelError',
       ],
       FetchTextExpansionModelApiLogic,
-      [
-        'apiSuccess as fetchTextExpansionModelSuccess',
-        'apiError as fetchTextExpansionModelError',
-      ],
+      ['apiSuccess as fetchTextExpansionModelSuccess', 'apiError as fetchTextExpansionModelError'],
       StartTextExpansionModelApiLogic,
-      [
-        'apiSuccess as startTextExpansionModelSuccess',
-        'apiError as startTextExpansionModelError',
-      ],
+      ['apiSuccess as startTextExpansionModelSuccess', 'apiError as startTextExpansionModelError'],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
@@ -172,7 +165,7 @@ export const TextExpansionCalloutLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: async () => {
-      const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({version: 2});
+      const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({ version: 2 });
       if (elserModel != null) {
         actions.setElserModelId(elserModel.name);
         actions.fetchTextExpansionModel();
@@ -185,9 +178,12 @@ export const TextExpansionCalloutLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
-    createTextExpansionModel: () => CreateTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
-    fetchTextExpansionModel: () => FetchTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
-    startTextExpansionModel: () => StartTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    createTextExpansionModel: () =>
+      CreateTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    fetchTextExpansionModel: () =>
+      FetchTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    startTextExpansionModel: () =>
+      StartTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
     createTextExpansionModelPollingTimeout: ({ duration }) => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);
@@ -253,8 +249,8 @@ export const TextExpansionCalloutLogic = kea<
       '',
       {
         setElserModelId: (_, { elserModelId }) => elserModelId,
-      }
-    ]
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
@@ -309,6 +305,6 @@ export const TextExpansionCalloutLogic = kea<
       (data: FetchTextExpansionModelResponse) =>
         // Running single threaded if model has max 1 deployment on 1 node with 1 thread
         data?.targetAllocationCount * data?.threadsPerAllocation <= 1,
-    ]
+    ],
   }),
 });
