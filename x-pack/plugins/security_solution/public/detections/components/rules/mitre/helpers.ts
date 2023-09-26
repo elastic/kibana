@@ -22,7 +22,7 @@ const lazyMitreConfiguration = () => {
  * Returns true if the given mitre technique has any subtechniques
  */
 export const hasSubtechniqueOptions = async (technique: ThreatTechnique) => {
-  return (await lazyMitreConfiguration()).subtechniquesOptions.some(
+  return (await lazyMitreConfiguration()).subtechniques.some(
     (subtechnique) => subtechnique.techniqueId === technique.id
   );
 };
