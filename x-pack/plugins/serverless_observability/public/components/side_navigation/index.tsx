@@ -135,16 +135,20 @@ const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'metrics:inventory',
                   getIsActive: ({ pathNameSerialized, prepend }) => {
+                    const nodeDetailPattern = /\/app\/metrics\/detail\/(?!host)/;
                     return (
                       pathNameSerialized.startsWith(prepend('/app/metrics/inventory')) ||
-                      pathNameSerialized.startsWith(prepend('/app/metrics/detail'))
+                      nodeDetailPattern.test(pathNameSerialized)
                     );
                   },
                 },
                 {
                   link: 'metrics:metrics-hosts',
                   getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/metrics/hosts')) ||
+                      pathNameSerialized.startsWith(prepend('/app/metrics/detail/host'))
+                    );
                   },
                 },
               ],
