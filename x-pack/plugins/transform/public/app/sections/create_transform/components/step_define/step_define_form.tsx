@@ -35,6 +35,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
 
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -112,6 +113,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
@@ -353,6 +355,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                   query={undefined}
                   disabled={false}
                   timefilter={timefilter}
+                  hideFrozenDataTierChoice={!showNodeInfo}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
