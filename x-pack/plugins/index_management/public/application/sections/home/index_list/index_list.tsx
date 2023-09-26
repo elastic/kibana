@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { ScopedHistory } from '@kbn/core/public';
+import { getIndexDetailsLink } from '../../../services/routing';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
@@ -25,9 +27,13 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
     page: 'indexManagementIndicesTab',
   });
 
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+  }, []);
+
   const openDetailPanel = useCallback(
     (indexName: string) => {
-      return history.push(encodeURI(`/indices/${indexName}`));
+      return history.push(getIndexDetailsLink(indexName));
     },
     [history]
   );
