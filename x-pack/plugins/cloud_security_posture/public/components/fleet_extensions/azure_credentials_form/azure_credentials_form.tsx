@@ -11,9 +11,12 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { NewPackagePolicyPostureInput } from '../utils';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
+import { NewPackagePolicyPostureInput } from '../utils';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -157,6 +160,8 @@ const ArmTemplateSetup = ({
   );
 };
 
+const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
+
 export const AzureCredentialsForm = ({
   input,
   newPolicy,
@@ -180,6 +185,37 @@ export const AzureCredentialsForm = ({
       onSetupFormatChange(AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE);
     }
   }, [setupFormat, onSetupFormatChange]);
+
+  const packageSemanticVersion = semverValid(packageInfo.version);
+  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
+  const isPackageVersionValidForAzure = !semverLt(
+    cleanPackageVersion,
+    AZURE_MINIMUM_PACKAGE_VERSION
+  );
+
+  useEffect(() => {
+    setIsValid(isPackageVersionValidForAzure);
+
+    onChange({
+      isValid: isPackageVersionValidForAzure,
+      updatedPolicy: newPolicy,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, packageInfo, setupFormat]);
+
+  if (!isPackageVersionValidForAzure) {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <EuiCallOut color="warning">
+          <FormattedMessage
+            id="xpack.csp.azureIntegration.azureNotSupportedMessage"
+            defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"
+          />
+        </EuiCallOut>
+      </>
+    );
+  }
 
   return (
     <>

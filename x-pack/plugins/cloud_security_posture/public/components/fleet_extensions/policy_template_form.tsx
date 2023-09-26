@@ -304,7 +304,6 @@ const GcpAccountTypeSelect = ({
   );
 };
 
-// const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0-preview1';
 const getAzureAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
 ): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
@@ -336,7 +335,7 @@ const AzureAccountTypeSelect = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  }, [input, updatePolicy]);
 
   return (
     <>
@@ -415,6 +414,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
+        console.log(updatedPolicy, isValid);
         onChange({ isValid, updatedPolicy });
       },
       [onChange, isValid]
