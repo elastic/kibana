@@ -86,6 +86,7 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
+  // @ts-expect-error
   private ilmPolicyManager?: IlmPolicyManager;
   config: ReportingCore['config'];
 
