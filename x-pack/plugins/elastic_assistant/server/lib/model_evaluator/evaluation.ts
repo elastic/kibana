@@ -17,7 +17,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { asyncForEach } from '@kbn/std';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
-import { wait } from './utils';
+import { getMessageFromLangChainResponse, wait } from './utils';
+import { ResponseBody } from '../langchain/helpers';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluator[];
@@ -27,6 +28,14 @@ export interface PerformEvaluationParams {
   evaluationType: string;
   maxConcurrency?: number;
   logger: Logger | ToolingLog;
+}
+
+export interface EvaluationResult {
+  evaluation: ChainValues;
+  input: string;
+  prediction: string;
+  predictionResponse: ResponseBody;
+  reference: string;
 }
 
 /**
@@ -43,11 +52,9 @@ export const performEvaluation = async ({
   maxConcurrency = 3,
   logger,
 }: PerformEvaluationParams) => {
-  const INPUT_POSTFIX = 'Only return the ESQL query, do not wrap in a codeblock.';
-
   const results: ChainValues = [];
   const requests = dataset.flatMap(({ input }) =>
-    agentExecutorEvaluators.map((agent) => agent([new HumanMessage(`${input} ${INPUT_POSTFIX}`)]))
+    agentExecutorEvaluators.map((agent) => agent([new HumanMessage(input)]))
   );
 
   logger.info(`Total Requests: ${requests.length}`);
@@ -58,35 +65,44 @@ export const performEvaluation = async ({
     logger.info(`Request chunk [${i}]: ${requestChunks[i].length}`);
 
     const chunkResults = await Promise.all(requestChunks[i]);
-    logger.info('Chunk Results:');
-    logger.info(JSON.stringify(chunkResults, null, 2));
+    logger.info(`Chunk Results:\n${JSON.stringify(chunkResults)}`);
     results.push(...chunkResults);
   }
 
   const mergedResults = dataset.map((d, i) => ({
     ...d,
-    prediction: results[i]?.text ?? 'error',
+    prediction: getMessageFromLangChainResponse(results[i]),
+    predictionResponse: results[i],
   }));
 
-  logger.info('Prediction results:');
-  logger.info(JSON.stringify(mergedResults));
+  logger.info(`Prediction results:\n${JSON.stringify(mergedResults)}`);
 
   logger.info('Performing evaluation....');
   const finalResults: ChainValues[] = [];
 
-  const evaluator = await loadEvaluator('labeled_criteria', {
-    criteria: 'correctness',
-    llm: evaluatorModel,
-  });
+  if (evaluationType === 'correctness') {
+    const evaluator = await loadEvaluator('labeled_criteria', {
+      criteria: 'correctness',
+      llm: evaluatorModel,
+    });
+    await asyncForEach(mergedResults, async ({ input, prediction, reference }) => {
+      const res = await evaluator.evaluateStrings({ input, prediction, reference });
+      finalResults.push(res);
+      await wait(1000);
+    });
+  } else if (evaluationType === 'esql-validator') {
+    // TODO: Implement esql-validator here
+  } else if (evaluationType === 'custom') {
+    // TODO: Implement custom evaluation here
+  }
 
-  await asyncForEach(mergedResults, async ({ input, prediction, reference }) => {
-    const res = await evaluator.evaluateStrings({ input, prediction, reference });
-    finalResults.push(res);
-    await wait(1000);
-  });
+  // Merge final evaluation results w/ dataset
+  const finalEvalResults = mergedResults.map((d, i) => ({
+    ...d,
+    evaluation: finalResults[i],
+  }));
 
-  logger.info('Final results:');
-  logger.info(JSON.stringify(finalResults));
+  logger.info(`Final results:\n${JSON.stringify(finalEvalResults)}`);
 
-  return finalResults;
+  return finalEvalResults;
 };

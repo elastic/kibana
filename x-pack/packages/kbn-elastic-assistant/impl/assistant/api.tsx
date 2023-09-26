@@ -13,7 +13,7 @@ import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
 import { getFormattedMessageContent } from './helpers';
-import { PerformEvaluationParams } from './settings/evaluation_settings/use_post_evaluation';
+import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
   assistantLangChain: boolean;

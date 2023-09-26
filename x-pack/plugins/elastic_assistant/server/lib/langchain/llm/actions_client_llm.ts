@@ -57,7 +57,7 @@ export class ActionsClientLlm extends LLM {
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
-      `ActionsClientLlm#_call assistantMessage:\n ${JSON.stringify(assistantMessage)} `
+      `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
     );
 
     // create a new connector request body with the assistant message:

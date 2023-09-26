@@ -25,7 +25,7 @@ import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
-import { usePerformEvaluation } from './use_post_evaluation';
+import { usePerformEvaluation } from './use_perform_evaluation';
 
 const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
 const DEFAULT_EVAL_TYPES = ['correctness', 'esql-validator', 'custom'];
@@ -155,7 +155,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   const sampleDataset = [
     {
       input:
-        'I want to see a query for metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets.',
+        'I want to see a query for metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets. Only return the ESQL query, and do not wrap in a codeblock.',
       reference:
         'FROM metrics-apm*\n| WHERE metricset.name == ""transaction"" AND metricset.interval == ""1m""\n| EVAL bucket = AUTO_BUCKET(transaction.duration.histogram, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.histogram) BY bucket',
     },

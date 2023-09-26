@@ -19,6 +19,10 @@ import { callAgentExecutor } from '../../lib/langchain/execute_custom_llm_chain'
 import { callOpenAIFunctionsExecutor } from '../../lib/langchain/executors/openai_functions_executor';
 import { AgentExecutor, AgentExecutorEvaluator } from '../../lib/langchain/executors/types';
 import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
+import {
+  indexEvaluations,
+  setupEvaluationIndex,
+} from '../../lib/model_evaluator/output_index/utils';
 
 const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
   DefaultAgentExecutor: callAgentExecutor,
@@ -39,9 +43,8 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
       const resp = buildResponse(response);
       const logger: Logger = (await context.elasticAssistant).logger;
 
-      const { evalModel, evaluationType } = request.query;
+      const { evalModel, evaluationType, outputIndex } = request.query;
       const { dataset, evalPrompt } = request.body;
-
       const connectorIds = request.query.models?.split(',') || [];
       const agentNames = request.query.agents?.split(',') || [];
 
@@ -109,7 +112,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
           logger,
         });
 
-        const evalResponse = await performEvaluation({
+        const evalResults = await performEvaluation({
           agentExecutorEvaluators: agents,
           dataset,
           evaluatorModel,
@@ -118,11 +121,9 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
           logger,
         });
 
-        logger.info('evalResponse: ');
-        logger.info(JSON.stringify(evalResponse, null, 2));
-
-        // TODO: Create a new index for the evaluation results
-        // TODO: Write the evaluation results to the index
+        logger.info(`Writing evaluation results to index: ${outputIndex}`);
+        await setupEvaluationIndex({ esClient, index: outputIndex, logger });
+        await indexEvaluations({ esClient, evalResults, index: outputIndex, logger });
 
         return response.ok({
           body: { success: true },

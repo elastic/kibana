@@ -57,7 +57,7 @@ export const ADVANCED_MENU_ITEM = i18n.translate(
 );
 
 export const EVALUATION_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsAdvancedMenuItemTitle',
+  'xpack.elasticAssistant.assistant.settings.settingsEvaluationMenuItemTitle',
   {
     defaultMessage: 'Evaluation',
   }

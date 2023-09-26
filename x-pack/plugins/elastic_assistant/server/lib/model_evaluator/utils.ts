@@ -8,6 +8,7 @@
 import { BaseChain } from 'langchain/dist/chains/base';
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
+import { ResponseBody } from '../langchain/helpers';
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -38,4 +39,40 @@ export const callAgentWithRetry = async (
     }
   }
   throw new Error('Max retries reached');
+};
+
+export const getMessageFromLangChainResponse = (response: ResponseBody): string => {
+  const choices = response.data.choices;
+
+  if (Array.isArray(choices) && choices.length > 0 && choices[0].message.content) {
+    const result: string = choices[0].message.content.trim();
+
+    return getFormattedMessageContent(result);
+  }
+
+  return 'error';
+};
+
+/**
+ * Lifted from `x-pack/packages/kbn-elastic-assistant/impl/assistant/helpers.ts`
+ * TODO: Move this to a shared location
+ *
+ * When `content` is a JSON string, prefixed with "```json\n"
+ * and suffixed with "\n```", this function will attempt to parse it and return
+ * the `action_input` property if it exists.
+ */
+export const getFormattedMessageContent = (content: string): string => {
+  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
+
+  if (formattedContentMatch) {
+    try {
+      const parsedContent = JSON.parse(formattedContentMatch[1]);
+
+      return parsedContent.action_input ?? content;
+    } catch {
+      // we don't want to throw an error here, so we'll fall back to the original content
+    }
+  }
+
+  return content;
 };
