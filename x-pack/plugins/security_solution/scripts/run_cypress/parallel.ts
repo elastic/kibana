@@ -402,7 +402,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
