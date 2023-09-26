@@ -23,7 +23,7 @@ export async function waitForDocumentInIndex({
   indexName: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({ index: indexName });
       if (response.hits.hits.length < num) {
@@ -74,7 +74,7 @@ export async function waitForAlertInIndex<T>({
   ruleId: string;
   num: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search<T>({
         index: indexName,
@@ -115,7 +115,7 @@ export async function waitForAllTasksIdle({
   esClient: Client;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -167,7 +167,7 @@ export async function waitForAllTasks({
   taskType: string;
   attempts: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -225,7 +225,7 @@ export async function waitForDisabled({
   ruleId: string;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -280,7 +280,7 @@ export async function waitForExecutionEventLog({
   ruleId: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana-event-log*',
