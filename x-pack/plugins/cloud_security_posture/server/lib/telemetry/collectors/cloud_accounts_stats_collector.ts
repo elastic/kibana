@@ -6,14 +6,16 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type {
-  AggregationsMultiBucketBase,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getSafeCloudAccountIdRuntimeMapping } from '../../../../common/runtime_mappings/get_cloud_account_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
-import type { CloudProviderKey, CloudSecurityAccountsStats } from './types';
+import type {
+  AccountEntity,
+  AccountsStats,
+  CloudProviderKey,
+  CloudSecurityAccountsStats,
+} from './types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
@@ -21,67 +23,6 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
-
-interface Value {
-  value: number;
-}
-interface BenchmarkName {
-  metrics: { 'rule.benchmark.name': string };
-}
-
-interface BenchmarkVersion {
-  metrics: { 'rule.benchmark.version': string };
-}
-
-interface BenchmarkId {
-  metrics: { 'rule.benchmark.id': string };
-}
-
-interface BenchmarkPostureType {
-  metrics: { 'rule.benchmark.posture_type': string };
-}
-
-interface CloudProvider {
-  metrics: { 'cloud.provider': string };
-}
-
-interface KubernetesVersion {
-  metrics: { 'cloudbeat.kubernetes.version': string };
-}
-
-interface PackagePolicyId {
-  metrics: { 'cloud_security_posture.package_policy_id': string };
-}
-
-interface LatestDocTimestamp {
-  metrics: { '@timestamp': string };
-}
-
-interface AccountsStats {
-  accounts: {
-    buckets: AccountEntity[];
-  };
-}
-interface AccountEntity {
-  key: string; // account_id
-  doc_count: number; // latest findings doc count
-  passed_findings_count: AggregationsMultiBucketBase;
-  failed_findings_count: AggregationsMultiBucketBase;
-  package_policy_id: { top: PackagePolicyId[] };
-  cloud_provider: { top: CloudProvider[] };
-  latest_doc_updated_timestamp: { top: LatestDocTimestamp[] };
-  benchmark_posture_type: { top: BenchmarkPostureType[] };
-  benchmark_id: { top: BenchmarkId[] };
-  benchmark_name: { top: BenchmarkName[] };
-  benchmark_version: { top: BenchmarkVersion[] };
-  kubernetes_version: { top: KubernetesVersion[] };
-  agents_count: Value;
-  nodes_count: Value;
-  pods_count: Value;
-  resources: {
-    pods_count: Value;
-  };
-}
 
 const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
@@ -330,18 +271,17 @@ const getVulnMgmtAccountsStatsQuery = (index: string): SearchRequest => ({
   _source: false,
 });
 
-const cloudBaseStats = (account: AccountEntity, product: string) => ({
+const cloudBaseStats = (account: AccountEntity) => ({
   account_id: account.key,
   latest_doc_count: account.doc_count,
   latest_doc_updated_timestamp: account.latest_doc_updated_timestamp.top[0].metrics['@timestamp'],
-  product,
   cloud_provider: account.cloud_provider.top[0].metrics['cloud.provider'],
   package_policy_id:
     account.package_policy_id.top[0].metrics['cloud_security_posture.package_policy_id'],
 });
 
-const cloudPostureStats = (account: AccountEntity) => ({
-  cloud_posture_stats: {
+const getPostureManagementStats = (account: AccountEntity) => ({
+  posture_management_stats: {
     posture_score: calculatePostureScore(
       account.passed_findings_count.doc_count,
       account.failed_findings_count.doc_count
@@ -353,7 +293,7 @@ const cloudPostureStats = (account: AccountEntity) => ({
   },
 });
 
-const kspmStats = (account: AccountEntity) => ({
+const getKspmStats = (account: AccountEntity) => ({
   kspm_stats: {
     kubernetes_version: account.kubernetes_version.top[0].metrics['cloudbeat.kubernetes.version'],
     agents_count: account.agents_count.value,
@@ -380,33 +320,37 @@ const getCloudAccountsStats = (
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
   const cloudAccountsStats = accounts.map((account) => {
+    const cloudAccount = cloudBaseStats(account);
     const postureType =
       account.benchmark_posture_type?.top?.[0]?.metrics['rule.benchmark.posture_type'];
 
     if (!postureType) {
       return {
-        ...cloudBaseStats(account, VULN_MGMT_POLICY_TEMPLATE),
+        ...cloudAccount,
+        product: VULN_MGMT_POLICY_TEMPLATE,
       };
     }
 
     if (postureType === CSPM_POLICY_TEMPLATE) {
       return {
-        ...cloudBaseStats(account, CSPM_POLICY_TEMPLATE),
-        ...cloudPostureStats(account),
+        ...cloudAccount,
+        product: CSPM_POLICY_TEMPLATE,
+        ...getPostureManagementStats(account),
       };
     }
 
     return {
-      ...cloudBaseStats(account, KSPM_POLICY_TEMPLATE),
-      ...cloudPostureStats(account),
-      ...kspmStats(account),
+      ...cloudAccount,
+      product: KSPM_POLICY_TEMPLATE,
+      ...getPostureManagementStats(account),
+      ...getKspmStats(account),
       cloud_provider: getCloudProvider(
         account.benchmark_id.top[0].metrics['rule.benchmark.id'] as CloudProviderKey
       ),
     };
   });
 
-  logger.info('Cloud Posture telemetry: accounts stats was sent');
+  logger.info('Cloud Account Stats telemetry: accounts stats was sent');
 
   return cloudAccountsStats;
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
 import { CspStatusCode } from '../../../../common/types';
 
 export type CloudSecurityUsageCollectorType =
@@ -17,6 +18,11 @@ export type CloudSecurityUsageCollectorType =
   | 'Cloud Accounts';
 
 export type CloudProviderKey = 'cis/eks' | 'cis/gke' | 'cis/k8s' | 'cis/ake';
+export type CloudbeatConfigKeyType =
+  | 'cloudbeat/cis_aws'
+  | 'cloudbeat/vuln_mgmt_aws'
+  | 'cloudbeat/cis_gcp'
+  | 'cloudbeat/cis_azure';
 
 export interface CspmUsage {
   indices: CspmIndicesStats;
@@ -68,7 +74,7 @@ export interface CloudSecurityAccountsStats {
   product: string;
   cloud_provider: string;
   package_policy_id: string;
-  cloud_posture_stats?: CloudPostureAccountsStats;
+  posture_management_stats?: CloudPostureAccountsStats;
   kspm_stats?: KSPMAccountsStats;
   latest_doc_count: number;
   latest_doc_updated_timestamp: string;
@@ -136,4 +142,65 @@ export interface CloudSecurityAlertsStats {
   alerts_open_count: number;
   alerts_closed_count: number;
   alerts_acknowledged_count: number;
+}
+
+export interface Value {
+  value: number;
+}
+export interface BenchmarkName {
+  metrics: { 'rule.benchmark.name': string };
+}
+
+export interface BenchmarkVersion {
+  metrics: { 'rule.benchmark.version': string };
+}
+
+export interface BenchmarkId {
+  metrics: { 'rule.benchmark.id': string };
+}
+
+export interface BenchmarkPostureType {
+  metrics: { 'rule.benchmark.posture_type': string };
+}
+
+export interface CloudProvider {
+  metrics: { 'cloud.provider': string };
+}
+
+export interface KubernetesVersion {
+  metrics: { 'cloudbeat.kubernetes.version': string };
+}
+
+export interface PackagePolicyId {
+  metrics: { 'cloud_security_posture.package_policy_id': string };
+}
+
+export interface LatestDocTimestamp {
+  metrics: { '@timestamp': string };
+}
+
+export interface AccountsStats {
+  accounts: {
+    buckets: AccountEntity[];
+  };
+}
+export interface AccountEntity {
+  key: string; // account_id
+  doc_count: number; // latest findings doc count
+  passed_findings_count: AggregationsMultiBucketBase;
+  failed_findings_count: AggregationsMultiBucketBase;
+  package_policy_id: { top: PackagePolicyId[] };
+  cloud_provider: { top: CloudProvider[] };
+  latest_doc_updated_timestamp: { top: LatestDocTimestamp[] };
+  benchmark_posture_type: { top: BenchmarkPostureType[] };
+  benchmark_id: { top: BenchmarkId[] };
+  benchmark_name: { top: BenchmarkName[] };
+  benchmark_version: { top: BenchmarkVersion[] };
+  kubernetes_version: { top: KubernetesVersion[] };
+  agents_count: Value;
+  nodes_count: Value;
+  pods_count: Value;
+  resources: {
+    pods_count: Value;
+  };
 }

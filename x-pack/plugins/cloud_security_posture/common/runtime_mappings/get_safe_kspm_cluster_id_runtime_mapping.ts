@@ -20,16 +20,10 @@ export const getSafeKspmClusterIdRuntimeMapping = (): MappingRuntimeFields => ({
           !doc["orchestrator.cluster.id"].empty;
         def clusterIdAvailable = doc.containsKey("cluster_id") &&
           !doc["cluster_id"].empty;
-        def packagePolicyId = doc.containsKey("cloud_security_posture.package_policy_id") &&
-          !doc["cloud_security_posture.package_policy_id"].empty;
-
         if (orchestratorIdAvailable) {
           emit(doc["orchestrator.cluster.id"].value);
         } else if (clusterIdAvailable) {
           emit(doc["cluster_id"].value);
-        }
-        if (packagePolicyId) {
-          emit(doc["cloud_security_posture.package_policy_id"].value);
         } 
       `,
     },

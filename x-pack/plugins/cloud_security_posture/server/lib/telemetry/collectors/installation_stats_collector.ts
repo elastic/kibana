@@ -13,7 +13,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import type { CloudSecurityInstallationStats } from './types';
+import type { CloudbeatConfigKeyType, CloudSecurityInstallationStats } from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 
@@ -23,19 +23,20 @@ const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
 };
 
 const getEnabledIsSetupAutomatic = (packagePolicy: PackagePolicy) => {
+  const cloudbeatConfig: Record<CloudbeatConfigKeyType, string> = {
+    'cloudbeat/cis_aws': 'cloud_formation_template_url',
+    'cloudbeat/vuln_mgmt_aws': 'cloud_formation_template_url',
+    'cloudbeat/cis_gcp': 'cloud_shell_url',
+    'cloudbeat/cis_azure': 'arm_template_url',
+  };
+
   const enabledInput = packagePolicy.inputs.find((input) => input.enabled);
-  if (
-    enabledInput?.type === 'cloudbeat/cis_aws' ||
-    enabledInput?.type === 'cloudbeat/vuln_mgmt_aws'
-  )
-    return enabledInput?.config?.cloud_formation_template_url?.value ? true : false;
 
-  if (enabledInput?.type === 'cloudbeat/cis_gcp')
-    return enabledInput?.config?.cloud_shell_url?.value ? true : false;
+  if (!enabledInput) return false;
 
-  if (enabledInput?.type === 'cloudbeat/cis_azure') return false;
+  const configKey = cloudbeatConfig[enabledInput.type as CloudbeatConfigKeyType];
 
-  return false;
+  return !!configKey && !!enabledInput.config?.[configKey]?.value;
 };
 
 const getAccountTypeField = (

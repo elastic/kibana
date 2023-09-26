@@ -177,7 +177,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       package_policy_id: { type: 'keyword' },
       latest_doc_count: { type: 'long' },
       latest_doc_updated_timestamp: { type: 'date' },
-      cloud_posture_stats: {
+      posture_management_stats: {
         posture_score: { type: 'long' },
         benchmark_name: { type: 'keyword' },
         benchmark_version: { type: 'keyword' },
