@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // / <reference types="cypress" />
@@ -209,7 +210,8 @@ export const dataLoadersForRealEndpoints = (
   config: Cypress.PluginConfigOptions
 ): void => {
   let fleetServerContainerId: string | undefined;
-
+  //
+  console.log('config', config.env);
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
@@ -251,9 +253,14 @@ export const dataLoadersForRealEndpoints = (
         log,
         kbnClient,
       }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
-          return newHost;
-        });
+        console.log('waitForEndpointToStreamData');
+        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000)
+          .then(() => {
+            return newHost;
+          })
+          .catch((err) => {
+            console.log({ err });
+          });
       });
     },
 

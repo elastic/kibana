@@ -20,7 +20,6 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './localhost_services';
-import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
 
@@ -113,44 +112,46 @@ export const createRuntimeServices = async ({
   asSuperuser = false,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
-  let username = _username;
-  let password = _password;
+  const username = _username;
+  const password = _password;
 
-  if (asSuperuser) {
-    await waitForKibana(kibanaUrl);
-    const tmpEsClient = createEsClient({
-      url: elasticsearchUrl,
-      username,
-      password,
-      log,
-      noCertForSsl,
-    });
-
-    const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
-
-    if (isServerlessEs) {
-      log?.warning(
-        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
-          'Will use username [system_indices_superuser] instead.'
-      );
-
-      username = 'system_indices_superuser';
-      password = 'changeme';
-    } else {
-      const superuserResponse = await createSecuritySuperuser(tmpEsClient);
-
-      ({ username, password } = superuserResponse);
-
-      if (superuserResponse.created) {
-        log.info(`Kibana user [${username}] was crated with password [${password}]`);
-      }
-    }
-  }
+  // console.log({ asSuperuser });
+  // if (asSuperuser) {
+  //   await waitForKibana(kibanaUrl);
+  //   const tmpEsClient = createEsClient({
+  //     url: elasticsearchUrl,
+  //     username,
+  //     password,
+  //     log,
+  //     noCertForSsl,
+  //   });
+  //
+  //   const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
+  //
+  //   if (isServerlessEs) {
+  //     log?.warning(
+  //       'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
+  //         'Will use username [system_indices_superuser] instead.'
+  //     );
+  //
+  //     username = 'system_indices_superuser';
+  //     password = 'changeme';
+  //   } else {
+  //     const superuserResponse = await createSecuritySuperuser(tmpEsClient);
+  //
+  //     ({ username, password } = superuserResponse);
+  //
+  //     if (superuserResponse.created) {
+  //       log.info(`Kibana user [${username}] was crated with password [${password}]`);
+  //     }
+  //   }
+  // }
 
   const kbnURL = new URL(kibanaUrl);
   const esURL = new URL(elasticsearchUrl);
   const fleetURL = new URL(fleetServerUrl);
 
+  console.log({ fleetURL, fleetServerUrl });
   return {
     kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl }),
     esClient: createEsClient({

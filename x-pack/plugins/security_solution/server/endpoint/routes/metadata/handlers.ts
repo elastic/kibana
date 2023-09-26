@@ -81,10 +81,15 @@ export const getMetadataRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
+    console.log('1111');
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
 
+    console.log('2222');
     try {
+      console.log('3333');
+
       const esClient = (await context.core).elasticsearch.client;
+      console.log('444');
       return response.ok({
         body: await endpointMetadataService.getEnrichedHostMetadata(
           esClient.asInternalUser,

@@ -109,10 +109,14 @@ export class EndpointMetadataService {
    * @throws
    */
   async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
+    console.log({ endpointId });
     const query = getESQueryHostMetadataByID(endpointId);
+    console.log({ query });
     const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
+    console.log({ queryResult });
     const endpointMetadata = queryResponseToHostResult(queryResult).result;
 
+    console.log({ endpointMetadata });
     if (endpointMetadata) {
       return endpointMetadata;
     }
@@ -155,7 +159,9 @@ export class EndpointMetadataService {
     fleetServices: EndpointFleetServicesInterface,
     endpointId: string
   ): Promise<HostInfo> {
+    console.log('5');
     const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
+    console.log('6');
 
     let fleetAgentId = endpointMetadata.elastic.agent.id;
     let fleetAgent: Agent | undefined;

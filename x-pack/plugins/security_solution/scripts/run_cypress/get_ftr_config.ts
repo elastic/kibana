@@ -133,10 +133,13 @@ export const getFTRConfig = ({
         }
       }
 
+      console.log({ hostRealIp });
+      console.log({ hasFleetServerArgs });
+
       if (hasFleetServerArgs) {
         if (vars.serverless) {
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${fleetServerPort}"]`
+            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
           );
           vars.kbnTestServer.serverArgs.push(
             `--xpack.fleet.agents.elasticsearch.host=https://es01:${esPort}`

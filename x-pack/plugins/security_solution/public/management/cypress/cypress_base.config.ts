@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { merge } from 'lodash';
@@ -59,6 +60,8 @@ export const getCypressBaseConfig = (
         supportFile: 'public/management/cypress/support/e2e.ts',
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
+        experimentalInteractiveRunEvents: true,
+        experimentalRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           dataLoaders(on, config);
 
@@ -67,10 +70,10 @@ export const getCypressBaseConfig = (
           // Once we are able to run Fleet server in serverless mode (see: https://github.com/elastic/kibana/pull/166183)
           // this `if()` statement needs to be removed and `dataLoadersForRealEndpoints()` should
           // just be called without having any checks around it.
-          if (!config.env.IS_SERVERLESS) {
-            // Data loaders specific to "real" Endpoint testing
-            dataLoadersForRealEndpoints(on, config);
-          }
+          // if (!config.env.IS_SERVERLESS) {
+          // Data loaders specific to "real" Endpoint testing
+          dataLoadersForRealEndpoints(on, config);
+          // }
 
           responseActionTasks(on, config);
 
