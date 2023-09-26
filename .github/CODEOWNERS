@@ -235,6 +235,7 @@ packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
+packages/core/plugins/core-plugins-contracts-browser @elastic/kibana-core
 packages/core/plugins/core-plugins-contracts-server @elastic/kibana-core
 packages/core/plugins/core-plugins-server @elastic/kibana-core
 packages/core/plugins/core-plugins-server-internal @elastic/kibana-core
