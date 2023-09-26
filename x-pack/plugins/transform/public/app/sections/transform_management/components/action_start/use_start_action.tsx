@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
@@ -46,7 +47,8 @@ export const useStartAction = (forceDisable: boolean, transformNodes: number) =>
           transformNodes={transformNodes}
         />
       ),
-      available: (item: TransformListRow) => item.stats.state === TRANSFORM_STATE.STOPPED,
+      available: (item: TransformListRow) =>
+        isTransformListRowWithStats(item) ? item.stats.state === TRANSFORM_STATE.STOPPED : true,
       enabled: (item: TransformListRow) =>
         !isStartActionDisabled([item], canStartStopTransform, transformNodes),
       description: startActionNameText,
