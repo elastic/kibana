@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { backoff } from 'exponential-backoff';
+import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
@@ -533,9 +533,8 @@ export class FleetPlugin
           )
           .toPromise();
 
-        // Retry Fleet setup indefinitely w/ backoff
-        // TODO: limit to only Serverless?
-        await backoff(
+        // Retry Fleet setup w/ backoff
+        await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
@@ -543,15 +542,22 @@ export class FleetPlugin
             );
           },
           {
-            numOfAttempts: Infinity,
-            startingDelay: 250, // 250ms
-            maxDelay: 60000,    // 60s
+            // We only retry when this feature flag is enabled
+            numOfAttempts: this.configInitialValue.internal.retrySetupOnBoot ? Infinity : 1,
+            // 250ms initial backoff
+            startingDelay: 250,
+            // 5m max backoff
+            maxDelay: 60000 * 5,
             timeMultiple: 2,
+            // avoid HA contention with other Kibana instances
             jitter: 'full',
             retry: (error: any, attemptCount: number) =>{
+              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
+              logger.debug(summary, { error: { message: error }});
+
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
-                summary: `Fleet is retrying setup attempt ${attemptCount} after error: ${error}`,
+                summary,
                 meta: {
                   attemptCount,
                   error
@@ -567,8 +573,7 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed');
-        logger.warn(error);
+        logger.warn('Fleet setup failed', { error: { message: error }});
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
