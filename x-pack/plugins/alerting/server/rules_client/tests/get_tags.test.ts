@@ -70,6 +70,7 @@ const listedTypes = new Set<RegistryRuleType>([
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   },
 ]);
 
@@ -123,6 +124,7 @@ describe('getTags()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );

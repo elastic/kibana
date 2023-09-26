@@ -158,6 +158,7 @@ describe('bulkDelete', () => {
       validate: {
         params: schema.any(),
       },
+      validLegacyConsumers: [],
     });
   });
 
