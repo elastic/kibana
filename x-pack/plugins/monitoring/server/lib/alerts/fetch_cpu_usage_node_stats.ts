@@ -180,11 +180,16 @@ async function fetchContainerStats(
 
       const limitsNotSet = node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1;
       if (limitsNotSet) {
+        const cpuUsage = node.average_cpu_usage_percent.value ?? undefined;
+
+        logger.warn(
+          `CPU usage rule: Kibana is configured for containerized workloads but node "${node.key}" does not have resource limits configured. Fallback metric reports usage of ${cpuUsage}%.`
+        );
+
         return {
-          missingLimits: true,
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
-          cpuUsage: node.average_cpu_usage_percent.value ?? undefined,
+          cpuUsage,
           nodeName,
           ccs,
         };
@@ -379,7 +384,8 @@ async function fetchNonContainerStats(
       }
 
       const runningInAContainerWithLimits =
-        node.quota_micros_min.value !== null || node.quota_micros_max.value !== null;
+        (node.quota_micros_min.value !== null && node.quota_micros_min.value !== -1) ||
+        (node.quota_micros_max.value !== null && node.quota_micros_max.value !== -1);
 
       return {
         clusterUuid: cluster.key as string,
