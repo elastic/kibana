@@ -32,7 +32,6 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions

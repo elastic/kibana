@@ -648,7 +648,7 @@ export default ({ getService }: FtrProviderContext) => {
           const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
-                field: 'host.os.name', // This matches the query above which will exclude everything
+                field: 'host.os.name',
                 operator: 'included',
                 type: 'match_any',
                 value: ['ubuntu'],
