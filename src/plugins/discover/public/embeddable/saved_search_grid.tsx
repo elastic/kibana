@@ -86,7 +86,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
         componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
-        showColumnTokens
       />
     </SavedSearchEmbeddableBase>
   );
