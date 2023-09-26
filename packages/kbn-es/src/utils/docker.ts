@@ -528,9 +528,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   if (Object.keys(resourceFileOverrides).length > 0) {
     throw new Error(
-      `Unsupported ES serverless --resources values:\n  ${Object.values(resourceFileOverrides).join(
-        '  \n'
-      )}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
+      `Unsupported ES serverless --resources value(s):\n  ${Object.values(
+        resourceFileOverrides
+      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
         basename(filePath)
       ).join(' | ')}`
     );

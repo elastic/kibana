@@ -14,7 +14,7 @@ export const cli = async () => {
   return run(
     async (cliContext: RunContext) => {
       if (!process.argv.includes('serverless')) {
-        process.argv.splice(2, 1, 'serverless', process.argv[2]);
+        process.argv.splice(2, 1, 'serverless', process.argv[2] ?? '');
       }
 
       return runEs({

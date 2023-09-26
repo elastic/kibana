@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+
+const ES_RESOURCES_DIR = resolve(__dirname, 'es_serverless_resources');
 
 export const ES_RESOURCES = Object.freeze({
-  roles: resolve('./roles.yml'),
-  users: resolve('./users'),
-  users_roles: resolve('./users_roles'),
+  roles: join(ES_RESOURCES_DIR, 'roles.yml'),
+  users: join(ES_RESOURCES_DIR, 'users'),
+  users_roles: join(ES_RESOURCES_DIR, 'users_roles'),
 });
