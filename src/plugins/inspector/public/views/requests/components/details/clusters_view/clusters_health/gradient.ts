@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme';
+
 export const HEALTH_HEX_CODES = {
-  successful: '#54B399',
-  partial: '#D6BF57',
+  successful: euiThemeVars.euiColorSuccess,
+  partial: euiThemeVars.euiColorWarning,
   skipped: '#DA8B45',
-  failed: '#E7664C',
+  failed: euiThemeVars.euiColorDanger,
 };
 
 export function getHeathBarLinearGradient(
