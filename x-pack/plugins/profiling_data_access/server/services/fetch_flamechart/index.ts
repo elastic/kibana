@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { createBaseFlameGraph, createCalleeTree } from '@kbn/profiling-utils';
+import { kqlQuery } from '../../utils/query';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
@@ -16,10 +17,17 @@ export interface FetchFlamechartParams {
   rangeFromMs: number;
   rangeToMs: number;
   kuery: string;
+  useESStackTracesAPI?: boolean;
 }
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({ esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
+  return async ({
+    esClient,
+    rangeFromMs,
+    rangeToMs,
+    kuery,
+    useESStackTracesAPI = false,
+  }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
 
@@ -28,28 +36,50 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
 
     const totalSeconds = rangeToSecs - rangeFromSecs;
 
-    const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
-      await searchStackTraces({
-        client: profilingEsClient,
-        rangeFrom: rangeFromSecs,
-        rangeTo: rangeToSecs,
-        kuery,
-        sampleSize: targetSampleSize,
+    // Use legacy stack traces API to fetch the flamegraph
+    if (useESStackTracesAPI) {
+      const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
+        await searchStackTraces({
+          client: profilingEsClient,
+          rangeFrom: rangeFromSecs,
+          rangeTo: rangeToSecs,
+          kuery,
+          sampleSize: targetSampleSize,
+        });
+
+      return await withProfilingSpan('create_flamegraph', async () => {
+        const tree = createCalleeTree(
+          events,
+          stackTraces,
+          stackFrames,
+          executables,
+          totalFrames,
+          samplingRate
+        );
+
+        return createBaseFlameGraph(tree, samplingRate, totalSeconds);
       });
+    }
 
-    const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-      const tree = createCalleeTree(
-        events,
-        stackTraces,
-        stackFrames,
-        executables,
-        totalFrames,
-        samplingRate
-      );
-
-      return createBaseFlameGraph(tree, samplingRate, totalSeconds);
+    return await profilingEsClient.profilingFlamegraph({
+      query: {
+        bool: {
+          filter: [
+            ...kqlQuery(kuery),
+            {
+              range: {
+                ['@timestamp']: {
+                  gte: String(rangeFromSecs),
+                  lt: String(rangeToSecs),
+                  format: 'epoch_second',
+                  boost: 1.0,
+                },
+              },
+            },
+          ],
+        },
+      },
+      sampleSize: targetSampleSize,
     });
-
-    return flamegraph;
   };
 }
