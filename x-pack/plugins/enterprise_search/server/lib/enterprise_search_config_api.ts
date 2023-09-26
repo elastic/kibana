@@ -158,6 +158,7 @@ export const callEnterpriseSearchConfigAPI = async ({
         organization: {
           name: data?.current_user?.workplace_search?.organization?.name,
           defaultOrgName: data?.current_user?.workplace_search?.organization?.default_org_name,
+          kibanaUIsEnabled: data?.current_user?.workplace_search?.organization?.kibana_uis_enabled,
         },
         account: {
           id: data?.current_user?.workplace_search?.account?.id,
