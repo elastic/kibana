@@ -73,7 +73,7 @@ Default.args = {
       {
         rule: {
           type: 'matchExactly',
-          values: ['b'],
+          values: ['b', ['double', 'value']],
         },
         color: {
           type: 'gradient',
@@ -93,7 +93,14 @@ Default.args = {
       {
         rule: {
           type: 'matchExactly',
-          values: ['this is', 'a multi-line wrap', 'combo box', 'test combo', '3 lines'],
+          values: [
+            'this is',
+            'a multi-line wrap',
+            'combo box',
+            'test combo',
+            '3 lines',
+            ['double', 'value'],
+          ],
         },
         color: {
           type: 'gradient',

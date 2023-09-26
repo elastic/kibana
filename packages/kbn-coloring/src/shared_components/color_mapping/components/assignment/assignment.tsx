@@ -38,6 +38,7 @@ export function Assignment({
   getPaletteFn,
   isDarkMode,
   specialTokens,
+  assignmentValuesCounter,
 }: {
   data: ColorMappingInputData;
   index: number;
@@ -51,6 +52,7 @@ export function Assignment({
   editable: boolean;
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
+  assignmentValuesCounter: Map<string | string[], number>;
 }) {
   const dispatch = useDispatch();
 
@@ -96,6 +98,7 @@ export function Assignment({
               })
             );
           }}
+          assignmentValuesCounter={assignmentValuesCounter}
         />
       ) : assignment.rule.type === 'range' ? (
         <Range

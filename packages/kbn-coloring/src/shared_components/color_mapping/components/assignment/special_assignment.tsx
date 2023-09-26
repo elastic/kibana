@@ -65,12 +65,12 @@ export function SpecialAssignment({
           compressed
           fullWidth
           disabled={true}
-          placeholder={i18n.translate('coloring.colorMapping.assignments.allOtherPlaceholder', {
-            defaultMessage: 'All other terms',
+          placeholder={i18n.translate('coloring.colorMapping.assignments.unassignedPlaceholder', {
+            defaultMessage: 'Unassigned terms',
           })}
-          aria-label={i18n.translate('coloring.colorMapping.assignments.allOtherAriaLabel', {
+          aria-label={i18n.translate('coloring.colorMapping.assignments.unassignedAriaLabel', {
             defaultMessage:
-              'Assign this color to all other terms not described in the assignment list',
+              'Assign this color to every unassigned not described in the assignment list',
           })}
         />
       </EuiFlexItem>

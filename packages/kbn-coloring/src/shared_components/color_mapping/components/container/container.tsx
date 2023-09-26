@@ -76,6 +76,17 @@ export function Container(props: {
 
   const canAddNewAssignment = !autoAssignmentMode && assignments.length < MAX_ASSIGNABLE_COLORS;
 
+  const assignmentValuesCounter = assignments.reduce<Map<string | string[], number>>(
+    (acc, assignment) => {
+      const values = assignment.rule.type === 'matchExactly' ? assignment.rule.values : [];
+      values.forEach((value) => {
+        acc.set(value, (acc.get(value) ?? 0) + 1);
+      });
+      return acc;
+    },
+    new Map()
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
       <EuiFlexItem>
@@ -160,6 +171,7 @@ export function Container(props: {
                     assignment={assignment}
                     disableDelete={assignments.length <= 1 || autoAssignmentMode}
                     specialTokens={props.specialTokens}
+                    assignmentValuesCounter={assignmentValuesCounter}
                   />
                 </div>
               );

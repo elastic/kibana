@@ -25,6 +25,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
@@ -171,15 +173,34 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 siblingRef={props.panelRef}
                 isOpen={isPaletteOpen}
                 handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-                title={i18n.translate('xpack.lens.colorMapping.colorMappingPanelTitle', {
-                  defaultMessage: 'Edit color by term mapping',
-                })}
+                title={
+                  useNewColorMapping
+                    ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
+                        defaultMessage: 'Edit colors by term mapping',
+                      })
+                    : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
+                        defaultMessage: 'Edit colors',
+                      })
+                }
               >
                 <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
                   <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
                     <EuiFlexItem>
                       <EuiSwitch
-                        label="Use new color mapping (tech preview)"
+                        label={
+                          <EuiText size="xs">
+                            <span>
+                              {i18n.translate('xpack.lens.colorMapping.tryLabel', {
+                                defaultMessage: 'Use the new Color Mapping feature',
+                              })}{' '}
+                              <EuiBadge color="hollow">
+                                {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
+                                  defaultMessage: 'Tech preview',
+                                })}
+                              </EuiBadge>
+                            </span>
+                          </EuiText>
+                        }
                         data-test-subj="lns_colorMappingOrLegacyPalette_switch"
                         compressed
                         checked={useNewColorMapping}

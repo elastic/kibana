@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chart = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       const legendColors = chart?.legend?.items?.map((item) => item.color.toLowerCase()) ?? [];
       expect(legendColors).to.eql(
-        ELASTIC_BRAND_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
+        EUI_AMSTERDAM_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
       );
     });
 

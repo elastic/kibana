@@ -85,7 +85,13 @@ export const ColorSwatch = ({
               defaultMessage: 'Pick a color',
             })}
             data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
-            onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
+            onClick={() =>
+              dispatch(
+                colorPickerVisible
+                  ? hideColorPickerVisibility()
+                  : colorPickerVisibility({ index, visible: true, type: forType })
+              )
+            }
             css={css`
               background: ${colorHex};
               width: 16px;
@@ -105,7 +111,13 @@ export const ColorSwatch = ({
               defaultMessage: 'Pick a color',
             })}
             data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
-            onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
+            onClick={() =>
+              dispatch(
+                colorPickerVisible
+                  ? hideColorPickerVisibility()
+                  : colorPickerVisibility({ index, visible: true, type: forType })
+              )
+            }
             style={{
               // the color swatch can't pickup colors written in rgb/css standard
               backgroundColor: colorHex,

@@ -81,27 +81,29 @@ export function Gradient({
 
   return (
     <>
-      <div
-        className="gradientLine"
-        css={css`
-          position: relative;
-          grid-column: 1;
-          grid-row: 1;
-          width: 6px;
-          margin-left: 5px;
-          top: 16px;
-          height: calc(100% - 12px);
-          border-top-left-radius: 6px;
-          border-top-right-radius: 6px;
-          background-image: linear-gradient(
-            to bottom,
-            ${[gradientColorScale(0), gradientColorScale(1 / assignmentsSize)].join(',')}
-          );
-          border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          border-top: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-        `}
-      />
+      {assignmentsSize > 1 && (
+        <div
+          className="gradientLine"
+          css={css`
+            position: relative;
+            grid-column: 1;
+            grid-row: 1;
+            width: 6px;
+            margin-left: 5px;
+            top: 16px;
+            height: calc(100% - 12px);
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            background-image: linear-gradient(
+              to bottom,
+              ${[gradientColorScale(0), gradientColorScale(1 / assignmentsSize)].join(',')}
+            );
+            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+            border-top: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+          `}
+        />
+      )}
       <div
         className="gradientStop"
         css={css`
@@ -125,79 +127,83 @@ export function Gradient({
         )}
       </div>
 
-      <div
-        className="gradientLine"
-        css={css`
-          position: relative;
-          z-index: 1;
-          grid-column: 1;
-          grid-row-start: 2;
-          grid-row-end: ${assignmentsSize};
-          background-image: linear-gradient(
-            to bottom,
-            ${[
-              gradientColorScale(1 / assignmentsSize),
-              gradientColorScale((assignmentsSize - 1) / assignmentsSize),
-            ].join(',')}
-          );
-          margin: -4px 0;
-          width: 6px;
-          margin-left: 5px;
-          ${assignmentsSize === 2 ? 'height: 0;' : ''};
-          border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-        `}
-      >
+      {assignmentsSize > 1 && (
         <div
+          className="gradientLine"
           css={css`
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: calc(50% - 5px);
-            margin-left: -6px;
-            margin-top: -3px;
+            position: relative;
+            z-index: 1;
+            grid-column: 1;
+            grid-row-start: 2;
+            grid-row-end: ${assignmentsSize};
+            background-image: linear-gradient(
+              to bottom,
+              ${[
+                gradientColorScale(1 / assignmentsSize),
+                gradientColorScale((assignmentsSize - 1) / assignmentsSize),
+              ].join(',')}
+            );
+            margin: -4px 0;
+            width: 6px;
+            margin-left: 5px;
+            ${assignmentsSize === 2 ? 'height: 0;' : ''};
+            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
           `}
         >
-          {middleMostColorSep ? (
-            <ColorStop
-              colorMode={colorMode}
-              step={middleMostColorSep}
-              index={middleMostColorStopIndex}
-              currentPalette={currentPalette}
-              getPaletteFn={getPaletteFn}
-              isDarkMode={isDarkMode}
-            />
-          ) : colorMode.steps.length === 2 ? (
-            <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
-          ) : undefined}
+          <div
+            css={css`
+              position: absolute;
+              width: 16px;
+              height: 16px;
+              top: calc(50% - 5px);
+              margin-left: -6px;
+              margin-top: -3px;
+            `}
+          >
+            {middleMostColorSep ? (
+              <ColorStop
+                colorMode={colorMode}
+                step={middleMostColorSep}
+                index={middleMostColorStopIndex}
+                currentPalette={currentPalette}
+                getPaletteFn={getPaletteFn}
+                isDarkMode={isDarkMode}
+              />
+            ) : colorMode.steps.length === 2 ? (
+              <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
+            ) : undefined}
+          </div>
         </div>
-      </div>
-      <div
-        className="gradientLine"
-        css={css`
-          position: relative;
+      )}
+      {assignmentsSize > 1 && (
+        <div
+          className="gradientLine"
+          css={css`
+            position: relative;
 
-          grid-column: 1;
-          grid-row: ${assignmentsSize};
-          background-image: linear-gradient(
-            to bottom,
+            grid-column: 1;
+            grid-row: ${assignmentsSize};
+            background-image: linear-gradient(
+              to bottom,
 
-            ${[
-              gradientColorScale((assignmentsSize - 1) / assignmentsSize),
-              gradientColorScale(1),
-            ].join(',')}
-          );
-          top: -4px;
-          height: 24px;
-          width: 6px;
-          margin-left: 5px;
-          border-bottom-left-radius: 6px;
-          border-bottom-right-radius: 6px;
-          border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          border-bottom: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-        `}
-      />
+              ${[
+                gradientColorScale((assignmentsSize - 1) / assignmentsSize),
+                gradientColorScale(1),
+              ].join(',')}
+            );
+            top: -4px;
+            height: 24px;
+            width: 6px;
+            margin-left: 5px;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+            border-bottom: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+          `}
+        />
+      )}
 
       <div
         css={css`

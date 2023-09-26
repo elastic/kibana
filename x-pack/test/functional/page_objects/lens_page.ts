@@ -1906,6 +1906,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await testSubjects.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
 
+      await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+
       await this.closePaletteEditor();
 
       await this.closeDimensionEditor();

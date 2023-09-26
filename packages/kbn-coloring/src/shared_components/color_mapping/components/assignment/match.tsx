@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ColorMapping } from '../../config';
 
 export const Match: React.FC<{
@@ -23,17 +24,31 @@ export const Match: React.FC<{
   updateValue: (values: Array<string | string[]>) => void;
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
-}> = ({ index, rule, updateValue, editable, options, specialTokens }) => {
+  assignmentValuesCounter: Map<string | string[], number>;
+}> = ({ index, rule, updateValue, editable, options, specialTokens, assignmentValuesCounter }) => {
   const selectedOptions =
     rule.type === 'auto'
       ? []
       : typeof rule.values === 'string'
-      ? [{ label: rule.values, value: rule.values }]
+      ? [
+          {
+            label: rule.values,
+            value: rule.values,
+            append:
+              (assignmentValuesCounter.get(rule.values) ?? 0) > 1 ? (
+                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+              ) : undefined,
+          },
+        ]
       : rule.values.map((value) => {
           const ruleValues = Array.isArray(value) ? value : [value];
           return {
             label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
             value,
+            append:
+              (assignmentValuesCounter.get(value) ?? 0) > 1 ? (
+                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+              ) : undefined,
           };
         });
 
