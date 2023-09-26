@@ -100,7 +100,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(409)
         .then(({ body }) => {
-          console.log(body);
           expect(body).to.eql({
             statusCode: 409,
             error: 'Conflict',
