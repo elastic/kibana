@@ -9,16 +9,21 @@
 
   .optionsList--filterBtn {
     height: $euiButtonHeight;
+    
 
     &.optionsList--filterBtnPlaceholder {
       color: $euiTextSubduedColor;
       font-weight: $euiFontWeightRegular;
     }
 
+    .optionsList__filterValid {
+      font-weight: 500;
+
+    }
+
     .optionsList__filterInvalid {
       color: $euiTextSubduedColor;
       text-decoration: line-through;
-      margin-left: $euiSizeS;
       font-weight: $euiFontWeightRegular;
     }
 
@@ -34,6 +39,7 @@
       width: 0;
     }
   }
+
 }
 
 .optionsList--sortPopover {
@@ -70,7 +76,7 @@
     }
   }
 
-  .optionsList-control-ignored-selection-title {
+  .optionsList-control-ignore“d-selection-title {
     padding-left: $euiSizeS;
   }
 

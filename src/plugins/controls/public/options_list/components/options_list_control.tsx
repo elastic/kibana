@@ -110,6 +110,8 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+    const delimiter = fieldSpec?.type === 'date' ? '; ' : OptionsListStrings.control.getSeparator();
+
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
       validSelectionsCount: validSelections?.length,
@@ -130,22 +132,17 @@ export const OptionsListControl = ({
             </span>
           ) : (
             <>
-              {validSelections && (
-                <span>
-                  {validSelections
-                    .map((value) => fieldFormatter(value))
-                    .join(
-                      fieldSpec?.type === 'date' ? '; ' : OptionsListStrings.control.getSeparator()
-                    )}
+              {validSelections?.length ? (
+                <span className="optionsList__filterValid">
+                  {validSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
-              )}
-              {invalidSelections && (
+              ) : null}
+              {validSelections?.length && invalidSelections?.length ? delimiter : null}
+              {invalidSelections?.length ? (
                 <span className="optionsList__filterInvalid">
-                  {invalidSelections
-                    .map((value) => fieldFormatter(value))
-                    .join(OptionsListStrings.control.getSeparator())}
+                  {invalidSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
-              )}
+              ) : null}
             </>
           )}
         </>
