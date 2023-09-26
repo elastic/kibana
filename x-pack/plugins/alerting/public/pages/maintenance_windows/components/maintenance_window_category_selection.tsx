@@ -7,16 +7,20 @@
 
 import React, { useMemo } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { EuiFlexGroup, EuiText, EuiFlexItem, EuiTextColor, EuiCheckboxGroup } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiText,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiCheckboxGroup,
+  EuiCheckboxGroupOption,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 
 import * as i18n from '../translations';
 
-const CHECKBOX_OPTIONS = [
-  {
-    id: DEFAULT_APP_CATEGORIES.kibana.id,
-    label: DEFAULT_APP_CATEGORIES.kibana.label,
-    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.kibana.id}`,
-  },
+const CHECKBOX_OPTIONS: EuiCheckboxGroupOption[] = [
   {
     id: DEFAULT_APP_CATEGORIES.observability.id,
     label: DEFAULT_APP_CATEGORIES.observability.label,
@@ -35,18 +39,20 @@ const CHECKBOX_OPTIONS = [
 ];
 
 const checkboxGroupLegend = {
-  children: <span>{i18n.CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE}</span>,
+  children: <span>{i18n.CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE}</span>,
 };
 
-export interface MaintenanceWindowSolutionSelectionProps {
+export interface MaintenanceWindowCategorySelectionProps {
   selectedCategories: string[];
   onChange: (category: string) => void;
 }
 
-export const MaintenanceWindowSolutionSelection = (
-  props: MaintenanceWindowSolutionSelectionProps
+export const MaintenanceWindowCategorySelection = (
+  props: MaintenanceWindowCategorySelectionProps
 ) => {
   const { selectedCategories = [], onChange } = props;
+
+  const { data = [], isLoading } = useGetRuleTypes();
 
   const selectedMap = useMemo(() => {
     return selectedCategories.reduce<Record<string, boolean>>((result, category) => {
@@ -55,14 +61,41 @@ export const MaintenanceWindowSolutionSelection = (
     }, {});
   }, [selectedCategories]);
 
+  const availableCategoryMap = useMemo(() => {
+    return data.reduce<Record<string, boolean>>((result, ruleType) => {
+      result[ruleType.category] = true;
+      return result;
+    }, {});
+  }, [data]);
+
+  const options: EuiCheckboxGroupOption[] = useMemo(() => {
+    return CHECKBOX_OPTIONS.map((option) => ({
+      ...option,
+      disabled: !availableCategoryMap[option.id],
+    }));
+  }, [availableCategoryMap]);
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+        data-test-subj="maintenanceWindowCategorySelectionLoading"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup data-test-subj="maintenanceWindowSolutionSelection">
+    <EuiFlexGroup data-test-subj="maintenanceWindowCategorySelection">
       <EuiFlexItem>
         <EuiText size="s">
-          <h4>{i18n.CREATE_FORM_SOLUTION_SELECTION_TITLE}</h4>
+          <h4>{i18n.CREATE_FORM_CATEGORY_SELECTION_TITLE}</h4>
           <p>
             <EuiTextColor color="subdued">
-              {i18n.CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION}
+              {i18n.CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION}
             </EuiTextColor>
           </p>
         </EuiText>
@@ -70,7 +103,7 @@ export const MaintenanceWindowSolutionSelection = (
       <EuiFlexItem>
         <EuiCheckboxGroup
           legend={checkboxGroupLegend}
-          options={CHECKBOX_OPTIONS}
+          options={options}
           idToSelectedMap={selectedMap}
           onChange={onChange}
         />

@@ -6,17 +6,20 @@
  */
 
 import React from 'react';
-import { within, fireEvent } from '@testing-library/react';
+import { within, fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
   CreateMaintenanceWindowFormProps,
   CreateMaintenanceWindowForm,
 } from './create_maintenance_windows_form';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn(),
+jest.mock('../../../utils/kibana_react');
+jest.mock('../../../services/alert_api', () => ({
+  loadRuleTypes: jest.fn(),
 }));
+
+const { loadRuleTypes } = jest.requireMock('../../../services/alert_api');
+const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_react');
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: jest.fn(),
@@ -28,30 +31,59 @@ describe('CreateMaintenanceWindowForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    loadRuleTypes.mockResolvedValue([
+      { category: 'observability' },
+      { category: 'management' },
+      { category: 'securitySolution' },
+    ]);
+
+    useKibana.mockReturnValue({
+      services: {
+        notifications: {
+          toasts: {
+            addSuccess: jest.fn(),
+            addDanger: jest.fn(),
+          },
+        },
+      },
+    });
+
+    useUiSetting.mockReturnValue('America/New_York');
     appMockRenderer = createAppMockRenderer();
-    (useUiSetting as jest.Mock).mockReturnValue('America/New_York');
   });
 
   it('renders all form fields except the recurring form fields', async () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
+    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
-    (useUiSetting as jest.Mock).mockReturnValue('Browser');
+    useUiSetting.mockReturnValue('Browser');
 
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
 
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
+    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.getByTestId('timezone-field')).toBeInTheDocument();
   });
@@ -73,7 +105,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(recurringInput).not.toBeChecked();
   });
 
-  it('should prefill the form when provided with initialValue', () => {
+  it('should prefill the form when provided with initialValue', async () => {
     const result = appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
@@ -96,24 +128,25 @@ describe('CreateMaintenanceWindowForm', () => {
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
     const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('input');
 
-    const kibanaInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
-    ).getByTestId('checkbox-kibana');
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-management');
 
-    expect(kibanaInput).not.toBeChecked();
     expect(observabilityInput).toBeChecked();
     expect(securityInput).not.toBeChecked();
     expect(managementInput).toBeChecked();
-
     expect(titleInput).toHaveValue('test');
     expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
     expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
@@ -121,36 +154,36 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
   });
 
-  it('can select category IDs', () => {
+  it('can select category IDs', async () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    const kibanaInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
-    ).getByTestId('checkbox-kibana');
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
     const observabilityInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-observability');
     const securityInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-securitySolution');
     const managementInput = within(
-      result.getByTestId('maintenanceWindowSolutionSelection')
+      result.getByTestId('maintenanceWindowCategorySelection')
     ).getByTestId('checkbox-management');
 
-    fireEvent.click(kibanaInput);
     fireEvent.click(observabilityInput);
 
-    expect(kibanaInput).toBeChecked();
     expect(observabilityInput).toBeChecked();
     expect(securityInput).not.toBeChecked();
     expect(managementInput).not.toBeChecked();
 
-    fireEvent.click(kibanaInput);
+    fireEvent.click(securityInput);
     fireEvent.click(observabilityInput);
 
-    expect(kibanaInput).not.toBeChecked();
     expect(observabilityInput).not.toBeChecked();
-    expect(securityInput).not.toBeChecked();
+    expect(securityInput).toBeChecked();
     expect(managementInput).not.toBeChecked();
   });
 });

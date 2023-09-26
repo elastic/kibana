@@ -40,7 +40,7 @@ import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenanc
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowSolutionSelection } from './maintenance_window_solution_selection';
+import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
 
 const UseField = getUseField({ component: Field });
 
@@ -270,7 +270,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <EuiHorizontalRule margin="xl" />
             <UseField path="categoryIds">
               {() => (
-                <MaintenanceWindowSolutionSelection
+                <MaintenanceWindowCategorySelection
                   selectedCategories={categoryIds}
                   onChange={onCategoryIdsChange}
                 />

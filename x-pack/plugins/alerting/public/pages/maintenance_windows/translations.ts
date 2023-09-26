@@ -158,25 +158,25 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.title',
+export const CREATE_FORM_CATEGORY_SELECTION_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.title',
   {
-    defaultMessage: 'Solution specific maintenance window',
+    defaultMessage: 'Category specific maintenance window',
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
+export const CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.description',
   {
     defaultMessage:
-      'Select which solutions should be affected by the maintenance window. Only rules created in that solution will reference the maintenance window',
+      'Only rules associated with the selected categories are affected by the maintenance window.',
   }
 );
 
-export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
+export const CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.categorySelection.checkboxGroupTitle',
   {
-    defaultMessage: 'Select the solution(s) this should affect',
+    defaultMessage: 'Select the categories this should affect',
   }
 );
 

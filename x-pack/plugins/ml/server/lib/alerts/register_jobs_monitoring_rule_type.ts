@@ -137,7 +137,7 @@ export function registerJobsMonitoringRuleType({
         },
       ],
     },
-    category: DEFAULT_APP_CATEGORIES.kibana.id,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,

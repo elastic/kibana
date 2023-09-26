@@ -202,6 +202,7 @@ function getRuleType(): RuleType {
   return {
     id: '.index-threshold',
     name: 'Index threshold',
+    category: 'management',
     producer: 'stackAlerts',
     enabledInLicense: true,
     recoveryActionGroup: {
