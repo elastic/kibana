@@ -9,11 +9,7 @@ import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import {
-  DEFAULT_AWS_REGION,
-  DEFAULT_BEDROCK_MODEL,
-  DEFAULT_BEDROCK_URL,
-} from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -70,11 +66,6 @@ export const bedrockConfig: ConfigFieldSchema[] = [
       />
     ),
     defaultValue: DEFAULT_BEDROCK_MODEL,
-  },
-  {
-    id: 'region',
-    label: i18n.REGION_LABEL,
-    defaultValue: DEFAULT_AWS_REGION,
   },
 ];
 

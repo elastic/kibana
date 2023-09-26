@@ -9,7 +9,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
+import { Config, Secrets } from '../../../common/gen_ai/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/gen_ai/constants';
 
@@ -27,7 +27,7 @@ axios.create = jest.fn(() => axios);
 
 axios.create = jest.fn(() => axios);
 
-let connectorType: SubActionConnectorType<GenAiConfig, GenAiSecrets>;
+let connectorType: SubActionConnectorType<Config, Secrets>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 describe('Generative AI Connector', () => {
@@ -41,7 +41,7 @@ describe('Generative AI Connector', () => {
   });
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
-      const config: GenAiConfig = {
+      const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
         defaultModel: DEFAULT_OPENAI_MODEL,
@@ -51,7 +51,7 @@ describe('Generative AI Connector', () => {
     });
 
     test('config validation failed when a url is invalid', () => {
-      const config: GenAiConfig = {
+      const config: Config = {
         apiUrl: 'example.com/do-something',
         apiProvider: OpenAiProviderType.OpenAi,
         defaultModel: DEFAULT_OPENAI_MODEL,
@@ -64,7 +64,7 @@ describe('Generative AI Connector', () => {
     });
 
     test('config validation failed when the OpenAI API provider is empty', () => {
-      const config: GenAiConfig = {
+      const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: '' as OpenAiProviderType,
         defaultModel: DEFAULT_OPENAI_MODEL,
@@ -77,7 +77,7 @@ describe('Generative AI Connector', () => {
     });
 
     test('config validation failed when the OpenAI API provider is invalid', () => {
-      const config: GenAiConfig = {
+      const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: 'bad-one' as OpenAiProviderType,
         defaultModel: DEFAULT_OPENAI_MODEL,
@@ -97,7 +97,7 @@ describe('Generative AI Connector', () => {
         },
       };
 
-      const config: GenAiConfig = {
+      const config: Config = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
         apiProvider: OpenAiProviderType.OpenAi,
         defaultModel: DEFAULT_OPENAI_MODEL,

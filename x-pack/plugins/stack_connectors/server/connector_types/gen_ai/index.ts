@@ -19,18 +19,18 @@ import {
   OPEN_AI_TITLE,
   OpenAiProviderType,
 } from '../../../common/gen_ai/constants';
-import { GenAiConfigSchema, GenAiSecretsSchema } from '../../../common/gen_ai/schema';
-import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
+import { ConfigSchema, SecretsSchema } from '../../../common/gen_ai/schema';
+import { Config, Secrets } from '../../../common/gen_ai/types';
 import { GenAiConnector } from './gen_ai';
 import { renderParameterTemplates } from './render';
 
-export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSecrets> => ({
+export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: GEN_AI_CONNECTOR_ID,
   name: OPEN_AI_TITLE,
   Service: GenAiConnector,
   schema: {
-    config: GenAiConfigSchema,
-    secrets: GenAiSecretsSchema,
+    config: ConfigSchema,
+    secrets: SecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [GeneralConnectorFeatureId],
@@ -38,10 +38,7 @@ export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSec
   renderParameterTemplates,
 });
 
-export const configValidator = (
-  configObject: GenAiConfig,
-  validatorServices: ValidatorServices
-) => {
+export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {
     assertURL(configObject.apiUrl);
     urlAllowListValidator('apiUrl')(configObject, validatorServices);

@@ -9,9 +9,9 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import { BedrockConfig, BedrockSecrets } from '../../../common/bedrock/types';
+import { Config, Secrets } from '../../../common/bedrock/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_AWS_REGION, DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -25,7 +25,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 
 axios.create = jest.fn(() => axios);
 
-let connectorType: SubActionConnectorType<BedrockConfig, BedrockSecrets>;
+let connectorType: SubActionConnectorType<Config, Secrets>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 describe('Bedrock Connector', () => {
@@ -39,20 +39,18 @@ describe('Bedrock Connector', () => {
   });
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
-      const config: BedrockConfig = {
+      const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         defaultModel: DEFAULT_BEDROCK_MODEL,
-        region: DEFAULT_AWS_REGION,
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
     });
 
     test('config validation failed when a url is invalid', () => {
-      const config: BedrockConfig = {
+      const config: Config = {
         apiUrl: 'example.com/do-something',
         defaultModel: DEFAULT_BEDROCK_MODEL,
-        region: DEFAULT_AWS_REGION,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -69,10 +67,9 @@ describe('Bedrock Connector', () => {
         },
       };
 
-      const config: BedrockConfig = {
+      const config: Config = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
         defaultModel: DEFAULT_BEDROCK_MODEL,
-        region: DEFAULT_AWS_REGION,
       };
 
       expect(() => {

@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
-export const GenAiConfigSchema = schema.oneOf([
+export const ConfigSchema = schema.oneOf([
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
@@ -21,10 +21,10 @@ export const GenAiConfigSchema = schema.oneOf([
   }),
 ]);
 
-export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
+export const SecretsSchema = schema.object({ apiKey: schema.string() });
 
 // Run action schema
-export const GenAiRunActionParamsSchema = schema.object({
+export const RunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
@@ -47,14 +47,14 @@ export const InvokeAIActionParamsSchema = schema.object({
 export const InvokeAIActionResponseSchema = schema.string();
 
 // Execute action schema
-export const GenAiStreamActionParamsSchema = schema.object({
+export const StreamActionParamsSchema = schema.object({
   body: schema.string(),
   stream: schema.boolean({ defaultValue: false }),
 });
 
-export const GenAiStreamingResponseSchema = schema.any();
+export const StreamingResponseSchema = schema.any();
 
-export const GenAiRunActionResponseSchema = schema.object(
+export const RunActionResponseSchema = schema.object(
   {
     id: schema.maybe(schema.string()),
     object: schema.maybe(schema.string()),
@@ -89,10 +89,10 @@ export const GenAiRunActionResponseSchema = schema.object(
 );
 
 // Run action schema
-export const GenAiDashboardActionParamsSchema = schema.object({
+export const DashboardActionParamsSchema = schema.object({
   dashboardId: schema.string(),
 });
 
-export const GenAiDashboardActionResponseSchema = schema.object({
+export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });

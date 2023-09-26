@@ -7,26 +7,26 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { initGenAiDashboard } from './create_dashboard';
+import { initDashboard } from './create_dashboard';
 import {
-  GenAiRunActionParamsSchema,
-  GenAiRunActionResponseSchema,
-  GenAiDashboardActionParamsSchema,
-  GenAiStreamActionParamsSchema,
-  GenAiStreamingResponseSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
+  DashboardActionParamsSchema,
+  StreamActionParamsSchema,
+  StreamingResponseSchema,
   InvokeAIActionParamsSchema,
 } from '../../../common/gen_ai/schema';
 import type {
-  GenAiConfig,
-  GenAiSecrets,
-  GenAiRunActionParams,
-  GenAiRunActionResponse,
-  GenAiStreamActionParams,
+  Config,
+  Secrets,
+  RunActionParams,
+  RunActionResponse,
+  StreamActionParams,
 } from '../../../common/gen_ai/types';
 import { SUB_ACTION } from '../../../common/gen_ai/constants';
 import {
-  GenAiDashboardActionParams,
-  GenAiDashboardActionResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/gen_ai/types';
@@ -37,12 +37,12 @@ import {
   sanitizeRequest,
 } from './lib/utils';
 
-export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets> {
+export class GenAiConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private provider;
   private key;
 
-  constructor(params: ServiceParams<GenAiConfig, GenAiSecrets>) {
+  constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
@@ -56,25 +56,25 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     this.registerSubAction({
       name: SUB_ACTION.RUN,
       method: 'runApi',
-      schema: GenAiRunActionParamsSchema,
+      schema: RunActionParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.TEST,
       method: 'runApi',
-      schema: GenAiRunActionParamsSchema,
+      schema: RunActionParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.STREAM,
       method: 'streamApi',
-      schema: GenAiStreamActionParamsSchema,
+      schema: StreamActionParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.DASHBOARD,
       method: 'getDashboard',
-      schema: GenAiDashboardActionParamsSchema,
+      schema: DashboardActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -99,7 +99,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {
+  public async runApi({ body }: RunActionParams): Promise<RunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
@@ -110,7 +110,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     const response = await this.request({
       url: this.url,
       method: 'post',
-      responseSchema: GenAiRunActionResponseSchema,
+      responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
       ...axiosOptions,
     });
@@ -125,10 +125,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
    * @param body request body for the API request
    * @param stream flag indicating whether it is a streaming request or not
    */
-  public async streamApi({
-    body,
-    stream,
-  }: GenAiStreamActionParams): Promise<GenAiRunActionResponse> {
+  public async streamApi({ body, stream }: StreamActionParams): Promise<RunActionResponse> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -141,7 +138,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     const response = await this.request({
       url: this.url,
       method: 'post',
-      responseSchema: stream ? GenAiStreamingResponseSchema : GenAiRunActionResponseSchema,
+      responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
       data: executeBody,
       ...axiosOptions,
     });
@@ -155,7 +152,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
    */
   public async getDashboard({
     dashboardId,
-  }: GenAiDashboardActionParams): Promise<GenAiDashboardActionResponse> {
+  }: DashboardActionParams): Promise<DashboardActionResponse> {
     const privilege = (await this.esClient.transport.request({
       path: '/_security/user/_has_privileges',
       method: 'POST',
@@ -174,7 +171,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       return { available: false };
     }
 
-    const response = await initGenAiDashboard({
+    const response = await initDashboard({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       dashboardId,
@@ -191,7 +188,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });
 
-    if (res.choices && res.choices.length > 0 && res.choices[0].message.content) {
+    if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
       return result;
     }

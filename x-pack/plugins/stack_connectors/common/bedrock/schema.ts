@@ -6,21 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_BEDROCK_MODEL, DEFAULT_AWS_REGION } from './constants';
+import { DEFAULT_BEDROCK_MODEL } from './constants';
 
 // Connector schema
-export const BedrockConfigSchema = schema.object({
+export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
-  region: schema.string({ defaultValue: DEFAULT_AWS_REGION }),
 });
 
-export const BedrockSecretsSchema = schema.object({
+export const SecretsSchema = schema.object({
   accessKey: schema.string(),
   secret: schema.string(),
 });
 
-export const BedrockRunActionParamsSchema = schema.object({
+export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),
 });
@@ -37,7 +36,7 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.string();
 
-export const BedrockRunActionResponseSchema = schema.object(
+export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
     stop_reason: schema.maybe(schema.string()),

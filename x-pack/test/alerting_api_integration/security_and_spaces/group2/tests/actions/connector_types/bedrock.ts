@@ -23,7 +23,6 @@ const secrets = {
 
 const defaultConfig = {
   defaultModel: 'anthropic.claude-v2',
-  region: 'us-east-1',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -94,32 +93,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('Falls back to default region when connector is created without the region', async () => {
-        const { region: _, ...rest } = config;
-        const { body: createdAction } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name,
-            connector_type_id: connectorTypeId,
-            config: rest,
-            secrets,
-          })
-          .expect(200);
-
-        expect(createdAction).to.eql({
-          id: createdAction.id,
-          is_preconfigured: false,
-          is_system_action: false,
-          is_deprecated: false,
-          name,
-          connector_type_id: connectorTypeId,
-          is_missing_secrets: false,
-          config,
-        });
-      });
-
-      it('Falls back to default region when connector is created without the region', async () => {
+      it('Falls back to default model when connector is created without the model', async () => {
         const { defaultModel: _, ...rest } = config;
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
@@ -349,6 +323,38 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               .expect(200);
 
             expect(simulator.requestData).to.eql(DEFAULT_BODY);
+            expect(simulator.requestUrl).to.eql(
+              `${apiUrl}/model/${defaultConfig.defaultModel}/invoke`
+            );
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: bedrockActionId,
+              data: bedrockSuccessResponse,
+            });
+          });
+
+          it('should overwrite the model when a model argument is provided', async () => {
+            const DEFAULT_BODY = {
+              prompt: `Hello world!`,
+              max_tokens_to_sample: 300,
+              stop_sequences: ['\n\nHuman:'],
+            };
+            const { body } = await supertest
+              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'test',
+                  subActionParams: {
+                    body: JSON.stringify(DEFAULT_BODY),
+                    model: 'some-other-model',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql(DEFAULT_BODY);
+            expect(simulator.requestUrl).to.eql(`${apiUrl}/model/some-other-model/invoke`);
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,

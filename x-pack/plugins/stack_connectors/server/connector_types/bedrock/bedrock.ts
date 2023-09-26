@@ -9,41 +9,36 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import type { AxiosError } from 'axios';
 import {
-  BedrockRunActionParamsSchema,
-  BedrockRunActionResponseSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
   InvokeAIActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import type {
-  BedrockConfig,
-  BedrockSecrets,
-  BedrockRunActionParams,
-  BedrockRunActionResponse,
+  Config,
+  Secrets,
+  RunActionParams,
+  RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 
 interface SignedRequest {
-  method: string;
-  service: string;
-  region: string;
   host: string;
   headers: Record<string, string>;
   body: string;
   path: string;
 }
 
-export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
+export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
-  private region;
 
-  constructor(params: ServiceParams<BedrockConfig, BedrockSecrets>) {
+  constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
-    this.region = this.config.region;
 
     this.registerSubActions();
   }
@@ -52,13 +47,13 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     this.registerSubAction({
       name: SUB_ACTION.RUN,
       method: 'runApi',
-      schema: BedrockRunActionParamsSchema,
+      schema: RunActionParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.TEST,
       method: 'runApi',
-      schema: BedrockRunActionParamsSchema,
+      schema: RunActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -89,9 +84,6 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
     const { host } = new URL(this.url);
     return aws.sign(
       {
-        method: 'POST',
-        service: 'bedrock',
-        region: this.region,
         host,
         headers: {
           'Content-Type': 'application/json',
@@ -112,20 +104,16 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({
-    body,
-    model: reqModel,
-  }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
+  public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
-    console.log('MOreqModelDEL!!!', reqModel);
-    console.log('MODEL!!!', model);
+    console.log('run api', model);
     const signed = this.signRequest(body, `/model/${model}/invoke`);
     const response = await this.request({
       ...signed,
       url: `${this.url}/model/${model}/invoke`,
       method: 'post',
-      responseSchema: BedrockRunActionResponseSchema,
+      responseSchema: RunActionResponseSchema,
       data: body,
     });
     return response.data;

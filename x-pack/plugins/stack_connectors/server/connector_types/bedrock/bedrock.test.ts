@@ -9,10 +9,9 @@ import { BedrockConnector } from './bedrock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { BedrockRunActionResponseSchema } from '../../../common/bedrock/schema';
+import { RunActionResponseSchema } from '../../../common/bedrock/schema';
 import {
   BEDROCK_CONNECTOR_ID,
-  DEFAULT_AWS_REGION,
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
 } from '../../../common/bedrock/constants';
@@ -47,7 +46,6 @@ describe('BedrockConnector', () => {
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
         defaultModel: DEFAULT_BEDROCK_MODEL,
-        region: DEFAULT_AWS_REGION,
       },
       secrets: { accessKey: '123', secret: 'secret' },
       logger: loggingSystemMock.createLogger(),
@@ -68,7 +66,7 @@ describe('BedrockConnector', () => {
           signed: true,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: DEFAULT_BODY,
         });
         expect(response).toEqual(mockResponse.data);
@@ -99,7 +97,7 @@ describe('BedrockConnector', () => {
           signed: true,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt: '\n\nHuman:Hello world \n\nAssistant:',
             max_tokens_to_sample: 300,
@@ -135,7 +133,7 @@ describe('BedrockConnector', () => {
           signed: true,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
-          responseSchema: BedrockRunActionResponseSchema,
+          responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt:
               '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',

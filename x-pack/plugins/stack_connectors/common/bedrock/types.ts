@@ -7,17 +7,17 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  BedrockConfigSchema,
-  BedrockSecretsSchema,
-  BedrockRunActionParamsSchema,
-  BedrockRunActionResponseSchema,
+  ConfigSchema,
+  SecretsSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIActionResponseSchema,
 } from './schema';
 
-export type BedrockConfig = TypeOf<typeof BedrockConfigSchema>;
-export type BedrockSecrets = TypeOf<typeof BedrockSecretsSchema>;
-export type BedrockRunActionParams = TypeOf<typeof BedrockRunActionParamsSchema>;
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
+export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
 export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
 export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
-export type BedrockRunActionResponse = TypeOf<typeof BedrockRunActionResponseSchema>;
+export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;

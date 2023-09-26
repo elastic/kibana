@@ -22,5 +22,4 @@ export enum SUB_ACTION {
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-v2';
 
-export const DEFAULT_AWS_REGION = 'us-east-1';
-export const DEFAULT_BEDROCK_URL = `https://bedrock.${DEFAULT_AWS_REGION}.amazonaws.com` as const;
+export const DEFAULT_BEDROCK_URL = `https://bedrock.us-east-1.amazonaws.com` as const;

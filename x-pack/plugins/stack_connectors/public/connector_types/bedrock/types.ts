@@ -7,25 +7,21 @@
 
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/bedrock/constants';
-import { BedrockRunActionParams } from '../../../common/bedrock/types';
+import { RunActionParams } from '../../../common/bedrock/types';
 
 export interface BedrockActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
-  subActionParams: BedrockRunActionParams;
+  subActionParams: RunActionParams;
 }
 
-export interface BedrockConfig {
+export interface Config {
   apiUrl: string;
   defaultModel: string;
 }
 
-export interface BedrockSecrets {
+export interface Secrets {
   accessKey: string;
   secret: string;
 }
 
-export type BedrockConnector = ConnectorTypeModel<
-  BedrockConfig,
-  BedrockSecrets,
-  BedrockActionParams
->;
+export type BedrockConnector = ConnectorTypeModel<Config, Secrets, BedrockActionParams>;

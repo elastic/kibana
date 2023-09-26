@@ -15,18 +15,18 @@ import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
-import { BedrockConfigSchema, BedrockSecretsSchema } from '../../../common/bedrock/schema';
-import { BedrockConfig, BedrockSecrets } from '../../../common/bedrock/types';
+import { ConfigSchema, SecretsSchema } from '../../../common/bedrock/schema';
+import { Config, Secrets } from '../../../common/bedrock/types';
 import { BedrockConnector } from './bedrock';
 import { renderParameterTemplates } from './render';
 
-export const getConnectorType = (): SubActionConnectorType<BedrockConfig, BedrockSecrets> => ({
+export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: BEDROCK_CONNECTOR_ID,
   name: BEDROCK_TITLE,
   Service: BedrockConnector,
   schema: {
-    config: BedrockConfigSchema,
-    secrets: BedrockSecretsSchema,
+    config: ConfigSchema,
+    secrets: SecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [GeneralConnectorFeatureId],
@@ -34,10 +34,7 @@ export const getConnectorType = (): SubActionConnectorType<BedrockConfig, Bedroc
   renderParameterTemplates,
 });
 
-export const configValidator = (
-  configObject: BedrockConfig,
-  validatorServices: ValidatorServices
-) => {
+export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {
     assertURL(configObject.apiUrl);
     urlAllowListValidator('apiUrl')(configObject, validatorServices);
