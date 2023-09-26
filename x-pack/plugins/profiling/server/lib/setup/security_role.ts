@@ -5,24 +5,11 @@
  * 2.0.
  */
 
+import {
+  METADATA_VERSION,
+  PROFILING_READER_ROLE_NAME,
+} from '@kbn/profiling-data-access-plugin/common';
 import { ProfilingSetupOptions } from './types';
-import { PartialSetupState } from '../../../common/setup';
-
-const PROFILING_READER_ROLE_NAME = 'profiling-reader';
-const METADATA_VERSION = 1;
-
-export async function validateSecurityRole({
-  client,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const esClient = client.getEsClient();
-  const roles = await esClient.security.getRole();
-  const profilingRole = roles[PROFILING_READER_ROLE_NAME];
-  return {
-    permissions: {
-      configured: !!profilingRole && profilingRole.metadata.version === METADATA_VERSION,
-    },
-  };
-}
 
 export async function setSecurityRole({ client }: ProfilingSetupOptions) {
   const esClient = client.getEsClient();

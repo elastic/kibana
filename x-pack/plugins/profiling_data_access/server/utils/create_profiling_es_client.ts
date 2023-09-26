@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { ProfilingStatusResponse, StackTraceResponse } from '@kbn/profiling-utils';
+import { ProfilingESClient } from '../../common/profiling_es_client';
 import { unwrapEsResponse } from './unwrap_es_response';
 import { withProfilingSpan } from './with_profiling_span';
-
-export interface ProfilingESClient {
-  search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
-    operationName: string,
-    searchRequest: TSearchRequest
-  ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  profilingStacktraces({}: {
-    query: QueryDslQueryContainer;
-    sampleSize: number;
-  }): Promise<StackTraceResponse>;
-  profilingStatus(): Promise<ProfilingStatusResponse>;
-  getEsClient(): ElasticsearchClient;
-}
 
 export function createProfilingEsClient({
   esClient,
