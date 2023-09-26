@@ -31642,7 +31642,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootkitDescription": "Bootkit (T1067)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootOrLogonAutostartExecutionDescription": "Boot or Logon Autostart Execution (T1547)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootOrLogonInitializationScriptsDescription": "Boot or Logon Initialization Scripts (T1037)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserBookmarkDiscoveryDescription": "Browser Bookmark Discovery (T1217)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserExtensionsDescription": "Browser Extensions (T1176)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserSessionHijackingDescription": "Browser Session Hijacking (T1185)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bruteForceDescription": "Brute Force (T1110)",
