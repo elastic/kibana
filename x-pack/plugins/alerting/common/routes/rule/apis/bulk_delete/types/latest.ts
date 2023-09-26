@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  type ObservabilityLogExplorerLocators,
-  SingleDatasetLocatorDefinition,
-  AllDatasetsLocatorDefinition,
-} from './locators';
+export * from './v1';

@@ -5,30 +5,49 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { tryToRemoveTasks } from '../common';
-import { API_KEY_GENERATE_CONCURRENCY } from '../common/constants';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { tryToRemoveTasks } from '../../../../rules_client/common';
+import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
   migrateLegacyActions,
-} from '../lib';
+} from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
-  getAndValidateCommonBulkOptions,
-} from '../common';
-import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
+} from '../../../../rules_client/common';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type {
+  BulkOperationError,
+  BulkDeleteRulesResult,
+  BulkDeleteRulesRequestBody,
+} from './types';
+import { validateCommonBulkOptions } from './validation';
+import type { RuleAttributes } from '../../../../data/rule/types';
+import { bulkDeleteRulesSo } from '../../../../data/rule';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { ruleDomainSchema } from '../../schemas';
+import type { RuleParams, RuleDomain } from '../../types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 
-export const bulkDeleteRules = async (context: RulesClientContext, options: BulkOptions) => {
-  const { ids, filter } = getAndValidateCommonBulkOptions(options);
+export const bulkDeleteRules = async <Params extends RuleParams>(
+  context: RulesClientContext,
+  options: BulkDeleteRulesRequestBody
+): Promise<BulkDeleteRulesResult<Params>> => {
+  try {
+    validateCommonBulkOptions(options);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating bulk delete data - ${error.message}`);
+  }
+
+  const { ids, filter } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -71,20 +90,35 @@ export const bulkDeleteRules = async (context: RulesClientContext, options: Bulk
   ]);
 
   const deletedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk create and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
       id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
+      logger: context.logger,
+      ruleType,
       references,
-      false
-    );
+      omitGeneratedValues: false,
+    });
+
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk edited rule domain object for id: ${id}, ${e}`);
+    }
+    return ruleDomain;
   });
 
+  // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+  const deletedPublicRules = deletedRules.map((rule: RuleDomain<Params>) => {
+    return transformRuleDomainToRule<Params>(rule);
+  }) as Array<SanitizedRule<Params>>;
+
   if (result.status === 'fulfilled') {
-    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: result.value };
+    return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: result.value };
   } else {
-    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: [] };
+    return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: [] };
   }
 };
 
@@ -98,15 +132,17 @@ const bulkDeleteWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
-        filter,
-        type: 'alert',
-        perPage: 100,
-        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      })
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+        }
+      )
   );
 
-  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -142,7 +178,11 @@ const bulkDeleteWithOCC = async (
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
-    () => context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete)
+    () =>
+      bulkDeleteRulesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        ids: rulesToDelete.map(({ id }) => id),
+      })
   );
 
   const deletedRuleIds: string[] = [];
@@ -173,6 +213,7 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   // migrate legacy actions only for SIEM rules
+  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
   await pMap(
     rules,
     async (rule) => {

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  type ObservabilityLogExplorerLocators,
-  SingleDatasetLocatorDefinition,
-  AllDatasetsLocatorDefinition,
-} from './locators';
+export { bulkDeleteRules } from './bulk_delete_rules';
+export type { BulkDeleteRulesResult, BulkDeleteRulesRequestBody } from './types';
