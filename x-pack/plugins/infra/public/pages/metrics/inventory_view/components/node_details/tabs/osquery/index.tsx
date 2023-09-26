@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../../hooks/use_kibana';
 import { TabContent, TabProps } from '../shared';
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
-import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../../../components/asset_details/hooks/use_metadata';
 import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
@@ -19,7 +18,6 @@ import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;
   const nodeType = props.nodeType as InventoryItemType;
-  const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
   const { loading, metadata } = useMetadata({
