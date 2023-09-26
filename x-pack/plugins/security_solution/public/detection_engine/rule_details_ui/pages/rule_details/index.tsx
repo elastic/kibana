@@ -234,6 +234,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     detailName: string;
     tabName: string;
   }>();
+
   const {
     rule: maybeRule,
     refresh: refreshRule,
@@ -385,19 +386,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
   );
 
+  const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
   useEffect(() => {
-    setShowBuildingBlockAlerts(rule?.building_block_type != null);
-  }, [rule, setShowBuildingBlockAlerts]);
+    setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
+  }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
 
+  const ruleRuleId = rule?.rule_id ?? '';
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildAlertsFilter(ruleRuleId ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+    [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertMergedFilters = useMemo(
