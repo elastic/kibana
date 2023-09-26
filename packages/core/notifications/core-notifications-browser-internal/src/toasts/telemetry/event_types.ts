@@ -14,20 +14,10 @@ export enum EventMetric {
 
 export enum FieldType {
   RECURRENCE_COUNT = 'toast_deduplication_count',
-  TOAST_MESSAGE = 'toast_message',
   TOAST_MESSAGE_TYPE = 'toast_message_type',
 }
 
 const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
-  [FieldType.TOAST_MESSAGE]: {
-    [FieldType.TOAST_MESSAGE]: {
-      type: 'keyword',
-      _meta: {
-        description: 'toast message text',
-        optional: false,
-      },
-    },
-  },
   [FieldType.RECURRENCE_COUNT]: {
     [FieldType.RECURRENCE_COUNT]: {
       type: 'long',
@@ -52,7 +42,6 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
   {
     eventType: EventMetric.TOAST_DISMISSED,
     schema: {
-      ...fields[FieldType.TOAST_MESSAGE],
       ...fields[FieldType.RECURRENCE_COUNT],
       ...fields[FieldType.TOAST_MESSAGE_TYPE],
     },

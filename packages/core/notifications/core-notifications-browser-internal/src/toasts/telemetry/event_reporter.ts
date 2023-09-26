@@ -15,7 +15,6 @@ type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'succe
 
 interface EventPayload {
   [FieldType.RECURRENCE_COUNT]: number;
-  [FieldType.TOAST_MESSAGE]: string;
   [FieldType.TOAST_MESSAGE_TYPE]: ToastMessageType;
 }
 
@@ -28,16 +27,13 @@ export class EventReporter {
 
   onDismissToast({
     recurrenceCount,
-    toastMessage,
     toastMessageType,
   }: {
-    toastMessage: string;
     recurrenceCount: number;
     toastMessageType: ToastMessageType;
   }) {
     this.reportEvent<EventPayload>(EventMetric.TOAST_DISMISSED, {
       [FieldType.RECURRENCE_COUNT]: recurrenceCount,
-      [FieldType.TOAST_MESSAGE]: toastMessage,
       [FieldType.TOAST_MESSAGE_TYPE]: toastMessageType,
     });
   }
