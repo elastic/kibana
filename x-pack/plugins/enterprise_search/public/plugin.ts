@@ -40,7 +40,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { ClientConfigType, InitialAppData } from '../common/types';
-import { configureElserInferenceModel } from '../common/ml_inference_pipeline';
+import { configureElserInferenceModel } from './applications/enterprise_search_content/api/ml_models/text_expansion/inference_model';
 
 import { docLinks } from './applications/shared/doc_links';
 

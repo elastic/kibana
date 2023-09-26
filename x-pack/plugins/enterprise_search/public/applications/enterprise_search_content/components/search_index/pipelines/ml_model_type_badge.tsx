@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { elserInferenceModel } from '../../../../../../common/ml_inference_pipeline';
+import { elserInferenceModel } from '../../../api/ml_models/text_expansion/inference_model';
 
 export const MLModelTypeBadge: React.FC<{ type: string }> = ({ type }) => {
   if (type === elserInferenceModel.taskType) {
