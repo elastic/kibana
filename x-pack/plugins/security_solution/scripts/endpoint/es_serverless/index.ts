@@ -33,7 +33,6 @@ export const cli = async () => {
       cliContext.log.info(`
 Starting ES with supported Security project roles and users.
 User accounts available for login:
-${gray(`(passwords have been set to ${cyan('changeme')})`)}
 
 ${
   new ColumnLayoutFormatter(

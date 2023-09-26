@@ -527,6 +527,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
     if (resourceFileOverrides[fileName]) {
       localFilePath = resourceFileOverrides[fileName];
+      log.info(`'${fileName}' resource overridden with: ${localFilePath}`);
       delete resourceFileOverrides[fileName];
     }
 
