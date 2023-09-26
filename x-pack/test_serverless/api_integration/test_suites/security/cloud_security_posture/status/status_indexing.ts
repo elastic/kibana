@@ -17,15 +17,8 @@ import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteIndex,
-  addIndex,
-  createPackagePolicy,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper';
-import {
-  findingsMockData,
-  vulnerabilityMockData,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data';
+import { deleteIndex, addIndex, createPackagePolicy } from '../helper';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
