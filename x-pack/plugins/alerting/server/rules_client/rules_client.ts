@@ -8,7 +8,6 @@
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
-
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
@@ -33,10 +32,14 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateParams } from './methods/aggregate';
+import { AggregateParams } from '../application/rule/methods/aggregate/types';
+import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
-import { bulkDeleteRules } from './methods/bulk_delete';
+import {
+  bulkDeleteRules,
+  BulkDeleteRulesRequestBody,
+} from '../application/rule/methods/bulk_delete';
 import {
   bulkEditRules,
   BulkEditOptions,
@@ -108,7 +111,7 @@ export class RulesClient {
   }
 
   public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
-    aggregate<T>(this.context, params);
+    aggregateRules<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
@@ -138,7 +141,8 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
-  public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
+  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
+    bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
