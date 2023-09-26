@@ -8,7 +8,6 @@
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
-  validateDuplicatedCustomFieldKeysInRequest,
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
 } from './validators';
@@ -267,49 +266,6 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
-    });
-  });
-
-  describe('validateDuplicatedCustomFieldKeysInRequest', () => {
-    it('returns customFields in request that have duplicated keys', () => {
-      expect(() =>
-        validateDuplicatedCustomFieldKeysInRequest({
-          requestCustomFields: [
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'triplicated_key',
-            },
-            {
-              key: 'duplicated_key',
-            },
-            {
-              key: 'duplicated_key',
-            },
-          ],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated custom field keys in request: triplicated_key,duplicated_key"`
-      );
-    });
-
-    it('does not throw if no customFields in request have duplicated keys', () => {
-      expect(() =>
-        validateDuplicatedCustomFieldKeysInRequest({
-          requestCustomFields: [
-            {
-              key: '1',
-            },
-            {
-              key: '2',
-            },
-          ],
-        })
-      ).not.toThrow();
     });
   });
 });

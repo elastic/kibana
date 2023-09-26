@@ -9,6 +9,7 @@ import { differenceWith, intersectionWith } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CaseRequestCustomFields } from '../../../common/types/api';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -93,31 +94,5 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
 
   if (missingCustomFieldKeys.length) {
     throw Boom.badRequest(`Missing custom field keys: ${missingCustomFieldKeys}`);
-  }
-};
-
-/**
- * Throws an error if the request has custom fields with duplicated keys.
- */
-export const validateDuplicatedCustomFieldKeysInRequest = ({
-  requestCustomFields = [],
-}: {
-  requestCustomFields?: Array<{ key: string }>;
-}) => {
-  const uniqueKeys = new Set<string>();
-  const duplicatedKeys = new Set<string>();
-
-  requestCustomFields.forEach((item) => {
-    if (uniqueKeys.has(item.key)) {
-      duplicatedKeys.add(item.key);
-    } else {
-      uniqueKeys.add(item.key);
-    }
-  });
-
-  if (duplicatedKeys.size > 0) {
-    throw Boom.badRequest(
-      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
-    );
   }
 };
