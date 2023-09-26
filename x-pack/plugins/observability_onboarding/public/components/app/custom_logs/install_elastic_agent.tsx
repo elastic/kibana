@@ -63,7 +63,7 @@ export function InstallElasticAgent() {
     useState<ElasticAgentPlatform>('linux-tar');
 
   const enforcedDatasetName =
-    integration === dataset ? dataset : `${integration}.${dataset}`;
+    (integration === dataset ? dataset : `${integration}.${dataset}`) ?? '';
 
   async function onContinue() {
     await singleDatasetLocator!.navigate({
@@ -113,7 +113,7 @@ export function InstallElasticAgent() {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
-              name: datasetName,
+              name: datasetName ?? '',
               type: 'logFiles',
               state: {
                 datasetName,
