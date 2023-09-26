@@ -9,17 +9,17 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { isEqual, pick } from 'lodash';
 
 export const savedSearchComparator = (
-  inputSavedSearch: SavedSearch,
-  existingSavedSearch: SavedSearch
+  inputSavedSearch: SavedSearch | null,
+  existingSavedSearch: SavedSearch | null
 ) => {
   const inputSavedSearchWithFields = {
     ...inputSavedSearch,
-    fields: inputSavedSearch.searchSource.getFields(),
+    fields: inputSavedSearch?.searchSource?.getFields(),
   };
 
   const existingSavedSearchWithFields = {
     ...existingSavedSearch,
-    fields: existingSavedSearch.searchSource.getFields(),
+    fields: existingSavedSearch?.searchSource?.getFields(),
   };
 
   const keysToSelect = [
