@@ -20,6 +20,8 @@ export interface FetchFlamechartParams {
   useLegacyFlamegraphAPI?: boolean;
 }
 
+const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
   return async ({
     esClient,
@@ -32,12 +34,11 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     const rangeToSecs = rangeToMs / 1000;
 
     const profilingEsClient = createProfilingEsClient({ esClient });
-    const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-
-    const totalSeconds = rangeToSecs - rangeFromSecs;
 
     // Use legacy stack traces API to fetch the flamegraph
     if (useLegacyFlamegraphAPI) {
+      const totalSeconds = rangeToSecs - rangeFromSecs;
+
       const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
         await searchStackTraces({
           client: profilingEsClient,
