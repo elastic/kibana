@@ -58,11 +58,12 @@ export const bulkDisableRules = async (context: RulesClientContext, options: Bul
       })
   );
 
-  const [taskIdsToDisable, taskIdsToDelete] = accListSpecificForBulkOperation;
+  const [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState] = accListSpecificForBulkOperation;
 
   await Promise.allSettled([
     tryToDisableTasks({
       taskIdsToDisable,
+      taskIdsToClearState,
       logger: context.logger,
       taskManager: context.taskManager,
     }),
@@ -193,6 +194,7 @@ const bulkDisableRulesWithOCC = async (
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];
+  const taskIdsToClearState: string[] = [];
   const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
   result.saved_objects.forEach((rule) => {
@@ -202,6 +204,12 @@ const bulkDisableRulesWithOCC = async (
           taskIdsToDelete.push(rule.attributes.scheduledTaskId);
         } else {
           taskIdsToDisable.push(rule.attributes.scheduledTaskId);
+          if (rule.attributes.alertTypeId) {
+            const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
+              rule.attributes.alertTypeId
+            );
+            if (isLifecycleAlert) taskIdsToClearState.push(rule.attributes.scheduledTaskId);
+          }
         }
       }
       disabledRules.push(rule);
@@ -221,23 +229,28 @@ const bulkDisableRulesWithOCC = async (
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
     rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-    accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete],
+    accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState],
   };
 };
 
 const tryToDisableTasks = async ({
   taskIdsToDisable,
+  taskIdsToClearState,
   logger,
   taskManager,
 }: {
   taskIdsToDisable: string[];
+  taskIdsToClearState: string[];
   logger: Logger;
   taskManager: TaskManagerStartContract;
 }) => {
   return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
     if (taskIdsToDisable.length > 0) {
       try {
-        const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable, true);
+        const resultFromDisablingTasks = await taskManager.bulkDisable(
+          taskIdsToDisable,
+          taskIdsToClearState
+        );
         if (resultFromDisablingTasks.tasks.length) {
           logger.debug(
             `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
