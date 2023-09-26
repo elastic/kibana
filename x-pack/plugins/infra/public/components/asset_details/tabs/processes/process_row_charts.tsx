@@ -19,7 +19,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { calculateDomain } from '@kbn/observability-plugin/public/components/custom_threshold/helpers/calculate_domain';
+import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
