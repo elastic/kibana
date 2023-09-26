@@ -7,6 +7,8 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -236,7 +238,7 @@ const getGcpAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
 ): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
 
-const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.5.9';
+const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.6.0';
 
 const GcpAccountTypeSelect = ({
   input,
@@ -250,10 +252,9 @@ const GcpAccountTypeSelect = ({
   packageInfo: PackageInfo;
 }) => {
   // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  const isValidSemantic = semverValid(packageInfo.version);
-  const isGcpOrgDisabled = isValidSemantic
-    ? semverCompare(packageInfo.version, GCP_ORG_MINIMUM_PACKAGE_VERSION) < 0
-    : true;
+  const validSemantic = semverValid(packageInfo.version);
+  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
+  const isGcpOrgDisabled = semverLt(integrationVersionNumberOnly, GCP_ORG_MINIMUM_PACKAGE_VERSION);
 
   const gcpAccountTypeOptions = useMemo(
     () => getGcpAccountTypeOptions(isGcpOrgDisabled),
@@ -690,3 +691,4 @@ const useCloudFormationTemplate = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };
+
