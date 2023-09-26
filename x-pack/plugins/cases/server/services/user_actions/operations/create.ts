@@ -168,10 +168,22 @@ export class UserActionPersister {
       typeof UserActionTypes.customFields
     > = (items: CaseCustomFields) => ({ customFields: items });
 
-    const { originalValue, newValue } = params;
-    const compareValues = arraysDifference(originalValue, newValue);
+    const { originalValue: originalCustomFields, newValue: newCustomFields } = params;
+
+    const originalCustomFieldsKeys = new Set(
+      originalCustomFields.map((customField) => customField.key)
+    );
+
+    const compareValues = arraysDifference(originalCustomFields, newCustomFields);
 
     const updatedCustomFieldsUsersActions = compareValues?.addedItems
+      .filter((customField) => {
+        if (customField.field.value != null) {
+          return true;
+        }
+
+        return originalCustomFieldsKeys.has(customField.key);
+      })
       .map((customField) =>
         this.buildUserAction({
           commonArgs: params,

@@ -169,7 +169,7 @@ const originalCasesWithCustomFields = [
   },
 ].map((so) => transformSavedObjectToExternalModel(so));
 
-export const patchAddCustomFieldsCasesRequest: PatchCasesArgs = {
+export const patchAddCustomFieldsToOriginalCasesRequest: PatchCasesArgs = {
   cases: [
     {
       ...createCaseSavedObjectResponse(),
@@ -212,7 +212,7 @@ export const patchUpdateCustomFieldsCasesRequest: PatchCasesArgs = {
   ],
 };
 
-export const patchAddResetCustomFieldsCasesRequest: PatchCasesArgs = {
+export const patchUpdateResetCustomFieldsCasesRequest: PatchCasesArgs = {
   cases: [
     {
       ...createCaseSavedObjectResponse(),
@@ -228,6 +228,54 @@ export const patchAddResetCustomFieldsCasesRequest: PatchCasesArgs = {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
             field: { value: ['new custom field 2'] },
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchNewCustomFieldConfAdded: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['new value'] },
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['old value 2'] },
+          },
+          {
+            key: 'string_custom_field_3',
+            type: CustomFieldTypes.TEXT,
+            field: { value: null },
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchCustomFieldConfRemoved: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['new value'] },
           },
         ],
       },
