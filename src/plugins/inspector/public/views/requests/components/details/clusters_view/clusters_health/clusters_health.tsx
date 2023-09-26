@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react'
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
