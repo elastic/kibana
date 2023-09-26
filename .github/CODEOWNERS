@@ -484,6 +484,7 @@ packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management
+packages/kbn-management/settings/components/form @elastic/platform-deployment-management
 packages/kbn-management/settings/field_definition @elastic/platform-deployment-management
 packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/platform-deployment-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/platform-deployment-management
@@ -539,6 +540,7 @@ x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
+packages/kbn-openapi-generator @elastic/security-detection-engine
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -927,6 +929,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/infra-monitoring-ui
+/x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/infra-monitoring-ui
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -974,6 +977,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/ @elastic/kibana-presentation
+/x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
@@ -1041,6 +1045,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
+/x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
 
 # Core
 /config/ @elastic/kibana-core
@@ -1114,6 +1119,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/ent-search-docs-team
 
 # Management Experience - Deployment Management
+/x-pack/test_serverless/functional/test_suites/common/index_management/ @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
@@ -1319,9 +1325,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
-/x-pack/test_serverless/functional/test_suites/security/cypress/e2e/endpoint_management @elastic/security-defend-workflows
-/x-pack/test_serverless/functional/test_suites/security/cypress/screens/endpoint_management @elastic/security-defend-workflows
-/x-pack/test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 
@@ -1397,6 +1400,9 @@ x-pack/plugins/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/profiling-ui
+
+# Observability shared profiling
+x-pack/plugins/observability_shared/public/components/profiling @elastic/profiling-ui
 
 # Shared UX
 packages/react @elastic/appex-sharedux

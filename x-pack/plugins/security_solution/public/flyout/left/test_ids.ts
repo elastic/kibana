@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const VISUALIZE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutVisualizeTab';
-export const INSIGHTS_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsTab';
-export const INVESTIGATION_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInvestigationTab';
-export const RESPONSE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseTab';
+import { PREFIX } from '../shared/test_ids';
+
+export const VISUALIZE_TAB_TEST_ID = `${PREFIX}FlyoutVisualizeTab` as const;
+export const INSIGHTS_TAB_TEST_ID = `${PREFIX}FlyoutInsightsTab` as const;
+export const INVESTIGATION_TAB_TEST_ID = `${PREFIX}FlyoutInvestigationTab` as const;
+export const RESPONSE_TAB_TEST_ID = `${PREFIX}FlyoutResponseTab` as const;

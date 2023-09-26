@@ -55,14 +55,20 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           refresh: true,
         }),
       ]),
-    add: async <T>(findingsMock: T[]) => {
+    add: async <
+      T extends {
+        '@timestamp'?: string;
+      }
+    >(
+      findingsMock: T[]
+    ) => {
       await Promise.all([
         ...findingsMock.map((finding) =>
           es.index({
             index: FINDINGS_INDEX,
             body: {
               ...finding,
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
             },
             refresh: true,
           })
@@ -72,12 +78,26 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
             index: FINDINGS_LATEST_INDEX,
             body: {
               ...finding,
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
             },
             refresh: true,
           })
         ),
       ]);
+    },
+  };
+
+  const detectionRuleApi = {
+    remove: async () => {
+      await supertest
+        .post('/api/detection_engine/rules/_bulk_action?dry_run=false')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .send({
+          action: 'delete',
+          query: '',
+        })
+        .expect(200);
     },
   };
 
@@ -203,6 +223,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         await nonStaleElement.click();
       }
     },
+
+    async openFlyoutAt(rowIndex: number) {
+      const table = await this.getElement();
+      const flyoutButton = await table.findAllByTestSubject('findings_table_expand_column');
+      await flyoutButton[rowIndex].click();
+    },
   });
 
   const navigateToLatestFindingsPage = async () => {
@@ -247,6 +273,41 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
 
+  const createFlyoutObject = (tableTestSubject: string) => ({
+    async getElement() {
+      return await testSubjects.find(tableTestSubject);
+    },
+    async clickTakeActionButton() {
+      const element = await this.getElement();
+      const button = await element.findByCssSelector('[data-test-subj="csp:take_action"] button');
+      await button.click();
+      return button;
+    },
+    async clickTakeActionCreateRuleButton() {
+      await this.clickTakeActionButton();
+      const button = await testSubjects.find('csp:create_rule');
+      await button.click();
+      return button;
+    },
+    async getVisibleText(testSubj: string) {
+      const element = await this.getElement();
+      return await (await element.findByTestSubject(testSubj)).getVisibleText();
+    },
+  });
+
+  const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
+
+  const toastMessage = async (testSubj = 'csp:toast-success') => ({
+    async getElement() {
+      return await testSubjects.find(testSubj);
+    },
+    async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
+      const element = await this.getElement();
+      const link = await element.findByTestSubject(linkTestSubj);
+      await link.click();
+    },
+  });
+
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
 
@@ -269,5 +330,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     waitForPluginInitialized,
     distributionBar,
     vulnerabilityDataGrid,
+    misconfigurationsFlyout,
+    toastMessage,
+    detectionRuleApi,
   };
 }
