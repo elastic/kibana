@@ -460,6 +460,7 @@ describe('#start()', () => {
       overlays: expect.any(Object),
       theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
+      analytics: expect.any(Object),
     });
   });
 
