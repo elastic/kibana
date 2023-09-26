@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elserInferenceModel } from './inference_model';
 import { Actions, createApiLogic } from '../../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../../shared/http';
 
-export type CreateTextExpansionModelArgs = undefined;
+export interface CreateTextExpansionModelArgs {
+  modelId: string;
+};
 
 export interface CreateTextExpansionModelResponse {
   deploymentState: string;
   modelId: string;
 }
 
-export const createTextExpansionModel = async (): Promise<CreateTextExpansionModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${elserInferenceModel.modelId}`;
+export const createTextExpansionModel = async ({ modelId }: CreateTextExpansionModelArgs): Promise<CreateTextExpansionModelResponse> => {
+  const route = `/internal/enterprise_search/ml/models/${modelId}`;
   return await HttpLogic.values.http.post<CreateTextExpansionModelResponse>(route, {
     body: undefined,
   });

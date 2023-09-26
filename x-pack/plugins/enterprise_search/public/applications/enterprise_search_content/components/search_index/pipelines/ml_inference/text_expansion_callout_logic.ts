@@ -12,6 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
+
+import { KibanaLogic } from '../../../../../shared/kibana';
+
 import {
   CreateTextExpansionModelApiLogic,
   CreateTextExpansionModelApiLogicActions,
@@ -46,6 +49,7 @@ interface TextExpansionCalloutActions {
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
   stopPollingTextExpansionModel: () => void;
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
+  setElserModelId: (elserModelId: string) => { elserModelId: string };
 }
 
 export interface TextExpansionCalloutError {
@@ -54,6 +58,7 @@ export interface TextExpansionCalloutError {
 }
 
 export interface TextExpansionCalloutValues {
+  elserModelId: string;
   createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
   createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
@@ -128,6 +133,7 @@ export const TextExpansionCalloutLogic = kea<
     }),
     startPollingTextExpansionModel: true,
     stopPollingTextExpansionModel: true,
+    setElserModelId: (elserModelId) => ({ elserModelId }),
   },
   connect: {
     actions: [
@@ -164,8 +170,12 @@ export const TextExpansionCalloutLogic = kea<
     ],
   },
   events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.fetchTextExpansionModel(undefined);
+    afterMount: async () => {
+      const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({version: 2});
+      if (elserModel != null) {
+        actions.setElserModelId(elserModel.name);
+        actions.fetchTextExpansionModel({ modelId: elserModel.name });
+      }
     },
     beforeUnmount: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
@@ -179,12 +189,12 @@ export const TextExpansionCalloutLogic = kea<
         clearTimeout(values.textExpansionModelPollTimeoutId);
       }
       const timeoutId = setTimeout(() => {
-        actions.fetchTextExpansionModel(undefined);
+        actions.fetchTextExpansionModel({ modelId: values.elserModelId });
       }, duration);
       actions.setTextExpansionModelPollingId(timeoutId);
     },
     createTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel(undefined);
+      actions.fetchTextExpansionModel({ modelId: values.elserModelId });
       actions.startPollingTextExpansionModel();
     },
     fetchTextExpansionModelError: () => {
@@ -217,7 +227,7 @@ export const TextExpansionCalloutLogic = kea<
       actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
     },
     startTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel(undefined);
+      actions.fetchTextExpansionModel({ modelId: values.elserModelId });
     },
     stopPollingTextExpansionModel: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
@@ -235,6 +245,12 @@ export const TextExpansionCalloutLogic = kea<
         setTextExpansionModelPollingId: (_, { pollTimeoutId }) => pollTimeoutId,
       },
     ],
+    elserModelId: [
+      '',
+      {
+        setElserModelId: (_, { elserModelId }) => elserModelId,
+      }
+    ]
   },
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
@@ -289,6 +305,6 @@ export const TextExpansionCalloutLogic = kea<
       (data: FetchTextExpansionModelResponse) =>
         // Running single threaded if model has max 1 deployment on 1 node with 1 thread
         data?.targetAllocationCount * data?.threadsPerAllocation <= 1,
-    ],
+    ]
   }),
 });

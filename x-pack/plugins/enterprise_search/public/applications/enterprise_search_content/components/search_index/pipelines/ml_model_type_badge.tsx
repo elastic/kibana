@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { EuiBadge } from '@elastic/eui';
 
-import { elserInferenceModel } from '../../../api/ml_models/text_expansion/inference_model';
+import {
+  TEXT_EXPANSION_TYPE,
+  TEXT_EXPANSION_FRIENDLY_TYPE,
+} from '../../../../../../common/ml_inference_pipeline';
 
 export const MLModelTypeBadge: React.FC<{ type: string }> = ({ type }) => {
-  if (type === elserInferenceModel.taskType) {
-    return <EuiBadge color="success">{elserInferenceModel.friendlyTaskType}</EuiBadge>;
+  if (type === TEXT_EXPANSION_TYPE) {
+    return <EuiBadge color="success">{TEXT_EXPANSION_FRIENDLY_TYPE}</EuiBadge>;
   }
   return <EuiBadge color="hollow">{type}</EuiBadge>;
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -35,6 +35,7 @@ export const DeployModel = ({
   TextExpansionCallOutState,
   'dismiss' | 'ingestionMethod' | 'isCreateButtonDisabled' | 'isDismissable'
 >) => {
+  const { elserModelId } = useValues(TextExpansionCalloutLogic)
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
@@ -91,7 +92,7 @@ export const DeployModel = ({
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
-                    onClick={() => createTextExpansionModel(undefined)}
+                    onClick={() => createTextExpansionModel({ modelId: elserModelId })}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',

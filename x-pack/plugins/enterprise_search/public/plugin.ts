@@ -40,7 +40,6 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { ClientConfigType, InitialAppData } from '../common/types';
-import { configureElserInferenceModel } from './applications/enterprise_search_content/api/ml_models/text_expansion/inference_model';
 
 import { docLinks } from './applications/shared/doc_links';
 
@@ -67,9 +66,6 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
-}
-
-export interface PluginsStartDependencies {
   ml: MlPluginStart;
 }
 
@@ -421,17 +417,13 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public async start(core: CoreStart, deps: PluginsStartDependencies) {
+  public async start(core: CoreStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
-
-    if(deps.ml.elasticModels != null) {
-      configureElserInferenceModel(deps.ml.elasticModels);
-    }
   }
 
   public stop() {}

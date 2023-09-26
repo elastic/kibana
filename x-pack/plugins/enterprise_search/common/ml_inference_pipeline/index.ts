@@ -14,6 +14,7 @@ import {
 
 
 import {
+  SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,
   BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
@@ -25,6 +26,8 @@ import {
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
+export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
+export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 const ML_INFERENCE_PREFIX = 'ml.inference.';
 
 export interface MlInferencePipelineParams {
