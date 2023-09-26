@@ -266,6 +266,7 @@ export function LensEditConfigurationFlyout({
           overflow-y: auto;
           padding-left: ${euiThemeVars.euiFormMaxWidth};
           margin-left: -${euiThemeVars.euiFormMaxWidth};
+          pointer-events: none;
           .euiFlyoutBody__overflow {
             padding-left: inherit;
             margin-left: inherit;
