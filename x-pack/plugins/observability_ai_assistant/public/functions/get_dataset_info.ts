@@ -25,9 +25,7 @@ export function registerGetDatasetInfoFunction({
       providing empty string as index name will retrieve all indices
       if index is provided and it doesnt match any indices in elasticsearch list of all indices will be provided as well
       else list of all fields for the given index will be given. if no fields are returned this means no indices were matched by provided index pattern.
-      wildcards can be part of index name.
-
-      DO NOT include the user's request. It will be added internally.`,
+      wildcards can be part of index name.`,
       descriptionForUser:
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
