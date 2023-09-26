@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { NonEmptyArray } from '@kbn/shared-ux-chrome-navigation/src/ui/types';
@@ -15,45 +15,59 @@ import {
   isTitleLinkCategory,
 } from '@kbn/security-solution-navigation';
 import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
-import { CATEGORIES } from '../side_navigation/categories';
 import { getNavLinkIdFromProjectPageName } from '../links/util';
 import { isBreadcrumbHidden } from './utils';
 
+const SECURITY_TITLE = i18n.translate('xpack.securitySolutionServerless.nav.solution.title', {
+  defaultMessage: 'Security',
+});
+const GET_STARTED_TITLE = i18n.translate('xpack.securitySolutionServerless.nav.getStarted.title', {
+  defaultMessage: 'Get Started',
+});
+const DEV_TOOLS_TITLE = i18n.translate('xpack.securitySolutionServerless.nav.devTools.title', {
+  defaultMessage: 'Developer tools',
+});
+const PROJECT_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.nav.projectSettings.title',
+  {
+    defaultMessage: 'Project settings',
+  }
+);
+
 export const formatNavigationTree = (
-  projectNavLinks: ProjectNavigationLink[]
+  projectNavLinks: ProjectNavigationLink[],
+  categories?: Readonly<Array<LinkCategory<ProjectPageName>>>
 ): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
       id: 'security_project_nav',
-      title: 'Security',
+      title: SECURITY_TITLE,
       icon: 'logoSecurity',
+      breadcrumbStatus: 'hidden',
       defaultIsCollapsed: false,
-      children: formatNodesFromProjectNavigationLinks(
-        projectNavLinks,
-        CATEGORIES as Array<LinkCategory<ProjectPageName>>
-      ),
+      children: formatNodesFromProjectNavigationLinks(projectNavLinks, categories),
     },
   ],
   footer: [
     {
       type: 'navGroup',
       id: 'getStarted',
-      title: 'Get Started',
+      title: GET_STARTED_TITLE,
       link: getNavLinkIdFromProjectPageName(SecurityPageName.landing) as AppDeepLinkId,
       icon: 'launch',
     },
     {
       type: 'navGroup',
       id: 'devTools',
-      title: 'Developer tools',
+      title: DEV_TOOLS_TITLE,
       link: 'dev_tools',
       icon: 'editorCodeBlock',
     },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
-      title: 'Project settings',
+      title: PROJECT_SETTINGS_TITLE,
       icon: 'gear',
       breadcrumbStatus: 'hidden',
       children: [

@@ -14,6 +14,7 @@ import type { PluginStart, PluginSetup } from './types';
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   setAppLinksSwitcher: jest.fn(),
+  setDeepLinksFormatter: jest.fn(),
 });
 
 const upselling = new UpsellingService();
