@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/elastic-assitant-plugin",
+  "name": "@kbn/elastic-assistant-plugin",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",
