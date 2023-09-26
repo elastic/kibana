@@ -28,7 +28,6 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
