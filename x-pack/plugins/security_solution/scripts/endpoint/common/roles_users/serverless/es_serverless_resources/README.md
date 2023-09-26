@@ -13,7 +13,6 @@ Example executed from the root directory of Kibana:
 ```shell
 yarn es serverless \
 --clean \
---teardown \
 --kill \
 -E xpack.security.authc.api_key.enabled=true \
 -E http.host=0.0.0.0 \
