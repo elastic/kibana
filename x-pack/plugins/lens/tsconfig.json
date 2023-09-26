@@ -87,6 +87,7 @@
     "@kbn/serverless",
     "@kbn/ebt-tools",
     "@kbn/search-response-warnings",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",
