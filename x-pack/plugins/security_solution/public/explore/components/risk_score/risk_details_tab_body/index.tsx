@@ -36,7 +36,7 @@ import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
@@ -59,7 +59,6 @@ const RiskDetailsTabBodyComponent: React.FC<
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     riskEntity === RiskScoreEntity.host
@@ -96,6 +95,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   });
 
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
+  const isNewRiskScoreModuleInstalled = riskScoreEngineStatus?.isNewRiskScoreModuleInstalled;
 
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
@@ -135,9 +135,9 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return <RiskScoreUpdatePanel />;
-  }
+  // if (riskScoreEngineStatus?.isUpdateAvailable) {
+  //   return <RiskScoreUpdatePanel />;
+  // }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
@@ -156,7 +156,8 @@ const RiskDetailsTabBodyComponent: React.FC<
 
   return (
     <>
-      {isNewRiskScoreModuleAvailable ? (
+      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
+      {isNewRiskScoreModuleInstalled ? (
         <StyledEuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             {data?.[0] && (

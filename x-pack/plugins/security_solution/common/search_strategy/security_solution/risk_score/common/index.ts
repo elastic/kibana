@@ -17,9 +17,9 @@ export { RiskQueries } from '../../../../api/search_strategy';
 export const getHostRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
+  return isNewRiskScoreModuleInstalled
     ? getRiskScoreLatestIndex(spaceId)
     : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
@@ -27,9 +27,9 @@ export const getHostRiskIndex = (
 export const getUserRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
+  return isNewRiskScoreModuleInstalled
     ? getRiskScoreLatestIndex(spaceId)
     : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };

@@ -34,9 +34,20 @@ export const enrichEvents: EnrichEventsFunction = async ({
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
 
+    // TODO: Remove isNewRiskScoreModuleInstalled once the legacy risk score module is removed
+    // we check for existing of new risk score index here to determine if the new risk score module is installed
+    let isNewRiskScoreModuleInstalled = false;
+    if (isNewRiskScoreModuleAvailable) {
+      isNewRiskScoreModuleInstalled = await getIsHostRiskScoreAvailable({
+        spaceId,
+        services,
+        isNewRiskScoreModuleInstalled: true,
+      });
+    }
+
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      getIsHostRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleAvailable }),
-      getIsUserRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleAvailable }),
+      getIsHostRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleInstalled }),
+      getIsUserRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleInstalled }),
     ]);
 
     if (isHostRiskScoreIndexExist) {
@@ -46,7 +57,7 @@ export const enrichEvents: EnrichEventsFunction = async ({
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleAvailable,
+          isNewRiskScoreModuleInstalled,
         })
       );
     }
@@ -58,7 +69,7 @@ export const enrichEvents: EnrichEventsFunction = async ({
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleAvailable,
+          isNewRiskScoreModuleInstalled,
         })
       );
     }

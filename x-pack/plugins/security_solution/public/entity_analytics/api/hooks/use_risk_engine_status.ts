@@ -26,14 +26,20 @@ export const useRiskEngineStatus = () => {
 
   return useQuery(FETCH_RISK_ENGINE_STATUS, async ({ signal }) => {
     if (!isRiskEngineEnabled) {
-      return null;
+      return {
+        isUpdateAvailable: false,
+        isNewRiskScoreModuleInstalled: false,
+      };
     }
     const response = await fetchRiskEngineStatus({ signal });
     const isUpdateAvailable =
       response?.legacy_risk_engine_status === RiskEngineStatus.ENABLED &&
       response.risk_engine_status === RiskEngineStatus.NOT_INSTALLED;
+    const isNewRiskScoreModuleInstalled =
+      response.risk_engine_status !== RiskEngineStatus.NOT_INSTALLED;
     return {
       isUpdateAvailable,
+      isNewRiskScoreModuleInstalled,
       ...response,
     };
   });

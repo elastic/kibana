@@ -152,10 +152,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isDeprecated: isDeprecated && !isTableLoading,
   };
 
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return null;
-  }
-
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EnableRiskScore
