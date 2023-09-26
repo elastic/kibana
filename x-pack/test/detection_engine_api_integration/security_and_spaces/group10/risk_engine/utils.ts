@@ -103,12 +103,17 @@ export const createAndSyncRuleAndAlertsFactory =
 
 export const deleteRiskScoreIndecies = async (log: ToolingLog, es: Client) => {
   try {
-    await Promise.allSettled([
+    let indecies = await es.indices.get({ index: ['risk-score.risk-score-*', 'ds-risk-score*'] });
+    log.info(JSON.stringify(indecies, null, 2));
+    const result = await Promise.allSettled([
       es.indices.deleteDataStream({ name: ['risk-score.risk-score-default'] }),
       es.indices.delete({
         index: ['risk-score.risk-score-latest-default'],
       }),
     ]);
+    log.info(JSON.stringify(result, null, 2));
+    indecies = await es.indices.get({ index: ['risk-score.risk-score-*', 'ds-risk-score*'] });
+    log.info(JSON.stringify(indecies, null, 2));
   } catch (e) {
     log.error(`Error deleting risk score indices: ${e.message}`);
   }
