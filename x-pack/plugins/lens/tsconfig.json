@@ -88,6 +88,7 @@
     "@kbn/ebt-tools",
     "@kbn/search-response-warnings",
     "@kbn/logging",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

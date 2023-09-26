@@ -30,6 +30,7 @@
     "@kbn/es-query",
     "@kbn/discover-utils",
     "@kbn/logging",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",
