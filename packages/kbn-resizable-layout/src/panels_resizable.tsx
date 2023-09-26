@@ -204,7 +204,7 @@ export const PanelsResizable = ({
           </EuiResizablePanel>
           <EuiResizableButton
             className={resizeButtonClassName}
-            css={resizeWithPortalsHackButtonCss}
+            css={resizeWithPortalsHackIsResizing && resizeWithPortalsHackButtonCss}
             data-test-subj={`${dataTestSubj}ResizableButton`}
           />
           <EuiResizablePanel
