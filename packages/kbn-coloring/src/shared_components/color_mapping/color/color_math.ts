@@ -7,7 +7,6 @@
  */
 
 import chroma from 'chroma-js';
-import { APCAContrast } from './apca';
 
 export function getValidColor(color: string): chroma.Color {
   try {
@@ -17,11 +16,8 @@ export function getValidColor(color: string): chroma.Color {
   }
 }
 
-export function getColorContrast(color: string, isDark: boolean) {
-  const [r, g, b] = getValidColor(color).rgb();
-  // TODO: change background depending on theme
-  const value = APCAContrast(isDark ? [0, 0, 0] : [255, 255, 255], [r, g, b]);
-  return { value: value.toFixed(1), contrast: Math.abs(value) > 40 };
+export function hasEnoughContrast(color: string, isDark: boolean, threshold = 4.5) {
+  return chroma.contrast(getValidColor(color), isDark ? 'black' : 'white') >= threshold;
 }
 
 export function changeAlpha(color: string, alpha: number) {
