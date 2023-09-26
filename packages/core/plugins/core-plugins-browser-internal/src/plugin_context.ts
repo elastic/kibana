@@ -63,11 +63,13 @@ export function createPluginSetupContext<
   TStart,
   TPluginsSetup extends object,
   TPluginsStart extends object
->(
-  coreContext: CoreContext,
-  deps: PluginsServiceSetupDeps,
-  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): CoreSetup {
+>({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServiceSetupDeps;
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+}): CoreSetup {
   return {
     analytics: deps.analytics,
     application: {
@@ -101,11 +103,13 @@ export function createPluginStartContext<
   TStart,
   TPluginsSetup extends object,
   TPluginsStart extends object
->(
-  coreContext: CoreContext,
-  deps: PluginsServiceStartDeps,
-  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): CoreStart {
+>({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServiceStartDeps;
+  plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+}): CoreStart {
   return {
     analytics: deps.analytics,
     application: {

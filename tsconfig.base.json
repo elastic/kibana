@@ -464,6 +464,8 @@
       "@kbn/core-plugins-browser-internal/*": ["packages/core/plugins/core-plugins-browser-internal/*"],
       "@kbn/core-plugins-browser-mocks": ["packages/core/plugins/core-plugins-browser-mocks"],
       "@kbn/core-plugins-browser-mocks/*": ["packages/core/plugins/core-plugins-browser-mocks/*"],
+      "@kbn/core-plugins-contracts-browser": ["packages/core/plugins/core-plugins-contracts-browser"],
+      "@kbn/core-plugins-contracts-browser/*": ["packages/core/plugins/core-plugins-contracts-browser/*"],
       "@kbn/core-plugins-contracts-server": ["packages/core/plugins/core-plugins-contracts-server"],
       "@kbn/core-plugins-contracts-server/*": ["packages/core/plugins/core-plugins-contracts-server/*"],
       "@kbn/core-plugins-server": ["packages/core/plugins/core-plugins-server"],

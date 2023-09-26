@@ -38,7 +38,9 @@ export interface InternalPluginsServiceStart {
  *
  * @internal
  */
-export class PluginsService implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart> {
+export class PluginsService
+  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
+{
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
@@ -96,10 +98,7 @@ export class PluginsService implements CoreService<InternalPluginsServiceSetup, 
         {} as Record<PluginName, unknown>
       );
 
-      const contract = plugin.setup(
-        createPluginSetupContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
+      const contract = plugin.setup(createPluginSetupContext({ deps, plugin }), pluginDepContracts);
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -126,10 +125,7 @@ export class PluginsService implements CoreService<InternalPluginsServiceSetup, 
         {} as Record<PluginName, unknown>
       );
 
-      const contract = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
+      const contract = plugin.start(createPluginStartContext({ deps, plugin }), pluginDepContracts);
 
       contracts.set(pluginName, contract);
     }

@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { type PluginName, PluginType } from '@kbn/core-base-common';
+import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
@@ -60,19 +60,15 @@ let mockStartContext: DeeplyMocked<CoreStart>;
 function createManifest(
   id: string,
   { required = [], optional = [] }: { required?: string[]; optional?: string[]; ui?: boolean } = {}
-) {
+): DiscoveredPlugin {
   return {
     id,
-    version: 'some-version',
     type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
-    owner: {
-      name: 'Core',
-      githubTeam: 'kibana-core',
-    },
+    runtimePluginDependencies: [],
   };
 }
 
