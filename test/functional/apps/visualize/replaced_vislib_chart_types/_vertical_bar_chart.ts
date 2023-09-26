@@ -16,13 +16,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+    'common',
+  ]);
 
   const xyChartSelector = 'xyVisChart';
 
   describe('vertical bar chart', function () {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     const vizName1 = 'Visualization VerticalBarChart';
@@ -33,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -64,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Range');
         await PageObjects.visEditor.selectField('@timestamp');
@@ -88,7 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Aggregation = Date Range');
         await PageObjects.visEditor.selectAggregation('Date Range');

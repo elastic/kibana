@@ -25,10 +25,14 @@ describe('validateActions', () => {
     producer: 'alerts',
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
-    getSummarizedAlerts: jest.fn(),
     validate: {
       params: { validate: (params) => params },
     },
+    alerts: {
+      context: 'context',
+      mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
+    },
+    validLegacyConsumers: [],
   };
 
   const data = {
@@ -213,11 +217,11 @@ describe('validateActions', () => {
     );
   });
 
-  it('should return error message if any action has alertsFilter but the rule type does not have getSummarizedAlerts', async () => {
+  it('should return error message if any action has alertsFilter but the rule type does not have alerts mapping', async () => {
     await expect(
       validateActions(
         context as unknown as RulesClientContext,
-        { ...ruleType, getSummarizedAlerts: undefined },
+        { ...ruleType, alerts: undefined },
         data,
         false
       )

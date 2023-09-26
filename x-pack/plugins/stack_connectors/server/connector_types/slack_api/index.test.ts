@@ -55,23 +55,9 @@ describe('validate config', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [message]: definition for this key is missing"`
     );
-
-    expect(() => {
-      validateConfig(connectorType, { allowedChannels: 'foo' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [allowedChannels]: could not parse array value from json input"`
-    );
   });
 
   test('should validate when config are valid', () => {
-    expect(() => {
-      validateConfig(
-        connectorType,
-        { allowedChannels: ['foo', 'bar'] },
-        { configurationUtilities }
-      );
-    }).not.toThrow();
-
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
     }).not.toThrow();

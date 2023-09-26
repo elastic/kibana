@@ -10,4 +10,5 @@ export * from './apm_transaction_error_rate';
 export * from './apm_transaction_duration';
 export * from './kql_custom';
 export * from './metric_custom';
+export * from './histogram';
 export * from './common';

@@ -38,6 +38,7 @@ describe('renderApp', () => {
       licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
+      user: {},
     },
   } as any;
   const pluginData = {

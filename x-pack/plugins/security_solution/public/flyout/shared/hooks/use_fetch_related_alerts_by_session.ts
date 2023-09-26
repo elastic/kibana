@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { find } from 'lodash/fp';
 import { useMemo } from 'react';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
+import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
 
 export interface UseFetchRelatedAlertsBySessionParams {
   /**
-   * An array of field objects with category and value
+   * Value of the process.entry_leader.entity_id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  entityId: string;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -44,17 +43,12 @@ export interface UseFetchRelatedAlertsBySessionResult {
  * Returns the number of alerts by session for the document (and the loading, error statuses as well as the alerts count)
  */
 export const useFetchRelatedAlertsBySession = ({
-  dataFormattedForFieldBrowser,
+  entityId,
   scopeId,
 }: UseFetchRelatedAlertsBySessionParams): UseFetchRelatedAlertsBySessionResult => {
-  const processSessionField = find(
-    { category: 'process', field: 'process.entry_leader.entity_id' },
-    dataFormattedForFieldBrowser
-  );
-  const { field, values } = processSessionField || { field: '', values: [] };
   const { loading, error, count, alertIds } = useAlertPrevalence({
-    field,
-    value: values,
+    field: ENTRY_LEADER_ENTITY_ID,
+    value: entityId,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
     includeAlertIds: true,

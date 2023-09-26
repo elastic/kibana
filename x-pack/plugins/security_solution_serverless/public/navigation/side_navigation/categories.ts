@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-side-nav';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import {
+  SecurityPageName,
+  LinkCategoryType,
+  type SeparatorLinkCategory,
+} from '@kbn/security-solution-navigation';
+import { ExternalPageName } from '../links/constants';
 
 export const CATEGORIES: SeparatorLinkCategory[] = [
   {
@@ -16,6 +20,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
@@ -24,13 +29,17 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
-      SecurityPageName.timelines,
-      SecurityPageName.threatIntelligenceIndicators,
+      SecurityPageName.investigations,
+      SecurityPageName.threatIntelligence,
       SecurityPageName.exploreLanding,
     ],
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.rulesLanding],
+    linkIds: [ExternalPageName.fleet, SecurityPageName.assets],
+  },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.mlLanding],
   },
 ];

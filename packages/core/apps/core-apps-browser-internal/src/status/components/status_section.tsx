@@ -7,13 +7,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { StatusTable } from './status_table';
 import { FormattedStatus, getHighestStatus } from '../lib';
 import { StatusBadge } from './status_badge';
@@ -28,7 +22,7 @@ export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) =
   const highestStatus = useMemo(() => getHighestStatus(statuses), [statuses]);
 
   return (
-    <EuiPageContent grow={false}>
+    <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -41,6 +35,6 @@ export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) =
       </EuiFlexGroup>
       <EuiSpacer />
       <StatusTable statuses={statuses} />
-    </EuiPageContent>
+    </EuiPanel>
   );
 };

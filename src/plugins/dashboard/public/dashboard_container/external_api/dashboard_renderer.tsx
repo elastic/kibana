@@ -15,6 +15,7 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useLayoutEffect,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
@@ -50,6 +51,7 @@ export interface DashboardRendererProps {
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
   ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner }, ref) => {
     const dashboardRoot = useRef(null);
+    const dashboardViewport = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
@@ -108,7 +110,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
-        ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
+        ) as DashboardContainerFactory & {
+          create: DashboardContainerFactoryDefinition['create'];
+        };
         const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
@@ -168,6 +172,45 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       return <div ref={dashboardRoot} />;
     };
 
-    return <div className={viewportClasses}>{renderDashboardContents()}</div>;
+    return (
+      <div ref={dashboardViewport} className={viewportClasses}>
+        {dashboardViewport?.current &&
+          dashboardContainer &&
+          !isErrorEmbeddable(dashboardContainer) && (
+            <ParentClassController
+              viewportRef={dashboardViewport.current}
+              dashboard={dashboardContainer}
+            />
+          )}
+        {renderDashboardContents()}
+      </div>
+    );
   }
 );
+
+/**
+ * Maximizing a panel in Dashboard only works if the parent div has a certain class. This
+ * small component listens to the Dashboard's expandedPanelId state and adds and removes
+ * the class to whichever element renders the Dashboard.
+ */
+const ParentClassController = ({
+  dashboard,
+  viewportRef,
+}: {
+  dashboard: DashboardContainer;
+  viewportRef: HTMLDivElement;
+}) => {
+  const maximizedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+
+  useLayoutEffect(() => {
+    const parentDiv = viewportRef.parentElement;
+    if (!parentDiv) return;
+
+    if (maximizedPanelId) {
+      parentDiv.classList.add('dshDashboardViewportWrapper');
+    } else {
+      parentDiv.classList.remove('dshDashboardViewportWrapper');
+    }
+  }, [maximizedPanelId, viewportRef.parentElement]);
+  return null;
+};

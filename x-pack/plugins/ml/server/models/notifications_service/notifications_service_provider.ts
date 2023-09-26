@@ -61,7 +61,7 @@ export class NotificationsService {
     if (this.enabledFeatures.dfa) {
       idsPerType.push({ type: 'data_frame_analytics', ids: dfaJobIds });
     }
-    if (this.enabledFeatures.ad) {
+    if (this.enabledFeatures.nlp) {
       idsPerType.push({ type: 'inference', ids: modelIds as string[] });
     }
 

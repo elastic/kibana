@@ -65,6 +65,7 @@ export const Table = (props: Props) => {
                     )}
                   >
                     <EuiButtonIcon
+                      data-test-subj="infraColumnsButton"
                       color="text"
                       size="s"
                       iconType="filter"

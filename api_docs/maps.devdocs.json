@@ -1813,7 +1813,7 @@
             "label": "mbFeature",
             "description": [],
             "signature": [
-              "maplibregl.GeoJSONFeature & { layer: Omit<maplibregl.LayerSpecification, \"source\"> & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+              "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -3091,54 +3091,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.createField",
-            "type": "Function",
-            "tags": [],
-            "label": "createField",
-            "description": [],
-            "signature": [
-              "({ fieldName }: { fieldName: string; }) => ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.IField",
-                "text": "IField"
-              }
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.IVectorSource.createField.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ fieldName }",
-                "description": [],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-public.IVectorSource.createField.$1.fieldName",
-                    "type": "string",
-                    "tags": [],
-                    "label": "fieldName",
-                    "description": [],
-                    "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
               }
             ],
             "returnComment": []

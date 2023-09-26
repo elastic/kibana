@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskWriteThroughput: LensChartConfig = {
-  title: 'Disk Write Throughput',
-  formula: {
-    formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 1,
-      },
+export const diskWriteThroughput: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.diskWriteThroughput', {
+    defaultMessage: 'Disk Write Throughput',
+  }),
+  value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 1,
     },
   },
-  getFilters,
+  timeScale: 's',
 };

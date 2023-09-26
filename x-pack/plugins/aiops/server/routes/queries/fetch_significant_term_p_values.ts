@@ -15,8 +15,11 @@ import {
   type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
 
-import { SPIKE_ANALYSIS_THRESHOLD, RANDOM_SAMPLER_SEED } from '../../../common/constants';
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import {
+  LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD,
+  RANDOM_SAMPLER_SEED,
+} from '../../../common/constants';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
@@ -27,7 +30,7 @@ import { getRequestBase } from './get_request_base';
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 export const getSignificantTermRequest = (
-  params: AiopsExplainLogRateSpikesSchema,
+  params: AiopsLogRateAnalysisSchema,
   fieldName: string,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
@@ -103,7 +106,7 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
 
 export const fetchSignificantTermPValues = async (
   esClient: ElasticsearchClient,
-  params: AiopsExplainLogRateSpikesSchema,
+  params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
   logger: Logger,
   // The default value of 1 means no sampling will be used
@@ -171,7 +174,7 @@ export const fetchSignificantTermPValues = async (
         0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
         0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-      if (typeof pValue === 'number' && pValue < SPIKE_ANALYSIS_THRESHOLD) {
+      if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD) {
         result.push({
           fieldName,
           fieldValue: String(bucket.key),

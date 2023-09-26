@@ -6,17 +6,19 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../common/endpoint/service/response_actions/constants';
 
 interface EndpointActionTextProps {
   name: EnabledAutomatedResponseActionsCommands;
+  isDisabled: boolean;
 }
 
-const EndpointActionTextComponent = ({ name }: EndpointActionTextProps) => {
-  const { title, description } = useGetCommandText(name);
-  return (
+const EndpointActionTextComponent = ({ name, isDisabled }: EndpointActionTextProps) => {
+  const { title, description, tooltip } = useGetCommandText(name);
+
+  const content = (
     <>
       <EuiTitle size="xs">
         <EuiText>{title}</EuiText>
@@ -25,11 +27,19 @@ const EndpointActionTextComponent = ({ name }: EndpointActionTextProps) => {
       <EuiText>{description}</EuiText>
     </>
   );
+  if (isDisabled) {
+    return (
+      <EuiToolTip position="top" content={tooltip}>
+        {content}
+      </EuiToolTip>
+    );
+  }
+  return content;
 };
 
 const useGetCommandText = (
   name: EndpointActionTextProps['name']
-): { title: ReactNode; description: ReactNode } => {
+): { title: ReactNode; description: ReactNode; tooltip: ReactNode } => {
   switch (name) {
     case 'isolate':
       return {
@@ -45,11 +55,18 @@ const useGetCommandText = (
             defaultMessage="Quarantine a host from the network to prevent further spread of threats and limit potential damage"
           />
         ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
+            defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
       };
     default:
       return {
         title: '',
         description: '',
+        tooltip: '',
       };
   }
 };

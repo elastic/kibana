@@ -49,7 +49,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'servers.elasticsearch.port'
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'endpointRbacEnabled',
           'endpointResponseActionsEnabled',
         ])}`,
       ],

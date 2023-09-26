@@ -27,7 +27,7 @@ configure additional security settings and authentication.
 
 . Set the `xpack.security.encryptionKey` property in the `kibana.yml`
 configuration file. You can use any text string that is 32 characters or longer
-as the encryption key.
+as the encryption key. Refer to <<xpack-security-encryptionKey,`xpack.security.encryptionKey`>>.
 +
 --
 [source,yaml]
@@ -35,7 +35,10 @@ as the encryption key.
 xpack.security.encryptionKey: "something_at_least_32_characters"
 ----
 
-For more information, see <<security-settings-kb,Security settings in {kib}>>.
+{kib}'s reporting and saved objects features also have encryption key settings.
+Refer to <<xpack-reporting-encryptionKey,`xpack.reporting.encryptionKey`>> and
+<<xpack-encryptedSavedObjects-encryptionKey,`xpack.encryptedSavedObjects.encryptionKey`>>
+respectively.
 --
 
 . Optional: <<xpack-security-session-management,Configure {kib}'s session expiration settings>>.

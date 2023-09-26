@@ -15,8 +15,22 @@ export const API_URL_LABEL = i18n.translate(
 );
 
 export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.apiKeySecret', {
-  defaultMessage: 'API Key',
+  defaultMessage: 'API key',
 });
+
+export const DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.stackConnectors.components.genAi.defaultModelTooltipContent',
+  {
+    defaultMessage: 'If a request does not include a model, it uses the default.',
+  }
+);
 
 export const API_PROVIDER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.apiProviderLabel',

@@ -478,4 +478,111 @@ describe('IndexPattern', () => {
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
     });
   });
+
+  describe('toMinimalSpec', () => {
+    test('can exclude fields', () => {
+      expect(indexPattern.toMinimalSpec()).toMatchSnapshot();
+    });
+
+    test('can omit counts', () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: undefined,
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+        }
+      `);
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              customLabel: 'test12',
+            },
+            test3: {
+              count: 30,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
+            "customLabel": "test12",
+          },
+        }
+      `);
+    });
+  });
 });

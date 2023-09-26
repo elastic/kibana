@@ -35,6 +35,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
 
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -58,7 +59,7 @@ import {
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
@@ -77,6 +78,9 @@ import { PivotFunctionForm } from './pivot_function_form';
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
+
+type PopulatedFields = Set<string>;
+const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
 
 export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   <>
@@ -109,6 +113,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
@@ -120,8 +125,22 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
+  const appDependencies = useAppDependencies();
+  const {
+    ml: { useFieldStatsFlyoutContext },
+  } = appDependencies;
+
+  const fieldStatsContext = useFieldStatsFlyoutContext();
   const indexPreviewProps = {
-    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
+    ...useIndexData(
+      dataView,
+      transformConfigQuery,
+      runtimeMappings,
+      timeRangeMs,
+      isPopulatedFields(fieldStatsContext?.populatedFields)
+        ? [...fieldStatsContext.populatedFields]
+        : []
+    ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -336,6 +355,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                   query={undefined}
                   disabled={false}
                   timefilter={timefilter}
+                  hideFrozenDataTierChoice={!showNodeInfo}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

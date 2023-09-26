@@ -12,7 +12,12 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getAggregateQueryMode,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -47,7 +52,10 @@ import {
 } from '../dataview_picker';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import './query_bar.scss';
 
 export const strings = {
@@ -76,13 +84,14 @@ const getWrapperWithTooltip = (
 ) => {
   if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
+    const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
       <EuiToolTip
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
             'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
-          values: { language: textBasedLanguage },
+          values: { language: displayName },
         })}
       >
         {children}
@@ -135,6 +144,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  textBasedLanguageModeWarning?: string;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -147,6 +157,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   submitButtonStyle?: 'auto' | 'iconOnly' | 'full';
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
@@ -560,6 +571,7 @@ export const QueryBarTopRow = React.memo(
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
+              suggestionsAbstraction={props.suggestionsAbstraction}
             />
           </EuiFlexItem>
         )
@@ -605,6 +617,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                suggestionsAbstraction={props.suggestionsAbstraction}
                 isDisabled={props.isDisabled}
                 appName={appName}
                 submitOnBlur={props.submitOnBlur}
@@ -642,6 +655,7 @@ export const QueryBarTopRow = React.memo(
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
+            warning={props.textBasedLanguageModeWarning}
             detectTimestamp={detectTimestamp}
             onTextLangQuerySubmit={() =>
               onSubmit({

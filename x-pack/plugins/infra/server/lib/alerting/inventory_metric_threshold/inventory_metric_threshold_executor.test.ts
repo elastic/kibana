@@ -157,10 +157,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
 
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
 
   return alertInstance.instance;
 });

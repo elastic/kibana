@@ -10,9 +10,8 @@ import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type {
   AppLocation,
   EndpointPendingActions,
+  EndpointSortableField,
   HostInfo,
-  HostPolicyResponse,
-  HostStatus,
   Immutable,
   PolicyData,
   ResponseActionApiResponse,
@@ -28,25 +27,16 @@ export interface EndpointState {
   pageSize: number;
   /** which page to show */
   pageIndex: number;
+  /** field used for sorting */
+  sortField: EndpointSortableField;
+  /** direction of sorting */
+  sortDirection: 'asc' | 'desc';
   /** total number of hosts returned */
   total: number;
   /** list page is retrieving data */
   loading: boolean;
   /** api error from retrieving host list */
   error?: ServerApiError;
-  endpointDetails: {
-    // Adding `hostInfo` to store full API response in order to support the
-    // refactoring effort with AgentStatus component
-    hostInfo?: HostInfo;
-    hostInfoError?: ServerApiError;
-    isHostInfoLoading: boolean;
-  };
-  /** Holds the Policy Response for the Host currently being displayed in the details */
-  policyResponse?: HostPolicyResponse;
-  /** policyResponse is being retrieved */
-  policyResponseLoading: boolean;
-  /** api error from retrieving the policy response */
-  policyResponseError?: ServerApiError;
   /** current location info */
   location?: Immutable<AppLocation>;
   /** policies */
@@ -57,7 +47,7 @@ export interface EndpointState {
   selectedPolicyId?: string;
   /** Endpoint package info */
   endpointPackageInfo: AsyncResourceState<GetInfoResponse['item']>;
-  /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
+  /** Tracks the list of policy IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
   agentPolicies: PolicyIds['agentPolicy'];
@@ -67,7 +57,7 @@ export interface EndpointState {
   patterns: DataViewBase[];
   /** api error from retrieving index patters for query bar */
   patternsError?: ServerApiError;
-  /** Is auto-refresh enabled */
+  /** Is auto-refresh enabled? */
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
@@ -79,10 +69,6 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
-  policyVersionInfo?: HostInfo['policy_info'];
-  /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
-  hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<ResponseActionApiResponse>;
   /**
@@ -116,6 +102,10 @@ export interface EndpointIndexUIQueryParams {
   page_size?: string;
   /** Which page to show */
   page_index?: string;
+  /** Field used for sorting */
+  sort_field?: EndpointSortableField;
+  /** Direction of sorting */
+  sort_direction?: 'asc' | 'desc';
   /** show the policy response or host details */
   show?: 'policy_response' | 'activity_log' | 'details' | 'isolate' | 'unisolate';
   /** Query text from search bar*/

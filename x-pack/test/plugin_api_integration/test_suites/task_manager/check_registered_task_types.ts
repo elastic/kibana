@@ -31,6 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
+    'sampleRecurringTaskWithInvalidIndirectParam',
+    'sampleOneTimeTaskWithInvalidIndirectParam',
+    'sampleTaskWithParamsSchema',
+    'taskToDisable',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -44,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
+        'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.cases-webhook',
         'actions:.d3security',
@@ -92,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_alert_thread_pool_write_rejections',
         'alerting:monitoring_ccr_read_exceptions',
         'alerting:monitoring_shard_size',
+        'alerting:observability.rules.custom_threshold',
         'alerting:siem.eqlRule',
         'alerting:siem.indicatorRule',
         'alerting:siem.mlRule',
@@ -126,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',
+        'observabilityAIAssistant:indexQueuedDocumentsTaskType',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',

@@ -21,7 +21,25 @@ journey('OverviewScrolling', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const retry: RetryService = params.getService('retry');
 
+  const listOfRequests: string[] = [];
+  const expected = [
+    'http://localhost:5620/internal/synthetics/service/enablement',
+    'http://localhost:5620/internal/uptime/dynamic_settings',
+    'http://localhost:5620/internal/synthetics/monitor/filters',
+    'http://localhost:5620/internal/uptime/service/locations',
+    'http://localhost:5620/internal/synthetics/overview?sortField=status&sortOrder=asc&',
+    'http://localhost:5620/internal/synthetics/overview_status?&scopeStatusByLocation=true',
+    'http://localhost:5620/internal/synthetics/service/monitors?perPage=10&page=1&sortOrder=asc&sortField=name.keyword&',
+    'http://localhost:5620/internal/synthetics/enable_default_alerting',
+  ];
+
   before(async () => {
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/internal/synthetics/') || url.includes('/internal/uptime/')) {
+        listOfRequests.push(request.url());
+      }
+    });
     await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
 
@@ -46,6 +64,20 @@ journey('OverviewScrolling', async ({ page, params }) => {
     await syntheticsApp.loginToKibana();
     const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
     expect(await invalid.isVisible()).toBeFalsy();
+  });
+
+  step('validates de-duplicate requests', async () => {
+    await page.waitForSelector(`text="test monitor 0"`);
+
+    const assertUnique = (value: string) => {
+      expect(listOfRequests.filter((req) => req.includes(value)).length).toBe(1);
+    };
+    assertUnique('/overview_status');
+    assertUnique('/overview?');
+    assertUnique('/service/monitors');
+    assertUnique('/monitor/filters');
+
+    expect(listOfRequests).toEqual(expected);
   });
 
   step('scroll until you see showing all monitors', async () => {

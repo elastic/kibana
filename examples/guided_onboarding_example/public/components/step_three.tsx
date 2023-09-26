@@ -12,10 +12,7 @@ import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/e
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -39,7 +36,7 @@ export const StepThree = (props: StepThreeProps) => {
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -48,8 +45,8 @@ export const StepThree = (props: StepThreeProps) => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -92,7 +89,7 @@ export const StepThree = (props: StepThreeProps) => {
             Complete step 3
           </EuiButton>
         </EuiTourStep>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

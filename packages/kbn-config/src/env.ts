@@ -124,6 +124,7 @@ export class Env {
       version: pkg.version,
       dist: isKibanaDistributable,
       buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),
+      buildFlavor: this.cliArgs.serverless ? 'serverless' : 'traditional',
     });
   }
 }

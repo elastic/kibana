@@ -37,6 +37,7 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
+  FleetServerMissingEncryptionKeyCallout,
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
@@ -51,7 +52,7 @@ import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
 import { getKuery } from './utils/get_kuery';
-import { useAgentSoftLimit } from './hooks';
+import { useAgentSoftLimit, useMissingEncryptionKeyCallout } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -392,6 +393,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return policyHasFleetServer(agentPolicy);
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
+  // Missing Encryption key
+  const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
+    useMissingEncryptionKeyCallout();
+
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const { isFleetServerStandalone } = useFleetServerStandalone();
@@ -485,6 +490,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
+            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
           />
         </EuiPortal>
       )}
@@ -523,20 +529,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {shouldDisplayAgentSoftLimit && (
+      {canShowMissingEncryptionKeyCallout && (
         <>
-          <AgentSoftLimitCallout />
+          <FleetServerMissingEncryptionKeyCallout onClickHandler={dismissEncryptionKeyCallout} />
           <EuiSpacer size="l" />
         </>
       )}
-      {/* TODO serverless agent soft limit */}
-      {showUnhealthyCallout && (
+      {shouldDisplayAgentSoftLimit && (
         <>
-          {cloud?.deploymentUrl ? (
-            <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
-          ) : (
-            <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
-          )}
+          <AgentSoftLimitCallout />
           <EuiSpacer size="l" />
         </>
       )}

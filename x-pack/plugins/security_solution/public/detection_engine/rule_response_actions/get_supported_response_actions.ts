@@ -9,7 +9,7 @@ import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/edit_
 import {
   RESPONSE_ACTION_TYPES,
   SUPPORTED_RESPONSE_ACTION_TYPES,
-} from '../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface ResponseActionType {
   id: RESPONSE_ACTION_TYPES;

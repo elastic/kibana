@@ -1,6 +1,11 @@
 [[manage-cases]]
 == Open and manage cases
 
+:frontmatter-description: Create a case then add files, visualizations, and user notifications.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [analyze]
+
 preview::[]
 
 [[open-case]]
@@ -72,8 +77,9 @@ go back to your case.
 
 . Click *Add Comment* to add the visualization to your case.
 
-After a visualization has been added to a case, you can modify or interact with
-it by clicking the *Open Visualization* option in the comment menu.
+Alternatively, while viewing a <<dashboard,dashboard>> you can open a panel's menu then click *More > Add to existing case* or *More > Add to new case*.
+
+After a visualization has been added to a case, you can modify or interact with it by clicking the *Open Visualization* option in the case's comment menu.
 
 [[add-case-notifications]]
 === Add email notifications
@@ -99,14 +105,13 @@ For self-managed {kib}:
 +
 --
 NOTE: At this time, email notifications support only preconfigured connectors,
-which are defined in the `kibana.yml` file. For examples, refer to
-{kibana-ref}/email-action-type.html#preconfigured-email-configuration[Preconfigured email connector]
-and {kibana-ref}/email-action-type.html#configuring-email[Configuring email connectors for well-known services].
+which are defined in the `kibana.yml` file.
+For examples, refer to <<preconfigured-email-configuration>> and <<configuring-email>>.
 --
 . Set the `notifications.connectors.default.email` {kib} setting to the name of
 your email connector.
 . If you want the email notifications to contain links back to the case, you
-must configure the {kibana-ref}/settings.html#server-publicBaseUrl[server.publicBaseUrl] setting.
+must configure the <<server-publicBaseUrl,server.publicBaseUrl>> setting.
 
 When you subsequently add assignees to cases, they receive an email.
 // end::case-notifications[]

@@ -16,7 +16,7 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
-import { createPrebuiltSavedObjectsSchema } from '../schema';
+import { createPrebuiltSavedObjectsRequestBody } from '../../../../../common/api/risk_score';
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -26,7 +26,7 @@ export const createPrebuiltSavedObjectsRoute = (
   router.post(
     {
       path: PREBUILT_SAVED_OBJECTS_BULK_CREATE,
-      validate: createPrebuiltSavedObjectsSchema,
+      validate: createPrebuiltSavedObjectsRequestBody,
       options: {
         tags: ['access:securitySolution'],
       },

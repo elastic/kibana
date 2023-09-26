@@ -30,9 +30,9 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
-import type { Privilege } from '../../../../../common/detection_engine/schemas/common';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { Privilege } from '../../../../../common/api/detection_engine';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -61,7 +61,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 
@@ -91,7 +91,7 @@ export const hasReadIndexPrivileges = async (args: {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
-      message: `This rule may not have the required read privileges to the following indices/index patterns: ${indexesString}`,
+      message: `This rule may not have the required read privileges to the following index patterns: ${indexesString}`,
     });
     return true;
   }
@@ -112,7 +112,7 @@ export const hasTimestampFields = async (args: {
   const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
@@ -432,7 +432,9 @@ export const getRuleRangeTuples = ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      'Failed to compute gap between rule runs: could not parse rule interval'
+      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+        interval
+      )}"`
     );
     return { tuples, remainingGap: moment.duration(0) };
   }

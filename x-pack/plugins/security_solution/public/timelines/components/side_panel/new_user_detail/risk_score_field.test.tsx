@@ -27,7 +27,7 @@ describe('RiskScoreField', () => {
   it('does not render content when the license is invalid', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskScoreField riskScoreState={{ ...mockRiskScoreState, isLicenseValid: false }} />
+        <RiskScoreField riskScoreState={{ ...mockRiskScoreState, isAuthorized: false }} />
       </TestProviders>
     );
 

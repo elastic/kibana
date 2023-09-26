@@ -54,17 +54,13 @@ export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolb
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
 export type {
-  KibanaPageTemplateProps,
   NoDataPageActions,
   NoDataPageActionsProps,
   NoDataPageProps,
   ElasticAgentCardProps,
 } from './page_template';
 export {
-  KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_MAX_WIDTH,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
   NO_DATA_RECOMMENDED,
   NoDataPage,
   ElasticAgentCard,
@@ -86,7 +82,8 @@ export type { ToMountPointOptions } from './util';
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 export { RedirectAppLinks } from './app_links';
 
-export { wrapWithTheme, KibanaThemeProvider } from './theme';
+/** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
+export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

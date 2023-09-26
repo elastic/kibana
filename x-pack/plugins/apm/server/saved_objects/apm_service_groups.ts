@@ -52,12 +52,16 @@ export const apmServiceGroups: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
     icon: 'apmApp',
-    getTitle: () =>
-      i18n.translate('xpack.apm.apmServiceGroups.title', {
-        defaultMessage: 'APM Service Groups',
-      }),
+    getTitle: (savedObject) =>
+      `${i18n.translate('xpack.apm.apmServiceGroups.title', {
+        defaultMessage: 'Service Group',
+      })}: ${savedObject.attributes.groupName}`,
+    getInAppUrl: (savedObject) => ({
+      path: `/app/apm/services?serviceGroup=${savedObject.id}`,
+      uiCapabilitiesPath: 'apm.show',
+    }),
   },
   modelVersions: {
     '1': {

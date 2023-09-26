@@ -73,6 +73,9 @@ export interface TaskRegisterDefinition {
       up: (state: Record<string, unknown>) => Record<string, unknown>;
     }
   >;
+
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 }
 
 /**

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type ElserVersion } from '@kbn/ml-trained-models-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -22,13 +26,36 @@ import {
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
+  createIngestPipelineSchema,
+  modelDownloadsQuery,
 } from './schemas/inference_schema';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
 
-export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
+
+export function filterForEnabledFeatureModels(
+  models: TrainedModelConfigResponse[] | estypes.MlTrainedModelConfig[],
+  enabledFeatures: MlFeatures
+) {
+  let filteredModels = models;
+  if (enabledFeatures.nlp === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
+  }
+
+  if (enabledFeatures.dfa === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type !== 'tree_ensemble');
+  }
+
+  return filteredModels;
+}
+
+export function trainedModelsRoutes(
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  cloud: CloudSetup
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -58,15 +85,14 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         try {
           const { modelId } = request.params;
           const { with_pipelines: withPipelines, ...query } = request.query;
-          const body = await mlClient.getTrainedModels({
-            // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
-            size: 1000,
+          const resp = await mlClient.getTrainedModels({
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
-          });
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
-          const result = body.trained_model_configs as TrainedModelConfigResponse[];
+          const result = resp.trained_model_configs as TrainedModelConfigResponse[];
           try {
             if (withPipelines) {
               // Also need to retrieve the list of deployment IDs from stats
@@ -120,8 +146,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
             mlLog.debug(e);
           }
 
+          const body = filterForEnabledFeatureModels(result, getEnabledFeatures());
+
           return response.ok({
-            body: result,
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -151,7 +179,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats();
+          const body = await mlClient.getTrainedModelsStats({
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
           return response.ok({
             body,
           });
@@ -230,6 +260,78 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/ingest_pipelines Get ingest pipelines
+   * @apiName GetIngestPipelines
+   * @apiDescription Retrieves pipelines
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const body = await modelsProvider(client).getPipelines();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/create_inference_pipeline creates the pipeline with inference processor
+   * @apiName CreateInferencePipeline
+   * @apiDescription Creates the inference pipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createIngestPipelineSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const { pipeline, pipelineName } = request.body;
+          const body = await modelsProvider(client).createInferencePipeline(
+            pipeline!,
+            pipelineName
+          );
+          return response.ok({
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -544,6 +646,80 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
             },
             ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
           });
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/model_downloads Gets available models for download
+   * @apiName GetTrainedModelDownloadList
+   * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client }) => {
+        try {
+          const body = await modelsProvider(client, cloud).getModelDownloads();
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/elser_config Gets ELSER config for download
+   * @apiName GetElserConfig
+   * @apiDescription Gets ELSER config for download based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: modelDownloadsQuery,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client, request }) => {
+        try {
+          const { version } = request.query;
+
+          const body = await modelsProvider(client, cloud).getELSER(
+            version ? { version: Number(version) as ElserVersion } : undefined
+          );
+
           return response.ok({
             body,
           });

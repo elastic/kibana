@@ -14,6 +14,7 @@ import {
 import { createVisualizeServicesMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import type { VisualizeServices } from '../types';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 
 const commonSerializedVisMock = {
   type: 'area',
@@ -60,14 +61,12 @@ describe('getVisualizationInstance', () => {
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
     mockServices.savedSearch = {
+      ...savedSearchPluginMock.createStartContract(),
       get: jest.fn().mockImplementation(() => ({
         id: 'savedSearch',
         searchSource: {},
         title: 'savedSearchTitle',
       })),
-      getAll: jest.fn(),
-      getNew: jest.fn().mockImplementation(() => ({})),
-      save: jest.fn().mockImplementation(() => ({})),
     };
   });
 

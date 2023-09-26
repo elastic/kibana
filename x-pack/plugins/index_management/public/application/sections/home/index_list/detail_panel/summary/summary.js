@@ -21,36 +21,43 @@ import {
 import { DataHealth } from '../../../../../components';
 import { AppContextConsumer } from '../../../../../app_context';
 
-const getHeaders = () => {
-  return {
-    health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
-      defaultMessage: 'Health',
-    }),
-    status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
-      defaultMessage: 'Status',
-    }),
+const getHeaders = (showStats) => {
+  const baseHeaders = {
     primary: i18n.translate('xpack.idxMgmt.summary.headers.primaryHeader', {
       defaultMessage: 'Primaries',
     }),
     replica: i18n.translate('xpack.idxMgmt.summary.headers.replicaHeader', {
       defaultMessage: 'Replicas',
     }),
-    documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
-      defaultMessage: 'Docs count',
-    }),
-    documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
-      defaultMessage: 'Docs deleted',
-    }),
-    size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
-      defaultMessage: 'Storage size',
-    }),
-    primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
-      defaultMessage: 'Primary storage size',
-    }),
     aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
       defaultMessage: 'Aliases',
     }),
   };
+
+  if (showStats) {
+    return {
+      ...baseHeaders,
+      health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
+        defaultMessage: 'Health',
+      }),
+      status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
+        defaultMessage: 'Docs count',
+      }),
+      documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
+        defaultMessage: 'Docs deleted',
+      }),
+      size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
+        defaultMessage: 'Storage size',
+      }),
+      primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
+        defaultMessage: 'Primary storage size',
+      }),
+    };
+  }
+  return baseHeaders;
 };
 
 export class Summary extends React.PureComponent {
@@ -58,18 +65,19 @@ export class Summary extends React.PureComponent {
     const { index } = this.props;
     const extensions = extensionsService.summaries;
     return extensions.map((summaryExtension, i) => {
+      const ExtensionSummaryComponent = summaryExtension;
       return (
         <Fragment key={`summaryExtension-${i}`}>
           <EuiHorizontalRule />
-          {summaryExtension(index, getUrlForApp)}
+          <ExtensionSummaryComponent index={index} getUrlForApp={getUrlForApp} />
         </Fragment>
       );
     });
   }
 
-  buildRows() {
+  buildRows(config) {
     const { index } = this.props;
-    const headers = getHeaders();
+    const headers = getHeaders(config.enableIndexStats);
     const rows = {
       left: [],
       right: [],
@@ -84,7 +92,7 @@ export class Summary extends React.PureComponent {
         content = content.join(', ');
       }
       const cell = [
-        <EuiDescriptionListTitle key={fieldName}>
+        <EuiDescriptionListTitle key={fieldName} data-test-subj="descriptionTitle">
           <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + '_desc'}>
@@ -103,8 +111,8 @@ export class Summary extends React.PureComponent {
   render() {
     return (
       <AppContextConsumer>
-        {({ services, core }) => {
-          const { left, right } = this.buildRows();
+        {({ services, core, config }) => {
+          const { left, right } = this.buildRows(config);
           const additionalContent = this.getAdditionalContent(
             services.extensionsService,
             core.getUrlForApp

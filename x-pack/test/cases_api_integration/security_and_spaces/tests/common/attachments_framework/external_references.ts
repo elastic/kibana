@@ -8,11 +8,12 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { ActionTypes, CommentRequest, CommentType } from '@kbn/cases-plugin/common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -243,7 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
       const createCommentUserAction = userActions.find(
-        (userAction) => userAction.type === ActionTypes.comment
+        (userAction) => userAction.type === UserActionTypes.comment
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -271,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === CommentType.externalReference
+        (comment) => comment.type === AttachmentType.externalReference
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -314,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === CommentType.externalReference
+        (comment) => comment.type === AttachmentType.externalReference
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -386,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return 400 when updating from so to doc', async () => {
-      const docAttachment: CommentRequest = {
+      const docAttachment: AttachmentRequest = {
         ...postExternalReferenceESReq,
         externalReferenceId: 'my-doc-id',
       };
@@ -411,7 +412,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return 400 when updating from doc to so', async () => {
-      const docAttachment: CommentRequest = {
+      const docAttachment: AttachmentRequest = {
         ...postExternalReferenceESReq,
         externalReferenceId: 'my-doc-id',
       };

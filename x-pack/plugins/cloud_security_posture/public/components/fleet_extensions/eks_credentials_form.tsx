@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -23,8 +24,8 @@ import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const AWSSetupInfoContent = () => (
   <>
-    <EuiSpacer size="l" />
-    <EuiTitle size="s">
+    <EuiHorizontalRule margin="xl" />
+    <EuiTitle size="xs">
       <h2>
         <FormattedMessage
           id="xpack.csp.eksIntegration.setupInfoContentTitle"

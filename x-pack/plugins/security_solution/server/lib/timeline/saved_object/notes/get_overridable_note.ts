@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Note } from '../../../../../common/types/timeline/note/api';
+import type { Note } from '../../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../../framework';
 import { getNote } from './saved_object';
 

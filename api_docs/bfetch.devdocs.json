@@ -480,15 +480,7 @@
               "section": "def-common.RequestHandlerContext",
               "text": "RequestHandlerContext"
             },
-            "> | undefined, options?: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "common",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.RouteConfigOptions",
-              "text": "RouteConfigOptions"
-            },
-            "<\"get\" | \"delete\" | \"post\" | \"put\"> | undefined) => void"
+            "> | undefined) => void"
           ],
           "path": "src/plugins/bfetch/server/plugin.ts",
           "deprecated": false,
@@ -587,28 +579,6 @@
                   "text": "RequestHandlerContext"
                 },
                 "> | undefined"
-              ],
-              "path": "src/plugins/bfetch/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
-            },
-            {
-              "parentPluginId": "bfetch",
-              "id": "def-server.BfetchServerSetup.addStreamingResponseRoute.$5",
-              "type": "Object",
-              "tags": [],
-              "label": "options",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.RouteConfigOptions",
-                  "text": "RouteConfigOptions"
-                },
-                "<\"get\" | \"delete\" | \"post\" | \"put\"> | undefined"
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
@@ -1695,6 +1665,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.BFETCH_ROUTE_VERSION_LATEST",
+        "type": "string",
+        "tags": [],
+        "label": "BFETCH_ROUTE_VERSION_LATEST",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/plugins/bfetch/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "bfetch",
         "id": "def-common.DISABLE_BFETCH",

@@ -7,6 +7,8 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
+import type { FieldTypeKnown } from '@kbn/discover-utils/types';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{
@@ -88,11 +90,6 @@ export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
 
-export type FieldTypeKnown = Exclude<
-  DataViewField['timeSeriesMetric'] | DataViewField['type'],
-  undefined
->;
-
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 
 export interface RenderFieldItemParams<T extends FieldListItem> {
@@ -102,4 +99,111 @@ export interface RenderFieldItemParams<T extends FieldListItem> {
   groupIndex: number;
   groupName: FieldsGroupNames;
   fieldSearchHighlight?: string;
+}
+
+export type OverrideFieldGroupDetails = (
+  groupName: FieldsGroupNames
+) => Partial<FieldsGroupDetails> | undefined | null;
+
+export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
+
+export type ButtonAddFieldVariant = 'primary' | 'toolbar';
+
+export type SearchMode = 'documents' | 'text-based';
+
+export interface UnifiedFieldListSidebarContainerCreationOptions {
+  /**
+   * Plugin ID
+   */
+  originatingApp: string;
+
+  /**
+   * Pass `true` to enable the compressed view
+   */
+  compressed?: boolean;
+
+  /**
+   * Your app name: "discover", "lens", etc. If not provided, sections and sidebar toggle states would not be persisted.
+   */
+  localStorageKeyPrefix?: string;
+
+  /**
+   * Pass `timefilter` only if you are not using search sessions for the global search
+   */
+  timeRangeUpdatesType?: TimeRangeUpdatesType;
+
+  /**
+   * Choose how the bottom "Add a field" button should look like. Default `primary`.
+   */
+  buttonAddFieldVariant?: ButtonAddFieldVariant;
+
+  /**
+   * Pass `true` to make the sidebar collapsible. Additionally, define `localStorageKeyPrefix` to persist toggle state.
+   */
+  showSidebarToggleButton?: boolean;
+
+  /**
+   * Pass `true` to skip auto fetching of fields existence info
+   */
+  disableFieldsExistenceAutoFetching?: boolean;
+
+  /**
+   * Pass `true` to see all multi fields flattened in the list. Otherwise, they will show in a field popover.
+   */
+  disableMultiFieldsGroupingByParent?: boolean;
+
+  /**
+   * Pass `true` to not have "Popular Fields" section in the field list
+   */
+  disablePopularFields?: boolean;
+
+  /**
+   * Pass `true` to have non-draggable field list items (like in the mobile flyout)
+   */
+  disableFieldListItemDragAndDrop?: boolean;
+
+  /**
+   * This button will be shown in mobile view
+   */
+  buttonPropsToTriggerFlyout?: Partial<EuiButtonProps>;
+
+  /**
+   * Custom props like `aria-label`
+   */
+  buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
+
+  /**
+   * Custom props like `aria-label`
+   */
+  buttonRemoveFieldFromWorkspaceProps?: Partial<EuiButtonIconProps>;
+
+  /**
+   * Return custom configuration for field list sections
+   */
+  onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
+
+  /**
+   * Use this predicate to hide certain fields
+   * @param field
+   */
+  onSupportedFieldFilter?: (field: DataViewField) => boolean;
+
+  /**
+   * Custom `data-test-subj`. Mostly for preserving legacy values.
+   */
+  dataTestSubj?: {
+    fieldListAddFieldButtonTestSubj?: string;
+    fieldListSidebarDataTestSubj?: string;
+    fieldListItemStatsDataTestSubj?: string;
+    fieldListItemDndDataTestSubjPrefix?: string;
+    fieldListItemPopoverDataTestSubj?: string;
+    fieldListItemPopoverHeaderDataTestSubjPrefix?: string;
+  };
+}
+
+/**
+ * The service used to manage the state of the container
+ */
+export interface UnifiedFieldListSidebarContainerStateService {
+  creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
 }

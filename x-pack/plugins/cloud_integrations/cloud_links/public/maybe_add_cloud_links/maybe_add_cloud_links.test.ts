@@ -14,11 +14,11 @@ import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 describe('maybeAddCloudLinks', () => {
   it('should skip if cloud is disabled', async () => {
     const security = securityMock.createStart();
+    const core = coreMock.createStart();
     maybeAddCloudLinks({
+      core,
       security,
-      chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
-      docLinks: coreMock.createStart().docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -30,12 +30,12 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const { chrome, docLinks } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -51,31 +51,28 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Profile",
-            "order": 100,
-            "setAsProfile": true,
-          },
-          Object {
-            "href": "billing-url",
-            "iconType": "visGauge",
-            "label": "Billing",
-            "order": 200,
-          },
-          Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Organization",
-            "order": 300,
-          },
-        ],
-      ]
-    `);
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
@@ -101,12 +98,12 @@ describe('maybeAddCloudLinks', () => {
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const { chrome, docLinks } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -122,31 +119,28 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Profile",
-            "order": 100,
-            "setAsProfile": true,
-          },
-          Object {
-            "href": "billing-url",
-            "iconType": "visGauge",
-            "label": "Billing",
-            "order": 200,
-          },
-          Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Organization",
-            "order": 300,
-          },
-        ],
-      ]
-    `);
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -173,12 +167,12 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const { chrome, docLinks } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));

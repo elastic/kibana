@@ -11,7 +11,6 @@ import * as React from 'react';
 import { EmbeddableOutput, isErrorEmbeddable, ViewMode } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { CustomizePanelEditor } from '../lib/panel/panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   EmbeddableTimeRangeInput,
@@ -20,9 +19,15 @@ import {
   TimeRangeEmbeddableFactory,
   TIME_RANGE_EMBEDDABLE,
 } from '../lib/test_samples';
+import { CustomizePanelEditor } from '../embeddable_panel/panel_actions/customize_panel_action/customize_panel_editor';
+import { embeddablePluginMock } from '../mocks';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 let container: TimeRangeContainer;
 let embeddable: TimeRangeEmbeddable;
+
+const mockGetFilters = jest.fn(async () => [] as Filter[]);
+const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
 
 beforeEach(async () => {
   const { doStart, setup } = testPlugin(coreMock.createSetup(), coreMock.createStart());
@@ -46,16 +51,25 @@ beforeEach(async () => {
     description: 'This might be a neat line chart',
     viewMode: ViewMode.EDIT,
   });
+
   if (isErrorEmbeddable(timeRangeEmbeddable)) {
     throw new Error('Error creating new hello world embeddable');
   } else {
-    embeddable = timeRangeEmbeddable;
+    embeddable = embeddablePluginMock.mockFilterableEmbeddable(timeRangeEmbeddable, {
+      getFilters: mockGetFilters,
+      getQuery: mockGetQuery,
+    });
   }
 });
 
 test('Value is initialized with the embeddables title', async () => {
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -69,7 +83,12 @@ test('Value is initialized with the embeddables title', async () => {
 test('Calls updateInput with a new title', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -86,7 +105,12 @@ test('Calls updateInput with a new title', async () => {
 test('Input value shows custom title if one given', async () => {
   embeddable.updateInput({ title: 'new title' });
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -98,7 +122,12 @@ test('Input value shows custom title if one given', async () => {
 test('Reset updates the input values with the default properties when the embeddable has overridden the properties', async () => {
   embeddable.updateInput({ title: 'my custom title', description: 'my custom description' });
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -118,7 +147,12 @@ test('Reset updates the input values with the default properties when the embedd
 
 test('Reset updates the input with the default properties when the embeddable has no property overrides', async () => {
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -142,7 +176,12 @@ test('Reset updates the input with the default properties when the embeddable ha
 test('Reset title calls updateInput with undefined', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -160,7 +199,12 @@ test('Reset title calls updateInput with undefined', async () => {
 test('Reset description calls updateInput with undefined', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
@@ -180,7 +224,12 @@ test('Reset description calls updateInput with undefined', async () => {
 test('Can set title and description to an empty string', async () => {
   const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelEditor embeddable={embeddable} timeRangeCompatible={true} onClose={() => {}} />
+    <CustomizePanelEditor
+      embeddable={embeddable}
+      timeRangeCompatible={true}
+      onClose={() => {}}
+      onEdit={() => {}}
+    />
   );
 
   for (const subject of [

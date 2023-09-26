@@ -1,15 +1,27 @@
 {
   "ml.get_buckets": {
     "url_params": {
-      "expand": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "anomaly_score": "",
+      "desc": "__flag__",
+      "end": [
+        "-1"
+      ],
       "exclude_interim": "__flag__",
-      "from": 0,
-      "size": 0,
-      "start": "",
-      "end": "",
-      "anomaly_score": 0,
-      "sort": "",
-      "desc": "__flag__"
+      "expand": "__flag__",
+      "from": "",
+      "size": [
+        "100"
+      ],
+      "sort": [
+        "timestamp"
+      ],
+      "start": [
+        "-1"
+      ]
     },
     "methods": [
       "GET",
@@ -19,6 +31,10 @@
       "_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}",
       "_ml/anomaly_detectors/{job_id}/results/buckets"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-bucket.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-bucket.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

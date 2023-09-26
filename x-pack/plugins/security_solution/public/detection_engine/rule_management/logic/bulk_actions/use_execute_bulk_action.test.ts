@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';

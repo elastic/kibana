@@ -19,6 +19,7 @@ export type {
   TaskRunCreatorFunction,
   RunContext,
   IntervalSchedule,
+  LoadIndirectParamsResult,
 } from './task';
 
 export { TaskStatus } from './task';
@@ -29,7 +30,10 @@ export { asInterval } from './lib/intervals';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
+  throwRetryableError,
   isEphemeralTaskRejectedDueToCapacityError,
+  isSkipError,
+  createSkipError,
 } from './task_running';
 export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { mockSearchHit } from '../mocks/mock_context';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { RightPanelContext } from '../context';
 import { MitreAttack } from './mitre_attack';
 
@@ -26,7 +26,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   const contextValue = {
     searchHit: {
       some_field: 'some_value',

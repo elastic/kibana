@@ -28,7 +28,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';
@@ -160,7 +161,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                       'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyConnectorText',
                       {
                         defaultMessage:
-                          'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
+                          'This pipeline runs automatically on all Crawler and Connector indices created through Search.',
                       }
                     )
                   )}
@@ -172,7 +173,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLabel',
                     {
-                      defaultMessage: 'Learn more about Enterprise Search ingest pipelines',
+                      defaultMessage: 'Learn more about Search ingest pipelines',
                     }
                   )}
                 </EuiLink>

@@ -11,11 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { InspectResponse } from '../common/helpers';
-import {
-  createFilter,
-  getInspectResponse,
-  generateTablePaginationOptions,
-} from '../common/helpers';
+import { getInspectResponse, generateTablePaginationOptions } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type {
   ResultEdges,
@@ -24,7 +20,6 @@ import type {
   Direction,
 } from '../../common/search_strategy';
 import { OsqueryQueries } from '../../common/search_strategy';
-import type { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -43,7 +38,7 @@ export interface UseActionResults {
   direction: Direction;
   limit: number;
   sortField: string;
-  filterQuery?: ESTermQuery | string;
+  kuery?: string;
   skip?: boolean;
   isLive?: boolean;
 }
@@ -55,7 +50,7 @@ export const useActionResults = ({
   direction,
   limit,
   sortField,
-  filterQuery,
+  kuery,
   skip = false,
   isLive = false,
 }: UseActionResults) => {
@@ -70,7 +65,7 @@ export const useActionResults = ({
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionResults,
-            filterQuery: createFilter(filterQuery),
+            kuery,
             pagination: generateTablePaginationOptions(activePage, limit),
             sort: {
               direction,

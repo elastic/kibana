@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const listingTable = getService('listingTable');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -46,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
+        await listingTable.clearSearchFilter();
       });
     });
 
@@ -198,6 +200,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
+      });
+    });
+
+    describe('edit meta data', () => {
+      it('saves changes to dashboard metadata', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
+        await dashboardAddPanel.ensureAddPanelIsClosed();
+        await PageObjects.dashboard.saveDashboard(`${dashboardName}-editMetaData`);
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.searchForItemWithName(`${dashboardName}-editMetaData`);
+        await listingTable.inspectVisualization();
+        await listingTable.editVisualizationDetails({
+          title: 'new title',
+          description: 'new description',
+        });
+
+        await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
+        await listingTable.setSearchFilterValue('new description');
+        await listingTable.expectItemsCount('dashboard', 1);
+        await listingTable.clickItemLink('dashboard', 'new title');
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.equal(originalPanelCount);
       });
     });
   });

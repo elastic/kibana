@@ -13,6 +13,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./create_lists'));
     loadTestFile(require.resolve('./create_lists_index'));
     loadTestFile(require.resolve('./create_list_items'));
+    loadTestFile(require.resolve('./patch_lists'));
+    loadTestFile(require.resolve('./patch_list_items'));
     loadTestFile(require.resolve('./read_lists'));
     loadTestFile(require.resolve('./read_list_items'));
     loadTestFile(require.resolve('./update_lists'));

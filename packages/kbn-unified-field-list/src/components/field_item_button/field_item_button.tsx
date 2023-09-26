@@ -62,6 +62,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param otherProps
  * @constructor
  */
+
 export function FieldItemButton<T extends FieldListItem = DataViewField>({
   field,
   fieldSearchHighlight,
@@ -104,6 +105,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
+      [`unifiedFieldListItemButton--withDragHandle`]: Boolean(otherProps.dragHandle),
     },
     className
   );

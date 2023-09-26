@@ -6,11 +6,23 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type {
+  IngestPipeline,
+  IngestSimulateDocument,
+  IngestSimulateRequest,
+  NodesInfoResponseBase,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  ELASTIC_MODEL_DEFINITIONS,
+  type GetElserOptions,
+  type ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-export function modelsProvider(client: IScopedClusterClient) {
+export function modelsProvider(client: IScopedClusterClient, cloud?: CloudSetup) {
   return {
     /**
      * Retrieves the map of model ids and aliases with associated pipelines.
@@ -63,6 +75,143 @@ export function modelsProvider(client: IScopedClusterClient) {
       await Promise.all(
         pipelinesIds.map((id) => client.asCurrentUser.ingest.deletePipeline({ id }))
       );
+    },
+
+    /**
+     * Simulates the effect of the pipeline on given document.
+     *
+     */
+    async simulatePipeline(docs: IngestSimulateDocument[], pipelineConfig: IngestPipeline) {
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: pipelineConfig,
+      };
+      let result = {};
+      try {
+        result = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return an empty response and a 200
+          return result;
+        }
+        throw error;
+      }
+
+      return result;
+    },
+
+    /**
+     * Creates the pipeline
+     *
+     */
+    async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
+      let result = {};
+
+      result = await client.asCurrentUser.ingest.putPipeline({
+        id: pipelineName,
+        ...pipelineConfig,
+      });
+
+      return result;
+    },
+
+    /**
+     * Retrieves existing pipelines.
+     *
+     */
+    async getPipelines() {
+      let result = {};
+      try {
+        result = await client.asCurrentUser.ingest.getPipeline();
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return an empty response and a 200
+          return result;
+        }
+        throw error;
+      }
+
+      return result;
+    },
+
+    /**
+     * Returns a list of elastic curated models available for download.
+     */
+    async getModelDownloads(): Promise<ModelDefinitionResponse[]> {
+      // We assume that ML nodes in Cloud are always on linux-x86_64, even if other node types aren't.
+      const isCloud = !!cloud?.cloudId;
+
+      const nodesInfoResponse =
+        await client.asInternalUser.transport.request<NodesInfoResponseBase>({
+          method: 'GET',
+          path: `/_nodes/ml:true/os`,
+        });
+
+      let osName: string | undefined;
+      let arch: string | undefined;
+      // Indicates that all ML nodes have the same architecture
+      let sameArch = true;
+      for (const node of Object.values(nodesInfoResponse.nodes)) {
+        if (!osName) {
+          osName = node.os?.name;
+        }
+        if (!arch) {
+          arch = node.os?.arch;
+        }
+        if (node.os?.name !== osName || node.os?.arch !== arch) {
+          sameArch = false;
+          break;
+        }
+      }
+
+      const result = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+        const recommended =
+          (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
+          (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
+        return {
+          ...def,
+          name,
+          ...(recommended ? { recommended } : {}),
+        };
+      });
+
+      return result;
+    },
+
+    /**
+     * Provides an ELSER model name and configuration for download based on the current cluster architecture.
+     * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
+     * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
+     * a portable version of the model is returned.
+     */
+    async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> | never {
+      const modelDownloadConfig = await this.getModelDownloads();
+
+      let requestedModel: ModelDefinitionResponse | undefined;
+      let recommendedModel: ModelDefinitionResponse | undefined;
+      let defaultModel: ModelDefinitionResponse | undefined;
+
+      for (const model of modelDownloadConfig) {
+        if (options?.version === model.version) {
+          requestedModel = model;
+          if (model.recommended) {
+            requestedModel = model;
+            break;
+          }
+        } else if (model.recommended) {
+          recommendedModel = model;
+        } else if (model.default) {
+          defaultModel = model;
+        }
+      }
+
+      if (!requestedModel && !defaultModel && !recommendedModel) {
+        throw new Error('Requested model not found');
+      }
+
+      return requestedModel || recommendedModel || defaultModel!;
     },
   };
 }

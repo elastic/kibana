@@ -31,8 +31,6 @@ const ScheduleCodec = t.interface({
   unit: ScheduleUnitCodec,
 });
 
-export type SyntheticsMonitorSchedule = t.TypeOf<typeof ScheduleCodec>;
-
 // TLSFields
 export const TLSFieldsCodec = t.partial({
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
@@ -48,7 +46,9 @@ export const TLSSensitiveFieldsCodec = t.partial({
 
 export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
 
-export type TLSFields = t.TypeOf<typeof TLSCodec>;
+const MonitorLocationsCodec = t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec]));
+
+export type MonitorLocations = t.TypeOf<typeof MonitorLocationsCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
@@ -60,7 +60,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
+    [ConfigKey.LOCATIONS]: MonitorLocationsCodec,
     [ConfigKey.MONITOR_QUERY_ID]: t.string,
     [ConfigKey.CONFIG_ID]: t.string,
   }),
@@ -79,8 +79,6 @@ export const CommonFieldsCodec = t.intersection([
   }),
 ]);
 
-export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
-
 // TCP Simple Fields
 export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
@@ -93,8 +91,6 @@ export const TCPSimpleFieldsCodec = t.intersection([
   }),
   CommonFieldsCodec,
 ]);
-
-export type TCPSimpleFields = t.TypeOf<typeof TCPSimpleFieldsCodec>;
 
 // TCPAdvancedFields
 export const TCPAdvancedFieldsCodec = t.intersection([
@@ -210,8 +206,6 @@ export const HTTPAdvancedCodec = t.intersection([
   HTTPSensitiveAdvancedFieldsCodec,
 ]);
 
-export type HTTPAdvancedFields = t.TypeOf<typeof HTTPAdvancedCodec>;
-
 // HTTPFields
 export const EncryptedHTTPFieldsCodec = t.intersection([
   HTTPSimpleFieldsCodec,
@@ -224,8 +218,6 @@ export const HTTPFieldsCodec = t.intersection([
   HTTPSensitiveAdvancedFieldsCodec,
   TLSSensitiveFieldsCodec,
 ]);
-
-export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.intersection([
@@ -300,10 +292,6 @@ export const BrowserFieldsCodec = t.intersection([
   TLSCodec,
 ]);
 
-export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
-export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
-export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
-
 // MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([
   HTTPFieldsCodec,
@@ -311,8 +299,6 @@ export const MonitorFieldsCodec = t.intersection([
   ICMPSimpleFieldsCodec,
   BrowserFieldsCodec,
 ]);
-
-export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
 
 // Monitor, represents one of (Icmp | Tcp | Http | Browser)
 export const SyntheticsMonitorCodec = t.union([
@@ -328,8 +314,6 @@ export const EncryptedSyntheticsMonitorCodec = t.union([
   ICMPSimpleFieldsCodec,
   EncryptedBrowserFieldsCodec,
 ]);
-
-export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
 
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
@@ -359,20 +343,12 @@ export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
-export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
-
-export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
-
-export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
-
 export const MonitorDefaultsCodec = t.interface({
   [DataStream.HTTP]: HTTPFieldsCodec,
   [DataStream.TCP]: TCPFieldsCodec,
   [DataStream.ICMP]: ICMPSimpleFieldsCodec,
   [DataStream.BROWSER]: BrowserFieldsCodec,
 });
-
-export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(EncryptedSyntheticsSavedMonitorCodec),
@@ -382,8 +358,6 @@ export const MonitorManagementListResultCodec = t.type({
   absoluteTotal: t.union([t.number, t.null]),
   syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
-
-export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
 export const MonitorOverviewItemCodec = t.intersection([
   t.interface({
@@ -395,21 +369,18 @@ export const MonitorOverviewItemCodec = t.intersection([
     isStatusAlertEnabled: t.boolean,
     type: t.string,
     tags: t.array(t.string),
+    schedule: t.string,
   }),
   t.partial({
     projectId: t.string,
   }),
 ]);
 
-export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
-
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
   monitors: t.array(MonitorOverviewItemCodec),
 });
-
-export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
 
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
@@ -418,11 +389,32 @@ export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   }),
 ]);
 
+export type SyntheticsMonitorSchedule = t.TypeOf<typeof ScheduleCodec>;
+export type TLSFields = t.TypeOf<typeof TLSCodec>;
+export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
+export type TCPSimpleFields = t.TypeOf<typeof TCPSimpleFieldsCodec>;
+export type HTTPAdvancedFields = t.TypeOf<typeof HTTPAdvancedCodec>;
+export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
+export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
+export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
+export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
+export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
+export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
+export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
+export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
+export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
+export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
+export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
+export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
 export type Secret = typeof secretKeys[number];
-
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
   Secret
 >;
-
+export type SyntheticsMonitorWithSecretsAttributes = Omit<
+  t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
+  Secret
+>;
 export type EncryptedSyntheticsMonitor = Omit<SyntheticsMonitorWithSecrets, 'secrets'>;
+export type EncryptedSyntheticsMonitorAttributes = Omit<SyntheticsMonitorWithSecrets, 'secrets'>;

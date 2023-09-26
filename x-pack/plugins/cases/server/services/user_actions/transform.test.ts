@@ -23,8 +23,8 @@ import {
 } from './test_utils';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { ConnectorUserAction } from '../../../common/api';
-import { Actions } from '../../../common/api';
+import type { ConnectorUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 describe('transform', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -32,7 +32,7 @@ describe('transform', () => {
   describe('action_id', () => {
     it('legacyTransformFindResponseToExternalModel sets action_id correctly to the saved object id', () => {
       const userAction = {
-        ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+        ...createUserActionSO({ action: UserActionActions.create, commentId: '5' }),
       };
 
       const transformed = legacyTransformFindResponseToExternalModel(
@@ -45,7 +45,7 @@ describe('transform', () => {
 
     it('transformFindResponseToExternalModel does not set action_id', () => {
       const userAction = {
-        ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+        ...createUserActionSO({ action: UserActionActions.create, commentId: '5' }),
       };
 
       const transformed = transformFindResponseToExternalModel(
@@ -153,7 +153,7 @@ describe('transform', () => {
     describe('reference ids', () => {
       it('sets comment_id to null when it cannot find the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+          ...createUserActionSO({ action: UserActionActions.create, commentId: '5' }),
           references: [],
         };
         const transformed = transformer(
@@ -166,7 +166,7 @@ describe('transform', () => {
 
       it('sets comment_id correctly when it finds the reference', () => {
         const userAction = createUserActionSO({
-          action: Actions.create,
+          action: UserActionActions.create,
           commentId: '5',
         });
 

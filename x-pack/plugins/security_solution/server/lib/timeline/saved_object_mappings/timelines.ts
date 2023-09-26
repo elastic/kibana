@@ -213,6 +213,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
             value: {
               type: 'text',
             },
+            relation: {
+              type: 'keyword',
+            },
           },
         },
         exists: {

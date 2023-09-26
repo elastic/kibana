@@ -8,8 +8,8 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingDeleteRoutes } from './delete';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('DELETE role mappings', () => {
   it('allows a role mapping to be deleted', async () => {

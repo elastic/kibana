@@ -10,6 +10,7 @@ export type {
   ObservabilitySharedPlugin,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
+  ProfilingLocators,
 } from './plugin';
 export const plugin = () => {
   return new ObservabilitySharedPlugin();
@@ -34,6 +35,8 @@ export {
 } from './components/section/section';
 export type { SectionLinkProps } from './components/section/section';
 export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
+
+export { TechnicalPreviewBadge } from './components/technical_preview_badge/technical_preview_badge';
 
 export { InspectorContextProvider } from './contexts/inspector/inspector_context';
 export type { AddInspectorRequest } from './contexts/inspector/inspector_context';
@@ -75,3 +78,10 @@ export {
   casesFeatureId,
   sloFeatureId,
 } from '../common';
+
+export {
+  EMBEDDABLE_FLAMEGRAPH,
+  EMBEDDABLE_FUNCTIONS,
+  EmbeddableFlamegraph,
+  EmbeddableFunctions,
+} from './components/profiling/embeddables';

@@ -11,8 +11,8 @@
  * 2.0.
  */
 
+import { EndpointActionListRequestSchema } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { actionListHandler } from './list_handler';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';

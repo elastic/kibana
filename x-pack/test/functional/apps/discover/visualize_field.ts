@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DebugState } from '@elastic/charts';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,14 +29,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'unifiedFieldList',
   ]);
+  const elasticChart = getService('elasticChart');
   const monacoEditor = getService('monacoEditor');
 
   const defaultSettings = {
-    'discover:enableSql': true,
+    'discover:enableESQL': true,
   };
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
+  }
+
+  function assertMatchesExpectedData(state: DebugState) {
+    expect(state.legend?.items.map(({ name }) => name).sort()).to.eql([
+      'css',
+      'gif',
+      'jpg',
+      'php',
+      'png',
+    ]);
   }
 
   describe('discover field visualize button', () => {
@@ -132,26 +144,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly text based language queries in Discover', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('heatmapChart')).to.be(true);
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
       await PageObjects.discover.chooseLensChart('Donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
-    it('should visualize correctly text based language queries in Lens', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+    it('should allow changing dimensions', async () => {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
+    });
+
+    it('should visualize correctly text based language queries in Lens', async () => {
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -162,15 +201,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
     });
 
     it('should visualize correctly text based language queries based on index patterns', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+        'from logstash* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -181,24 +220,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
     });
 
-    it('should save correctly chart to dashboard', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+    it('should save and edit chart in the dashboard on the fly', async () => {
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.saveModal('TextBasedChart', false, false, false, 'new');
       await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
     });
   });
 }

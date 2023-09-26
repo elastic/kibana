@@ -23,7 +23,7 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
       GeoContainmentAlertInstanceState,
       GeoContainmentAlertInstanceContext
     >();
-    alertInstance.scheduleActions.mockImplementation(
+    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
       (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
         // Check subset of alert for comparison to expected results
         // @ts-ignore
@@ -220,7 +220,8 @@ describe('getGeoContainmentExecutor', () => {
         {
           dateInShape: '2021-04-28T16:56:11.923Z',
           docId: 'ZVBoGXkBsFLYN2Tj1wmV',
-          location: [-73.99018926545978, 40.751759740523994],
+          location: [0, 0],
+          locationWkt: 'POINT (-73.99018926545978 40.751759740523994)',
           shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
         },
       ],
@@ -228,7 +229,8 @@ describe('getGeoContainmentExecutor', () => {
         {
           dateInShape: '2021-04-28T16:56:11.923Z',
           docId: 'ZlBoGXkBsFLYN2Tj1wmV',
-          location: [-73.99561604484916, 40.75449890457094],
+          location: [0, 0],
+          locationWkt: 'POINT (-73.99561604484916 40.75449890457094)',
           shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
         },
       ],

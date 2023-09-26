@@ -41,6 +41,47 @@
         "children": [
           {
             "parentPluginId": "devTools",
+            "id": "def-public.DevToolsPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "devTools",
+                "id": "def-public.DevToolsPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<",
+                  "ConfigSchema",
+                  ">"
+                ],
+                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "devTools",
             "id": "def-public.DevToolsPlugin.setup",
             "type": "Function",
             "tags": [],

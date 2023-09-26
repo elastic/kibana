@@ -580,7 +580,7 @@
             "tags": [],
             "label": "defaultIsCollapsed",
             "description": [
-              "\nFlag to indicate if the group is initially collapsed or not.\n\n`false`: the group will be opened event if none of its children nodes matches the current URL.\n\n`true`: the group will be collapsed event if any of its children nodes matches the current URL.\n\n`undefined`: the group will be opened if any of its children nodes matches the current URL."
+              "\nFlag to indicate if the group is initially collapsed or not.\n\n`undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.\n\n`false`: the group will be opened event if none of its children nodes matches the current URL.\n\n`true`: the group will be collapsed event if any of its children nodes matches the current URL."
             ],
             "signature": [
               "boolean | undefined"
@@ -812,6 +812,20 @@
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]>"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.NavigationServices.cloudLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "cloudLinks",
+            "description": [],
+            "signature": [
+              "{ userAndRoles?: { title: string; href: string; } | undefined; performance?: { title: string; href: string; } | undefined; billingAndSub?: { title: string; href: string; } | undefined; deployment?: { title: string; href: string; } | undefined; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/types/index.ts",
             "deprecated": false,

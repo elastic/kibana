@@ -44,7 +44,7 @@ describe('GettingStartedSteps', () => {
         ...rest,
       }));
 
-    expect(steps[0].title).toEqual('Add your documents to Enterprise Search');
+    expect(steps[0].title).toEqual('Add your documents to Search');
     expect(steps[0].status).toEqual('current');
     expect(steps[0].children.find(IconRow).length).toEqual(1);
 

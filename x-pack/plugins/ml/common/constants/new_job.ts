@@ -33,3 +33,5 @@ export const DEFAULT_RARE_BUCKET_SPAN = '1h';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
+
+export const NUMBER_OF_CATEGORY_EXAMPLES = 5;

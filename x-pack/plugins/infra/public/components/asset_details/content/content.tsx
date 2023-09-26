@@ -5,89 +5,58 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
-import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
+import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
+import { ContentTabIds } from '../types';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'node' | 'nodeType' | 'overrides' | 'onTabsStateChange'
->;
+export const Content = () => {
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={false}>
+        <DatePickerWrapper
+          visibleFor={[
+            ContentTabIds.OVERVIEW,
+            ContentTabIds.LOGS,
+            ContentTabIds.METADATA,
+            ContentTabIds.PROCESSES,
+            ContentTabIds.ANOMALIES,
+          ]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
+          <Anomalies />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.OVERVIEW}>
+          <Overview />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.LOGS}>
+          <Logs />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.METADATA}>
+          <Metadata />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.OSQUERY}>
+          <Osquery />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.PROCESSES}>
+          <Processes />
+        </TabPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-export const Content = ({
-  overrides,
-  currentTimeRange,
-  node,
-  onTabsStateChange,
-  nodeType = 'host',
-}: Props) => {
-  const onChange = (state: TabState) => {
-    if (!onTabsStateChange) {
-      return;
-    }
-
-    onTabsStateChange(state);
-  };
+const DatePickerWrapper = ({ visibleFor }: { visibleFor: ContentTabIds[] }) => {
+  const { activeTabId } = useTabSwitcherContext();
 
   return (
-    <>
-      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
-        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
-        <Overview
-          currentTimeRange={currentTimeRange}
-          nodeName={node.name}
-          nodeType={nodeType}
-          dataView={overrides?.overview?.dataView}
-          dateRange={overrides?.overview?.dateRange}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTime={currentTimeRange.to}
-          logViewReference={overrides?.logs?.logView?.reference}
-          logViewLoading={overrides?.logs?.logView?.loading}
-          search={overrides?.logs?.query}
-          onSearchChange={(query) => onChange({ logs: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.METADATA}>
-        <Metadata
-          currentTimeRange={currentTimeRange}
-          nodeName={node.name}
-          nodeType={nodeType}
-          showActionsColumn={overrides?.metadata?.showActionsColumn}
-          search={overrides?.metadata?.query}
-          onSearchChange={(query) => onChange({ metadata: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.METRICS}>
-        <Metrics
-          currentTime={currentTimeRange.to}
-          accountId={overrides?.metrics?.accountId}
-          customMetrics={overrides?.metrics?.customMetrics}
-          region={overrides?.metrics?.region}
-          nodeId={node.id}
-          nodeType={nodeType}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
-        <Processes
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTime={currentTimeRange.to}
-          search={overrides?.processes?.query}
-          onSearchFilterChange={(query) => onChange({ processes: { query } })}
-        />
-      </TabPanel>
-    </>
+    <div hidden={!visibleFor.includes(activeTabId as ContentTabIds)}>
+      <DatePicker />
+    </div>
   );
 };
 
@@ -95,7 +64,7 @@ const TabPanel = ({
   activeWhen,
   children,
 }: {
-  activeWhen: FlyoutTabIds;
+  activeWhen: ContentTabIds;
   children: React.ReactNode;
 }) => {
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();

@@ -23,7 +23,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
@@ -579,6 +579,7 @@ const CreateRulePageComponent: React.FC = () => {
             dataViewId={defineStepData.dataViewId}
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
+            isActive={activeStep === RuleStep.aboutRule}
             form={aboutStepForm}
           />
 

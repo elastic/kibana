@@ -81,6 +81,7 @@ const ObservabilitySloAlertOptional = rt.partial({
   }),
   slo: rt.partial({
     id: schemaString,
+    instanceId: schemaString,
     revision: schemaStringOrNumber,
   }),
 });

@@ -24,13 +24,13 @@ import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { NoSpacesAvailable } from './no_spaces_available';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
-import { NoSpacesAvailable } from './no_spaces_available';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

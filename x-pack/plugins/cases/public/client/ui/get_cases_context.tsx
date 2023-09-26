@@ -8,6 +8,8 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { useIsDarkTheme } from '../../common/use_is_dark_theme';
 import type { CasesContextProps } from '../../components/cases_context';
 
 export type GetCasesContextPropsInternal = CasesContextProps;
@@ -32,21 +34,25 @@ const CasesProviderLazyWrapper = ({
   releasePhase,
   getFilesClient,
 }: GetCasesContextPropsInternal & { children: ReactNode }) => {
+  const isDarkTheme = useIsDarkTheme();
+
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy
-        value={{
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
-          owner,
-          permissions,
-          features,
-          releasePhase,
-          getFilesClient,
-        }}
-      >
-        {children}
-      </CasesProviderLazy>
+      <StyledComponentsThemeProvider darkMode={isDarkTheme}>
+        <CasesProviderLazy
+          value={{
+            externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry,
+            owner,
+            permissions,
+            features,
+            releasePhase,
+            getFilesClient,
+          }}
+        >
+          {children}
+        </CasesProviderLazy>
+      </StyledComponentsThemeProvider>
     </Suspense>
   );
 };

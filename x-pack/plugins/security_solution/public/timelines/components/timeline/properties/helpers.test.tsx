@@ -15,7 +15,7 @@ import { useCreateTimelineButton } from './use_create_timeline';
 import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import {
   createSecuritySolutionStorageMock,
   mockGlobalState,

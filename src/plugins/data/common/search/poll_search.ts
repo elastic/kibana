@@ -22,6 +22,8 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     else {
       // if static pollInterval is not provided, then use default back-off logic
       switch (true) {
+        case elapsedTime < 1500:
+          return 300;
         case elapsedTime < 5000:
           return 1000;
         case elapsedTime < 20000:

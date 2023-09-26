@@ -29,6 +29,7 @@ import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_
 import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
+import { DashboardPublicState } from '../../types';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -86,15 +87,27 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build and return the dashboard container.
   // --------------------------------------------------------------------------------------
+  const initialComponentState: DashboardPublicState = {
+    lastSavedInput: savedObjectResult?.dashboardInput ?? {
+      ...DEFAULT_DASHBOARD_INPUT,
+      id: input.id,
+    },
+    hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
+    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
+    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
+    managed: savedObjectResult.managed,
+    lastSavedId: savedObjectId,
+  };
+
   const dashboardContainer = new DashboardContainer(
     input,
     reduxEmbeddablePackage,
     searchSessionId,
-    savedObjectResult?.dashboardInput,
     dashboardCreationStartTime,
     undefined,
     creationOptions,
-    savedObjectId
+    initialComponentState
   );
   dashboardContainerReady$.next(dashboardContainer);
   return dashboardContainer;
@@ -137,7 +150,6 @@ export const initializeDashboard = async ({
     useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
-  const overrideInput = getInitialInput?.();
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -161,6 +173,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),

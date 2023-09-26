@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Eslint from 'eslint';
+import type { Rule, AST } from 'eslint';
 import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
@@ -15,7 +15,7 @@ const messages = {
     'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
 };
 
-const meta: Eslint.Rule.RuleMetaData = {
+const meta: Rule.RuleMetaData = {
   type: 'problem',
   fixable: 'code',
   docs: {
@@ -25,7 +25,7 @@ const meta: Eslint.Rule.RuleMetaData = {
   messages,
 };
 
-const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
+const create = (context: Rule.RuleContext): Rule.RuleListener => {
   return {
     Program(node) {
       const nodeComments = node.comments || [];
@@ -56,7 +56,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           loc: reportLoc,
           messageId: NAKED_DISABLE_MSG_ID,
           fix(fixer) {
-            return fixer.removeRange(parsedEslintDisable.range as Eslint.AST.Range);
+            return fixer.removeRange(parsedEslintDisable.range as AST.Range);
           },
         });
       });
@@ -64,7 +64,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
   };
 };
 
-export const NoNakedESLintDisableRule: Eslint.Rule.RuleModule = {
+export const NoNakedESLintDisableRule: Rule.RuleModule = {
   meta,
   create,
 };

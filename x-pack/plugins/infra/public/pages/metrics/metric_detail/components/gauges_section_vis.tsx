@@ -7,7 +7,7 @@
 
 import {
   EuiFlexItem,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -54,7 +54,7 @@ export const GaugesSectionVis = ({
     return null;
   }
   return (
-    <EuiPageContentBody>
+    <EuiPageSection>
       <EuiSpacer size="m" />
       <GroupBox>
         {metric.series.map((series) => {
@@ -93,7 +93,7 @@ export const GaugesSectionVis = ({
         })}
       </GroupBox>
       <EuiSpacer size="m" />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };
 

@@ -32,104 +32,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files and folders stored on Box with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'gmail',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.gmailName', {
-      defaultMessage: 'Gmail',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.gmailDescription',
-      {
-        defaultMessage: 'Search over your emails managed by Gmail with Workplace Search.',
-      }
-    ),
-    categories: [
-      'enterprise_search',
-      'google_cloud',
-      'workplace_search',
-      'workplace_search_content_source',
-    ],
-  },
-  {
-    id: 'google_drive',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveName', {
-      defaultMessage: 'Google Drive',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveDescription',
-      {
-        defaultMessage: 'Search over your documents on Google Drive with Workplace Search.',
-      }
-    ),
-    categories: [
-      'enterprise_search',
-      'google_cloud',
-      'workplace_search',
-      'workplace_search_content_source',
-    ],
-  },
-  {
-    id: 'onedrive',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
-      defaultMessage: 'OneDrive',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.onedriveDescription',
-      {
-        defaultMessage: 'Search over your files stored on OneDrive with Workplace Search.',
-      }
-    ),
-    categories: [
-      'enterprise_search',
-      'azure',
-      'workplace_search',
-      'workplace_search_content_source',
-    ],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
-  },
-  {
-    id: 'salesforce',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.salesforceName', {
-      defaultMessage: 'Salesforce',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceDescription',
-      {
-        defaultMessage: 'Search over your content on Salesforce with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'salesforce_sandbox',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxName',
-      {
-        defaultMessage: 'Salesforce Sandbox',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxDescription',
-      {
-        defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'slack',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.slackName', {
-      defaultMessage: 'Slack',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.slackDescription',
-      {
-        defaultMessage: 'Search over your messages on Slack with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
     id: 'zendesk',
@@ -142,37 +45,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your tickets on Zendesk with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'github',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.githubName', {
-      defaultMessage: 'GitHub',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription',
-      {
-        defaultMessage: 'Search over your projects and repos on GitHub with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search', 'content_source'],
-  },
-  {
-    id: 'github_enterprise_server',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerName',
-      {
-        defaultMessage: 'GitHub Enterprise Server',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerDescription',
-      {
-        defaultMessage:
-          'Search over your projects and repos on GitHub Enterprise Server with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search', 'content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
 ];
 
@@ -229,7 +102,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Web crawler',
       }),
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
-        defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
+        defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
       uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/crawler',
@@ -273,8 +146,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.content.integrations.dropboxDescription',
         {
-          defaultMessage:
-            'Search over your files and folders stored on Dropbox with Enterprise Search.',
+          defaultMessage: 'Search over your files and folders stored on Dropbox.',
         }
       ),
       categories: [
@@ -283,6 +155,7 @@ export const registerEnterpriseSearchIntegrations = (
         'datastore',
         'connector',
         'connector_client',
+        ...nativeSearchTag,
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=dropbox',
@@ -296,54 +169,104 @@ export const registerEnterpriseSearchIntegrations = (
       isBeta: false,
     });
 
-    // TODO: Review around BC 2/3 whether github is ready
+    customIntegrations.registerCustomIntegration({
+      id: 'dropbox_paper',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.dropboxPaper', {
+        defaultMessage: 'Dropbox Paper',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.integrations.dropboxPaperDescription',
+        {
+          defaultMessage: 'Search over your files and folders stored on Dropbox Paper.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'datastore',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=dropbox',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/dropbox.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
 
-    // customIntegrations.registerCustomIntegration({
-    //   id: 'github',
-    //   title: i18n.translate('xpack.enterpriseSearch.content.integrations.github', {
-    //     defaultMessage: 'GitHub',
-    //   }),
-    //   description: i18n.translate('xpack.enterpriseSearch.content.integrations.githubDescription', {
-    //     defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
-    //   }),
-    //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-    //   uiInternalPath:
-    //     '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
-    //   icons: [
-    //     {
-    //       type: 'svg',
-    //       src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/github.svg'),
-    //     },
-    //   ],
-    //   shipper: 'enterprise_search',
-    //   isBeta: false,
-    // });
+    customIntegrations.registerCustomIntegration({
+      id: 'github',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.github', {
+        defaultMessage: 'GitHub',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.content.integrations.githubDescription', {
+        defaultMessage: 'Search over your projects and repos on GitHub.',
+      }),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/github.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
 
-    // customIntegrations.registerCustomIntegration({
-    //   id: 'github_server',
-    //   title: i18n.translate('xpack.enterpriseSearch.content.integrations.githubServer', {
-    //     defaultMessage: 'GitHub Enterprise Server',
-    //   }),
-    //   description: i18n.translate(
-    //     'xpack.enterpriseSearch.content.integrations.githubServerDescription',
-    //     {
-    //       defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
-    //     }
-    //   ),
-    //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-    //   uiInternalPath:
-    //     '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
-    //   icons: [
-    //     {
-    //       type: 'svg',
-    //       src: http.basePath.prepend(
-    //         '/plugins/enterpriseSearch/assets/source_icons/github_enterprise_server.svg'
-    //       ),
-    //     },
-    //   ],
-    //   shipper: 'enterprise_search',
-    //   isBeta: false,
-    // });
+    customIntegrations.registerCustomIntegration({
+      id: 'github_server',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.githubServer', {
+        defaultMessage: 'GitHub Enterprise Server',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.integrations.githubServerDescription',
+        {
+          defaultMessage: 'Search over your projects and repos on GitHub.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/github_enterprise_server.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'gmail',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.gmail', {
+        defaultMessage: 'Gmail',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.content.integrations.gmailDescription', {
+        defaultMessage: 'Search over your content on Gmail.',
+      }),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=gmail',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/gmail.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
 
     customIntegrations.registerCustomIntegration({
       id: 'mongodb',
@@ -353,7 +276,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBDescription',
         {
-          defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
+          defaultMessage: 'Search over your MongoDB content.',
         }
       ),
       categories: [
@@ -384,7 +307,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.mysqlDescription',
         {
-          defaultMessage: 'Search over your MySQL content with Enterprise Search.',
+          defaultMessage: 'Search over your MySQL content.',
         }
       ),
       categories: [
@@ -406,6 +329,40 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       isBeta: false,
     });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'onedrive',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.oneDriveTitle', {
+        defaultMessage: 'OneDrive',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.integrations.oneDriveDescription',
+        {
+          defaultMessage: 'Search over your content on OneDrive.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/salesforce_sandbox.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
     customIntegrations.registerCustomIntegration({
       id: 'build_a_connector',
       title: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorName', {
@@ -414,10 +371,10 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.buildAConnectorDescription',
         {
-          defaultMessage: 'Search over data stored on custom data sources with Enterprise Search.',
+          defaultMessage: 'Search over data stored on custom data sources.',
         }
       ),
-      categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector_client'],
+      categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector', 'connector_client'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=custom',
       icons: [
@@ -438,10 +395,18 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.postgreSQLDescription',
         {
-          defaultMessage: 'Search over your content on PostgreSQL with Enterprise Search.',
+          defaultMessage: 'Search over your content on PostgreSQL.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=postgresql',
       icons: [
@@ -457,6 +422,39 @@ export const registerEnterpriseSearchIntegrations = (
     });
 
     customIntegrations.registerCustomIntegration({
+      id: 'salesforce_sandbox',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.salesforceSandboxTitle', {
+        defaultMessage: 'Salesforce Sandbox',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxDescription',
+        {
+          defaultMessage: 'Search over your content on Salesforce Sandbox.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/salesforce_sandbox.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
       id: 'servicenow',
       title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.serviceNowName', {
         defaultMessage: 'ServiceNow',
@@ -464,10 +462,16 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.serviceNowDescription',
         {
-          defaultMessage: 'Search over your content on ServiceNow with Enterprise Search.',
+          defaultMessage: 'Search over your content on ServiceNow.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=service_now',
       icons: [
@@ -475,6 +479,35 @@ export const registerEnterpriseSearchIntegrations = (
           type: 'svg',
           src: http.basePath.prepend(
             '/plugins/enterpriseSearch/assets/source_icons/servicenow.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'salesforce',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.salesforceName', {
+        defaultMessage: 'Salesforce',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.integrations.salesforceDescription', {
+        defaultMessage: 'Search over your content on Salesforce.',
+      }),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/salesforce.svg'
           ),
         },
       ],
@@ -493,7 +526,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointOnlineDescription',
         {
-          defaultMessage: 'Search over your content on SharePoint Online with Enterprise Search.',
+          defaultMessage: 'Search over your content on SharePoint Online.',
         }
       ),
       categories: [
@@ -528,7 +561,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerDescription',
         {
-          defaultMessage: 'Search over your content on SharePoint Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on SharePoint Server.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
@@ -547,6 +580,27 @@ export const registerEnterpriseSearchIntegrations = (
     });
 
     customIntegrations.registerCustomIntegration({
+      id: 'slack',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.slack', {
+        defaultMessage: 'Slack',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.content.integrations.slackDescription', {
+        defaultMessage: 'Search over your content on Slack.',
+      }),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=slack',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/slack.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
       id: 'oracle',
       title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.oracleName', {
         defaultMessage: 'Oracle',
@@ -554,10 +608,17 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.oracleDescription',
         {
-          defaultMessage: 'Search over your content on Oracle with Enterprise Search.',
+          defaultMessage: 'Search over your content on Oracle.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=oracle',
       icons: [
@@ -578,11 +639,18 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.msSqlDescription',
         {
-          defaultMessage:
-            'Search over your content on Microsoft SQL Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Microsoft SQL Server.',
         }
       ),
-      categories: ['enterprise_search', 'custom', 'elastic_stack', 'datastore'],
+      categories: [
+        'enterprise_search',
+        'custom',
+        'elastic_stack',
+        'datastore',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=mssql',
       icons: [
@@ -606,7 +674,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.netowkrDriveDescription',
         {
-          defaultMessage: 'Search over your Network Drive content with Enterprise Search.',
+          defaultMessage: 'Search over your Network Drive content.',
         }
       ),
       categories: [
@@ -638,10 +706,16 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.s3Description',
         {
-          defaultMessage: 'Search over your content on Amazon S3 with Enterprise Search.',
+          defaultMessage: 'Search over your content on Amazon S3.',
         }
       ),
-      categories: ['enterprise_search', 'datastore', 'elastic_stack'],
+      categories: [
+        'enterprise_search',
+        'datastore',
+        'elastic_stack',
+        'connector',
+        'connector_client',
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=s3',
       icons: [
@@ -662,11 +736,10 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.googleCloudDescription',
         {
-          defaultMessage:
-            'Search over your content on Google Cloud Storage with Enterprise Search.',
+          defaultMessage: 'Search over your content on Google Cloud Storage.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'custom'],
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=google_cloud_storage',
       icons: [
@@ -682,6 +755,32 @@ export const registerEnterpriseSearchIntegrations = (
     });
 
     customIntegrations.registerCustomIntegration({
+      id: 'google_drive',
+      title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.googleDrive', {
+        defaultMessage: 'Google Drive',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveDescription',
+        {
+          defaultMessage: 'Search over your content on Google Drive.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=google_drive',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/google_drive.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
       id: 'azure_blob_storage',
       title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.azureBlob', {
         defaultMessage: 'Azure Blob Storage',
@@ -689,10 +788,17 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.azureBlobDescription',
         {
-          defaultMessage: 'Search over your content on Azure Blob Storage with Enterprise Search.',
+          defaultMessage: 'Search over your content on Azure Blob Storage.',
         }
       ),
-      categories: ['enterprise_search', 'elastic_stack', 'custom'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        ...nativeSearchTag,
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=azure_blob_storage',
       icons: [
@@ -714,7 +820,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.confluenceDescription',
         {
-          defaultMessage: 'Search over your content on Confluence Cloud with Enterprise Search.',
+          defaultMessage: 'Search over your content on Confluence Cloud.',
         }
       ),
       categories: [
@@ -749,7 +855,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.confluenceServerDescription',
         {
-          defaultMessage: 'Search over your content on Confluence Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Confluence Server.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
@@ -774,7 +880,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.jiraDescription',
         {
-          defaultMessage: 'Search over your content on Jira Cloud with Enterprise Search.',
+          defaultMessage: 'Search over your content on Jira Cloud.',
         }
       ),
       categories: [
@@ -784,6 +890,7 @@ export const registerEnterpriseSearchIntegrations = (
         'connector',
         'connector_client',
         'jira',
+        ...nativeSearchTag,
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=jira',
@@ -807,7 +914,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.jiraServerDescription',
         {
-          defaultMessage: 'Search over your content on Jira Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Jira Server.',
         }
       ),
       categories: [
@@ -817,6 +924,7 @@ export const registerEnterpriseSearchIntegrations = (
         'connector',
         'connector_client',
         'jira',
+        ...nativeSearchTag,
       ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=jira',

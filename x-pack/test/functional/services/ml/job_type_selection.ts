@@ -64,5 +64,14 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     async assertCategorizationJobWizardOpen() {
       await testSubjects.existOrFail('mlPageJobWizard categorization');
     },
+
+    async selectRecognizerJob(moduleId: string) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`mlRecognizerCard ${moduleId}`);
+      await this.assertRecognizerJobWizardOpen();
+    },
+
+    async assertRecognizerJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard recognizer');
+    },
   };
 }

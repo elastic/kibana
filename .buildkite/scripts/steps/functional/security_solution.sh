@@ -3,14 +3,14 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/functional/common_cypress.sh
 
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-Xvfb :99 -screen 0 1600x1200x24 &
+echo "--- Security Solution Cypress tests (Chrome)"
 
-export DISPLAY=:99
+cd x-pack/test/security_solution_cypress
 
-echo "--- Security Solution tests (Chrome)"
-
-yarn --cwd x-pack/plugins/security_solution cypress:run
+set +e
+yarn cypress:run:ess; status=$?; yarn junit:merge || :; exit $status

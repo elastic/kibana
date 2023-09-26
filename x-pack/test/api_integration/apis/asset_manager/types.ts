@@ -7,7 +7,7 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
-import { AssetManagerServices } from './config';
+import { AssetManagerServices } from './config_with_signals_source';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
   infer TServices,

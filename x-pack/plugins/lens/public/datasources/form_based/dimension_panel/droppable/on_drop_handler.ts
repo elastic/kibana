@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { DropType } from '@kbn/dom-drag-drop';
-import { isDraggedDataViewField } from '../../../../utils';
+import {
+  isDraggedDataViewField,
+  reorderElements,
+  shouldRemoveSource as shouldRemoveSourceChecker,
+} from '../../../../utils';
 import {
   DatasourceDimensionDropHandlerProps,
   DragDropOperation,
   IndexPatternMap,
   isOperation,
-  StateSetter,
   VisualizationDimensionGroupConfig,
   DraggedField,
 } from '../../../../types';
@@ -27,16 +30,10 @@ import {
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
 import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: FormBasedPrivateState;
-  setState: StateSetter<
-    FormBasedPrivateState,
-    {
-      isDimensionComplete?: boolean;
-      forceRender?: boolean;
-    }
-  >;
   targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
   dropType?: DropType;
   source: T;
@@ -63,12 +60,12 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPriva
   }
 
   if (!isOperation(source)) {
-    return false;
+    return;
   }
   const sourceDataView = indexPatterns[state.layers[source.layerId].indexPatternId];
   const targetDataView = indexPatterns[state.layers[target.layerId].indexPatternId];
   if (sourceDataView !== targetDataView) {
-    return false;
+    return;
   }
 
   const operationProps = {
@@ -95,17 +92,18 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPriva
       'replace_compatible',
     ].includes(dropType)
   ) {
-    return onMoveCompatible(operationProps);
+    return onMoveCompatible(operationProps, shouldRemoveSourceChecker(source, dropType));
   }
   if (
     [
       'duplicate_incompatible',
       'replace_duplicate_incompatible',
+
       'move_incompatible',
       'replace_incompatible',
     ].includes(dropType)
   ) {
-    return onMoveIncompatible(operationProps);
+    return onMoveIncompatible(operationProps, shouldRemoveSourceChecker(source, dropType));
   }
   if (dropType === 'swap_compatible') {
     return onSwapCompatible(operationProps);
@@ -114,7 +112,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPriva
     return onSwapIncompatible(operationProps);
   }
   if (['combine_incompatible', 'combine_compatible'].includes(dropType)) {
-    return onCombine(operationProps);
+    return onCombine(operationProps, shouldRemoveSourceChecker(source, dropType));
   }
 }
 
@@ -122,7 +120,7 @@ const isFieldDropType = (dropType: DropType) =>
   ['field_add', 'field_replace', 'field_combine'].includes(dropType);
 
 function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boolean) {
-  const { setState, state, source, target, targetLayerDimensionGroups, indexPatterns } = props;
+  const { state, source, target, targetLayerDimensionGroups, indexPatterns } = props;
 
   const prioritizedOperation = targetLayerDimensionGroups.find(
     (g) => g.groupId === target.groupId
@@ -154,7 +152,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     (shouldAddField &&
       !hasOperationSupportForMultipleFields(indexPattern, targetColumn, undefined, source.field))
   ) {
-    return false;
+    return;
   }
   const field = shouldAddField ? getField(targetColumn, indexPattern) : source.field;
   const initialParams = shouldAddField
@@ -179,17 +177,19 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     shouldCombineField: shouldAddField,
     initialParams,
   });
-  setState(mergeLayer({ state, layerId: target.layerId, newLayer }));
-  return true;
+  return mergeLayer({ state, layerId: target.layerId, newLayer });
 }
 
-function onMoveCompatible({
-  setState,
-  state,
-  source,
-  target,
-  targetLayerDimensionGroups,
-}: DropHandlerProps<DataViewDragDropOperation>) {
+function onMoveCompatible(
+  {
+    state,
+    source,
+    target,
+    targetLayerDimensionGroups,
+    indexPatterns,
+  }: DropHandlerProps<DataViewDragDropOperation>,
+  shouldRemoveSource?: boolean
+) {
   let modifiedLayers = copyColumn({
     layers: state.layers,
     target,
@@ -212,55 +212,47 @@ function onMoveCompatible({
     },
   };
 
-  setState(
-    mergeLayers({
-      state,
-      newLayers: modifiedLayers,
-    })
-  );
-  return true;
-}
+  const newState = mergeLayers({
+    state,
+    newLayers: modifiedLayers,
+  });
 
-function onReorder({
-  setState,
-  state,
-  source,
-  target,
-}: DropHandlerProps<DataViewDragDropOperation>) {
-  function reorderElements(items: string[], targetId: string, sourceId: string) {
-    const result = items.filter((c) => c !== sourceId);
-    const targetIndex = items.findIndex((c) => c === sourceId);
-    const sourceIndex = items.findIndex((c) => c === targetId);
-
-    const targetPosition = result.indexOf(targetId);
-    result.splice(targetIndex < sourceIndex ? targetPosition + 1 : targetPosition, 0, sourceId);
-    return result;
+  if (shouldRemoveSource) {
+    return removeColumn({
+      layerId: source.layerId,
+      columnId: source.columnId,
+      prevState: newState,
+      indexPatterns,
+    });
   }
 
-  setState(
-    mergeLayer({
-      state,
-      layerId: target.layerId,
-      newLayer: {
-        columnOrder: reorderElements(
-          state.layers[target.layerId].columnOrder,
-          target.columnId,
-          source.columnId
-        ),
-      },
-    })
-  );
-  return true;
+  return newState;
 }
 
-function onMoveIncompatible({
-  setState,
-  state,
-  source,
-  targetLayerDimensionGroups,
-  target,
-  indexPatterns,
-}: DropHandlerProps<DataViewDragDropOperation>) {
+function onReorder({ state, source, target }: DropHandlerProps<DataViewDragDropOperation>) {
+  return mergeLayer({
+    state,
+    layerId: target.layerId,
+    newLayer: {
+      columnOrder: reorderElements(
+        state.layers[target.layerId].columnOrder,
+        target.columnId,
+        source.columnId
+      ),
+    },
+  });
+}
+
+function onMoveIncompatible(
+  {
+    state,
+    source,
+    targetLayerDimensionGroups,
+    target,
+    indexPatterns,
+  }: DropHandlerProps<DataViewDragDropOperation>,
+  shouldRemoveSource?: boolean
+) {
   const targetLayer = state.layers[target.layerId];
   const targetColumn = targetLayer.columns[target.columnId] || null;
   const sourceLayer = state.layers[source.layerId];
@@ -269,8 +261,10 @@ function onMoveIncompatible({
   const sourceField = getField(sourceColumn, indexPattern);
   const newOperation = getNewOperation(sourceField, target.filterOperations, targetColumn);
   if (!newOperation) {
-    return false;
+    return;
   }
+
+  let newState;
 
   if (target.layerId === source.layerId) {
     const newLayer = insertOrReplaceColumn({
@@ -283,14 +277,11 @@ function onMoveIncompatible({
       targetGroup: target.groupId,
       shouldResetLabel: true,
     });
-    setState(
-      mergeLayer({
-        state,
-        layerId: target.layerId,
-        newLayer,
-      })
-    );
-    return true;
+    newState = mergeLayer({
+      state,
+      layerId: target.layerId,
+      newLayer,
+    });
   } else {
     const outputTargetLayer = insertOrReplaceColumn({
       layer: targetLayer,
@@ -302,21 +293,28 @@ function onMoveIncompatible({
       targetGroup: target.groupId,
       shouldResetLabel: true,
     });
-    setState(
-      mergeLayers({
-        state,
-        newLayers: {
-          [source.layerId]: sourceLayer,
-          [target.layerId]: outputTargetLayer,
-        },
-      })
-    );
-    return true;
+    newState = mergeLayers({
+      state,
+      newLayers: {
+        [source.layerId]: sourceLayer,
+        [target.layerId]: outputTargetLayer,
+      },
+    });
   }
+
+  if (shouldRemoveSource) {
+    return removeColumn({
+      layerId: source.layerId,
+      columnId: source.columnId,
+      prevState: newState,
+      indexPatterns,
+    });
+  }
+
+  return newState;
 }
 
 function onSwapIncompatible({
-  setState,
   state,
   source,
   targetLayerDimensionGroups,
@@ -336,7 +334,7 @@ function onSwapIncompatible({
   const newOperationForTarget = getNewOperation(targetField, source.filterOperations, sourceColumn);
 
   if (!newOperationForSource || !newOperationForTarget) {
-    return false;
+    return;
   }
 
   const outputTargetLayer = insertOrReplaceColumn({
@@ -361,14 +359,11 @@ function onSwapIncompatible({
       targetGroup: source.groupId,
       shouldResetLabel: true,
     });
-    setState(
-      mergeLayer({
-        state,
-        layerId: target.layerId,
-        newLayer,
-      })
-    );
-    return true;
+    return mergeLayer({
+      state,
+      layerId: target.layerId,
+      newLayer,
+    });
   } else {
     const outputSourceLayer = insertOrReplaceColumn({
       layer: sourceLayer,
@@ -380,13 +375,10 @@ function onSwapIncompatible({
       targetGroup: source.groupId,
       shouldResetLabel: true,
     });
-    setState(
-      mergeLayers({
-        state,
-        newLayers: { [source.layerId]: outputSourceLayer, [target.layerId]: outputTargetLayer },
-      })
-    );
-    return true;
+    return mergeLayers({
+      state,
+      newLayers: { [source.layerId]: outputSourceLayer, [target.layerId]: outputTargetLayer },
+    });
   }
 }
 
@@ -402,7 +394,6 @@ const swapColumnOrder = (columnOrder: string[], sourceId: string, targetId: stri
 };
 
 function onSwapCompatible({
-  setState,
   state,
   source,
   targetLayerDimensionGroups,
@@ -424,18 +415,14 @@ function onSwapCompatible({
       target.columnId
     );
 
-    setState(
-      mergeLayer({
-        state,
-        layerId: target.layerId,
-        newLayer: {
-          columnOrder: updatedColumnOrder,
-          columns: newColumns,
-        },
-      })
-    );
-
-    return true;
+    return mergeLayer({
+      state,
+      layerId: target.layerId,
+      newLayer: {
+        columnOrder: updatedColumnOrder,
+        columns: newColumns,
+      },
+    });
   } else {
     // TODO why not reorderByGroups for both columns? Are they already in that order?
     const newTargetLayer = copyColumn({
@@ -452,28 +439,26 @@ function onSwapCompatible({
       shouldDeleteSource: true,
     })[source.layerId];
 
-    setState(
-      mergeLayers({
-        state,
-        newLayers: {
-          [source.layerId]: newSourceLayer,
-          [target.layerId]: newTargetLayer,
-        },
-      })
-    );
-
-    return true;
+    return mergeLayers({
+      state,
+      newLayers: {
+        [source.layerId]: newSourceLayer,
+        [target.layerId]: newTargetLayer,
+      },
+    });
   }
 }
 
-function onCombine({
-  state,
-  setState,
-  source,
-  target,
-  targetLayerDimensionGroups,
-  indexPatterns,
-}: DropHandlerProps<DataViewDragDropOperation>) {
+function onCombine(
+  {
+    state,
+    source,
+    target,
+    targetLayerDimensionGroups,
+    indexPatterns,
+  }: DropHandlerProps<DataViewDragDropOperation>,
+  shouldRemoveSource?: boolean
+) {
   const targetLayer = state.layers[target.layerId];
   const targetColumn = targetLayer.columns[target.columnId];
   const targetField = getField(targetColumn, target.dataView);
@@ -484,7 +469,7 @@ function onCombine({
   const sourceField = getField(sourceColumn, indexPattern);
   // extract the field from the source column
   if (!sourceField || !targetField) {
-    return false;
+    return;
   }
   // pass it to the target column and delete the source column
   const initialParams = {
@@ -508,8 +493,19 @@ function onCombine({
     shouldCombineField: true,
   });
 
-  setState(
-    mergeLayers({ state, newLayers: { ...state.layers, [target.layerId]: outputTargetLayer } })
-  );
-  return true;
+  const newState = mergeLayers({
+    state,
+    newLayers: { ...state.layers, [target.layerId]: outputTargetLayer },
+  });
+
+  if (shouldRemoveSource) {
+    return removeColumn({
+      layerId: source.layerId,
+      columnId: source.columnId,
+      prevState: newState,
+      indexPatterns,
+    });
+  }
+
+  return newState;
 }

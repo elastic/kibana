@@ -7,6 +7,9 @@ exports[`Should render error when upload fails from elasticsearch request failur
       "settings": Object {
         "get": [MockFunction],
       },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -104,6 +107,9 @@ exports[`Should render error when upload fails from http request timeout 1`] = `
       "settings": Object {
         "get": [MockFunction],
       },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -200,6 +206,9 @@ exports[`Should render success 1`] = `
     Object {
       "settings": Object {
         "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
       },
       "uiSettings": Object {
         "get": [MockFunction],
@@ -360,6 +369,9 @@ exports[`Should render warning when some features failed import 1`] = `
     Object {
       "settings": Object {
         "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
       },
       "uiSettings": Object {
         "get": [MockFunction],

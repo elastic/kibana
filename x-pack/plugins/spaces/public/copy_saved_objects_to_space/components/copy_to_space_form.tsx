@@ -10,11 +10,11 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { SpacesDataEntry } from '../../types';
-import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';
 import type { CopyMode } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import type { SpacesDataEntry } from '../../types';
+import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';
 
 interface Props {
   savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>;

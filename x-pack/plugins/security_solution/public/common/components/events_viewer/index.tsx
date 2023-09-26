@@ -79,6 +79,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const storage = new Storage(localStorage);
 
@@ -92,7 +93,7 @@ export interface EventsViewerProps {
   leadingControlColumns: ControlColumnProps[];
   sourcererScope: SourcererScopeName;
   start: string;
-  showTotalCount?: boolean;
+  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
@@ -183,6 +184,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+
+  const getFieldSpec = useGetFieldSpec(sourcererScope);
 
   const { globalFullScreen } = useGlobalFullScreen();
 
@@ -602,6 +605,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
                             getFieldBrowser={getFieldBrowser}
+                            getFieldSpec={getFieldSpec}
                           />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>

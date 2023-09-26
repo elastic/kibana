@@ -12,8 +12,8 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
-import { licenseMock } from '../../../common/licensing/index.mock';
 import { rolesManagementApp } from './roles_management_app';
+import { licenseMock } from '../../../common/licensing/index.mock';
 
 jest.mock('./roles_grid', () => ({
   RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,

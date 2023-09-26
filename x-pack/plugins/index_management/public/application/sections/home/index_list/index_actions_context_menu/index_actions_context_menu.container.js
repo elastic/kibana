@@ -23,17 +23,11 @@ import {
   unfreezeIndices,
 } from '../../../../store/actions';
 
-import {
-  getIndexStatusByIndexName,
-  getIndicesByName,
-  getIsSystemIndexByName,
-  hasSystemIndex,
-} from '../../../../store/selectors';
+import { getIndexStatusByIndexName, getIndicesByName } from '../../../../store/selectors';
 
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
-  const allIndices = state.indices.byId;
 
   indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
@@ -42,8 +36,6 @@ const mapStateToProps = (state, ownProps) => {
   return {
     indexStatusByName,
     indices: getIndicesByName(state, indexNames),
-    isSystemIndexByName: getIsSystemIndexByName(indexNames, allIndices),
-    hasSystemIndex: hasSystemIndex(indexNames, allIndices),
   };
 };
 

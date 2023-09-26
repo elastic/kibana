@@ -12,13 +12,12 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { TableHeader } from './components/table_header/table_header';
-import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
-import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
@@ -90,10 +89,6 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
-  /**
-   * Doc viewer component
-   */
-  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export interface DocTableRenderProps {
@@ -134,7 +129,6 @@ export const DocTableWrapper = forwardRef(
       sharedItemTitle,
       dataTestSubj,
       isLoading,
-      DocViewer,
     }: DocTableWrapperProps,
     ref
   ) => {
@@ -192,7 +186,6 @@ export const DocTableWrapper = forwardRef(
             shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            DocViewer={DocViewer}
             isPlainRecord={isPlainRecord}
             rows={rows}
           />
@@ -208,7 +201,6 @@ export const DocTableWrapper = forwardRef(
         shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
-        DocViewer,
         isPlainRecord,
         rows,
       ]

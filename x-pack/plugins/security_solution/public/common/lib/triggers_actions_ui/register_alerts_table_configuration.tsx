@@ -93,10 +93,25 @@ const registerAlertsTableConfiguration = (
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
     cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true },
     columns: alertColumns,
+
     getRenderCellValue: renderCellValueHookCasePage,
     useInternalFlyout,
     useBulkActions: getBulkActionHook(TableId.alertsOnCasePage),
     useCellActions: getUseCellActionsHook(TableId.alertsOnCasePage),
+    sort,
+    showInspectButton: true,
+  });
+
+  registerIfNotAlready(registry, {
+    id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS,
+    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true },
+    columns: alertColumns,
+    getRenderCellValue: renderCellValueHookAlertPage,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsRiskInputs),
+    useInternalFlyout,
+    useBulkActions: getBulkActionHook(TableId.alertsRiskInputs),
+    useCellActions: getUseCellActionsHook(TableId.alertsRiskInputs),
+    usePersistentControls: getPersistentControlsHook(TableId.alertsRiskInputs),
     sort,
     showInspectButton: true,
   });

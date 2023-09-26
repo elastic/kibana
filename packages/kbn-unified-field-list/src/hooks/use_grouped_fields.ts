@@ -14,9 +14,9 @@ import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   type FieldListGroups,
-  type FieldsGroupDetails,
   type FieldsGroup,
   type FieldListItem,
+  type OverrideFieldGroupDetails,
   FieldsGroupNames,
   ExistenceFetchStatus,
 } from '../types';
@@ -38,9 +38,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   popularFieldsLimit?: number;
   sortedSelectedFields?: T[];
   getCustomFieldType?: FieldFiltersParams<T>['getCustomFieldType'];
-  onOverrideFieldGroupDetails?: (
-    groupName: FieldsGroupNames
-  ) => Partial<FieldsGroupDetails> | undefined | null;
+  onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
 }

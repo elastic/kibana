@@ -26,8 +26,8 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any

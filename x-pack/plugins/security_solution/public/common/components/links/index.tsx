@@ -7,7 +7,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -22,11 +22,10 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
-  useGetSecuritySolutionUrl,
 } from '../link_to';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
+import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
@@ -43,16 +42,17 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
+import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
 
+export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
+
+export { useGetSecuritySolutionLinkProps, withSecuritySolutionLink };
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 /** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
-
-const isModified = (event: MouseEvent) =>
-  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -576,74 +576,6 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
-
-interface SecuritySolutionLinkProps {
-  deepLinkId: SecurityPageName;
-  path?: string;
-}
-
-interface LinkProps {
-  onClick: MouseEventHandler;
-  href: string;
-}
-
-export type GetSecuritySolutionProps = (
-  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
-) => LinkProps;
-
-/**
- * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
- */
-export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { navigateTo } = useNavigateTo();
-
-  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
-    ({ deepLinkId, path, onClick: onClickProps }) => {
-      const url = getSecuritySolutionUrl({ deepLinkId, path });
-      return {
-        href: url,
-        onClick: (ev: MouseEvent) => {
-          if (isModified(ev)) {
-            return;
-          }
-
-          ev.preventDefault();
-          navigateTo({ url });
-          if (onClickProps) {
-            onClickProps(ev);
-          }
-        },
-      };
-    },
-    [getSecuritySolutionUrl, navigateTo]
-  );
-
-  return getSecuritySolutionProps;
-};
-
-/**
- * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- */
-export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<T>
-) => {
-  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
-    deepLinkId,
-    path,
-    onClick: onClickProps,
-    ...rest
-  }) => {
-    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-    const { onClick, href } = getSecuritySolutionLinkProps({
-      deepLinkId,
-      path,
-      onClick: onClickProps,
-    });
-    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
-  };
-  return SecuritySolutionLink;
-};
 
 /**
  * Security Solutions internal link button.

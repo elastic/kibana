@@ -22,6 +22,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
+import { documentationService } from '../../../mappings_editor/shared_imports';
 
 interface Props {
   defaultValue?: { [key: string]: any };
@@ -65,7 +66,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={`${esDocsBase}/indices-aliases.html`}
+              href={documentationService.getBulkIndexAlias()}
               target="_blank"
               iconType="help"
             >

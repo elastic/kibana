@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
 
-  // Failing: See https://github.com/elastic/kibana/issues/161157
-  describe.skip('discover request counts', function describeIndexTests() {
+  describe('discover request counts', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -39,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'bfetch:disable': true,
-        'discover:enableSql': true,
+        'discover:enableESQL': true,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    const getSearchCount = async (type: 'ese' | 'sql') => {
+    const getSearchCount = async (type: 'ese' | 'esql') => {
       const requests = await browser.execute(() =>
         performance
           .getEntries()
@@ -70,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.canvasExists();
     };
 
-    const expectSearches = async (type: 'ese' | 'sql', expected: number, cb: Function) => {
+    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
       await browser.execute(async () => {
         performance.clearResourceTimings();
       });
@@ -87,15 +86,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearch,
       query1,
       query2,
+      savedSearchesRequests,
       setQuery,
-      skipSavedSearchTests,
     }: {
-      type: 'ese' | 'sql';
+      type: 'ese' | 'esql';
       savedSearch: string;
       query1: string;
       query2: string;
+      savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
-      skipSavedSearchTests?: boolean;
     }) => {
       it('should send 2 search requests (documents + chart) on page load', async () => {
         await browser.refresh();
@@ -138,37 +137,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      if (!skipSavedSearchTests) {
-        it('should send 2 requests for saved search changes', async () => {
-          await setQuery(query1);
-          await queryBar.clickQuerySubmitButton();
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Sep 21, 2015 @ 06:31:44.000',
-            'Sep 23, 2015 @ 00:00:00.000'
-          );
-          await waitForLoadingToFinish();
-          // creating the saved search
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.saveSearch(savedSearch);
-          });
-          // resetting the saved search
-          await setQuery(query2);
-          await queryBar.clickQuerySubmitButton();
-          await waitForLoadingToFinish();
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.clickResetSavedSearchButton();
-          });
-          // clearing the saved search
-          await expectSearches(type, 2, async () => {
-            await testSubjects.click('discoverNewButton');
-            await waitForLoadingToFinish();
-          });
-          // loading the saved search
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.loadSavedSearch(savedSearch);
-          });
+      it('should send 2 requests for saved search changes', async () => {
+        await setQuery(query1);
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 23, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        // TODO: Check why the request happens 4 times in case of opening a saved search
+        // https://github.com/elastic/kibana/issues/165192
+        // creating the saved search
+        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+          await PageObjects.discover.saveSearch(savedSearch);
         });
-      }
+        // resetting the saved search
+        await setQuery(query2);
+        await queryBar.clickQuerySubmitButton();
+        await waitForLoadingToFinish();
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.clickResetSavedSearchButton();
+        });
+        // clearing the saved search
+        await expectSearches('ese', 2, async () => {
+          await testSubjects.click('discoverNewButton');
+          await waitForLoadingToFinish();
+        });
+        // loading the saved search
+        // TODO: https://github.com/elastic/kibana/issues/165192
+        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+          await PageObjects.discover.loadSavedSearch(savedSearch);
+        });
+      });
     };
 
     describe('data view mode', () => {
@@ -223,25 +223,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('SQL mode', () => {
-      const type = 'sql';
+    describe('ES|QL mode', () => {
+      const type = 'esql';
 
       beforeEach(async () => {
-        await PageObjects.discover.selectTextBaseLang('SQL');
-        monacoEditor.setCodeEditorValue('SELECT count(*) FROM "logstash-*" WHERE bytes > 1000');
+        await PageObjects.discover.selectTextBaseLang();
+        monacoEditor.setCodeEditorValue(
+          'from logstash-* | where bytes > 1000 | stats countB = count(bytes)'
+        );
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
       });
 
       getSharedTests({
         type,
-        savedSearch: 'sql test',
-        query1: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes > 1000 GROUP BY type',
-        query2: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes < 2000 GROUP BY type',
+        savedSearch: 'esql test',
+        query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
+        query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
+        savedSearchesRequests: 4,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
-        // TODO: We get 4 requests instead of 2 for the saved search test in SQL mode,
-        // so we're skipping them for now until we fix the issue.
-        skipSavedSearchTests: true,
       });
     });
   });

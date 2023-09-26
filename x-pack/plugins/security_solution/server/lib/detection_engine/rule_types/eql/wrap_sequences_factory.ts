@@ -13,7 +13,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 export const wrapSequencesFactory =
   ({

@@ -14,9 +14,10 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
@@ -42,7 +43,7 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
-import { useChartConfigPanel } from './hooks/use_chart_config_panel';
+import { ChartConfigPanel } from './chart_config_panel';
 import { getLensAttributes } from './utils/get_lens_attributes';
 import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
@@ -69,6 +70,8 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensTablesAdapter?: Record<string, Datatable>;
+  isOnHistogramMode?: boolean;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -78,6 +81,7 @@ export interface ChartProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -104,6 +108,8 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensTablesAdapter,
+  isOnHistogramMode,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -113,6 +119,7 @@ export function Chart({
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -220,19 +227,6 @@ export function Chart({
     ]
   );
 
-  const ChartConfigPanel = useChartConfigPanel({
-    services,
-    lensAttributesContext,
-    dataView,
-    lensTablesAdapter,
-    currentSuggestion,
-    isFlyoutVisible,
-    setIsFlyoutVisible,
-    isPlainRecord,
-    query: originalQuery,
-    onSuggestionChange,
-  });
-
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
       onSuggestionChange?.(s);
@@ -275,7 +269,7 @@ export function Chart({
     [isFlyoutVisible]
   );
 
-  const canEditVisualizationOnTheFly = isPlainRecord && chartVisible;
+  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
   return (
     <EuiFlexGroup
@@ -425,6 +419,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
@@ -438,9 +440,11 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}
+              withDefaultActions={withDefaultActions}
             />
           </section>
           {appendHistogram}
@@ -454,7 +458,22 @@ export function Chart({
           isSaveable={false}
         />
       )}
-      {isFlyoutVisible && ChartConfigPanel}
+      {isFlyoutVisible && (
+        <ChartConfigPanel
+          {...{
+            services,
+            lensAttributesContext,
+            dataView,
+            lensTablesAdapter,
+            currentSuggestion,
+            isFlyoutVisible,
+            setIsFlyoutVisible,
+            isPlainRecord,
+            query: originalQuery,
+            onSuggestionChange,
+          }}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

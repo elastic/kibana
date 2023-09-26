@@ -120,6 +120,7 @@ import {
   getIndexPatternsObjects,
   getSearchWarningMessages,
   inferTimeField,
+  extractReferencesFromState,
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import {
@@ -460,7 +461,6 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
       .then(() => {
-        this.loadUserMessages();
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -594,17 +594,6 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterAndSortUserMessages(
-      [...this._userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
-    );
-  };
-
-  private _userMessages: UserMessage[] = [];
-
-  // loads all available user messages
-  private loadUserMessages() {
     const userMessages: UserMessage[] = [];
 
     userMessages.push(
@@ -671,8 +660,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    this._userMessages = userMessages;
-  }
+    return filterAndSortUserMessages(
+      [...userMessages, ...Object.values(this.additionalUserMessages)],
+      locationId,
+      filters ?? {}
+    );
+  };
 
   private additionalUserMessages: Record<string, UserMessage> = {};
 
@@ -741,19 +734,37 @@ export class Embeddable
 
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
-    const datasourceId = (this.activeDatasourceId ??
+    const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
     if (viz?.state) {
+      const datasourceStates = {
+        ...viz.state.datasourceStates,
+        [activeDatasourceId]: datasourceState,
+      };
+      const references = extractReferencesFromState({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: this.deps.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates: Object.fromEntries(
+          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
+        ),
+        visualizationState,
+        activeVisualization: this.activeVisualizationId
+          ? this.deps.visualizationMap[this.activeVisualizationId]
+          : undefined,
+      });
       const attrs = {
         ...viz,
         state: {
           ...viz.state,
           visualization: visualizationState,
-          datasourceStates: {
-            ...viz.state.datasourceStates,
-            [datasourceId]: datasourceState,
-          },
+          datasourceStates,
         },
+        references,
       };
       this.updateInput({ attributes: attrs });
     }
@@ -761,7 +772,7 @@ export class Embeddable
 
   async openConfingPanel(startDependencies: LensPluginStartDependencies) {
     const { getEditLensConfiguration } = await import('../async_services');
-    const Component = getEditLensConfiguration(
+    const Component = await getEditLensConfiguration(
       this.deps.coreStart,
       startDependencies,
       this.deps.visualizationMap,
@@ -770,6 +781,7 @@ export class Embeddable
 
     const datasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
+
     const attributes = this.savedVis as TypedLensByValueInput['attributes'];
     const dataView = this.dataViews[0];
     if (attributes) {
@@ -780,6 +792,7 @@ export class Embeddable
           updateAll={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
+          panelId={this.id}
         />
       );
     }
@@ -887,12 +900,7 @@ export class Embeddable
 
     this.activeData = newActiveData;
 
-    // Refresh messanges if info type is found as with active data
-    // these messages can be enriched
-    if (this._userMessages.some(({ severity }) => severity === 'info')) {
-      this.loadUserMessages();
-      this.renderUserMessages();
-    }
+    this.renderUserMessages();
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -971,6 +979,7 @@ export class Embeddable
       return;
     }
     super.render(domNode as HTMLElement);
+
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -1018,7 +1027,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers}
+              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1034,6 +1043,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1174,7 +1184,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
-      disableShardWarnings: true,
+      disableWarningToasts: true,
     };
 
     if (input.query) {
@@ -1205,45 +1215,35 @@ export class Embeddable
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
+
+    let eventHandler:
+      | LensBaseEmbeddableInput['onBrushEnd']
+      | LensBaseEmbeddableInput['onFilter']
+      | LensBaseEmbeddableInput['onTableRowClick'];
+    let shouldExecuteDefaultTriggers = true;
+
     if (isLensBrushEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
-      if (shouldExecuteDefaultTriggers) {
-        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: {
-            ...event.data,
-            timeFieldName:
-              event.data.timeFieldName ||
-              inferTimeField(this.deps.data.datatableUtilities, event.data),
-          },
-          embeddable: this,
-        });
-      }
+      eventHandler = this.input.onBrushEnd;
+    } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
+      eventHandler = this.input.onFilter;
+    } else if (isLensTableRowContextMenuClickEvent(event)) {
+      eventHandler = this.input.onTableRowClick;
     }
-    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onFilter) {
-        this.input.onFilter({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
+
+    eventHandler?.({
+      ...event.data,
+      preventDefault: () => {
+        shouldExecuteDefaultTriggers = false;
+      },
+    });
+
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
             timeFieldName:
-              event.data.timeFieldName ||
-              inferTimeField(this.deps.data.datatableUtilities, event.data),
+              event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
           },
           embeddable: this,
         });
@@ -1251,15 +1251,6 @@ export class Embeddable
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onTableRowClick) {
-        this.input.onTableRowClick({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
       if (shouldExecuteDefaultTriggers) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
           {
@@ -1288,7 +1279,6 @@ export class Embeddable
 
       this.expression = ast;
 
-      this.loadUserMessages();
       this.reload();
     }
   };

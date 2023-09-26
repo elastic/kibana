@@ -8,10 +8,11 @@
 import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
 import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import { loadPage } from './common';
 import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
-  cy.visit(APP_ENDPOINTS_PATH);
+  loadPage(APP_ENDPOINTS_PATH);
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
@@ -21,13 +22,11 @@ export const openResponseConsoleFromEndpointList = (): void => {
 };
 
 export const inputConsoleCommand = (command: string): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(command);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(command);
 };
 
 export const clearConsoleCommandInput = (): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture')
-    .click()
-    .type(`{selectall}{backspace}`);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(`{selectall}{backspace}`);
 };
 
 export const selectCommandFromHelpMenu = (command: string): void => {

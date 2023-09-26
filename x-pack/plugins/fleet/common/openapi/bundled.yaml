@@ -772,11 +772,17 @@ paths:
       operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: boolean
+          name: force
+          description: delete package even if policies used by agents
+          in: query
       requestBody:
         content:
           application/json:
             schema:
               type: object
+              deprecated: true
               properties:
                 force:
                   type: boolean
@@ -2430,7 +2436,11 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/format'
     parameters: []
     post:
       summary: Create package policy
@@ -2463,6 +2473,7 @@ paths:
               $ref: '#/components/schemas/package_policy_request'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
   /package_policies/_bulk_get:
     post:
       summary: Bulk get package policies
@@ -2501,7 +2512,8 @@ paths:
           $ref: '#/components/responses/error'
       operationId: bulk-get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/format'
   /package_policies/delete:
     post:
       summary: Delete package policy
@@ -2627,6 +2639,12 @@ paths:
         '400':
           $ref: '#/components/responses/error'
   /package_policies/{packagePolicyId}:
+    parameters:
+      - schema:
+          type: string
+        name: packagePolicyId
+        in: path
+        required: true
     get:
       summary: Get package policy by ID
       tags:
@@ -2646,12 +2664,8 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-package-policy
-    parameters:
-      - schema:
-          type: string
-        name: packagePolicyId
-        in: path
-        required: true
+      parameters:
+        - $ref: '#/components/parameters/format'
     put:
       summary: Update package policy by ID
       tags:
@@ -2681,6 +2695,7 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
     delete:
       summary: Delete package policy by ID
       tags:
@@ -3354,7 +3369,6 @@ components:
       name: kuery
       in: query
       required: false
-      deprecated: true
       schema:
         type: string
     show_inactive:
@@ -3392,6 +3406,16 @@ components:
       required: false
       schema:
         type: boolean
+    format:
+      name: format
+      in: query
+      description: Simplified or legacy format for package inputs
+      required: false
+      schema:
+        type: string
+        enum:
+          - simplified
+          - legacy
   responses:
     error:
       description: Generic Error
@@ -4263,8 +4287,10 @@ components:
             revision:
               type: number
             inputs:
-              type: array
-              items: {}
+              oneOf:
+                - type: array
+                  items: {}
+                - type: object
           required:
             - id
             - revision
@@ -4938,6 +4964,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -4969,6 +5002,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5017,10 +5055,8 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_buffer_size:
+        required_acks:
           type: number
-        broker_ack_reliability:
-          type: string
       required:
         - name
         - type
@@ -5202,6 +5238,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -5233,6 +5276,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5281,9 +5329,7 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_ack_reliability:
-          type: string
-        broker_buffer_size:
+        required_acks:
           type: number
       required:
         - name
@@ -5371,6 +5417,12 @@ components:
           type: string
         host:
           type: string
+        proxy_id:
+          description: >-
+            The ID of the proxy to use for this download source. See the proxies
+            API for more information.
+          type: string
+          nullable: true
       required:
         - is_default
         - name

@@ -15,7 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from '../rules_table/translations';
 
@@ -27,7 +27,7 @@ import { isMlRule } from '../../../../../common/detection_engine/utils';
 import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
 import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
 const POPOVER_WIDTH = '340px';
 

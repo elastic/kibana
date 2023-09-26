@@ -22,7 +22,7 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
@@ -34,7 +34,7 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
@@ -1576,11 +1576,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

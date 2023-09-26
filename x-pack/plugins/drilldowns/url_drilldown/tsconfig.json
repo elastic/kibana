@@ -18,7 +18,8 @@
     "@kbn/std",
     "@kbn/image-embeddable-plugin",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-theme-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

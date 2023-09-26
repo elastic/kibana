@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createTitleUserActionBuilder } from './title';
@@ -26,7 +26,7 @@ describe('createTitleUserActionBuilder ', () => {
   });
 
   it('renders correctly', async () => {
-    const userAction = getUserAction('title', Actions.update);
+    const userAction = getUserAction('title', UserActionActions.update);
     // @ts-ignore no need to pass all the arguments
     const builder = createTitleUserActionBuilder({
       ...builderArgs,

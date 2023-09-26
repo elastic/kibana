@@ -7,6 +7,7 @@
 
 declare namespace Cypress {
   interface Chainable {
+    loginAsSuperUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsMonitorUser(): Cypress.Chainable<Cypress.Response<any>>;
@@ -27,5 +28,6 @@ declare namespace Cypress {
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
     dismissServiceGroupsTour(): void;
+    withHidden(selector: string, callback: () => void): void;
   }
 }

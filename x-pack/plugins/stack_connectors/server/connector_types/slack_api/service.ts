@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosHeaders, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -106,12 +106,11 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
 };
 
 export const createExternalService = (
-  { config, secrets }: { config?: { allowedChannels?: string[] }; secrets: { token: string } },
+  { secrets }: { secrets: { token: string } },
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): SlackApiService => {
   const { token } = secrets;
-  const { allowedChannels } = config || { allowedChannels: [] };
   if (!token) {
     throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
   }
@@ -148,7 +147,9 @@ export const createExternalService = (
         status: 0,
         statusText: '',
         headers: {},
-        config: {},
+        config: {
+          headers: new AxiosHeaders({}),
+        },
       };
 
       while (numberOfFetch < RE_TRY) {
@@ -170,23 +171,6 @@ export const createExternalService = (
       }
       result.data.channels = channels;
       const responseData = result.data;
-      if ((allowedChannels ?? []).length > 0) {
-        const allowedChannelsList = channels.filter((channel: ChannelsResponse) =>
-          allowedChannels?.includes(channel.name)
-        );
-        allowedChannels?.forEach((ac) => {
-          if (!allowedChannelsList.find((c: ChannelsResponse) => c.name === ac)) {
-            allowedChannelsList.push({
-              id: '-1',
-              name: ac,
-              is_channel: true,
-              is_archived: false,
-              is_private: false,
-            });
-          }
-        });
-        responseData.channels = allowedChannelsList;
-      }
 
       return buildSlackExecutorSuccessResponse<GetChannelsResponse>({
         slackApiResponseData: responseData,
@@ -201,19 +185,6 @@ export const createExternalService = (
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      if (
-        allowedChannels &&
-        allowedChannels.length > 0 &&
-        !channels.every((c) => allowedChannels?.includes(c))
-      ) {
-        return buildSlackExecutorErrorResponse({
-          slackApiError: {
-            message: `The channel "${channels.join()}" is not included in the allowed channels list "${allowedChannels.join()}"`,
-          },
-          logger,
-        });
-      }
-
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',

@@ -16,7 +16,7 @@ import type {
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */

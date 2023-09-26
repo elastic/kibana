@@ -122,4 +122,33 @@ describe('ExportTypesRegistry', function () {
       }).toThrow();
     });
   });
+
+  describe('getByJobType', function () {
+    it('returns obj that matches the predicate', function () {
+      const prop = 'fooProp';
+      const match = { id: 'foo', jobType: prop };
+      [match, { id: 'bar' }, { id: 'baz' }].forEach((obj) => exportTypesRegistry.register(obj));
+      expect(exportTypesRegistry.getByJobType(prop)).toBe(match);
+    });
+
+    it('throws Error if multiple items match predicate', function () {
+      const prop = 'fooProp';
+      [
+        { id: 'foo', jobType: prop },
+        { id: 'bar', jobType: prop },
+      ].forEach((obj) => exportTypesRegistry.register(obj));
+      expect(() => {
+        exportTypesRegistry.getByJobType(prop);
+      }).toThrow();
+    });
+
+    it('throws Error if no items match predicate', function () {
+      const prop = 'fooProp';
+      [
+        { id: 'foo', jobtType: prop },
+        { id: 'bar', jobType: prop },
+      ].forEach((obj) => exportTypesRegistry.register(obj));
+      expect(() => exportTypesRegistry.getByJobType('foo')).toThrow();
+    });
+  });
 });

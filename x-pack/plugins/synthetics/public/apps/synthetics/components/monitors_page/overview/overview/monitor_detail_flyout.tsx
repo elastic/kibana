@@ -251,7 +251,7 @@ export function MonitorDetailFlyout(props: Props) {
   const upsertSuccess = upsertStatus?.status === 'success';
 
   const {
-    data: monitorSavedObject,
+    data: monitorObject,
     error,
     status,
     loading,
@@ -262,7 +262,7 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorDetail = useMonitorDetail(configId, props.location);
   const { locations } = useStatusByLocation({
     configId,
-    monitorLocations: monitorSavedObject?.locations,
+    monitorLocations: monitorObject?.locations,
   });
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
@@ -276,14 +276,14 @@ export function MonitorDetailFlyout(props: Props) {
     >
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <LoadingState />}
-      {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
+      {status === FETCH_STATUS.SUCCESS && monitorObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorSavedObject?.[ConfigKey.NAME]}</h2>
+                    <h2>{monitorObject?.[ConfigKey.NAME]}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -307,7 +307,7 @@ export function MonitorDetailFlyout(props: Props) {
                 locations={locations}
                 setCurrentLocation={setLocation}
                 configId={configId}
-                monitor={monitorSavedObject}
+                monitor={monitorObject}
                 onEnabledChange={props.onEnabledChange}
               />
             </EuiPanel>
@@ -320,10 +320,8 @@ export function MonitorDetailFlyout(props: Props) {
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
-                ...monitorSavedObject,
+                ...monitorObject,
                 id,
-                updated_at: monitorSavedObject.updated_at!,
-                created_at: monitorSavedObject.created_at!,
               }}
               loading={Boolean(loading)}
             />

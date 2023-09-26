@@ -26,6 +26,11 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    isServerlessEnabled: false,
+    serverless: {
+      projectId: undefined,
+      projectName: undefined,
+    },
   };
 }
 
@@ -42,6 +47,10 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   billingUrl: 'billing-url',
   profileUrl: 'profile-url',
   organizationUrl: 'organization-url',
+  isServerlessEnabled: false,
+  serverless: {
+    projectId: undefined,
+  },
 });
 
 export const cloudMock = {

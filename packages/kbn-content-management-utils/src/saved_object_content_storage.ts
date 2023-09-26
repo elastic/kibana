@@ -69,11 +69,13 @@ function savedObjectToItem<Attributes extends object>(
     error,
     namespaces,
     version,
+    managed,
   } = savedObject;
 
   return {
     id,
     type,
+    managed,
     updatedAt,
     createdAt,
     attributes: pick(attributes, allowedSavedObjectAttributes),
@@ -135,6 +137,7 @@ export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
   enableMSearch?: boolean;
+  mSearchAdditionalSearchFields?: string[];
 }
 
 export abstract class SOContentStorage<Types extends CMCrudTypes>
@@ -153,6 +156,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     searchArgsToSOFindOptions,
     enableMSearch,
     allowedSavedObjectAttributes,
+    mSearchAdditionalSearchFields,
   }: SOContentStorageConstrutorParams<Types>) {
     this.savedObjectType = savedObjectType;
     this.cmServicesDefinition = cmServicesDefinition;
@@ -166,6 +170,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (enableMSearch) {
       this.mSearch = {
         savedObjectType: this.savedObjectType,
+        additionalSearchFields: mSearchAdditionalSearchFields,
         toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): Types['Item'] => {
           const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
 
@@ -201,6 +206,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   mSearch?: {
     savedObjectType: string;
     toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult) => Types['Item'];
+    additionalSearchFields?: string[];
   };
 
   async get(ctx: StorageContext, id: string): Promise<Types['GetOut']> {

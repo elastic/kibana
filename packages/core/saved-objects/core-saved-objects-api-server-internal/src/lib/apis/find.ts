@@ -239,11 +239,13 @@ export const performFind = async <T = unknown, A = unknown>(
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
         (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => {
-          const savedObject = migrationHelper.migrateStorageDocument(
-            serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-              migrationVersionCompatibility,
-            })
-          ) as SavedObject;
+          let savedObject = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
+            migrationVersionCompatibility,
+          });
+          // can't migrate a document with partial attributes
+          if (!fields) {
+            savedObject = migrationHelper.migrateStorageDocument(savedObject) as SavedObject;
+          }
           return {
             ...savedObject,
             score: hit._score!,

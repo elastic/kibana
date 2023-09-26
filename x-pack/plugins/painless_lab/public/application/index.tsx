@@ -36,6 +36,7 @@ export function renderApp(
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
+    theme: { theme$ },
   });
   render(
     <I18nContext>

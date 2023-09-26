@@ -6,7 +6,7 @@
  */
 
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
-import { RuleExecutionEventType } from '../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionEventType } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import { RULE_EXECUTION_LOG_PROVIDER } from './event_log_constants';
 
 export const registerEventLogProvider = (eventLogService: IEventLogService) => {

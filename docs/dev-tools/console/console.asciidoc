@@ -122,6 +122,34 @@ GET ${pathVariable}
 }
 ----------------------------------
 
+By default, variables in the body may be substituted as a boolean, number, array, or
+object by removing nearby quotes instead of a string with surrounding quotes. Triple
+quotes overwrite this default behavior and enforce simple replacement as a string.
+
+[source,js]
+----------------------------------
+GET /locations/_search
+{
+  "query": {
+    "bool": {
+      "must": {
+        "match": {
+          // ${shopName} shall be replaced as a string if the variable exists.
+          "shop.name": """${shopName}"""
+        }
+      },
+      "filter": {
+        "geo_distance": {
+          "distance": "12km",
+          // "${pinLocation}" may be substituted with an array such as [-70, 40].
+          "pin.location": "${pinLocation}"
+        }
+      }
+    }
+  }
+}
+----------------------------------
+
 [float]
 [[auto-formatting]]
 ==== Auto-formatting

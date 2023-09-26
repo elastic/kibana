@@ -112,6 +112,12 @@ export const defaultNavigation: MlNodeDefinition = {
           }),
           link: 'ml:indexDataVisualizer',
         },
+        {
+          title: i18n.translate('defaultNavigation.ml.dataComparison', {
+            defaultMessage: 'Data comparison',
+          }),
+          link: 'ml:dataComparison',
+        },
       ],
     },
     {
@@ -121,7 +127,7 @@ export const defaultNavigation: MlNodeDefinition = {
       }),
       children: [
         {
-          link: 'ml:explainLogRateSpikes',
+          link: 'ml:logRateAnalysis',
         },
         {
           link: 'ml:logPatternAnalysis',

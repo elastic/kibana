@@ -13,11 +13,38 @@ import { get } from 'lodash';
 
 interface EndpointCallOutProps {
   basePath: string;
+  editDisabled: boolean;
 }
 
-const EndpointActionCalloutComponent = ({ basePath }: EndpointCallOutProps) => {
+const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCallOutProps) => {
   const [data] = useFormData();
   const currentCommand = get(data, `${basePath}.command`);
+
+  if (editDisabled) {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.privileges"
+              defaultMessage="Insufficient privileges"
+            />
+          }
+        >
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
+              defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
+            />
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
 
   if (currentCommand === 'isolate') {
     return (

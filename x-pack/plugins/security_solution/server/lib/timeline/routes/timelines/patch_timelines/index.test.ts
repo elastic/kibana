@@ -42,7 +42,6 @@ describe('update timelines', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();

@@ -6,7 +6,7 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { DatasourceDimensionDropProps, IndexPatternMap, OperationMetadata } from '../../../types';
+import { DatasourceDimensionProps, IndexPatternMap, OperationMetadata } from '../../../types';
 import { OperationType } from '../form_based';
 import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
 import { FormBasedPrivateState } from '../types';
@@ -18,9 +18,12 @@ export interface OperationSupportMatrix {
 }
 
 type Props = Pick<
-  DatasourceDimensionDropProps<FormBasedPrivateState>['target'],
+  DatasourceDimensionProps<FormBasedPrivateState>,
   'layerId' | 'columnId' | 'filterOperations'
-> & { state: FormBasedPrivateState; indexPatterns: IndexPatternMap };
+> & {
+  state: FormBasedPrivateState;
+  indexPatterns: IndexPatternMap;
+};
 
 function computeOperationMatrix(
   operationsByMetadata: Array<{

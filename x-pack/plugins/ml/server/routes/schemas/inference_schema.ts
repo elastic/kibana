@@ -77,3 +77,17 @@ export const deleteTrainedModelQuerySchema = schema.object({
   with_pipelines: schema.maybe(schema.boolean({ defaultValue: false })),
   force: schema.maybe(schema.boolean({ defaultValue: false })),
 });
+
+export const createIngestPipelineSchema = schema.object({
+  pipelineName: schema.string(),
+  pipeline: schema.maybe(
+    schema.object({
+      processors: schema.arrayOf(schema.any()),
+      description: schema.maybe(schema.string()),
+    })
+  ),
+});
+
+export const modelDownloadsQuery = schema.object({
+  version: schema.maybe(schema.oneOf([schema.literal('1'), schema.literal('2')])),
+});

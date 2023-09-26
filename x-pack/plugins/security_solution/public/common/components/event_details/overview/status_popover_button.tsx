@@ -9,7 +9,7 @@ import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,

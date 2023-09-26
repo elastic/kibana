@@ -6,7 +6,8 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest, Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
@@ -23,12 +24,21 @@ import { User } from '../../../cases_api_integration/common/lib/authentication/t
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
-type OmitSupertest<T> = Omit<T, 'supertest'>;
+type GetParams<T extends (...args: any) => any> = Omit<Parameters<T>[0], 'supertest'>;
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  const getSuperTest = (hasAuth: boolean) => (hasAuth ? supertestWithoutAuth : kbnSupertest);
+
+  const createApiFunction =
+    <T extends (...args: any) => any>(apiFunc: T) =>
+    (params: GetParams<typeof apiFunc>): ReturnType<typeof apiFunc> => {
+      const supertest = getSuperTest(Boolean(params.auth));
+      return apiFunc({ supertest, ...params });
+    };
 
   return {
     async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<Case> {
@@ -40,10 +50,10 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return createCaseAPI(kbnSupertest, caseData);
     },
 
-    async createNthRandomCases(amount: number = 3) {
+    async createNthRandomCases(amount: number = 3, owner?: string) {
       const cases: CasePostRequest[] = Array.from(
         { length: amount },
-        () => generateRandomCaseWithoutConnector() as CasePostRequest
+        () => generateRandomCaseWithoutConnector(owner) as CasePostRequest
       );
 
       await pMap(cases, async (caseData) => createCaseAPI(kbnSupertest, caseData), {
@@ -55,15 +65,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       await deleteAllCaseItems(es);
     },
 
-    async createAttachment({
-      caseId,
-      params,
-    }: {
-      caseId: Parameters<typeof createComment>[0]['caseId'];
-      params: Parameters<typeof createComment>[0]['params'];
-    }): Promise<Case> {
-      return createComment({ supertest: kbnSupertest, params, caseId });
-    },
+    createAttachment: createApiFunction(createComment),
 
     async setStatus(
       caseId: string,
@@ -95,9 +97,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return suggestUserProfiles({ supertest: kbnSupertest, req: options });
     },
 
-    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<Case> {
-      return getCase({ supertest: kbnSupertest, caseId });
-    },
+    getCase: createApiFunction(getCase),
 
     async generateUserActions({
       caseId,

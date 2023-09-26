@@ -13,43 +13,35 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elas
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
-
-export interface LogsProps {
-  currentTime: number;
-  logViewReference?: LogViewReference | null;
-  logViewLoading?: boolean;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
-export const Logs = ({
-  nodeName,
-  currentTime,
-  nodeType,
-  logViewReference,
-  search,
-  logViewLoading = false,
-  onSearchChange,
-}: LogsProps) => {
+export const Logs = () => {
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
+  const { logs } = useDataViewsProviderContext();
+
+  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
+
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
-  const [textQuery, setTextQuery] = useState(search ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(search ?? '');
-  const startTimestamp = currentTime - 60 * 60 * 1000; // 60 minutes
+  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
+  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
+
+  const currentTimestamp = getDateRangeInTimestamp().to;
+  const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(
     () => {
-      if (onSearchChange) {
-        onSearchChange(textQuery);
-      }
+      setUrlState({ logsSearch: textQuery });
       setTextQueryDebounced(textQuery);
     },
     TEXT_QUERY_THROTTLE_INTERVAL_MS,
@@ -58,7 +50,7 @@ export const Logs = ({
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(nodeType).id}: "${nodeName}"`,
+      `${findInventoryFields(assetType).id}: "${asset.name}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -66,7 +58,7 @@ export const Logs = ({
       language: 'kuery',
       query,
     };
-  }, [nodeType, nodeName, textQueryDebounced]);
+  }, [assetType, asset.name, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -79,13 +71,20 @@ export const Logs = ({
 
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType,
-      nodeId: nodeName,
+      nodeType: assetType,
+      nodeId: asset.name,
       time: startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [locators.nodeLogsLocator, nodeName, nodeType, startTimestamp, textQueryDebounced, logView]);
+  }, [
+    locators.nodeLogsLocator,
+    asset.name,
+    assetType,
+    startTimestamp,
+    textQueryDebounced,
+    logView,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
@@ -137,7 +136,7 @@ export const Logs = ({
           <LogStream
             logView={logView}
             startTimestamp={startTimestamp}
-            endTimestamp={currentTime}
+            endTimestamp={currentTimestamp}
             query={filter}
             height="60vh"
             showFlyoutAction

@@ -57,19 +57,19 @@ export const ComplianceScoreBar = ({
               gap: 1,
             }}
           >
-            {!!totalFailed && (
-              <EuiFlexItem
-                style={{
-                  flex: totalFailed,
-                  background: statusColors.failed,
-                }}
-              />
-            )}
             {!!totalPassed && (
               <EuiFlexItem
                 style={{
                   flex: totalPassed,
                   background: statusColors.passed,
+                }}
+              />
+            )}
+            {!!totalFailed && (
+              <EuiFlexItem
+                style={{
+                  flex: totalFailed,
+                  background: statusColors.failed,
                 }}
               />
             )}

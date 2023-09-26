@@ -15,9 +15,9 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { Note } from '../../../../../common/types/timeline/note/api';
-import type { PinnedEvent } from '../../../../../common/types/timeline/pinned_event/api';
 import type {
+  Note,
+  PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
@@ -32,8 +32,8 @@ import type {
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
-} from '../../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+} from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';

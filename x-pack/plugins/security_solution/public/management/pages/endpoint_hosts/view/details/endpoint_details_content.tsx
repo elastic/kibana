@@ -24,7 +24,6 @@ import { useEndpointSelector } from '../hooks';
 import {
   getEndpointPendingActionsCallback,
   nonExistingPolicies,
-  policyResponseStatus,
   uiQueryParams,
 } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
@@ -35,14 +34,6 @@ import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link'
 import { OutOfDate } from '../components/out_of_date';
 
 const EndpointDetailsContentStyled = styled.div`
-  dl dt {
-    max-width: 27%;
-  }
-
-  dl dd {
-    max-width: 73%;
-  }
-
   .policyLineText {
     padding-right: 5px;
   }
@@ -64,9 +55,10 @@ interface EndpointDetailsContentProps {
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
     const queryParams = useEndpointSelector(uiQueryParams);
-    const policyStatus = useEndpointSelector(
-      policyResponseStatus
-    ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
+    const policyStatus = useMemo(
+      () => hostInfo.metadata.Endpoint.policy.applied.status,
+      [hostInfo]
+    );
     const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
@@ -239,7 +231,9 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
       <EndpointDetailsContentStyled>
         <EuiSpacer size="s" />
         <EuiDescriptionList
-          compressed={true}
+          columnWidths={[1, 3]}
+          compressed
+          rowGutterSize="m"
           type="column"
           listItems={detailsResults}
           data-test-subj="endpointDetailsList"

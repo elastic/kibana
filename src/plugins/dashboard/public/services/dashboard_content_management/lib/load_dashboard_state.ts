@@ -20,9 +20,11 @@ import {
   type DashboardOptions,
   convertSavedPanelsToPanelMap,
 } from '../../../../common';
+import { migrateDashboardInput } from './migrate_dashboard_input';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -66,6 +68,7 @@ export const loadDashboardState = async ({
     .catch((e) => {
       throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
     });
+
   if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
       dashboardInput: newDashboardState,
@@ -77,7 +80,7 @@ export const loadDashboardState = async ({
   /**
    * Inject saved object references back into the saved object attributes
    */
-  const { references, attributes: rawAttributes } = rawDashboardContent;
+  const { references, attributes: rawAttributes, managed } = rawDashboardContent;
   const attributes = (() => {
     if (!references || references.length === 0) return rawAttributes;
     return injectReferences(
@@ -118,6 +121,7 @@ export const loadDashboardState = async ({
     optionsJSON,
     panelsJSON,
     timeFrom,
+    version,
     timeTo,
     title,
   } = attributes;
@@ -136,11 +140,8 @@ export const loadDashboardState = async ({
   const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
-  return {
-    resolveMeta,
-    dashboardFound: true,
-    dashboardId: savedObjectId,
-    dashboardInput: {
+  const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
+    {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
 
@@ -160,6 +161,18 @@ export const loadDashboardState = async ({
       controlGroupInput:
         attributes.controlGroupInput &&
         rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+
+      version: convertNumberToDashboardVersion(version),
     },
+    embeddable
+  );
+
+  return {
+    managed,
+    resolveMeta,
+    dashboardInput,
+    anyMigrationRun,
+    dashboardFound: true,
+    dashboardId: savedObjectId,
   };
 };

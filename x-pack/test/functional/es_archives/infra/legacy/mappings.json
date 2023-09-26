@@ -8475,6 +8475,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
@@ -10470,6 +10471,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {

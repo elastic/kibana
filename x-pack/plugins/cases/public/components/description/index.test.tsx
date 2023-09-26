@@ -110,21 +110,6 @@ describe('Description', () => {
     });
   });
 
-  it('shows an error when description is empty', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
-    });
-  });
-
   it('shows an error when description is too long', async () => {
     const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
       .fill('a')
@@ -141,8 +126,11 @@ describe('Description', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('The length of the description is too long. The maximum length is 30000.')
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
       ).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 
@@ -162,12 +150,6 @@ describe('Description', () => {
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');
-    });
-
-    it('should show unsaved draft message correctly', async () => {
-      appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
-
-      expect(screen.getByTestId('description-unsaved-draft')).toBeInTheDocument();
     });
 
     it('should not show unsaved draft message when loading', async () => {

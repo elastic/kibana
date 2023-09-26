@@ -6,7 +6,7 @@
  */
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { JsonValue } from '@kbn/utility-types';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
@@ -74,7 +74,7 @@ export const generateAttachmentsWithoutOwner = (
 
   return [
     {
-      type: CommentType.externalReference,
+      type: AttachmentType.externalReference,
       externalReferenceId,
       externalReferenceStorage: {
         type: ExternalReferenceStorageType.elasticSearchDoc,

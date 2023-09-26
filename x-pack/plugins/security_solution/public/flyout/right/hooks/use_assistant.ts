@@ -8,8 +8,8 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { getPromptContextFromEventDetailsItem } from '../../../assistant/helpers';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { getRawData } from '../../../assistant/helpers';
 import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_CONVERSATION_ID,
@@ -31,7 +31,7 @@ export interface UseAssistantParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * Is true if the document is an alert
    */
@@ -56,10 +56,10 @@ export const useAssistant = ({
   dataFormattedForFieldBrowser,
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
-  const useAssistantHook = isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
-    async () => getPromptContextFromEventDetailsItem(dataFormattedForFieldBrowser ?? []),
+    async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
   );
   const { promptContextId } = useAssistantHook(
@@ -77,7 +77,7 @@ export const useAssistant = ({
   );
 
   return {
-    showAssistant: isAssistantEnabled && promptContextId !== null,
+    showAssistant: hasAssistantPrivilege && promptContextId !== null,
     promptContextId: promptContextId || '',
   };
 };

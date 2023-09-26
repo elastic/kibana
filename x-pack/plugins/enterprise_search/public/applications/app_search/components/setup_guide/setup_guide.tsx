@@ -36,7 +36,7 @@ export const SetupGuide: React.FC = () => (
             "Getting started with App Search - in this short video we'll guide you through how to get App Search up and running",
         })}
         width="1280"
-        height-="720"
+        height="720"
       />
     </a>
 

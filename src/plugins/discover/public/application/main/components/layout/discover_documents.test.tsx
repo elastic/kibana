@@ -11,15 +11,14 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
-import { esHits } from '../../../../__mocks__/es_hits';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { EsHitRecord } from '../../../../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppState } from '../../services/discover_app_state_container';
@@ -68,13 +67,13 @@ describe('Discover documents layout', () => {
   });
 
   test('render complete when loading but documents were already fetched', async () => {
-    const component = await mountComponent(FetchStatus.LOADING, esHits);
+    const component = await mountComponent(FetchStatus.LOADING, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
   test('render complete', async () => {
-    const component = await mountComponent(FetchStatus.COMPLETE, esHits);
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });

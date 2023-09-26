@@ -6,11 +6,11 @@
  */
 
 import type { HTTPError } from '../../../../../common/detection_engine/types';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import {
   BulkActionEditType,
   BulkActionType,
-} from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 

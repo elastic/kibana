@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
@@ -62,11 +63,14 @@ const useGetTitleValueMetricItems = (
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[SingleCaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
-      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
-      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
-      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
-      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
-      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
+      [CaseMetricsFeature.ALERTS_COUNT, { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
+      [CaseMetricsFeature.ALERTS_USERS, { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
+      [CaseMetricsFeature.ALERTS_HOSTS, { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
+      [
+        CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
+        { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts },
+      ],
+      [CaseMetricsFeature.CONNECTORS, { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
     ];
 
     return items.reduce(

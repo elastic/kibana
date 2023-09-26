@@ -68,11 +68,11 @@ export const AccountHeader: React.FC = () => {
   return (
     <EuiHeader>
       <EuiHeaderSection grow={false}>
-        <EuiHeaderSectionItem border="none">
+        <EuiHeaderSectionItem>
           <EuiHeaderLogo iconType="logoWorkplaceSearch" />
           <EuiText role="banner">{WORKPLACE_SEARCH_TITLE}</EuiText>
         </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem border="none">
+        <EuiHeaderSectionItem>
           <EuiHeaderLinks>
             <EuiButtonEmptyTo to={PRIVATE_SOURCES_PATH}>{ACCOUNT_NAV.SOURCES}</EuiButtonEmptyTo>
           </EuiHeaderLinks>

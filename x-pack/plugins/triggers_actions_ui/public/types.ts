@@ -26,6 +26,7 @@ import type {
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
 } from '@elastic/eui';
+import type { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -78,6 +79,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -127,6 +129,7 @@ export type {
   RuleTagBadgeOptions,
   RuleEventLogListProps,
   RuleEventLogListOptions,
+  GlobalRuleEventLogListProps,
   RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -348,7 +351,7 @@ export interface RuleType<
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
   hasFieldsForAAD?: boolean;
-  hasGetSummarizedAlerts?: boolean;
+  hasAlertsMappings?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -374,6 +377,7 @@ export interface RuleTypeParamsExpressionProps<
   MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
+  id?: string;
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
@@ -454,6 +458,8 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];
+  validConsumers?: RuleCreationValidConsumer[];
+  useRuleProducer?: boolean;
 }
 export interface RuleDefinitionProps {
   rule: Rule;
@@ -594,7 +600,7 @@ export interface BulkActionsConfig {
 
 interface PanelConfig {
   id: number;
-  title?: string;
+  title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
 
@@ -757,6 +763,7 @@ export interface RulesListFilters {
   searchText: string;
   tags: string[];
   types: string[];
+  kueryNode?: KueryNode;
 }
 
 export type UpdateFiltersProps =
@@ -775,6 +782,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'ruleParams';
       value: Record<string, string | number | object>;
+    }
+  | {
+      filter: 'kueryNode';
+      value: KueryNode;
     };
 
 export interface RulesPageContainerState {
@@ -811,3 +822,8 @@ export interface NotifyWhenSelectOptions {
   isForEachAlertOption?: boolean;
   value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }
+
+export type RuleCreationValidConsumer =
+  | typeof AlertConsumers.LOGS
+  | typeof AlertConsumers.INFRASTRUCTURE
+  | typeof STACK_ALERTS_FEATURE_ID;

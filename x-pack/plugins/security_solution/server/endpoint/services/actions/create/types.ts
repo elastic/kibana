@@ -8,7 +8,7 @@
 import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
+import type { ResponseActionBodySchema } from '../../../../../common/api/endpoint';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,

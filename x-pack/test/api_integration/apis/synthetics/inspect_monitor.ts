@@ -8,7 +8,6 @@
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
@@ -27,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
     let _monitors: MonitorFields[];
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: [syntheticsParamType] });
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: ['synthetics-param'] });
+      await testPrivateLocations.installSyntheticsPackage();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -200,6 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: '@every 5m',
         timeout: '3ms',
         max_redirects: 3,
+        max_attempts: 2,
         proxy_url: 'http://proxy.com',
         tags: ['tag1', 'tag2'],
         username: 'test-username',
