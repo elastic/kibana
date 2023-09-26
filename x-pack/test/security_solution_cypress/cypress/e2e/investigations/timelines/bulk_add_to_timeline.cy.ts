@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { SELECTED_ALERTS } from '../../../screens/alerts';
@@ -20,13 +19,14 @@ import {
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
-import { login, visit } from '../../../tasks/login';
-import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
-describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'bulk_process');
+    cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
     login();
   });
 
@@ -34,14 +34,14 @@ describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, ()
     cy.task('esArchiverUnload', 'bulk_process');
   });
 
-  context('Alerts', () => {
+  context('Alerts', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
       createRule(getNewRule());
     });
 
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -71,7 +71,7 @@ describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, ()
   context('Host -> Events Viewer', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -102,7 +102,7 @@ describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, ()
   context('Host -> Sessions Viewer', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openSessions();
       waitsForEventsToBeLoaded();
     });

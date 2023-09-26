@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -22,7 +21,8 @@ import {
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   clickUpgradeRiskScore,
   clickUpgradeRiskScoreConfirmed,
@@ -39,7 +39,8 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// Flaky on serverless
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -52,7 +53,7 @@ describe('Upgrade risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
     installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
-    visit(ENTITY_ANALYTICS_URL);
+    visitWithTimeRange(ENTITY_ANALYTICS_URL);
   });
 
   it('shows upgrade risk button for host and user', () => {
@@ -60,31 +61,39 @@ describe('Upgrade risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
   });
 
-  it('should show a confirmation modal for upgrading host risk score and display a link to host risk score Elastic doc', () => {
-    clickUpgradeRiskScore(RiskScoreEntity.host);
-    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)).should('exist');
+  it(
+    'should show a confirmation modal for upgrading host risk score and display a link to host risk score Elastic doc',
+    { tags: ['@brokenInServerless'] },
+    () => {
+      clickUpgradeRiskScore(RiskScoreEntity.host);
+      cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)).should('exist');
 
-    cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)} a`)
-      .then((link) => {
-        expect(link.prop('href')).to.eql(
-          `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
-        );
-      });
-  });
+      cy.get(UPGRADE_CANCELLATION_BUTTON)
+        .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)} a`)
+        .then((link) => {
+          expect(link.prop('href')).to.eql(
+            `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
+          );
+        });
+    }
+  );
 
-  it('should show a confirmation modal for upgrading user risk score and display a link to user risk score Elastic doc', () => {
-    clickUpgradeRiskScore(RiskScoreEntity.user);
-    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)).should('exist');
+  it(
+    'should show a confirmation modal for upgrading user risk score and display a link to user risk score Elastic doc',
+    { tags: ['@brokenInServerless'] },
+    () => {
+      clickUpgradeRiskScore(RiskScoreEntity.user);
+      cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)).should('exist');
 
-    cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)} a`)
-      .then((link) => {
-        expect(link.prop('href')).to.eql(
-          `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
-        );
-      });
-  });
+      cy.get(UPGRADE_CANCELLATION_BUTTON)
+        .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)} a`)
+        .then((link) => {
+          expect(link.prop('href')).to.eql(
+            `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
+          );
+        });
+    }
+  );
 });
 
 const versions: Array<'8.3' | '8.4'> = ['8.3', '8.4'];
@@ -101,7 +110,7 @@ versions.forEach((version) =>
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, version);
       installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId, version);
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     afterEach(() => {

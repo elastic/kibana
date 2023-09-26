@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { INSIGHTS_ENTITIES_NO_DATA_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
-import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
-import { ENTITIES_TITLE } from './translations';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
@@ -42,33 +42,51 @@ export const EntitiesOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  if (!eventId || (!userName && !hostName)) {
-    return null;
-  }
-
   return (
     <>
       <ExpandablePanel
         header={{
-          title: ENTITIES_TITLE,
-          callback: goToEntitiesTab,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.entitiesTitle"
+              defaultMessage="Entities"
+            />
+          ),
+          link: {
+            callback: goToEntitiesTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+                defaultMessage="Show all entities"
+              />
+            ),
+          },
           iconType: 'arrowStart',
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {userName && (
-            <EuiFlexItem>
-              <UserEntityOverview userName={userName} />
-            </EuiFlexItem>
-          )}
-          <EuiSpacer size="s" />
-          {hostName && (
-            <EuiFlexItem>
-              <HostEntityOverview hostName={hostName} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {userName || hostName ? (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {userName && (
+              <EuiFlexItem>
+                <UserEntityOverview userName={userName} />
+              </EuiFlexItem>
+            )}
+            <EuiSpacer size="s" />
+            {hostName && (
+              <EuiFlexItem>
+                <HostEntityOverview hostName={hostName} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <p data-test-subj={INSIGHTS_ENTITIES_NO_DATA_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.entities.noDataDescription"
+              defaultMessage="Host and user information are unavailable for this alert."
+            />
+          </p>
+        )}
       </ExpandablePanel>
     </>
   );

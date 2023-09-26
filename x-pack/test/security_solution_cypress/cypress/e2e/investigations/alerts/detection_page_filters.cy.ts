@@ -8,7 +8,6 @@ import { encode } from '@kbn/rison';
 import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -25,7 +24,8 @@ import {
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   closePageFilterPopover,
@@ -108,7 +108,7 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -116,7 +116,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
 
   beforeEach(() => {
     login();
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
     resetFilters();
   });
@@ -128,7 +128,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
   context('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlerts();
     });
 
@@ -197,7 +197,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
     });
@@ -218,7 +218,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {

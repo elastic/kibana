@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
@@ -15,15 +13,10 @@ import {
   openAddEndpointExceptionFromFirstAlert,
   waitForAlerts,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
-import {
-  waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
-} from '../../../tasks/create_new_rule';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
@@ -40,12 +33,17 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
-import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
+import {
+  goToEndpointExceptionsTab,
+  visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Endpoint Exceptions workflows from Alert',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const ITEM_NAME_EDIT = 'Sample Exception List Item';
@@ -56,10 +54,10 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverLoad', 'endpoint');
-      createRule(getEndpointRule());
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+
+      cy.task('esArchiverLoad', { archiveName: 'endpoint' });
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
     });

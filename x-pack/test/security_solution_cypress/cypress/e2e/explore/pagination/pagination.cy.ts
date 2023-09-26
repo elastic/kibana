@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   PROCESS_NAME_FIELD,
@@ -14,22 +13,24 @@ import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../screens/table_pagi
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { refreshPage } from '../../../tasks/security_header';
-import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../../urls/navigation';
+import { hostsUrl, USERS_URL } from '../../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
-describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165968
+describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'host_uncommon_processes');
+      cy.task('esArchiverLoad', { archiveName: 'host_uncommon_processes' });
     });
 
     beforeEach(() => {
       login();
-      visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+      visitWithTimeRange(hostsUrl('uncommonProcesses'));
       waitForUncommonProcessesToBeLoaded();
     });
 
@@ -100,7 +101,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('All users and all Hosts tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {
@@ -112,7 +113,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it(`reset all Hosts pagination when sorting column`, () => {
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       goToTablePage(2);
       cy.get(ALL_HOSTS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 
@@ -122,7 +123,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it(`reset all users pagination when sorting column`, () => {
-      visit(USERS_URL);
+      visitWithTimeRange(USERS_URL);
       goToTablePage(2);
       cy.get(ALL_USERS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 

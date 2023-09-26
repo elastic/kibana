@@ -30,7 +30,7 @@ export async function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse
 ): Promise<CoverageOverviewDashboard> {
   const mitreConfig = await lazyMitreConfiguration();
-  const { tactics, technique: techniques, subtechniques } = mitreConfig;
+  const { tactics, techniques, subtechniques } = mitreConfig;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {
@@ -115,10 +115,13 @@ function addRule(
       id: ruleId,
       name: ruleData.name,
     });
-  } else if (ruleData.activity === CoverageOverviewRuleActivity.Available) {
-    container.availableRules.push({
-      id: ruleId,
-      name: ruleData.name,
-    });
   }
+
+  // When we add support for available (not installed) rules to this feature, add the following here:
+  // else if (ruleData.activity === CoverageOverviewRuleActivity.Available) {
+  //   container.availableRules.push({
+  //     id: ruleId,
+  //     name: ruleData.name,
+  //   });
+  // }
 }

@@ -9,18 +9,16 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
-import { HttpStart } from '@kbn/core-http-browser';
 
 export const GithubLink: React.FC<{
+  assetBasePath: string;
   label: string;
   href: string;
-  http: HttpStart;
-  pluginId: string;
-}> = ({ label, href, http, pluginId }) => {
+}> = ({ assetBasePath, label, href }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type={http.basePath.prepend(`/plugins/${pluginId}/assets/github.svg`)} />
+        <EuiIcon size="s" type={`${assetBasePath}github.svg`} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">

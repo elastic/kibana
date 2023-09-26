@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   addExceptionEntryFieldMatchIncludedValue,
@@ -13,26 +12,23 @@ import {
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
-  goToExceptionsTab,
   openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
-import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../screens/lists';
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForListsIndex,
   waitForValueListsModalToBeLoaded,
-  selectValueListType,
-  selectValueListsFile,
-  uploadValueList,
   openValueListsModal,
   deleteValueListsFile,
-  closeValueListsModal,
+  importValueList,
+  KNOWN_VALUE_LIST_FILES,
 } from '../../../tasks/lists';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
@@ -45,89 +41,78 @@ import {
 } from '../../../screens/exceptions';
 
 const goToRulesAndOpenValueListModal = () => {
-  visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+  visit(RULES_MANAGEMENT_URL);
   waitForListsIndex();
   waitForValueListsModalToBeLoaded();
   openValueListsModal();
 };
 
-describe('Use Value list in exception entry', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-    cy.task('esArchiverLoad', 'exceptions');
-    createRule({
-      ...getNewRule(),
-      query: 'user.name:*',
-      index: ['exceptions*'],
-      exceptions_list: [],
-      rule_id: '2',
+// TODO: https://github.com/elastic/kibana/issues/161539
+// Flaky on serverless
+describe(
+  'Use Value list in exception entry',
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  () => {
+    beforeEach(() => {
+      cleanKibana();
+      login();
+      createListsIndex();
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+      importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
+
+      createRule(
+        getNewRule({
+          query: 'user.name:*',
+          index: ['exceptions*'],
+          exceptions_list: [],
+          rule_id: '2',
+          enabled: false,
+        })
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-  });
-  beforeEach(() => {
-    createListsIndex();
-  });
 
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-  });
+    afterEach(() => {
+      cy.task('esArchiverUnload', 'exceptions');
+    });
 
-  it('Should use value list in exception entry, and validate deleting value list prompt', () => {
-    const ITEM_NAME = 'Exception item with value list';
-    const ITEM_FIELD = 'agent.name';
+    it('Should use value list in exception entry, and validate deleting value list prompt', () => {
+      const ITEM_NAME = 'Exception item with value list';
+      const ITEM_FIELD = 'agent.name';
 
-    goToRulesAndOpenValueListModal();
+      // open add exception modal
+      openExceptionFlyoutFromEmptyViewerPrompt();
 
-    // Add new value list of type keyword
-    const listName = 'value_list.txt';
-    selectValueListType('keyword');
-    selectValueListsFile(listName);
-    uploadValueList();
+      // add exception item name
+      addExceptionFlyoutItemName(ITEM_NAME);
 
-    cy.get(VALUE_LISTS_TABLE)
-      .find(VALUE_LISTS_ROW)
-      .should(($row) => {
-        expect($row.text()).to.contain(listName);
-        expect($row.text()).to.contain('Keywords');
-      });
-    closeValueListsModal();
-    goToRuleDetails();
-    goToExceptionsTab();
+      addExceptionEntryFieldValue(ITEM_FIELD, 0);
+      addExceptionEntryOperatorValue('is in list', 0);
 
-    // open add exception modal
-    openExceptionFlyoutFromEmptyViewerPrompt();
+      addExceptionEntryFieldMatchIncludedValue(KNOWN_VALUE_LIST_FILES.TEXT, 0);
 
-    // add exception item name
-    addExceptionFlyoutItemName(ITEM_NAME);
+      // The Close all alerts that match attributes in this exception option is disabled
+      cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+      cy.get(CLOSE_ALERTS_CHECKBOX).should('have.attr', 'disabled');
 
-    addExceptionEntryFieldValue(ITEM_FIELD, 0);
-    addExceptionEntryOperatorValue('is in list', 0);
+      // Create exception
+      submitNewExceptionItem();
 
-    addExceptionEntryFieldMatchIncludedValue('value_list.txt', 0);
+      // displays existing exception items
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should(
+        'have.text',
+        ` ${ITEM_FIELD}included in value_list.txt`
+      );
 
-    // The Close all alerts that match attributes in this exception option is disabled
-    cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-    cy.get(CLOSE_ALERTS_CHECKBOX).should('have.attr', 'disabled');
+      // Go back to value list to delete the existing one
+      goToRulesAndOpenValueListModal();
 
-    // Create exception
-    submitNewExceptionItem();
+      deleteValueListsFile(KNOWN_VALUE_LIST_FILES.TEXT);
 
-    // displays existing exception items
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should(
-      'have.text',
-      ` ${ITEM_FIELD}included in value_list.txt`
-    );
-
-    // Go back to value list to delete the existing one
-    goToRulesAndOpenValueListModal();
-
-    deleteValueListsFile(listName);
-
-    // Toast should be shown because of exception reference
-    cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
-  });
-});
+      // Toast should be shown because of exception reference
+      cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
+    });
+  }
+);

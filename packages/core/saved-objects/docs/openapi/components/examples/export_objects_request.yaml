@@ -3,9 +3,10 @@ value:
   {
     "objects": [
       {
-        "type": "index-pattern",
-        "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
+        "type": "map",
+        "id": "de71f4f0-1902-11e9-919b-ffe5949a18d2"
         }
     ],
-    "includeReferencesDeep": false
+    "includeReferencesDeep": false,
+    "excludeExportDetails": true
   }

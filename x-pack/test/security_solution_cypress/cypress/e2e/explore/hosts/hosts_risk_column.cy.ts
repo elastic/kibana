@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { cleanKibana } from '../../../tasks/common';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 
-describe('All hosts table', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    // illegal_argument_exception: unknown setting [index.lifecycle.name]
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {
@@ -28,7 +29,7 @@ describe('All hosts table', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('it renders risk column', () => {
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     kqlSearch('host.name: "siem-kibana" {enter}');
 
     cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');

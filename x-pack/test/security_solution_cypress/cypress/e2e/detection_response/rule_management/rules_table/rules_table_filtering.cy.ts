@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
   expectNumberOfRulesShownOnPage,
 } from '../../../../tasks/rule_filters';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
-
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
+import {
+  expectManagementTableRules,
+  filterByTags,
+  unselectTags,
+} from '../../../../tasks/alerts_detection_rules';
 
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
@@ -25,10 +26,12 @@ import {
   createIndex,
   createDocument,
 } from '../../../../tasks/api_calls/elasticsearch';
-
+import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+// Flaky in serverless tests
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -41,8 +44,11 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.task('esArchiverResetKibana');
   });
 
-  describe('Last response filter', () => {
-    it('Filters rules by last response', function () {
+  // TODO: https://github.com/elastic/kibana/issues/161540
+  describe.skip('Last response filter', () => {
+    // Flaky in serverless tests
+    // @brokenInServerless tag is not working so a skip was needed
+    it('Filters rules by last response', { tags: ['@brokenInServerless'] }, function () {
       deleteIndex('test_index');
 
       createIndex('test_index', {
@@ -58,6 +64,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           name: 'Successful rule',
           rule_id: 'successful_rule',
           index: ['test_index'],
+          enabled: true,
         })
       );
 
@@ -66,6 +73,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           name: 'Warning rule',
           rule_id: 'warning_rule',
           index: ['non_existent_index'],
+          enabled: true,
         })
       );
 
@@ -76,14 +84,14 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           index: ['test_index'],
           // Setting a crazy large "Additional look-back time" to force a failure
           from: 'now-9007199254746990s',
+          enabled: true,
         })
       );
 
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-      waitForRulesTableToBeLoaded();
+      visitRulesManagementTable();
+      disableAutoRefresh();
 
       // Initial table state - before filtering by status
       expectNumberOfRulesShownOnPage(3);
@@ -105,6 +113,47 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       filterByExecutionStatus('Failed');
       expectNumberOfRulesShownOnPage(1);
       expectRulesWithExecutionStatus(1, 'Failed');
+    });
+  });
+
+  describe('Tags filter', () => {
+    beforeEach(() => {
+      createRule(
+        getNewRule({
+          name: 'Rule 1',
+          tags: [],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 2',
+          tags: ['simpleTag'],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 3',
+          tags: ['category:tag'],
+        })
+      );
+    });
+
+    it('filter by different tags', () => {
+      visitRulesManagementTable();
+
+      expectManagementTableRules(['Rule 1', 'Rule 2', 'Rule 3']);
+
+      filterByTags(['simpleTag']);
+
+      expectManagementTableRules(['Rule 2']);
+
+      unselectTags();
+
+      filterByTags(['category:tag']);
+
+      expectManagementTableRules(['Rule 3']);
     });
   });
 });

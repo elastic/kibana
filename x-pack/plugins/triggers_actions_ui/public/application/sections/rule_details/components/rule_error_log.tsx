@@ -112,7 +112,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
 
   const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
-    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+    return (pageIndex + 1) * pageSize! >= MAX_RESULTS;
   }, [pagination]);
 
   const formattedSort = useMemo(() => {

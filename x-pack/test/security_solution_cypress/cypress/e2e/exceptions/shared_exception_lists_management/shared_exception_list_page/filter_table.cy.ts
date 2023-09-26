@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
@@ -19,7 +18,8 @@ import {
   searchForExceptionList,
   clearSearchSelection,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const EXCEPTION_LIST_NAME = 'My test list';
@@ -36,7 +36,9 @@ const getExceptionList2 = () => ({
   name: EXCEPTION_LIST_NAME_TWO,
   list_id: 'exception_list_2',
 });
-describe('Filter Lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();
@@ -57,11 +59,9 @@ describe('Filter Lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
   });
 
   it('Filters exception lists on search', () => {

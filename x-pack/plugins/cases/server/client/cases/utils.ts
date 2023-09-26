@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy, isEmpty } from 'lodash';
+import { uniqBy, isEmpty, differenceWith } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -19,11 +19,15 @@ import type {
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
+  CustomFieldsConfiguration,
   ExternalService,
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import type {
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -452,4 +456,18 @@ export const getUserProfiles = async (
     acc.set(profile.uid, profile);
     return acc;
   }, new Map());
+};
+
+export const compareCustomFieldKeysAgainstConfiguration = ({
+  requestCustomFields,
+  configurationCustomFields = [],
+}: {
+  requestCustomFields: CaseRequestCustomFields;
+  configurationCustomFields?: CustomFieldsConfiguration;
+}): string[] => {
+  return differenceWith(
+    requestCustomFields,
+    configurationCustomFields,
+    (requestVal, configurationVal) => requestVal.key === configurationVal.key
+  ).map((e) => e.key);
 };

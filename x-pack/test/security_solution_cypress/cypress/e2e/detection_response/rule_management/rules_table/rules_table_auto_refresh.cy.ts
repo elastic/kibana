@@ -5,115 +5,165 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
-  RULE_CHECKBOX,
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULES_MANAGEMENT_TABLE,
 } from '../../../../screens/alerts_detection_rules';
+import { EUI_CHECKBOX } from '../../../../screens/common/controls';
 import {
   selectAllRules,
   clearAllRuleSelection,
-  selectNumberOfRules,
   mockGlobalClock,
   disableAutoRefresh,
   expectAutoRefreshIsDisabled,
   expectAutoRefreshIsEnabled,
   expectAutoRefreshIsDeactivated,
   expectNumberOfRules,
+  selectRulesByName,
+  getRuleRow,
+  setRulesTableAutoRefreshIntervalSetting,
 } from '../../../../tasks/alerts_detection_rules';
-import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
 
-const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
-const NUM_OF_TEST_RULES = 6;
+const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
-describe('Rules table: auto-refresh', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe(
+  'Rules table: auto-refresh',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    before(() => {
+      cleanKibana();
+      login();
 
-    for (let i = 1; i <= NUM_OF_TEST_RULES; ++i) {
-      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
-    }
-  });
+      setRulesTableAutoRefreshIntervalSetting({
+        enabled: true,
+        refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
+      });
+      createRule(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
+    });
 
-  beforeEach(() => {
-    login();
-  });
+    beforeEach(() => {
+      login();
+    });
 
-  it('Auto refreshes rules', () => {
-    mockGlobalClock();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    it('gets deactivated when any rule selected and activated after rules unselected', () => {
+      visitRulesManagementTable();
 
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
-    // // mock 1 minute passing to make sure refresh is conducted
-    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
-    cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('be.visible');
+      // check refresh settings if it's enabled before selecting
+      expectAutoRefreshIsEnabled();
 
-    cy.contains(REFRESH_RULES_STATUS, 'Updated now');
-  });
+      selectAllRules();
 
-  it('should prevent table from rules refetch if any rule selected', () => {
-    mockGlobalClock();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      // auto refresh should be deactivated (which means disabled without an ability to enable it) after rules selected
+      expectAutoRefreshIsDeactivated();
 
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+      clearAllRuleSelection();
 
-    selectNumberOfRules(1);
+      // after all rules unselected, auto refresh should be reset to its previous state
+      expectAutoRefreshIsEnabled();
+    });
 
-    // mock 1 minute passing to make sure refresh is not conducted
-    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
-    cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+    describe('when enabled', () => {
+      beforeEach(() => {
+        mockGlobalClock();
+        visitRulesManagementTable();
 
-    // ensure rule is still selected
-    cy.get(RULE_CHECKBOX).first().should('be.checked');
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
+      });
 
-    cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
-  });
+      it('refreshes rules after refresh interval has passed', () => {
+        cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS);
+        cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('be.visible');
 
-  it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        cy.contains(REFRESH_RULES_STATUS, 'Updated now');
+      });
 
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+      it('refreshes rules on window focus', () => {
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS / 2);
 
-    // check refresh settings if it's enabled before selecting
-    expectAutoRefreshIsEnabled();
+        cy.window().trigger('blur');
+        cy.window().trigger('focus');
 
-    selectAllRules();
+        cy.contains(REFRESH_RULES_STATUS, 'Updated now');
+      });
+    });
 
-    // auto refresh should be deactivated (which means disabled without an ability to enable it) after rules selected
-    expectAutoRefreshIsDeactivated();
+    describe('when disabled', () => {
+      beforeEach(() => {
+        mockGlobalClock();
+        visitRulesManagementTable();
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
+      });
 
-    clearAllRuleSelection();
+      it('does NOT refresh rules after refresh interval has passed', () => {
+        disableAutoRefresh();
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS * 2); // Make sure enough time has passed to verify auto-refresh doesn't happen
 
-    // after all rules unselected, auto refresh should be reset to its previous state
-    expectAutoRefreshIsEnabled();
-  });
+        cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago');
+      });
 
-  it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+      it('does NOT refresh rules on window focus', () => {
+        disableAutoRefresh();
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS * 2); // Make sure enough time has passed to verify auto-refresh doesn't happen
 
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+        cy.window().trigger('blur');
+        cy.window().trigger('focus');
 
-    disableAutoRefresh();
+        // We need to make sure window focus event doesn't cause refetching. Without some delay
+        // the following expectations always pass even. It happens since 'focus' event gets handled
+        // in an async way so the status text is updated with some delay.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(1000);
 
-    selectAllRules();
+        // By using a custom timeout make sure it doesn't wait too long due to global timeout configuration
+        // so the expected text appears after a refresh and the test passes while it shouldn't.
+        cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago', { timeout: 10000 });
+      });
 
-    expectAutoRefreshIsDeactivated();
+      it('does NOT get enabled after rules were unselected', () => {
+        disableAutoRefresh();
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS * 2); // Make sure enough time has passed to verify auto-refresh doesn't happen
 
-    clearAllRuleSelection();
+        selectAllRules();
 
-    // after all rules unselected, auto refresh should still be disabled
-    expectAutoRefreshIsDisabled();
-  });
-});
+        expectAutoRefreshIsDeactivated();
+
+        clearAllRuleSelection();
+
+        // after all rules unselected, auto refresh should still be disabled
+        expectAutoRefreshIsDisabled();
+      });
+    });
+
+    describe('when one rule is selected', () => {
+      it('does NOT refresh after refresh interval has passed', () => {
+        mockGlobalClock();
+        visitRulesManagementTable();
+
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
+
+        selectRulesByName(['Test rule 1']);
+
+        // mock 1 minute passing to make sure refresh is not conducted
+        cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+        cy.tick(RULES_TABLE_REFRESH_INTERVAL_MS * 2); // Make sure enough time has passed
+        cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+
+        // ensure rule is still selected
+        getRuleRow('Test rule 1').find(EUI_CHECKBOX).should('be.checked');
+
+        cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
+      });
+    });
+  }
+);

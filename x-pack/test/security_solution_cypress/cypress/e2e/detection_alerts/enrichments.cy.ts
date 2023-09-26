@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { getNewRule } from '../../objects/rule';
 import {
   HOST_RISK_HEADER_COLIMN,
@@ -28,14 +26,16 @@ import {
 } from '../../tasks/alerts';
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   after(() => {
@@ -45,11 +45,11 @@ describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Custom query rule', () => {
     beforeEach(() => {
       disableExpandableFlyout();
-      cy.task('esArchiverLoad', 'risk_hosts');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -77,7 +77,7 @@ describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
       closeAlertFlyout();
       cy.task('esArchiverUnload', 'risk_hosts');
-      cy.task('esArchiverLoad', 'risk_hosts_updated');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');

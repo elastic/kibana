@@ -24,6 +24,14 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
+  const deleteEndpointPackage = async () => {
+    await supertest
+      .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
+
   describe('Package Policy APIs', () => {
     skipIfNoDockerRegistry(providerContext);
 
@@ -111,12 +119,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
           .expect(200);
 
-        // uninstall endpoint package
-        await supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
+        await deleteEndpointPackage();
       });
 
       it('should succeed with a valid id', async function () {
@@ -254,12 +257,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
           .expect(200);
 
-        // uninstall endpoint package
-        await supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
+        await deleteEndpointPackage();
       });
 
       it('should succeed with valid ids', async function () {
@@ -476,12 +474,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packagePolicyIds: [endpointPackagePolicyId] })
           .expect(200);
 
-        // uninstall endpoint package
-        await supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
+        await deleteEndpointPackage();
       });
 
       it('should return 200 if the passed kuery is correct', async () => {

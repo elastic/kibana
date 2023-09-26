@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -35,13 +34,14 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'auditbeat_big');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
     cleanKibana();
   });
 

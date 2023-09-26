@@ -23,6 +23,8 @@ post:
         examples:
           createEsQueryRuleRequest:
             $ref: '../components/examples/create_es_query_rule_request.yaml'
+          createEsQueryKqlRuleRequest:
+            $ref: '../components/examples/create_es_query_kql_rule_request.yaml'
           createIndexThresholdRuleRequest:
             $ref: '../components/examples/create_index_threshold_rule_request.yaml'
   responses:
@@ -35,6 +37,8 @@ post:
           examples:
             createEsQueryRuleResponse:
               $ref: '../components/examples/create_es_query_rule_response.yaml'
+            createEsQueryKqlRuleResponse:
+              $ref: '../components/examples/create_es_query_kql_rule_response.yaml'
             createIndexThresholdRuleResponse:
               $ref: '../components/examples/create_index_threshold_rule_response.yaml'
     '401':

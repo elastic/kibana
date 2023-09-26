@@ -14,13 +14,13 @@ import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
   contextPropagationOnly: true,
   environment: 'development',
-  logUncaughtExceptions: true,
   globalLabels: {},
 };
 
@@ -50,6 +50,18 @@ const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
   transactionSampleRate: 0.1,
 };
 
+interface KibanaRawConfig {
+  elastic?: {
+    apm?: ApmConfigSchema;
+  };
+  path?: {
+    data?: string;
+  };
+  server?: {
+    uuid?: string;
+  };
+}
+
 export class ApmConfiguration {
   private baseConfig?: AgentConfigOptions;
   private kibanaVersion: string;
@@ -57,7 +69,7 @@ export class ApmConfiguration {
 
   constructor(
     private readonly rootDir: string,
-    private readonly rawKibanaConfig: Record<string, any>,
+    private readonly rawKibanaConfig: KibanaRawConfig,
     private readonly isDistributable: boolean
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -67,10 +79,19 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    return {
+    const { servicesOverrides = {} } = this.getConfigFromKibanaConfig();
+
+    let baseConfig = {
       ...this.getBaseConfig(),
       serviceName,
     };
+
+    const serviceOverride = servicesOverrides[serviceName];
+    if (serviceOverride) {
+      baseConfig = merge({}, baseConfig, serviceOverride);
+    }
+
+    return baseConfig;
   }
 
   private getBaseConfig() {
@@ -147,6 +168,10 @@ export class ApmConfiguration {
       config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
     }
 
+    if (process.env.ELASTIC_APM_API_KEY) {
+      config.apiKey = process.env.ELASTIC_APM_API_KEY;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
@@ -163,7 +188,7 @@ export class ApmConfiguration {
    * Get the elastic.apm configuration from the --config file, supersedes the
    * default config.
    */
-  private getConfigFromKibanaConfig(): AgentConfigOptions {
+  private getConfigFromKibanaConfig(): ApmConfigSchema {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
   }
 
@@ -263,7 +288,7 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const configFromKibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides, ...configFromKibanaConfig } = this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
 

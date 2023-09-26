@@ -6,11 +6,13 @@
  */
 
 import pRetry from 'p-retry';
+import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { runRule } from './alerting_api_helper';
 
 export async function waitForDocumentInIndex({
   esClient,
@@ -21,11 +23,11 @@ export async function waitForDocumentInIndex({
   indexName: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({ index: indexName });
       if (response.hits.hits.length < num) {
-        throw new Error('No hits found');
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },
@@ -61,27 +63,44 @@ export async function createIndex({
 
 export async function waitForAlertInIndex<T>({
   esClient,
+  filter,
   indexName,
   ruleId,
+  num = 1,
 }: {
   esClient: Client;
+  filter: Date;
   indexName: string;
   ruleId: string;
+  num: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search<T>({
         index: indexName,
         body: {
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: filter.getTime().toString(),
+                    },
+                  },
+                },
+              ],
             },
           },
         },
       });
-      if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+      if (response.hits.hits.length < num) {
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },
@@ -96,7 +115,7 @@ export async function waitForAllTasksIdle({
   esClient: Client;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -148,7 +167,7 @@ export async function waitForAllTasks({
   taskType: string;
   attempts: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -206,7 +225,7 @@ export async function waitForDisabled({
   ruleId: string;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -250,18 +269,18 @@ export async function waitForDisabled({
   );
 }
 
-export async function waitForEventLog({
+export async function waitForExecutionEventLog({
   esClient,
-  provider,
   filter,
+  ruleId,
   num = 1,
 }: {
   esClient: Client;
-  provider: string;
   filter: Date;
+  ruleId: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana-event-log*',
@@ -271,8 +290,15 @@ export async function waitForEventLog({
               filter: [
                 {
                   term: {
+                    'rule.id': {
+                      value: ruleId,
+                    },
+                  },
+                },
+                {
+                  term: {
                     'event.provider': {
-                      value: provider,
+                      value: 'alerting',
                     },
                   },
                 },
@@ -300,4 +326,34 @@ export async function waitForEventLog({
     },
     { retries: 10 }
   );
+}
+
+export async function waitForNumRuleRuns({
+  supertest,
+  numOfRuns,
+  ruleId,
+  esClient,
+  testStart,
+}: {
+  supertest: SuperTest<Test>;
+  numOfRuns: number;
+  ruleId: string;
+  esClient: Client;
+  testStart: Date;
+}) {
+  for (let i = 0; i < numOfRuns; i++) {
+    await pRetry(
+      async () => {
+        await runRule({ supertest, ruleId });
+        await waitForExecutionEventLog({
+          esClient,
+          filter: testStart,
+          ruleId,
+          num: i + 1,
+        });
+        await waitForAllTasksIdle({ esClient, filter: testStart });
+      },
+      { retries: 10 }
+    );
+  }
 }

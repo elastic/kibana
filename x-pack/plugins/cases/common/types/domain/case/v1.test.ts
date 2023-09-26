@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../attachment/v1';
 import { ConnectorTypes } from '../connector/v1';
 import {
@@ -13,6 +14,7 @@ import {
   CaseSeverity,
   CasesRt,
   CaseStatuses,
+  CustomFieldRt,
   RelatedCaseRt,
 } from './v1';
 
@@ -74,6 +76,18 @@ const basicCase = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  customFields: [
+    {
+      key: 'first_custom_field_key',
+      type: 'text',
+      field: { value: ['this is a text field value', 'this is second'] },
+    },
+    {
+      key: 'second_custom_field_key',
+      type: 'toggle',
+      field: { value: [true] },
+    },
+  ],
 };
 
 describe('RelatedCaseRt', () => {
@@ -170,6 +184,18 @@ describe('CaseAttributesRt', () => {
     updated_at: '2020-02-20T15:02:57.995Z',
     updated_by: null,
     category: null,
+    customFields: [
+      {
+        key: 'first_custom_field_key',
+        type: 'text',
+        field: { value: ['this is a text field value', 'this is second'] },
+      },
+      {
+        key: 'second_custom_field_key',
+        type: 'toggle',
+        field: { value: [true] },
+      },
+    ],
   };
 
   it('has expected attributes in request', () => {
@@ -238,5 +264,69 @@ describe('CasesRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+});
+
+describe('CustomFieldRt', () => {
+  it.each([
+    [
+      'type text value text',
+      {
+        key: 'string_custom_field_1',
+        type: 'text',
+        field: { value: ['this is a text field value'] },
+      },
+    ],
+    [
+      'type text value null',
+      {
+        key: 'string_custom_field_2',
+        type: 'text',
+        field: { value: null },
+      },
+    ],
+    [
+      'type toggle value boolean',
+      {
+        key: 'toggle_custom_field_1',
+        type: 'toggle',
+        field: { value: [true] },
+      },
+    ],
+    [
+      'type toggle value null',
+      {
+        key: 'toggle_custom_field_2',
+        type: 'toggle',
+        field: { value: null },
+      },
+    ],
+  ])(`has expected attributes for customField with %s`, (_, customField) => {
+    const query = CustomFieldRt.decode(customField);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: customField,
+    });
+  });
+
+  it('fails if text type and value dont match expected attributes in request', () => {
+    const query = CustomFieldRt.decode({
+      key: 'text_custom_field_1',
+      type: 'text',
+      field: { value: [666] },
+    });
+
+    expect(PathReporter.report(query)[0]).toContain('Invalid value 666 supplied');
+  });
+
+  it('fails if toggle type and value dont match expected attributes in request', () => {
+    const query = CustomFieldRt.decode({
+      key: 'list_custom_field_1',
+      type: 'toggle',
+      field: { value: ['hello'] },
+    });
+
+    expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');
   });
 });

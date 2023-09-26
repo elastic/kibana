@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RIGHT_SECTION } from './test_ids';
 
 interface RightSectionProps {
@@ -28,12 +28,13 @@ export const RightSection: React.FC<RightSectionProps> = ({
   component,
   width,
 }: RightSectionProps) => {
+  const style = useMemo<React.CSSProperties>(
+    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    [width]
+  );
+
   return (
-    <EuiFlexItem
-      grow={false}
-      style={{ height: '100%', width: `${width * 100}%` }}
-      data-test-subj={RIGHT_SECTION}
-    >
+    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION}>
       <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
     </EuiFlexItem>
   );

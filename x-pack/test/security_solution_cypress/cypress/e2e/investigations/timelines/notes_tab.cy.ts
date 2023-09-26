@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getTimelineNonValidQuery } from '../../../objects/timeline';
 
@@ -23,7 +22,8 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   addNotesToTimeline,
   goToNotesTab,
@@ -36,11 +36,11 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
-describe.skip('Timeline notes tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
 
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
@@ -54,7 +54,7 @@ describe.skip('Timeline notes tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   beforeEach(function () {
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     openTimelineById(this?.timelineId as string);
     goToNotesTab();
     // eslint-disable-next-line cypress/no-unnecessary-waiting

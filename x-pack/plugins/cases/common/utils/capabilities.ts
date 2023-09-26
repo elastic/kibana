@@ -14,11 +14,16 @@ import {
   UPDATE_CASES_CAPABILITY,
 } from '../constants';
 
+export interface CasesUiCapabilities {
+  all: readonly string[];
+  read: readonly string[];
+  delete: readonly string[];
+}
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI
  * here: x-pack/plugins/cases/public/client/helpers/capabilities.ts
  */
-export const createUICapabilities = () => ({
+export const createUICapabilities = (): CasesUiCapabilities => ({
   all: [
     CREATE_CASES_CAPABILITY,
     READ_CASES_CAPABILITY,

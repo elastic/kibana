@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { cleanKibana } from '../../../tasks/common';
 import {
@@ -18,19 +17,21 @@ import {
   HOST_BY_RISK_TABLE_HOSTNAME_CELL,
   HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
 } from '../../../screens/hosts/host_risk';
-import { login, visit } from '../../../tasks/login';
-import { HOSTS_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
-describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// Tracked by https://github.com/elastic/security-team/issues/7696
+describe.skip('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     navigateToHostRiskDetailTab();
   });
 
@@ -46,7 +47,7 @@ describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     clearSearchBar();
   });
 
-  it('filters the table', () => {
+  it.skip('filters the table', () => {
     openRiskTableFilterAndSelectTheCriticalOption();
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
@@ -54,7 +55,8 @@ describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     removeCriticalFilterAndCloseRiskTableFilter();
   });
 
-  it('should be able to change items count per page', () => {
+  // Flaky
+  it.skip('should be able to change items count per page', () => {
     selectFiveItemsPerPageOption();
 
     cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);

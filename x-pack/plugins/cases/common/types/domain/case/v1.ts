@@ -11,6 +11,7 @@ import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 
 export { CaseStatuses };
 
@@ -50,6 +51,25 @@ export const CaseSeverityRt = rt.union([
 export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
+
+export const customFieldValue = <C extends rt.Mixed>(codec: C) =>
+  rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
+
+const CustomFieldText = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  field: customFieldValue(rt.string),
+});
+
+export const CustomFieldToggle = rt.strict({
+  key: rt.string,
+  type: CustomFieldToggleTypeRt,
+  field: customFieldValue(rt.boolean),
+});
+
+export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
+
+const CaseCustomFieldsRt = rt.array(CustomFieldRt);
 
 const CaseBasicRt = rt.strict({
   /**
@@ -92,6 +112,11 @@ const CaseBasicRt = rt.strict({
    * The category of the case.
    */
   category: rt.union([rt.string, rt.null]),
+  /**
+   * An array containing the possible,
+   * user-configured custom fields.
+   */
+  customFields: CaseCustomFieldsRt,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -139,6 +164,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

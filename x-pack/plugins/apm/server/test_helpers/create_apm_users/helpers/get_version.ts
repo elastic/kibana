@@ -31,17 +31,17 @@ export async function getKibanaVersion({
       switch (e.response?.status) {
         case 401:
           throw new AbortError(
-            `Could not access Kibana with the provided credentials. Username: "${e.config.auth?.username}". Password: "${e.config.auth?.password}"`
+            `Could not access Kibana with the provided credentials. Username: "${e.config?.auth?.username}". Password: "${e.config?.auth?.password}"`
           );
 
         case 404:
           throw new AbortError(
-            `Could not get version on ${e.config.url} (Code: 404)`
+            `Could not get version on ${e.config?.url} (Code: 404)`
           );
 
         default:
           throw new AbortError(
-            `Cannot access Kibana on ${e.config.baseURL}. Please specify Kibana with: "--kibana-url <url>"`
+            `Cannot access Kibana on ${e.config?.baseURL}. Please specify Kibana with: "--kibana-url <url>"`
           );
       }
     }

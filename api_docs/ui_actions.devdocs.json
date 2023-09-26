@@ -2543,13 +2543,10 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2557,13 +2554,10 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.description",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false

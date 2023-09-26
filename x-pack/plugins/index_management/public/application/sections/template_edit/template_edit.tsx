@@ -9,16 +9,12 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { TemplateForm } from '../../components';
@@ -50,7 +46,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('templateEdit');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templateEdit);
   }, []);
 
   const onSave = async (updatedTemplate: TemplateDeserialized) => {
@@ -131,7 +127,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       {isSystemTemplate && (
         <Fragment>
           <EuiCallOut
@@ -171,6 +167,6 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

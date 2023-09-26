@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiImage, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 export * from './components/code_box';
 export * from './components/github_link';
@@ -21,21 +22,17 @@ export * from './components/try_in_console_button';
 export * from './components/install_client';
 
 export * from './types';
+export * from './utils';
 
 export interface WelcomeBannerProps {
-  userProfile: {
-    user: {
-      full_name?: string;
-      username?: string;
-    };
-  };
+  user?: AuthenticatedUser;
   assetBasePath?: string;
   image?: string;
   showDescription?: boolean;
 }
 
 export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
-  userProfile,
+  user,
   assetBasePath,
   image,
   showDescription = true,
@@ -53,16 +50,22 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxxs">
-            <h2>
-              {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
-                defaultMessage: 'Hi {name}!',
-                values: { name: userProfile?.user?.full_name || userProfile?.user?.username },
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        {Boolean(user) && (
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxxs">
+              <h2>
+                {user
+                  ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
+                      defaultMessage: 'Hi {name}!',
+                      values: { name: user.full_name || user.username },
+                    })
+                  : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
+                      defaultMessage: 'Hi!',
+                    })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer />
       {showDescription && (

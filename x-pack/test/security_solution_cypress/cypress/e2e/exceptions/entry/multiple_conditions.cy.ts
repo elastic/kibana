@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
-  goToExceptionsTab,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
@@ -27,15 +25,20 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
+// FLAKY: https://github.com/elastic/kibana/issues/165651
+// FLAKY: https://github.com/elastic/kibana/issues/165734
+// FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');
       login();
+      deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions
       createRule({
         ...getNewRule(),
@@ -43,15 +46,13 @@ describe(
         index: ['exceptions*'],
         exceptions_list: [],
         rule_id: '2',
-      });
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
-      goToExceptionsTab();
+      }).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
     after(() => {
       cy.task('esArchiverUnload', 'exceptions');
     });
+
     const exceptionName = 'My item name';
 
     it('Use multipe AND conditions and validate it generates one exception', () => {

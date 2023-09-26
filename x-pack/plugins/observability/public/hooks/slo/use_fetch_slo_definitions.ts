@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { FindSloDefinitionsResponse, SLOResponse } from '@kbn/slo-schema';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { SLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDefinitionsResponse {
   isLoading: boolean;
@@ -26,31 +27,33 @@ export interface UseFetchSloDefinitionsResponse {
 
 interface Params {
   name?: string;
-  size?: number;
 }
 
-export function useFetchSloDefinitions({
-  name = '',
-  size = 10,
-}: Params): UseFetchSloDefinitionsResponse {
-  const { savedObjects } = useKibana().services;
+export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefinitionsResponse {
+  const { http } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchSloDefinitions', search],
-    queryFn: async () => {
+    queryKey: sloKeys.definitions(search),
+    queryFn: async ({ signal }) => {
       try {
-        const response = await savedObjects.client.find<SLOResponse>({
-          type: 'slo',
-          search,
-          searchFields: ['name'],
-          perPage: size,
-        });
-        return response.savedObjects.map((so) => so.attributes);
+        const response = await http.get<FindSloDefinitionsResponse>(
+          '/internal/observability/slos/_definitions',
+          {
+            query: {
+              search,
+            },
+            signal,
+          }
+        );
+
+        return response;
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   return { isLoading, isError, isSuccess, data, refetch };

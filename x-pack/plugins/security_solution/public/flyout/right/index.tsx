@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { EventKind } from '../shared/hooks/use_fetch_field_value_pair_by_event_type';
+import { EventKind } from '../shared/constants/event_kinds';
 import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
 import { PanelHeader } from './header';

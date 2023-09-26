@@ -85,6 +85,7 @@ import type {
 } from '../../types';
 import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
+import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -452,6 +453,13 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
           message: error.message,
         },
       });
+    } else if (error instanceof DatasetNamePrefixError) {
+      return response.customError({
+        statusCode: 422,
+        body: {
+          message: error.message,
+        },
+      });
     }
     return await defaultFleetErrorHandler({ error, response });
   }
@@ -540,7 +548,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 
 export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.params>,
-  undefined,
+  TypeOf<typeof DeletePackageRequestSchema.query>,
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
@@ -554,7 +562,7 @@ export const deletePackageHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       esClient,
-      force: request.body?.force,
+      force: request.query?.force,
     });
     const body: DeletePackageResponse = {
       items: res,

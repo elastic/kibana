@@ -7,18 +7,28 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
-import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { ServicesCollectorOptions, QUERY_MAX_SIZE } from '.';
 
 export async function collectServices({
   client,
   from,
   to,
-  sourceIndices,
+  apmIndices,
   afterKey,
-}: CollectorOptions) {
-  const { traces, serviceMetrics, serviceLogs } = sourceIndices;
+  filters = [],
+}: ServicesCollectorOptions) {
+  const { transaction, error, metric } = apmIndices;
+  const musts: estypes.QueryDslQueryContainer[] = [
+    ...filters,
+    {
+      exists: {
+        field: 'service.name',
+      },
+    },
+  ];
+
   const dsl: estypes.SearchRequest = {
-    index: [traces, serviceMetrics, serviceLogs],
+    index: [transaction, error, metric],
     size: 0,
     _source: false,
     query: {
@@ -33,13 +43,7 @@ export async function collectServices({
             },
           },
         ],
-        must: [
-          {
-            exists: {
-              field: 'service.name',
-            },
-          },
-        ],
+        must: musts,
       },
     },
     aggs: {
@@ -58,6 +62,7 @@ export async function collectServices({
               serviceEnvironment: {
                 terms: {
                   field: 'service.environment',
+                  missing_bucket: true,
                 },
               },
             },
@@ -112,13 +117,13 @@ export async function collectServices({
     }
 
     containerHosts.buckets?.forEach((containerBucket: any) => {
-      const [containerId, hostname] = containerBucket.key;
-      if (containerId) {
-        (service['asset.parents'] as string[]).push(`container:${containerId}`);
-      }
-
+      const [hostname, containerId] = containerBucket.key;
       if (hostname) {
         (service['asset.references'] as string[]).push(`host:${hostname}`);
+      }
+
+      if (containerId) {
+        (service['asset.parents'] as string[]).push(`container:${containerId}`);
       }
     });
 

@@ -14,18 +14,24 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
-import { FlyoutTabIds } from '../../../types';
+import { ContentTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
+import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
+import { MetadataSectionTitle } from '../../../components/section_titles';
 
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
-  isCompactView: boolean;
+}
+interface MetadataSummaryWrapperProps {
+  visibleMetadata: MetadataData[];
+  metadataLoading: boolean;
 }
 
 export interface MetadataData {
@@ -63,24 +69,42 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
-export const MetadataSummaryList = ({
-  metadata,
+const MetadataSummaryListWrapper = ({
   metadataLoading,
-  isCompactView,
-}: MetadataSummaryProps) => {
+  visibleMetadata,
+}: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
-    showTab(FlyoutTabIds.METADATA);
+    showTab(ContentTabIds.METADATA);
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+    <>
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="flexStart">
+          <MetadataSectionTitle />
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false} key="metadata-link">
+          <EuiButtonEmpty
+            data-test-subj="infraAssetDetailsMetadataShowAllButton"
+            onClick={onClick}
+            size="xs"
+            flush="both"
+            iconSide="right"
+            iconType="sortRight"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <MetadataExplanationMessage />
+      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="flexStart">
-        {(isCompactView
-          ? metadataData(metadata?.info)
-          : [...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]
-        ).map(
+        {visibleMetadata.map(
           (metadataValue) =>
             metadataValue && (
               <EuiFlexItem key={metadataValue.field}>
@@ -98,21 +122,19 @@ export const MetadataSummaryList = ({
             )
         )}
       </EuiFlexGroup>
-      <EuiFlexItem grow={false} key="metadata-link">
-        <EuiButtonEmpty
-          data-test-subj="infraAssetDetailsMetadataShowAllButton"
-          onClick={onClick}
-          size="xs"
-          flush="both"
-          iconSide="right"
-          iconType="sortRight"
-        >
-          <FormattedMessage
-            id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
-            defaultMessage="Show all"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 };
+export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
+  <MetadataSummaryListWrapper
+    visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
+    metadataLoading={metadataLoading}
+  />
+);
+
+export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
+  <MetadataSummaryListWrapper
+    visibleMetadata={metadataData(metadata?.info)}
+    metadataLoading={metadataLoading}
+  />
+);

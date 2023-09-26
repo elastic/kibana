@@ -5,16 +5,15 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -28,15 +27,19 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539 Do we need this to run in Serverless?
+describe('Exceptions viewer read only', { tags: ['@ess', '@skipInServerless'] }, () => {
   const exceptionList = getExceptionList();
 
-  before(() => {
-    cleanKibana();
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
         getNewRule({
+          name: 'Test exceptions rule',
           query: 'agent.name:*',
           index: ['exceptions*'],
           exceptions_list: [
@@ -51,19 +54,11 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
         })
       );
     });
-  });
 
-  beforeEach(() => {
     login(ROLES.reader);
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
-    goToRuleDetails();
-    cy.url().should('contain', 'app/security/rules/id');
+    visitRulesManagementTable(ROLES.reader);
+    goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
-  });
-
-  after(() => {
-    deleteAlertsAndRules();
-    deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
   });
 
   it('Cannot add an exception from empty viewer screen', () => {

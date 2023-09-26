@@ -16,6 +16,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
   CustomIntegrationsStart,
@@ -49,6 +50,8 @@ import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -57,6 +60,8 @@ import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
+
+import { API_VERSIONS } from '../common/constants';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
@@ -79,7 +84,7 @@ import { setCustomIntegrations, setCustomIntegrationsStart } from './services/cu
 
 import type { RequestError } from './hooks';
 import { sendGetBulkAssets } from './hooks';
-import { fleetDeepLinks } from './deep_links';
+import { getFleetDeepLinks } from './deep_links';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -115,6 +120,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -128,6 +134,7 @@ export interface FleetStartDeps {
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
+  dashboard: DashboardStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -212,7 +219,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9020,
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
-      deepLinks: fleetDeepLinks,
+      deepLinks: getFleetDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const cloud =
@@ -283,7 +290,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
-      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+      core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: API_VERSIONS.public.v1,
+        },
+        version: API_VERSIONS.public.v1,
+      })
     );
 
     // Set up license service
@@ -321,7 +333,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         if (permissionsResponse?.success) {
           const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
-            setupRouteService.getSetupPath()
+            setupRouteService.getSetupPath(),
+            {
+              version: API_VERSIONS.public.v1,
+            }
           );
           if (!isInitialized) {
             throw new Error('Unknown setup error');

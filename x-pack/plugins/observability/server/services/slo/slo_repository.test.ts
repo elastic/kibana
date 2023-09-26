@@ -163,4 +163,20 @@ describe('KibanaSavedObjectsSLORepository', () => {
     });
     expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
+
+  it('searches by name', async () => {
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+    soClientMock.find.mockResolvedValueOnce(soFindResponse([SOME_SLO, ANOTHER_SLO]));
+
+    const results = await repository.search(SOME_SLO.name);
+
+    expect(results).toEqual([SOME_SLO, ANOTHER_SLO]);
+    expect(soClientMock.find).toHaveBeenCalledWith({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 25,
+      search: SOME_SLO.name,
+      searchFields: ['name'],
+    });
+  });
 });

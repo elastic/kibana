@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { getNewRule } from '../../../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-describe('Rules table: links', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+// Flaky in serverless tests
+describe('Rules table: links', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -22,8 +23,8 @@ describe('Rules table: links', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: 'rule1' }));
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    createRule(getNewRule({ rule_id: 'rule1', enabled: false }));
+    visit(RULES_MANAGEMENT_URL);
   });
 
   it('should render correct link for rule name - rules', () => {

@@ -12,8 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/163950
-  describe.skip('Findings Page onboarding', function () {
+  describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
@@ -34,6 +33,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
 
@@ -44,6 +44,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledCSP.navigateToAction('cspm-not-installed-action');
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
 

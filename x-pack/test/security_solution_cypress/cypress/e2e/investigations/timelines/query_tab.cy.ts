@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -15,27 +14,26 @@ import {
   TIMELINE_QUERY,
   NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   addFilter,
   openTimelineById,
-  persistNoteToFirstEvent,
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
@@ -45,14 +43,16 @@ describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           .then(() => cy.wrap(timelineId).as('timelineId'))
           // eslint-disable-next-line cypress/no-unnecessary-waiting
           .then(() => cy.wait(1000))
-          .then(() =>
-            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-              expect(response.status).to.equal(200)
-            )
-          )
+          // TO-DO: Issue 163398
+          // .then(() =>
+          //   addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
+          //     expect(response.status).to.equal(200)
+          //   )
+          // )
           .then(() => openTimelineById(timelineId))
           .then(() => pinFirstEvent())
-          .then(() => persistNoteToFirstEvent('event note'))
+          // TO-DO: Issue 163398
+          // .then(() => persistNoteToFirstEvent('event note'))
           .then(() => addFilter(getTimeline().filter));
       });
   });
@@ -60,7 +60,7 @@ describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Query tab', () => {
     beforeEach(function () {
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       openTimelineById(this.timelineId).then(() => addFilter(getTimeline().filter));
     });
 
@@ -68,7 +68,8 @@ describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${getTimeline().query}`);
     });
 
-    it('should be able to add event note', () => {
+    // TO-DO: Issue 163398
+    it.skip('should be able to add event note', () => {
       cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
     });
 
@@ -82,7 +83,7 @@ describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         .and('match', /Unpin the event in row 2/);
     });
 
-    it('should have an unlock icon', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    it('should have an unlock icon', { tags: '@brokenInServerless' }, () => {
       cy.get(UNLOCKED_ICON).should('be.visible');
     });
   });

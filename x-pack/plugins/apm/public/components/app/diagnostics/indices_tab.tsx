@@ -27,7 +27,7 @@ export function DiagnosticsIndices() {
     return <EuiLoadingElastic size="m" />;
   }
 
-  const { invalidIndices, validIndices } = diagnosticsBundle;
+  const { invalidIndices = [], validIndices = [] } = diagnosticsBundle;
   const columns: Array<EuiBasicTableColumn<IndiciesItem>> = [
     {
       field: 'index',

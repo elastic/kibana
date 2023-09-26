@@ -11,9 +11,8 @@ import {
   waitForAlerts,
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
-import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
+import { login } from '../../../../tasks/login';
+import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -27,35 +26,36 @@ import {
   submitNewExceptionItem,
 } from '../../../../tasks/exceptions';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
-describe('Close matching Alerts ', () => {
-  const newRule = getNewRule();
+describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
     cy.task('esArchiverUnload', 'exceptions');
     cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
     login();
     postDataView('exceptions-*');
-    createRule({
-      ...newRule,
-      query: 'agent.name:*',
-      data_view_id: 'exceptions-*',
-      interval: '10s',
-      rule_id: 'rule_testing',
-    });
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
+    createRule(
+      getNewRule({
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      })
+    ).then((rule) => visitRuleDetailsPage(rule.body.id));
+
     waitForAlertsToPopulate();
   });
   after(() => {
     cy.task('esArchiverUnload', 'exceptions');
   });
 
-  it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  it.skip('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 

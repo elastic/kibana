@@ -9,24 +9,18 @@ import * as t from 'io-ts';
 import { enumeration, NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 /**
- * Rule activity (status) filter applicable to two groups of rules
- * - installed from a Fleet package, custom and customized which are installed but customized later on which
- *  can be either enabled or disabled
- * - available to be installed from a Fleet package rules
+ * Rule activity (status) filter, which now can filter enabled and disabled rules.
+ * Later we're going to support available rules as well (prebuilt rules that are not yet installed).
  */
 export enum CoverageOverviewRuleActivity {
   /**
-   * Enabled rules (installed from a Fleet package, custom or customized)
+   * Enabled rules (prebuilt and custom)
    */
   Enabled = 'enabled',
   /**
-   * Disabled rules (installed from a Fleet package, custom or customized)
+   * Disabled rules (prebuilt and custom)
    */
   Disabled = 'disabled',
-  /**
-   * Available to be installed from a Fleet package rules (Elastic prebuilt rules)
-   */
-  Available = 'available',
 }
 export const CoverageOverviewRuleActivitySchema = enumeration(
   'CoverageOverviewRuleActivity',
@@ -45,10 +39,6 @@ export enum CoverageOverviewRuleSource {
    * Rules created manually
    */
   Custom = 'custom',
-  /**
-   * Rules installed from a Fleet package but modified later on
-   */
-  Customized = 'customized',
 }
 export const CoverageOverviewRuleSourceSchema = enumeration(
   'CoverageOverviewRuleSource',

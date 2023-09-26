@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getInfraMetricIndices({
   infraPlugin,
@@ -15,6 +15,9 @@ export async function getInfraMetricIndices({
   infraPlugin: Required<APMRouteHandlerResources['plugins']['infra']>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string> {
+  if (!infraPlugin) {
+    throw new Error('Infra Plugin needs to be setup');
+  }
   const infra = await infraPlugin.start();
   const infraMetricIndices = await infra.getMetricIndices(savedObjectsClient);
 

@@ -46,6 +46,7 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
+        data-test-subj="eventLogStatusFilter"
         button={
           <EuiFilterButton
             data-test-subj="eventLogStatusFilterButton"

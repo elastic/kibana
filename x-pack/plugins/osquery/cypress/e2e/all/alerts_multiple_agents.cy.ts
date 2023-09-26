@@ -6,15 +6,16 @@
  */
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { ROLE, login } from '../../tasks/login';
 import {
+  clickRuleName,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Alert Event Details - dynamic params', () => {
+describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -31,14 +32,14 @@ describe('Alert Event Details - dynamic params', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    clickRuleName(ruleName);
   });
 
   it('should substitute parameters in investigation guide', () => {
     cy.getBySel('expand-event').first().click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+    cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
     cy.contains('Get processes').click();
     cy.getBySel('flyout-body-osquery').within(() => {
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");

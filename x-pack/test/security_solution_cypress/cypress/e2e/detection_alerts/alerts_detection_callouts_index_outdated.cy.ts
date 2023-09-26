@@ -6,14 +6,16 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../tags';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
+import { ruleDetailsUrl } from '../../urls/rule_details';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
+
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -23,7 +25,7 @@ import {
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
-  waitForPageWithoutDateRange(url, ROLES.soc_manager);
+  visit(url, { role: ROLES.soc_manager });
   waitForPageTitleToBeShown();
 };
 
@@ -31,15 +33,16 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
+// TODO: https://github.com/elastic/kibana/issues/161539 Does it need to run in Serverless?
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
-  { tags: tag.ESS },
+  { tags: ['@ess', '@skipInServerless'] },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
       // Otherwise the app will be disabled and show a "welcome"-like page.
       login();
-      visitWithoutDateRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForPageTitleToBeShown();
     });
 
@@ -71,7 +74,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -81,10 +84,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {
@@ -121,7 +123,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -131,10 +133,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {
@@ -171,7 +172,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -181,10 +182,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {

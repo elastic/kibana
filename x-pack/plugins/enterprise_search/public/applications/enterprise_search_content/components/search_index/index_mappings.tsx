@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
 
 import { docLinks } from '../../../shared/doc_links';
 
@@ -52,7 +53,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
   const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
   const { data: mappingData } = useValues(mappingsWithPropsApiLogic(indexToShow));
   const shouldShowAccessControlSwitch =

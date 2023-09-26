@@ -109,7 +109,11 @@ export class FatalErrorsService {
   private setupGlobalErrorHandlers() {
     if (window.addEventListener) {
       window.addEventListener('unhandledrejection', (e) => {
-        console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
+        const { message, stack } = getErrorInfo(e.reason);
+        // eslint-disable-next-line no-console
+        console.log(`Detected an unhandled Promise rejection.\n
+        Message: ${message}\n
+        Stack: ${stack}`);
       });
     }
   }

@@ -35,7 +35,7 @@ const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 
-type RuleProps = {
+export type RuleComponentProps = {
   rule: Rule;
   ruleType: RuleType;
   readOnly: boolean;
@@ -64,7 +64,7 @@ export function RuleComponent({
   onChangeDuration,
   durationEpoch = Date.now(),
   isLoadingChart,
-}: RuleProps) {
+}: RuleComponentProps) {
   const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
 
   const alerts = Object.entries(ruleSummary.alerts)
@@ -152,6 +152,7 @@ export function RuleComponent({
             healthColor={healthColor}
             statusMessage={statusMessage}
             requestRefresh={requestRefresh}
+            refreshToken={refreshToken}
           />
         </EuiFlexItem>
         {suspendedComponentWithProps(

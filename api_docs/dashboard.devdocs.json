@@ -728,7 +728,7 @@
             "section": "def-common.DashboardPanelMap",
             "text": "DashboardPanelMap"
           },
-          ", versionOverride?: string | undefined) => ",
+          ", removeLegacyVersion?: boolean | undefined) => ",
           "SavedDashboardPanel",
           "[]"
         ],
@@ -760,12 +760,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-common.convertPanelMapToSavedPanels.$2",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
-            "label": "versionOverride",
+            "label": "removeLegacyVersion",
             "description": [],
             "signature": [
-              "string | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
@@ -800,7 +800,7 @@
             "section": "def-common.SavedObjectEmbeddableInput",
             "text": "SavedObjectEmbeddableInput"
           },
-          ">, version: string | undefined) => ",
+          ">, removeLegacyVersion: boolean | undefined) => ",
           "SavedDashboardPanel"
         ],
         "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
@@ -840,12 +840,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-common.convertPanelStateToSavedDashboardPanel.$2",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
-            "label": "version",
+            "label": "removeLegacyVersion",
             "description": [],
             "signature": [
-              "string | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
@@ -1761,6 +1761,22 @@
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardPanelState.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nThis version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.\nAs of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the\nembeddable's input. This key is needed for BWC, but its value will be removed on Dashboard save."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1830,7 +1846,7 @@
           "\nFor BWC reasons, dashboard state is stored with panels as an array instead of a map"
         ],
         "signature": [
-          "{ id?: string | undefined; tags?: string[] | undefined; description?: string | undefined; title?: string | undefined; query?: ",
+          "{ id?: string | undefined; tags?: string[] | undefined; description?: string | undefined; title?: string | undefined; version?: string | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

@@ -129,7 +129,6 @@ export function Header({
                     customBranding$={customBranding$}
                   />,
                 ],
-                borders: 'none',
               },
               {
                 ...(observables.navControlsCenter$ && {
@@ -139,7 +138,6 @@ export function Header({
                     </EuiShowFor>,
                   ],
                 }),
-                borders: 'none',
               },
               {
                 items: [
@@ -164,14 +162,13 @@ export function Header({
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
-                borders: 'none',
               },
             ]}
           />
 
           <EuiHeader position="fixed" className="header__secondBar">
             <EuiHeaderSection grow={false}>
-              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+              <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
                   appId$={application.currentAppId$}
                   id={navId}
@@ -230,7 +227,7 @@ export function Header({
             <HeaderBadge badge$={observables.badge$} />
 
             <EuiHeaderSection side="right">
-              <EuiHeaderSectionItem border="none">
+              <EuiHeaderSectionItem>
                 <HeaderActionMenu mounter={headerActionMenuMounter} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

@@ -15,16 +15,17 @@ import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_even
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitUserDetailsPage } from '../../../tasks/navigation';
 
 import { USERS_URL } from '../../../urls/navigation';
 
 describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'users');
+    cy.task('esArchiverLoad', { archiveName: 'users' });
 
-    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   beforeEach(() => {
