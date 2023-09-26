@@ -17,7 +17,12 @@ import type {
   HostPolicyResponse,
   LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions, HostActionResponse } from './types';
+import type {
+  HostActionResponse,
+  IndexEndpointHostsCyTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+  CreateUserAndRoleCyTaskOptions,
+} from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -32,6 +37,7 @@ import type {
   DeletedIndexedEndpointRuleAlerts,
   IndexedEndpointRuleAlerts,
 } from '../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { LoadedRoleAndUser } from '../../../scripts/endpoint/common/role_and_user_loader';
 
 declare global {
   namespace Cypress {
@@ -185,6 +191,18 @@ declare global {
         arg: { hostname: string; path: string; password?: string },
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<string>;
+
+      task(
+        name: 'loadUserAndRole',
+        arg: LoadUserAndRoleCyTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LoadedRoleAndUser>;
+
+      task(
+        name: 'createUserAndRole',
+        arg: CreateUserAndRoleCyTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LoadedRoleAndUser>;
     }
   }
 }
