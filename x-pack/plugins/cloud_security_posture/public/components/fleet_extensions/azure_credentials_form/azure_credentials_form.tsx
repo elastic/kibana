@@ -85,7 +85,6 @@ interface Props {
   setIsValid: (isValid: boolean) => void;
 }
 
-// TODO: get link from tin
 const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 

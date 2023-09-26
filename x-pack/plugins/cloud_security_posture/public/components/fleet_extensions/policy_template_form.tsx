@@ -414,7 +414,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
-        console.log(updatedPolicy, isValid);
         onChange({ isValid, updatedPolicy });
       },
       [onChange, isValid]
