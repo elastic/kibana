@@ -49,12 +49,16 @@ export const ProductSelector: React.FC = () => {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
 
   useEffect(() => {
-    security.authc
-      .getCurrentUser()
-      .then(setUser)
-      .catch(() => {
-        setUser(null);
-      });
+    try {
+      security.authc
+        .getCurrentUser()
+        .then(setUser)
+        .catch(() => {
+          setUser(null);
+        });
+    } catch {
+      setUser(null);
+    }
   }, [security.authc]);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
