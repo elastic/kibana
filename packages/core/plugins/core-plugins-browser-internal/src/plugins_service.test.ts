@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 import {
   type MockedPluginInitializer,
   mockPluginInitializerProvider,
+  runtimeResolverMock,
 } from './plugins_service.test.mocks';
 
 import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
@@ -74,6 +75,10 @@ function createManifest(
 
 describe('PluginsService', () => {
   beforeEach(() => {
+    runtimeResolverMock.setDependencyMap.mockReset();
+    runtimeResolverMock.resolveSetupRequests.mockReset();
+    runtimeResolverMock.resolveStartRequests.mockReset();
+
     plugins = [
       { id: 'pluginA', plugin: createManifest('pluginA') },
       { id: 'pluginB', plugin: createManifest('pluginB', { required: ['pluginA'] }) },
@@ -97,6 +102,7 @@ describe('PluginsService', () => {
     mockSetupContext = {
       ...omit(mockSetupDeps, 'injectedMetadata'),
       application: expect.any(Object),
+      plugins: expect.any(Object),
       getStartServices: expect.any(Function),
     };
     // @ts-expect-error this file was not being type checked properly in the past, error is legit
@@ -120,6 +126,7 @@ describe('PluginsService', () => {
     mockStartContext = {
       ...omit(mockStartDeps, 'injectedMetadata'),
       application: expect.any(Object),
+      plugins: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
     };
 
@@ -244,6 +251,28 @@ describe('PluginsService', () => {
       expect(pluginDDeps).not.toHaveProperty('missing');
     });
 
+    it('setups the runtimeResolver', async () => {
+      const pluginsService = new PluginsService(mockCoreContext, plugins);
+      await pluginsService.setup(mockSetupDeps);
+
+      expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledWith(expect.any(Map));
+
+      expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledWith(expect.any(Map));
+      expect(
+        Object.fromEntries([...runtimeResolverMock.resolveSetupRequests.mock.calls[0][0].entries()])
+      ).toEqual({
+        pluginA: {
+          setupValue: 1,
+        },
+        pluginB: {
+          pluginAPlusB: 2,
+        },
+        pluginC: undefined,
+      });
+    });
+
     it('returns plugin setup contracts', async () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       const { contracts } = await pluginsService.setup(mockSetupDeps);
@@ -293,6 +322,26 @@ describe('PluginsService', () => {
       expect(pluginDInstance.start).toHaveBeenCalledWith(mockStartContext, {});
       const pluginDDeps = pluginDInstance.start.mock.calls[0][1];
       expect(pluginDDeps).not.toHaveProperty('missing');
+    });
+
+    it('setups the runtimeResolver', async () => {
+      const pluginsService = new PluginsService(mockCoreContext, plugins);
+      await pluginsService.setup(mockSetupDeps);
+      await pluginsService.start(mockStartDeps);
+
+      expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledWith(expect.any(Map));
+      expect(
+        Object.fromEntries([...runtimeResolverMock.resolveStartRequests.mock.calls[0][0].entries()])
+      ).toEqual({
+        pluginA: {
+          startValue: 2,
+        },
+        pluginB: {
+          pluginAPlusB: 3,
+        },
+        pluginC: undefined,
+      });
     });
 
     it('returns plugin start contracts', async () => {
