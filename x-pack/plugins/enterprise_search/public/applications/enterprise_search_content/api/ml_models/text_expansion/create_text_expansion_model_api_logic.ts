@@ -9,14 +9,16 @@ import { HttpLogic } from '../../../../shared/http';
 
 export interface CreateTextExpansionModelArgs {
   modelId: string;
-};
+}
 
 export interface CreateTextExpansionModelResponse {
   deploymentState: string;
   modelId: string;
 }
 
-export const createTextExpansionModel = async ({ modelId }: CreateTextExpansionModelArgs): Promise<CreateTextExpansionModelResponse> => {
+export const createTextExpansionModel = async ({
+  modelId,
+}: CreateTextExpansionModelArgs): Promise<CreateTextExpansionModelResponse> => {
   const route = `/internal/enterprise_search/ml/models/${modelId}`;
   return await HttpLogic.values.http.post<CreateTextExpansionModelResponse>(route, {
     body: undefined,

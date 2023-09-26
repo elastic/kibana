@@ -9,7 +9,7 @@ import { HttpLogic } from '../../../../shared/http';
 
 export interface FetchTextExpansionModelArgs {
   modelId: string;
-};
+}
 
 export interface FetchTextExpansionModelResponse {
   deploymentState: string;

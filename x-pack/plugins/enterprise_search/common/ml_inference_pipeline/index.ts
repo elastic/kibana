@@ -12,7 +12,6 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 
-
 import {
   SUPPORTED_PYTORCH_TASKS,
   TRAINED_MODEL_TYPE,

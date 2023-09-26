@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
+
 import {
   ElasticsearchResponseError,
   isNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
-
-import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 
 export const acceptableModelNames = Object.keys(ELASTIC_MODEL_DEFINITIONS);
 
