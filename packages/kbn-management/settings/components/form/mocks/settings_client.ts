@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPageTemplateProps } from '../page_template';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
-export const NO_DATA_PAGE_MAX_WIDTH = 950;
-
-export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-  },
+/**
+ * Mock of the portion of the {@link IUiSettingsClient} used as a parameter in the {@link getFieldDefinitions} function.
+ */
+export const uiSettingsClientMock: Pick<IUiSettingsClient, 'isCustom' | 'isOverridden'> = {
+  isCustom: () => false,
+  isOverridden: () => false,
 };
