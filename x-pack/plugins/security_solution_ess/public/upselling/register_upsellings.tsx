@@ -7,13 +7,13 @@
 
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
-  MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
   UpsellingMessageId,
   UpsellingSectionId,
   UpsellingService,
 } from '@kbn/security-solution-upselling/service';
+import type { MessageUpsellings } from '@kbn/security-solution-upselling/service/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import React, { lazy } from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';

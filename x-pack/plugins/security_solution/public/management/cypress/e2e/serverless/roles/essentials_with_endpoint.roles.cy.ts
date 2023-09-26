@@ -7,7 +7,7 @@
 
 import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { login, ROLE } from '../../../tasks/login';
+import { login, ROLE, type ROLE_KEYS } from '../../../tasks/login';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
   getNoPrivilegesPage,
@@ -55,7 +55,7 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
-    (['t1_analyst', `t2_analyst`] as ROLE[]).forEach((roleName) => {
+    (['t1_analyst', `t2_analyst`] as ROLE_KEYS[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
@@ -238,7 +238,7 @@ describe(
 
     // Endpoint Operations Manager, Endpoint Policy Manager and Platform Engineer currently have the same level of access
     (
-      ['platform_engineer', `endpoint_operations_analyst`, 'endpoint_policy_manager'] as ROLE[]
+      ['platform_engineer', `endpoint_operations_analyst`, 'endpoint_policy_manager'] as ROLE_KEYS[]
     ).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [

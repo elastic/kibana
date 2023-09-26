@@ -17,6 +17,7 @@ export const ROLE = Object.freeze<Record<SecurityTestUser, SecurityTestUser>>({
   elastic_serverless: 'elastic_serverless',
   system_indices_superuser: 'system_indices_superuser',
 });
+export type ROLE_KEYS = keyof typeof ROLE;
 
 interface CyLoginTask {
   (user?: SecurityTestUser): ReturnType<typeof sendApiLoginRequest>;
@@ -94,7 +95,9 @@ const sendApiLoginRequest = (
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
-
+      if (!basicProvider) {
+        throw new Error(`basicProvider was not found`);
+      }
       return request({
         url: loginUrl,
         method: 'POST',
