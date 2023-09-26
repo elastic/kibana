@@ -8,11 +8,8 @@
 import { loadEvaluator } from 'langchain/evaluation';
 import { LLM } from 'langchain/llms/base';
 import { ChainValues, HumanMessage } from 'langchain/schema';
-
 import { chunk } from 'lodash/fp';
-
 import { Logger } from '@kbn/core/server';
-
 import { ToolingLog } from '@kbn/tooling-log';
 import { asyncForEach } from '@kbn/std';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';

@@ -24,6 +24,10 @@ import {
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
 
+/**
+ * To support additional Agent Executors from the UI, add them to this map
+ * and reference your specific AgentExecutor function
+ */
 const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
   DefaultAgentExecutor: callAgentExecutor,
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,

@@ -32,10 +32,6 @@
     "reference": "FROM postgres-logs\n| DISSECT message \"%{} duration: %{query_duration} ms\"\"\n| EVAL query_duration_num = TO_DOUBLE(query_duration)\n| STATS avg_duration = AVG(query_duration_num)"
   },
   {
-    "input": "I,'ve got APM data in `metrics-apm`. Filter on `metricset.name:service_destination` and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.",
-    "reference": ""
-  },
-  {
     "input": "From, `nyc_taxis`, give me the top 10 results where the drop off time was between 6am and 10am. Just give me the query.",
     "reference": "FROM nyc_taxis\n| WHERE DATE_EXTRACT(drop_off_time, \"hour\") >= 6 AND DATE_EXTRACT(drop_off_time, \"hour\") < 10\n| LIMIT 10"
   }

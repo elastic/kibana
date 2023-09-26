@@ -35,7 +35,7 @@ interface Props {
 }
 
 /**
- * Evaluation Settings -- experimental feature toggled dev ui for evaluating models
+ * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
   const { http } = useAssistantContext();

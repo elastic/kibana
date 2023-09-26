@@ -11,7 +11,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { postEvaluation } from '../../api';
 
-const PERFORM_EVALUATION_MUTATION_KEY = ['elastic-assistant', 'post-knowledge-base'];
+const PERFORM_EVALUATION_MUTATION_KEY = ['elastic-assistant', 'perform-evaluation'];
 
 export interface UsePerformEvaluationParams {
   http: HttpSetup;
@@ -50,7 +50,7 @@ export const usePerformEvaluation = ({ http, toasts }: UsePerformEvaluationParam
           toasts?.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,
             {
-              title: i18n.translate('xpack.elasticAssistant.evaluation.setupError', {
+              title: i18n.translate('xpack.elasticAssistant.evaluation.evaluationError', {
                 defaultMessage: 'Error performing evaluation...',
               }),
             }
