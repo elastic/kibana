@@ -18,6 +18,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { deleteIndex, addIndex, createPackagePolicy } from '../helper';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 const INDEX_ARRAY = [
