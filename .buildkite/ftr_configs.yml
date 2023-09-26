@@ -186,6 +186,7 @@ enabled:
   - x-pack/test/api_integration/apis/logs_ui/config.ts
   - x-pack/test/api_integration/apis/logstash/config.ts
   - x-pack/test/api_integration/apis/management/config.ts
+  - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/maps/config.ts
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
