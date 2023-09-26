@@ -10,7 +10,8 @@ import { cyan, gray } from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
-import { ES_RESOURCES } from '../common/roles_users/serverless';
+import { ColumnLayoutFormatter } from '../common/screen/column_layout_formatter';
+import { ES_LOADED_USERS, ES_RESOURCES } from '../common/roles_users/serverless';
 
 export const cli = async () => {
   return run(
@@ -28,6 +29,21 @@ export const cli = async () => {
           return acc;
         }, [] as string[])
       );
+
+      cliContext.log.info(`
+Starting ES with supported Security project roles and users.
+User accounts available for login ${gray('(username: password)')}:
+
+${
+  new ColumnLayoutFormatter(
+    [
+      `USERNAME\n------------------\n${ES_LOADED_USERS.join('\n')}`,
+      `PASSWORD\n------------------\n${ES_LOADED_USERS.map(() => 'changeme').join('\n')}`,
+    ],
+    { separator: '  ' }
+  ).output
+}
+`);
 
       cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
 

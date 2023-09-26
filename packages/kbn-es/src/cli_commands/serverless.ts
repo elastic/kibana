@@ -46,6 +46,7 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
+
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 

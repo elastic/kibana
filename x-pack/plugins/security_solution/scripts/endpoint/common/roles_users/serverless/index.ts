@@ -6,6 +6,7 @@
  */
 
 import { resolve, join } from 'path';
+import { readFileSync } from 'fs';
 
 const ES_RESOURCES_DIR = resolve(__dirname, 'es_serverless_resources');
 
@@ -14,3 +15,11 @@ export const ES_RESOURCES = Object.freeze({
   users: join(ES_RESOURCES_DIR, 'users'),
   users_roles: join(ES_RESOURCES_DIR, 'users_roles'),
 });
+
+export const ES_LOADED_USERS = readFileSync(ES_RESOURCES.users)
+  .toString()
+  .split(/\n/)
+  .filter((v) => !!v) // Ensure no empty strings
+  .map((userAndPasswordString) => {
+    return userAndPasswordString.split(':').at(0);
+  });
