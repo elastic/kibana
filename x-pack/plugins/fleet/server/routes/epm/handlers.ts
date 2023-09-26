@@ -392,8 +392,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
-    ignoreMappingUpdateErrors: request.body?.ignoreMappingUpdateErrors,
-    skipDataStreamRollover: request.body?.skipDataStreamRollover,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
 
   if (!res.error) {
@@ -511,7 +511,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 
 export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.query>,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -533,6 +533,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     spaceId,
     contentType,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {

@@ -326,6 +326,8 @@ interface InstallUploadedArchiveParams {
   spaceId: string;
   version?: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -715,8 +717,16 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const bundledPackages = await getBundledPackages();
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError, prerelease } =
-      args;
+    const {
+      pkgkey,
+      force,
+      ignoreConstraints,
+      spaceId,
+      neverIgnoreVerificationError,
+      prerelease,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    } = args;
 
     const matchingBundledPackage = bundledPackages.find(
       (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
@@ -735,6 +745,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         spaceId,
         version: matchingBundledPackage.version,
         authorizationHeader,
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -751,10 +763,18 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreConstraints,
       prerelease,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
     return response;
   } else if (args.installSource === 'upload') {
-    const { archiveBuffer, contentType, spaceId } = args;
+    const {
+      archiveBuffer,
+      contentType,
+      spaceId,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    } = args;
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -762,6 +782,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       contentType,
       spaceId,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
     return response;
   } else if (args.installSource === 'custom') {

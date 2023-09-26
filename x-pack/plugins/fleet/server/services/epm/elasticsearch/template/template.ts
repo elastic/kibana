@@ -827,7 +827,7 @@ const updateExistingDataStream = async ({
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       if (options?.skipDataStreamRollover === true) {
         logger.info(
-          `Skipping rollover for ${dataStreamName} as "xpack.fleet.packageUpgrade.skipDataStreamRollover" config is enabled`
+          `Skipping rollover for ${dataStreamName} as "skipDataStreamRollover" is enabled`
         );
         return;
       } else {
@@ -838,9 +838,7 @@ const updateExistingDataStream = async ({
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
     if (options?.ignoreMappingUpdateErrors === true) {
-      logger.info(
-        `Ignore mapping update errors as "xpack.fleet.packageUpgrade.ignoreMappingUpdateErrors" config is enabled`
-      );
+      logger.info(`Ignore mapping update errors as "ignoreMappingUpdateErrors" is enabled`);
       return;
     } else {
       throw err;
@@ -851,7 +849,7 @@ const updateExistingDataStream = async ({
   if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
     if (options?.skipDataStreamRollover === true) {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "xpack.fleet.packageUpgrade.skipDataStreamRollover" config is enabled`
+        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
       );
       return;
     } else {
