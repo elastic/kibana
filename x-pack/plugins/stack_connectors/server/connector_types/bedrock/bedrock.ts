@@ -107,7 +107,6 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
-    console.log('run api', model);
     const signed = this.signRequest(body, `/model/${model}/invoke`);
     const response = await this.request({
       ...signed,
