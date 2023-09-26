@@ -24,6 +24,7 @@ import {
   leaveConfirmStrings,
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
+  dashboardManagedBadge,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
@@ -67,7 +68,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
-    dashboardCapabilities: { saveQuery: showSaveQuery },
+    dashboardCapabilities: { saveQuery: showSaveQuery, showWriteControls },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -82,6 +83,8 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -237,9 +240,8 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   });
 
   const badges = useMemo(() => {
-    if (viewMode !== ViewMode.EDIT) return;
     const allBadges: TopNavMenuProps['badges'] = [];
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChanges && viewMode === ViewMode.EDIT) {
       allBadges.push({
         'data-test-subj': 'dashboardUnsavedChangesBadge',
         badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
@@ -251,7 +253,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         } as EuiToolTipProps,
       });
     }
-    if (hasRunMigrations) {
+    if (hasRunMigrations && viewMode === ViewMode.EDIT) {
       allBadges.push({
         'data-test-subj': 'dashboardSaveRecommendedBadge',
         badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
@@ -264,8 +266,21 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         } as EuiToolTipProps,
       });
     }
+    if (showWriteControls && managed) {
+      allBadges.push({
+        'data-test-subj': 'dashboardSaveRecommendedBadge',
+        badgeText: dashboardManagedBadge.getText(),
+        title: '',
+        color: 'primary',
+        iconType: 'glasses',
+        toolTipProps: {
+          content: dashboardManagedBadge.getTooltip(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
     return allBadges;
-  }, [hasRunMigrations, hasUnsavedChanges, viewMode]);
+  }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
 
   return (
     <div className="dashboardTopNav">
@@ -309,7 +324,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
           <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
         </PresentationUtilContextProvider>
       ) : null}
-      {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
+      {viewMode === ViewMode.EDIT ? (
+        <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
+      ) : null}
       <EuiHorizontalRule margin="none" />
     </div>
   );

@@ -17,6 +17,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
 
@@ -28,12 +29,13 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
-  infra: InfraClientStartExports;
+  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  share: SharePluginSetup;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

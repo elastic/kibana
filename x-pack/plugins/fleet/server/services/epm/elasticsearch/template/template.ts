@@ -11,6 +11,8 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import pMap from 'p-map';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -534,9 +536,15 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
 /**
  * Given a data stream name, return the indexTemplate name
  */
-function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
-  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
-  return [type, dataset].join('-');
+async function getIndexTemplate(
+  esClient: ElasticsearchClient,
+  dataStreamName: string
+): Promise<string> {
+  const dataStream = await esClient.indices.getDataStream({
+    name: dataStreamName,
+    expand_wildcards: ['open', 'hidden'],
+  });
+  return dataStream.data_streams[0].template;
 }
 
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
@@ -723,15 +731,22 @@ const updateAllDataStreams = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
-    return updateExistingDataStream({
-      esClient,
-      logger,
-      dataStreamName: templateEntry.dataStreamName,
-    });
-  });
-  await Promise.all(updatedataStreamPromises);
+  await pMap(
+    indexNameWithTemplates,
+    (templateEntry) => {
+      return updateExistingDataStream({
+        esClient,
+        logger,
+        dataStreamName: templateEntry.dataStreamName,
+      });
+    },
+    {
+      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
+      concurrency: 20,
+    }
+  );
 };
+
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
@@ -757,9 +772,9 @@ const updateExistingDataStream = async ({
   let lifecycle: any;
 
   try {
-    const simulateResult = await retryTransientEsErrors(() =>
+    const simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
-        name: dataStreamNameToIndexTemplateName(dataStreamName),
+        name: await getIndexTemplate(esClient, dataStreamName),
       })
     );
 

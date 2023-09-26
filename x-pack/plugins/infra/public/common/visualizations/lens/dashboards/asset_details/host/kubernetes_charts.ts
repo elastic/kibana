@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { kubernetesLensFormulas } from '../../../formulas';
 import { XY_OVERRIDES } from '../../constants';
-import type { XYConfig } from '../metric_charts/types';
+import type { XYConfig } from '../../types';
 
 export const kubernetesCharts: XYConfig[] = [
   {
