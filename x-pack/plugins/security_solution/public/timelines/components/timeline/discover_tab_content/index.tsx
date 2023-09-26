@@ -219,9 +219,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     async ({ stateContainer }) => {
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
-      if (savedSearchById) {
-        savedSearchAppState = getAppStateFromSavedSearch(savedSearchById);
+      if (savedSearchId) {
+        const localSavedSearch = await stateContainer.savedSearchState.load(savedSearchId);
+        savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
+
       const finalAppState = savedSearchAppState?.appState ?? discoverAppState;
 
       if (finalAppState) {
@@ -270,8 +272,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       dataView,
       setDiscoverStateContainer,
       getAppStateFromSavedSearch,
-      savedSearchById,
       discoverDataService.query.timefilter.timefilter,
+      savedSearchId,
     ]
   );
 

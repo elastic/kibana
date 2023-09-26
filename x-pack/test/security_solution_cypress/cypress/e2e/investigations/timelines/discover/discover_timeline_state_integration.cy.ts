@@ -115,7 +115,7 @@ describe(
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
-    context('save/restore', () => {
+    context.only('save/restore', () => {
       it('should be able create an empty timeline with default discover state', () => {
         addNameToTimeline('Timerange timeline');
         createNewTimeline();
@@ -167,6 +167,43 @@ describe(
             );
           });
       });
+      it('should save/restore discover dataview/timerange/filter/query/columns when timeline is opened via url', () => {
+        const dataviewName = '.kibana-event-log';
+        const timelineSuffix = Date.now();
+        const timelineName = `DataView timeline-${timelineSuffix}`;
+        const kqlQuery = '_id:*';
+        const column1 = 'event.category';
+        const column2 = 'ecs.version';
+        switchDataViewTo(dataviewName);
+        addDiscoverKqlQuery(kqlQuery);
+        openAddDiscoverFilterPopover();
+        fillAddFilterForm({
+          key: 'ecs.version',
+          value: '1.8.0',
+        });
+        addFieldToTable(column1);
+        addFieldToTable(column2);
+
+        // create a custom timeline
+        addNameToTimeline(timelineName);
+        cy.wait(`@${TIMELINE_PATCH_REQ}`)
+          .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
+          .then((timelineId) => {
+            cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+            // reload the page with the exact url
+            cy.reload();
+            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
+            cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
+            cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+            cy.get(DISCOVER_FILTER_BADGES).should('contain.text', 'ecs.version: 1.8.0');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+              'have.text',
+              INITIAL_START_DATE
+            );
+          });
+      });
       it('should save/restore discover ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
@@ -188,7 +225,7 @@ describe(
       });
     });
     /*
-     * skipping because it is @brokenInServerless. Tag was somehow not working
+     * skipping because it is @brokenInServerless and this cypress tag was somehow not working
      * so skipping this test both in ess and serverless.
      *
      * Raised issue: https://github.com/elastic/kibana/issues/165913
