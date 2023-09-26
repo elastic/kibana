@@ -179,9 +179,7 @@ async function fetchContainerStats(
       }
 
       const limitsNotSet = node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1;
-      const notRunningInAContainer =
-        node.quota_micros_min.value === null && node.quota_micros_max.value === null;
-      if (limitsNotSet || notRunningInAContainer) {
+      if (limitsNotSet) {
         return {
           missingLimits: true,
           clusterUuid: cluster.key as string,
@@ -380,7 +378,7 @@ async function fetchNonContainerStats(
         ccs = index.includes(':') ? index.split(':')[0] : undefined;
       }
 
-      const runningInAContainer =
+      const runningInAContainerWithLimits =
         node.quota_micros_min.value !== null || node.quota_micros_max.value !== null;
 
       return {
@@ -389,7 +387,7 @@ async function fetchNonContainerStats(
         cpuUsage: node.average_cpu.value ?? undefined,
         nodeName,
         ccs,
-        unexpectedLimits: runningInAContainer,
+        unexpectedLimits: runningInAContainerWithLimits,
       };
     });
   });
