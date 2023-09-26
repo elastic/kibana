@@ -177,7 +177,7 @@ export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
-export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="edit-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
@@ -248,7 +248,7 @@ export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
-export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
+export const TIMELINE_TITLE_INPUT = '[data-test-subj="edit-timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
@@ -257,9 +257,9 @@ export const TIMESTAMP_TOGGLE_FIELD =
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
-export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
+export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="edit-timeline-button-icon"]';
 
-export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
+export const TIMELINE_SAVE_MODAL = '[data-test-subj="edit-timeline-modal"]';
 
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
@@ -299,9 +299,9 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 
-export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
+export const EDIT_TIMELINE_BTN = '[data-test-subj="edit-timeline-button-icon"]';
 
-export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
+export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="edit-timeline-btn-tooltip"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';

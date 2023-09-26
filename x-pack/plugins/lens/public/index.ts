@@ -9,6 +9,7 @@ import { LensPlugin } from './plugin';
 
 export type {
   EmbeddableComponentProps,
+  EmbeddableComponent,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 export type {

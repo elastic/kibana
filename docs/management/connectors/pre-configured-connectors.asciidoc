@@ -108,15 +108,19 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 === Examples
 
 * <<preconfigured-d3security-configuration>>
-* <<preconfigured-resilient-configuration>>
 * <<preconfigured-email-configuration>>
+* <<preconfigured-gen-ai-configuration>>
+* <<preconfigured-resilient-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
+* <<preconfigured-teams-configuration>>
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-slack-configuration>>
 * <<preconfigured-swimlane-configuration>>
+* <<preconfigured-torq-configuration>>
+* <<preconfigured-tines-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
@@ -275,6 +279,30 @@ secrets:
     user: <email.address>
     password: <password>
 --------------------------------------------------
+
+[float]
+[[preconfigured-gen-ai-configuration]]
+==== Generative AI connectors
+
+The following example creates a <<gen-ai-action-type,generative AI connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-gen-ai:
+    name: preconfigured-gen-ai-connector-type
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://api.openai.com/v1/chat/completions <1>
+      apiProvider: 'OpenAI' <2>
+      defaultModel: gpt-4 <3>
+    secrets:
+      apiKey: superlongapikey <4>
+--
+<1> The OpenAI request URL
+<2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+<3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
+<4> The OpenAI or Azure OpenAI API key for authentication.
 
 [float]
 [[preconfigured-resilient-configuration]]
@@ -502,6 +530,48 @@ xpack.actions.preconfigured:
 <2> The {swimlane} application identifier.
 <3> Field mappings for properties such as the alert identifer, severity, and rule name.
 <4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[preconfigured-tines-configuration]]
+==== Tines connectors
+
+The following example creates a <<tines-action-type,Tines connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com <1>
+    secrets:
+      email: some.address@test.com <2>
+      token: ausergeneratedapitoken <3>
+--
+<1> The Tines tenant URL.
+<2> The email used to sign in to Tines.
+<3> The Tines API token.
+
+[float]
+[[preconfigured-torq-configuration]]
+==== Torq connectors
+
+The following example creates a <<torq-action-type,Torq connector>>:
+
+[source,yaml]
+--
+xpack.actions.preconfigured:
+  my-torq:
+    name: preconfigured-torq-connector-type
+    actionTypeId: .torq
+    config:
+      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <1>
+    secrets:
+      token: mytorqtoken <2>
+--
+<1> The endpoint URL of the Elastic Security integration in Torq.
+<2> The secret of the webhook authentication header.
 
 [float]
 [[preconfigured-webhook-configuration]]
