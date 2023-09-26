@@ -21,4 +21,8 @@ export default createTestConfig({
   kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/tree/main/internal/project/esproject/config
+  esServerArgs: ['xpack.ml.ad.enabled=false', 'xpack.ml.dfa.enabled=false'],
 });

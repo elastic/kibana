@@ -16,4 +16,8 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search Screenshot Creation',
   },
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/tree/main/internal/project/esproject/config
+  esServerArgs: ['xpack.ml.ad.enabled=false', 'xpack.ml.dfa.enabled=false'],
 });
