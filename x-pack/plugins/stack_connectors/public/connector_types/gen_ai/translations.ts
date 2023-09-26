@@ -15,7 +15,7 @@ export const API_URL_LABEL = i18n.translate(
 );
 
 export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.apiKeySecret', {
-  defaultMessage: 'API Key',
+  defaultMessage: 'API key',
 });
 
 export const DEFAULT_MODEL_LABEL = i18n.translate(
@@ -28,8 +28,7 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
 export const DEFAULT_MODEL_TOOLTIP_CONTENT = i18n.translate(
   'xpack.stackConnectors.components.genAi.defaultModelTooltipContent',
   {
-    defaultMessage:
-      'The model can be set on a per request basis by including a "model" parameter in the request body. If no model is provided, the fallback will be the default model.',
+    defaultMessage: 'If a request does not include a model, it uses the default.',
   }
 );
 
