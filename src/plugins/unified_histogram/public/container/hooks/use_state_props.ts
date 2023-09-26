@@ -14,9 +14,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
-import type { Observable } from 'rxjs';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
@@ -144,14 +142,11 @@ export const useStateProps = ({
   );
 
   const onChartLoad = useCallback(
-    (
-      event: UnifiedHistogramChartLoadEvent,
-      embeddablelensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
-    ) => {
+    (event: UnifiedHistogramChartLoadEvent) => {
       // We need to store the Lens request adapter in order to inspect its requests
       stateService?.setLensRequestAdapter(event.adapters.requests);
       stateService?.setLensAdapters(event.adapters);
-      stateService?.setlensEmbeddableOutput$(embeddablelensEmbeddableOutput$);
+      stateService?.setlensEmbeddableOutput$(event.embeddableOutput$);
     },
     [stateService]
   );

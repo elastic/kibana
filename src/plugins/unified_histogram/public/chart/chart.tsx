@@ -83,10 +83,7 @@ export interface ChartProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  onChartLoad?: (
-    event: UnifiedHistogramChartLoadEvent,
-    lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
-  ) => void;
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];

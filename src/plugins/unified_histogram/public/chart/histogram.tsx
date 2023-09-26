@@ -51,10 +51,7 @@ export interface HistogramProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  onChartLoad?: (
-    event: UnifiedHistogramChartLoadEvent,
-    lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
-  ) => void;
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
@@ -166,7 +163,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {} }, lensEmbeddableOutput$);
+      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
     }
   );
 
