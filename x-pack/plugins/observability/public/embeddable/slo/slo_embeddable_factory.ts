@@ -57,7 +57,7 @@ export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactory
 
   public getDescription() {
     return i18n.translate('xpack.observability.sloEmbeddable.description', {
-      defaultMessage: 'Add an SLO overview.',
+      defaultMessage: 'Get an overview of your SLO health',
     });
   }
 
