@@ -370,7 +370,7 @@ describe('SLO Edit Page', () => {
 
         const history = createBrowserHistory();
         history.push(
-          '/slos/create?_a=(name:%27prefilledSloName%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+          '/slos/create?_a=(indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
         );
         jest.spyOn(Router, 'useHistory').mockReturnValue(history);
         jest
@@ -409,18 +409,14 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloForm')).toBeTruthy();
 
         expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
-        // Show default values from the kql indicator
         expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
           'sli.apm.transactionDuration'
         );
-
-        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
-        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
-
         expect(screen.queryByTestId('apmLatencyServiceSelector')).toHaveTextContent('cartService');
         expect(screen.queryByTestId('apmLatencyEnvironmentSelector')).toHaveTextContent('prod');
 
-        expect(screen.queryByTestId('sloFormNameInput')).toHaveValue('prefilledSloName');
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeFalsy();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeFalsy();
       });
     });
 

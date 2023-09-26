@@ -9,8 +9,8 @@ import { transformPartialUrlStateToFormState as transform } from './process_slo_
 
 describe('Transform Partial URL State into partial State Form', () => {
   describe('indicators', () => {
-    it('returns null when no indicator type is specified', () => {
-      expect(transform({ indicator: { params: { index: 'my-index' } } })).toEqual(null);
+    it("returns an empty '{}' when no indicator type is specified", () => {
+      expect(transform({ indicator: { params: { index: 'my-index' } } })).toEqual({});
     });
 
     it('handles partial APM Availability state', () => {
