@@ -24,11 +24,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Creating required index and enrich policy');
       try {
-        await dataStreams.createDataStream(TEST_DS_NAME, {
-          '@timestamp': {
-            type: 'date',
+        await dataStreams.createDataStream(
+          TEST_DS_NAME,
+          {
+            '@timestamp': {
+              type: 'date',
+            },
           },
-        }, false);
+          false
+        );
       } catch (e) {
         log.debug('[Setup error] Error creating test data stream');
         throw e;
