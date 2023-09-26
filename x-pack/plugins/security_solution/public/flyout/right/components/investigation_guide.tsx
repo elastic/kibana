@@ -5,14 +5,13 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
@@ -58,7 +57,13 @@ export const InvestigationGuide: React.FC = () => {
         </EuiTitle>
       </EuiFlexItem>
       {loading ? (
-        <FlyoutLoading data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID} />
+        <EuiSkeletonText
+          data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
+          contentAriaLabel={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideLoadingAriaLabel',
+            { defaultMessage: 'investigation guide' }
+          )}
+        />
       ) : !error && basicAlertData.ruleId && ruleNote ? (
         <EuiFlexItem>
           <EuiButton

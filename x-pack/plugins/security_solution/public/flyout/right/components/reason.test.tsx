@@ -39,7 +39,7 @@ const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
     </IntlProvider>
   );
 
-const NO_DATA_MESSAGE = 'There is no alert reason for this alert.';
+const NO_DATA_MESSAGE = "There's no source event information for this alert.";
 
 describe('<Reason />', () => {
   it('should render the component for alert', () => {

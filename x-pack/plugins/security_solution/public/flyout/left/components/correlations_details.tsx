@@ -56,7 +56,7 @@ export const CorrelationsDetails: React.FC = () => {
     showSuppressedAlerts;
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={CORRELATIONS_DETAILS_TEST_ID}>
+    <EuiPanel paddingSize="none" data-test-subj={CORRELATIONS_DETAILS_TEST_ID} color="transparent">
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup gutterSize="l" direction="column">
           {showSuppressedAlerts && (

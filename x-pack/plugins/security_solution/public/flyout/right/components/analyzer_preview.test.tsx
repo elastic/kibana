@@ -30,7 +30,7 @@ const renderAnalyzerPreview = (contextValue: RightPanelContext) =>
     </TestProviders>
   );
 
-const NO_DATA_MESSAGE = 'Error loading data...';
+const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.';
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {

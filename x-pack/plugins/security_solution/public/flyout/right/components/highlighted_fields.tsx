@@ -15,17 +15,12 @@ import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlight
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import {
-  HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
-  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
-  HIGHLIGHTED_FIELDS_LOADING_TEST_ID,
-} from './test_ids';
+import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
@@ -123,22 +118,22 @@ export const HighlightedFields: FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      {loading ? (
-        <FlyoutLoading data-test-subj={HIGHLIGHTED_FIELDS_LOADING_TEST_ID} />
-      ) : items.length === 0 || error ? (
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
-            defaultMessage="There are no highlighted fields for this alert."
+      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
+        <EuiPanel hasBorder hasShadow={false}>
+          <EuiInMemoryTable
+            items={error ? [] : items}
+            columns={columns}
+            compressed
+            loading={loading}
+            message={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
+                defaultMessage="There's no highlighted fields for this alert."
+              />
+            }
           />
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
-          <EuiPanel hasBorder hasShadow={false}>
-            <EuiInMemoryTable items={items} columns={columns} compressed />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
+        </EuiPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

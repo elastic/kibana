@@ -88,7 +88,7 @@ export const Description: FC = () => {
     ) : (
       <FormattedMessage
         id="xpack.securitySolution.flyout.right.about.description.noRuleDescription"
-        defaultMessage="There is no rule description for this rule."
+        defaultMessage="There's no description for this rule."
       />
     );
 

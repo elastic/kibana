@@ -27,7 +27,7 @@ const renderHighlightedFields = (contextValue: RightPanelContext) =>
     </TestProviders>
   );
 
-const NO_DATA_MESSAGE = 'There are no highlighted fields for this alert.';
+const NO_DATA_MESSAGE = "There's no highlighted fields for this alert.";
 
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
@@ -58,8 +58,7 @@ describe('<HighlightedFields />', () => {
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-    const { getByText, queryByTestId } = renderHighlightedFields(contextValue);
+    const { getByText } = renderHighlightedFields(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).not.toBeInTheDocument();
   });
 });

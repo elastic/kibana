@@ -45,12 +45,6 @@ describe.skip(
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
         .should('be.visible')
         .and('have.text', 'Session View');
-
-      // TODO ideally we would have a test for the session view component instead
-      // cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
-      //   .should('be.visible')
-      //   .and('contain.text', 'Unable to display session view')
-      //   .and('contain.text', 'There was an error displaying session view');
     });
   }
 );

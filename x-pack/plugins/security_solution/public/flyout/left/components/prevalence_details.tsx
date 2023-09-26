@@ -26,9 +26,7 @@ import { useLicense } from '../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import {
-  PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
@@ -318,10 +316,6 @@ export const PrevalenceDetails: React.FC = () => {
     [data, absoluteStart, absoluteEnd]
   );
 
-  if (loading) {
-    return <FlyoutLoading size="xxl" data-test-subj={PREVALENCE_DETAILS_LOADING_TEST_ID} />;
-  }
-
   const upsell = (
     <>
       <EuiCallOut data-test-subj={PREVALENCE_DETAILS_UPSELL_TEST_ID}>
@@ -356,18 +350,18 @@ export const PrevalenceDetails: React.FC = () => {
           width="full"
         />
         <EuiSpacer size="m" />
-        {data.length > 0 ? (
-          <EuiInMemoryTable
-            items={items}
-            columns={columns}
-            data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
-            defaultMessage="No prevalence data available."
-          />
-        )}
+        <EuiInMemoryTable
+          items={error ? [] : items}
+          columns={columns}
+          loading={loading}
+          data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+          message={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
+              defaultMessage="No prevalence data available."
+            />
+          }
+        />
       </EuiPanel>
     </>
   );

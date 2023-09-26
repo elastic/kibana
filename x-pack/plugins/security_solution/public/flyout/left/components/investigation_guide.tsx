@@ -27,7 +27,7 @@ export const InvestigationGuide: React.FC = () => {
   return (
     <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
       {loading ? (
-        <FlyoutLoading size="xxl" data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID} />
+        <FlyoutLoading data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID} />
       ) : !error && basicAlertData.ruleId && ruleNote ? (
         <InvestigationGuideView
           basicData={basicAlertData}

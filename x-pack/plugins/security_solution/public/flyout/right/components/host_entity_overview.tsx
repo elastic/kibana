@@ -14,9 +14,11 @@ import {
   useEuiTheme,
   useEuiFontSize,
   EuiIconTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
+import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
@@ -35,8 +37,11 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import * as i18n from '../../../overview/components/host_overview/translations';
+import {
+  FAMILY,
+  LAST_SEEN,
+  HOST_RISK_CLASSIFICATION,
+} from '../../../overview/components/host_overview/translations';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
@@ -114,7 +119,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.FAMILY,
+        title: FAMILY,
         description: (
           <DefaultFieldRenderer
             rowItems={getOr([], 'host.os.family', hostDetails)}
@@ -131,7 +136,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const hostLastSeen: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.LAST_SEEN,
+        title: LAST_SEEN,
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
@@ -154,7 +159,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       {
         title: (
           <>
-            {i18n.HOST_RISK_CLASSIFICATION}
+            {HOST_RISK_CLASSIFICATION}
             <EuiIconTip
               title={
                 <FormattedMessage
@@ -213,7 +218,13 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         </EuiFlexGroup>
       </EuiFlexItem>
       {isRiskScoreLoading || isHostDetailsLoading ? (
-        <FlyoutLoading data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID} />
+        <EuiSkeletonText
+          data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID}
+          contentAriaLabel={i18n.translate(
+            'xpack.securitySolution.flyout.right.insights.entities.hostLoadingAriaLabel',
+            { defaultMessage: 'host overview' }
+          )}
+        />
       ) : (
         <EuiFlexItem>
           <EuiFlexGroup>

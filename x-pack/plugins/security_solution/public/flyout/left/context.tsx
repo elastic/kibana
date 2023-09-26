@@ -113,7 +113,7 @@ export const LeftPanelProvider = memo(
     );
 
     if (loading) {
-      return <FlyoutLoading size="xxl" />;
+      return <FlyoutLoading />;
     }
 
     if (!contextValue) {

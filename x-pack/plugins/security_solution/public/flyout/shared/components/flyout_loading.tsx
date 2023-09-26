@@ -6,16 +6,11 @@
  */
 
 import React from 'react';
-import type { EuiLoadingSpinnerProps } from '@elastic/eui';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FLYOUT_LOADING_TEST_ID } from '../test_ids';
 
 interface FlyoutLoadingProps {
-  /**
-   * Spinner size
-   */
-  size?: EuiLoadingSpinnerProps['size'];
   /**
   Data test subject string for testing
   */
@@ -26,7 +21,6 @@ interface FlyoutLoadingProps {
  * Use this when you need to show a loading state in the flyout
  */
 export const FlyoutLoading: React.FC<FlyoutLoadingProps> = ({
-  size = 'm',
   'data-test-subj': dataTestSubj = FLYOUT_LOADING_TEST_ID,
 }) => (
   <EuiFlexItem
@@ -35,6 +29,6 @@ export const FlyoutLoading: React.FC<FlyoutLoadingProps> = ({
       justify-content: center;
     `}
   >
-    <EuiLoadingSpinner size={size} data-test-subj={dataTestSubj} />
+    <EuiLoadingSpinner size="xxl" data-test-subj={dataTestSubj} />
   </EuiFlexItem>
 );

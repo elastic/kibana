@@ -86,7 +86,7 @@ export const Reason: FC = () => {
   ) : (
     <FormattedMessage
       id="xpack.securitySolution.flyout.right.about.reason.noReasonDescription"
-      defaultMessage="There is no alert reason for this alert."
+      defaultMessage="There's no source event information for this alert."
     />
   );
 

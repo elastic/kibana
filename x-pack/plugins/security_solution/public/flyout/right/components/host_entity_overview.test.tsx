@@ -101,7 +101,7 @@ describe('<HostEntityContent />', () => {
     });
   });
 
-  it('should render loading spinner if loading for host details is true', () => {
+  it('should render loading if loading for host details is true', () => {
     mockUseHostDetails.mockReturnValue([true, { hostDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
@@ -115,7 +115,7 @@ describe('<HostEntityContent />', () => {
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render loading spinner if loading for risk score is true', () => {
+  it('should render loading if loading for risk score is true', () => {
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true, loading: true });
 

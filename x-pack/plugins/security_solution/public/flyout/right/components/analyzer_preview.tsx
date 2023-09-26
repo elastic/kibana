@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
-import { EuiTreeView } from '@elastic/eui';
+import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
@@ -16,7 +16,6 @@ import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../helpers';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -63,7 +62,15 @@ export const AnalyzerPreview: React.FC = () => {
   const showAnalyzerTree = documentId && index && items && items.length > 0 && !error;
 
   return loading ? (
-    <FlyoutLoading data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID} />
+    <EuiSkeletonText
+      data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
+      contentAriaLabel={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+        {
+          defaultMessage: 'analyzer preview',
+        }
+      )}
+    />
   ) : showAnalyzerTree ? (
     <EuiTreeView
       items={items}
@@ -80,7 +87,7 @@ export const AnalyzerPreview: React.FC = () => {
   ) : (
     <FormattedMessage
       id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
-      defaultMessage="Error loading data..."
+      defaultMessage="An error is preventing this alert from being analyzed."
     />
   );
 };

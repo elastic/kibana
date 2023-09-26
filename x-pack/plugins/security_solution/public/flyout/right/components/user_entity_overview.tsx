@@ -14,9 +14,11 @@ import {
   useEuiTheme,
   useEuiFontSize,
   EuiIconTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
+import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
@@ -36,8 +38,11 @@ import { RiskScore } from '../../../explore/components/risk_score/severity/commo
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import * as i18n from '../../../overview/components/user_overview/translations';
+import {
+  USER_DOMAIN,
+  LAST_SEEN,
+  USER_RISK_CLASSIFICATION,
+} from '../../../overview/components/user_overview/translations';
 import {
   ENTITIES_USER_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -112,7 +117,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const userDomain: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.USER_DOMAIN,
+        title: USER_DOMAIN,
         description: (
           <DefaultFieldRenderer
             rowItems={getOr([], 'user.domain', userDetails)}
@@ -129,7 +134,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const userLastSeen: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.LAST_SEEN,
+        title: LAST_SEEN,
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
@@ -153,7 +158,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       {
         title: (
           <>
-            {i18n.USER_RISK_CLASSIFICATION}
+            {USER_RISK_CLASSIFICATION}
             <EuiIconTip
               title={
                 <FormattedMessage
@@ -213,7 +218,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       </EuiFlexItem>
       <EuiFlexItem>
         {isUserDetailsLoading || isRiskScoreLoading ? (
-          <FlyoutLoading data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID} />
+          <EuiSkeletonText
+            contentAriaLabel={i18n.translate(
+              'xpack.securitySolution.flyout.right.insights.entities.userLoadingAriaLabel',
+              { defaultMessage: 'user overview' }
+            )}
+            data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID}
+          />
         ) : (
           <EuiFlexGroup>
             <EuiFlexItem>

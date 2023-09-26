@@ -10,7 +10,6 @@ import React from 'react';
 import { LeftPanelContext } from '../context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
-  PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
@@ -202,20 +201,6 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render loading', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: true,
-      error: false,
-      data: [],
-    });
-
-    const { getByTestId, queryByTestId, queryByText } = renderPrevalenceDetails();
-
-    expect(getByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-  });
-
   it('should render no data message if call errors out', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
@@ -223,9 +208,8 @@ describe('PrevalenceDetails', () => {
       data: [],
     });
 
-    const { queryByTestId, getByText } = renderPrevalenceDetails();
+    const { getByText } = renderPrevalenceDetails();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message if no data', () => {
@@ -235,8 +219,7 @@ describe('PrevalenceDetails', () => {
       data: [],
     });
 
-    const { queryByTestId, getByText } = renderPrevalenceDetails();
+    const { getByText } = renderPrevalenceDetails();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
   });
 });

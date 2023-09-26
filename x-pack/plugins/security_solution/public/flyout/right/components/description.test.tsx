@@ -68,6 +68,8 @@ const renderDescription = (panelContext: RightPanelContext) =>
     </IntlProvider>
   );
 
+const NO_DATA_MESSAGE = "There's no description for this rule.";
+
 describe('<Description />', () => {
   it('should render the component', () => {
     const { getByTestId } = renderDescription(
@@ -81,12 +83,10 @@ describe('<Description />', () => {
   });
 
   it('should render no data message if rule description is not available', () => {
-    const { getByTestId } = renderDescription(panelContextValue([ruleUuid]));
+    const { getByTestId, getByText } = renderDescription(panelContextValue([ruleUuid]));
 
     expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_DETAILS_TEST_ID)).toHaveTextContent(
-      'There is no rule description for this rule.'
-    );
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render document title if document is not an alert', () => {

@@ -123,7 +123,7 @@ describe('<UserEntityOverview />', () => {
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('should render loading spinner if user details returns loading as true', () => {
+    it('should render loading if user details returns loading as true', () => {
       mockUseUserDetails.mockReturnValue([true, { userDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
@@ -138,7 +138,7 @@ describe('<UserEntityOverview />', () => {
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should render loading spinner if risk score returns loading as true', () => {
+    it('should render loading if risk score returns loading as true', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true, loading: true });
 

@@ -72,7 +72,7 @@ export const PreviewPanelProvider = memo(
     );
 
     if (loading) {
-      return <FlyoutLoading size="xxl" />;
+      return <FlyoutLoading />;
     }
 
     if (!contextValue) {

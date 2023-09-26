@@ -20,6 +20,7 @@ import { StepDefineRuleReadOnly } from '../../../detections/components/rules/ste
 import { StepScheduleRuleReadOnly } from '../../../detections/components/rules/step_schedule_rule';
 import { StepRuleActionsReadOnly } from '../../../detections/components/rules/step_rule_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutError } from '../../shared/components/flyout_error';
 import {
   RULE_PREVIEW_BODY_TEST_ID,
   RULE_PREVIEW_ABOUT_TEST_ID,
@@ -81,7 +82,7 @@ export const RulePreview: React.FC = memo(() => {
   const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
 
   return ruleLoading ? (
-    <FlyoutLoading size="xxl" data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
+    <FlyoutLoading data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
   ) : rule ? (
     <EuiPanel hasShadow={false} data-test-subj={RULE_PREVIEW_BODY_TEST_ID} className="eui-yScroll">
       <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
@@ -172,7 +173,11 @@ export const RulePreview: React.FC = memo(() => {
         </ExpandableSection>
       )}
     </EuiPanel>
-  ) : null;
+  ) : (
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <FlyoutError />
+    </EuiPanel>
+  );
 });
 
 RulePreview.displayName = 'RulePreview';

@@ -31,7 +31,7 @@ export const ThreatIntelligenceDetails: React.FC = () => {
   } = useThreatIntelligenceDetails();
 
   return isEventDataLoading ? (
-    <FlyoutLoading size="xxl" data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
+    <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
   ) : (
     <ThreatDetailsView
       before={null}

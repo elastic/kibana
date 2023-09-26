@@ -18,11 +18,11 @@ import {
   EuiText,
   useEuiTheme,
   EuiToolTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FlyoutLoading } from './flyout_loading';
 
 export interface ExpandablePanelPanelProps {
   header: {
@@ -197,7 +197,13 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
   }, [children, expandable, toggleStatus]);
 
   const content = loading ? (
-    <FlyoutLoading data-test-subj={`${dataTestSubj}Loading`} />
+    <EuiSkeletonText
+      data-test-subj={`${dataTestSubj}Loading`}
+      contentAriaLabel={i18n.translate(
+        'xpack.securitySolution.flyout.shared.expandablePanelLoadingAriaLabel',
+        { defaultMessage: 'expandable panel' }
+      )}
+    />
   ) : error ? null : (
     children
   );
