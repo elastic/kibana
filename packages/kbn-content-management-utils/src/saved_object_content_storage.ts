@@ -141,7 +141,7 @@ export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
   mSearchAdditionalSearchFields?: string[];
 
   logger: Logger;
-  throwOnResultValidationError?: boolean;
+  throwOnResultValidationError: boolean;
 }
 
 export abstract class SOContentStorage<Types extends CMCrudTypes>
@@ -182,16 +182,29 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
         toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): Types['Item'] => {
           const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
 
+          const contentItem = savedObjectToItem(
+            savedObject as SavedObjectsFindResult<Types['Attributes']>,
+            this.allowedSavedObjectAttributes,
+            false
+          );
+
+          const validationError = transforms.mSearch.out.result.validate(contentItem);
+          if (validationError) {
+            if (this.throwOnResultValidationError) {
+              throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+            } else {
+              this.logger.warn(`Invalid response. ${validationError.message}`);
+            }
+          }
+
           // Validate DB response and DOWN transform to the request version
           const { value, error: resultError } = transforms.mSearch.out.result.down<
             Types['Item'],
             Types['Item']
           >(
-            savedObjectToItem(
-              savedObject as SavedObjectsFindResult<Types['Attributes']>,
-              this.allowedSavedObjectAttributes,
-              false
-            )
+            contentItem,
+            undefined, // do not override version
+            { validate: false } // validation is done above
           );
 
           if (resultError) {
@@ -240,11 +253,24 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       },
     };
 
+    const validationError = transforms.get.out.result.validate(response);
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
       Types['GetOut'],
       Types['GetOut']
-    >(response);
+    >(
+      response,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -358,13 +384,28 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       updateOptions
     );
 
+    const result = {
+      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
+    };
+
+    const validationError = transforms.update.out.result.validate(result);
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
       Types['UpdateOut'],
       Types['UpdateOut']
-    >({
-      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
-    });
+    >(
+      result,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -407,20 +448,34 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       options: optionsToLatest,
     });
     // Execute the query in the DB
-    const response = await soClient.find<Types['Attributes']>(soQuery);
+    const soResponse = await soClient.find<Types['Attributes']>(soQuery);
+    const response = {
+      hits: soResponse.saved_objects.map((so) =>
+        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
+      ),
+      pagination: {
+        total: soResponse.total,
+      },
+    };
+
+    const validationError = transforms.search.out.result.validate(response);
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<
       Types['SearchOut'],
       Types['SearchOut']
-    >({
-      hits: response.saved_objects.map((so) =>
-        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
-      ),
-      pagination: {
-        total: response.total,
-      },
-    });
+    >(
+      response,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
