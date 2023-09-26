@@ -28,7 +28,7 @@ import {
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
-const ML_INFERENCE_PREFIX = 'ml.inference.';
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
 
 export interface MlInferencePipelineParams {
   description?: string;
