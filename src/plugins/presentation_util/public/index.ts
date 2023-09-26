@@ -10,11 +10,7 @@ import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
-export type {
-  PresentationCapabilitiesService,
-  PresentationDashboardsService,
-  PresentationLabsService,
-} from './services';
+export type { PresentationCapabilitiesService, PresentationLabsService } from './services';
 
 export type {
   KibanaPluginServiceFactory,

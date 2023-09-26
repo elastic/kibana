@@ -437,14 +437,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dispatch.setExpandedPanelId(newId);
   };
 
-  public openOverlay = (ref: OverlayRef) => {
+  public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
     this.clearOverlays();
     this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
+    if (options?.focusedPanelId) {
+      this.setFocusedPanelId(options?.focusedPanelId);
+    }
   };
 
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
+    this.dispatch.setFocusedPanelId(undefined);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
@@ -502,5 +506,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       });
     }
     this.setHighlightPanelId(undefined);
+  };
+
+  public setFocusedPanelId = (id: string | undefined) => {
+    this.dispatch.setFocusedPanelId(id);
   };
 }
