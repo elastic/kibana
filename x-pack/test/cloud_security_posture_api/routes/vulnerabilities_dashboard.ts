@@ -214,7 +214,6 @@ export default function ({ getService }: FtrProviderContext) {
           {
             high: 1,
             policy_template: 'vuln_mgmt',
-            // '@timestamp': '2023-09-03T12:57:04.925186Z',
             critical: 0,
             low: 0,
             vulnerabilities_stats_by_cloud_account: {
