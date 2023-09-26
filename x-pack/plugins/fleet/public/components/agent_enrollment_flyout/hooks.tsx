@@ -14,12 +14,9 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import {
-  getCloudFormationTemplateUrlFromPackageInfo,
-  getCloudShellUrlFromAgentPolicy,
-} from '../../services';
+import { getTemplateUrlFromPackageInfo, getCloudShellUrlFromAgentPolicy } from '../../services';
 
-import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
+import { getTemplateUrlFromAgentPolicy } from '../../services';
 
 import type {
   K8sMode,
@@ -113,14 +110,14 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
 
     if (!integrationType) return undefined;
 
-    const cloudFormationTemplateFromAgentPolicy = getCloudFormationTemplateUrlFromAgentPolicy(
-      agentPolicy,
-      'cloud_formation_template_url'
+    const cloudFormationTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
+      'cloud_formation_template_url',
+      agentPolicy
     );
 
-    const azureArmTemplateFromAgentPolicy = getCloudFormationTemplateUrlFromAgentPolicy(
-      agentPolicy,
-      'arm_template_url'
+    const azureArmTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
+      'arm_template_url',
+      agentPolicy
     );
 
     // Use the latest CloudFormation template for the current version
@@ -129,7 +126,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     // In case it can't find the template for the current version,
     // it will fallback to the one from the agent policy.
     const cloudFormationTemplateUrl = packageInfoData?.item
-      ? getCloudFormationTemplateUrlFromPackageInfo(
+      ? getTemplateUrlFromPackageInfo(
           packageInfoData.item,
           integrationType,
           'cloud_formation_template_url'
@@ -142,11 +139,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       ]?.value;
 
     const azureArmTemplateUrl = packageInfoData?.item
-      ? getCloudFormationTemplateUrlFromPackageInfo(
-          packageInfoData.item,
-          integrationType,
-          'arm_template_url'
-        )
+      ? getTemplateUrlFromPackageInfo(packageInfoData.item, integrationType, 'arm_template_url')
       : azureArmTemplateFromAgentPolicy;
 
     const azureArmTemplateAccountType: CloudSecurityIntegrationAzureAccountType | undefined =

@@ -7,12 +7,7 @@
 
 import type { PackageInfo } from '../types';
 
-/**
- * Get the cloud formation template url from the PackageInfo
- * It looks for a input var with a object containing cloud_formation_template_url present in
- * the package_policies inputs of the given integration type
- */
-export const getCloudFormationTemplateUrlFromPackageInfo = (
+export const getTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
   integrationType: string,
   templateUrlFieldName: string

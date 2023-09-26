@@ -5,25 +5,33 @@
  * 2.0.
  */
 
-import { getCloudFormationTemplateUrlFromPackageInfo } from './get_cloud_formation_template_url_from_package_info';
+import { getTemplateUrlFromPackageInfo } from './get_template_url_from_package_info';
 
-describe('getCloudFormationTemplateUrlFromPackageInfo', () => {
+describe('getTemplateUrlFromPackageInfo', () => {
   test('returns undefined when packageInfo is undefined', () => {
-    const result = getCloudFormationTemplateUrlFromPackageInfo(undefined, 'test');
+    const result = getTemplateUrlFromPackageInfo(undefined, 'test', 'cloud_formation_template_url');
     expect(result).toBeUndefined();
   });
 
   test('returns undefined when packageInfo has no policy_templates', () => {
     const packageInfo = { inputs: [] };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromPackageInfo(packageInfo, 'test');
+    const result = getTemplateUrlFromPackageInfo(
+      packageInfo,
+      'test',
+      'cloud_formation_template_url'
+    );
     expect(result).toBeUndefined();
   });
 
   test('returns undefined when integrationType is not found in policy_templates', () => {
     const packageInfo = { policy_templates: [{ name: 'template1' }, { name: 'template2' }] };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromPackageInfo(packageInfo, 'nonExistentTemplate');
+    const result = getTemplateUrlFromPackageInfo(
+      packageInfo,
+      'nonExistentTemplate',
+      'cloud_formation_template_url'
+    );
     expect(result).toBeUndefined();
   });
 
@@ -40,7 +48,11 @@ describe('getCloudFormationTemplateUrlFromPackageInfo', () => {
       ],
     };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromPackageInfo(packageInfo, 'template1');
+    const result = getTemplateUrlFromPackageInfo(
+      packageInfo,
+      'template1',
+      'cloud_formation_template_url'
+    );
     expect(result).toBeUndefined();
   });
 
@@ -60,7 +72,30 @@ describe('getCloudFormationTemplateUrlFromPackageInfo', () => {
       ],
     };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromPackageInfo(packageInfo, 'template1');
+    const result = getTemplateUrlFromPackageInfo(
+      packageInfo,
+      'template1',
+      'cloud_formation_template_url'
+    );
     expect(result).toBe('cloud_formation_template_url');
+  });
+
+  test('returns the armTemplateUrl from the policy template', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          inputs: [
+            { name: 'input1', vars: [] },
+            {
+              name: 'input2',
+              vars: [{ name: 'arm_template_url', default: 'arm_template_url_value' }],
+            },
+          ],
+        },
+      ],
+    };
+    const result = getTemplateUrlFromPackageInfo(packageInfo, 'template1', 'arm_template_url');
+    expect(result).toBe('arm_template_url_value');
   });
 });

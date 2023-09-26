@@ -103,6 +103,28 @@ export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   } as PackageInfo;
 };
 
+export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
+  return {
+    version: packageVersion,
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_AZURE,
+            title: 'Azure',
+            description: '',
+            vars: [{}],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
 const getPolicyMock = (
   type: PostureInput,
   posture: string,

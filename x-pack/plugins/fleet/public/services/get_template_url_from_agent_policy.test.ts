@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getCloudFormationTemplateUrlFromAgentPolicy } from './get_cloud_formation_template_url_from_agent_policy';
+import { getTemplateUrlFromAgentPolicy } from './get_template_url_from_agent_policy';
 
-describe('getCloudFormationTemplateUrlFromAgentPolicy', () => {
+describe('getTemplateUrlFromAgentPolicy', () => {
   it('should return undefined when selectedPolicy is undefined', () => {
-    const result = getCloudFormationTemplateUrlFromAgentPolicy();
+    const result = getTemplateUrlFromAgentPolicy('cloud_formation_template_url');
     expect(result).toBeUndefined();
   });
 
   it('should return undefined when selectedPolicy has no package_policies', () => {
     const selectedPolicy = {};
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromAgentPolicy(selectedPolicy);
+    const result = getTemplateUrlFromAgentPolicy('cloud_formation_template_url', selectedPolicy);
     expect(result).toBeUndefined();
   });
 
@@ -38,7 +38,7 @@ describe('getCloudFormationTemplateUrlFromAgentPolicy', () => {
       ],
     };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromAgentPolicy(selectedPolicy);
+    const result = getTemplateUrlFromAgentPolicy('cloud_formation_template_url', selectedPolicy);
     expect(result).toBeUndefined();
   });
 
@@ -62,7 +62,7 @@ describe('getCloudFormationTemplateUrlFromAgentPolicy', () => {
       ],
     };
     // @ts-expect-error
-    const result = getCloudFormationTemplateUrlFromAgentPolicy(selectedPolicy);
+    const result = getTemplateUrlFromAgentPolicy(selectedPolicy);
     expect(result).toBe('url3');
   });
 });
