@@ -95,7 +95,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     status,
     savedSearchId,
     activeTab,
-    isLoading: isTimelineLoading,
     savedObjectId,
     title,
     description,
@@ -125,7 +124,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   }, [savedObjectId, setSavedSearchLoaded]);
 
   useEffect(() => {
-    if (isFetching || isTimelineLoading) return; // no-op is fetch is in progress
+    if (isFetching) return; // no-op is fetch is in progress
     if (isDiscoverSavedSearchLoaded) return; // no-op if saved search has been already loaded
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
@@ -141,7 +140,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     discoverStateContainer,
     savedSearchId,
     isDiscoverSavedSearchLoaded,
-    isTimelineLoading,
     status,
     activeTab,
     resetDiscoverAppState,
@@ -179,7 +177,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   );
 
   useEffect(() => {
-    if (isFetching || isTimelineLoading) return;
+    if (isFetching) return;
     if (!isDiscoverSavedSearchLoaded) return;
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
@@ -191,7 +189,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   }, [
     getCombinedDiscoverSavedSearchState,
     debouncedUpdateSavedSearch,
-    isTimelineLoading,
     savedSearchById,
     updateSavedSearch,
     isDiscoverSavedSearchLoaded,
