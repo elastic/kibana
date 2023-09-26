@@ -11,8 +11,10 @@ import type { Histogram } from './types';
 /**
  * Compute the p-value for how similar the datasets are.
  * Returned value ranges from 0 to 1, with 1 meaning the datasets are identical.
- * @param normalizedBaselineTerms
- * @param normalizedDriftedTerms
+ *
+ * @param {Histogram[]} normalizedBaselineTerms - An array of normalized baseline terms (Histogram objects).
+ * @param {Histogram[]} normalizedDriftedTerms - An array of normalized drifted terms (Histogram objects).
+ * @returns {number} The p-value indicating the similarity of the datasets.
  */
 export const computeChi2PValue = (
   normalizedBaselineTerms: Histogram[],
@@ -41,5 +43,6 @@ export const computeChi2PValue = (
     chiSquared += Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
   });
 
+  // Use the criticalTableLookup function to determine the p-value
   return criticalTableLookup(chiSquared, degreesOfFreedom);
 };
