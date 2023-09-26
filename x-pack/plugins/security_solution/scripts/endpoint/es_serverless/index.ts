@@ -40,7 +40,7 @@ ${
       ['USERNAME', '-'.repeat(20), ...ES_LOADED_USERS.map((u) => cyan(u))].join('\n'),
 
       [
-        'USERNAME',
+        'PASSWORD',
         '-'.repeat(20),
         ' ',
         ' ',
