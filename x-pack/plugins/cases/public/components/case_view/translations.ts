@@ -52,7 +52,7 @@ export const REMOVED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.re
 export const CHANGED_FIELD_TO_EMPTY = (field: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.changeFieldToEmpty', {
     values: { field },
-    defaultMessage: 'changed {field} to an empty value',
+    defaultMessage: 'changed {field} to "None"',
   });
 
 export const VIEW_INCIDENT = (incidentNumber: string) =>
