@@ -368,6 +368,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/zip:
@@ -516,6 +530,20 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
@@ -689,6 +717,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
