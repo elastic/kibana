@@ -254,13 +254,9 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginSetupContext.mockImplementation((context, deps, plugin) =>
-    setupContextMap.get(plugin.name)
-  );
+  mockCreatePluginSetupContext.mockImplementation(({ plugin }) => setupContextMap.get(plugin.name));
 
-  mockCreatePluginStartContext.mockImplementation((context, deps, plugin) =>
-    startContextMap.get(plugin.name)
-  );
+  mockCreatePluginStartContext.mockImplementation(({ plugin }) => startContextMap.get(plugin.name));
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
     Array [
@@ -288,7 +284,11 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(coreContext, setupDeps, plugin);
+    expect(mockCreatePluginSetupContext).toHaveBeenCalledWith({
+      deps: setupDeps,
+      plugin,
+      runtimeResolver: expect.any(Object),
+    });
     expect(plugin.setup).toHaveBeenCalledTimes(1);
     expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps.setup);
   }
@@ -319,7 +319,11 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, startDeps, plugin);
+    expect(mockCreatePluginStartContext).toHaveBeenCalledWith({
+      deps: startDeps,
+      plugin,
+      runtimeResolver: expect.any(Object),
+    });
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps.start);
   }
@@ -362,7 +366,7 @@ test('correctly orders preboot plugins and returns exposed values for "setup"', 
     prebootPluginSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginPrebootSetupContext.mockImplementation((context, deps, plugin) =>
+  mockCreatePluginPrebootSetupContext.mockImplementation(({ plugin }) =>
     setupContextMap.get(plugin.name)
   );
 
@@ -392,11 +396,10 @@ test('correctly orders preboot plugins and returns exposed values for "setup"', 
   `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
-      coreContext,
-      prebootDeps,
-      plugin
-    );
+    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith({
+      deps: prebootDeps,
+      plugin,
+    });
     expect(plugin.setup).toHaveBeenCalledTimes(1);
     expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
   }
@@ -426,17 +429,21 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
     ]
   `);
 
-  expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(
-    coreContext,
-    setupDeps,
-    firstPluginToRun
-  );
-  expect(mockCreatePluginSetupContext).not.toHaveBeenCalledWith(coreContext, secondPluginNotToRun);
-  expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(
-    coreContext,
-    setupDeps,
-    thirdPluginToRun
-  );
+  expect(mockCreatePluginSetupContext).toHaveBeenCalledWith({
+    deps: setupDeps,
+    plugin: firstPluginToRun,
+    runtimeResolver: expect.any(Object),
+  });
+  expect(mockCreatePluginSetupContext).not.toHaveBeenCalledWith({
+    deps: setupDeps,
+    plugin: secondPluginNotToRun,
+    runtimeResolver: expect.any(Object),
+  });
+  expect(mockCreatePluginSetupContext).toHaveBeenCalledWith({
+    deps: setupDeps,
+    plugin: thirdPluginToRun,
+    runtimeResolver: expect.any(Object),
+  });
 
   expect(firstPluginToRun.setup).toHaveBeenCalledTimes(1);
   expect(secondPluginNotToRun.setup).not.toHaveBeenCalled();
