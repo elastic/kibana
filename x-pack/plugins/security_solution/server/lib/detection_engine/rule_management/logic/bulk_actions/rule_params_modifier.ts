@@ -87,7 +87,7 @@ const applyBulkActionEditToRuleParams = (
       );
       invariant(
         ruleParams.type !== 'esql',
-        "Index patterns can't be added. Esql rule doesn't have index patterns property"
+        "Index patterns can't be added. ES|QL rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
@@ -109,7 +109,7 @@ const applyBulkActionEditToRuleParams = (
       );
       invariant(
         ruleParams.type !== 'esql',
-        "Index patterns can't be deleted. Esql rule doesn't have index patterns property"
+        "Index patterns can't be deleted. ES|QL rule doesn't have index patterns property"
       );
 
       if (
@@ -136,7 +136,7 @@ const applyBulkActionEditToRuleParams = (
       );
       invariant(
         ruleParams.type !== 'esql',
-        "Index patterns can't be overwritten. Esql rule doesn't have index patterns property"
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {

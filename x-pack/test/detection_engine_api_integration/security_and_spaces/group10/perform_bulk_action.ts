@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
@@ -1125,6 +1126,36 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: mlRule.id,
                 name: mlRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should return error if index patterns action is applied to ES|QL rule', async () => {
+          const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [esqlRule.id],
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
+                {
+                  type: BulkActionEditType.add_index_patterns,
+                  value: ['index-*'],
+                },
+              ],
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).to.eql({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message:
+              "Index patterns can't be added. ES|QL rule doesn't have index patterns property",
+            status_code: 500,
+            rules: [
+              {
+                id: esqlRule.id,
+                name: esqlRule.name,
               },
             ],
           });
