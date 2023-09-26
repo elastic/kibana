@@ -15,18 +15,18 @@ export const CustomFieldTextTypeRt = rt.literal(CustomFieldTypes.TEXT);
 export const CustomFieldToggleTypeRt = rt.literal(CustomFieldTypes.TOGGLE);
 
 export const createCustomFieldValueRt = <C extends rt.Mixed>(codec: C) =>
-  rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
+  rt.union([rt.array(codec), rt.null]);
 
 const CaseCustomFieldText = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  field: createCustomFieldValueRt(rt.string),
+  value: createCustomFieldValueRt(rt.string),
 });
 
 export const CaseCustomFieldToggle = rt.strict({
   key: rt.string,
   type: CustomFieldToggleTypeRt,
-  field: createCustomFieldValueRt(rt.boolean),
+  value: createCustomFieldValueRt(rt.boolean),
 });
 
 export const CaseCustomFieldRt = rt.union([CaseCustomFieldText, CaseCustomFieldToggle]);

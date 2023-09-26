@@ -202,32 +202,28 @@ export const createCaseSavedObjectType = (
           type: {
             type: 'keyword',
           },
-          field: {
-            properties: {
-              value: {
-                type: 'keyword',
-                fields: {
-                  number: {
-                    type: 'long',
-                    ignore_malformed: true,
-                  },
-                  boolean: {
-                    type: 'boolean',
-                    // @ts-expect-error: es types are not correct. ignore_malformed is supported.
-                    ignore_malformed: true,
-                  },
-                  string: {
-                    type: 'text',
-                  },
-                  date: {
-                    type: 'date',
-                    ignore_malformed: true,
-                  },
-                  ip: {
-                    type: 'ip',
-                    ignore_malformed: true,
-                  },
-                },
+          value: {
+            type: 'keyword',
+            fields: {
+              number: {
+                type: 'long',
+                ignore_malformed: true,
+              },
+              boolean: {
+                type: 'boolean',
+                // @ts-expect-error: es types are not correct. ignore_malformed is supported.
+                ignore_malformed: true,
+              },
+              string: {
+                type: 'text',
+              },
+              date: {
+                type: 'date',
+                ignore_malformed: true,
+              },
+              ip: {
+                type: 'ip',
+                ignore_malformed: true,
               },
             },
           },
