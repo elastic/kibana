@@ -12,14 +12,10 @@ export interface AssetManagerSetupExports {
 }
 
 export type AssetManagerStartExports = void;
-export interface AssetManagerSetupDeps {}
-export interface AssetManagerStartDeps {}
 
 export type AssetManagerPluginClass = PluginClass<
   AssetManagerSetupExports,
-  AssetManagerStartExports,
-  AssetManagerSetupDeps,
-  AssetManagerStartDeps
+  AssetManagerStartExports
 >;
 
 export interface IPublicAssetsClient {

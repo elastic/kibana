@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
-import { AssetManagerPluginClass, AssetManagerSetupDeps } from './types';
+import { AssetManagerPluginClass } from './types';
 import { PublicAssetsClient } from './lib/public_assets_client';
 
 export class Plugin implements AssetManagerPluginClass {
@@ -16,7 +16,7 @@ export class Plugin implements AssetManagerPluginClass {
     this.config = context.config.get();
   }
 
-  setup(core: CoreSetup, pluginsSetup: AssetManagerSetupDeps) {
+  setup(core: CoreSetup) {
     const publicAssetsClient = new PublicAssetsClient(core.http);
     return {
       publicAssetsClient,
