@@ -3226,7 +3226,7 @@
     "guidedOnboardingPackage.gettingStarted.cards.progressLabel": "已完成 {numberCompleteSteps} 个（共 {numberSteps} 个）步骤",
     "guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title": "通过 SIEM{lineBreak}在我的数据中检测威胁",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "指南完成",
-    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "构建语义搜索体验",
+    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "打造人工智能驱动的搜索体验",
     "guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title": "监测我的主机指标",
     "guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title": "监测 Kubernetes 集群",
     "guidedOnboardingPackage.gettingStarted.cards.logsObservability.title": "收集并分析我的日志",

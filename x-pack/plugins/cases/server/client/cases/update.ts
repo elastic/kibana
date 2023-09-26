@@ -37,17 +37,8 @@ import {
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import {
-  arraysDifference,
-  getCaseToUpdate,
-  throwIfDuplicatedCustomFieldKeysInRequest,
-} from '../utils';
-import {
-  dedupAssignees,
-  getClosedInfoForUpdate,
-  getDurationForUpdate,
-  compareCustomFieldKeysAgainstConfiguration,
-} from './utils';
+import { arraysDifference, getCaseToUpdate } from '../utils';
+import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -64,6 +55,7 @@ import type {
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { validateCustomFields } from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -73,7 +65,7 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
 
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
+    throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -107,10 +99,7 @@ async function throwIfMaxUserActionsReached({
   });
 }
 
-/**
- * Throws if any of the custom field keys in the request does not exist in the case configuration.
- */
-export async function throwIfCustomFieldKeysInvalid({
+async function validateCustomFieldsInRequest({
   casesToUpdate,
   casesClient,
 }: {
@@ -118,33 +107,19 @@ export async function throwIfCustomFieldKeysInvalid({
   casesClient: CasesClient;
 }) {
   const configurations = await casesClient.configure.get({});
-
-  const configurationMap: Record<string, CustomFieldsConfiguration> = {};
-  const invalidKeysPerCase: Record<string, string[]> = {};
-
-  configurations.forEach((conf) => {
-    if (!(conf.owner in configurationMap)) {
-      configurationMap[conf.owner] = conf.customFields;
-    }
-  });
+  const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+    configurations.map((conf) => [conf.owner, conf.customFields])
+  );
 
   casesToUpdate.forEach(({ updateReq, originalCase }) => {
     if (updateReq.customFields) {
       const owner = originalCase.attributes.owner;
-      const configurationCustomFields = configurationMap[owner] ?? [];
+      const customFieldsConfiguration = customFieldsConfigurationMap.get(owner);
 
-      invalidKeysPerCase[originalCase.id] = compareCustomFieldKeysAgainstConfiguration({
+      validateCustomFields({
         requestCustomFields: updateReq.customFields,
-        configurationCustomFields,
+        customFieldsConfiguration,
       });
-    }
-  });
-
-  Object.keys(invalidKeysPerCase).forEach((caseId) => {
-    if (invalidKeysPerCase[caseId].length) {
-      throw Boom.badRequest(
-        `The case with case id ${caseId} has the following invalid custom field keys: ${invalidKeysPerCase[caseId]}`
-      );
     }
   });
 }
@@ -173,19 +148,6 @@ function throwIfUpdateAssigneesWithoutValidLicense(
       )}]`
     );
   }
-}
-
-/**
- * Throws an error if the requests has custom fields with duplicated keys.
- */
-function throwIfDuplicatedCustomFieldKeysInCasesToUpdate({
-  casesToUpdate,
-}: {
-  casesToUpdate: UpdateRequestWithOriginalCase[];
-}) {
-  casesToUpdate.forEach(({ updateReq }) => {
-    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: updateReq.customFields });
-  });
 }
 
 function notifyPlatinumUsage(
@@ -435,9 +397,9 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
-    throwIfDuplicatedCustomFieldKeysInCasesToUpdate({ casesToUpdate });
-    await throwIfCustomFieldKeysInvalid({ casesToUpdate, casesClient });
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+
+    await validateCustomFieldsInRequest({ casesToUpdate, casesClient });
 
     const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });
     const userActionsDict = userActionService.creator.buildUserActions({

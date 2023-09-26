@@ -42,15 +42,13 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import {
-  combineAuthorizedAndOwnerFilter,
-  throwIfDuplicatedCustomFieldKeysInRequest,
-} from '../utils';
+import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 
 /**
  * Defines the internal helper functions.
@@ -253,7 +251,7 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
-    throwIfDuplicatedCustomFieldKeysInRequest({ customFieldsInRequest: request.customFields });
+    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
 
     const { version, ...queryWithoutVersion } = request;
 
@@ -361,8 +359,8 @@ export async function create(
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
 
-    throwIfDuplicatedCustomFieldKeysInRequest({
-      customFieldsInRequest: validatedConfigurationRequest.customFields,
+    validateDuplicatedCustomFieldKeysInRequest({
+      requestCustomFields: validatedConfigurationRequest.customFields,
     });
 
     let error = null;

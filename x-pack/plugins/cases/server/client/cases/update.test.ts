@@ -19,8 +19,7 @@ import {
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import type { UpdateRequestWithOriginalCase } from './update';
-import { throwIfCustomFieldKeysInvalid, update } from './update';
+import { update } from './update';
 
 describe('update', () => {
   const cases = {
@@ -922,7 +921,7 @@ describe('update', () => {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
               label: 'foo',
-              required: false,
+              required: true,
             },
             {
               key: 'second_key',
@@ -944,7 +943,7 @@ describe('update', () => {
         },
         {
           key: 'second_key',
-          type: CustomFieldTypes.TEXT as const,
+          type: CustomFieldTypes.TOGGLE as const,
           field: { value: null },
         },
       ];
@@ -1011,8 +1010,8 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 5."`
       );
     });
 
@@ -1042,7 +1041,9 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow('Error: Invalid duplicated custom field keys in request: duplicated_key');
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+      );
     });
 
     it('throws when customFields keys are not present in configuration', async () => {
@@ -1071,8 +1072,65 @@ describe('update', () => {
           clientArgs,
           casesClient
         )
-      ).rejects.toThrow(
-        'Error: The case with case id mock-id-1 has the following invalid custom field keys: missing_key'
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid custom field keys: missing_key"`
+      );
+    });
+
+    it('throws error when custom fields are missing', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    field: { value: null },
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing custom field keys: first_key"`
+      );
+    });
+
+    it('throws when the customField types dont match the configuration', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    field: { value: [true] },
+                  },
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TEXT,
+                    field: { value: ['foobar'] },
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
       );
     });
   });
@@ -1232,238 +1290,6 @@ describe('update', () => {
           `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
         );
       });
-    });
-  });
-
-  describe('throwIfCustomFieldKeysInvalid', () => {
-    const casesClient = createCasesClientMock();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('does not throw if all custom fields are in configuration', async () => {
-      const customFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT as const,
-          field: { value: ['this is a text field value', 'this is second'] },
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TEXT as const,
-          field: { value: null },
-        },
-      ];
-
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: { customFields },
-              originalCase: { attributes: { owner: mockCases[0].attributes.owner } },
-            },
-          ] as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if no custom fields are in request', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: {},
-              originalCase: { attributes: { owner: mockCases[0].attributes.owner } },
-            },
-          ] as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('does not throw if no configuration found but no custom fields are in request', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: {},
-              originalCase: { attributes: { owner: mockCases[0].attributes.owner } },
-            },
-          ] as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('throws if a single case has invalid custom field keys', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: {
-                customFields: [
-                  {
-                    key: 'invalid_key',
-                    type: CustomFieldTypes.TEXT as const,
-                    field: { value: ['this is a text field value', 'this is second'] },
-                  },
-                ],
-              },
-              originalCase: {
-                attributes: { id: mockCases[0].id, owner: mockCases[0].attributes.owner },
-              },
-            },
-          ] as unknown as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The case with case id undefined has the following invalid custom field keys: invalid_key"`
-      );
-    });
-
-    it('throws if multiple cases have invalid custom field keys', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-        {
-          owner: mockCases[1].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: {
-                customFields: [
-                  {
-                    key: 'invalid_key',
-                    type: CustomFieldTypes.TEXT as const,
-                    field: { value: ['this is a text field value', 'this is second'] },
-                  },
-                ],
-              },
-              originalCase: mockCases[0],
-            },
-            {
-              updateReq: {
-                customFields: [
-                  {
-                    key: 'invalid_key',
-                    type: CustomFieldTypes.TEXT as const,
-                    field: { value: ['this is a text field value', 'this is second'] },
-                  },
-                ],
-              },
-              originalCase: mockCases[1],
-            },
-          ] as unknown as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The case with case id mock-id-1 has the following invalid custom field keys: invalid_key"`
-      );
-    });
-
-    it('throws if no configuration found when trying to update custom fields', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        throwIfCustomFieldKeysInvalid({
-          casesToUpdate: [
-            {
-              updateReq: {
-                customFields: [
-                  {
-                    key: 'invalid_key',
-                    type: CustomFieldTypes.TEXT as const,
-                    field: { value: ['this is a text field value'] },
-                  },
-                ],
-              },
-              originalCase: mockCases[0],
-            },
-          ] as unknown as UpdateRequestWithOriginalCase[],
-          casesClient,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"The case with case id mock-id-1 has the following invalid custom field keys: invalid_key"`
-      );
     });
   });
 });

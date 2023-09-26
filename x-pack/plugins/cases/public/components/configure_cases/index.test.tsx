@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
 import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
@@ -603,10 +604,16 @@ describe('ConfigureCases', () => {
 
   describe('custom fields', () => {
     let appMockRender: AppMockRenderer;
+    let persistCaseConfigure: jest.Mock;
 
     beforeEach(() => {
       jest.clearAllMocks();
       appMockRender = createAppMockRenderer();
+      persistCaseConfigure = jest.fn();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
     });
 
     it('renders custom field group when no custom fields available', () => {
@@ -654,26 +661,11 @@ describe('ConfigureCases', () => {
     });
 
     it('renders multiple custom field when available', () => {
-      const customFieldsMock: CustomFieldsConfiguration = [
-        {
-          key: 'random_custom_key',
-          label: 'Summary',
-          type: CustomFieldTypes.TEXT,
-          required: true,
-        },
-        {
-          key: 'random_custom_key_2',
-          label: 'Maintenance',
-          type: CustomFieldTypes.TOGGLE,
-          required: false,
-        },
-      ];
-
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         data: {
           ...useCaseConfigureResponse.data,
-          customFields: customFieldsMock,
+          customFields: customFieldsConfigurationMock,
           currentConfiguration: {
             connector: {
               id: 'resilient-2',
@@ -690,11 +682,59 @@ describe('ConfigureCases', () => {
 
       const droppable = screen.getByTestId('droppable');
 
-      for (const field of customFieldsMock) {
+      for (const field of customFieldsConfigurationMock) {
         expect(
           within(droppable).getByTestId(`custom-field-${field.label}-${field.type}`)
         ).toBeInTheDocument();
       }
+    });
+
+    it('deletes a custom field correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          currentConfiguration: {
+            connector: {
+              id: 'resilient-2',
+              name: 'unchanged',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+            closureType: 'close-by-user',
+          },
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const droppable = screen.getByTestId('droppable');
+
+      userEvent.click(
+        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      });
+
+      userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [{ ...customFieldsConfigurationMock[1] }],
+          id: '',
+          version: '',
+        });
+      });
     });
 
     it('opens fly out for when click on add field', async () => {
@@ -729,7 +769,30 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
 
-      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: expect.anything(),
+              label: 'Summary',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
     });
   });

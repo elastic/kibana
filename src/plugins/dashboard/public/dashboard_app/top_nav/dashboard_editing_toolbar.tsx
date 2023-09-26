@@ -23,7 +23,7 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar() {
+export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
     usageCollection,
     data: { search },
@@ -106,15 +106,22 @@ export function DashboardEditingToolbar() {
   );
 
   const extraButtons = [
-    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
+    <EditorMenu
+      createNewVisType={createNewVisType}
+      createNewEmbeddable={createNewEmbeddable}
+      isDisabled={isDisabled}
+    />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
+      isDisabled={isDisabled}
     />,
   ];
   if (dashboard.controlGroup) {
-    extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
+    extraButtons.push(
+      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
+    );
   }
 
   return (
@@ -128,6 +135,7 @@ export function DashboardEditingToolbar() {
           primaryButton: (
             <ToolbarButton
               type="primary"
+              isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
               onClick={createNewVisType(lensAlias)}

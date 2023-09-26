@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
-import userEvent from '@testing-library/user-event';
+import * as i18n from './translations';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
@@ -31,6 +32,7 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
+    expect(screen.getByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
     expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
 
     for (const item of customFieldsConfigurationMock) {
@@ -47,6 +49,7 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
+    expect(screen.queryByText(i18n.ADDITIONAL_FIELDS)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 

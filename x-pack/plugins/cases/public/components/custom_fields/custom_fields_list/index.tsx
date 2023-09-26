@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -16,24 +16,43 @@ import {
   EuiSpacer,
   EuiText,
   EuiIcon,
+  EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
+import { DeleteConfirmationModal } from '../delete_confirmation_modal';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;
+  onDeleteCustomField: (key: string) => void;
 }
 
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
-  const { customFields } = props;
+  const { customFields, onDeleteCustomField } = props;
+  const { euiTheme } = useEuiTheme();
+  const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
 
     return createdBuilder && createdBuilder().label;
   };
+
+  const onConfirm = useCallback(() => {
+    if (selectedItem) {
+      onDeleteCustomField(selectedItem.key);
+    }
+
+    setSelectedItem(null);
+  }, [onDeleteCustomField, setSelectedItem, selectedItem]);
+
+  const onCancel = useCallback(() => {
+    setSelectedItem(null);
+  }, []);
+
+  const showModal = Boolean(selectedItem);
 
   return (
     <>
@@ -43,19 +62,19 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
           {customFields.length ? (
             <EuiDragDropContext onDragEnd={() => {}}>
               <EuiDroppable droppableId="custom-fields-list-droppable" spacing="m">
-                {customFields.map(({ key, type, label }, idx) => (
+                {customFields.map((customField, idx) => (
                   <EuiDraggable
                     spacing="m"
-                    key={key}
+                    key={customField.key}
                     index={idx}
-                    draggableId={key}
+                    draggableId={customField.key}
                     customDragHandle={true}
                     hasInteractiveChildren={true}
                   >
                     {() => (
                       <EuiPanel
                         paddingSize="s"
-                        data-test-subj={`custom-field-${label}-${type}`}
+                        data-test-subj={`custom-field-${customField.label}-${customField.type}`}
                         hasShadow={false}
                       >
                         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -65,15 +84,23 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
-                                <EuiText
-                                  css={css`
-                                    font-weight: 700;
-                                  `}
-                                >
-                                  {label}
+                                <EuiText>
+                                  <h4>{customField.label}</h4>
                                 </EuiText>
                               </EuiFlexItem>
-                              <EuiText color="subdued">{renderTypeLabel(type)}</EuiText>
+                              <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  data-test-subj={`${customField.key}-custom-field-delete`}
+                                  iconType="minusInCircle"
+                                  color="danger"
+                                  onClick={() => setSelectedItem(customField)}
+                                />
+                              </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -85,6 +112,13 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
             </EuiDragDropContext>
           ) : null}
         </EuiFlexItem>
+        {showModal && selectedItem ? (
+          <DeleteConfirmationModal
+            label={selectedItem.label}
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+          />
+        ) : null}
       </EuiFlexGroup>
     </>
   );
