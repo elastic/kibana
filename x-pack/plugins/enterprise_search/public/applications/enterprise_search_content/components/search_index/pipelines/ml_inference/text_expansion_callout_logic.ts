@@ -190,9 +190,12 @@ export const TextExpansionCalloutLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
-    createTextExpansionModel: () => actions.createTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
-    fetchTextExpansionModel: () => actions.fetchTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
-    startTextExpansionModel: () => actions.startTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
+    createTextExpansionModel: () =>
+      actions.createTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
+    fetchTextExpansionModel: () =>
+      actions.fetchTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
+    startTextExpansionModel: () =>
+      actions.startTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
     createTextExpansionModelPollingTimeout: ({ duration }) => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);
