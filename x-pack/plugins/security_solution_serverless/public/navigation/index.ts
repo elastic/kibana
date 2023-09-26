@@ -53,6 +53,7 @@ export const startNavigation = (services: Services, config: ServerlessSecurityPu
     });
     serverless.setSideNavComponent(getSecuritySideNavComponent(services));
   }
+  management.setIsSidebarEnabled(false);
 
   subscribeBreadcrumbs(services);
 };

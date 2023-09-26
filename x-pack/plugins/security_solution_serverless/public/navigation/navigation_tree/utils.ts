@@ -29,4 +29,6 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
   SecurityPageName.sessions,
 ]);
 
-export const isBreadcrumbHidden = (id: ProjectPageName) => HIDDEN_BREADCRUMBS.has(id);
+export const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
+  HIDDEN_BREADCRUMBS.has(id) ||
+  id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
