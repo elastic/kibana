@@ -25,6 +25,7 @@ import openTelemetryIcon from '../agent_icon/icons/opentelemetry.svg';
 
 interface Props {
   serviceName: string;
+  environment: string;
   start: string;
   end: string;
 }
@@ -92,7 +93,7 @@ export interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ start, end, serviceName }: Props) {
+export function ServiceIcons({ start, end, serviceName, environment }: Props) {
   const [selectedIconPopover, setSelectedIconPopover] =
     useState<Icons | null>();
 
@@ -117,20 +118,20 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
-      if (selectedIconPopover && serviceName && start && end) {
+      if (selectedIconPopover && serviceName && start && end && environment) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/metadata/details',
           {
             isCachable: true,
             params: {
               path: { serviceName },
-              query: { start, end },
+              query: { start, end, environment },
             },
           }
         );
       }
     },
-    [selectedIconPopover, serviceName, start, end]
+    [selectedIconPopover, serviceName, start, end, environment]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
