@@ -42,6 +42,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
+  const log = getService('log');
 
   describe('test metadata apis', () => {
     describe('list endpoints GET route', () => {
@@ -54,7 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteAllDocsFromFleetAgents(getService);
         await deleteAllDocsFromMetadataDatastream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        try {
+          await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        } catch (err) {
+          log.warning(`Unable to delete index: ${err}`);
+        }
 
         const customIndexFn = async (): Promise<IndexedHostsAndAlertsResponse> => {
           // generate an endpoint policy and attach id to agents since
