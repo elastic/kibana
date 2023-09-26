@@ -16,7 +16,7 @@ const getLabelTitle = (
   customField: CaseUICustomField,
   customFieldConfiguration?: CasesConfigurationUICustomField
 ) => {
-  const customFieldValue = customField.field.value;
+  const customFieldValue = customField.value;
   const label = customFieldConfiguration?.label ?? customFieldConfiguration?.key ?? i18n.UNKNOWN;
 
   if (customFieldValue == null || customFieldValue.length === 0) {

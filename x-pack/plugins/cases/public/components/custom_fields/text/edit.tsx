@@ -113,17 +113,17 @@ const EditComponent: CustomFieldType['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TEXT,
-        field: { value },
+        value,
       });
     }
 
     setIsEdit(false);
   };
 
-  const initialValue = (customField?.field.value?.[0] as string) ?? '';
+  const initialValue = (customField?.value?.[0] as string) ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
-  const isCustomFieldValueDefined = !isEmpty(customField?.field.value);
+  const isCustomFieldValueDefined = !isEmpty(customField?.value);
 
   return (
     <>

@@ -114,7 +114,7 @@ describe('Edit ', () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
-          customField={{ ...customField, field: { value: null } }}
+          customField={{ ...customField, value: null }}
           customFieldConfiguration={customFieldConfiguration}
           onSubmit={onSubmit}
           isLoading={false}
@@ -145,7 +145,7 @@ describe('Edit ', () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
-          customField={{ ...customField, field: { value: null } }}
+          customField={{ ...customField, value: null }}
           customFieldConfiguration={customFieldConfiguration}
           onSubmit={onSubmit}
           isLoading={false}
@@ -208,7 +208,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        field: { value: ['My text test value 1!!!'] },
+        value: ['My text test value 1!!!'],
       });
     });
   });
@@ -240,7 +240,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        field: { value: null },
+        value: null,
       });
     });
   });

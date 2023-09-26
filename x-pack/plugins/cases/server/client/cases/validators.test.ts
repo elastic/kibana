@@ -25,12 +25,12 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              field: { value: ['this is a text field value', 'this is second'] },
+              value: ['this is a text field value', 'this is second'],
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE as const,
-              field: { value: null },
+              value: null,
             },
           ],
           customFieldsConfiguration: [
@@ -83,12 +83,12 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: null },
+              value: null,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: [true] },
+              value: [true],
             },
           ],
 
@@ -119,17 +119,17 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: null },
+              value: null,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: [true] },
+              value: [true],
             },
             {
               key: 'third_key',
               type: CustomFieldTypes.TEXT,
-              field: { value: ['abc'] },
+              value: ['abc'],
             },
           ],
 
@@ -166,7 +166,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: null },
+              value: null,
             },
           ],
         })
@@ -186,12 +186,12 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              field: { value: ['this is a text field value', 'this is second'] },
+              value: ['this is a text field value', 'this is second'],
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TEXT as const,
-              field: { value: null },
+              value: null,
             },
           ],
           customFieldsConfiguration: [
@@ -223,7 +223,7 @@ describe('validators', () => {
             {
               key: 'invalid_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: null },
+              value: null,
             },
           ],
           customFieldsConfiguration: [
@@ -261,7 +261,7 @@ describe('validators', () => {
             {
               key: 'invalid_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: null },
+              value: null,
             },
           ],
         })

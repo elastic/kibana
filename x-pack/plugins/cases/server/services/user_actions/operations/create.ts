@@ -178,7 +178,7 @@ export class UserActionPersister {
 
     const updatedCustomFieldsUsersActions = compareValues?.addedItems
       .filter((customField) => {
-        if (customField.field.value != null) {
+        if (customField.value != null) {
           return true;
         }
 

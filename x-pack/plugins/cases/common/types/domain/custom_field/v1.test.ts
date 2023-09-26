@@ -15,7 +15,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'string_custom_field_1',
         type: 'text',
-        field: { value: ['this is a text field value'] },
+        value: ['this is a text field value'],
       },
     ],
     [
@@ -23,7 +23,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'string_custom_field_2',
         type: 'text',
-        field: { value: null },
+        value: null,
       },
     ],
     [
@@ -31,7 +31,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'toggle_custom_field_1',
         type: 'toggle',
-        field: { value: [true] },
+        value: [true],
       },
     ],
     [
@@ -39,7 +39,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'toggle_custom_field_2',
         type: 'toggle',
-        field: { value: null },
+        value: null,
       },
     ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
@@ -55,7 +55,7 @@ describe('CaseCustomFieldRt', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'text_custom_field_1',
       type: 'text',
-      field: { value: [666] },
+      value: [666],
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value 666 supplied');
@@ -65,7 +65,7 @@ describe('CaseCustomFieldRt', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'list_custom_field_1',
       type: 'toggle',
-      field: { value: ['hello'] },
+      value: ['hello'],
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');

@@ -27,7 +27,7 @@ describe('CustomFieldsUserActionBuilder', () => {
         {
           key: 'string_custom_field_1',
           type: CustomFieldTypes.TEXT,
-          field: { value: ['this is a text field value'] },
+          value: ['this is a text field value'],
         },
       ],
     },
@@ -75,13 +75,11 @@ describe('CustomFieldsUserActionBuilder', () => {
             "payload": Object {
               "customFields": Array [
                 Object {
-                  "field": Object {
-                    "value": Array [
-                      "this is a text field value",
-                    ],
-                  },
                   "key": "string_custom_field_1",
                   "type": "text",
+                  "value": Array [
+                    "this is a text field value",
+                  ],
                 },
               ],
             },

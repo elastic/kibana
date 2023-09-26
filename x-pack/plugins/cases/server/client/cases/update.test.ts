@@ -939,12 +939,12 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE as const,
-          field: { value: null },
+          value: null,
         },
       ];
 
@@ -993,7 +993,7 @@ describe('update', () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
         type: 'text',
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       });
 
       await expect(
@@ -1027,12 +1027,12 @@ describe('update', () => {
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                 ],
               },
@@ -1058,12 +1058,12 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                   {
                     key: 'missing_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: null },
+                    value: null,
                   },
                 ],
               },
@@ -1089,7 +1089,7 @@ describe('update', () => {
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TOGGLE,
-                    field: { value: null },
+                    value: null,
                   },
                 ],
               },
@@ -1115,12 +1115,12 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TOGGLE,
-                    field: { value: [true] },
+                    value: [true],
                   },
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['foobar'] },
+                    value: ['foobar'],
                   },
                 ],
               },

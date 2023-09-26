@@ -112,9 +112,7 @@ export const FormContext: React.FC<Props> = ({
           transformedCustomFields.push({
             key: configCustomField.key,
             type: configCustomField.type,
-            field: {
-              value: fieldValue,
-            },
+            value: fieldValue,
           } as CaseUICustomField);
         }
       }

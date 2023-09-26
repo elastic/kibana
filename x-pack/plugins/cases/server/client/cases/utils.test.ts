@@ -1349,12 +1349,12 @@ describe('utils', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       },
       {
         key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
-        field: { value: [true] },
+        value: [true],
       },
     ];
     const configurationCustomFields = [
@@ -1398,7 +1398,7 @@ describe('utils', () => {
             {
               key: 'missing_key',
               type: CustomFieldTypes.TOGGLE,
-              field: { value: [true] },
+              value: [true],
             },
           ],
           configurationCustomFields,

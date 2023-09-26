@@ -101,7 +101,7 @@ const createMissingAndRemoveExtraCustomFields = (
       return foundCustomField;
     }
 
-    return { key: confCustomField.key, type: confCustomField.type, field: { value: null } };
+    return { key: confCustomField.key, type: confCustomField.type, value: null };
   });
 
   return createdCustomFields;

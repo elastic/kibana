@@ -57,7 +57,7 @@ describe('createCustomFieldsUserActionBuilder ', () => {
           {
             type: CustomFieldTypes.TEXT,
             key: 'test_key_1',
-            field: { value: null },
+            value: null,
           },
         ],
       },
@@ -86,7 +86,7 @@ describe('createCustomFieldsUserActionBuilder ', () => {
           {
             type: CustomFieldTypes.TEXT,
             key: 'test_key_1',
-            field: { value: [] },
+            value: [],
           },
         ],
       },

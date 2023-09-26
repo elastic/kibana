@@ -50,7 +50,7 @@ import { CasesStatusResponseRt } from '../stats/v1';
 const CustomFieldText = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  field: createCustomFieldValueRt(
+  value: createCustomFieldValueRt(
     limitedStringSchema({
       fieldName: 'value',
       min: 0,

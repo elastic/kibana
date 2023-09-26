@@ -448,12 +448,12 @@ describe('create', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       },
       {
         key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
-        field: { value: [true] },
+        value: [true],
       },
     ];
 
@@ -544,12 +544,12 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['this is a text field value', 'this is second'] },
+                value: ['this is a text field value', 'this is second'],
               },
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TOGGLE,
-                field: { value: [true] },
+                value: [true],
               },
             ],
           },
@@ -570,7 +570,7 @@ describe('create', () => {
               {
                 key: 'missing_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: null },
+                value: null,
               },
             ],
           },
@@ -591,7 +591,7 @@ describe('create', () => {
               {
                 key: 'first_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['this is a text field value', 'this is second'] },
+                value: ['this is a text field value', 'this is second'],
               },
             ],
           },
@@ -612,12 +612,12 @@ describe('create', () => {
               {
                 key: 'first_key',
                 type: CustomFieldTypes.TOGGLE,
-                field: { value: [true] },
+                value: [true],
               },
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['foobar'] },
+                value: ['foobar'],
               },
             ],
           },
@@ -646,12 +646,12 @@ describe('create', () => {
         {
           key: 'first_customField_key',
           type: CustomFieldTypes.TEXT,
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_customField_key',
           type: CustomFieldTypes.TOGGLE,
-          field: { value: [true] },
+          value: [true],
         },
       ],
     };

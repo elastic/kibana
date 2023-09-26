@@ -19,7 +19,7 @@ describe('View ', () => {
   const customField = {
     type: CustomFieldTypes.TEXT as const,
     key: 'test_key_1',
-    field: { value: ['My text test value'] },
+    value: ['My text test value'],
   };
 
   it('renders correctly', async () => {
