@@ -339,7 +339,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               value={note}
               disabled={getNoteInProgress || createNoteInProgress}
               onChange={(e) => setNote(e.target.value)}
-              fullWidth={true}
+              fullWidth
               rows={3}
               placeholder={i18n.translate(
                 'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
@@ -360,7 +360,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       <>
         <EuiPanel
           data-test-subject="protection-updates-layout"
-          hasBorder={true}
+          hasBorder
           hasShadow={false}
           paddingSize="none"
         >
