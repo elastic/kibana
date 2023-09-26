@@ -33,7 +33,7 @@ export interface CloudPostureTableResult {
   setPageSize: Dispatch<SetStateAction<number | undefined>>;
   onChangeItemsPerPage: (newPageSize: number) => void;
   onChangePage: (newPageIndex: number) => void;
-  onSort: (sort: QuerySort[]) => void;
+  onSort: (sort: string[][]) => void;
   onResetFilters: () => void;
 }
 

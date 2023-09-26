@@ -11,6 +11,7 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plug
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsHitRecord } from '@kbn/discover-utils/types';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
@@ -20,13 +21,13 @@ import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
-  sort: Sort<CspFinding>;
+  sort: any;
   enabled: boolean;
 }
 
 export interface FindingsGroupByNoneQuery {
   pageIndex: Pagination['pageIndex'];
-  sort: Sort<CspFinding>;
+  sort: any;
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -41,11 +42,19 @@ interface FindingsAggs {
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   query,
-  sort: getSortField(sort),
+  sort: Object.hasOwn(sort, 'field') ? getSortField(sort) : getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
 });
+
+const getMultiFieldsSort = (sort: string[][]) => {
+  return sort.map(([id, direction]) => {
+    return {
+      [id]: direction,
+    };
+  });
+};
 
 /**
  * By default, ES will sort keyword fields in case-sensitive format, the
@@ -97,7 +106,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         throw new Error('expected buckets to be an array');
 
       return {
-        page: hits.hits.map((hit) => buildDataTableRecord(hit as estypes.EsHitRecord)),
+        page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
         count: getAggregationCount(aggregations.count.buckets),
       };
