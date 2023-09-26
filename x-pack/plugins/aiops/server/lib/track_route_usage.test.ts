@@ -14,8 +14,8 @@ describe('trackAIOpsRouteUsage', () => {
 
     trackAIOpsRouteUsage('test_type', 'test_source', mockUsageCounter);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'test_source',
-      counterType: 'test_type',
+      counterName: 'test_type',
+      counterType: 'run_via_test_source',
       incrementBy: 1,
     });
   });
