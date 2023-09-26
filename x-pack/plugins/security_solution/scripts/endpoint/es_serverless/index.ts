@@ -45,21 +45,15 @@ ${
         '-'.repeat(20),
         ' ',
         ' ',
-        'Password for all',
-        'accounts set',
-        `to: ${cyan('changeme')}`,
+        gray('Password for all'),
+        gray('accounts set'),
+        `${gray('to:')} ${cyan('changeme')}`,
       ].join('\n'),
     ],
     { separator: '  ', widths: [50, 40] }
   ).output
 }
 `);
-
-      /*
-
- USERNAME                                  PASSWORD
- ------------------                        ------------------
-       */
 
       cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
 
