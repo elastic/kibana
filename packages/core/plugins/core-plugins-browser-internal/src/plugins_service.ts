@@ -23,12 +23,12 @@ export type PluginsServiceSetupDeps = InternalCoreSetup;
 export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
-export interface PluginsServiceSetup {
+export interface InternalPluginsServiceSetup {
   contracts: ReadonlyMap<string, unknown>;
 }
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface InternalPluginsServiceStart {
   contracts: ReadonlyMap<string, unknown>;
 }
 
@@ -38,7 +38,7 @@ export interface PluginsServiceStart {
  *
  * @internal
  */
-export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
+export class PluginsService implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart> {
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
@@ -79,7 +79,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     );
   }
 
-  public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
+  public async setup(deps: PluginsServiceSetupDeps): Promise<InternalPluginsServiceSetup> {
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -109,7 +109,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return { contracts };
   }
 
-  public async start(deps: PluginsServiceStartDeps): Promise<PluginsServiceStart> {
+  public async start(deps: PluginsServiceStartDeps): Promise<InternalPluginsServiceStart> {
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
