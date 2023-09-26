@@ -31,6 +31,7 @@ import {
   NumericField,
 } from '../../../../../shared_imports';
 
+import { splitSizeAndUnits } from '../../../../../../common/lib/component_template_serialization';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
@@ -166,22 +167,6 @@ const configurationFormSchema: FormSchema = {
       }
     ),
   },
-};
-
-const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
-  let size = '';
-  let unit = '';
-
-  const result = /(\d+)(\w+)/.exec(field);
-  if (result) {
-    size = result[1];
-    unit = result[2];
-  }
-
-  return {
-    size,
-    unit,
-  };
 };
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
