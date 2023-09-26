@@ -17,6 +17,9 @@ import { registerRecallFunction } from './recall';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
+import {
+  registerAddPanelToDashboardFunction
+} from './add_dashboard_panel';
 
 export async function registerFunctions({
   registerFunction,
@@ -74,6 +77,7 @@ export async function registerFunctions({
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
         registerGetDatasetInfoFunction({ service, registerFunction });
+        registerAddPanelToDashboardFunction({ service, registerFunction, pluginsStart });
       } else {
         description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }

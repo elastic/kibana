@@ -114,10 +114,15 @@ export async function createChatService({
   } = {}) => {
     const allFunctions = Array.from(functionRegistry.values());
 
-    return contexts || filter
+    const enforcedContexts = contexts ? [...contexts] : [];
+    if (enforcedContexts.length === 0) {
+      enforcedContexts.push('core', currentAppId!)
+    }
+
+    return enforcedContexts || filter
       ? allFunctions.filter((fn) => {
           const matchesContext =
-            !contexts || fn.options.contexts.some((context) => contexts.includes(context));
+            !enforcedContexts || fn.options.contexts.some((context) => enforcedContexts.includes(context));
           const matchesFilter =
             !filter || fn.options.name.includes(filter) || fn.options.description.includes(filter);
 
@@ -190,7 +195,7 @@ export async function createChatService({
 
       const contexts = ['core', 'apm'];
 
-      const functions = getFunctions({ contexts });
+      const functions = getFunctions();
 
       const controller = new AbortController();
 

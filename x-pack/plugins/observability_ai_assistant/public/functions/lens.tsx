@@ -7,17 +7,16 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
-import { Assign } from 'utility-types';
 import type { RegisterFunctionDefinition } from '../../common/types';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from '../types';
+import {getLensConfig} from "./prepare_lens_config";
 
 export enum SeriesType {
   Bar = 'bar',
@@ -33,7 +32,9 @@ export enum SeriesType {
 
 function Lens({
   indexPattern,
-  xyDataLayer,
+  layers,
+  breakdown,
+  seriesType,
   start,
   end,
   lens,
@@ -41,48 +42,34 @@ function Lens({
   timeField,
 }: {
   indexPattern: string;
-  xyDataLayer: XYDataLayer;
+  layers: any;
+  breakdown?: { field: string };
+  seriesType?: string;
   start: string;
   end: string;
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   timeField: string;
 }) {
-  const formulaAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
-
-  const dataViewAsync = useAsync(() => {
-    return dataViews.create({
-      id: indexPattern,
-      title: indexPattern,
-      timeFieldName: timeField,
+  const lensEmbeddableInputAsync = useAsync(() => {
+    return getLensConfig(lens, dataViews, {
+      indexPattern,
+      timeField,
+      start,
+      end,
+      layers,
+      seriesType,
+      breakdown,
     });
-  }, [indexPattern]);
+  }, [lens, dataViews, indexPattern, timeField, start, end, layers, seriesType, breakdown]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
-  if (!formulaAsync.value || !dataViewAsync.value) {
+  if (!lensEmbeddableInputAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
-  const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
-      dataView: dataViewAsync.value,
-    }),
-  }).build();
-
-  const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
-    id: indexPattern,
-    attributes,
-    timeRange: {
-      from: start,
-      to: end,
-      mode: 'relative' as const,
-    },
-  };
+  const lensEmbeddableInput = lensEmbeddableInputAsync.value;
 
   return (
     <>
@@ -252,31 +239,14 @@ export function registerLensFunction({
       };
     },
     ({ arguments: { layers, indexPattern, breakdown, seriesType, start, end, timeField } }) => {
-      const xyDataLayer = new XYDataLayer({
-        data: layers.map((layer) => ({
-          type: 'formula',
-          value: layer.formula,
-          label: layer.label,
-          format: layer.format,
-          filter: {
-            language: 'kql',
-            query: layer.filter ?? '',
-          },
-        })),
-        options: {
-          seriesType,
-          breakdown: breakdown
-            ? { type: 'top_values', params: { size: 10 }, field: breakdown.field }
-            : undefined,
-        },
-      });
-
       if (!timeField) return;
 
       return (
         <Lens
           indexPattern={indexPattern}
-          xyDataLayer={xyDataLayer}
+          layers={layers}
+          seriesType={seriesType}
+          breakdown={breakdown}
           start={start}
           end={end}
           lens={pluginsStart.lens}
