@@ -67,7 +67,7 @@ Now we'd like to ensure that only users with the `all` privilege are granted acc
 
 To do so, we modify the feature registration config above and include the following entries in the `privileges.all` and `privileges.read` sections respectively
 
-```
+```ts
 {
     ...,
     privileges: {
@@ -158,7 +158,7 @@ Here we've added two routes, one which returns the current date-time in ISO 8601
 
 To do so, we need to modify the configuration object for our route to look like this:
 
-```
+```ts
 public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
   // ...
   const router = core.http.createRouter();
@@ -196,7 +196,7 @@ public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
 
 Notice, we've added an `options.tags` property for the API route that returns sensitive information. This tag is then used in the privileges object as follow
 
-```
+```ts
 {
     …,
     privileges: {
