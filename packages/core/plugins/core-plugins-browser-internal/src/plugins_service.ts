@@ -103,7 +103,14 @@ export class PluginsService
         {} as Record<PluginName, unknown>
       );
 
-      const contract = plugin.setup(createPluginSetupContext({ deps, plugin }), pluginDepContracts);
+      const contract = plugin.setup(
+        createPluginSetupContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        }),
+        pluginDepContracts
+      );
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -132,7 +139,14 @@ export class PluginsService
         {} as Record<PluginName, unknown>
       );
 
-      const contract = plugin.start(createPluginStartContext({ deps, plugin }), pluginDepContracts);
+      const contract = plugin.start(
+        createPluginStartContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        }),
+        pluginDepContracts
+      );
 
       contracts.set(pluginName, contract);
     }
