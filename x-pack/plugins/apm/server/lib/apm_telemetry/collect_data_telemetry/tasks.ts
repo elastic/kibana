@@ -638,17 +638,15 @@ export const tasks: TelemetryTask[] = [
           size: 0,
           track_total_hits: false,
           query: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    exists: {
-                      field: SERVICE_NAME,
-                    },
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: SERVICE_NAME,
                   },
-                  range1d,
-                ],
-              },
+                },
+                range1d,
+              ],
             },
           },
           timeout,
