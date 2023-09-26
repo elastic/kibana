@@ -227,9 +227,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      const titleElement = await cell.findByTestSubject('unifiedDataTableColumnTitle');
-      const textContent = await (titleElement || cell).getAttribute('textContent');
-      textArr.push(textContent.trim());
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
     }
     return Promise.resolve(textArr);
   }
