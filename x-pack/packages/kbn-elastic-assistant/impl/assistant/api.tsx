@@ -13,6 +13,7 @@ import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
 import { getFormattedMessageContent } from './helpers';
+import { PerformEvaluationParams } from './settings/evaluation_settings/use_post_evaluation';
 
 export interface FetchConnectorExecuteAction {
   assistantLangChain: boolean;
@@ -202,6 +203,60 @@ export const deleteKnowledgeBase = async ({
     });
 
     return response as DeleteKnowledgeBaseResponse;
+  } catch (error) {
+    return error as IHttpFetchError;
+  }
+};
+
+export interface PostEvaluationParams {
+  http: HttpSetup;
+  evalParams?: PerformEvaluationParams;
+  signal?: AbortSignal | undefined;
+}
+
+export interface PostEvaluationResponse {
+  success: boolean;
+}
+
+/**
+ * API call for evaluating models.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} [options.evalParams] - Params necessary for evaluation
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<PostEvaluationResponse | IHttpFetchError>}
+ */
+export const postEvaluation = async ({
+  http,
+  evalParams,
+  signal,
+}: PostEvaluationParams): Promise<PostEvaluationResponse | IHttpFetchError> => {
+  try {
+    const path = `/internal/elastic_assistant/evaluate`;
+    const query = {
+      models: evalParams?.models.sort()?.join(','),
+      agents: evalParams?.agents.sort()?.join(','),
+      evaluationType: evalParams?.evaluationType.sort()?.join(','),
+      evalModel: evalParams?.evalModel.sort()?.join(','),
+      outputIndex: evalParams?.outputIndex,
+    };
+
+    const response = await http.fetch(path, {
+      method: 'POST',
+      body: JSON.stringify({
+        dataset: JSON.parse(evalParams?.dataset ?? '[]'),
+        evalPrompt: evalParams?.evalPrompt ?? '',
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      query,
+      signal,
+    });
+
+    return response as PostEvaluationResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

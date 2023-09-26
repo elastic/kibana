@@ -25,6 +25,7 @@ import {
   deleteKnowledgeBaseRoute,
   getKnowledgeBaseStatusRoute,
   postActionsConnectorExecuteRoute,
+  postEvaluateRoute,
   postKnowledgeBaseRoute,
 } from './routes';
 
@@ -72,10 +73,14 @@ export class ElasticAssistantPlugin
       )
     );
 
+    // Knowledge Base
     deleteKnowledgeBaseRoute(router);
     getKnowledgeBaseStatusRoute(router);
     postKnowledgeBaseRoute(router);
+    // Actions Connector Execute (LLM Wrapper)
     postActionsConnectorExecuteRoute(router);
+    // Evaluate
+    postEvaluateRoute(router);
     return {
       actions: plugins.actions,
     };

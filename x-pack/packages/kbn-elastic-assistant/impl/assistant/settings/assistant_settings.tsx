@@ -34,6 +34,7 @@ import { AdvancedSettings } from './advanced_settings/advanced_settings';
 import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
+import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -45,13 +46,15 @@ export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
 export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
 export const ADVANCED_TAB = 'ADVANCED_TAB' as const;
+export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 export type SettingsTabs =
   | typeof CONVERSATIONS_TAB
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
-  | typeof ADVANCED_TAB;
+  | typeof ADVANCED_TAB
+  | typeof EVALUATION_TAB;
 interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
@@ -248,6 +251,16 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   <EuiIcon type="advancedSettingsApp" size="l" />
                 </EuiKeyPadMenuItem>
               )}
+              {assistantLangChain && (
+                <EuiKeyPadMenuItem
+                  id={EVALUATION_TAB}
+                  label={i18n.EVALUATION_MENU_ITEM}
+                  isSelected={selectedSettingsTab === EVALUATION_TAB}
+                  onClick={() => setSelectedSettingsTab(EVALUATION_TAB)}
+                >
+                  <EuiIcon type="crossClusterReplicationApp" size="l" />
+                </EuiKeyPadMenuItem>
+              )}
             </EuiKeyPadMenu>
           </EuiPageSidebar>
           <EuiPageBody paddingSize="none" panelled={true}>
@@ -301,6 +314,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   />
                 )}
                 {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
+                {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner
                 grow={false}

@@ -13,9 +13,15 @@ import { ChainTool, Tool } from 'langchain/tools';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
-import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
+import type { AgentExecutorParams, AgentExecutorResponse } from './types';
 
-export const callAgentExecutor = async ({
+/**
+ * This is an agent executor to be used with the model evaluation API for benchmarking.
+ * Currently just a copy of `callAgentExecutor`, but using the `openai-functions` agent type.
+ *
+ * NOTE: This is not to be used in production as-is, and must be used with an OpenAI ConnectorId
+ */
+export const callOpenAIFunctionsExecutor = async ({
   actions,
   connectorId,
   esClient,
@@ -50,7 +56,7 @@ export const callAgentExecutor = async ({
   ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
-    agentType: 'chat-conversational-react-description',
+    agentType: 'openai-functions',
     memory,
     verbose: false,
   });
