@@ -479,7 +479,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], true);
     });
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
