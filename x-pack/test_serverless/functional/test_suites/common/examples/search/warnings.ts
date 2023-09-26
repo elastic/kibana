@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
       });
 
-      await PageObjects.common.navigateToApp('searchExamples');
+      await PageObjects.svlCommonPage.navigateToApp('searchExamples');
     });
 
     beforeEach(async () => {

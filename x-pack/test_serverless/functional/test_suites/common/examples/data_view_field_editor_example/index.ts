@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       );
 
       // TODO: Navigation to Data View Management is different in Serverless
-      await PageObjects.common.navigateToApp('management');
+      await PageObjects.svlCommonPage.navigateToApp('management');
       await retry.waitFor('data views link', async () => {
         if (await testSubjects.exists('app-card-dataViews')) {
           await testSubjects.click('app-card-dataViews');
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         return false;
       });
       await PageObjects.settings.createIndexPattern('blogs', null);
-      await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
+      await PageObjects.svlCommonPage.navigateToApp('dataViewFieldEditorExample');
     });
 
     loadTestFile(require.resolve('./data_view_field_editor_example'));

@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   // Failing: See https://github.com/elastic/kibana/issues/166573
-  describe.skip('Importing an existing dashboard', () => {
+  describe('Importing an existing dashboard', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to import dashboard created in 8.11', async () => {
-      await PageObjects.common.navigateToApp('management');
+      await PageObjects.svlCommonPage.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
       await PageObjects.savedObjects.importFile(
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render all panels on the dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboards');
+      await PageObjects.svlCommonPage.navigateToApp('dashboards');
       await PageObjects.dashboard.loadSavedDashboard('Super Saved Serverless');
 
       // dashboard should load properly

@@ -12,7 +12,13 @@ const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'header', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'header',
+    'unifiedFieldList',
+    'svlCommonPage',
+  ]);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
@@ -22,7 +28,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const dataViewTitle = 'logstash-2015.09.22';
 
   // FLAKY: https://github.com/elastic/kibana/issues/165882
-  describe.skip('Field stats', () => {
+  describe('Field stats', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -34,7 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded(
         'x-pack/test_serverless/functional/es_archives/pre_calculated_histogram'
       );
-      await PageObjects.common.navigateToApp('unifiedFieldListExamples');
+      await PageObjects.svlCommonPage.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('combobox is ready', async () => {
         return await testSubjects.exists('dataViewSelector');

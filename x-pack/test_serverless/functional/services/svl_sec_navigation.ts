@@ -13,12 +13,12 @@ export function SvlSecNavigationServiceProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['svlCommonPage']);
 
   return {
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('landingPage');
+        await PageObjects.svlCommonPage.navigateToApp('landingPage');
         // Currently, the security landing page app is not loading correctly.
         // Replace '~kbnAppWrapper' with a proper test subject of the landing
         // page once it loads successfully.

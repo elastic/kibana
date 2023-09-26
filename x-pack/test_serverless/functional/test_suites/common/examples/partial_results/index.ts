@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();
-      await PageObjects.common.navigateToApp('partialResultsExample');
+      await PageObjects.svlCommonPage.navigateToApp('partialResultsExample');
 
       const element = await testSubjects.find('example-help');
 

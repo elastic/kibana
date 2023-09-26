@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('connectors list screenshot', async () => {
-      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.svlCommonPage.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await svlCommonScreenshots.takeScreenshot(
         'connector-listing',
