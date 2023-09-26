@@ -18,9 +18,9 @@ import {
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
-import { AssetManagerConfig, configSchema } from './types';
 import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
+import { AssetManagerConfig, configSchema } from '../common/config';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -49,11 +49,11 @@ export class AssetManagerServerPlugin
   public setup(core: CoreSetup, plugins: AssetManagerPluginSetupDependencies) {
     // Check for config value and bail out if not "alpha-enabled"
     if (!this.config.alphaEnabled) {
-      this.logger.info('Asset manager plugin [tech preview] is NOT enabled');
+      this.logger.info('Server is NOT enabled');
       return;
     }
 
-    this.logger.info('Asset manager plugin [tech preview] is enabled');
+    this.logger.info('Server is enabled');
 
     const assetClient = new AssetClient({
       source: this.config.lockedSource,

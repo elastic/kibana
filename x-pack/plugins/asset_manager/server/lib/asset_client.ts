@@ -7,8 +7,8 @@
 
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { AssetManagerConfig } from '../../common/config';
 import { Asset } from '../../common/types_api';
-import { AssetManagerConfig } from '../types';
 import { OptionsWithInjectedValues } from './accessors';
 import { GetHostsOptions } from './accessors/hosts';
 import { GetServicesOptions } from './accessors/services';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { GetHostsOptionsPublic } from '../../../../common/types_client';
-import { AssetClientDependencies, OptionsWithInjectedValues } from '..';
+import type { AssetClientDependencies } from '../../../types';
+import type { GetHostsOptionsPublic } from '../../../../common/types_client';
+import type { OptionsWithInjectedValues } from '..';
 
 export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
 export type GetHostsOptionsInjected = OptionsWithInjectedValues<GetHostsOptions>;
