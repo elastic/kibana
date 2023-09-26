@@ -48,7 +48,7 @@ const defaultHeadersInDefaultEcsCategory = [
 
 describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'auditbeat_big');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
   });
 
   after(() => {

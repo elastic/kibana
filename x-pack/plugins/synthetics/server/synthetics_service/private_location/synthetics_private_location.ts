@@ -435,9 +435,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    const agentPolicies = await getAgentPoliciesAsInternalUser(this.server);
-
-    return agentPolicies.items;
+    return await getAgentPoliciesAsInternalUser(this.server);
   }
 }
 

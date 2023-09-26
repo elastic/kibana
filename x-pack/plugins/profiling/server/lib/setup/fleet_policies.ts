@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { omit } from 'lodash';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { PackageInputType } from '../..';
 import { PartialSetupState } from '../../../common/setup';
 import { ELASTIC_CLOUD_APM_POLICY, getApmPolicy } from './get_apm_policy';
@@ -27,8 +28,10 @@ async function getPackagePolicy({
   soClient: SavedObjectsClientContract;
   packageName: string;
 }) {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.find((pkg) => pkg.name === packageName);
+  const packagePolicies = await packagePolicyClient.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:${packageName}`,
+  });
+  return packagePolicies.items[0];
 }
 
 export async function getCollectorPolicy({
@@ -189,17 +192,23 @@ export async function validateProfilingInApmPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-
-  return {
-    policies: {
-      apm: {
-        profilingEnabled: !!(
-          apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
-        ),
+  try {
+    const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+    return {
+      policies: {
+        apm: {
+          profilingEnabled: !!(
+            apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
+          ),
+        },
       },
-    },
-  };
+    };
+  } catch (e) {
+    // In case apm integration is not available ignore the error and return as profiling is not enabled on the integration
+    return {
+      policies: { apm: { profilingEnabled: false } },
+    };
+  }
 }
 
 export async function removeProfilingFromApmPackagePolicy({

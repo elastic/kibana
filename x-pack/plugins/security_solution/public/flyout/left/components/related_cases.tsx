@@ -20,6 +20,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import {
   CORRELATIONS_CASE_NAME_COLUMN_TITLE,
   CORRELATIONS_CASE_STATUS_COLUMN_TITLE,
+  RELATED_CASES_NO_DATA,
 } from './translations';
 
 const ICON = 'warning';
@@ -82,6 +83,7 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
         items={data}
         columns={columns}
         pagination={true}
+        message={RELATED_CASES_NO_DATA}
         data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID}
       />
     </ExpandablePanel>

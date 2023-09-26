@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RELATED_ALERTS_BY_SESSION_NO_DATA } from './translations';
 import { CORRELATIONS_SESSION_ALERTS } from '../../shared/translations';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -51,6 +52,7 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
       alertIds={data}
       scopeId={scopeId}
       eventId={eventId}
+      noItemsMessage={RELATED_ALERTS_BY_SESSION_NO_DATA}
       data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
     />
   );

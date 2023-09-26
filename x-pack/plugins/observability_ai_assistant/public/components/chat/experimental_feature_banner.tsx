@@ -20,7 +20,7 @@ import illustration from '../../assets/illustration.svg';
 
 export function ExperimentalFeatureBanner() {
   return (
-    <>
+    <div>
       <EuiPanel color="warning" paddingSize="s" hasBorder={false}>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -33,7 +33,7 @@ export function ExperimentalFeatureBanner() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap>
               <FormattedMessage
                 id="xpack.observabilityAiAssistant.experimentalFunctionBanner.title"
                 defaultMessage="This feature is currently in {techPreview} and may contain issues."
@@ -42,7 +42,12 @@ export function ExperimentalFeatureBanner() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="warning" href="https://ela.st/obs-ai-assistant" target="_blank">
+            <EuiButton
+              data-test-subj="observabilityAiAssistantExperimentalFeatureBannerGiveFeedbackButton"
+              color="warning"
+              href="https://ela.st/obs-ai-assistant"
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.observabilityAiAssistant.experimentalFunctionBanner.feedbackButton',
                 { defaultMessage: 'Give feedback' }
@@ -52,6 +57,6 @@ export function ExperimentalFeatureBanner() {
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-    </>
+    </div>
   );
 }

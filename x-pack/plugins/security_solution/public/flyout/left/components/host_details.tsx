@@ -267,7 +267,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
+              <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP(hostName)}>
                 <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -287,6 +287,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               loading={isRelatedUsersLoading}
               data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
               pagination={pagination}
+              message={i18n.RELATED_USERS_TABLE_NO_DATA}
             />
             <InspectButton
               queryId={relatedUsersQueryId}

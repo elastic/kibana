@@ -53,7 +53,12 @@ export function IncorrectLicensePanel() {
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButton fill href="https://www.elastic.co/subscriptions" target="_blank">
+              <EuiButton
+                data-test-subj="observabilityAiAssistantIncorrectLicensePanelSubscriptionPlansButton"
+                fill
+                href="https://www.elastic.co/subscriptions"
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.observabilityAiAssistant.incorrectLicense.subscriptionPlansButton',
                   {
@@ -63,7 +68,10 @@ export function IncorrectLicensePanel() {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonEmpty onClick={handleNavigateToLicenseManagement}>
+              <EuiButtonEmpty
+                data-test-subj="observabilityAiAssistantIncorrectLicensePanelManageLicenseButton"
+                onClick={handleNavigateToLicenseManagement}
+              >
                 {i18n.translate('xpack.observabilityAiAssistant.incorrectLicense.manageLicense', {
                   defaultMessage: 'Manage license',
                 })}

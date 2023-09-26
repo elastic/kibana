@@ -94,7 +94,6 @@ import {
   getIndicatorOrButton,
   selectIndicatorMatchType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
@@ -104,7 +103,11 @@ import {
 } from '../../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../../tasks/edit_rule';
 import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
-import { goBackToRulesTable, getDetails } from '../../../tasks/rule_details';
+import {
+  goBackToRulesTable,
+  getDetails,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../../urls/navigation';
 
@@ -122,8 +125,8 @@ describe('indicator match', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () =>
 
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'threat_indicator');
-      cy.task('esArchiverLoad', 'suspicious_source_event');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+      cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     });
 
     beforeEach(() => {

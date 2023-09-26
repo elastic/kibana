@@ -18,6 +18,7 @@ export const putUpdateNative = async (
   const result = await client.asCurrentUser.update<Connector>({
     doc: {
       is_native: isNative,
+      status: ConnectorStatus.CONFIGURED,
     },
     id: connectorId,
     index: CONNECTORS_INDEX,

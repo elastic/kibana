@@ -18,7 +18,6 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt } from '../default_api_types';
 import { getServicesItems } from '../services/get_services/get_services_items';
 import {
   CorrelationValue,
@@ -26,20 +25,20 @@ import {
   getApmCorrelationValues,
 } from './get_apm_correlation_values';
 import {
-  type APMDownstreamDependency,
   downstreamDependenciesRouteRt,
   getAssistantDownstreamDependencies,
+  type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
 import { errorRouteRt, getApmErrorDocument } from './get_apm_error_document';
 import {
   getApmServiceSummary,
-  type ServiceSummary,
   serviceSummaryRouteRt,
+  type ServiceSummary,
 } from './get_apm_service_summary';
 import {
-  type ApmTimeseries,
   getApmTimeseries,
   getApmTimeseriesRt,
+  type ApmTimeseries,
 } from './get_apm_timeseries';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
@@ -204,15 +203,15 @@ interface ApmServicesListItem {
 type ApmServicesListContent = ApmServicesListItem[];
 
 const getApmServicesListRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assistant/get_services_list',
+  endpoint: 'POST /internal/apm/assistant/get_services_list',
   params: t.type({
-    query: t.intersection([
+    body: t.intersection([
       t.type({
         start: t.string,
         end: t.string,
       }),
       t.partial({
-        'service.environment': environmentRt.props.environment,
+        'service.environment': t.string,
         healthStatus: t.array(
           t.union([
             t.literal(ServiceHealthStatus.unknown),
@@ -229,9 +228,9 @@ const getApmServicesListRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ content: ApmServicesListContent }> => {
     const { params } = resources;
-    const { query } = params;
+    const { body } = params;
 
-    const { healthStatus } = query;
+    const { healthStatus } = body;
 
     const [apmEventClient, apmAlertsClient, mlClient, randomSampler] =
       await Promise.all([
@@ -245,8 +244,8 @@ const getApmServicesListRoute = createApmServerRoute({
         }),
       ]);
 
-    const start = datemath.parse(query.start)?.valueOf()!;
-    const end = datemath.parse(query.end)?.valueOf()!;
+    const start = datemath.parse(body.start)?.valueOf()!;
+    const end = datemath.parse(body.end)?.valueOf()!;
 
     const serviceItems = await getServicesItems({
       apmAlertsClient,
@@ -254,7 +253,7 @@ const getApmServicesListRoute = createApmServerRoute({
       documentType: ApmDocumentType.TransactionMetric,
       start,
       end,
-      environment: query['service.environment'] ?? ENVIRONMENT_ALL.value,
+      environment: body['service.environment'] || ENVIRONMENT_ALL.value,
       kuery: '',
       logger: resources.logger,
       randomSampler,

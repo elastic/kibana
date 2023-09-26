@@ -38,8 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/164996
-  describe.skip('search', () => {
+  describe('search', () => {
     before(async () => {
       // ensure es not empty
       await es.index({
@@ -456,7 +455,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      it('should delete a completed search', async function () {
+      // Failing: See https://github.com/elastic/kibana/issues/164996
+      it.skip('should delete a completed search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest

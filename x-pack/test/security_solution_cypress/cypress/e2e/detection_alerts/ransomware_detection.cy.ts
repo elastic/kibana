@@ -18,7 +18,9 @@ import { createTimeline } from '../../tasks/timelines';
 
 describe('Ransomware Detection Alerts', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'ransomware_detection');
+    cy.task('esArchiverLoad', {
+      archiveName: 'ransomware_detection',
+    });
   });
 
   describe('Ransomware display in Alerts Section', () => {

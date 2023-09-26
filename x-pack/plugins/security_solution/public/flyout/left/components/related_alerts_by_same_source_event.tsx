@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RELATED_ALERTS_BY_SOURCE_EVENT_NO_DATA } from './translations';
 import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
@@ -51,6 +52,7 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
       alertIds={data}
       scopeId={scopeId}
       eventId={eventId}
+      noItemsMessage={RELATED_ALERTS_BY_SOURCE_EVENT_NO_DATA}
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
     />
   );

@@ -34,7 +34,8 @@ export const esArchiver = (
   });
 
   on('task', {
-    esArchiverLoad: async (archiveName) => esArchiverInstance.load(archiveName),
+    esArchiverLoad: async ({ archiveName, ...options }) =>
+      esArchiverInstance.load(archiveName, options),
     esArchiverUnload: async (archiveName) => esArchiverInstance.unload(archiveName),
     esArchiverResetKibana: async () => esArchiverInstance.emptyKibanaIndex(),
   });

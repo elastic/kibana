@@ -5,23 +5,77 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import {
-  ADD_INTEGRATION_BTN,
-  INTEGRATION_ADDED_POP_UP,
-  QUEUE_URL,
-  SAVE_AND_CONTINUE_BTN,
-  SKIP_AGENT_INSTALLATION_BTN,
-} from '../screens/integrations';
+  AGENT_POLICY_API_ROUTES,
+  CreateAgentPolicyResponse,
+  EPM_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
+} from '@kbn/fleet-plugin/common';
+import {
+  NewAgentPolicySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
+} from '@kbn/fleet-plugin/server/types';
+import { rootRequest } from './common';
 
-import { visit } from './login';
+interface Package {
+  name: string;
+  version: string;
+}
 
-export const installAwsCloudFrontWithPolicy = () => {
-  visit('app/integrations/detail/aws-1.17.0/overview?integration=cloudfront');
-  cy.get(ADD_INTEGRATION_BTN).click();
-  cy.get(SKIP_AGENT_INSTALLATION_BTN).click();
-  cy.get(QUEUE_URL).type('http://www.example.com');
+export type AgentPolicy = TypeOf<typeof NewAgentPolicySchema>;
+export type PackagePolicy = TypeOf<typeof SimplifiedCreatePackagePolicyRequestBodySchema>;
+export type PackagePolicyWithoutAgentPolicyId = Omit<PackagePolicy, 'policy_id'>;
 
-  // Fleet installs an integration very slowly, so we have to increase the timeout here.
-  cy.get(SAVE_AND_CONTINUE_BTN).click();
-  cy.get(INTEGRATION_ADDED_POP_UP, { timeout: 120000 }).should('exist');
-};
+/**
+ * Installs provided integrations by installing provided packages, creating an agent policy and adding a package policy.
+ * An agent policy is created with System integration enabled (with `?sys_monitoring=true` query param).
+ *
+ * Agent and package policies can be generated in Kibana by opening Fleet UI e.g. for AWS CloudFront the steps are following
+ *
+ * - open `app/integrations/detail/aws-1.17.0/overview?integration=cloudfront`
+ * - click the button `Add Amazon CloudFront`
+ * - fill in `Queue URL`
+ * - press `Preview API request` at the bottom
+ * - copy shown policies
+ */
+export function installIntegrations({
+  packages,
+  agentPolicy,
+  packagePolicy,
+}: {
+  packages: Package[];
+  agentPolicy: AgentPolicy;
+  packagePolicy: Omit<PackagePolicy, 'policy_id'>;
+}): void {
+  // Bulk install provided packages
+  rootRequest({
+    method: 'POST',
+    url: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+    body: {
+      packages,
+      force: true,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+  });
+
+  // Install agent and package policies
+  rootRequest<CreateAgentPolicyResponse>({
+    method: 'POST',
+    url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
+    body: agentPolicy,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+  }).then((response) => {
+    const packagePolicyWithAgentPolicyId: PackagePolicy = {
+      ...packagePolicy,
+      policy_id: response.body.item.id,
+    };
+
+    rootRequest({
+      method: 'POST',
+      url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      body: packagePolicyWithAgentPolicyId,
+      headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    });
+  });
+}

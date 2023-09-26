@@ -270,7 +270,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.RELATED_HOSTS_TOOL_TIP}>
+              <EuiToolTip content={i18n.RELATED_HOSTS_TOOL_TIP(userName)}>
                 <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -290,6 +290,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               loading={isRelatedHostLoading}
               data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
               pagination={pagination}
+              message={i18n.RELATED_HOSTS_TABLE_NO_DATA}
             />
             <InspectButton
               queryId={relatedHostsQueryId}

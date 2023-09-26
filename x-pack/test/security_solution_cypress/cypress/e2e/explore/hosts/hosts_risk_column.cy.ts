@@ -16,7 +16,7 @@ import { kqlSearch } from '../../../tasks/security_header';
 describe('All hosts table', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

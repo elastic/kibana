@@ -44,5 +44,6 @@
     "@kbn/cases-components",
     "@kbn/security-solution-plugin",
     "@kbn/expandable-flyout",
+    "@kbn/config-schema",
   ]
 }

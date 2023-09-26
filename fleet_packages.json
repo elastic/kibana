@@ -24,13 +24,13 @@
 [
   {
     "name": "apm",
-    "version": "8.10.0-preview-1692199701",
+    "version": "8.10.3-preview-1695284222",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.11.0"
+    "version": "1.13.1"
   },
   {
     "name": "endpoint",
@@ -54,10 +54,10 @@
   },
   {
     "name": "synthetics",
-    "version": "1.0.4"
+    "version": "1.0.6"
   },
   {
     "name": "security_detection_engine",
-    "version": "8.9.4"
+    "version": "8.10.3"
   }
 ]

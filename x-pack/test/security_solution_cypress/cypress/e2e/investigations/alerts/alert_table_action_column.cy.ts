@@ -19,7 +19,9 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Alerts Table Action column', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'process_ancestry');
+    cy.task('esArchiverLoad', {
+      archiveName: 'process_ancestry',
+    });
   });
 
   beforeEach(() => {

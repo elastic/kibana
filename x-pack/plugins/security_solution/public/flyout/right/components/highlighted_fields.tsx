@@ -54,11 +54,13 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     field: 'field',
     name: HIGHLIGHTED_FIELDS_FIELD_COLUMN,
     'data-test-subj': 'fieldCell',
+    width: '50%',
   },
   {
     field: 'description',
     name: HIGHLIGHTED_FIELDS_VALUE_COLUMN,
     'data-test-subj': 'valueCell',
+    width: '50%',
     render: (description: {
       field: string;
       values: string[] | null | undefined;
@@ -111,7 +113,7 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={items} columns={columns} compressed tableLayout="auto" />
+          <EuiInMemoryTable items={items} columns={columns} compressed />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

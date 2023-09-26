@@ -17,6 +17,7 @@ export interface APMIndices {
     span?: string;
     transaction?: string;
     metric?: string;
+    sourcemap?: string;
   };
   isSpaceAware?: boolean;
 }

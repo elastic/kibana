@@ -25,7 +25,7 @@ import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 /**
- * Threat Intelligence section under Insights section, overview tab.
+ * Threat intelligence section under Insights section, overview tab.
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */

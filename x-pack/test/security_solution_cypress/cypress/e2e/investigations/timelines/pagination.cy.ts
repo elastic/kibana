@@ -27,7 +27,7 @@ const defaultPageSize = 25;
 describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'timeline');
+    cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });
 
   beforeEach(() => {

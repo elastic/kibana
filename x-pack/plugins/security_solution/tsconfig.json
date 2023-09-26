@@ -149,7 +149,6 @@
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
     "@kbn/securitysolution-data-table",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
@@ -169,5 +168,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/handlebars",
+    "@kbn/content-management-plugin"
   ]
 }

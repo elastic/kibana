@@ -16,15 +16,17 @@ import {
   RULE_PREVIEW_TITLE_TEST_ID,
   RULE_PREVIEW_RULE_CREATED_BY_TEST_ID,
   RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
+  RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID,
 } from './test_ids';
 
 const defaultProps = {
   rule: { id: 'id' } as Rule,
+  isSuppressed: false,
 };
 
 describe('<RulePreviewTitle />', () => {
   it('should render title and its components', () => {
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
           <RulePreviewTitle {...defaultProps} />
@@ -34,5 +36,21 @@ describe('<RulePreviewTitle />', () => {
     expect(getByTestId(RULE_PREVIEW_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_RULE_CREATED_BY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render deleted rule badge', () => {
+    const props = {
+      ...defaultProps,
+      isSuppressed: true,
+    };
+    const { getByTestId } = render(
+      <TestProviders>
+        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+          <RulePreviewTitle {...props} />
+        </ExpandableFlyoutContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID)).toBeInTheDocument();
   });
 });

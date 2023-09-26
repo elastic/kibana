@@ -33,8 +33,8 @@ import { addsFieldsToTimeline } from '../../tasks/rule_details';
 describe('CTI Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'threat_indicator');
-    cy.task('esArchiverLoad', 'suspicious_source_event');
+    cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+    cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
     disableExpandableFlyout();
@@ -157,7 +157,7 @@ describe('CTI Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('with additional indicators', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'threat_indicator2');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
     });
 
     beforeEach(() => {

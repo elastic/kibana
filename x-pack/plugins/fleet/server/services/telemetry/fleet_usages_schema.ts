@@ -286,29 +286,4 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  components_status: {
-    type: 'array',
-    items: {
-      properties: {
-        id: {
-          type: 'keyword',
-          _meta: {
-            description: 'Component Id',
-          },
-        },
-        status: {
-          type: 'keyword',
-          _meta: {
-            description: 'Component Status',
-          },
-        },
-        count: {
-          type: 'long',
-          _meta: {
-            description: 'Number of this component with this status',
-          },
-        },
-      },
-    },
-  },
 };

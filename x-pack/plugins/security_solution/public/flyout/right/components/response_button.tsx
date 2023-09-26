@@ -42,16 +42,20 @@ export const ResponseButton: React.FC = () => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
-  if (!responseActions) return <div data-test-subj={RESPONSE_EMPTY_TEST_ID}>{RESPONSE_EMPTY}</div>;
-
   return (
-    <EuiButton
-      onClick={goToResponseTab}
-      iconType="documentation"
-      data-test-subj={RESPONSE_BUTTON_TEST_ID}
-    >
-      {RESPONSE_TITLE}
-    </EuiButton>
+    <>
+      {!responseActions ? (
+        <div data-test-subj={RESPONSE_EMPTY_TEST_ID}>{RESPONSE_EMPTY}</div>
+      ) : (
+        <EuiButton
+          onClick={goToResponseTab}
+          iconType="documentation"
+          data-test-subj={RESPONSE_BUTTON_TEST_ID}
+        >
+          {RESPONSE_TITLE}
+        </EuiButton>
+      )}
+    </>
   );
 };
 

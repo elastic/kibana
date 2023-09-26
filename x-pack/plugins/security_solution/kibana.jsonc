@@ -17,6 +17,7 @@
       "cloud",
       "cloudDefend",
       "cloudSecurityPosture",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViews",
@@ -45,7 +46,6 @@
       "files",
       "controls",
       "dataViewEditor",
-      "savedObjectsManagement",
       "stackConnectors",
       "discover",
       "notifications"

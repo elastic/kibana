@@ -36,7 +36,7 @@ describe('Close matching Alerts ', () => {
     cy.task('esArchiverUnload', 'exceptions');
     cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
     login();
     postDataView('exceptions-*');
