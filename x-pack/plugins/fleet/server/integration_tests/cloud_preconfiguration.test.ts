@@ -312,31 +312,11 @@ describe('Fleet preconfiguration reset', () => {
                   cluster: ['cluster:monitor/main'],
                   indices: [
                     {
-                      names: ['logs-apm.app-default'],
+                      names: ['traces-*', 'logs-*', 'metrics-*'],
                       privileges: ['auto_configure', 'create_doc'],
                     },
                     {
-                      names: ['metrics-apm.app.*-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['logs-apm.error-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['metrics-apm.internal-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['metrics-apm.profiling-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['traces-apm.rum-default'],
-                      privileges: ['auto_configure', 'create_doc'],
-                    },
-                    {
-                      names: ['traces-apm.sampled-default'],
+                      names: ['traces-apm.sampled-*'],
                       privileges: [
                         'auto_configure',
                         'create_doc',
@@ -344,10 +324,6 @@ describe('Fleet preconfiguration reset', () => {
                         'monitor',
                         'read',
                       ],
-                    },
-                    {
-                      names: ['traces-apm-default'],
-                      privileges: ['auto_configure', 'create_doc'],
                     },
                   ],
                 },
