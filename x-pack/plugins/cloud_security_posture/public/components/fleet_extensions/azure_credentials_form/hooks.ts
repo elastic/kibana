@@ -116,8 +116,6 @@ export const useAzureCredentialsForm = ({
 
   useEffect(() => {
     const isInvalid = setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && !hasArmTemplateUrl;
-    console.log({ isInvalid, newPolicy });
-
     setIsValid(!isInvalid);
 
     onChange({
