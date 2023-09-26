@@ -12,6 +12,8 @@ import type { MlPluginSetup, MlPluginStart } from './plugin';
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
     locator: sharePluginMock.createLocator(),
+    // TODO: Fix with proper mock (cc: @arnautov)
+    elasticModels: undefined as any,
   };
 };
 
