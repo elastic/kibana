@@ -11,6 +11,8 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import pMap from 'p-map';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -729,15 +731,22 @@ const updateAllDataStreams = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
-    return updateExistingDataStream({
-      esClient,
-      logger,
-      dataStreamName: templateEntry.dataStreamName,
-    });
-  });
-  await Promise.all(updatedataStreamPromises);
+  await pMap(
+    indexNameWithTemplates,
+    (templateEntry) => {
+      return updateExistingDataStream({
+        esClient,
+        logger,
+        dataStreamName: templateEntry.dataStreamName,
+      });
+    },
+    {
+      // Limit concurrent putMapping/rollover requests to avoid overhwhelming ES cluster
+      concurrency: 20,
+    }
+  );
 };
+
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
