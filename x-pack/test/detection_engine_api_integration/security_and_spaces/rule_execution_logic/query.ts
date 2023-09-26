@@ -786,8 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-1',
             },
           };
-          // Add a new document, then disable and re-enable to trigger another rule run. The existing docs
-          // should be marked as untracked, and a new rule run should begin. The second doc of the new run should
+          // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
           // trigger an update to the existing alert without changing the timestamp
           await indexListOfDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
@@ -815,7 +814,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
             [ALERT_SUPPRESSION_START]: firstTimestamp,
             [ALERT_SUPPRESSION_END]: secondTimestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
           });
         });
 
