@@ -183,7 +183,7 @@ async function fetchContainerStats(
         const cpuUsage = node.average_cpu_usage_percent.value ?? undefined;
 
         logger.warn(
-          `CPU usage rule: Kibana is configured for containerized workloads but node "${node.key}" does not have resource limits configured. Fallback metric reports usage of ${cpuUsage}%.`
+          `CPU usage rule: Node "${node.key}" does not have resource limits configured. Fallback metric reports usage of ${cpuUsage}%.`
         );
 
         return {

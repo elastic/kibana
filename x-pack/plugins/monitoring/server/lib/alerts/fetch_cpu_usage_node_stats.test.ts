@@ -126,10 +126,10 @@ describe('fetchCpuUsageNodeStats', () => {
                         value: 45,
                       },
                       quota_micros_max: {
-                        value: -1,
+                        value: 2000,
                       },
                       quota_micros_min: {
-                        value: -1,
+                        value: 2000,
                       },
                       name: {
                         buckets: [
@@ -366,7 +366,6 @@ describe('fetchCpuUsageNodeStats', () => {
 
       expect(stats).toEqual([
         {
-          missingLimits: true,
           clusterUuid: 'my-test-cluster',
           nodeId: 'my-test-node',
           nodeName: 'test-node',
