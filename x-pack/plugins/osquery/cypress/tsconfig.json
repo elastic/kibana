@@ -3,11 +3,11 @@
   "include": [
     "**/*",
     "../cypress.config.ts",
+    "../serverless_cypress.config.ts",
     "../../../test_serverless/shared/lib"
   ],
   "exclude": [
     "target/**/*",
-    "../serverless_cypress.config.ts"
   ],
   "compilerOptions": {
     "outDir": "target/types",
