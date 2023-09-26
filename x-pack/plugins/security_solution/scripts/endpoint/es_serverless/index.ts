@@ -32,18 +32,34 @@ export const cli = async () => {
 
       cliContext.log.info(`
 Starting ES with supported Security project roles and users.
-User accounts available for login ${gray('(username: password)')}:
+User accounts available for login:
+${gray(`(passwords have been set to ${cyan('changeme')})`)}
 
 ${
   new ColumnLayoutFormatter(
     [
-      `USERNAME\n------------------\n${ES_LOADED_USERS.join('\n')}`,
-      `PASSWORD\n------------------\n${ES_LOADED_USERS.map(() => 'changeme').join('\n')}`,
+      ['USERNAME', '-'.repeat(20), ...ES_LOADED_USERS.map((u) => cyan(u))].join('\n'),
+
+      [
+        'USERNAME',
+        '-'.repeat(20),
+        ' ',
+        ' ',
+        'Password for all',
+        'accounts set',
+        `to: ${cyan('changeme')}`,
+      ].join('\n'),
     ],
-    { separator: '  ' }
+    { separator: '  ', widths: [50, 40] }
   ).output
 }
 `);
+
+      /*
+
+ USERNAME                                  PASSWORD
+ ------------------                        ------------------
+       */
 
       cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
 
