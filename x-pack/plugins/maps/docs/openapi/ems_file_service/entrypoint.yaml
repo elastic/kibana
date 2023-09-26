@@ -140,7 +140,7 @@ paths:
                             type: string
                         layer_name:
                           type: object
-                          description: A human readable descriptor of the dataset in different languages
+                          description: A human-readable descriptor of the dataset in different languages
                           additionalProperties: true
                           required:
                             - en
