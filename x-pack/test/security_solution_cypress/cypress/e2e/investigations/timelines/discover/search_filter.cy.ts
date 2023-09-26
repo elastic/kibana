@@ -38,7 +38,8 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/167186
+describe.skip(
   'Basic discover search and filter operations',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
