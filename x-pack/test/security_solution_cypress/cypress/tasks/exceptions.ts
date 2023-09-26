@@ -114,8 +114,10 @@ export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
-  cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+export const addExceptionEntryFieldMatchAnyValue = (values: string[], index = 0) => {
+  values.forEach((value) => {
+    cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+  });
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
