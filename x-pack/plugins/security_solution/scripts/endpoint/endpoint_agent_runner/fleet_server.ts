@@ -44,7 +44,7 @@ import type {
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
 import { resolve } from 'path';
-import { SERVERLESS_NODES } from '@kbn/es';
+import { SERVERLESS_NODES, verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { isServerlessKibanaFlavor } from '../common/stack_services';
 import type { FormattedAxiosError } from '../common/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
@@ -71,6 +71,9 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
   const isServerless = await isServerlessKibanaFlavor(kbnClient);
+
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
 
   try {
     if (isServerless) {
