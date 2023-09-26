@@ -9,8 +9,11 @@ import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page
 import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 
-export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+export const cloudSecurityPosturePageObjects = {
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
+};
+export const pageObjects = {
+  ...xpackFunctionalPageObjects,
+  ...cloudSecurityPosturePageObjects,
 };

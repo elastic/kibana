@@ -71,6 +71,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         login: {
           pathname: '/login',
         },
+        securitySolution: {
+          pathname: '/app/security',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
