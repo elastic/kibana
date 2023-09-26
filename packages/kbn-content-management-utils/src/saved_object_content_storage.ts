@@ -69,11 +69,13 @@ function savedObjectToItem<Attributes extends object>(
     error,
     namespaces,
     version,
+    managed,
   } = savedObject;
 
   return {
     id,
     type,
+    managed,
     updatedAt,
     createdAt,
     attributes: pick(attributes, allowedSavedObjectAttributes),
