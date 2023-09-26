@@ -529,17 +529,20 @@ export const SEVERITY_LOW_LABEL = i18n.translate(
   }
 );
 
-export const STATUS_OPEN = i18n.translate('stackConnectors.components.casesWebhook.status.open', {
-  defaultMessage: 'Open',
-});
+export const STATUS_OPEN = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.open',
+  {
+    defaultMessage: 'Open',
+  }
+);
 export const STATUS_CLOSED = i18n.translate(
-  'stackConnectors.components.casesWebhook.status.closed',
+  'xpack.stackConnectors.components.casesWebhook.status.closed',
   {
     defaultMessage: 'Closed',
   }
 );
 export const STATUS_IN_PROGRESS = i18n.translate(
-  'stackConnectors.components.casesWebhook.status.inProgress',
+  'xpack.stackConnectors.components.casesWebhook.status.inProgress',
   {
     defaultMessage: 'In progress',
   }
