@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { EuiBadge } from '@elastic/eui';
 
 import {
