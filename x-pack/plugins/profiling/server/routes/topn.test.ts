@@ -57,6 +57,14 @@ describe('TopN data from Elasticsearch', () => {
           body: {},
         }) as Promise<any>
     ),
+    profilingFlamegraph: jest.fn(
+      () =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'GET',
+          path: encodeURI('_profiling/flamegraph'),
+          body: {},
+        }) as Promise<any>
+    ),
     getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
   };
   const logger = loggerMock.create();
