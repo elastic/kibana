@@ -19,6 +19,7 @@ import type { PostureInput } from '../../../common/types';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
 export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
+export const getMockPolicyAzure = () => getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure');
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
@@ -136,6 +137,11 @@ const getPolicyMock = (
     'gcp.credentials.type': { type: 'text' },
   };
 
+  const azureVarsMock = {
+    'azure.account_type': { type: 'text' },
+    'azure.credentials.type': { type: 'text' },
+  };
+
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
 
   return {
@@ -179,11 +185,12 @@ const getPolicyMock = (
         streams: [{ enabled: type === CLOUDBEAT_GCP, data_stream: dataStream, vars: gcpVarsMock }],
       },
       {
-        // TODO: update mock
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
         enabled: false,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        streams: [
+          { enabled: type === CLOUDBEAT_AZURE, data_stream: dataStream, vars: azureVarsMock },
+        ],
       },
       {
         type: CLOUDBEAT_VULN_MGMT_AWS,
