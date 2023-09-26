@@ -32,9 +32,13 @@ discover-app {
   height: 100%;
 }
 
-.dscSidebarResizeButton:not(:hover):not(:focus) {
-  &:before, &:after {
+.dscSidebarResizeButton {
+  background-color: transparent !important;
+
+  &:not(:hover):not(:focus) {
+    &:before, &:after {
     width: 0;
+  }
   }
 }
 
