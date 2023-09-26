@@ -21,7 +21,6 @@ const REPORTING_ROLE = 'reporting_user_role';
 const REPORTING_USER_USERNAME = 'elastic_serverless';
 const REPORTING_USER_PASSWORD = 'changeme';
 
-
 /**
  * Services to create roles and users for security testing
  */
