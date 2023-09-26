@@ -77,6 +77,8 @@ export async function _installPackage({
   force,
   verificationResult,
   authorizationHeader,
+  ignoreMappingUpdateErrors,
+  skipDataStreamRollover,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -93,6 +95,8 @@ export async function _installPackage({
   force?: boolean;
   verificationResult?: PackageVerificationResult;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
@@ -250,7 +254,10 @@ export async function _installPackage({
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, indexTemplates)
+      updateCurrentWriteIndices(esClient, logger, indexTemplates, {
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      })
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
