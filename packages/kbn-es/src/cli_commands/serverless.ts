@@ -13,9 +13,8 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import {
-  SERVERLESS_REPO,
-  SERVERLESS_TAG,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
   ServerlessOptions,
 } from '../utils';
@@ -28,9 +27,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ES serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
-      --image             Full path of ES serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
-      
+      --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
+      --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
@@ -39,14 +37,14 @@ export const serverless: Command = {
       --ssl               Enable HTTP SSL on the ES cluster
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
-      
+
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 
     Examples:
 
-      es serverless --tag git-fec36430fba2-x86_64
-      es serverless --image docker.elastic.co/repo:tag
+      es serverless --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
+      es serverless --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
     `;
   },
   run: async (defaults = {}) => {
