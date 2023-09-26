@@ -30,6 +30,7 @@ import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { savedSearchComparator } from './utils';
 import { setIsDiscoverSavedSearchLoaded } from '../../../store/timeline/actions';
+import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -154,7 +155,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       refreshInterval: discoverStateContainer.current?.globalState.get()?.refreshInterval,
       breakdownField: discoverStateContainer.current?.appState.getState().breakdownField,
       rowsPerPage: discoverStateContainer.current?.appState.getState().rowsPerPage,
-      title: `Saved Search for timeline - ${title}`,
+      title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
   }, [

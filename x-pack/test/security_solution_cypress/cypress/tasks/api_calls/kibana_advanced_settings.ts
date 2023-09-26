@@ -33,11 +33,3 @@ export const disableRelatedIntegrations = () => {
 export const disableExpandableFlyout = () => {
   setKibanaSetting(ENABLE_EXPANDABLE_FLYOUT_SETTING, false);
 };
-
-export const enableDiscoverSQL = () => {
-  setKibanaSetting(ADVANCED_SETTINGS.DISCOVER_SQL, true);
-};
-
-export const disableDiscoverSQL = () => {
-  setKibanaSetting(ADVANCED_SETTINGS.DISCOVER_SQL, false);
-};

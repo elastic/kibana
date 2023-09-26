@@ -1630,7 +1630,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     noteIds: ['noteId4'],
     notes: [
       {
-        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis various quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
+        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis varius quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
         savedObjectId: 'noteId1',
         updated: 1553700738 * 1000,
         updatedBy: 'alice',
