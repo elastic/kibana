@@ -128,6 +128,13 @@ const ExportTypeSchema = schema.object({
   }),
 });
 
+const SettingsSchema = schema.object({
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }),
+});
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
@@ -138,6 +145,7 @@ export const ConfigSchema = schema.object({
   roles: RolesSchema,
   poll: PollSchema,
   export_types: ExportTypeSchema,
+  statefulSettings: SettingsSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

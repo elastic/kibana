@@ -85,6 +85,14 @@ describe('Reporting Config Schema', () => {
       `);
   });
 
+  it('disables ilm settings in serverless', () => {
+    expect(ConfigSchema.validate({}, { serverless: true }).statefulSettings).toMatchInlineSnapshot(`
+      Object {
+        "enabled": false,
+      }
+    `);
+  });
+
   it('disables screenshot type exports in serverless', () => {
     expect(ConfigSchema.validate({}, { serverless: true }).export_types).toMatchInlineSnapshot(`
         Object {
