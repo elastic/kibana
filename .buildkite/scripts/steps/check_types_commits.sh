@@ -5,22 +5,32 @@ set -euo pipefail
 
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
-  
-  sha1="${GITHUB_PR_TARGET_BRANCH-}"
+
+  sha1=$(git merge-base $GITHUB_PR_TARGET_BRANCH $GITHUB_PR_TRIGGERED_SHA)
   sha2="${GITHUB_PR_TRIGGERED_SHA-}"
 else
-  # Script take between 0 and 2 arguments representing two commit SHA's:
-  # If 0, it will diff HEAD and HEAD^
-  # If 1 (SHA1), it will diff SHA1 and SHA1^
-  # If 2 (SHA1, SHA2), it will diff SHA1 and SHA2
-  sha1="${1-HEAD}"
-  sha2="${2-$sha1^}"
+  if [[ "${1-}" == "--cached" ]]; then
+    # Only check staged files
+    sha1=$1
+    sha2=""
+  else
+    # Script take between 0 and 2 arguments representing two commit SHA's:
+    # If 0, it will diff HEAD and HEAD^
+    # If 1 (SHA1), it will diff SHA1 and SHA1^
+    # If 2 (SHA1, SHA2), it will diff SHA1 and SHA2
+    sha1="${1-HEAD}"
+    sha2="${2-$sha1^}"
+  fi
 fi
 
 uniq_dirs=()
 uniq_tsconfigs=()
 
-echo "Detecting files changed between $sha1 and $sha2..."
+if [[ "$sha1" == "--cached" ]]; then
+  echo "Detecting files changed in staging area..."
+else
+  echo "Detecting files changed between $sha1 and $sha2..."
+fi
 
 files=($(git diff --name-only $sha1 $sha2))
 
@@ -102,7 +112,11 @@ do
 done
 
 if [ ${#uniq_tsconfigs[@]} -eq 0 ]; then
-  echo "No tsconfig.json files found for changes in $sha1 $sha2"
+  if [[ "$sha1" == "--cached" ]]; then
+    echo "No tsconfig.json files found for staged changes"
+  else
+    echo "No tsconfig.json files found for changes between $sha1 and $sha2"
+  fi
   exit
 fi
 
