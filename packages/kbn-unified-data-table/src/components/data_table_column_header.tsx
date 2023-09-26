@@ -39,7 +39,9 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
       `}
     >
       {columnToken && <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem>}
-      <EuiFlexItem grow={false}>{columnDisplayName}</EuiFlexItem>
+      <EuiFlexItem grow={false} className="eui-displayInline eui-textTruncate">
+        {columnDisplayName}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
