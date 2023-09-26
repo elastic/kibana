@@ -170,9 +170,6 @@ export class UserActionPersister {
 
     const { originalValue, newValue } = params;
     const compareValues = arraysDifference(originalValue, newValue);
-    const updatedCustomFieldsKeys = new Set(
-      compareValues?.addedItems.map((customField) => customField.key) ?? []
-    );
 
     const updatedCustomFieldsUsersActions = compareValues?.addedItems
       .map((customField) =>
@@ -186,26 +183,7 @@ export class UserActionPersister {
       )
       .filter((userAction): userAction is UserActionEvent => userAction != null);
 
-    const customFieldsRemovedUserActions = compareValues?.deletedItems
-      .map((customField) => {
-        if (updatedCustomFieldsKeys.has(customField.key)) {
-          return null;
-        }
-
-        return this.buildUserAction({
-          commonArgs: params,
-          actionType: UserActionTypes.customFields,
-          action: UserActionActions.delete,
-          createPayload,
-          modifiedItems: [customField],
-        });
-      })
-      .filter((userAction): userAction is UserActionEvent => userAction != null);
-
-    return [
-      ...(updatedCustomFieldsUsersActions ? updatedCustomFieldsUsersActions : []),
-      ...(customFieldsRemovedUserActions ? customFieldsRemovedUserActions : []),
-    ];
+    return [...(updatedCustomFieldsUsersActions ? updatedCustomFieldsUsersActions : [])];
   }
 
   private buildAddDeleteUserActions<Item, ActionType extends UserActionType>(

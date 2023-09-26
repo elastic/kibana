@@ -157,6 +157,11 @@ const originalCasesWithCustomFields = [
             type: CustomFieldTypes.TEXT,
             field: { value: ['old value'] },
           },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            field: { value: ['old value 2'] },
+          },
         ],
       },
     }),
@@ -195,37 +200,10 @@ export const patchUpdateCustomFieldsCasesRequest: PatchCasesArgs = {
             type: CustomFieldTypes.TEXT,
             field: { value: ['updated value'] },
           },
-        ],
-      },
-      originalCase: originalCasesWithCustomFields[0],
-    },
-  ],
-};
-
-export const patchRemoveCustomFieldsCasesRequest: PatchCasesArgs = {
-  cases: [
-    {
-      ...createCaseSavedObjectResponse(),
-      caseId: '1',
-      updatedAttributes: {
-        customFields: [],
-      },
-      originalCase: originalCasesWithCustomFields[0],
-    },
-  ],
-};
-
-export const patchAddRemoveCustomFieldsCasesRequest: PatchCasesArgs = {
-  cases: [
-    {
-      ...createCaseSavedObjectResponse(),
-      caseId: '1',
-      updatedAttributes: {
-        customFields: [
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['new custom field 2'] },
+            field: { value: ['old value 2'] },
           },
         ],
       },

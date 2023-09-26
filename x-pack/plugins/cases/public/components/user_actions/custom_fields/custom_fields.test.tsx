@@ -108,25 +108,6 @@ describe('createCustomFieldsUserActionBuilder ', () => {
     expect(screen.getByText('changed My test label 1 to an empty value')).toBeInTheDocument();
   });
 
-  it('renders correctly when a custom field is deleted', () => {
-    const userAction = getUserAction('customFields', UserActionActions.delete);
-
-    const builder = createCustomFieldsUserActionBuilder({
-      ...builderArgs,
-      userAction,
-    });
-
-    const createdUserAction = builder.build();
-
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
-
-    expect(screen.getByText('changed My test label 1 to an empty value')).toBeInTheDocument();
-  });
-
   it('renders correctly the label when the configuration is not found', () => {
     const userAction = getUserAction('customFields', UserActionActions.update);
 
