@@ -51,7 +51,7 @@ Object {
       Object {
         "range": Object {
           "log_timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -232,7 +232,7 @@ Object {
           Object {
             "range": Object {
               "log_timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -488,7 +488,7 @@ Object {
           Object {
             "range": Object {
               "log_timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
