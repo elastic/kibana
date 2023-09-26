@@ -111,3 +111,6 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
 export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
+
+/** Search strategy keys */
+export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';

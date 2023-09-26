@@ -12,8 +12,9 @@ import React from 'react';
 import {
   StackTracesDisplayOption,
   TopNType,
-} from '@kbn/profiling-data-access-plugin/common/stack_traces';
-import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
+  TopNFunctionSortField,
+  topNFunctionSortFieldRt,
+} from '@kbn/profiling-utils';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,

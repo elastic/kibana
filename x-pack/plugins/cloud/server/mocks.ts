@@ -28,6 +28,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,
+      projectName: undefined,
     },
   };
 }

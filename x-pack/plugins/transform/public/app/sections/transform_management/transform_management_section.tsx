@@ -21,6 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+import type { TransformListRow } from '../../common';
+import { isTransformStats } from '../../../../common/types/transform_stats';
+import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
+import { useEnabledFeatures } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
@@ -71,6 +75,7 @@ const ErrorMessageCallout: FC<{
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -78,15 +83,41 @@ export const TransformManagement: FC = () => {
     isInitialLoading: transformNodesInitialLoading,
     error: transformNodesErrorMessage,
     data: transformNodesData = 0,
-  } = useGetTransformNodes();
+  } = useGetTransformNodes({ enabled: true });
   const transformNodes = transformNodesErrorMessage === null ? transformNodesData : 0;
 
   const {
     isInitialLoading: transformsInitialLoading,
-    isLoading: transformsLoading,
+    isLoading: transformsWithoutStatsLoading,
     error: transformsErrorMessage,
-    data: { transforms, transformIdsWithoutConfig },
-  } = useGetTransforms({ enabled: !transformNodesInitialLoading && transformNodes > 0 });
+    data: { transforms: transformsWithoutStats, transformIdsWithoutConfig },
+  } = useGetTransforms({
+    enabled: !transformNodesInitialLoading && transformNodes > 0,
+  });
+
+  const {
+    isLoading: transformsStatsLoading,
+    error: transformsStatsErrorMessage,
+    data: transformsStats,
+  } = useGetTransformsStats({
+    enabled: !transformNodesInitialLoading && transformNodes > 0,
+  });
+
+  const transforms: TransformListRow[] = useMemo(() => {
+    if (!transformsStats) return transformsWithoutStats;
+
+    return transformsWithoutStats.map((t) => {
+      const stats = transformsStats.transforms.find((d) => t.config.id === d.id);
+
+      // A newly created transform might not have corresponding stats yet.
+      // If that's the case we just skip the transform and don't add it to the transform list yet.
+      if (!isTransformStats(stats)) {
+        return t;
+      }
+
+      return { ...t, stats };
+    });
+  }, [transformsStats, transformsWithoutStats]);
 
   const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
@@ -193,7 +224,7 @@ export const TransformManagement: FC = () => {
           <>
             {unauthorizedTransformsWarning}
 
-            {transformNodesErrorMessage !== null && (
+            {showNodeInfo && transformNodesErrorMessage !== null && (
               <ErrorMessageCallout
                 text={
                   <FormattedMessage
@@ -215,6 +246,17 @@ export const TransformManagement: FC = () => {
                 errorMessage={transformsErrorMessage}
               />
             )}
+            {transformsStatsErrorMessage !== null ? (
+              <ErrorMessageCallout
+                text={
+                  <FormattedMessage
+                    id="xpack.transform.list.transformStatsErrorPromptTitle"
+                    defaultMessage="An error occurred getting the transform stats."
+                  />
+                }
+                errorMessage={transformsStatsErrorMessage}
+              />
+            ) : null}
             <EuiSpacer size="s" />
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
@@ -268,11 +310,12 @@ export const TransformManagement: FC = () => {
               ) : null}
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
-                  isLoading={transformsLoading}
+                  isLoading={transformsWithoutStatsLoading}
                   onCreateTransform={onOpenModal}
                   transformNodes={transformNodes}
                   transforms={transforms}
-                  transformsLoading={transformsLoading}
+                  transformsLoading={transformsWithoutStatsLoading}
+                  transformsStatsLoading={transformsStatsLoading}
                 />
               )}
               <TransformAlertFlyoutWrapper />

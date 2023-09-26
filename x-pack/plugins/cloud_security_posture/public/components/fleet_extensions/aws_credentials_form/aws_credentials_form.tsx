@@ -44,8 +44,8 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiHorizontalRule margin="xxl" />
-      <EuiTitle size="s">
+      <EuiHorizontalRule margin="xl" />
+      <EuiTitle size="xs">
         <h2>
           <FormattedMessage
             id="xpack.csp.awsIntegration.setupInfoContentTitle"
@@ -133,6 +133,12 @@ const CloudFormationSetup = ({
             list-style: auto;
           `}
         >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage

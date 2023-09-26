@@ -50,9 +50,8 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
   <>
-    <EuiHorizontalRule margin="xxl" />
-    <EuiSpacer size="s" />
-    <EuiTitle size="s">
+    <EuiHorizontalRule margin="xl" />
+    <EuiTitle size="xs">
       <h2>
         <FormattedMessage
           id="xpack.csp.gcpIntegration.setupInfoContentTitle"
@@ -85,6 +84,12 @@ const GoogleCloudShellSetup = () => {
             list-style: auto;
           `}
         >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
           <li>
             <FormattedMessage
               id="xpack.csp.gcpIntegration.cloudShellSetupStep.login"

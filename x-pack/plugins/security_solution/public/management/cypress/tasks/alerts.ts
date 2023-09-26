@@ -181,7 +181,7 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
 
 export const changeAlertsFilter = (text: string) => {
   cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click().type(text);
+    cy.getByTestSubj('queryInput').type(text);
     cy.getByTestSubj('querySubmitButton').click();
   });
 };

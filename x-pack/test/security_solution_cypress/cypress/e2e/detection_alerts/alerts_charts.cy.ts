@@ -16,7 +16,8 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
@@ -24,6 +25,7 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Histogram legend hover actions',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -37,7 +39,7 @@ describe(
     beforeEach(() => {
       login();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       selectAlertsHistogram();
     });
 

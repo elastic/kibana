@@ -50,7 +50,7 @@ export function Doc(props: DocProps) {
           values: { id: props.id },
         })}
       </h1>
-      <EuiPageBody panelled paddingSize="l" panelProps={{ role: 'main' }}>
+      <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"

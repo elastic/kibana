@@ -40,7 +40,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -49,11 +49,13 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Detection rules, machine learning', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
@@ -66,7 +68,7 @@ describe('Detection rules, machine learning', { tags: ['@ess', '@brokenInServerl
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new ml rule', () => {
@@ -86,7 +88,7 @@ describe('Detection rules, machine learning', { tags: ['@ess', '@brokenInServerl
     cy.get(SEVERITY).should('have.text', 'Critical');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(mlRule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${mlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', mlRule.description);

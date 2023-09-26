@@ -8,7 +8,6 @@
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -18,17 +17,17 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
   removeException,
+  visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -41,9 +40,10 @@ import {
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add exception using data views from rule details',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
     const ITEM_NAME = 'Sample Exception List Item';
@@ -60,6 +60,7 @@ describe(
     });
 
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       createRule(
         getNewRule({
@@ -68,10 +69,7 @@ describe(
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      );
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      ).then((rule) => visitRuleDetailsPage(rule.body.id));
       waitForAlertsToPopulate();
     });
 

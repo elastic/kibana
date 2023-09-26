@@ -46,6 +46,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 
 const context: RuleContextOpts = {
@@ -728,6 +729,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
       });
 
@@ -826,6 +828,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,

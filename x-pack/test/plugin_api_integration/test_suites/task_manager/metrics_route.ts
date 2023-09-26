@@ -28,13 +28,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   function getMetrics(
     reset: boolean = false,
-    callback: (metrics: NodeMetrics) => boolean
+    callback?: (metrics: NodeMetrics) => boolean
   ): Promise<NodeMetrics> {
     return retry.try(async () => {
       const metrics = await getMetricsRequest(reset);
 
-      if (metrics.metrics && callback(metrics)) {
-        return metrics;
+      if (metrics.metrics) {
+        if ((callback && callback(metrics)) || !callback) {
+          return metrics;
+        }
       }
 
       await delay(500);
@@ -142,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('task run test', () => {
+    describe('task run', () => {
       let ruleId: string | null = null;
       before(async () => {
         // create a rule that fires actions
@@ -185,12 +187,13 @@ export default function ({ getService }: FtrProviderContext) {
         await request.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo').expect(204);
       });
 
-      it('should increment task run success/total counters', async () => {
+      it('should increment task run success/not_timed_out/total counters', async () => {
         const initialMetrics = (
           await getMetrics(
             false,
             (metrics) =>
               metrics?.metrics?.task_run?.value.by_type.alerting?.total === 1 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === 1 &&
               metrics?.metrics?.task_run?.value.by_type.alerting?.success === 1
           )
         ).metrics;
@@ -206,12 +209,20 @@ export default function ({ getService }: FtrProviderContext) {
             .send({ task: { id: ruleId } })
             .expect(200);
 
-          await getMetrics(
-            false,
-            (metrics) =>
-              metrics?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
-              metrics?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
-          );
+          const metrics = (
+            await getMetrics(
+              false,
+              (m) =>
+                m?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === i + 2 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
+            )
+          ).metrics;
+
+          // check that delay histogram exists
+          expect(metrics?.task_run?.value?.overall?.delay).not.to.be(null);
+          expect(Array.isArray(metrics?.task_run?.value?.overall?.delay.counts)).to.be(true);
+          expect(Array.isArray(metrics?.task_run?.value?.overall?.delay.values)).to.be(true);
         }
 
         // counter should reset on its own
@@ -219,8 +230,22 @@ export default function ({ getService }: FtrProviderContext) {
           false,
           (metrics) =>
             metrics?.metrics?.task_run?.value.by_type.alerting?.total === 0 &&
+            metrics?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === 0 &&
             metrics?.metrics?.task_run?.value.by_type.alerting?.success === 0
         );
+      });
+    });
+
+    describe('task overdue', () => {
+      it('histograms should exist', async () => {
+        const metrics = (await getMetrics(false)).metrics;
+        expect(metrics).not.to.be(null);
+        expect(metrics?.task_overdue).not.to.be(null);
+        expect(metrics?.task_overdue?.value).not.to.be(null);
+        expect(metrics?.task_overdue?.value.overall).not.to.be(null);
+        expect(metrics?.task_overdue?.value.overall.overdue_by).not.to.be(null);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.counts)).to.be(true);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.values)).to.be(true);
       });
     });
   });

@@ -19,6 +19,7 @@ import {
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
@@ -35,6 +36,8 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
+  const { showNodeInfo } = useEnabledFeatures();
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState<{ sort: Sorting }>({
@@ -96,16 +99,20 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
       render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
       sortable: true,
     },
-    {
-      field: 'node_name',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.messagesPane.nodeLabel',
-        {
-          defaultMessage: 'Node',
-        }
-      ),
-      sortable: true,
-    },
+    ...(showNodeInfo
+      ? [
+          {
+            field: 'node_name',
+            name: i18n.translate(
+              'xpack.transform.transformList.transformDetails.messagesPane.nodeLabel',
+              {
+                defaultMessage: 'Node',
+              }
+            ),
+            sortable: true,
+          },
+        ]
+      : []),
     {
       field: 'message',
       name: i18n.translate(
@@ -114,7 +121,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
           defaultMessage: 'Message',
         }
       ),
-      width: '50%',
+      width: showNodeInfo ? '50%' : '70%',
     },
   ];
 

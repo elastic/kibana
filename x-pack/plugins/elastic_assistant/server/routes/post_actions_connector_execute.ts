@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
@@ -20,7 +20,7 @@ import {
   PostActionsConnectorExecutePathParams,
 } from '../schemas/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
-import { executeCustomLlmChain } from '../lib/langchain/execute_custom_llm_chain';
+import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -35,6 +35,7 @@ export const postActionsConnectorExecuteRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
+      const logger: Logger = (await context.elasticAssistant).logger;
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -43,16 +44,21 @@ export const postActionsConnectorExecuteRoute = (
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
 
+        // get a scoped esClient for assistant memory
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
         // get the assistant messages from the request body:
         const assistantMessages = unsafeGetAssistantMessagesFromRequest(rawSubActionParamsBody);
 
         // convert the assistant messages to LangChain messages:
         const langChainMessages = getLangChainMessages(assistantMessages);
 
-        const langChainResponseBody = await executeCustomLlmChain({
+        const langChainResponseBody = await callAgentExecutor({
           actions,
           connectorId,
+          esClient,
           langChainMessages,
+          logger,
           request,
         });
 
@@ -60,6 +66,7 @@ export const postActionsConnectorExecuteRoute = (
           body: langChainResponseBody,
         });
       } catch (err) {
+        logger.error(err);
         const error = transformError(err);
 
         return resp.error({

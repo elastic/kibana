@@ -84,7 +84,7 @@ import { setCustomIntegrations, setCustomIntegrationsStart } from './services/cu
 
 import type { RequestError } from './hooks';
 import { sendGetBulkAssets } from './hooks';
-import { fleetDeepLinks } from './deep_links';
+import { getFleetDeepLinks } from './deep_links';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -219,7 +219,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9020,
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
-      deepLinks: fleetDeepLinks,
+      deepLinks: getFleetDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const cloud =
@@ -333,7 +333,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         if (permissionsResponse?.success) {
           const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
-            setupRouteService.getSetupPath()
+            setupRouteService.getSetupPath(),
+            {
+              version: API_VERSIONS.public.v1,
+            }
           );
           if (!isInitialized) {
             throw new Error('Unknown setup error');

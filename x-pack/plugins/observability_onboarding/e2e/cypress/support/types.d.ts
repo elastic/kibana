@@ -17,6 +17,7 @@ declare namespace Cypress {
     loginAsElastic(): Cypress.Chainable<Cypress.Response<any>>;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
     visitKibana(url: string, rangeFrom?: string, rangeTo?: string): void;
+    installCustomIntegration(integrationName: string): void;
     deleteIntegration(integrationName: string): void;
     updateInstallationStepStatus(
       onboardingId: string,

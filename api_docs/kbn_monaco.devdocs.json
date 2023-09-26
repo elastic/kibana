@@ -894,6 +894,61 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.languageConfiguration",
+            "type": "Object",
+            "tags": [],
+            "label": "languageConfiguration",
+            "description": [],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.languageConfiguration.brackets",
+                "type": "Array",
+                "tags": [],
+                "label": "brackets",
+                "description": [],
+                "signature": [
+                  "[string, string][]"
+                ],
+                "path": "packages/kbn-monaco/src/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.languageConfiguration.autoClosingPairs",
+                "type": "Array",
+                "tags": [],
+                "label": "autoClosingPairs",
+                "description": [],
+                "signature": [
+                  "{ open: string; close: string; }[]"
+                ],
+                "path": "packages/kbn-monaco/src/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.languageConfiguration.surroundingPairs",
+                "type": "Array",
+                "tags": [],
+                "label": "surroundingPairs",
+                "description": [],
+                "signature": [
+                  "{ open: string; close: string; }[]"
+                ],
+                "path": "packages/kbn-monaco/src/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
             "id": "def-common.ESQLLang.getSuggestionProvider",
             "type": "Function",
             "tags": [],
