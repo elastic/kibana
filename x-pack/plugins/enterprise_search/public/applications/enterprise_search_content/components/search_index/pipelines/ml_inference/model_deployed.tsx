@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useActions } from 'kea';
 
 import {
   EuiButton,
@@ -36,7 +36,6 @@ export const ModelDeployed = ({
   TextExpansionCallOutState,
   'dismiss' | 'ingestionMethod' | 'isDismissable' | 'isStartButtonDisabled'
 >) => {
-  const { elserModelId } = useValues(TextExpansionCalloutLogic)
   const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
@@ -93,7 +92,7 @@ export const ModelDeployed = ({
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
-                onClick={() => startTextExpansionModel({ modelId: elserModelId })}
+                onClick={() => startTextExpansionModel()}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',

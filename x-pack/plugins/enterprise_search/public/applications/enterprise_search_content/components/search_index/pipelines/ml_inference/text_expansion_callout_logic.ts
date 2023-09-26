@@ -35,17 +35,17 @@ const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seco
 
 interface TextExpansionCalloutActions {
   clearTextExpansionModelPollingId: () => void;
-  createTextExpansionModel: CreateTextExpansionModelApiLogicActions['makeRequest'];
+  createTextExpansionModel: () => void;
   createTextExpansionModelPollingTimeout: (duration: number) => { duration: number };
   createTextExpansionModelSuccess: CreateTextExpansionModelApiLogicActions['apiSuccess'];
-  fetchTextExpansionModel: FetchTextExpansionModelApiLogicActions['makeRequest'];
+  fetchTextExpansionModel: () => void;
   fetchTextExpansionModelError: FetchTextExpansionModelApiLogicActions['apiError'];
   fetchTextExpansionModelSuccess: FetchTextExpansionModelApiLogicActions['apiSuccess'];
   setTextExpansionModelPollingId: (pollTimeoutId: ReturnType<typeof setTimeout>) => {
     pollTimeoutId: ReturnType<typeof setTimeout>;
   };
   startPollingTextExpansionModel: () => void;
-  startTextExpansionModel: StartTextExpansionModelApiLogicActions['makeRequest'];
+  startTextExpansionModel: () => void;
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
   stopPollingTextExpansionModel: () => void;
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
@@ -134,24 +134,25 @@ export const TextExpansionCalloutLogic = kea<
     startPollingTextExpansionModel: true,
     stopPollingTextExpansionModel: true,
     setElserModelId: (elserModelId) => ({ elserModelId }),
+    createTextExpansionModel: true,
+    fetchTextExpansionModel: true,
+    startTextExpansionModel: true,
+
   },
   connect: {
     actions: [
       CreateTextExpansionModelApiLogic,
       [
-        'makeRequest as createTextExpansionModel',
         'apiSuccess as createTextExpansionModelSuccess',
         'apiError as createTextExpansionModelError',
       ],
       FetchTextExpansionModelApiLogic,
       [
-        'makeRequest as fetchTextExpansionModel',
         'apiSuccess as fetchTextExpansionModelSuccess',
         'apiError as fetchTextExpansionModelError',
       ],
       StartTextExpansionModelApiLogic,
       [
-        'makeRequest as startTextExpansionModel',
         'apiSuccess as startTextExpansionModelSuccess',
         'apiError as startTextExpansionModelError',
       ],
@@ -174,7 +175,7 @@ export const TextExpansionCalloutLogic = kea<
       const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({version: 2});
       if (elserModel != null) {
         actions.setElserModelId(elserModel.name);
-        actions.fetchTextExpansionModel({ modelId: elserModel.name });
+        actions.fetchTextExpansionModel();
       }
     },
     beforeUnmount: () => {
@@ -184,17 +185,20 @@ export const TextExpansionCalloutLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
+    createTextExpansionModel: () => CreateTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    fetchTextExpansionModel: () => FetchTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
+    startTextExpansionModel: () => StartTextExpansionModelApiLogic.actions.makeRequest({ modelId: values.elserModelId }),
     createTextExpansionModelPollingTimeout: ({ duration }) => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);
       }
       const timeoutId = setTimeout(() => {
-        actions.fetchTextExpansionModel({ modelId: values.elserModelId });
+        actions.fetchTextExpansionModel();
       }, duration);
       actions.setTextExpansionModelPollingId(timeoutId);
     },
     createTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel({ modelId: values.elserModelId });
+      actions.fetchTextExpansionModel();
       actions.startPollingTextExpansionModel();
     },
     fetchTextExpansionModelError: () => {
@@ -227,7 +231,7 @@ export const TextExpansionCalloutLogic = kea<
       actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
     },
     startTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel({ modelId: values.elserModelId });
+      actions.fetchTextExpansionModel();
     },
     stopPollingTextExpansionModel: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
