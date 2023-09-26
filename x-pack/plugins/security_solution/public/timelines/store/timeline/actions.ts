@@ -281,10 +281,3 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
-
-/** To tie the discover state changes to timeline auto save, we use this action
- * to trigger the autosave logic managed here: x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts
- */
-export const triggerTimelineDiscoverAutoSave = actionCreator<{ id: string }>(
-  'TRIGGER_TIMELINE_DISCOVER_AUTO_SAVE'
-);
