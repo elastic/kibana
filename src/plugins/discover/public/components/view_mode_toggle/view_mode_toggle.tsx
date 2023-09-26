@@ -26,7 +26,7 @@ export const DocumentViewModeToggle = ({
 
   const tabsCss = css`
     padding: 0 ${useEuiPaddingSize('s')};
-    border-bottom: ${viewMode === VIEW_MODE.AGGREGATED_LEVEL ? euiTheme.border.thin : 'none'};
+    border-bottom: ${euiTheme.border.thin};
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
