@@ -33,7 +33,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-describe(`Event Rendered View`, () => {
+describe(`Event Rendered View`, { tags: ['@ess'] }, () => {
   before(() => {
     cleanKibana();
   });
