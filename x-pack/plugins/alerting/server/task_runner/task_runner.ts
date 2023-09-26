@@ -50,6 +50,7 @@ import {
   RuleAlertData,
   SanitizedRule,
   RuleNotifyWhen,
+  RulesSettingsQueryDelayProperties,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -324,6 +325,7 @@ export class TaskRunner<
 
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
 
     const alertsClientParams = {
       logger: this.logger,
@@ -502,6 +504,7 @@ export class TaskRunner<
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              getTimeRange: (timeWindow) => this.getTimeRange(timeWindow, queryDelaySettings),
             })
           );
 
@@ -991,5 +994,14 @@ export class TaskRunner<
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
+  }
+
+  private getTimeRange(timeWindow: number, queryDelaySettings: RulesSettingsQueryDelayProperties) {
+    const date = Date.now();
+
+    const dateStart = new Date(date - (timeWindow + queryDelaySettings.delay)).toISOString();
+    const dateEnd = new Date(date - queryDelaySettings.delay).toISOString();
+
+    return { dateStart, dateEnd };
   }
 }
