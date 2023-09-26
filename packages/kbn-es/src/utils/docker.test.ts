@@ -23,7 +23,7 @@ import {
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -451,7 +451,7 @@ describe('runServerlessEsNode()', () => {
   const node = {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
-    image: SERVERLESS_IMG,
+    image: ES_SERVERLESS_DEFAULT_IMAGE,
   };
 
   test('should call the correct Docker command', async () => {
@@ -462,7 +462,7 @@ describe('runServerlessEsNode()', () => {
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        SERVERLESS_IMG,
+        ES_SERVERLESS_DEFAULT_IMAGE,
         ...node.params,
         '--name',
         node.name,
@@ -530,7 +530,9 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
-    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+    );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
   });
 
