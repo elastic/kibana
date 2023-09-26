@@ -66,7 +66,8 @@
     "test:ftr:runner": "node scripts/functional_test_runner",
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
-    "test:jest_integration": "node scripts/jest_integration"
+    "test:jest_integration": "node scripts/jest_integration",
+    "test:type_check": "node scripts/type_check"
   },
   "repository": {
     "type": "git",
@@ -505,6 +506,7 @@
     "@kbn/management-plugin": "link:src/plugins/management",
     "@kbn/management-settings-components-field-input": "link:packages/kbn-management/settings/components/field_input",
     "@kbn/management-settings-components-field-row": "link:packages/kbn-management/settings/components/field_row",
+    "@kbn/management-settings-components-form": "link:packages/kbn-management/settings/components/form",
     "@kbn/management-settings-field-definition": "link:packages/kbn-management/settings/field_definition",
     "@kbn/management-settings-ids": "link:packages/kbn-management/settings/setting_ids",
     "@kbn/management-settings-section-registry": "link:packages/kbn-management/settings/section_registry",
@@ -866,7 +868,6 @@
     "d3": "3.5.17",
     "d3-array": "2.12.1",
     "d3-brush": "^3.0.0",
-    "d3-cloud": "1.2.5",
     "d3-interpolate": "^3.0.1",
     "d3-scale": "^3.3.0",
     "d3-selection": "^3.0.0",
