@@ -6,16 +6,21 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { DATA_COMPARISON_TYPE } from './constants';
 
-export interface DataComparisonAppState {
+export interface DataComparisonQueryState {
   searchString?: Query['query'];
   searchQuery?: estypes.QueryDslQueryContainer;
   searchQueryLanguage: SearchQueryLanguage;
   filters?: Filter[];
+}
+
+export interface DataComparisonAppState extends DataComparisonQueryState {
+  reference: DataComparisonQueryState;
+  comparison: DataComparisonQueryState;
 }
 
 export type DataComparisonFullAppState = Required<DataComparisonAppState>;
@@ -32,6 +37,18 @@ export const getDefaultDataComparisonState = (
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   filters: [],
+  reference: {
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+  },
+  comparison: {
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+  },
   ...overrides,
 });
 
@@ -45,18 +62,28 @@ export interface ComparisonHistogram extends Histogram {
   g: string;
 }
 
+interface Domain {
+  min: number;
+  max: number;
+}
 // Show the overview table
 export interface Feature {
   featureName: string;
-  fieldType: DataComparisonField['type'];
+  fieldType: DataDriftField['type'];
+  secondaryType: DataDriftField['secondaryType'];
   driftDetected: boolean;
   similarityTestPValue: number;
-  productionHistogram: Histogram[];
+  comparisonHistogram: Histogram[];
   referenceHistogram: Histogram[];
   comparisonDistribution: ComparisonHistogram[];
+  domain?: {
+    doc_count: Domain;
+    percentage: Domain;
+    x: Domain;
+  };
 }
 
-export interface DataComparisonField {
+export interface DataDriftField {
   field: string;
   type: DataComparisonType;
   secondaryType: string;
@@ -92,7 +119,7 @@ export interface NumericDriftData {
   pValue: number;
   range?: Range;
   referenceHistogram: Histogram[];
-  productionHistogram: Histogram[];
+  comparisonHistogram: Histogram[];
   secondaryType: string;
 }
 export interface CategoricalDriftData {

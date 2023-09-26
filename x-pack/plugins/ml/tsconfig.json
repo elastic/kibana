@@ -105,5 +105,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/core-http-browser",
+    "@kbn/data-view-editor-plugin",
   ],
 }
