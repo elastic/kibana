@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard(fewPanelsTitle);
       await PageObjects.dashboard.waitForRenderComplete();
@@ -85,9 +85,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await label.click();
 
-      await testSubjects.setValue('dashboardPickerInput', fewPanelsTitle);
+      await testSubjects.click('open-dashboard-picker');
+      await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
       await testSubjects.existOrFail(`dashboard-picker-option-few-panels`);
-      await find.clickByButtonText(fewPanelsTitle);
+      await testSubjects.click(`dashboard-picker-option-few-panels`);
       await testSubjects.click('confirmCopyToButton');
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -113,7 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await label.click();
 
-      await testSubjects.setValue('dashboardPickerInput', fewPanelsTitle);
+      await testSubjects.click('open-dashboard-picker');
+      await testSubjects.setValue('dashboard-picker-search', fewPanelsTitle);
       await testSubjects.missingOrFail(`dashboard-picker-option-few-panels`);
 
       await testSubjects.click('cancelCopyToButton');

@@ -572,6 +572,24 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "query",
+            "name": "ignoreMappingUpdateErrors",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "avoid erroring out on unexpected mapping update errors"
+          },
+          {
+            "in": "query",
+            "name": "skipDataStreamRollover",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -810,6 +828,24 @@
             "name": "pkgkey",
             "in": "path",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "ignoreMappingUpdateErrors",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "avoid erroring out on unexpected mapping update errors"
+          },
+          {
+            "in": "query",
+            "name": "skipDataStreamRollover",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -1090,6 +1126,24 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "query",
+            "name": "ignoreMappingUpdateErrors",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "avoid erroring out on unexpected mapping update errors"
+          },
+          {
+            "in": "query",
+            "name": "skipDataStreamRollover",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -1231,6 +1285,14 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "force",
+            "description": "delete package even if policies used by agents",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -1238,6 +1300,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "deprecated": true,
                 "properties": {
                   "force": {
                     "type": "boolean"

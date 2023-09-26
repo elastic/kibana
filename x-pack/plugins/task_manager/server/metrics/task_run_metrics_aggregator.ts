@@ -6,13 +6,27 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { isOk, unwrap } from '../lib/result_type';
+import { merge } from 'lodash';
+import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { ErroredTask, RanTask, TaskRun } from '../task_events';
-import { MetricCounterService } from './counter/metric_counter_service';
+import {
+  ErroredTask,
+  RanTask,
+  TaskRun,
+  isTaskManagerStatEvent,
+  isTaskRunEvent,
+  TaskManagerStat,
+} from '../task_events';
+import {
+  getTaskTypeGroup,
+  MetricCounterService,
+  SimpleHistogram,
+  type SerializedHistogram,
+} from './lib';
 import { ITaskMetricsAggregator } from './types';
 
-const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
+const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
+const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
 enum TaskRunKeys {
   SUCCESS = 'success',
@@ -31,11 +45,18 @@ interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.TOTAL]: number;
 }
 
-export interface TaskRunMetric extends JsonObject {
+export interface TaskRunMetrics extends JsonObject {
   [TaskRunMetricKeys.OVERALL]: TaskRunCounts;
   [TaskRunMetricKeys.BY_TYPE]: {
     [key: string]: TaskRunCounts;
   };
+}
+
+export interface TaskRunMetric extends JsonObject {
+  overall: TaskRunMetrics['overall'] & {
+    delay: SerializedHistogram;
+  };
+  by_type: TaskRunMetrics['by_type'];
 }
 
 export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
@@ -43,24 +64,37 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     Object.values(TaskRunKeys),
     TaskRunMetricKeys.OVERALL
   );
+  private delayHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
   public initialMetric(): TaskRunMetric {
-    return this.counter.initialMetrics();
+    return merge(this.counter.initialMetrics(), {
+      by_type: {},
+      overall: { delay: { counts: [], values: [] } },
+    });
   }
 
   public collect(): TaskRunMetric {
-    return this.counter.collect();
+    return merge(this.counter.collect(), { overall: { delay: this.delayHistogram.serialize() } });
   }
 
   public reset() {
     this.counter.reset();
+    this.delayHistogram.reset();
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
-    const { task, isExpired }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
+    if (isTaskRunEvent(taskEvent)) {
+      this.processTaskRunEvent(taskEvent);
+    } else if (isTaskManagerStatEvent(taskEvent)) {
+      this.processTaskManagerStatEvent(taskEvent);
+    }
+  }
+
+  private processTaskRunEvent(taskEvent: TaskRun) {
+    const { task, isExpired }: RanTask | ErroredTask = unwrap(taskEvent.event);
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
-    const taskTypeGroup = this.getTaskTypeGroup(taskType);
+    const taskTypeGroup = getTaskTypeGroup(taskType);
 
     // increment the total counters
     this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
@@ -76,19 +110,18 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     }
   }
 
+  private processTaskManagerStatEvent(taskEvent: TaskManagerStat) {
+    if (taskEvent.id === 'runDelay') {
+      const delayInSec = Math.round((taskEvent.event as Ok<number>).value);
+      this.delayHistogram.record(delayInSec);
+    }
+  }
+
   private incrementCounters(key: TaskRunKeys, taskType: string, group?: string) {
     this.counter.increment(key, TaskRunMetricKeys.OVERALL);
     this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${taskType}`);
     if (group) {
       this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${group}`);
-    }
-  }
-
-  private getTaskTypeGroup(taskType: string): string | undefined {
-    for (const group of taskTypeGrouping) {
-      if (taskType.startsWith(group)) {
-        return group.replaceAll(':', '');
-      }
     }
   }
 }

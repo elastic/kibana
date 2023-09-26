@@ -29,10 +29,7 @@ import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { savedSearchComparator } from './utils';
-import {
-  triggerTimelineDiscoverAutoSave,
-  setIsDiscoverSavedSearchLoaded,
-} from '../../../store/timeline/actions';
+import { setIsDiscoverSavedSearchLoaded } from '../../../store/timeline/actions';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
@@ -109,7 +106,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     status,
     savedSearchId,
     activeTab,
-    isLoading: isTimelineLoading,
     savedObjectId,
     title,
     description,
@@ -139,7 +135,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   }, [savedObjectId, setSavedSearchLoaded]);
 
   useEffect(() => {
-    if (isFetching || isTimelineLoading) return; // no-op is fetch is in progress
+    if (isFetching) return; // no-op is fetch is in progress
     if (isDiscoverSavedSearchLoaded) return; // no-op if saved search has been already loaded
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
@@ -155,7 +151,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     discoverStateContainer,
     savedSearchId,
     isDiscoverSavedSearchLoaded,
-    isTimelineLoading,
     status,
     activeTab,
     resetDiscoverAppState,
@@ -193,7 +188,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   );
 
   useEffect(() => {
-    if (isFetching || isTimelineLoading) return;
+    if (isFetching) return;
     if (!isDiscoverSavedSearchLoaded) return;
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
@@ -205,7 +200,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   }, [
     getCombinedDiscoverSavedSearchState,
     debouncedUpdateSavedSearch,
-    isTimelineLoading,
     savedSearchById,
     updateSavedSearch,
     isDiscoverSavedSearchLoaded,
@@ -240,9 +234,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     async ({ stateContainer }) => {
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
-      if (savedSearchById) {
-        savedSearchAppState = getAppStateFromSavedSearch(savedSearchById);
+      if (savedSearchId) {
+        const localSavedSearch = await stateContainer.savedSearchState.load(savedSearchId);
+        savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
+
       const finalAppState = savedSearchAppState?.appState ?? discoverAppState;
 
       if (finalAppState) {
@@ -254,10 +250,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
-        next: (state) => {
-          setDiscoverAppState(state);
-          if (title) dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
-        },
+        next: setDiscoverAppState,
       });
 
       const internalStateSubscription = stateContainer.internalState.state$.subscribe({
@@ -278,7 +271,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
         .subscribe({
           next: () => {
             setDiscoverTimerange(discoverDataService.query.timefilter.timefilter.getTime());
-            if (title) dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
           },
         });
 
@@ -288,18 +280,15 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
       discoverTimerangeSubscription.current = timeRangeSub;
     },
     [
-      setDiscoverStateContainer,
-      savedSearchById,
       discoverAppState,
-      setDiscoverInternalState,
-      discoverDataService.query.timefilter.timefilter,
-      getAppStateFromSavedSearch,
-      dataView,
-      setDiscoverAppState,
-      title,
-      dispatch,
-      timelineId,
       setDiscoverSavedSearchState,
+      setDiscoverInternalState,
+      setDiscoverAppState,
+      dataView,
+      setDiscoverStateContainer,
+      getAppStateFromSavedSearch,
+      discoverDataService.query.timefilter.timefilter,
+      savedSearchId,
     ]
   );
 

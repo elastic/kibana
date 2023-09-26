@@ -94,17 +94,29 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
 
   const handleTopicProcessorChange = useCallback(
     (index: number, field: 'topic' | 'condition' | 'type', value: string) => {
-      const updatedPairs = [...topics];
-      if (field === 'topic') {
-        updatedPairs[index].topic = value;
-      } else {
-        updatedPairs[index].when = {
-          ...(updatedPairs[index].when || {}),
-          ...((field === 'condition' ? { condition: value } : {}) as { condition?: string }),
-          ...((field === 'type' ? { type: value } : {}) as { type?: ValueOf<KafkaTopicWhenType> }),
-        };
-      }
-      onChange(updatedPairs);
+      const updatedTopics = topics.map((topic, i) => {
+        if (i === index) {
+          if (field === 'topic') {
+            return {
+              ...topic,
+              topic: value,
+            };
+          } else {
+            return {
+              ...topic,
+              when: {
+                ...(topic.when || {}),
+                ...((field === 'condition' ? { condition: value } : {}) as { condition?: string }),
+                ...((field === 'type' ? { type: value } : {}) as {
+                  type?: ValueOf<KafkaTopicWhenType>;
+                }),
+              },
+            };
+          }
+        }
+        return topic;
+      });
+      onChange(updatedTopics);
     },
     [topics, onChange]
   );

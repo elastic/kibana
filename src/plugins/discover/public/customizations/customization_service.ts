@@ -9,12 +9,14 @@
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
 import type {
   DataViewCustomization,
+  FlyoutCustomization,
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =
+  | FlyoutCustomization
   | SearchBarCustomization
   | DataViewCustomization
   | TopNavCustomization

@@ -7,11 +7,11 @@
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
   createFlameGraph,
+  TopNFunctions,
   type BaseFlameGraph,
   type ElasticFlameGraph,
 } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
-import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,
   IndicesStorageDetailsAPIResponse,

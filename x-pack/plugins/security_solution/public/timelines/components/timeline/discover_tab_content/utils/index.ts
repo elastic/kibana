@@ -9,23 +9,34 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { isEqual, pick } from 'lodash';
 
 export const savedSearchComparator = (
-  inputSavedSearch: SavedSearch,
-  existingSavedSearch: SavedSearch
+  inputSavedSearch: SavedSearch | null,
+  existingSavedSearch: SavedSearch | null
 ) => {
+  const inputSavedSearchWithFields = {
+    ...inputSavedSearch,
+    fields: inputSavedSearch?.searchSource?.getFields(),
+  };
+
+  const existingSavedSearchWithFields = {
+    ...existingSavedSearch,
+    fields: existingSavedSearch?.searchSource?.getFields(),
+  };
+
   const keysToSelect = [
     'columns',
     'grid',
     'hideChart',
     'sort',
     'timeRange',
-    'searchSource.fields.filter',
-    'searchSource.fields.index.id',
-    'searchSource.fields.query',
+    'fields.filter',
+    'fields.index.id',
+    'fields.query',
     'title',
     'description',
   ];
-  const modifiedInputSavedSearch = pick(inputSavedSearch, keysToSelect);
-  const modifiedExistingSavedSearch = pick(existingSavedSearch, keysToSelect);
+
+  const modifiedInputSavedSearch = pick(inputSavedSearchWithFields, keysToSelect);
+  const modifiedExistingSavedSearch = pick(existingSavedSearchWithFields, keysToSelect);
 
   const result = isEqual(modifiedInputSavedSearch, modifiedExistingSavedSearch);
   return result;
