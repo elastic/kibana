@@ -113,7 +113,7 @@ export const getPolicySettingsFormTestSubjects = (
       card: windowsEventsTestSubj(),
       osValueContainer: windowsEventsTestSubj('osValueContainer'),
       optionsContainer: windowsEventsTestSubj('options'),
-      apiCheckbox: windowsEventsTestSubj('api'),
+      apiCheckbox: windowsEventsTestSubj('credential_access'),
       dllCheckbox: windowsEventsTestSubj('dll_and_driver_load'),
       dnsCheckbox: windowsEventsTestSubj('dns'),
       fileCheckbox: windowsEventsTestSubj('file'),

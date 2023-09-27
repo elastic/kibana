@@ -1255,39 +1255,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api_call.credential_access',
-    first_supported_version: '8.11',
+    key: 'windows.advanced.events.api',
+    first_supported_version: '8.8',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.credential_access',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
-        defaultMessage: 'Controls whether Credential Access API events are enabled. Default: true',
+        defaultMessage: 'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
       }
     ),
   },
   {
-    key: 'windows.advanced.events.api_call.etw_threat_intelligence',
-    first_supported_version: '8.11',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.etw_threat_intelligence',
-      {
-        defaultMessage:
-          'Controls whether Microsoft-Windows-Threat-Intelligence API events are enabled. Default: true',
-      }
-    ),
-  },
-  {
-    key: 'windows.advanced.events.api_call.etw_win32k',
-    first_supported_version: '8.11',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.etw_win32k',
-      {
-        defaultMessage:
-          'Controls whether Microsoft-Windows-Win32k API events are enabled. Default: true',
-      }
-    ),
-  },
-  {
-    key: 'windows.advanced.events.api_call.disabled',
+    key: 'windows.advanced.events.api_disabled',
     first_supported_version: '8.11',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.disbaled',
@@ -1297,7 +1275,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.api_call.verbose',
+    key: 'windows.advanced.events.api_verbose',
     first_supported_version: '8.11',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api_call.verbose',

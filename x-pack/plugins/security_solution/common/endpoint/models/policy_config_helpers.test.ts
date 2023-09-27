@@ -84,7 +84,7 @@ describe('Policy Config helpers', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
       const windowsEvents: typeof defaultPolicy.windows.events = {
-        api: false,
+        credential_access: false, // Controls all API events
         dll_and_driver_load: false,
         dns: false,
         file: false,
@@ -203,7 +203,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
   },
   windows: {
     events: {
-      api: true,
+      credential_access: true,
       dll_and_driver_load: true,
       dns: true,
       file: true,

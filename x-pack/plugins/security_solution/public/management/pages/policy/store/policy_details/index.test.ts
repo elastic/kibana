@@ -280,7 +280,7 @@ describe('policy details: ', () => {
                   },
                   windows: {
                     events: {
-                      api: true,
+                      credential_access: true,  // API
                       dll_and_driver_load: true,
                       dns: false,
                       file: true,
