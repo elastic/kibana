@@ -9,6 +9,7 @@ import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoi
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
+import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
 import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -30,6 +31,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
       ],
+    },
+    esServerlessOptions: {
+      ...(svlSharedConfig.get('esServerlessOptions') ?? {}),
+      resources: Object.values(ES_RESOURCES),
     },
     servers: {
       ...svlSharedConfig.get('servers'),
