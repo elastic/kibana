@@ -4846,27 +4846,9 @@
             "section": "def-common.IExecutionErrorsResult",
             "text": "IExecutionErrorsResult"
           },
-          ">; bulkDeleteRules: (options: ",
-          "BulkOptions",
-          ") => Promise<{ errors: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkOperationError",
-            "text": "BulkOperationError"
-          },
-          "[]; total: number; rules: (",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.Rule",
-            "text": "Rule"
-          },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>)[]; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
+          ">; bulkDeleteRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<",
+          "BulkDeleteRulesResult",
+          "<Record<string, any>>>; bulkEdit: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
