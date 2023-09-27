@@ -8,15 +8,10 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import { Retry } from '..';
 import { KibanaPage } from './kibana_page';
 import { ProjectPage } from './project_page';
 
-export function getNewPageObject(
-  isServerless: boolean,
-  page: Page,
-  log: ToolingLog,
-  retry: RetryService
-) {
+export function getNewPageObject(isServerless: boolean, page: Page, log: ToolingLog, retry: Retry) {
   return isServerless ? new ProjectPage(page, log, retry) : new KibanaPage(page, log, retry);
 }

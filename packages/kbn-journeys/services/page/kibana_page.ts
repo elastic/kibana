@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
+import { Retry } from '..';
 
 interface WaitForRenderArgs {
   expectedItemsCount: number;
@@ -20,9 +20,9 @@ interface WaitForRenderArgs {
 export class KibanaPage {
   readonly page: Page;
   readonly log: ToolingLog;
-  readonly retry: RetryService;
+  readonly retry: Retry;
 
-  constructor(page: Page, log: ToolingLog, retry: RetryService) {
+  constructor(page: Page, log: ToolingLog, retry: Retry) {
     this.page = page;
     this.log = log;
     this.retry = retry;

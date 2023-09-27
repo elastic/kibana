@@ -21,8 +21,7 @@ import {
 } from '@kbn/core-http-common';
 
 import { AxiosError } from 'axios';
-import { Es, EsArchiver, KibanaServer, RetryService } from '../services';
-import { Auth } from '../services/auth';
+import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
@@ -40,7 +39,7 @@ export class JourneyFtrHarness {
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
     private readonly es: Es,
-    private readonly retry: RetryService,
+    private readonly retry: Retry,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {

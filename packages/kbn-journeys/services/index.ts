@@ -11,15 +11,18 @@ import { EsArchiverProvider } from '@kbn/ftr-common-functional-services/services
 import { KibanaServerProvider } from '@kbn/ftr-common-functional-services/services/kibana_server';
 import { ProvidedType } from '@kbn/test';
 import { EsProvider } from './es';
+import { AuthService } from './auth';
 
 export const services = {
   es: EsProvider,
   kibanaServer: commonFunctionalServices.kibanaServer,
   esArchiver: commonFunctionalServices.esArchiver,
   retry: commonFunctionalServices.retry,
+  auth: AuthService,
 };
 
 export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
-export { RetryService };
 export type KibanaServer = ProvidedType<typeof KibanaServerProvider>;
 export type Es = ProvidedType<typeof EsProvider>;
+export type Auth = AuthService;
+export type Retry = RetryService;
