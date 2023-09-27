@@ -111,6 +111,7 @@ export function registerTransactionErrorRateRuleType({
         spaceId,
         params: ruleParams,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
@@ -152,6 +153,10 @@ export function registerTransactionErrorRateRuleType({
             ]
           : [];
 
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
+
         const searchParams = {
           index,
           body: {
@@ -163,7 +168,7 @@ export function registerTransactionErrorRateRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },

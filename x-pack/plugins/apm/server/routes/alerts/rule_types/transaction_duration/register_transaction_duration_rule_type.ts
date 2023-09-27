@@ -109,7 +109,12 @@ export function registerTransactionDurationRuleType({
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async ({ params: ruleParams, services, spaceId }) => {
+    executor: async ({
+      params: ruleParams,
+      services,
+      spaceId,
+      getTimeRange,
+    }) => {
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
         ruleParams.groupBy
@@ -150,6 +155,10 @@ export function registerTransactionDurationRuleType({
           ]
         : [];
 
+      const { dateStart } = getTimeRange(
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+      );
+
       const searchParams = {
         index,
         body: {
@@ -161,7 +170,7 @@ export function registerTransactionDurationRuleType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                      gte: dateStart,
                     },
                   },
                 },

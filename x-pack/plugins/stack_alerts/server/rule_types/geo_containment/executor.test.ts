@@ -44,6 +44,13 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
   done: () => ({ getRecoveredAlerts: () => [] }),
 });
 
+const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
+const startedAt = new Date('2021-04-29T16:56:11.923Z');
+
+const getTimeRange = () => {
+  return { dateStart: previousStartedAt.toISOString(), dateEnd: startedAt.toISOString() };
+};
+
 describe('getGeoContainmentExecutor', () => {
   // Params needed for all tests
   const expectedAlertResults = [
@@ -69,8 +76,6 @@ describe('getGeoContainmentExecutor', () => {
     },
   ];
   const testAlertActionArr: unknown[] = [];
-  const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
-  const startedAt = new Date('2021-04-29T16:56:11.923Z');
   const geoContainmentParams: GeoContainmentRuleParams = {
     index: 'testIndex',
     indexId: 'testIndexId',
@@ -140,6 +145,7 @@ describe('getGeoContainmentExecutor', () => {
       },
       // @ts-ignore
       state: {},
+      getTimeRange,
     });
     if (executionResult && executionResult.state.shapesFilters) {
       expect(boundaryCall.mock.calls.length).toBe(1);
@@ -167,6 +173,7 @@ describe('getGeoContainmentExecutor', () => {
           geoField: 'otherLocation',
         },
       },
+      getTimeRange,
     });
     if (executionResult && executionResult.state.shapesFilters) {
       expect(boundaryCall.mock.calls.length).toBe(1);
@@ -187,6 +194,7 @@ describe('getGeoContainmentExecutor', () => {
         id: ruleId,
       },
       state: geoContainmentState,
+      getTimeRange,
     });
     if (executionResult && executionResult.state.shapesFilters) {
       expect(boundaryCall.mock.calls.length).toBe(0);
@@ -207,6 +215,7 @@ describe('getGeoContainmentExecutor', () => {
         id: ruleId,
       },
       state: geoContainmentState,
+      getTimeRange,
     });
     if (executionResult && executionResult.state.shapesFilters) {
       expect(executionResult.state.shapesFilters).toEqual(geoContainmentState.shapesFilters);
@@ -246,6 +255,7 @@ describe('getGeoContainmentExecutor', () => {
         id: ruleId,
       },
       state: geoContainmentState,
+      getTimeRange,
     });
     if (executionResult && executionResult.state.prevLocationMap) {
       expect(executionResult.state.prevLocationMap).toEqual(expectedPrevLocationMap);

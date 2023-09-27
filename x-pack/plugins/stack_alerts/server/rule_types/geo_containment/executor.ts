@@ -25,12 +25,12 @@ import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
   previousStartedAt,
-  startedAt: windowEnd,
   services,
   params,
   rule,
   state,
   logger,
+  getTimeRange,
 }: RuleExecutorOptions<
   GeoContainmentRuleParams,
   GeoContainmentRuleState,
@@ -51,14 +51,12 @@ export async function executor({
       ? state
       : await getShapeFilters(boundariesRequestMeta, services.scopedClusterClient.asCurrentUser);
 
-  let windowStart = previousStartedAt;
-  if (!windowStart) {
+  if (!previousStartedAt) {
     logger.debug(`alert ${GEO_CONTAINMENT_ID}:${rule.id} alert initialized. Collecting data`);
-    // Consider making first time window configurable?
-    const START_TIME_WINDOW = 1;
-    windowStart = new Date(windowEnd);
-    windowStart.setMinutes(windowStart.getMinutes() - START_TIME_WINDOW);
   }
+  const { dateStart, dateEnd } = getTimeRange('1m');
+  const windowStart = new Date(dateStart);
+  const windowEnd = new Date(dateEnd);
 
   const results = await executeEsQuery(
     params,

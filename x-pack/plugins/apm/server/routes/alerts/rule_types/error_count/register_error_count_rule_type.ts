@@ -102,6 +102,7 @@ export function registerErrorCountRuleType({
         services,
         spaceId,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.ErrorCount,
@@ -129,6 +130,10 @@ export function registerErrorCountRuleType({
             ]
           : [];
 
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
+
         const searchParams = {
           index: indices.error,
           body: {
@@ -140,7 +145,7 @@ export function registerErrorCountRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },
