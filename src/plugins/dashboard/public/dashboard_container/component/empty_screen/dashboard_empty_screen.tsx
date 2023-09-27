@@ -24,7 +24,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
-import { DASHBOARD_UI_METRIC_ID, DASHBOARD_APP_ID } from '../../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 
 export function DashboardEmptyScreen() {
   const {
