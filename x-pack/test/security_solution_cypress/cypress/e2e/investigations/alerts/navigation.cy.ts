@@ -9,7 +9,7 @@ import { expandFirstAlert, waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { getNewRule } from '../../../objects/rule';
 
