@@ -88,6 +88,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
+      if (viewMode !== ViewMode.EDIT) return;
+
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
           updatedPanelsAcc[panelLayout.i] = {
@@ -102,7 +104,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         dashboard.dispatch.setPanels(updatedPanels);
       }
     },
-    [dashboard, panels]
+    [dashboard, panels, viewMode]
   );
 
   const classes = classNames({

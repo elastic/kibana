@@ -86,7 +86,7 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        <DashboardGrid viewportWidth={viewportWidth} />
+        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
     </div>
   );
