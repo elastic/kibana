@@ -15,7 +15,6 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
-import { Config as DrilldownConfig } from '../../types';
 
 export const dashboards = [
   { value: 'dashboard1', label: 'Dashboard 1' },
