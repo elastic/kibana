@@ -91,13 +91,14 @@ describe('<PrevalenceOverview />', () => {
   it('should render only data with prevalence less than 10%', () => {
     const field1 = 'field1';
     const field2 = 'field2';
+    const field3 = 'field3';
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -105,7 +106,15 @@ describe('<PrevalenceOverview />', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2', 'value22'],
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.06,
+          userPrevalence: 0.2,
+        },
+        {
+          field: field3,
+          values: ['value3'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -126,8 +135,14 @@ describe('<PrevalenceOverview />', () => {
 
     const iconDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Icon`;
     const valueDataTestSubj2 = `${PREVALENCE_TEST_ID}${field2}Value`;
-    expect(queryByTestId(iconDataTestSubj2)).not.toBeInTheDocument();
-    expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
+    expect(getByTestId(iconDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toBeInTheDocument();
+    expect(getByTestId(valueDataTestSubj2)).toHaveTextContent('field2, value2,value22 is uncommon');
+
+    const iconDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Icon`;
+    const valueDataTestSubj3 = `${PREVALENCE_TEST_ID}${field3}Value`;
+    expect(queryByTestId(iconDataTestSubj3)).not.toBeInTheDocument();
+    expect(queryByTestId(valueDataTestSubj3)).not.toBeInTheDocument();
 
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
@@ -139,7 +154,7 @@ describe('<PrevalenceOverview />', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
