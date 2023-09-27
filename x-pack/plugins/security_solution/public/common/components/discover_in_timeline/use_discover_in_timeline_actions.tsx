@@ -202,11 +202,22 @@ export const useDiscoverInTimelineActions = (
     [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
   );
 
-  return {
-    resetDiscoverAppState,
-    restoreDiscoverAppStateFromSavedSearch,
-    updateSavedSearch,
-    getAppStateFromSavedSearch,
-    defaultDiscoverAppState,
-  };
+  const actions = useMemo(
+    () => ({
+      resetDiscoverAppState,
+      restoreDiscoverAppStateFromSavedSearch,
+      updateSavedSearch,
+      getAppStateFromSavedSearch,
+      defaultDiscoverAppState,
+    }),
+    [
+      resetDiscoverAppState,
+      restoreDiscoverAppStateFromSavedSearch,
+      updateSavedSearch,
+      getAppStateFromSavedSearch,
+      defaultDiscoverAppState,
+    ]
+  );
+
+  return actions;
 };

@@ -10,7 +10,8 @@ import type { RefObject } from 'react';
 import { createContext } from 'react';
 import type { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 
-interface DiscoverInTimelineContextType extends ReturnType<typeof useDiscoverInTimelineActions> {
+export interface DiscoverInTimelineContextType
+  extends ReturnType<typeof useDiscoverInTimelineActions> {
   discoverStateContainer: RefObject<DiscoverStateContainer | undefined>;
   setDiscoverStateContainer: (stateContainer: DiscoverStateContainer) => void;
 }
