@@ -76,6 +76,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;
+  recommended?: boolean;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -138,7 +139,7 @@ export const getModelStateColor = (
       };
     case MODEL_STATE.NOT_DOWNLOADED:
       return {
-        color: 'subdued',
+        color: '#d4dae5',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.notDownloadedName', {
           defaultMessage: 'Not downloaded',
         }),
@@ -277,7 +278,7 @@ export const ModelsList: FC<Props> = ({
       await fetchModelsStats(newItems);
 
       let resultItems = newItems;
-      // don't add any of the built in models (e.g. elser) if NLP is disabled
+      // don't add any of the built-in models (e.g. elser) if NLP is disabled
       if (isNLPEnabled) {
         const idSet = new Set(resultItems.map((i) => i.model_id));
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
@@ -291,6 +292,7 @@ export const ModelsList: FC<Props> = ({
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,
+              recommended: !!modelDefinition.recommended,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -489,22 +491,31 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnId',
     },
     {
-      field: ModelsTableToConfigMapping.description,
       width: '35%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
-      sortable: false,
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
-      render: (description: string) => {
+      render: ({ description, recommended }: ModelItem) => {
         if (!description) return null;
         const isTechPreview = description.includes('(Tech Preview)');
         return (
-          <>
-            {description.replace('(Tech Preview)', '')}
-            {isTechPreview ? <TechnicalPreviewBadge compressed /> : null}
-          </>
+          <EuiFlexGroup>
+            <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexItem grow={false}>{description.replace('(Tech Preview)', '')}</EuiFlexItem>
+              {isTechPreview ? (
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge compressed />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+            {recommended ? (
+              <EuiFlexItem>
+                <EuiBadge color="accent">Recommended</EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         );
       },
     },

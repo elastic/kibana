@@ -380,17 +380,20 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download model',
+          defaultMessage: 'Download',
         }),
         description: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download model',
+          defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
+        // @ts-ignore
         icon: 'download',
-        type: 'icon',
+        type: 'button',
         isPrimary: true,
         available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
-        enabled: (item) => !item.state && !isLoading,
+        enabled: (item) => {
+          return (!item.state || item.state === MODEL_STATE.NOT_DOWNLOADED) && !isLoading;
+        },
         onClick: async (item) => {
           try {
             onLoading(true);
