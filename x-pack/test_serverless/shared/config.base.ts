@@ -120,6 +120,12 @@ export default async () => {
             level: 'all',
             appenders: ['deprecation'],
           },
+          // Temporarily adds debug security logging to aid with
+          // debugging recurring intermittent login-related failures
+          {
+            name: 'plugins.security',
+            level: 'debug',
+          },
         ])}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
