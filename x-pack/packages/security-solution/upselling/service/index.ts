@@ -11,5 +11,4 @@ export type {
   SectionUpsellings,
   UpsellingSectionId,
   UpsellingMessageId,
-  MessageUpsellings,
 } from './types';
