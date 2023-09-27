@@ -9,7 +9,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import { PREVALENCE_NO_DATA_TEST_ID, PREVALENCE_TEST_ID } from './test_ids';
+import { PREVALENCE_TEST_ID } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -30,6 +30,8 @@ const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(PREVALENCE_TEST_ID);
+
+const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -69,10 +71,10 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId, queryByTestId } = renderPrevalenceOverview();
+    const { getByTestId, queryByText } = renderPrevalenceOverview();
 
     expect(getByTestId(EXPANDABLE_PANEL_LOADING_TEST_ID(PREVALENCE_TEST_ID))).toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no-data message', () => {
@@ -82,12 +84,8 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
 
-    const { getByTestId } = renderPrevalenceOverview();
-
-    expect(getByTestId(PREVALENCE_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(PREVALENCE_NO_DATA_TEST_ID)).toHaveTextContent(
-      'No prevalence data available.'
-    );
+    const { getByText } = renderPrevalenceOverview();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should render only data with prevalence less than 10%', () => {
@@ -116,7 +114,7 @@ describe('<PrevalenceOverview />', () => {
       ],
     });
 
-    const { queryByTestId, getByTestId } = renderPrevalenceOverview();
+    const { queryByTestId, getByTestId, queryByText } = renderPrevalenceOverview();
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
 
@@ -131,7 +129,7 @@ describe('<PrevalenceOverview />', () => {
     expect(queryByTestId(iconDataTestSubj2)).not.toBeInTheDocument();
     expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
 
-    expect(queryByTestId(PREVALENCE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
