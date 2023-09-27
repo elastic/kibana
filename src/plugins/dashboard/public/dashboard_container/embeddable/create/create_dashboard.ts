@@ -137,6 +137,7 @@ export const initializeDashboard = async ({
   const {
     dashboardBackup,
     embeddable: { getEmbeddableFactory },
+    dashboardCapabilities: { showWriteControls },
     data: {
       query: queryService,
       search: { session },
@@ -203,8 +204,8 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   dashboardBackup.storeViewMode(initialInput.viewMode);
 
-  // managed Dashboards are always in view mode - but we don't want to store this.
-  if (loadDashboardReturn.managed) {
+  // Some Dashboards are always in view mode, but we don't want opening these Dashboards to overwrite the backed up view mode.
+  if (loadDashboardReturn.managed || !showWriteControls) {
     initialInput.viewMode = ViewMode.VIEW;
   } else {
     untilDashboardReady().then((dashboard) => {
