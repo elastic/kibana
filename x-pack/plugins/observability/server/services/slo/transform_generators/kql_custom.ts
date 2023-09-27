@@ -40,11 +40,23 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
-    const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
       index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
-      query: filter,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                [indicator.params.timestampField]: {
+                  gte: `now-${slo.timeWindow.duration.format()}/d`,
+                },
+              },
+            },
+            getElastichsearchQueryOrThrow(indicator.params.filter),
+          ],
+        },
+      },
     };
   }
 
