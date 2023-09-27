@@ -15,8 +15,34 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   let pkgVersion: string;
+
+  const getSecrets = async (ids?: string[]) => {
+    const query = ids ? { terms: { _id: ids } } : { match_all: {} };
+    return es.search({
+      index: '.fleet-secrets',
+      body: {
+        query,
+      },
+    });
+  };
+
+  const deleteAllSecrets = async () => {
+    try {
+      await es.deleteByQuery({
+        index: '.fleet-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+    } catch (err) {
+      // index doesn't exist
+    }
+  };
 
   describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -39,6 +65,8 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       pkgVersion = getPkRes.body.item.version;
+
+      await deleteAllSecrets();
 
       await supertest
         .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
@@ -953,6 +981,39 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+      });
+
+      it('should create ssl.key secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            secrets: {
+              ssl: {
+                key: 'KEY',
+              },
+            },
+          })
+          .expect(200);
+
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const searchRes = await getSecrets([secretId]);
+        expect(searchRes.hits.hits[0]._source.value).to.equal('KEY');
       });
     });
 

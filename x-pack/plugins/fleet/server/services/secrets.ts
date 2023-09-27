@@ -263,7 +263,7 @@ export async function extractAndWriteOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
   secretPaths.forEach((secretPath, i) => {
-    set(outputWithSecretRefs, secretPath.path + '.value', { id: secrets[i].id });
+    set(outputWithSecretRefs, secretPath.path, { id: secrets[i].id });
   });
 
   return {
