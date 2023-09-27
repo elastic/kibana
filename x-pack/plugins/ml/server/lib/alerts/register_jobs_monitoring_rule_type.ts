@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
+import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
