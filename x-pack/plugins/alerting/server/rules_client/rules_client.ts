@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext, BulkOptions, MuteOptions } from './types';
-
+import { RulesClientContext, BulkOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
@@ -33,10 +33,14 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateParams } from './methods/aggregate';
+import { AggregateParams } from '../application/rule/methods/aggregate/types';
+import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
-import { bulkDeleteRules } from './methods/bulk_delete';
+import {
+  bulkDeleteRules,
+  BulkDeleteRulesRequestBody,
+} from '../application/rule/methods/bulk_delete';
 import {
   bulkEditRules,
   BulkEditOptions,
@@ -49,14 +53,15 @@ import { disable } from './methods/disable';
 import { snooze, SnoozeParams } from './methods/snooze';
 import { unsnooze, UnsnoozeParams } from './methods/unsnooze';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
+import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
 import { unmuteAll } from './methods/unmute_all';
-import { muteInstance } from './methods/mute_instance';
 import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 import { getTags, GetTagsParams } from './methods/get_tags';
+import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -107,7 +112,7 @@ export class RulesClient {
   }
 
   public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
-    aggregate<T>(this.context, params);
+    aggregateRules<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
@@ -137,7 +142,8 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
-  public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
+  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
+    bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
@@ -158,8 +164,8 @@ export class RulesClient {
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
-  public muteInstance = (options: MuteOptions) => muteInstance(this.context, options);
-  public unmuteInstance = (options: MuteOptions) => unmuteInstance(this.context, options);
+  public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
+  public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
@@ -178,6 +184,8 @@ export class RulesClient {
   }
 
   public getTags = (params: GetTagsParams) => getTags(this.context, params);
+
+  public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(

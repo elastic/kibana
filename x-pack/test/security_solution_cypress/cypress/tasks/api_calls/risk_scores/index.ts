@@ -8,7 +8,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { RISK_SCORE_URL } from '../../../urls/risk_score';
-import { visit } from '../../login';
+import { visitWithTimeRange } from '../../navigation';
 import { RiskScoreEntity } from '../../risk_scores/common';
 import {
   getLegacyRiskScoreIndicesOptions,
@@ -184,7 +184,7 @@ const installLegacyHostRiskScoreModule = (spaceId: string, version?: '8.3' | '8.
     })
     .then(() => {
       // refresh page
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 };
 
@@ -268,7 +268,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default', version?: '
       return startTransforms(transformIds);
     })
     .then(() => {
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 };
 

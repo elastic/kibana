@@ -6,7 +6,12 @@
  */
 
 import { KueryNode } from '@kbn/es-query';
-import { Logger, SavedObjectsClientContract, PluginInitializerContext } from '@kbn/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  PluginInitializerContext,
+  ISavedObjectsRepository,
+} from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -55,11 +60,13 @@ export interface RulesClientContext {
   readonly authorization: AlertingAuthorization;
   readonly ruleTypeRegistry: RuleTypeRegistry;
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
   readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
+  readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
@@ -114,6 +121,7 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
+// TODO: remove once all mute endpoints have been migrated to RuleMuteAlertOptions
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;

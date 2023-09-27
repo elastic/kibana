@@ -48,6 +48,7 @@ import { AnalyzeDataButton } from './analyze_data_button';
 import { ServerlessType } from '../../../../../common/serverless';
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
+import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -60,7 +61,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'alerts';
+    | 'alerts'
+    | 'profiling';
   hidden?: boolean;
 };
 
@@ -88,7 +90,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
@@ -138,6 +140,7 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />
@@ -215,6 +218,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     plugins,
     capabilities
   );
+  const { isProfilingAvailable } = useProfilingPlugin();
 
   const router = useApmRouter();
   const isInfraTabAvailable = useApmFeatureFlag(
@@ -390,6 +394,24 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Alerts',
       }),
       hidden: !(isAlertingAvailable && canReadAlerts),
+    },
+    {
+      key: 'profiling',
+      href: router.link('/services/{serviceName}/profiling', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.profilingTabLabel', {
+        defaultMessage: 'Universal Profiling',
+      }),
+      hidden: !isProfilingAvailable,
+      append: (
+        <EuiBadge color="accent">
+          {i18n.translate('xpack.apm.universalProfiling.newLabel', {
+            defaultMessage: 'New',
+          })}
+        </EuiBadge>
+      ),
     },
   ];
 

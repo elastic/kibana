@@ -22,7 +22,8 @@ import {
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import {
   createNewTimeline,
   gotToDiscoverTab,
@@ -34,16 +35,18 @@ import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165663
+// FLAKY: https://github.com/elastic/kibana/issues/165747
 describe(
   'Discover State',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
   () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);

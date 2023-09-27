@@ -40,6 +40,20 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
     },
 
+    async getAssetDetailsNginxMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsNginxMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsNginxMetricsChart"]'
+      );
+    },
+
+    async getAssetDetailsKubernetesMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
+      );
+    },
+
     async clickOverviewLinkToAlerts() {
       return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
     },
@@ -134,6 +148,14 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getProcessesSearchField() {
       return await testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
+    },
+
+    async processesSearchInputErrorMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
+    async processesSearchInputErrorExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
     },
 
     // Logs

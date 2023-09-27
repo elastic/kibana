@@ -893,6 +893,22 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.RuleDataClient.getReader",
             "type": "Function",
             "tags": [],
@@ -2544,6 +2560,22 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.IRuleDataClient.getReader",
             "type": "Function",
             "tags": [],
@@ -3738,6 +3770,17 @@
                 "text": "Logger"
               }
             ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.isUsingDataStreams",
+            "type": "boolean",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false

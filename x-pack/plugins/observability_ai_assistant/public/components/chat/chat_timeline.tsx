@@ -14,6 +14,8 @@ import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
+import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { ChatActionClickHandler } from './types';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -37,18 +39,22 @@ export interface ChatTimelineItem
 
 export interface ChatTimelineProps {
   items: ChatTimelineItem[];
+  knowledgeBase: UseKnowledgeBaseResult;
   onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
   onStopGenerating: () => void;
+  onActionClick: ChatActionClickHandler;
 }
 
 export function ChatTimeline({
   items = [],
+  knowledgeBase,
   onEdit,
   onFeedback,
   onRegenerate,
   onStopGenerating,
+  onActionClick,
 }: ChatTimelineProps) {
   const filteredItems = items.filter((item) => !item.display.hide);
 
@@ -74,10 +80,11 @@ export function ChatTimeline({
               return onEdit(item, message);
             }}
             onStopGeneratingClick={onStopGenerating}
+            onActionClick={onActionClick}
           />
         ))
       )}
-      {filteredItems.length === 1 ? <ChatWelcomePanel /> : null}
+      {filteredItems.length === 1 ? <ChatWelcomePanel knowledgeBase={knowledgeBase} /> : null}
     </EuiCommentList>
   );
 }

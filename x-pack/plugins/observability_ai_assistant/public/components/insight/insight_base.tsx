@@ -95,6 +95,7 @@ export function InsightBase({
                         )}
                         color="text"
                         css={{ alignSelf: 'flex-start' }}
+                        data-test-subj="observabilityAiAssistantInsightBaseButtonIcon"
                         disabled={actions?.length === 0}
                         display="empty"
                         iconType="boxesHorizontal"

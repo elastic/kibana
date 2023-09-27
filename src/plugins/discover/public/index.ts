@@ -15,6 +15,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
+export type { DiscoverAppState } from './application/main/services/discover_app_state_container';
 export type { DiscoverStateContainer } from './application/main/services/discover_state';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
@@ -24,6 +25,7 @@ export type {
   RegisterCustomizationProfile,
   DiscoverCustomization,
   DiscoverCustomizationService,
+  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,

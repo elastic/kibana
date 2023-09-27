@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
-import { EnterpriseSearchPlugin, EnterpriseSearchPluginStart as PluginStart } from './plugin';
+import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
@@ -52,11 +52,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   },
   schema: configSchema,
 };
-export const CONNECTORS_INDEX = '.elastic-connectors';
-export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
-export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
-export const CURRENT_CONNECTORS_JOB_INDEX = '.elastic-connectors-sync-jobs-v1';
-export const CONNECTORS_VERSION = 1;
-export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
 
-export type EnterpriseSearchPluginStart = PluginStart;
+export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';

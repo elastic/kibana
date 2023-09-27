@@ -10,13 +10,15 @@ import React, { FC } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   jobCount: number;
 }
 
 export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
-  if (lazyMlNodesAvailable() === false || jobCount === 0) {
+  const { showNodeInfo } = useEnabledFeatures();
+  if (showNodeInfo === false || lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;
   }
 

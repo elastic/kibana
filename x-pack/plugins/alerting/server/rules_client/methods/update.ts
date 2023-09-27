@@ -33,6 +33,7 @@ import {
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -86,6 +87,21 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     );
     // Still attempt to load the object using SOC
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  }
+
+  const {
+    attributes: { enabled, schedule },
+  } = alertSavedObject;
+  try {
+    if (enabled && schedule.interval !== data.schedule.interval) {
+      await validateScheduleLimit({
+        context,
+        prevInterval: alertSavedObject.attributes.schedule?.interval,
+        updatedInterval: data.schedule.interval,
+      });
+    }
+  } catch (error) {
+    throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
 
   try {

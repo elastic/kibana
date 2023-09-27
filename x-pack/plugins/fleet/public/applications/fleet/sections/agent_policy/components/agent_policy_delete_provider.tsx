@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX } from '../../../constants';
 import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
@@ -104,6 +105,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       query: {
         kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
       },
+      version: API_VERSIONS.public.v1,
     });
     setAgentsCount(data?.total || 0);
     setIsLoadingAgentsCount(false);

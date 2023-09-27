@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Assets Schema
+  version: '1'
+paths:
+  /internal/osquery/assets:
+    get:
+      summary: Get assets
+      parameters:
+          - $ref: './assets_status.schema.yaml#/components/parameters/AssetsStatusRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './assets_status.schema.yaml#/components/schemas/SuccessResponse'
+  /internal/osquery/assets/update:
+    post:
+      summary: Update assets
+      parameters:
+          - $ref: './assets_status.schema.yaml#/components/parameters/AssetsStatusRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './assets_status.schema.yaml#/components/schemas/SuccessResponse'

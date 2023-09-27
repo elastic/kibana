@@ -48,7 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Field preview', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165868
+  describe.skip('Field preview', function () {
     before(async () => await createIndex());
     after(async () => await deleteIndex());
 

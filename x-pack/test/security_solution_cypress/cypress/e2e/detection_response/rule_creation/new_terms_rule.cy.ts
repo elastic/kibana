@@ -43,8 +43,8 @@ import {
   NEW_TERMS_FIELDS_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -53,13 +53,14 @@ import {
   fillScheduleRuleAndContinue,
   selectNewTermsRuleType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('New Terms rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -79,7 +80,7 @@ describe('New Terms rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
     });
 
     it('Creates and enables a new terms rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       selectNewTermsRuleType();
       fillDefineNewTermsRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -95,7 +96,7 @@ describe('New Terms rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);

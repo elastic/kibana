@@ -9,6 +9,8 @@ import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/ser
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
+import { deleteAllDocuments } from './api_calls/elasticsearch';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
 
 const primaryButton = 0;
 
@@ -134,17 +136,7 @@ export const deleteAlertsAndRules = () => {
     },
   });
 
-  rootRequest({
-    method: 'POST',
-    url: `${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000&refresh`,
-    body: {
-      query: {
-        match_all: {},
-      },
-    },
-  });
+  deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
 };
 
 export const deleteTimelines = () => {

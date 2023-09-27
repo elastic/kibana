@@ -15,10 +15,10 @@
       "controls",
       "embeddable",
       "features",
-      "infra",
       "logsShared",
       "inspector",
       "licensing",
+      "metricsDataAccess",
       "observability",
       "observabilityShared",
       "exploratoryView",
@@ -41,6 +41,7 @@
       "discover",
       "fleet",
       "fieldFormats",
+      "infra",
       "home",
       "ml",
       "security",
@@ -49,7 +50,7 @@
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
-      "profiling",
+      "profilingDataAccess"
     ],
     "requiredBundles": [
       "advancedSettings",
@@ -58,7 +59,6 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "esUiShared",
       "maps",
       "observabilityAIAssistant"
     ]

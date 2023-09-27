@@ -39,6 +39,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
       <EuiSpacer />
 
       <EuiButton
+        data-test-subj="observabilityAiAssistantTemplateAddMessageButton"
         onClick={() => setCount(count >= 0 && count < props.items.length - 1 ? count + 1 : 0)}
       >
         Add message
@@ -48,6 +49,18 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 };
 
 const defaultProps: ComponentProps<typeof Component> = {
+  knowledgeBase: {
+    status: {
+      loading: false,
+      value: {
+        ready: true,
+      },
+      refresh: () => {},
+    },
+    isInstalling: false,
+    installError: undefined,
+    install: async () => {},
+  },
   items: [
     buildChatInitItem(),
     buildUserChatItem(),
@@ -119,6 +132,7 @@ const defaultProps: ComponentProps<typeof Component> = {
   onFeedback: () => {},
   onRegenerate: () => {},
   onStopGenerating: () => {},
+  onActionClick: async () => {},
 };
 
 export const ChatTimeline = Template.bind({});

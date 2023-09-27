@@ -7,9 +7,10 @@
 
 import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
+import { login, loginWithUser } from '../../tasks/login';
+import { visitWithTimeRange, visitWithUser } from '../../tasks/navigation';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { hostsUrl } from '../../urls/navigation';
 import {
   addIndexToDefault,
   deselectSourcererOptions,
@@ -35,28 +36,32 @@ const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer', () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161539
   describe('permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
     it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
       loginWithUser(secReadCasesAllUser);
-      visitWithUser(HOSTS_URL, secReadCasesAllUser);
+      visitWithUser(hostsUrl('allHosts'), secReadCasesAllUser);
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
 
-  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  // FLAKY: https://github.com/elastic/kibana/issues/165766
+  describe('Default scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
     });
 
     it('correctly loads SIEM data view', () => {

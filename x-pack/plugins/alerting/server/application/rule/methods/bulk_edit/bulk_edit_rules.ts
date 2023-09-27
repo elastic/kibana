@@ -77,6 +77,11 @@ import {
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+
+const isValidInterval = (interval: string | undefined): interval is string => {
+  return interval !== undefined;
+};
 
 export const bulkEditFieldsToExcludeFromRevisionUpdates = new Set(['snoozeSchedule', 'apiKey']);
 
@@ -286,8 +291,16 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
+    const intervals = response.saved_objects
+      .filter((rule) => rule.attributes.enabled)
+      .map((rule) => rule.attributes.schedule?.interval)
+      .filter(isValidInterval);
+
+    prevInterval.concat(intervals);
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RuleAttributes>) =>
@@ -308,9 +321,44 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   }
   await rulesFinder.close();
 
+  const updatedInterval = rules
+    .filter((rule) => rule.attributes.enabled)
+    .map((rule) => rule.attributes.schedule?.interval)
+    .filter(isValidInterval);
+
+  try {
+    if (operations.some((operation) => operation.field === 'schedule')) {
+      await validateScheduleLimit({
+        context,
+        prevInterval,
+        updatedInterval,
+      });
+    }
+  } catch (error) {
+    return {
+      apiKeysToInvalidate: Array.from(apiKeysMap.values())
+        .filter((value) => value.newApiKey)
+        .map((value) => value.newApiKey as string),
+      resultSavedObjects: [],
+      rules: [],
+      errors: rules.map((rule) => ({
+        message: `Failed to bulk edit rule - ${error.message}`,
+        rule: {
+          id: rule.id,
+          name: rule.attributes.name || 'n/a',
+        },
+      })),
+      skipped: [],
+    };
+  }
+
   const { result, apiKeysToInvalidate } =
     rules.length > 0
-      ? await saveBulkUpdatedRules(context, rules, apiKeysMap)
+      ? await saveBulkUpdatedRules({
+          context,
+          rules,
+          apiKeysMap,
+        })
       : {
           result: { saved_objects: [] },
           apiKeysToInvalidate: [],
@@ -821,11 +869,15 @@ function updateAttributes(
   };
 }
 
-async function saveBulkUpdatedRules(
-  context: RulesClientContext,
-  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-  apiKeysMap: ApiKeysMap
-) {
+async function saveBulkUpdatedRules({
+  context,
+  rules,
+  apiKeysMap,
+}: {
+  context: RulesClientContext;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
+  apiKeysMap: ApiKeysMap;
+}) {
   const apiKeysToInvalidate: string[] = [];
   let result;
   try {

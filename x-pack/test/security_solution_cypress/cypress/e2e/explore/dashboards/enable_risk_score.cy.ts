@@ -20,7 +20,8 @@ import {
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { clickEnableRiskScore } from '../../../tasks/risk_scores';
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import {
@@ -32,7 +33,8 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165644
+describe('Enable risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -43,7 +45,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
     login();
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-    visit(ENTITY_ANALYTICS_URL);
+    visitWithTimeRange(ENTITY_ANALYTICS_URL);
   });
 
   afterEach(() => {

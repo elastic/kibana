@@ -43,6 +43,7 @@ export type {
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {
@@ -116,6 +117,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,

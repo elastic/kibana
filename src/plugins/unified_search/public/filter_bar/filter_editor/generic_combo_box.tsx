@@ -20,6 +20,7 @@ export interface GenericComboBoxProps<T> {
     searchValue: string,
     OPTION_CONTENT_CLASSNAME: string
   ) => React.ReactNode;
+  inputRef?: ((instance: HTMLInputElement | null) => void) | undefined;
   [propName: string]: any;
 }
 
