@@ -448,7 +448,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult).totalFailed > 0
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');
