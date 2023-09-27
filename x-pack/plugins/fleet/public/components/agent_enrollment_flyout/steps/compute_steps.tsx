@@ -227,6 +227,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
+
+  const fleetServerHost = fleetServerHosts?.[0];
+  
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHosts,
