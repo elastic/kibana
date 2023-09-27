@@ -57,12 +57,7 @@ const formDeserializer = ({
 };
 
 const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
-  const keyDefaultValue = useMemo<string>(() => {
-    if (initialValue) {
-      return '';
-    }
-    return uuidv4();
-  }, [initialValue]);
+  const keyDefaultValue = useMemo(() => uuidv4(), []);
 
   const { form } = useForm({
     defaultValue: initialValue ?? {
