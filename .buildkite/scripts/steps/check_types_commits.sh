@@ -9,7 +9,9 @@ diffArgs=("--name-only")
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
 
-  diffArgs+=("--merge-base" "${GITHUB_PR_TARGET_BRANCH-}" "${GITHUB_PR_TRIGGERED_SHA-}")
+  targetBranch="${GITHUB_PR_TARGET_BRANCH-}"
+  git fetch origin $targetBranch
+  diffArgs+=("--merge-base" "$targetBranch" "${GITHUB_PR_TRIGGERED_SHA-}")
 elif [[ "${1-}" == "--merge-base" ]]; then
   # Similar to when CI=true, but locally
   diffArgs+=("--merge-base" "${2-main}" "${3-HEAD}")
