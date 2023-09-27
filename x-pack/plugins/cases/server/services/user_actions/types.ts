@@ -26,6 +26,7 @@ import type {
   CaseStatuses,
   User,
   CaseAssignees,
+  CaseCustomFields,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
@@ -91,6 +92,9 @@ export interface BuilderParameters {
   };
   category: {
     parameters: { payload: { category: string | null } };
+  };
+  customFields: {
+    parameters: { payload: { customFields: CaseCustomFields } };
   };
 }
 

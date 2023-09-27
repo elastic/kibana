@@ -13,6 +13,7 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
+import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
@@ -25,6 +26,7 @@ import {
 } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
+import { omit } from 'lodash';
 
 describe('create', () => {
   const theCase = {
@@ -625,6 +627,117 @@ describe('create', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to create case: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
       );
+    });
+  });
+
+  describe('User actions', () => {
+    const caseWithOnlyRequiredFields = omit(theCase, [
+      'assignees',
+      'category',
+      'severity',
+      'customFields',
+    ]) as CasePostRequest;
+
+    const caseWithOptionalFields: CasePostRequest = {
+      ...theCase,
+      category: 'My category',
+      severity: CaseSeverity.CRITICAL,
+      customFields: [
+        {
+          key: 'first_customField_key',
+          type: CustomFieldTypes.TEXT,
+          field: { value: ['this is a text field value', 'this is second'] },
+        },
+        {
+          key: 'second_customField_key',
+          type: CustomFieldTypes.TOGGLE,
+          field: { value: [true] },
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    casesClient.configure.get = jest.fn().mockResolvedValue([
+      {
+        owner: caseWithOptionalFields.owner,
+        customFields: [
+          {
+            key: 'first_customField_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'foo',
+            required: false,
+          },
+          {
+            key: 'second_customField_key',
+            type: CustomFieldTypes.TOGGLE,
+            label: 'foo',
+            required: false,
+          },
+        ],
+      },
+    ]);
+
+    it('should create a user action with defaults correctly', async () => {
+      await create(caseWithOnlyRequiredFields, clientArgs, casesClient);
+
+      expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
+        caseId: 'mock-id-1',
+        owner: 'securitySolution',
+        payload: {
+          assignees: [],
+          category: null,
+          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+          customFields: [],
+          description: 'testing sir',
+          owner: 'securitySolution',
+          settings: { syncAlerts: true },
+          severity: 'low',
+          tags: [],
+          title: 'My Case',
+        },
+        type: 'create_case',
+        user: {
+          email: 'damaged_raccoon@elastic.co',
+          full_name: 'Damaged Raccoon',
+          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          username: 'damaged_raccoon',
+        },
+      });
+    });
+
+    it('should create a user action with optional fields set correctly', async () => {
+      await create(caseWithOptionalFields, clientArgs, casesClient);
+
+      expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
+        caseId: 'mock-id-1',
+        owner: 'securitySolution',
+        payload: {
+          assignees: [{ uid: '1' }],
+          category: 'My category',
+          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+          customFields: caseWithOptionalFields.customFields,
+          description: 'testing sir',
+          owner: 'securitySolution',
+          settings: { syncAlerts: true },
+          severity: 'critical',
+          tags: [],
+          title: 'My Case',
+        },
+        type: 'create_case',
+        user: {
+          email: 'damaged_raccoon@elastic.co',
+          full_name: 'Damaged Raccoon',
+          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          username: 'damaged_raccoon',
+        },
+      });
     });
   });
 });

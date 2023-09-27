@@ -17,7 +17,7 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
-import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
@@ -40,7 +40,6 @@ import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
-import { addOrReplaceCustomField } from './helpers';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -75,9 +74,7 @@ export const CaseViewActivity = ({
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
-  const {
-    data: { customFields: customFieldsConfiguration },
-  } = useGetCaseConfiguration();
+  const { data: casesConfiguration } = useGetCaseConfiguration();
 
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
@@ -156,15 +153,13 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitCustomFields = useCallback(
-    (customFieldToAdd) => {
-      const updatedCustomFields = addOrReplaceCustomField(caseData.customFields, customFieldToAdd);
-
+    (customFields: CaseUICustomField[]) => {
       onUpdateField({
         key: 'customFields',
-        value: updatedCustomFields,
+        value: customFields,
       });
     },
-    [caseData.customFields, onUpdateField]
+    [onUpdateField]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -224,6 +219,7 @@ export const CaseViewActivity = ({
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
+                casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
@@ -305,7 +301,7 @@ export const CaseViewActivity = ({
           <CustomFields
             isLoading={isLoading && loadingKey === 'customFields'}
             customFields={caseData.customFields}
-            customFieldsConfiguration={customFieldsConfiguration}
+            customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomFields}
           />
         </EuiFlexGroup>

@@ -30,15 +30,17 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CustomFieldTextTypeRt } from '../../domain';
+import {
+  CaseCustomFieldToggle,
+  CustomFieldTextTypeRt,
+  createCustomFieldValueRt,
+} from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
-  CustomFieldToggle,
-  customFieldValue,
   RelatedCaseRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
@@ -48,7 +50,7 @@ import { CasesStatusResponseRt } from '../stats/v1';
 const CustomFieldText = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  field: customFieldValue(
+  field: createCustomFieldValueRt(
     limitedStringSchema({
       fieldName: 'value',
       min: 0,
@@ -57,7 +59,7 @@ const CustomFieldText = rt.strict({
   ),
 });
 
-const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
+const CustomFieldRt = rt.union([CustomFieldText, CaseCustomFieldToggle]);
 
 const CustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,

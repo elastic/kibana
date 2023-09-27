@@ -192,10 +192,6 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
   defaultMessage: 'A name is required.',
 });
 
-export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
-  defaultMessage: 'Configure cases',
-});
-
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
   defaultMessage: 'Settings',
 });
