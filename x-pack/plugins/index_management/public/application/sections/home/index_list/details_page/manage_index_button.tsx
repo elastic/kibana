@@ -73,7 +73,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.closeIndicesAction.indexClosedMessage', {
           defaultMessage: 'The index {indexNames} was closed.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -91,7 +91,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.openIndicesAction.indexOpenedMessage', {
           defaultMessage: 'The index {indexNames} was opened.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -109,7 +109,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.flushIndicesAction.successfullyFlushedIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.flushIndicesAction.indexFlushedMessage', {
           defaultMessage: 'The index {indexNames} was flushed.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -127,7 +127,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.refreshIndicesAction.indexRefreshedMessage', {
           defaultMessage: 'The index {indexNames} was refreshed.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -145,7 +145,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
+        i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.indexCacheClearedMessage', {
           defaultMessage: 'The cache of the index {indexNames} was cleared.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -163,7 +163,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.successfullyUnfrozeIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.indexUnfrozenMessage', {
           defaultMessage: 'The index {indexNames} was unfrozen.',
           values: { indexNames: indexNames.join(', ') },
         })
@@ -182,13 +182,10 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
         await reloadIndices();
         setIsLoading(false);
         notificationService.showSuccessToast(
-          i18n.translate(
-            'xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage',
-            {
-              defaultMessage: 'The index {indexNames} was force merged.',
-              values: { indexNames: indexNames.join(', ') },
-            }
-          )
+          i18n.translate('xpack.idxMgmt.forceMergeIndicesAction.indexForcemergedMessage', {
+            defaultMessage: 'The index {indexNames} was force merged.',
+            values: { indexNames: indexNames.join(', ') },
+          })
         );
       } catch (error) {
         setIsLoading(false);
@@ -204,7 +201,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       await deleteIndicesRequest(indexNames);
       setIsLoading(false);
       notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
+        i18n.translate('xpack.idxMgmt.deleteIndicesAction.indexDeletedMessage', {
           defaultMessage: 'The index {indexNames} was deleted.',
           values: { indexNames: indexNames.join(', ') },
         })
