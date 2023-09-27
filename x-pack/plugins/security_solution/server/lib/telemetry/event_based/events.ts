@@ -6,29 +6,29 @@
  */
 import type { EventTypeOpts } from '@kbn/analytics-client';
 
-export const RISK_SCORE_EXECUTION_SUCESS_EVENT: EventTypeOpts<{
+export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
-  taskCompletionTimeSeconds: number;
-  isRunMoreThanInteval: boolean;
+  taskDurationInSeconds: number;
+  executionDurationExceededInterval: boolean;
 }> = {
   eventType: 'risk_score_execution_success',
   schema: {
     scoresWritten: {
       type: 'long',
       _meta: {
-        description: 'Amount of written scores',
+        description: 'Number of risk scores written during this scoring task execution',
       },
     },
-    taskCompletionTimeSeconds: {
+    taskDurationInSeconds: {
       type: 'long',
       _meta: {
-        description: 'Time for task comletion in seconds',
+        description: 'Duration (in seconds) of the current risk scoring task execution',
       },
     },
-    isRunMoreThanInteval: {
+    executionDurationExceededInterval: {
       type: 'boolean',
       _meta: {
-        description: 'If execution time is more than interval',
+        description: `Whether the risk scoring task's duration exceeded its allocated interval`,
       },
     },
   },
@@ -39,4 +39,4 @@ export const RISK_SCORE_EXECUTION_ERROR_EVENT: EventTypeOpts<{}> = {
   schema: {},
 };
 
-export const events = [RISK_SCORE_EXECUTION_SUCESS_EVENT, RISK_SCORE_EXECUTION_ERROR_EVENT];
+export const events = [RISK_SCORE_EXECUTION_SUCCESS_EVENT, RISK_SCORE_EXECUTION_ERROR_EVENT];

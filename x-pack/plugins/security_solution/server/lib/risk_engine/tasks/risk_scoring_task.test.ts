@@ -418,9 +418,9 @@ describe('Risk Scoring Task', () => {
 
         expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
         expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-          isRunMoreThanInteval: false,
+          executionDurationExceededInterval: false,
           scoresWritten: 10,
-          taskCompletionTimeSeconds: 0,
+          taskDurationInSeconds: 0,
         });
       });
 

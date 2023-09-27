@@ -18,7 +18,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server';
-import { parseIntervalAsSecond } from '@kbn/task-manager-plugin/server/lib/intervals';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
@@ -31,10 +30,14 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import {
+  buildScopedInternalSavedObjectsClientUnsafe,
+  convertRangeToISO,
+  isExecutionDurationExceededInterval,
+} from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 import {
-  RISK_SCORE_EXECUTION_SUCESS_EVENT,
+  RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
 } from '../../telemetry/event_based/events';
 
@@ -173,12 +176,12 @@ export const runTask = async ({
   const taskId = taskInstance.id;
   const log = logFactory(logger, taskId);
   try {
-    const taskExecutionTime = moment().utc().toISOString();
+    const taskStartTime = moment().utc().toISOString();
     log('running task');
 
     let scoresWritten = 0;
     const updatedState = {
-      lastExecutionTimestamp: taskExecutionTime,
+      lastExecutionTimestamp: taskStartTime,
       namespace: state.namespace,
       runs: state.runs + 1,
       scoresWritten,
@@ -247,26 +250,20 @@ export const runTask = async ({
 
     updatedState.scoresWritten = scoresWritten;
 
-    const taskCompletedTime = moment().utc().toISOString();
+    const taskCompletionTime = moment().utc().toISOString();
 
-    const taskCompletionTimeSeconds = moment(taskCompletedTime).diff(
-      moment(taskExecutionTime),
-      'seconds'
-    );
-
-    let isRunMoreThanInteval = false;
-    const intervalSeconds = taskInstance?.schedule?.interval;
-    if (intervalSeconds) {
-      isRunMoreThanInteval = taskCompletionTimeSeconds > parseIntervalAsSecond(intervalSeconds);
-    }
+    const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
 
     const telemetryEvent = {
       scoresWritten,
-      taskCompletionTimeSeconds,
-      isRunMoreThanInteval,
+      taskDurationInSeconds,
+      executionDurationExceededInterval: isExecutionDurationExceededInterval(
+        taskInstance?.schedule?.interval,
+        taskDurationInSeconds
+      ),
     };
 
-    telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCESS_EVENT.eventType, telemetryEvent);
+    telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
     log('task run completed');
     log(JSON.stringify(telemetryEvent));
