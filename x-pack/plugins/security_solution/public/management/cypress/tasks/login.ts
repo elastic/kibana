@@ -95,9 +95,6 @@ const sendApiLoginRequest = (
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
-      if (!basicProvider) {
-        throw new Error(`basicProvider was not found`);
-      }
       return request({
         url: loginUrl,
         method: 'POST',
