@@ -15,6 +15,7 @@ import {
   data as telemetryMockData,
   MockTelemetryFindings,
 } from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import { createPackagePolicy } from './benchmark';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
@@ -23,6 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   /**
    * required before indexing findings
@@ -59,8 +62,37 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Verify cloud_security_posture telemetry payloads', async () => {
+    let agentPolicyId: string;
+
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+        });
+
+      agentPolicyId = agentPolicyResponse.item.id;
+
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId,
+        'cspm',
+        'cloudbeat/cis_aws',
+        'aws',
+        'cspm',
+        'CSPM-1'
+      );
       await waitForPluginInitialized();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     afterEach(async () => {
