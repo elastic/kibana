@@ -113,7 +113,9 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
-      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+      ...(this.config.featureFlags.metricsExplorerEnabled
+        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+        : []),
       { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
@@ -265,13 +267,17 @@ export class Plugin implements InfraClientPluginClass {
         }),
         path: '/hosts',
       },
-      {
-        id: 'metrics-explorer',
-        title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-          defaultMessage: 'Metrics Explorer',
-        }),
-        path: '/explorer',
-      },
+      ...(this.config.featureFlags.metricsExplorerEnabled
+        ? [
+            {
+              id: 'metrics-explorer',
+              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                defaultMessage: 'Metrics Explorer',
+              }),
+              path: '/explorer',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {

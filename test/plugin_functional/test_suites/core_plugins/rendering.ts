@@ -256,10 +256,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          */
         'xpack.infra.logs (any)',
         /**
-         * xpack.infra.featureFlags is conditional and will resolve to an object of properties
-         * - xpack.infra.featureFlags.metricsExplorerEnabled (boolean)
+         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
+         * and will resolve to (boolean)
          */
-        'xpack.infra.featureFlags (any)',
+        'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',

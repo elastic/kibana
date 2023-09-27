@@ -97,12 +97,10 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         ),
       })
     ),
-    featureFlags: offeringBasedSchema({
-      traditional: schema.object({
-        metricsExplorerEnabled: schema.boolean({ defaultValue: true }),
-      }),
-      serverless: schema.object({
-        metricsExplorerEnabled: schema.boolean({ defaultValue: false }),
+    featureFlags: schema.object({
+      metricsExplorerEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
       }),
     }),
   }),
