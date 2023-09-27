@@ -8,14 +8,20 @@
 import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
 import { DocumentCountChart } from '@kbn/aiops-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { Filter } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
+
+import { isDefined } from '@kbn/ml-is-defined';
+import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DocumentCountStats } from '../../../common/types/field_stats';
+import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
-
+import { getDataTestSubject } from '../common/util/get_data_test_subject';
 export interface DocumentCountContentProps
   extends Omit<
     DocumentCountChartProps,
@@ -43,9 +49,13 @@ export interface DocumentCountContentProps
   randomSampler: RandomSampler;
   reload: () => void;
   approximate: boolean;
+  stateManager: DataDriftStateManager;
+  label?: string;
+  id?: string;
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
+  id,
   randomSampler,
   reload,
   brushSelectionUpdateHandler,
@@ -60,12 +70,34 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   barHighlightColorOverride,
   windowParameters,
   incomingInitialAnalysisStart,
-  approximate,
+  stateManager,
+  label,
   ...docCountChartProps
 }) => {
   const {
-    services: { data, uiSettings, fieldFormats, charts },
+    services: {
+      data,
+      uiSettings,
+      fieldFormats,
+      charts,
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
+    },
   } = useDataVisualizerKibana();
+
+  const { dataView } = useDataDriftStateManagerContext();
+
+  const approximate = useObservable(
+    randomSampler
+      .getProbability$()
+      .pipe(
+        map((samplingProbability) =>
+          isDefined(samplingProbability) ? samplingProbability < 1 : false
+        )
+      ),
+    false
+  );
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -74,6 +106,35 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
   const timeRangeLatest = Math.max(...[...bucketTimestamps, ...splitBucketTimestamps]);
 
+  if (dataView.getTimeField() === undefined) {
+    return (
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiTitle size="xxs">
+          <h3>{label}</h3>
+        </EuiTitle>
+        <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
+          <EuiFlexItem>
+            <SearchBar
+              key={`dataDrift-${stateManager.id}`}
+              dataTestSubj="dataVisualizerQueryInput"
+              appName={'dataVisualizer'}
+              showFilterBar={true}
+              showDatePicker={false}
+              showQueryInput={false}
+              filters={stateManager.filters}
+              onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}
+              indexPatterns={[dataView]}
+              displayStyle={'inPage'}
+              isClearable={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SamplingMenu randomSampler={randomSampler} reload={reload} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    );
+  }
   if (
     documentCountStats === undefined ||
     documentCountStats.buckets === undefined ||
@@ -99,13 +160,35 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexGroup gutterSize="m" direction="row">
+    <EuiFlexGroup
+      gutterSize="m"
+      direction="column"
+      data-test-subj={getDataTestSubject('dataDriftTotalDocCountHeader', id)}
+    >
+      <EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} approximate={approximate} label={label} />
+      </EuiFlexItem>
+
+      <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
         <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} approximate={approximate} />
+          <SearchBar
+            key={`dataDrift-${stateManager.id}`}
+            dataTestSubj="dataVisualizerQueryInput"
+            appName={'dataVisualizer'}
+            showFilterBar={true}
+            showDatePicker={false}
+            showQueryInput={false}
+            filters={stateManager.filters}
+            onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}
+            indexPatterns={[dataView]}
+            displayStyle={'inPage'}
+            isClearable={true}
+            customSubmitButton={<div />}
+          />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <SamplingMenu randomSampler={randomSampler} reload={reload} />
+          <SamplingMenu randomSampler={randomSampler} reload={reload} id={id} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -125,6 +208,8 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
             {...docCountChartProps}
+            height={60}
+            dataTestSubj={getDataTestSubject('dataDriftDocCountChart', id)}
           />
         </EuiFlexItem>
       )}
