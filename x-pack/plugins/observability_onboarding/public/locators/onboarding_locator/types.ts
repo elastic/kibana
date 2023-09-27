@@ -8,5 +8,6 @@
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability/locators';
 
+export type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability/locators';
 export type ObservabilityOnboardingLocator =
   LocatorPublic<ObservabilityOnboardingLocatorParams>;
