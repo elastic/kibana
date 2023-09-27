@@ -7,8 +7,8 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
+import { DatasetSelectionChange } from '../../common/dataset_selection';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
-import { DatasetSelectionChange } from '../utils/dataset_selection';
 
 export const useDatasetSelection = (
   logExplorerProfileStateService: LogExplorerProfileStateService

@@ -57,6 +57,8 @@ export interface LogRateAnalysisContentWrapperProps {
    * @param d Log rate analysis results data
    */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional flag to indicate whether kibana is running in serverless */
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
@@ -70,6 +72,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
 
@@ -82,6 +85,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   return (

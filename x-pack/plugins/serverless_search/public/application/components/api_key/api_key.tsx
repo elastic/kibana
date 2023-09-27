@@ -31,7 +31,7 @@ import { CreateApiKeyResponse } from './types';
 import './api_key.scss';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
-  const { http, userProfile } = useKibanaServices();
+  const { http, user } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
@@ -49,7 +49,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
           setApiKey={saveApiKey}
-          username={userProfile.user.full_name || userProfile.user.username}
+          username={user?.full_name || user?.username || ''}
         />
       )}
       {apiKey ? (
@@ -86,6 +86,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.serverlessSearch.apiKey.panel.description', {
               defaultMessage:
@@ -94,8 +95,8 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
           </EuiText>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <span>
                     <EuiButton

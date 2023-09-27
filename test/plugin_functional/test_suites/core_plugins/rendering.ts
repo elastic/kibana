@@ -230,6 +230,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
+        'xpack.cloud.serverless.project_name (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
@@ -246,17 +247,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean)',
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
-        /**
-         * xpack.infra.logs is conditional and will resolve to an object of properties
-         * - xpack.infra.logs.app_target (string)
-         */
-        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
+        'xpack.ml.ad.enabled (boolean)',
+        'xpack.ml.dfa.enabled (boolean)',
+        'xpack.ml.nlp.enabled (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**

@@ -28,6 +28,7 @@ disabled:
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
   - x-pack/test/defend_workflows_cypress/endpoint_config.ts
+  - x-pack/test/defend_workflows_cypress/endpoint_serverless_config.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config_open.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config.ts
@@ -232,6 +233,7 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/bundled_prebuilt_rules_package/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/large_prebuilt_rules_package/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/update_prebuilt_rules_package/config.ts
+  - x-pack/test/disable_ems/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
@@ -276,7 +278,6 @@ enabled:
   - x-pack/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
-  - x-pack/test/functional/apps/index_management/index_details_page/config.ts
   - x-pack/test/functional/apps/infra/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/test/functional/apps/lens/group1/config.ts

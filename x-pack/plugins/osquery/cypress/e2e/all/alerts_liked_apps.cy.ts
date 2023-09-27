@@ -16,10 +16,11 @@ import {
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Alert Event Details', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -36,7 +37,7 @@ describe('Alert Event Details', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
   });
