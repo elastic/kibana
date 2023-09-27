@@ -11,7 +11,6 @@ export { FieldRowProvider, FieldRowKibanaProvider, type FieldRowProviderProps } 
 export type {
   FieldRowServices,
   FieldRowKibanaDependencies,
-  RowOnChangeFn,
   KibanaDependencies,
   Services,
 } from './types';

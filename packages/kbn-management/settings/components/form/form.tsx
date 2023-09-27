@@ -9,8 +9,8 @@
 import React, { Fragment } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
-import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { FieldRow } from '@kbn/management-settings-components-field-row';
+import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
@@ -53,7 +53,7 @@ export const Form = (props: FormProps) => {
     setIsLoading(false);
   };
 
-  const onChange: RowOnChangeFn = (id, change) => {
+  const onFieldChange: OnFieldChangeFn = (id, change) => {
     if (!change) {
       const { [id]: unsavedChange, ...rest } = unsavedChanges;
       setUnsavedChanges(rest);
@@ -66,7 +66,7 @@ export const Form = (props: FormProps) => {
   const fieldRows = fields.map((field) => {
     const { id: key } = field;
     const unsavedChange = unsavedChanges[key];
-    return <FieldRow {...{ key, field, unsavedChange, onChange, isSavingEnabled }} />;
+    return <FieldRow {...{ key, field, unsavedChange, onFieldChange, isSavingEnabled }} />;
   });
 
   return (

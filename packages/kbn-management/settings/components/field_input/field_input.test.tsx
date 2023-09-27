@@ -55,7 +55,7 @@ describe('FieldInput', () => {
         },
         options,
       } as FieldDefinition<typeof type>,
-      onChange: jest.fn(),
+      onInputChange: jest.fn(),
       isSavingEnabled: true,
     };
 
@@ -132,7 +132,7 @@ describe('FieldInput', () => {
     const { getByTestId } = render(wrap(<FieldInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(props.onChange).toHaveBeenCalledWith({ type: 'string', unsavedValue: 'new value' });
+    expect(props.onInputChange).toHaveBeenCalledWith({ type: 'string', unsavedValue: 'new value' });
   });
 
   it('disables the input when isDisabled prop is true', () => {

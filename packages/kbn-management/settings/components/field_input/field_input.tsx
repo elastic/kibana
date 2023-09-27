@@ -10,7 +10,7 @@ import React, { useImperativeHandle, useRef } from 'react';
 
 import type {
   FieldDefinition,
-  OnChangeFn,
+  OnInputChangeFn,
   ResetInputRef,
   SettingType,
   UnsavedFieldChange,
@@ -61,8 +61,8 @@ export interface FieldInputProps<T extends SettingType = SettingType> {
   field: Pick<FieldDefinition<T>, 'type' | 'id' | 'name' | 'ariaAttributes'>;
   /** An {@link UnsavedFieldChange} for the component, if any. */
   unsavedChange?: UnsavedFieldChange<T>;
-  /** The `onChange` handler for the input. */
-  onChange: OnChangeFn<T>;
+  /** The `onInputChange` handler for the input. */
+  onInputChange: OnInputChangeFn<T>;
   /** True if the input can be saved, false otherwise. */
   isSavingEnabled: boolean;
   /** True if the value within the input is invalid, false otherwise. */
@@ -82,7 +82,7 @@ const getMismatchError = (type: SettingType, unsavedType?: SettingType) =>
  * @param props The props for the {@link FieldInput} component.
  */
 export const FieldInput = React.forwardRef<ResetInputRef, FieldInputProps>((props, ref) => {
-  const { field, unsavedChange, onChange, isSavingEnabled } = props;
+  const { field, unsavedChange, onInputChange, isSavingEnabled } = props;
 
   // Create a ref for those input fields that require an imperative handle.
   const inputRef = useRef<ResetInputRef>(null);
@@ -97,7 +97,7 @@ export const FieldInput = React.forwardRef<ResetInputRef, FieldInputProps>((prop
     },
   }));
 
-  const inputProps = { isSavingEnabled, onChange };
+  const inputProps = { isSavingEnabled, onInputChange };
 
   // These checks might seem excessive or redundant, but they are necessary to ensure that
   // the types are honored correctly using type guards.  These checks get compiled down to
