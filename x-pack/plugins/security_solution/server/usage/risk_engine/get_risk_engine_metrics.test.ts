@@ -6,11 +6,11 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getRiskEngineMetrics } from './get_risk_engine_metrics';
-import { getAggregationResult, getStatsResult } from './get_risk_engine_metrics.mocks';
+import { getAggregationResultMock, getStatsResultMock } from './get_risk_engine_metrics.mocks';
 
 const riskEngineIndexPatterns = {
-  all: '.ds-risk-score*',
-  latest: 'risk-score.risk-score-latest-*',
+  all: 'an-index-pattern',
+  latest: 'another-index-pattern',
 };
 
 describe('risk engine metrics', () => {
@@ -43,36 +43,36 @@ describe('risk engine metrics', () => {
 
     it('should return metrics object', async () => {
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 100,
           host: 200,
         })
       );
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 10,
           host: 20,
         })
       );
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 1000,
           host: 2000,
         })
       );
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 500,
           host: 600,
         })
       );
       esClient.indices.stats.mockResponseOnce(
-        getStatsResult({
+        getStatsResultMock({
           size: 10000,
         })
       );
       esClient.indices.stats.mockResponseOnce(
-        getStatsResult({
+        getStatsResultMock({
           size: 5000,
         })
       );
@@ -97,19 +97,19 @@ describe('risk engine metrics', () => {
 
     it('should still return metrics object if some request return error', async () => {
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 100,
           host: 200,
         })
       );
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 10,
           host: 20,
         })
       );
       esClient.search.mockResponseOnce(
-        getAggregationResult({
+        getAggregationResultMock({
           user: 1000,
           host: 2000,
         })
@@ -119,12 +119,12 @@ describe('risk engine metrics', () => {
       });
 
       esClient.indices.stats.mockResponseOnce(
-        getStatsResult({
+        getStatsResultMock({
           size: 10000,
         })
       );
       esClient.indices.stats.mockResponseOnce(
-        getStatsResult({
+        getStatsResultMock({
           size: 5000,
         })
       );

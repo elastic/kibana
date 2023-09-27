@@ -36,37 +36,37 @@ export const riskEngineMetricsSchema: MakeSchemaFrom<RiskEngineMetrics> = {
   all_host_risk_scores_total: {
     type: 'long',
     _meta: {
-      description: 'Total number of host risk score executions',
+      description: 'Total number of host risk score records',
     },
   },
   all_user_risk_scores_total: {
     type: 'long',
     _meta: {
-      description: 'Total number of user risk score executions',
+      description: 'Total number of user risk score records',
     },
   },
   all_host_risk_scores_total_day: {
     type: 'long',
     _meta: {
-      description: 'Number of host risk score executions per day',
+      description: 'Number of host risk score records per day',
     },
   },
   all_user_risk_scores_total_day: {
     type: 'long',
     _meta: {
-      description: 'Number of user risk score executions per day',
+      description: 'Number of user risk score records per day',
     },
   },
   all_risk_scores_index_size: {
     type: 'long',
     _meta: {
-      description: 'Total size of the Risk Score indice (MB)',
+      description: 'Total size of the all Risk Score indices (MB)',
     },
   },
   unique_risk_scores_index_size: {
     type: 'long',
     _meta: {
-      description: 'Total size of the Risk Score indice (MB)',
+      description: 'Total size of the unique Risk Score indices (MB)',
     },
   },
 };

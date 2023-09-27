@@ -50,24 +50,21 @@ const getEntitiesAggregationData = async ({
   lastDay: boolean;
 }) => {
   try {
-    let bodyRequest: SearchRequest['body'] = {
+    const bodyRequest: SearchRequest['body'] = {
       ...allEnititiesByTypeAggregationBody,
     };
     if (lastDay) {
-      bodyRequest = {
-        ...bodyRequest,
-        query: {
-          range: {
-            '@timestamp': {
-              gte: 'now-24h',
-              lt: 'now',
-            },
+      bodyRequest.query = {
+        range: {
+          '@timestamp': {
+            gte: 'now-24h',
+            lt: 'now',
           },
         },
       };
     }
     const riskScoreAggsResponse = await esClient.search<
-      unknown,
+      never,
       {
         user_name: {
           value: number;

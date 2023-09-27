@@ -6,7 +6,7 @@
  */
 import type { SearchResponse, IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 
-export const getAggregationResult = ({
+export const getAggregationResultMock = ({
   user,
   host,
 }: {
@@ -30,7 +30,7 @@ export const getAggregationResult = ({
   aggregations: { user_name: { value: user }, host_name: { value: host } },
 });
 
-export const getStatsResult = ({ size }: { size: number }): IndicesStatsResponse => ({
+export const getStatsResultMock = ({ size }: { size: number }): IndicesStatsResponse => ({
   _shards: { total: 2, successful: 1, failed: 0 },
   _all: {
     primaries: {

@@ -101,7 +101,7 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
-export const deleteRiskScoreIndecies = async ({
+export const deleteRiskScoreIndices = async ({
   log,
   es,
   namespace = 'default',

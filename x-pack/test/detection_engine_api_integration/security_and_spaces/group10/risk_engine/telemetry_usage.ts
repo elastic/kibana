@@ -13,7 +13,7 @@ import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
   deleteRiskEngineTask,
-  deleteRiskScoreIndecies,
+  deleteRiskScoreIndices,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
   cleanRiskEngineConfig,
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await cleanRiskEngineConfig({ kibanaServer });
       await deleteRiskEngineTask({ es, log });
-      await deleteRiskScoreIndecies({ log, es });
+      await deleteRiskScoreIndices({ log, es });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await cleanRiskEngineConfig({ kibanaServer });
         await deleteRiskEngineTask({ es, log });
-        await deleteRiskScoreIndecies({ log, es });
+        await deleteRiskScoreIndices({ log, es });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
