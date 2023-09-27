@@ -151,8 +151,8 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          <MaintenanceWindowCallout 
-            kibanaServices={kibanaServices} 
+          <MaintenanceWindowCallout
+            kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
           <AllRules data-test-subj="all-rules" />
