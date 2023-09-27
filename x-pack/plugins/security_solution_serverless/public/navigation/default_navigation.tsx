@@ -10,7 +10,7 @@ import type { NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation'
 import type { SideNavComponent } from '@kbn/core-chrome-browser';
 import type { Services } from '../common/services';
 
-const Navigation = React.lazy(() =>
+const SecurityDefaultNavigationLazy = React.lazy(() =>
   import('@kbn/shared-ux-chrome-navigation').then(
     ({ DefaultNavigation, NavigationKibanaProvider }) => ({
       default: React.memo<{
@@ -41,7 +41,7 @@ export const getDefaultNavigationComponent = (
   function SecuritySideNavComponent() {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <Navigation navigationTree={navigationTree} services={services} />
+        <SecurityDefaultNavigationLazy navigationTree={navigationTree} services={services} />
       </Suspense>
     );
   };

@@ -46,7 +46,7 @@ export const formatNavigationTree = (
       icon: 'logoSecurity',
       breadcrumbStatus: 'hidden',
       defaultIsCollapsed: false,
-      children: formatNodesFromProjectNavigationLinks(projectNavLinks, categories),
+      children: formatNodesFromLinks(projectNavLinks, categories),
     },
   ],
   footer: [
@@ -99,7 +99,7 @@ export const formatNavigationTree = (
   ],
 });
 
-const formatNodesFromProjectNavigationLinks = (
+const formatNodesFromLinks = (
   projectNavLinks: ProjectNavigationLink[],
   parentCategories?: Readonly<Array<LinkCategory<ProjectPageName>>>
 ): NonEmptyArray<NodeDefinition> | undefined => {
@@ -112,7 +112,7 @@ const formatNodesFromProjectNavigationLinks = (
       nodes.push(...formatNodesFromLinksWithCategory(projectNavLinks, category));
     }, []);
   } else {
-    nodes.push(...formatNodesFromLinks(projectNavLinks));
+    nodes.push(...formatNodesFromLinksWithoutCategory(projectNavLinks));
   }
   if (nodes.length === 0) {
     return undefined;
@@ -130,14 +130,11 @@ const formatNodesFromLinksWithCategory = (
   if (isTitleLinkCategory(category)) {
     const children = category.linkIds.reduce<NodeDefinition[]>((acc, linkId) => {
       const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);
-      if (projectNavLink == null) {
-        return acc;
+      if (projectNavLink != null) {
+        acc.push(createNodeFromProjectNavLink(projectNavLink));
       }
-      const node = createNodeFromProjectNavLink(projectNavLink);
-      acc.push(node);
       return acc;
     }, []);
-
     if (children.length === 0) {
       return [];
     }
@@ -149,24 +146,23 @@ const formatNodesFromLinksWithCategory = (
       },
     ];
   } else if (isSeparatorLinkCategory(category)) {
-    // TODO: Add separator support
+    // TODO: Add separator support when implemented in the shared-ux navigation
     const categoryProjectNavLinks = category.linkIds.reduce<ProjectNavigationLink[]>(
       (acc, linkId) => {
         const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);
-        if (projectNavLink == null) {
-          return acc;
+        if (projectNavLink != null) {
+          acc.push(projectNavLink);
         }
-        acc.push(projectNavLink);
         return acc;
       },
       []
     );
-    return formatNodesFromLinks(categoryProjectNavLinks);
+    return formatNodesFromLinksWithoutCategory(categoryProjectNavLinks);
   }
   return [];
 };
 
-const formatNodesFromLinks = (projectNavLinks: ProjectNavigationLink[]) =>
+const formatNodesFromLinksWithoutCategory = (projectNavLinks: ProjectNavigationLink[]) =>
   projectNavLinks.map((projectNavLink) =>
     createNodeFromProjectNavLink(projectNavLink)
   ) as NonEmptyArray<NodeDefinition>;
@@ -180,7 +176,7 @@ const createNodeFromProjectNavLink = (projectNavLink: ProjectNavigationLink): No
     ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
   };
   if (links?.length) {
-    node.children = formatNodesFromProjectNavigationLinks(links, categories);
+    node.children = formatNodesFromLinks(links, categories);
   }
   return node;
 };
