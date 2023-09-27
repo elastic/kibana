@@ -2,8 +2,8 @@
 
 Spec files for Elastic Map Service manifests can be used for online tools like those found at https://openapi.tools/. 
 
-* **EMS Tile Service** as [JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/maps/docs/openapi/ems_tile_service/bundled.json) or [YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/maps/docs/openapi/ems_tile_service/bundled.yaml)
-* **EMS File Service** as [JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/maps/docs/openapi/ems_file_service/bundled.json) or [YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/maps/docs/openapi/ems_file_service/bundled.yaml)
+* **EMS Tile Service** as [JSON](https://raw.githubusercontent.com/elastic/kibana/master/src/plugins/maps_ems/docs/openapi/ems_tile_service/bundled.json) or [YAML](https://raw.githubusercontent.com/elastic/kibana/master/src/plugins/maps_ems/docs/openapi/ems_tile_service/bundled.yaml)
+* **EMS File Service** as [JSON](https://raw.githubusercontent.com/elastic/kibana/master/src/plugins/maps_ems/docs/openapi/ems_file_service/bundled.json) or [YAML](https://raw.githubusercontent.com/elastic/kibana/master/src/plugins/maps_ems/docs/openapi/ems_file_service/bundled.yaml)
 
 
 A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
@@ -12,7 +12,7 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 
 You can use the `Makefile` script with the `validate`, `bundle`, and `clean` targets.
 
-Alternatively, you can run this validate the docs before bundling them with the following command in the `x-pack/plugins/maps/docs/openapi/` folder:
+Alternatively, you can run this validate the docs before bundling them with the following command in the `src/plugins/maps_ems/docs/openapi/` folder:
 
   ```bash
 for e in ems_file_service ems_tile_service; do
