@@ -7,7 +7,7 @@
     "../../../test_serverless/shared/lib"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ],
   "compilerOptions": {
     "outDir": "target/types",
