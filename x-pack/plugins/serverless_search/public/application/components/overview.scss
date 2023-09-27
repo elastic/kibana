@@ -10,3 +10,7 @@
 .serverlessSearchOverviewFooterSection {
   background-color: transparentize($euiColorPrimary, .9);
 }
+
+.serverlessSearchCloudDetailsCopyPanel {
+  word-break: break-all;
+}

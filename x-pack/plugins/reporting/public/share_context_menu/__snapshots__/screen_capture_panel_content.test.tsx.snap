@@ -172,7 +172,10 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"
@@ -366,7 +369,10 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"
@@ -501,7 +507,10 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"
