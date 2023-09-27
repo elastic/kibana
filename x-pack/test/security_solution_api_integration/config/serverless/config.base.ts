@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 
 import { services } from '../../../../test_serverless/api_integration/services';
 import type { CreateTestConfigOptions } from '../../../../test_serverless/shared/types';
 
-export function createTestConfig(options: CreateTestConfigOptions) {
+export function createTestConfig(options: Partial<CreateTestConfigOptions>) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../../test_serverless/shared/config.base.ts')
@@ -26,13 +26,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          `--serverless=${options.serverlessProject}`,
+          '--serverless=security',
           ...(options.kbnServerArgs || []),
         ],
+        env: {
+          ELASTICSEARCH_USERNAME: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username,
+        },
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: options.suiteTags,
     };
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from './ftr';
+import { createTestConfig } from './create_test_config';
 
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig({
