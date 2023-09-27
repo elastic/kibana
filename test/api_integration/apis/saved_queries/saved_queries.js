@@ -55,6 +55,28 @@ export default function ({ getService }) {
         .send({ description: 'my description' })
         .expect(400));
 
+    it('should return 400 for saved query with title that exceeds length', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_create`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({ ...mockSavedQuery, title: Array(100).fill('a').join('') })
+        .expect(400)
+        .then((res) => {
+          expect(res.body.message).to.contain('title');
+          expect(res.body.message).to.contain('maximum length');
+        }));
+
+    it('should return 400 for saved query with description that exceeds length', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_create`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({ ...mockSavedQuery, description: Array(1000).fill('a').join('') })
+        .expect(400)
+        .then((res) => {
+          expect(res.body.message).to.contain('description');
+          expect(res.body.message).to.contain('maximum length');
+        }));
+
     it('should return 200 for update saved query', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)

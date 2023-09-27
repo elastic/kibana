@@ -13,12 +13,15 @@ import { SavedQueryRouteHandlerContext } from './route_handler_context';
 import { SavedQueryRestResponse } from './route_types';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
 
+export const SAVED_QUERY_NAME_MAX_LENGTH = 50;
+export const SAVED_QUERY_DESCRIPTION_MAX_LENGTH = 200;
+
 const SAVED_QUERY_ID_CONFIG = schema.object({
   id: schema.string(),
 });
 const SAVED_QUERY_ATTRS_CONFIG = schema.object({
-  title: schema.string(),
-  description: schema.string(),
+  title: schema.string({ maxLength: SAVED_QUERY_NAME_MAX_LENGTH }),
+  description: schema.string({ maxLength: SAVED_QUERY_DESCRIPTION_MAX_LENGTH }),
   query: schema.object({
     query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
     language: schema.string(),

@@ -8,6 +8,7 @@
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { isFilters, isOfQueryType } from '@kbn/es-query';
+import { SAVED_QUERY_NAME_MAX_LENGTH, SAVED_QUERY_DESCRIPTION_MAX_LENGTH } from './routes';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 
@@ -62,7 +63,7 @@ function extractReferences({
   return { attributes, references };
 }
 
-function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) {
+function verifySavedQuery({ title, query, filters = [], description }: SavedQueryAttributes) {
   if (!isQuery(query)) {
     throw new Error(`Invalid query: ${query}`);
   }
@@ -73,6 +74,16 @@ function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) 
 
   if (!title.trim().length) {
     throw new Error('Cannot create saved query without a title');
+  }
+
+  if (title.trim().length > SAVED_QUERY_NAME_MAX_LENGTH) {
+    throw new Error(`Saved query name may not exceed ${SAVED_QUERY_NAME_MAX_LENGTH} characters`);
+  }
+
+  if (description?.trim()?.length > SAVED_QUERY_DESCRIPTION_MAX_LENGTH) {
+    throw new Error(
+      `Saved query description may not exceed ${SAVED_QUERY_DESCRIPTION_MAX_LENGTH} characters`
+    );
   }
 }
 
