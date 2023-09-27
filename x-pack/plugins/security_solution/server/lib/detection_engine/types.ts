@@ -9,4 +9,4 @@ import type { Filter } from '@kbn/es-query';
 
 export type PartialFilter = Partial<Filter>;
 
-export type RefreshTypes = boolean | 'wait_for';
+export type RefreshTypes = boolean;
