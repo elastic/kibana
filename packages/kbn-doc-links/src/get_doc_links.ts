@@ -21,6 +21,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
+  const SEARCH_LABS_URL = meta.searchLabsUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
@@ -36,6 +37,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
   const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
+  const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
@@ -128,6 +130,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
+      aiSearchDoc: `${ESRE_DOCS}`,
+      aiSearchHelp: `${ESRE_DOCS}help.html`,
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
       behavioralAnalyticsCORS: `${ENTERPRISE_SEARCH_DOCS}analytics-cors-proxy.html`,
@@ -168,10 +172,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
       elser: `${ENTERPRISE_SEARCH_DOCS}elser-text-expansion.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
-      esre: `${ESRE_DOCS}index.html`,
-      esreFaq: `${ESRE_DOCS}faq.html`,
-      esreHelp: `${ESRE_DOCS}help.html`,
-      esreLearn: `${ESRE_DOCS}learn.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       ingestionApis: `${ENTERPRISE_SEARCH_DOCS}ingestion-apis.html`,
       ingestPipelines: `${ENTERPRISE_SEARCH_DOCS}ingest-pipelines.html`,
@@ -188,6 +188,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       searchApplicationsSearchApi: `${ENTERPRISE_SEARCH_DOCS}search-applications-safe-search.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
       searchApplicationsSearch: `${ENTERPRISE_SEARCH_DOCS}search-applications-search.html`,
+      searchLabs: `${SEARCH_LABS_URL}`,
+      searchLabsRepo: `${SEARCH_LABS_REPO}`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html`,
@@ -336,6 +338,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
       dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
       deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+      createEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
+      matchAllQuery: `${ELASTICSEARCH_DOCS}query-dsl-match-all-query.html`,
+      enrichPolicies: `${ELASTICSEARCH_DOCS}ingest-enriching-data.html#enrich-policy`,
       createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,
       gettingStarted: `${ELASTICSEARCH_DOCS}getting-started.html`,

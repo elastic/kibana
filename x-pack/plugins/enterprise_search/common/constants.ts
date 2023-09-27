@@ -46,19 +46,19 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
-export const ESRE_PLUGIN = {
-  ID: 'enterpriseSearchEsre',
-  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
-    defaultMessage: 'ESRE',
+export const AI_SEARCH_PLUGIN = {
+  ID: 'enterpriseSearchAISearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
+    defaultMessage: 'AI Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
-    defaultMessage: 'ESRE',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.aiSearch.navTitle', {
+    defaultMessage: 'AI Search',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.aiSearch.description', {
     defaultMessage:
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
-  URL: '/app/enterprise_search/esre',
+  URL: '/app/enterprise_search/ai_search',
   LOGO: 'logoEnterpriseSearch',
 };
 
