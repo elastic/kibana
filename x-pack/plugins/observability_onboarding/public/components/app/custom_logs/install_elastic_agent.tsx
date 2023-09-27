@@ -120,7 +120,7 @@ export function InstallElasticAgent() {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
-              name: datasetName,
+              name: datasetName || '',
               type: 'logFiles',
               state: {
                 datasetName,
