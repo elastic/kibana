@@ -691,4 +691,3 @@ const useCloudFormationTemplate = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };
-
