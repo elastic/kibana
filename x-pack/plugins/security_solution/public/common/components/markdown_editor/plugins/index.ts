@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TODO: This import can be removed, once https://github.com/elastic/eui/pull/7221 made its way into Kibana main
+import type { DefaultEuiMarkdownProcessingPlugins } from '@elastic/eui/src/components/markdown_editor/plugins/markdown_default_plugins/processing_plugins';
 import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
@@ -14,15 +16,11 @@ import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
 
-export const {
-  uiPlugins: nonStatefulUiPlugins,
-  parsingPlugins,
-  processingPlugins,
-} = {
-  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
-  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
-};
+export const nonStatefulUiPlugins = getDefaultEuiMarkdownUiPlugins();
+export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+// TODO: This explicit type can be removed, once https://github.com/elastic/eui/pull/7221 made its way into Kibana main
+export const processingPlugins: DefaultEuiMarkdownProcessingPlugins =
+  getDefaultEuiMarkdownProcessingPlugins();
 
 export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
