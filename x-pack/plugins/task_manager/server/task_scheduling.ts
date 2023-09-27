@@ -152,7 +152,7 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | true) {
+  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,

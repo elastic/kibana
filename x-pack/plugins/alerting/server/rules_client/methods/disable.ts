@@ -102,6 +102,9 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
           : {}),
       }
     );
+    const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
+      attributes.alertTypeId
+    );
 
     // If the scheduledTaskId does not match the rule id, we should
     // remove the task, otherwise mark the task as disabled
@@ -109,7 +112,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       if (attributes.scheduledTaskId !== id) {
         await context.taskManager.removeIfExists(attributes.scheduledTaskId);
       } else {
-        await context.taskManager.bulkDisable([attributes.scheduledTaskId], true);
+        await context.taskManager.bulkDisable([attributes.scheduledTaskId], isLifecycleAlert);
       }
     }
   }
