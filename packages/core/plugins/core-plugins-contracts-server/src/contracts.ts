@@ -24,7 +24,7 @@ export interface PluginsServiceSetup {
    *
    * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
    *
-   * @remark Requested dependencies must be defined as `runtimeDependencies` in the plugin's manifest,
+   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
    *         otherwise the API will throw when called.
    *
    * @example
@@ -50,7 +50,7 @@ export interface PluginsServiceSetup {
    *
    * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
    *
-   * @remark Requested dependencies must be defined as `runtimeDependencies` in the plugin's manifest,
+   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
    *         otherwise the API will throw when called.
    *
    * @example
@@ -84,7 +84,7 @@ export interface PluginsServiceStart {
    *
    * @remark This API **should only be used** when trying to address cyclic dependency issues that can't be solved otherwise.
    *
-   * @remark Requested dependencies must be defined as `runtimeDependencies` in the plugin's manifest,
+   * @remark Requested dependencies must be defined as `runtimePluginDependencies` in the plugin's manifest,
    *         otherwise the API will throw when called.
    *
    * @example
