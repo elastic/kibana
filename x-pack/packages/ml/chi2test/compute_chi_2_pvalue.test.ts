@@ -32,7 +32,7 @@ describe('computeChi2PValue()', () => {
         percentage: 0.5422117647058824,
       },
     ];
-    const productionTerms: Histogram[] = [
+    const comparisonTerms: Histogram[] = [
       {
         key: 'ap-northwest-1',
         doc_count: 40320,
@@ -55,7 +55,7 @@ describe('computeChi2PValue()', () => {
       },
     ];
     expect(computeChi2PValue([], [])).toStrictEqual(1);
-    expect(computeChi2PValue(referenceTerms, productionTerms)).toStrictEqual(0.99);
+    expect(computeChi2PValue(referenceTerms, comparisonTerms)).toStrictEqual(0.99);
   });
 
   test('should return close to 0 if datasets differ', () => {
@@ -71,7 +71,7 @@ describe('computeChi2PValue()', () => {
         percentage: 0,
       },
     ];
-    const productionTerms: Histogram[] = [
+    const comparisonTerms: Histogram[] = [
       {
         key: 'jackson',
         doc_count: 0,
@@ -83,6 +83,6 @@ describe('computeChi2PValue()', () => {
         percentage: 1,
       },
     ];
-    expect(computeChi2PValue(referenceTerms, productionTerms)).toStrictEqual(0.000001);
+    expect(computeChi2PValue(referenceTerms, comparisonTerms)).toStrictEqual(0.000001);
   });
 });
