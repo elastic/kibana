@@ -12,7 +12,6 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Security Cloud Security Functional Tests',
   },
-  // add feature flags
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
     `--xpack.fleet.packages.0.version=1.5.2`,
