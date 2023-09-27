@@ -30,8 +30,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WorkplaceSearchGatePageTemplate } from '../../components/layout';
-
 import { WorkplaceSearchGateLogic } from './workplace_search_gate_logic';
 
 const getFeature = (id: string) => {
@@ -42,8 +40,8 @@ const getFeature = (id: string) => {
       return featuresList.contentSources;
     case featuresList.contentExtraction.id:
       return featuresList.contentExtraction;
-    case featuresList.documentLevelPermission.id:
-      return featuresList.documentLevelPermission;
+    case featuresList.documentLevelPermissions.id:
+      return featuresList.documentLevelPermissions;
     case featuresList.synonyms.id:
       return featuresList.synonyms;
     case featuresList.analytics.id:
@@ -52,7 +50,12 @@ const getFeature = (id: string) => {
 };
 const featuresList = {
   analytics: {
-    actionLabel: 'Start with Behavioral Analytics',
+    actionLabel: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.analytics.action.Label',
+      {
+        defaultMessage: 'Start with Behavioral Analytics',
+      }
+    ),
     actionLink: './analytics ',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
@@ -122,14 +125,14 @@ const featuresList = {
       }
     ),
   },
-  documentLevelPermission: {
+  documentLevelPermissions: {
     actionLabel: undefined,
     actionLink: undefined,
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
 
     description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.gateForm.docLevelPermission.featureDescription',
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.docLevelPermissions.featureDescription',
       {
         defaultMessage:
           'Did you know you can restrict access to documents in your Elasticsearch indices according to user and group permissions? Return only authorized search results for users with Elastic’s document level security. ',
@@ -138,16 +141,26 @@ const featuresList = {
     id: 'documentLevelPermissions',
     learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/dls.html',
     title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.gateForm.docLevelPermission.featureName',
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.docLevelPermissions.featureName',
       {
         defaultMessage: 'Use Elastic connectors',
       }
     ),
   },
   searchApplication: {
-    actionLabel: 'Create a Search Application',
+    actionLabel: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.action.Label',
+      {
+        defaultMessage: 'Create a Search Application',
+      }
+    ),
     actionLink: './applications/search_applications',
-    addOnLearnMoreLabel: 'Search UI',
+    addOnLearnMoreLabel: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.addOn.learnMoreLabel',
+      {
+        defaultMessage: 'Search UI',
+      }
+    ),
     addOnLearnMoreUrl: 'https://www.elastic.co/guide/en/enterprise-search/current/search-ui.html  ',
     description: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.featureDescription',
@@ -166,7 +179,12 @@ const featuresList = {
     ),
   },
   synonyms: {
-    actionLabel: 'Search with synonyms',
+    actionLabel: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.gateForm.synonyms.action.Label',
+      {
+        defaultMessage: 'Search with synonyms',
+      }
+    ),
     actionLink:
       'https://www.elastic.co/guide/en/elasticsearch/reference/current/search-with-synonyms.html ',
     addOnLearnMoreLabel: undefined,
@@ -283,7 +301,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
     );
   }
 };
-export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
+export const WorkplaceSearchGate: React.FC = () => {
   const options = [
     {
       dropdownDisplay: (
@@ -312,15 +330,10 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
       inputDisplay: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.contentSource.inputDisplay',
         {
-          defaultMessage: 'Content ources',
+          defaultMessage: 'Content Sources',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.contentSource.value',
-        {
-          defaultMessage: 'contentSources',
-        }
-      ),
+      value: featuresList.contentSources.id,
     },
     {
       dropdownDisplay: (
@@ -352,19 +365,14 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           defaultMessage: 'Content extraction',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.contentExtraction.value',
-        {
-          defaultMessage: 'contentExtraction',
-        }
-      ),
+      value: featuresList.contentExtraction.id,
     },
     {
       dropdownDisplay: (
         <Fragment>
           <strong>
             {i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermission.title',
+              'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermissions.title',
               {
                 defaultMessage: 'Document-level permissions',
               }
@@ -373,7 +381,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermission.description',
+                'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermissions.description',
                 {
                   defaultMessage: 'Control access to specific documents',
                 }
@@ -383,17 +391,12 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
         </Fragment>
       ),
       inputDisplay: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermission.inputDisplay',
+        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.docLevelPermissions.inputDisplay',
         {
           defaultMessage: 'Document-level permissions',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.docLevelPermission.value',
-        {
-          defaultMessage: 'documentLevelPermissions',
-        }
-      ),
+      value: featuresList.documentLevelPermissions.id,
     },
     {
       dropdownDisplay: (
@@ -424,12 +427,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           defaultMessage: 'An out-of-the-box search experience',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.searchApplication.value',
-        {
-          defaultMessage: 'searchApplication',
-        }
-      ),
+      value: featuresList.searchApplication.id,
     },
     {
       dropdownDisplay: (
@@ -460,12 +458,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           defaultMessage: 'Synonyms',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.synonymns.value',
-        {
-          defaultMessage: 'synonyms',
-        }
-      ),
+      value: featuresList.synonyms.id,
     },
     {
       dropdownDisplay: (
@@ -496,12 +489,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           defaultMessage: 'Analytics',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.analytics.value',
-        {
-          defaultMessage: 'analytics',
-        }
-      ),
+      value: featuresList.analytics.id,
     },
     {
       dropdownDisplay: (
@@ -532,12 +520,7 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
           defaultMessage: 'Other',
         }
       ),
-      value: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.gateForm.superSelect.value.other.value',
-        {
-          defaultMessage: 'other',
-        }
-      ),
+      value: 'other',
     },
   ];
 
@@ -547,205 +530,136 @@ export const WorkplaceSearchGate: React.FC<{ isLoading: boolean }> = ({ isLoadin
   const { feature, participateInUXLabs } = useValues(WorkplaceSearchGateLogic);
 
   return (
-    <WorkplaceSearchGatePageTemplate
-      pageChrome={[]}
-      pageHeader={{
-        description: (
-          <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.gateForm.description"
-            defaultMessage="The standalone Workplace Search product remains available in maintenance mode, and is not recommended for new search experiences. Instead, we recommend using our set of Elasticsearch-native tools, which our team is actively developing and improving, for your workplace search use case. These tools offer the flexibility and composability of working directly with Elasticsearch indices. Learn more about the context for this refocus in this {blogUrl}. To help choose which of these tools best suit your use case, we’ve created this recommendation wizard. Let us know what features you need, and we'll guide you to the best solutions. If you still want to go ahead and use the standalone Workplace Search product at this point, you can do so after submitting the form."
-            values={{
-              blogUrl: (
-                <EuiLink
-                  data-test-subj="workplaceSearch-gateForm-blog-link"
-                  href="#"
-                  target="_blank"
-                  data-telemetry-id="workplaceSearch-gateForm-blog-viewLink"
-                >
-                  {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.viewBlog', {
-                    defaultMessage: 'blog',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
-        pageTitle: i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.title', {
-          defaultMessage: 'Before you begin...',
-        }),
-      }}
-      pageViewTelemetry="Workplace Search Gate form"
-      isLoading={isLoading}
-    >
-      <EuiPanel hasShadow={false}>
-        <EuiForm component="form" fullWidth>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>
-                {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.features.Label', {
-                  defaultMessage: 'What Workplace Search feature are you looking to use?',
-                })}
-              </EuiFormLabel>
-            </EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiText color="danger" size="xs">
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.features.required',
-                      {
-                        defaultMessage: 'Required',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiSuperSelect
-            options={options}
-            valueOfSelected={feature}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.gateForm.features.selectOption',
-              {
-                defaultMessage: 'Select an option',
-              }
-            )}
-            onChange={(value) => setFeature(value)}
-            itemLayoutAlign="top"
-            hasDividers
-            fullWidth
-          />
+    <EuiPanel hasShadow={false}>
+      <EuiForm component="form" fullWidth>
+        <EuiFormLabel>
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.features.Label', {
+            defaultMessage: 'What Workplace Search feature are you looking to use?',
+          })}
+        </EuiFormLabel>
 
-          {feature && <EducationPanel featureContent={feature} />}
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.Label',
-                  {
-                    defaultMessage: 'Would you like to share any additional feedback?',
-                  }
-                )}
-              </EuiFormLabel>
-            </EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.optional',
-                      {
-                        defaultMessage: 'Optional',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiTextArea
-                onChange={(e) => {
-                  setAdditionalFeedback(e.target.value);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color="subdued" size="xs">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
-                  defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
+        <EuiSpacer size="xs" />
+        <EuiSuperSelect
+          options={options}
+          valueOfSelected={feature}
+          placeholder={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.features.selectOption',
+            {
+              defaultMessage: 'Select an option',
+            }
+          )}
+          onChange={(value) => setFeature(value)}
+          itemLayoutAlign="top"
+          hasDividers
+          fullWidth
+        />
+
+        {feature && <EducationPanel featureContent={feature} />}
+        <EuiSpacer />
+
+        <EuiFormLabel>
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.Label',
+            {
+              defaultMessage: 'Would you like to share any additional feedback? (Optional)',
+            }
+          )}
+        </EuiFormLabel>
+
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTextArea
+              onChange={(e) => {
+                setAdditionalFeedback(e.target.value);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
+                defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
                     using the details you provide above. See {privacyStatementLink} for more
                     details or to opt-out at any time."
-                  values={{
-                    contact: (
-                      <EuiLink href="#">
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
-                          defaultMessage="Contact You"
-                        />
-                      </EuiLink>
-                    ),
-                    privacyStatementLink: (
-                      <EuiLink href="#">
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
-                          defaultMessage="Elastic’s Privacy Statement"
-                        />
-                      </EuiLink>
-                    ),
-                    termsOfService: (
-                      <EuiLink href="#">
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
-                          defaultMessage="Terms of Service"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label',
-                  {
-                    defaultMessage: 'Join our user research studies to improve Elasticsearch?',
-                  }
-                )}
-              </EuiFormLabel>
-            </EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.optional',
-                      {
-                        defaultMessage: 'Optional',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiSelect
-            hasNoInitialSelection
-            options={[
-              { text: 'Yes', value: 'yes' },
-              { text: 'No', value: 'no' },
-            ]}
-            onChange={(e) => setParticipateInUXLabs(e.target.value)}
-            value={participateInUXLabs}
-          />
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isDisabled={!feature ?? false}
-                type="submit"
-                fill
-                onClick={setFormSubmitted}
-              >
-                {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
-                  defaultMessage: 'Submit',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </EuiPanel>
-    </WorkplaceSearchGatePageTemplate>
+                values={{
+                  contact: (
+                    <EuiLink href="#">
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
+                        defaultMessage="contact you"
+                      />
+                    </EuiLink>
+                  ),
+                  privacyStatementLink: (
+                    <EuiLink href="#">
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
+                        defaultMessage="Elastic’s Privacy Statement"
+                      />
+                    </EuiLink>
+                  ),
+                  termsOfService: (
+                    <EuiLink href="#">
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
+                        defaultMessage="Terms of Service"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+
+        <EuiFormLabel>
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label',
+            {
+              defaultMessage: 'Join our user research studies to improve Elasticsearch? (Optional)',
+            }
+          )}
+        </EuiFormLabel>
+
+        <EuiSpacer size="xs" />
+        <EuiSelect
+          hasNoInitialSelection
+          options={[
+            {
+              text: i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.Yes',
+                {
+                  defaultMessage: 'Yes',
+                }
+              ),
+              value: 'yes',
+            },
+            {
+              text: i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.No',
+                {
+                  defaultMessage: 'No',
+                }
+              ),
+              value: 'no',
+            },
+          ]}
+          onChange={(e) => setParticipateInUXLabs(e.target.value)}
+          value={participateInUXLabs}
+        />
+        <EuiSpacer />
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton isDisabled={!feature ?? false} type="submit" fill onClick={setFormSubmitted}>
+              {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
+                defaultMessage: 'Submit',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+    </EuiPanel>
   );
 };

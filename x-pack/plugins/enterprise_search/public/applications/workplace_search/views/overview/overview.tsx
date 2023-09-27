@@ -19,7 +19,7 @@ import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
-import { WorkplaceSearchGate } from './workplace_search_gate';
+import { WorkplaceSearchGatePage } from './workplace_search_gate_form';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.title',
@@ -77,6 +77,6 @@ export const Overview: React.FC = () => {
       <RecentActivity />
     </WorkplaceSearchPageTemplate>
   ) : (
-    <WorkplaceSearchGate isLoading={dataLoading} />
+    <WorkplaceSearchGatePage isLoading={dataLoading} />
   );
 };

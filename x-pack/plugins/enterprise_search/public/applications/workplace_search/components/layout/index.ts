@@ -6,7 +6,6 @@
  */
 
 export { WorkplaceSearchPageTemplate } from './page_template';
-export { WorkplaceSearchGatePageTemplate } from './page_template_gate';
 export { useWorkplaceSearchNav } from './nav';
 export { WorkplaceSearchHeaderActions } from './kibana_header_actions';
 export { AccountHeader } from './account_header';

@@ -17,7 +17,7 @@ import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { Overview } from './overview';
 import { RecentActivity } from './recent_activity';
-import { WorkplaceSearchGate } from './workplace_search_gate';
+import { WorkplaceSearchGatePage } from './workplace_search_gate_form';
 
 describe('Overview', () => {
   it('calls initialize function', async () => {
@@ -37,7 +37,7 @@ describe('Overview', () => {
     setMockValues({ dataLoading: true });
     const wrapper = shallow(<Overview />);
 
-    expect(wrapper.find(WorkplaceSearchGate)).toHaveLength(1);
+    expect(wrapper.find(WorkplaceSearchGatePage)).toHaveLength(1);
     expect(wrapper.find(OnboardingSteps)).toHaveLength(0);
     expect(wrapper.find(OrganizationStats)).toHaveLength(0);
     expect(wrapper.find(RecentActivity)).toHaveLength(0);
