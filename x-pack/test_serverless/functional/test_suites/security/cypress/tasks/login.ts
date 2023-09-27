@@ -36,8 +36,8 @@ const sendApiLoginRequest = (
         method: 'POST',
         headers,
         body: {
-          providerType: basicProvider!.type,
-          providerName: basicProvider!.name,
+          providerType: basicProvider?.type,
+          providerName: basicProvider?.name,
           currentURL: '/',
           params: { username, password },
         },

@@ -20,6 +20,7 @@ export interface User {
   description?: string;
   roles: string[];
 }
+
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
