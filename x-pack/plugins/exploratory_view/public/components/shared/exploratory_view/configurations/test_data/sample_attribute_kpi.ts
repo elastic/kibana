@@ -50,6 +50,7 @@ export const sampleAttributeKpi = {
                 },
                 isBucketed: false,
                 label: 'test-series',
+                customLabel: true,
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
