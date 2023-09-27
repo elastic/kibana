@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { RequestDetailsRequest } from './req_details_request';
-export { RequestDetailsResponse } from './req_details_response';
-export { RequestDetailsStats } from './req_details_stats';
-export { ClustersView } from './clusters_view';
+export { ClustersHealth } from './clusters_health';
+export { ClusterHealth } from './cluster_health';
