@@ -88,6 +88,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isPersistingConfiguration,
   } = usePersistConfiguration();
 
+  const isLoadingCustomFields = loadingCaseConfigure || isPersistingConfiguration;
+
   const {
     isLoading: isLoadingConnectors,
     data: connectors = [],
@@ -367,8 +369,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <CustomFields
                 customFields={customFields}
-                isLoading={loadingCaseConfigure || isPersistingConfiguration}
-                disabled={isPersistingConfiguration || loadingCaseConfigure}
+                isLoading={isLoadingCustomFields}
+                disabled={isLoadingCustomFields}
                 handleAddCustomField={onAddCustomFields}
                 handleDeleteCustomField={onDeleteCustomField}
               />
