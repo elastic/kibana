@@ -134,55 +134,40 @@ Array [
   Object {
     "children": Array [
       Object {
-        "children": Array [
-          Object {
-            "children": undefined,
-            "deepLink": Object {
-              "baseUrl": "/mocked",
-              "href": "http://mocked/ml:overview",
-              "id": "ml:overview",
-              "title": "Deeplink ml:overview",
-              "url": "/mocked/ml:overview",
-            },
-            "href": undefined,
-            "id": "ml:overview",
-            "isActive": false,
-            "path": Array [
-              "rootNav:ml",
-              "root",
-              "ml:overview",
-            ],
-            "title": "Deeplink ml:overview",
-          },
-          Object {
-            "children": undefined,
-            "deepLink": Object {
-              "baseUrl": "/mocked",
-              "href": "http://mocked/ml:notifications",
-              "id": "ml:notifications",
-              "title": "Deeplink ml:notifications",
-              "url": "/mocked/ml:notifications",
-            },
-            "href": undefined,
-            "id": "ml:notifications",
-            "isActive": false,
-            "path": Array [
-              "rootNav:ml",
-              "root",
-              "ml:notifications",
-            ],
-            "title": "Deeplink ml:notifications",
-          },
-        ],
-        "deepLink": undefined,
+        "children": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:overview",
+          "id": "ml:overview",
+          "title": "Deeplink ml:overview",
+          "url": "/mocked/ml:overview",
+        },
         "href": undefined,
-        "id": "root",
+        "id": "ml:overview",
         "isActive": false,
         "path": Array [
           "rootNav:ml",
-          "root",
+          "ml:overview",
         ],
-        "title": "",
+        "title": "Deeplink ml:overview",
+      },
+      Object {
+        "children": undefined,
+        "deepLink": Object {
+          "baseUrl": "/mocked",
+          "href": "http://mocked/ml:notifications",
+          "id": "ml:notifications",
+          "title": "Deeplink ml:notifications",
+          "url": "/mocked/ml:notifications",
+        },
+        "href": undefined,
+        "id": "ml:notifications",
+        "isActive": false,
+        "path": Array [
+          "rootNav:ml",
+          "ml:notifications",
+        ],
+        "title": "Deeplink ml:notifications",
       },
       Object {
         "children": Array [
@@ -451,7 +436,6 @@ Array [
               "data_visualizer",
               "ml:dataDrift",
             ],
-            "renderItem": undefined,
             "title": "Data drift",
           },
         ],
