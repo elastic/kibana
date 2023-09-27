@@ -529,7 +529,7 @@ export const buildOSSFeatures = ({
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
         defaultMessage:
-          'Set to "All" to enable saving queries across Kibana. Otherwise, set to "None" and configure individually via other feature privileges.',
+          'If set to "All", saved queries can be managed across Kibana in all applications that support them. If set to "None", saved query privileges will be determined independently by each application.',
       }),
       privileges: {
         all: {
