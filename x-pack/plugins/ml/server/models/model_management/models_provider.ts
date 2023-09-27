@@ -166,18 +166,39 @@ export function modelsProvider(client: IScopedClusterClient, cloud?: CloudSetup)
         }
       }
 
-      const result = Object.entries(ELASTIC_MODEL_DEFINITIONS).map(([name, def]) => {
+      const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
+
+      for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
         const recommended =
           (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
           (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
-        return {
-          ...def,
-          name,
-          ...(recommended ? { recommended } : {}),
-        };
-      });
 
-      return result;
+        const { modelName, ...rest } = def;
+
+        const modelDefinitionResponse = {
+          ...rest,
+          ...(recommended ? { recommended } : {}),
+          name,
+        };
+
+        if (modelDefinitionMap.has(modelName)) {
+          modelDefinitionMap.get(modelName)!.push(modelDefinitionResponse);
+        } else {
+          modelDefinitionMap.set(modelName, [modelDefinitionResponse]);
+        }
+      }
+
+      // check if there is no recommended, so we mark default as recommended
+      for (const [, arr] of modelDefinitionMap.entries()) {
+        const defaultModel = arr.find((a) => a.default);
+        const recommendedModel = arr.find((a) => a.recommended);
+        if (defaultModel && !recommendedModel) {
+          delete defaultModel.default;
+          defaultModel.recommended = true;
+        }
+      }
+
+      return [...modelDefinitionMap.values()].flat();
     },
 
     /**
