@@ -49,7 +49,10 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     const requests = this.getRequests();
     this.state = {
       requests,
-      request: getInitialRequest(requests, (this.props.options as RequestViewOptions | undefined)?.initialRequestId),
+      request: getInitialRequest(
+        requests,
+        (this.props.options as RequestViewOptions | undefined)?.initialRequestId
+      ),
     };
   }
 
@@ -179,7 +182,12 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
 
         <EuiSpacer size="m" />
 
-        {this.state.request && <RequestDetails initialTabs={(this.props.options as RequestViewOptions | undefined)?.initialTabs} request={this.state.request} />}
+        {this.state.request && (
+          <RequestDetails
+            initialTabs={(this.props.options as RequestViewOptions | undefined)?.initialTabs}
+            request={this.state.request}
+          />
+        )}
       </>
     );
   }

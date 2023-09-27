@@ -63,11 +63,10 @@ const DETAILS: DetailViewData[] = [
 export function RequestDetails(props: Props) {
   const [availableDetails, setAvailableDetails] = useState<DetailViewData[]>([]);
   const [selectedDetail, setSelectedDetail] = useState<DetailViewData | null>(null);
-  
+
   useEffect(() => {
-    const nextAvailableDetails = DETAILS.filter(
-      (detail: DetailViewData) =>
-        detail.component.shouldShow?.(props.request)
+    const nextAvailableDetails = DETAILS.filter((detail: DetailViewData) =>
+      detail.component.shouldShow?.(props.request)
     );
     setAvailableDetails(nextAvailableDetails);
 
@@ -79,9 +78,9 @@ export function RequestDetails(props: Props) {
 
     const firstDetail = nextAvailableDetails.length ? nextAvailableDetails[0] : null;
     const initialTabName = props.initialTabs
-      ? props.initialTabs.find(tabName => {
+      ? props.initialTabs.find((tabName) => {
           return nextAvailableDetails.some(({ name }) => tabName === name);
-      })
+        })
       : undefined;
     const initialDetail = initialTabName
       ? nextAvailableDetails.find(({ name }) => initialTabName === name)
@@ -94,7 +93,7 @@ export function RequestDetails(props: Props) {
   return selectedDetail ? (
     <>
       <EuiTabs size="s">
-        {availableDetails.map(detail => (
+        {availableDetails.map((detail) => (
           <EuiTab
             key={detail.name}
             isSelected={detail.name === selectedDetail.name}
