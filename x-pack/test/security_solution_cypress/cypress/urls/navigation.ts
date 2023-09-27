@@ -13,7 +13,6 @@ export const LOGOUT_URL = '/logout';
 export const MANAGE_URL = '/app/security/manage';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 
-export const ALERTS_URL = 'app/security/alerts';
 export const DISCOVER_URL = '/app/discover';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
 export const POLICIES_URL = '/app/security/administration/policy';
