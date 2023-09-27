@@ -23,14 +23,20 @@ export class ActionsClientLlm extends LLM {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   #actionResultData: Record<string, any>;
 
+  // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
+  // Not using getter as `this._llmType()` is called in the constructor via `super({})`
+  protected llmType: string;
+
   constructor({
     actions,
     connectorId,
+    llmType,
     logger,
     request,
   }: {
     actions: ActionsPluginStart;
     connectorId: string;
+    llmType?: string;
     logger: Logger;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     request: KibanaRequest<unknown, unknown, any, any>;
@@ -39,6 +45,7 @@ export class ActionsClientLlm extends LLM {
 
     this.#actions = actions;
     this.#connectorId = connectorId;
+    this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
     this.#actionResultData = {};
@@ -50,7 +57,14 @@ export class ActionsClientLlm extends LLM {
   }
 
   _llmType() {
-    return LLM_TYPE;
+    return this.llmType;
+  }
+
+  // Model type needs to be `base_chat_model` to work with LangChain OpenAI Tools
+  // We may want to make this configurable (ala _llmType) if different agents end up requiring different model types
+  // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
+  _modelType() {
+    return 'base_chat_model';
   }
 
   async _call(prompt: string): Promise<string> {

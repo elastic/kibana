@@ -74,6 +74,18 @@ describe('ActionsClientLlm', () => {
 
       expect(actionsClientLlm._llmType()).toEqual('ActionsClientLlm');
     });
+
+    it('returns the expected LLM type when overridden', () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actions: mockActions,
+        connectorId,
+        llmType: 'special-llm-type',
+        logger: mockLogger,
+        request: mockRequest,
+      });
+
+      expect(actionsClientLlm._llmType()).toEqual('special-llm-type');
+    });
   });
 
   describe('_call', () => {

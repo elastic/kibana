@@ -23,6 +23,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
+import { getLlmType } from './utils';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -72,6 +73,13 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
         // Get the actions plugin start contract from the request context for the agents
         const actions = (await context.elasticAssistant).actions;
 
+        // Fetch all connectors from the actions plugin, so we can set the appropriate `llmType` on ActionsClientLlm
+        const actionsClient = await actions.getActionsClientWithRequest(request);
+        const connectors = await actionsClient.getBulk({
+          ids: connectorIds,
+          throwIfSystemAction: false,
+        });
+
         // Get a scoped esClient for passing to the agents for retrieval, and
         // writing results to the output index
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -93,17 +101,19 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
         const agents: AgentExecutorEvaluator[] = [];
         connectorIds.forEach((connectorId) => {
           agentNames.forEach((agentName) => {
+            logger.info(`Creating agent: ${connectorId} + ${agentName}`);
+            const llmType = getLlmType(connectorId, connectors);
             agents.push((langChainMessages) =>
               AGENT_EXECUTOR_MAP[agentName]({
                 actions,
                 connectorId,
                 esClient,
                 langChainMessages,
+                llmType,
                 logger,
                 request: skeletonRequest,
               })
             );
-            logger.info(`Creating agent: ${connectorId} + ${agentName}`);
           });
         });
 

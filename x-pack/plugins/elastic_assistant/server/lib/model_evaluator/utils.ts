@@ -5,26 +5,35 @@
  * 2.0.
  */
 
-import { BaseChain } from 'langchain/dist/chains/base';
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
+import { BaseMessage } from 'langchain/schema';
 import { ResponseBody } from '../langchain/helpers';
+import { AgentExecutorEvaluator } from '../langchain/executors/types';
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const callAgentWithRetry = async (
-  agent: BaseChain,
-  query: string,
-  logger: Logger | ToolingLog,
-  maxRetries = 3
-) => {
+export interface CallAgentWithRetryParams {
+  agent: AgentExecutorEvaluator;
+  messages: BaseMessage[];
+  logger: Logger | ToolingLog;
+  maxRetries?: number;
+}
+export const callAgentWithRetry = async ({
+  agent,
+  messages,
+  logger,
+  maxRetries = 3,
+}: CallAgentWithRetryParams) => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      return await agent.call({ query });
+      return await agent(messages);
     } catch (error) {
       // Check for 429, and then if there is a retry-after header
       if (error.status === 429) {
-        logger.error("Slow down! You're going too fast! 429 detected! Retrying after...");
+        logger.error(
+          "callAgentWithRetry: Slow down! You're going too fast! 429 detected! Retrying after..."
+        );
         const retryAfter = error.headers?.['retry-after'];
         if (retryAfter) {
           const retryAfterNum = parseInt(retryAfter, 10);
@@ -35,21 +44,26 @@ export const callAgentWithRetry = async (
         }
       }
       // If not 429 or there is no retry-after header, reject the promise
+      logger.error(`Error calling agent:\n${error}`);
       throw error;
     }
   }
-  throw new Error('Max retries reached');
+  logger.error(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
+  throw new Error(`callAgentWithRetry: Max retries reached: ${maxRetries}`);
 };
 
-export const getMessageFromLangChainResponse = (response: ResponseBody): string => {
-  const choices = response.data.choices;
+export const getMessageFromLangChainResponse = (
+  response: PromiseSettledResult<ResponseBody>
+): string => {
+  if (response.status === 'fulfilled') {
+    const choices = response.value.data.choices;
 
-  if (Array.isArray(choices) && choices.length > 0 && choices[0].message.content) {
-    const result: string = choices[0].message.content.trim();
+    if (Array.isArray(choices) && choices.length > 0 && choices[0].message.content) {
+      const result: string = choices[0].message.content.trim();
 
-    return getFormattedMessageContent(result);
+      return getFormattedMessageContent(result);
+    }
   }
-
   return 'error';
 };
 

@@ -18,8 +18,12 @@ import {
   EuiComboBoxOptionOption,
   EuiTextArea,
   EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLink,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -32,7 +36,11 @@ import { usePerformEvaluation } from './use_perform_evaluation';
  * for the agent name -> executor mapping
  */
 const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
-const DEFAULT_EVAL_TYPES = ['correctness', 'esql-validator', 'custom'];
+const DEFAULT_EVAL_TYPES_OPTIONS = [
+  { label: 'correctness' },
+  { label: 'esql-validator', disabled: true },
+  { label: 'custom', disabled: true },
+];
 
 interface Props {
   onEvaluationSettingsChange?: () => void;
@@ -122,7 +130,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     [setSelectedEvaluationType]
   );
   const evaluationTypeOptions = useMemo(() => {
-    return DEFAULT_EVAL_TYPES.map((label) => ({ label }));
+    return DEFAULT_EVAL_TYPES_OPTIONS;
   }, []);
 
   // Eval Model
@@ -308,15 +316,38 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         />
       </EuiFormRow>
 
-      <EuiButton
-        size="s"
-        type="submit"
-        isLoading={isPerformingEvaluation}
-        onClick={handlePerformEvaluation}
-        fill
-      >
-        {i18n.PERFORM_EVALUATION}
-      </EuiButton>
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            type="submit"
+            isLoading={isPerformingEvaluation}
+            onClick={handlePerformEvaluation}
+            fill
+          >
+            {i18n.PERFORM_EVALUATION}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color={'subdued'} size={'xs'}>
+            <FormattedMessage
+              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and {click here} to view the results in Discover once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
+              values={{
+                seeDocs: (
+                  <EuiLink external href={''} target="_blank">
+                    {i18n.EVALUATOR_FUN_FACT_DISCOVER_LINK}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
     </>
   );
 });

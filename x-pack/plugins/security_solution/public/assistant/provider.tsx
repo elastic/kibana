@@ -19,6 +19,7 @@ import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { APP_ID } from '../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -33,6 +34,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
+  const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
   const { conversations, setConversations } = useConversationStore();
   const getInitialConversation = useCallback(() => {
@@ -52,7 +54,9 @@ export const AssistantProvider: React.FC = ({ children }) => {
       actionTypeRegistry={actionTypeRegistry}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      assistantLangChain={false}
+      // NOTE: `assistantLangChain` and `assistantModelEvaluation` experimental feature will be coupled until upcoming
+      // Knowledge Base UI updates, which will remove the `assistantLangChain` feature flag in favor of a UI feature toggle
+      assistantLangChain={isModelEvaluationEnabled}
       assistantTelemetry={assistantTelemetry}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}

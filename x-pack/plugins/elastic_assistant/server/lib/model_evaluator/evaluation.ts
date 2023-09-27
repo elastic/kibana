@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { loadEvaluator } from 'langchain/evaluation';
 import { LLM } from 'langchain/llms/base';
 import { ChainValues, HumanMessage } from 'langchain/schema';
@@ -14,7 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { asyncForEach } from '@kbn/std';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
-import { getMessageFromLangChainResponse, wait } from './utils';
+import { callAgentWithRetry, getMessageFromLangChainResponse, wait } from './utils';
 import { ResponseBody } from '../langchain/helpers';
 
 export interface PerformEvaluationParams {
@@ -31,7 +32,7 @@ export interface EvaluationResult {
   evaluation: ChainValues;
   input: string;
   prediction: string;
-  predictionResponse: ResponseBody;
+  predictionResponse: PromiseSettledResult<ResponseBody>;
   reference: string;
 }
 
@@ -49,20 +50,23 @@ export const performEvaluation = async ({
   maxConcurrency = 3,
   logger,
 }: PerformEvaluationParams) => {
-  const results: ChainValues = [];
+  const startTime = new Date().getTime();
+  const results: Array<PromiseSettledResult<ResponseBody>> = [];
   const requests = dataset.flatMap(({ input }) =>
-    agentExecutorEvaluators.map((agent) => agent([new HumanMessage(input)]))
+    agentExecutorEvaluators.map((agent) =>
+      callAgentWithRetry({ agent, messages: [new HumanMessage(input)], logger })
+    )
   );
 
-  logger.info(`Total Requests: ${requests.length}`);
-
+  logger.info(`Total requests: ${requests.length}`);
+  logger.info(`Chunk size: ${maxConcurrency}`);
   logger.info('Fetching predictions...');
   const requestChunks = chunk(maxConcurrency, requests);
   for (let i = 0; i < requestChunks.length; i++) {
     logger.info(`Request chunk [${i}]: ${requestChunks[i].length}`);
 
-    const chunkResults = await Promise.all(requestChunks[i]);
-    logger.info(`Chunk Results:\n${JSON.stringify(chunkResults)}`);
+    const chunkResults = await Promise.allSettled(requestChunks[i]);
+    logger.info(`Chunk results:\n${JSON.stringify(chunkResults)}`);
     results.push(...chunkResults);
   }
 
@@ -98,6 +102,15 @@ export const performEvaluation = async ({
     ...d,
     evaluation: finalResults[i],
   }));
+  const endTime = new Date().getTime();
+
+  const executionSummary = {
+    evaluationId: uuidv4(),
+    evaluationDuration: endTime - startTime,
+    totalAgents: agentExecutorEvaluators.length,
+    totalRequests: requests.length,
+    totalInput: dataset.length,
+  };
 
   logger.info(`Final results:\n${JSON.stringify(finalEvalResults)}`);
 

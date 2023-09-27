@@ -26,10 +26,11 @@ export const callOpenAIFunctionsExecutor = async ({
   connectorId,
   esClient,
   langChainMessages,
+  llmType,
   logger,
   request,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
+  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message

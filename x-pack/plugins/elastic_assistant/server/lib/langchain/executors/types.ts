@@ -17,6 +17,7 @@ export interface AgentExecutorParams {
   connectorId: string;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
+  llmType?: string;
   logger: Logger;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any, any>;
