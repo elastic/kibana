@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-
 if [[ "${CI-}" == "true" ]]; then
   .buildkite/scripts/bootstrap.sh
 
