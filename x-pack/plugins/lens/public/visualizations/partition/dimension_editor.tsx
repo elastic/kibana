@@ -12,10 +12,10 @@ import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   PaletteRegistry,
-  getPaletteColors,
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERTION,
   AVAILABLE_PALETTES,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
 import {
@@ -127,7 +127,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getPaletteColors(false, currentLayer.colorMapping);
+  const colors = getColorsFromMapping(props.isDarkMode, currentLayer.colorMapping);
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
 

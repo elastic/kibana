@@ -11,10 +11,10 @@ import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   ColorMapping,
-  getPaletteColors,
   SPECIAL_TOKENS_STRING_CONVERTION,
   PaletteOutput,
   AVAILABLE_PALETTES,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import {
@@ -61,7 +61,7 @@ export function TagsDimensionEditor({
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
 
-  const colors = getPaletteColors(false, state.colorMapping);
+  const colors = getColorsFromMapping(isDarkMode, state.colorMapping);
   const table = frame.activeData?.[state.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
 

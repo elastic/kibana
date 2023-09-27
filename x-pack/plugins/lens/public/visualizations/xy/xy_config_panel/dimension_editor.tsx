@@ -27,11 +27,11 @@ import {
   PaletteRegistry,
   ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  getPaletteColors,
   CategoricalColorMapping,
   PaletteOutput,
   SPECIAL_TOKENS_STRING_CONVERTION,
   AVAILABLE_PALETTES,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
@@ -149,7 +149,7 @@ export function DataDimensionEditor(
   const localLayer: XYDataLayerConfig = layer;
 
   const colors = layer.colorMapping
-    ? getPaletteColors(props.darkMode, layer.colorMapping)
+    ? getColorsFromMapping(props.darkMode, layer.colorMapping)
     : props.paletteService
         .get(layer.palette?.name || 'default')
         .getCategoricalColors(10, layer.palette);

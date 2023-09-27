@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import chroma from 'chroma-js';
 import { ColorMapping } from '.';
 import { AVAILABLE_PALETTES, getPalette } from '../palettes';
 import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
 import { NeutralPalette } from '../palettes/neutral';
+import { changeAlpha, combineColors } from '../color/color_math';
+import { getColor } from '../color/color_handling';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
@@ -45,4 +48,45 @@ export function getPaletteColors(
   const colorMappingModel = colorMappings ?? { ...DEFAULT_COLOR_MAPPING_CONFIG };
   const palette = getPalette(AVAILABLE_PALETTES, NeutralPalette)(colorMappingModel.paletteId);
   return Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i, isDarkMode));
+}
+
+export function getColorsFromMapping(
+  isDarkMode: boolean,
+  colorMappings?: ColorMapping.Config
+): string[] {
+  const { colorMode, paletteId, assignmentMode, assignments, specialAssignments } =
+    colorMappings ?? {
+      ...DEFAULT_COLOR_MAPPING_CONFIG,
+    };
+
+  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
+  if (colorMode.type === 'gradient') {
+    const steps =
+      colorMode.steps.length === 1
+        ? [
+            getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+            combineColors(
+              changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+              isDarkMode ? 'black' : 'white'
+            ),
+          ]
+        : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
+    steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
+    const colorScale = chroma.scale(steps).mode('lab');
+    return Array.from({ length: 6 }, (d, i) => colorScale(i / 6).hex());
+  } else {
+    const palette = getPaletteFn(paletteId);
+    if (assignmentMode === 'auto') {
+      return Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i, isDarkMode));
+    } else {
+      return [
+        ...assignments.map((a) => {
+          return a.color.type === 'gradient' ? '' : getColor(a.color, getPaletteFn, isDarkMode);
+        }),
+        ...specialAssignments.map((a) => {
+          return getColor(a.color, getPaletteFn, isDarkMode);
+        }),
+      ].filter((color) => color !== '');
+    }
+  }
 }

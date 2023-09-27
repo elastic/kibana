@@ -16,7 +16,7 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { PaletteRegistry, DEFAULT_COLOR_MAPPING_CONFIG, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
@@ -114,6 +114,21 @@ export const getTagcloudVisualization = ({
   },
 
   getConfiguration({ state }) {
+    const canUseColorMapping = state.colorMapping ? true : false;
+    let colors: string[] = [];
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getColorsFromMapping(theme.darkMode, state.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(state.palette?.name || 'default')
+        .getCategoricalColors(10, state.palette?.params);
+    }
     return {
       groups: [
         {
@@ -127,9 +142,7 @@ export const getTagcloudVisualization = ({
                 {
                   columnId: state.tagAccessor,
                   triggerIconType: 'colorBy',
-                  palette: paletteService
-                    .get(state.palette?.name || 'default')
-                    .getCategoricalColors(10, state.palette?.params),
+                  palette: colors,
                 },
               ]
             : [],

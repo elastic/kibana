@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  getPaletteColors,
   PaletteRegistry,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -204,7 +204,7 @@ export const getPieVisualization = ({
       .subscribe({
         next(theme) {
           colors = state.layers[0]?.colorMapping
-            ? getPaletteColors(theme.darkMode, state.layers[0].colorMapping)
+            ? getColorsFromMapping(theme.darkMode, state.layers[0].colorMapping)
             : paletteService
                 .get(state.palette?.name || 'default')
                 .getCategoricalColors(10, state.palette?.params);

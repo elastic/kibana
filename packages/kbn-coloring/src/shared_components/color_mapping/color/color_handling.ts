@@ -40,7 +40,6 @@ export function getAssignmentColor(
             ]
           : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
       steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
-      // const colorScale = scaleSequential(piecewise(interp`olateLab, steps));
       const colorScale = chroma.scale(steps).mode('lab');
       return total === 0
         ? 'red'
