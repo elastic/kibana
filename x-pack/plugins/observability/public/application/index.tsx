@@ -14,11 +14,8 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
@@ -90,7 +87,7 @@ export const renderApp = ({
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
           <CloudProvider>
             <KibanaContextProvider
               services={{
