@@ -7,7 +7,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
@@ -19,17 +18,28 @@ import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
 import { disambiguateRequestNames } from './disambiguate_request_names';
 
+function getInitialRequest(requests: Request[], initialRequestId?: string) {
+  const initialRequest = initialRequestId
+    ? requests.find(({ id }) => id === initialRequestId)
+    : undefined;
+
+  if (initialRequest) {
+    return initialRequest;
+  }
+
+  return requests.length ? requests[0] : null;
+}
+
+interface RequestViewOptions {
+  requestId?: string;
+}
+
 interface RequestSelectorState {
   requests: Request[];
   request: Request | null;
 }
 
 export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {
-  static propTypes = {
-    adapters: PropTypes.object.isRequired,
-    title: PropTypes.string.isRequired,
-  };
-
   constructor(props: InspectorViewProps) {
     super(props);
 
@@ -38,7 +48,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     const requests = this.getRequests();
     this.state = {
       requests,
-      request: requests.length ? requests[0] : null,
+      request: getInitialRequest(requests, (this.props.options as RequestViewOptions).requestId),
     };
   }
 

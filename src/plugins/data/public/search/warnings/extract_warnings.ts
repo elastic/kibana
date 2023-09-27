@@ -68,7 +68,11 @@ export function extractWarnings(
           {
             requests: inspector.adapter,
           },
-          {}
+          {
+            options: {
+              requestId: inspector?.id,
+            }
+          }
         );
       },
     });
