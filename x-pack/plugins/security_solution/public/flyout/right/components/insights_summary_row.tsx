@@ -9,6 +9,7 @@ import type { ReactElement, VFC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedCount } from '../../../common/components/formatted_number';
 
 export interface InsightsSummaryRowProps {
@@ -64,7 +65,13 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         lines={1}
         size="m"
         isLoading={loading}
-        contentAriaLabel="Loading"
+        contentAriaLabel={i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
+          {
+            defaultMessage: 'Loading insights for {value}',
+            values: { value },
+          }
+        )}
         data-test-subj={loadingDataTestSubj}
       />
     );
@@ -83,7 +90,12 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           data-test-subj={iconDataTestSubj}
-          aria-label={'entity-icon'}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
+            {
+              defaultMessage: 'Insight summary row icon',
+            }
+          )}
           color="text"
           display="empty"
           iconType={icon}
