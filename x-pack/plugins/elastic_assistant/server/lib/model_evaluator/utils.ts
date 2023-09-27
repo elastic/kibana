@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { BaseMessage } from 'langchain/schema';
-import { ResponseBody } from '../langchain/helpers';
+import { ResponseBody } from '../langchain/types';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,14 +55,8 @@ export const callAgentWithRetry = async ({
 export const getMessageFromLangChainResponse = (
   response: PromiseSettledResult<ResponseBody>
 ): string => {
-  if (response.status === 'fulfilled') {
-    const choices = response.value.data.choices;
-
-    if (Array.isArray(choices) && choices.length > 0 && choices[0].message.content) {
-      const result: string = choices[0].message.content.trim();
-
-      return getFormattedMessageContent(result);
-    }
+  if (response.status === 'fulfilled' && response.value.data != null) {
+    return getFormattedMessageContent(response.value.data);
   }
   return 'error';
 };

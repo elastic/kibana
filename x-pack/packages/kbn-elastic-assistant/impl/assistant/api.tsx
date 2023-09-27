@@ -45,15 +45,14 @@ export const fetchConnectorExecuteAction = async ({
           temperature: 0.2,
         }
       : {
+          // Azure OpenAI and Bedrock invokeAI both expect this body format
           messages: outboundMessages,
         };
 
   const requestBody = {
     params: {
-      subActionParams: {
-        body: JSON.stringify(body),
-      },
-      subAction: 'test',
+      subActionParams: body,
+      subAction: 'invokeAI',
     },
   };
 
@@ -62,29 +61,23 @@ export const fetchConnectorExecuteAction = async ({
       ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
       : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
 
-    // TODO: Find return type for this API
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await http.fetch<any>(path, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-      signal,
-    });
+    const response = await http.fetch<{ connector_id: string; status: string; data: string }>(
+      path,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        signal,
+      }
+    );
 
-    const data = response.data;
-    if (response.status !== 'ok') {
+    if (response.status !== 'ok' || !response.data) {
       return API_ERROR;
     }
 
-    if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
-      const result = data.choices[0].message.content.trim();
-
-      return assistantLangChain ? getFormattedMessageContent(result) : result;
-    } else {
-      return API_ERROR;
-    }
+    return assistantLangChain ? getFormattedMessageContent(response.data) : response.data;
   } catch (error) {
     return API_ERROR;
   }

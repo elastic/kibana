@@ -16,7 +16,7 @@ import { asyncForEach } from '@kbn/std';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
 import { callAgentWithRetry, getMessageFromLangChainResponse, wait } from './utils';
-import { ResponseBody } from '../langchain/helpers';
+import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluator[];

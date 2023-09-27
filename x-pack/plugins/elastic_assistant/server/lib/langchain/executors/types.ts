@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { ResponseBody } from '../helpers';
+import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
   actions: ActionsPluginStart;
@@ -19,8 +19,7 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<unknown, unknown, any, any>;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;

@@ -79,13 +79,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const {
-      actionTypeRegistry,
-      assistantLangChain,
-      http,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+    const { assistantLangChain, http, selectedSettingsTab, setSelectedSettingsTab } =
+      useAssistantContext();
     const {
       conversationSettings,
       defaultAllow,
@@ -280,7 +275,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     conversationSettings={conversationSettings}
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={systemPromptSettings}
-                    actionTypeRegistry={actionTypeRegistry}
                     selectedConversation={selectedConversation}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
