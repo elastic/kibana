@@ -19323,7 +19323,6 @@
     "xpack.infra.metrics.nodeDetails.processes.stateZombie": "僵停",
     "xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM": "在 APM 中查看跟踪",
     "xpack.infra.metrics.nodeDetails.processesHeader": "排序靠前的进程",
-    "": "下表聚合了 CPU 和内存消耗靠前的进程。不显示所有进程。",
     "xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel": "更多信息",
     "xpack.infra.metrics.nodeDetails.processListError": "无法加载进程数据",
     "xpack.infra.metrics.nodeDetails.processListRetry": "重试",
