@@ -1260,7 +1260,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
       {
-        defaultMessage: 'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
+        defaultMessage:
+          'Controls whether ETW API events are enabled. Set to false to disable ETW event collection. Default: true',
       }
     ),
   },
