@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
@@ -75,14 +75,18 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'test' } });
 
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
-    fireEvent.click(saveButton);
+    act(() => {
+      fireEvent.click(saveButton);
+    });
 
-    expect(services.saveChanges).toHaveBeenCalledWith({
-      string: { type: 'string', unsavedValue: 'test' },
+    await waitFor(() => {
+      expect(services.saveChanges).toHaveBeenCalledWith({
+        string: { type: 'string', unsavedValue: 'test' },
+      });
     });
   });
 
-  it('clears changes when Cancel button is clicked', () => {
+  it('clears changes when Cancel button is clicked', async () => {
     const { getByTestId } = render(wrap(<Form fields={fields} isSavingEnabled={false} />));
 
     const testFieldType = 'string';
@@ -90,12 +94,16 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'test' } });
 
     const cancelButton = getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
-    fireEvent.click(cancelButton);
+    act(() => {
+      fireEvent.click(cancelButton);
+    });
 
-    expect(input).toHaveValue(settingsMock[testFieldType].value);
+    await waitFor(() => {
+      expect(input).toHaveValue(settingsMock[testFieldType].value);
+    });
   });
 
-  it('fires showError when saving is unsuccessful', () => {
+  it('fires showError when saving is unsuccessful', async () => {
     const services: FormServices = createFormServicesMock();
     const saveChangesWithError = jest.fn(() => {
       throw new Error('Unable to save');
@@ -111,9 +119,13 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'test' } });
 
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
-    fireEvent.click(saveButton);
+    act(() => {
+      fireEvent.click(saveButton);
+    });
 
-    expect(testServices.showError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(testServices.showError).toHaveBeenCalled();
+    });
   });
 
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
@@ -132,7 +144,9 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'test' } });
 
     const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
-    fireEvent.click(saveButton);
+    act(() => {
+      fireEvent.click(saveButton);
+    });
 
     await waitFor(() => {
       expect(services.showReloadPagePrompt).toHaveBeenCalled();
