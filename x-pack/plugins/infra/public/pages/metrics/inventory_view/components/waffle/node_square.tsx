@@ -10,90 +10,80 @@ import React, { CSSProperties } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { DispatchWithOptionalAction } from '../../../../../hooks/use_boolean';
 
-const NodeContainer = euiStyled.div`
-  position: relative;
-  cursor: pointer;
-`;
-const NodeContainerSmall = euiStyled.div<ColorProps>`
-  cursor: pointer;
-  position: relative;
-  background-color: ${(props) => darken(0.1, props.color)};
-  border-radius: 3px;
-  margin: 2px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-`;
-
-interface ColorProps {
-  color: string;
-}
-
-const SquareOuter = euiStyled.div<ColorProps>`
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  bottom: 4px;
-  right: 4px;
-  background-color: ${(props) => darken(0.1, props.color)};
-  border-radius: 3px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-`;
-
-const SquareInner = euiStyled.div<ColorProps>`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 2px;
-  left: 0;
-  border-radius: 3px;
-  background-color: ${(props) => props.color};
-`;
-
-const ValueInner = euiStyled.button`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  line-height: 1.2em;
-  align-items: center;
-  align-content: center;
-  padding: 1em;
-  overflow: hidden;
-  flex-wrap: wrap;
-  width: 100%;
-  border: none;
-  &:focus {
-    outline: none !important;
-    border: ${(params) => params.theme?.eui.euiFocusRingSize} solid
-      ${(params) => params.theme?.eui.euiFocusRingColor};
-    box-shadow: none;
-  }
-`;
-
-const SquareTextContent = euiStyled.div<ColorProps>`
+const SquareTextContentStyles = (color: string) => `
   text-align: center;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1 0 auto;
-  color: ${(props) => readableColor(props.color)};
+  color: ${readableColor(color)};
 `;
-
-const Value = euiStyled(SquareTextContent)`
-  font-weight: bold;
-  font-size: 0.9em;
-  line-height: 1.2em;
-`;
-
-const Label = euiStyled(SquareTextContent)`
-  font-size: 0.7em;
-  margin-bottom: 0.7em;
-`;
+const styles = {
+  nodeContainerSmall: (color: string) => `
+    cursor: pointer;
+    position: relative;
+    background-color: ${darken(0.1, color)};
+    border-radius: 3px;
+    margin: 2px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  `,
+  valueInner: `
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    line-height: 1.2em;
+    align-items: center;
+    align-content: center;
+    padding: 1em;
+    overflow: hidden;
+    flex-wrap: wrap;
+    width: 100%;
+    border: none;
+    &:focus {
+      outline: none !important;
+      border: ${euiThemeVars.euiFocusRingSize} solid ${euiThemeVars.euiFocusRingColor};
+      box-shadow: none;
+    }
+  `,
+  squareOuter: (color: string) => `
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    bottom: 4px;
+    right: 4px;
+    background-color: ${darken(0.1, color)};
+    border-radius: 3px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  `,
+  squareInner: (color: string) => `
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 2px;
+    left: 0;
+    border-radius: 3px;
+    background-color: ${color};
+  `,
+  label: (color: string) => `
+    font-size: 0.7em;
+    margin-bottom: 0.7em;
+    ${SquareTextContentStyles(color)}
+  `,
+  value: (color: string) => `
+    font-weight: bold;
+    font-size: 0.9em;
+    line-height: 1.2em;
+    ${SquareTextContentStyles(color)}
+  `,
+};
 
 export const NodeSquare = ({
   squareSize,
@@ -122,41 +112,85 @@ export const NodeSquare = ({
   });
 
   return valueMode || ellipsisMode ? (
-    <NodeContainer
+    <div
+      css={css`
+        position: relative;
+        cursor: pointer;
+      `}
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
+      onKeyPress={togglePopover}
+      onFocus={showToolTip}
       onMouseOver={showToolTip}
       onMouseLeave={hideToolTip}
       className="buttonContainer"
     >
-      <SquareOuter color={color} style={nodeBorder}>
-        <SquareInner color={color}>
+      <div
+        css={css`
+          ${styles.squareOuter(color)}
+        `}
+        style={nodeBorder}
+      >
+        <div
+          css={css`
+            ${styles.squareInner(color)}
+          `}
+        >
           {valueMode ? (
-            <ValueInner aria-label={nodeAriaLabel}>
-              <Label data-test-subj="nodeName" color={color}>
+            <button
+              css={css`
+                ${styles.valueInner}
+              `}
+              aria-label={nodeAriaLabel}
+            >
+              <div
+                css={css`
+                  ${styles.label(color)}
+                `}
+                data-test-subj="nodeName"
+              >
                 {nodeName}
-              </Label>
-              <Value data-test-subj="nodeValue" color={color}>
+              </div>
+              <div
+                css={css`
+                  ${styles.value(color)}
+                `}
+                data-test-subj="nodeValue"
+              >
                 {value}
-              </Value>
-            </ValueInner>
+              </div>
+            </button>
           ) : (
             ellipsisMode && (
-              <ValueInner aria-label={nodeAriaLabel}>
-                <Label color={color}>...</Label>
-              </ValueInner>
+              <button
+                css={css`
+                  ${styles.valueInner}
+                `}
+                aria-label={nodeAriaLabel}
+              >
+                <div
+                  css={css`
+                    ${styles.label(color)}
+                  `}
+                >
+                  ...
+                </div>
+              </button>
             )
           )}
-        </SquareInner>
-      </SquareOuter>
-    </NodeContainer>
+        </div>
+      </div>
+    </div>
   ) : (
-    <NodeContainerSmall
+    <div
+      css={styles.nodeContainerSmall(color)}
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
       onClick={togglePopover}
+      onKeyPress={togglePopover}
       onMouseOver={showToolTip}
+      onFocus={showToolTip}
       onMouseLeave={hideToolTip}
       color={color}
     />
