@@ -26,7 +26,7 @@ interface LeftSectionProps {
  */
 export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: LeftSectionProps) => {
   const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    () => ({ height: '100%', width: `${width * 100}%` }),
     [width]
   );
   return (

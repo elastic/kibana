@@ -29,7 +29,7 @@ export const RightSection: React.FC<RightSectionProps> = ({
   width,
 }: RightSectionProps) => {
   const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    () => ({ height: '100%', width: `${width * 100}%` }),
     [width]
   );
 
