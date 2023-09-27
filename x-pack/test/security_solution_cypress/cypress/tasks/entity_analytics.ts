@@ -10,6 +10,7 @@ import {
   ANOMALIES_TABLE_ROWS,
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
+  OPEN_RISK_INFORMATION_FLYOUT_BUTTON,
 } from '../screens/entity_analytics';
 import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
 import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
@@ -60,3 +61,5 @@ export const updateRiskEngineConfirm = () => {
 export const previewErrorButtonClick = () => {
   cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
 };
+
+export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();

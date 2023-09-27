@@ -70,3 +70,9 @@ export const USERS_TABLE_ALERT_CELL =
 
 export const HOSTS_TABLE_ALERT_CELL =
   '[data-test-subj="entity_analytics_hosts"] [data-test-subj="risk-score-alerts"]';
+
+export const OPEN_RISK_INFORMATION_FLYOUT_BUTTON =
+  '[data-test-subj="open-risk-information-flyout-trigger"]';
+
+export const RISK_INFORMATION_FLYOUT_HEADER =
+  '[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader';

@@ -42,6 +42,11 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServer
     visitWithTimeRange(ENTITY_ANALYTICS_URL);
   });
 
+  afterEach(() => {
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+  });
+
   it('shows upgrade risk button for host and user', () => {
     cy.get(UPGRADE_RISK_SCORE_BUTTON).should('be.visible');
 
