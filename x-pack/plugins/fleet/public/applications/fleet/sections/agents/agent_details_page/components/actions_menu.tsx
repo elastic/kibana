@@ -107,6 +107,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           setIsUpgradeModalOpen(true);
         }}
         key="upgradeAgent"
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"

@@ -111,6 +111,7 @@ export const TableRowActions: React.FunctionComponent<{
         onClick={() => {
           onUpgradeClick();
         }}
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
