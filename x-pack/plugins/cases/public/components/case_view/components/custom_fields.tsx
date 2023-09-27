@@ -16,7 +16,7 @@ import type {
 import type { CaseUI } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
-
+import { addOrReplaceCustomField } from '../../custom_fields/utils';
 interface Props {
   isLoading: boolean;
   customFields: CaseUI['customFields'];
@@ -45,7 +45,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
 
       const updatedCustomFields = addOrReplaceCustomField(allCustomFields, customFieldToAdd);
 
-      onSubmit(updatedCustomFields);
+      onSubmit(updatedCustomFields as CaseUICustomField[]);
     },
     [customFields, customFieldsConfiguration, onSubmit]
   );
@@ -105,25 +105,4 @@ const createMissingAndRemoveExtraCustomFields = (
   });
 
   return createdCustomFields;
-};
-
-const addOrReplaceCustomField = (
-  customFields: CaseUICustomField[],
-  customFieldToAdd: CaseUICustomField
-): CaseUICustomField[] => {
-  const foundCustomField = customFields.find(
-    (customField) => customField.key === customFieldToAdd.key
-  );
-
-  if (foundCustomField == null) {
-    return [...customFields, customFieldToAdd];
-  }
-
-  return customFields.map((customField) => {
-    if (customField.key !== customFieldToAdd.key) {
-      return customField;
-    }
-
-    return customFieldToAdd;
-  });
 };

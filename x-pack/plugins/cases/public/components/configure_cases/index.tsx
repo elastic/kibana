@@ -13,10 +13,7 @@ import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type {
-  CustomFieldConfiguration,
-  CustomFieldsConfiguration,
-} from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -37,6 +34,7 @@ import { CustomFields } from '../custom_fields';
 import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { addOrReplaceCustomField } from '../custom_fields/utils';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -287,21 +285,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onSaveCustomField = useCallback(
     (customFieldData: CustomFieldConfiguration) => {
-      let updatedFields: CustomFieldsConfiguration = [];
-      const isExistingCustomField = customFields.find((field) => field.key === customFieldData.key);
-
-      if (isExistingCustomField) {
-        updatedFields = customFields.map((item) => {
-          if (item.key === customFieldData.key) {
-            return customFieldData;
-          }
-          return item;
-        });
-      }
-
+      const updatedFields = addOrReplaceCustomField(customFields, customFieldData);
       persistCaseConfigure({
         connector,
-        customFields: isExistingCustomField ? updatedFields : [...customFields, customFieldData],
+        customFields: updatedFields as CustomFieldConfiguration[],
         id: configurationId,
         version: configurationVersion,
         closureType,

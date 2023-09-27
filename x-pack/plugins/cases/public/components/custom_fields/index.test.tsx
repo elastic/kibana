@@ -70,6 +70,18 @@ describe('CustomFields', () => {
     expect(props.handleAddCustomField).toBeCalled();
   });
 
+  it('calls handleEditCustomField on edit option click', async () => {
+    appMockRender.render(
+      <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
+    );
+
+    userEvent.click(
+      screen.getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+    );
+
+    expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+  });
+
   it('shows the experimental badge', () => {
     appMockRender.render(<CustomFields {...props} />);
 

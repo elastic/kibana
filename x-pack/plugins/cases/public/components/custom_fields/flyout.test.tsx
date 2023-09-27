@@ -111,6 +111,7 @@ describe('CustomFieldFlyout ', () => {
       'value',
       customFieldsConfigurationMock[0].label
     );
+    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
     expect(await screen.findByTestId('text-custom-field-options')).toHaveAttribute('checked');
   });
 });

@@ -87,7 +87,7 @@ const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
 
   return (
     <Form form={form}>
-      <FormFields isSubmitting={isSubmitting} />
+      <FormFields isSubmitting={isSubmitting} isEditMode={Boolean(initialValue)} />
     </Form>
   );
 };

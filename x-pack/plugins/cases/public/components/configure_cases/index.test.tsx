@@ -637,15 +637,6 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
@@ -662,15 +653,6 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
@@ -691,15 +673,6 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
@@ -737,15 +710,6 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
