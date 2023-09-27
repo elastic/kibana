@@ -103,6 +103,12 @@ const GoogleCloudShellSetup = ({
         >
           <li>
             <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
+          <li>
+            <FormattedMessage
               id="xpack.csp.gcpIntegration.cloudShellSetupStep.login"
               defaultMessage="Log into your Google Cloud Console"
             />

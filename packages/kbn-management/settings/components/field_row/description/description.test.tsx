@@ -36,6 +36,19 @@ describe('FieldDescription', () => {
     expect(getByText(description)).toBeInTheDocument();
   });
 
+  it('renders a React Element', () => {
+    const value = 'This is a description.';
+    const element = <div>{value}</div>;
+    const { getByText } = render(
+      wrap(
+        <FieldDescription
+          {...{ ...defaultProps, field: { ...defaultProps.field, description: element } }}
+        />
+      )
+    );
+    expect(getByText(value)).toBeInTheDocument();
+  });
+
   it('renders no description without one', () => {
     const { queryByText } = render(wrap(<FieldDescription {...defaultProps} />));
     expect(queryByText(description)).toBeNull();

@@ -21,7 +21,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
 jest.mock('../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver');
@@ -32,6 +32,14 @@ jest.mock(
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
 });
 
 const panelContextValue = {

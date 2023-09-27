@@ -270,6 +270,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           enrollToken,
           cloudSecurityIntegration,
+          fleetServerHost,
         })
       );
     } else if (cloudSecurityIntegration?.cloudShellUrl) {
@@ -289,7 +290,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
-          fleetServerHost: fleetServerHosts?.[0],
+          fleetServerHost,
           enrollToken,
         })
       );
@@ -334,7 +335,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrollToken,
     installManagedCommands,
     isK8s,
-    fleetServerHosts,
+    fleetServerHost,
     onClickViewAgents,
     link,
     enrolledAgentIds,

@@ -3589,15 +3589,15 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/find_maintenance_windows.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -3694,38 +3694,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
               },
               {
                 "plugin": "assetManager",
@@ -3890,6 +3858,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -4350,6 +4322,38 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/server/plugin.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/storage_explorer/route.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
               },
               {
                 "plugin": "reporting",
@@ -5184,54 +5188,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/find_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/find_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/find_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/find_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.test.ts"
-              },
-              {
                 "plugin": "cloudChat",
                 "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.test.ts"
               },
@@ -5326,6 +5282,54 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_active_space.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get/get_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/get_active/get_active_maintenance_windows_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6079,19 +6083,19 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/archive_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6103,7 +6107,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6226,10 +6230,6 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
-              },
-              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
@@ -6314,6 +6314,18 @@
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
               {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.ts"
               },
@@ -6340,6 +6352,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -6748,6 +6764,10 @@
               {
                 "plugin": "painlessLab",
                 "path": "x-pack/plugins/painless_lab/server/routes/api/execute.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
               },
               {
                 "plugin": "reporting",
@@ -7375,86 +7395,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/archive_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/archive_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/archive_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/archive_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
               },
               {
@@ -7512,6 +7452,86 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/update_objects_spaces.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/archive/archive_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7962,6 +7982,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8583,7 +8607,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_delete_rules.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -8643,22 +8667,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_delete_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_delete_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_delete_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/bulk_delete_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.test.ts"
               },
               {
@@ -8700,6 +8708,22 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -8949,7 +8973,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.ts"
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -8988,12 +9012,20 @@
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
               {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_delete_route.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.ts"
               },
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -9268,22 +9300,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.test.ts"
-              },
-              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.test.ts"
               },
@@ -9294,6 +9310,22 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/delete.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -13083,6 +13115,14 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
               },
               {
@@ -14456,6 +14496,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
