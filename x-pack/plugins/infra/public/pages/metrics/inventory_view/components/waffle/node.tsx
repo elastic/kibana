@@ -62,9 +62,6 @@ export const Node = ({
     }
   };
 
-  const nodeBorder =
-    detailsItemId === node.name || isPopoverOpen ? { border: 'solid 4px #000' } : undefined;
-
   const nodeSquare = (
     <NodeSquare
       squareSize={squareSize}
@@ -74,7 +71,7 @@ export const Node = ({
       color={color}
       nodeName={node.name}
       value={value}
-      nodeBorder={nodeBorder}
+      showBorder={detailsItemId === node.name || isPopoverOpen}
     />
   );
 

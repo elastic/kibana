@@ -93,7 +93,7 @@ export const NodeSquare = ({
   color,
   nodeName,
   value,
-  nodeBorder,
+  showBorder,
 }: {
   squareSize: number;
   togglePopover: DispatchWithOptionalAction<boolean>;
@@ -102,7 +102,7 @@ export const NodeSquare = ({
   color: string;
   nodeName: string;
   value: string;
-  nodeBorder?: CSSProperties;
+  showBorder?: boolean;
 }) => {
   const valueMode = squareSize > 70;
   const ellipsisMode = squareSize > 30;
@@ -110,6 +110,7 @@ export const NodeSquare = ({
     defaultMessage: '{nodeName}, click to open menu',
     values: { nodeName },
   });
+  const style: CSSProperties | undefined = showBorder ? { border: 'solid 4px #000' } : undefined;
 
   return valueMode || ellipsisMode ? (
     <div
@@ -130,7 +131,7 @@ export const NodeSquare = ({
         css={css`
           ${styles.squareOuter(color)}
         `}
-        style={nodeBorder}
+        style={style}
       >
         <div
           css={css`
@@ -186,7 +187,7 @@ export const NodeSquare = ({
     <div
       css={styles.nodeContainerSmall(color)}
       data-test-subj="nodeContainer"
-      style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
+      style={{ width: squareSize || 0, height: squareSize || 0, ...style }}
       onClick={togglePopover}
       onKeyPress={togglePopover}
       onMouseOver={showToolTip}
