@@ -11,12 +11,12 @@ import { estypes } from '@elastic/elasticsearch';
 import { EuiSpacer } from '@elastic/eui';
 import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
-import type { RequestDetailsProps } from '../../types';
+import type { DetailViewProps } from '../types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
 
-export class ClustersView extends Component<RequestDetailsProps> {
+export class ClustersView extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(
       (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
