@@ -37,8 +37,8 @@ import {
   useNotifications,
   useNavigateToPath,
   useMlKibana,
-  useIsServerless,
 } from '../../../../contexts/kibana';
+import { useEnabledFeatures } from '../../../../contexts/ml';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -55,9 +55,9 @@ interface Props {
   refreshJobsCallback: () => void;
 }
 
-function getListItemsFactory(isServerless: boolean) {
+function getListItemsFactory(showLicenseInfo: boolean) {
   return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
-    if (isServerless) {
+    if (showLicenseInfo === false) {
       delete details.license_level;
     }
 
@@ -94,8 +94,8 @@ export const Controls: FC<Props> = React.memo(
     const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
-    const isServerless = useIsServerless();
-    const getListItems = useMemo(() => getListItemsFactory(isServerless), [isServerless]);
+    const { showLicenseInfo } = useEnabledFeatures();
+    const getListItems = useMemo(() => getListItemsFactory(showLicenseInfo), [showLicenseInfo]);
 
     const {
       closeDeleteJobCheckModal,
@@ -170,6 +170,15 @@ export const Controls: FC<Props> = React.memo(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [share.url.locators, nodeLabel]);
+
+    const onAnalyzeDataDrift = useCallback(async () => {
+      closePopover();
+      const path = await mlLocator.getUrl({
+        page: ML_PAGES.DATA_DRIFT_CUSTOM,
+        pageState: { comparison: nodeLabel },
+      });
+      await navigateToPath(path);
+    }, [nodeLabel, navigateToPath, mlLocator]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
@@ -259,6 +268,21 @@ export const Controls: FC<Props> = React.memo(
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
                 defaultMessage="Clone job"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
+      ...(nodeType === JOB_MAP_NODE_TYPES.INDEX
+        ? [
+            <EuiContextMenuItem
+              disabled={!canCreateDataFrameAnalytics}
+              key={`${nodeId}-drift-data`}
+              icon="visTagCloud"
+              onClick={onAnalyzeDataDrift}
+            >
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.flyout.analyzeDrift"
+                defaultMessage="Analyze data drift"
               />
             </EuiContextMenuItem>,
           ]
