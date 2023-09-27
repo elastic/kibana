@@ -50,7 +50,7 @@ export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
   );
 
   return (
-    <div>
+    <div data-test-subj="listItemColumnStepRuleDescription">
       <EuiDescriptionList
         type="column"
         listItems={ruleSectionListItems}

@@ -384,6 +384,7 @@ export const RuleAboutSection = ({ rule, hideName, hideDescription }: RuleAboutS
         listItems={aboutSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
         rowGutterSize="m"
+        data-test-subj="listItemColumnStepRuleDescription"
       />
     </div>
   );
