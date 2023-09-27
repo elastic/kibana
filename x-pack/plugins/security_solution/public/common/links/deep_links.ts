@@ -35,7 +35,7 @@ const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
  */
 export const registerDeepLinksUpdater = (
   appUpdater$: Subject<AppUpdater>,
-  formatter: DeepLinksFormatter = defaultDeepLinksFormatter // custom formatter allowed, defaults to defaultDeepLinksFormatter
+  formatter: DeepLinksFormatter = defaultDeepLinksFormatter
 ): Subscription => {
   return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
