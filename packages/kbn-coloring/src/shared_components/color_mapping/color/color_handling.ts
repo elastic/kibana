@@ -7,11 +7,12 @@
  */
 import chroma from 'chroma-js';
 import { ColorMapping } from '../config';
-import { changeAlpha, combineColors } from './color_math';
+import { changeAlpha, combineColors, getValidColor } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
 import { getPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
+import { GradientColorMode } from '../config/types';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
@@ -29,23 +30,8 @@ export function getAssignmentColor(
       if (colorMode.type === 'categorical') {
         return 'red';
       }
-      const steps =
-        colorMode.steps.length === 1
-          ? [
-              getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
-              combineColors(
-                changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
-                isDarkMode ? 'black' : 'white'
-              ),
-            ]
-          : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
-      steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
-      const colorScale = chroma.scale(steps).mode('lab');
-      return total === 0
-        ? 'red'
-        : total === 1
-        ? colorScale(0).hex()
-        : colorScale(index / (total - 1)).hex();
+      const colorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
+      return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
     }
   }
 }
@@ -55,12 +41,9 @@ export function getColor(
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean
 ) {
-  switch (color.type) {
-    case 'colorCode':
-      return color.colorCode;
-    case 'categorical':
-      return getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode);
-  }
+  return color.type === 'colorCode'
+    ? color.colorCode
+    : getValidColor(getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode)).hex();
 }
 
 export function getColorFactory(
@@ -158,4 +141,24 @@ export function getColorFactory(
       return getColor(model.specialAssignments[0].color, getPaletteFn, isDarkMode);
     }
   };
+}
+
+export function getGradientColorScale(
+  colorMode: GradientColorMode,
+  getPaletteFn: ReturnType<typeof getPalette>,
+  isDarkMode: boolean
+): (value: number) => string {
+  const steps =
+    colorMode.steps.length === 1
+      ? [
+          getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+          combineColors(
+            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+            isDarkMode ? 'black' : 'white'
+          ),
+        ]
+      : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
+  steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
+  const scale = chroma.scale(steps).mode('lab');
+  return (value: number) => scale(value).hex();
 }

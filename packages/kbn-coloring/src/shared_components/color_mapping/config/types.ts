@@ -122,15 +122,18 @@ export interface Assignment<R, C> {
   touched: boolean;
 }
 
+export interface CategoricalColorMode {
+  type: 'categorical';
+}
+export interface GradientColorMode {
+  type: 'gradient';
+  steps: Array<(CategoricalColor | ColorCode) & { touched: boolean }>;
+  sort: 'asc' | 'desc';
+}
+
 export interface Config {
   paletteId: string;
-  colorMode:
-    | { type: 'categorical' }
-    | {
-        type: 'gradient';
-        steps: Array<(CategoricalColor | ColorCode) & { touched: boolean }>;
-        sort: 'asc' | 'desc';
-      };
+  colorMode: CategoricalColorMode | GradientColorMode;
   assignmentMode: 'auto' | 'manual';
   assignments: Array<
     Assignment<

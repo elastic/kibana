@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import chroma from 'chroma-js';
 
 import { euiFocusRing, EuiIcon, euiShadowSmall, useEuiTheme } from '@elastic/eui';
 import React from 'react';
@@ -13,7 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { changeAlpha, getValidColor, combineColors } from '../../color/color_math';
+import { changeAlpha } from '../../color/color_math';
 
 import { ColorMapping } from '../../config';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -21,6 +20,7 @@ import { getPalette } from '../../palettes';
 
 import { addGradientColorStep, updateGradientColorStep } from '../../state/color_mapping';
 import { colorPickerVisibility } from '../../state/ui';
+import { getGradientColorScale } from '../../color/color_handling';
 
 export function Gradient({
   paletteId,
@@ -39,20 +39,7 @@ export function Gradient({
     return null;
   }
   const currentPalette = getPaletteFn(paletteId);
-  const gradientDirection = () => (colorMode.sort === 'asc' ? -1 : 1);
-
-  const gradientColorSteps =
-    colorMode.steps.length === 1
-      ? [
-          getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
-          combineColors(
-            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
-            isDarkMode ? 'black' : 'white'
-          ),
-        ].sort(gradientDirection)
-      : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode)).sort(gradientDirection);
-
-  const gradientColorScale = chroma.scale(gradientColorSteps).mode('lab');
+  const gradientColorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
 
   const topMostColorStop =
     colorMode.sort === 'asc'
@@ -316,11 +303,7 @@ function ColorStop({
   getPaletteFn,
   isDarkMode,
 }: {
-  colorMode: {
-    type: 'gradient';
-    steps: Array<(ColorMapping.CategoricalColor | ColorMapping.ColorCode) & { touched: boolean }>;
-    sort: 'asc' | 'desc';
-  };
+  colorMode: ColorMapping.GradientColorMode;
   step: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
   index: number;
   currentPalette: ColorMapping.CategoricalPalette;
@@ -350,14 +333,4 @@ function ColorStop({
       forType="gradient"
     />
   );
-}
-
-function getColor(
-  color: ColorMapping.CategoricalColor | ColorMapping.ColorCode,
-  getPaletteFn: ReturnType<typeof getPalette>,
-  isDarkMode: boolean
-) {
-  return color.type === 'colorCode'
-    ? color.colorCode
-    : getValidColor(getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode)).hex();
 }

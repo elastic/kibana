@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import chroma from 'chroma-js';
 import { ColorMapping } from '.';
 import { AVAILABLE_PALETTES, getPalette } from '../palettes';
 import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
 import { NeutralPalette } from '../palettes/neutral';
-import { changeAlpha, combineColors } from '../color/color_math';
-import { getColor } from '../color/color_handling';
+import { getColor, getGradientColorScale } from '../color/color_handling';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
@@ -61,19 +59,8 @@ export function getColorsFromMapping(
 
   const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
   if (colorMode.type === 'gradient') {
-    const steps =
-      colorMode.steps.length === 1
-        ? [
-            getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
-            combineColors(
-              changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
-              isDarkMode ? 'black' : 'white'
-            ),
-          ]
-        : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
-    steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
-    const colorScale = chroma.scale(steps).mode('lab');
-    return Array.from({ length: 6 }, (d, i) => colorScale(i / 6).hex());
+    const colorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
+    return Array.from({ length: 6 }, (d, i) => colorScale(i / 6));
   } else {
     const palette = getPaletteFn(paletteId);
     if (assignmentMode === 'auto') {
