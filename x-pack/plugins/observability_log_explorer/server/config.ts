@@ -10,6 +10,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 import { ObservabilityLogExplorerConfig } from '../common/plugin_config';
 
 export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   navigation: schema.object({
     showAppLink: offeringBasedSchema({
       serverless: schema.boolean({
