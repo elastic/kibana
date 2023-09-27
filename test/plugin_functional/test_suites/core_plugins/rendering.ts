@@ -253,6 +253,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
+        'xpack.ml.ad.enabled (boolean)',
+        'xpack.ml.dfa.enabled (boolean)',
+        'xpack.ml.nlp.enabled (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
