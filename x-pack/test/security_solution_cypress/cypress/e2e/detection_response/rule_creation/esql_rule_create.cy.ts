@@ -47,6 +47,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   describe('creation', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
+      login();
     });
 
     it('creates an ES|QL rule', function () {

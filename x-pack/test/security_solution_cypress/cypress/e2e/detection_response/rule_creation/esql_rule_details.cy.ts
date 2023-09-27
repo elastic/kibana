@@ -33,6 +33,7 @@ describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
+    login();
   });
 
   it('displays ES|QL rule specific fields', function () {
