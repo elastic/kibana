@@ -20,6 +20,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../common/components/event_details/table/use_action_cell_data_provider';
+import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -30,17 +31,34 @@ export const columns = [
     name: i18n.CORRELATIONS_TIMESTAMP_COLUMN_TITLE,
     truncateText: true,
     dataType: 'date' as const,
-    render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
+    render: (value: string) => {
+      const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
+      return (
+        <CellTooltipWrapper tooltip={date}>
+          <span>{date}</span>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: ALERT_RULE_NAME,
     name: i18n.CORRELATIONS_RULE_COLUMN_TITLE,
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value}>
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: ALERT_REASON,
     name: i18n.CORRELATIONS_REASON_COLUMN_TITLE,
     truncateText: true,
+    render: (value: string) => (
+      <CellTooltipWrapper tooltip={value} anchorPosition="left">
+        <span>{value}</span>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: 'kibana.alert.severity',
@@ -48,7 +66,12 @@ export const columns = [
     truncateText: true,
     render: (value: string) => {
       const decodedSeverity = Severity.decode(value);
-      return isRight(decodedSeverity) ? <SeverityBadge value={decodedSeverity.right} /> : value;
+      const renderValue = isRight(decodedSeverity) ? (
+        <SeverityBadge value={decodedSeverity.right} />
+      ) : (
+        <p>{value}</p>
+      );
+      return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
     },
   },
 ];
