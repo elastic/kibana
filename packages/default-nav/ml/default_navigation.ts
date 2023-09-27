@@ -28,16 +28,10 @@ export const defaultNavigation: MlNodeDefinition = {
   icon: 'machineLearningApp',
   children: [
     {
-      title: '',
-      id: 'root',
-      children: [
-        {
-          link: 'ml:overview',
-        },
-        {
-          link: 'ml:notifications',
-        },
-      ],
+      link: 'ml:overview',
+    },
+    {
+      link: 'ml:notifications',
     },
     {
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
