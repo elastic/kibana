@@ -39,7 +39,6 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "cloudChat",
       "esUiShared",
       "logsShared",
       "kibanaUtils",

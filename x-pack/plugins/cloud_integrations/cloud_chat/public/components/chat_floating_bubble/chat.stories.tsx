@@ -16,7 +16,7 @@ import {
 
 import { forceReRender } from '@storybook/react';
 
-import { Chat } from './chat';
+import { Chat } from './chat_floating_bubble';
 import { ServicesProvider } from '../../services';
 
 export default {

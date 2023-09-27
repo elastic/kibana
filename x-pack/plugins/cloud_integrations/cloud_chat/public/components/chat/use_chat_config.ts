@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useChat } from '../../services';
 import { getChatContext } from './get_chat_context';
 import { Props as ChatProps } from './chat';
+import type { ChatVariantExperiment } from '../chat_experiment_switcher';
 
 type UseChatType =
   | { enabled: false }
@@ -21,12 +23,26 @@ type UseChatType =
       isResized: boolean;
     };
 
+export interface ChatApi {
+  show: () => void;
+  hide: () => void;
+  toggle: () => void;
+}
+
 const MESSAGE_WIDGET_READY = 'driftWidgetReady';
 const MESSAGE_IFRAME_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
 const MESSAGE_SET_CONTEXT = 'driftSetContext';
+const MESSAGE_CHAT_CLOSED = 'driftChatClosed';
+const MESSAGE_PLAYBOOK_FIRED = 'driftPlaybookFired';
 
-type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
+type ChatConfigParams = Exclude<ChatProps, 'onHide'> & {
+  /** if the chat visibility is controlled from the outside */
+  controlled?: boolean;
+
+  /** just pass this down to user attributes */
+  chatVariant?: ChatVariantExperiment;
+};
 
 /**
  * Hook which handles positioning and communication with the chat widget.
@@ -34,12 +50,20 @@ type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
 export const useChatConfig = ({
   onReady = () => {},
   onResize = () => {},
+  onPlaybookFired = () => {},
+  controlled = true,
+  chatVariant,
 }: ChatConfigParams): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
   const [style, setStyle] = useState<CSSProperties>({ height: 0, width: 0 });
   const [isReady, setIsReady] = useState(false);
   const [isResized, setIsResized] = useState(false);
+  const isChatOpenRef = useRef<boolean>(false);
+  const [hasPlaybookFiredOnce, setPlaybookFiredOnce] = useLocalStorage(
+    'cloudChatPlaybookFiredOnce',
+    false
+  );
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
@@ -54,6 +78,40 @@ export const useChatConfig = ({
       const { user: userConfig } = chat;
       const { id, email, jwt, trialEndDate, kbnVersion, kbnBuildNum } = userConfig;
 
+      const chatApi: ChatApi = {
+        show: () => {
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftShow`,
+            },
+            '*'
+          );
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftOpenChat`,
+            },
+            '*'
+          );
+          isChatOpenRef.current = true;
+        },
+        hide: () => {
+          ref.current?.contentWindow?.postMessage(
+            {
+              type: `driftHide`,
+            },
+            '*'
+          );
+          isChatOpenRef.current = false;
+        },
+        toggle: () => {
+          if (isChatOpenRef.current) {
+            chatApi.hide();
+          } else {
+            chatApi.show();
+          }
+        },
+      };
+
       switch (message.type) {
         // The IFRAME is ready to receive messages.
         case MESSAGE_IFRAME_READY: {
@@ -64,6 +122,7 @@ export const useChatConfig = ({
               trial_end_date: trialEndDate,
               kbn_version: kbnVersion,
               kbn_build_num: kbnBuildNum,
+              kbn_chat_variant: chatVariant,
             },
             jwt,
           };
@@ -83,7 +142,13 @@ export const useChatConfig = ({
         // its interface.
         case MESSAGE_RESIZE: {
           const styles = message.data.styles || ({} as CSSProperties);
-          setStyle({ ...style, ...styles });
+          // camelize to avoid style warnings from react
+          const camelize = (s: string) => s.replace(/-./g, (x) => x[1].toUpperCase());
+          const camelStyles = Object.keys(styles).reduce((acc, key) => {
+            acc[camelize(key)] = styles[key];
+            return acc;
+          }, {} as Record<string, string>) as CSSProperties;
+          setStyle({ ...style, ...camelStyles });
 
           if (!isResized) {
             setIsResized(true);
@@ -95,8 +160,28 @@ export const useChatConfig = ({
 
         // The chat widget is ready.
         case MESSAGE_WIDGET_READY:
+          if (controlled) chatApi.hide();
+
           setIsReady(true);
-          onReady();
+          onReady(chatApi);
+
+          if (hasPlaybookFiredOnce) {
+            // The `MESSAGE_PLAYBOOK_FIRED` event is only fired until the interaction,
+            // so we need to manually trigger the callback if the event has already fired.
+            // otherwise, users might have an ongoing conversion, but they can't get back to it
+            onPlaybookFired();
+          }
+          break;
+
+        case MESSAGE_CHAT_CLOSED:
+          if (controlled) chatApi.hide();
+          break;
+
+        case MESSAGE_PLAYBOOK_FIRED:
+          onPlaybookFired();
+          setPlaybookFiredOnce(true);
+          break;
+
         default:
           break;
       }
@@ -105,10 +190,29 @@ export const useChatConfig = ({
     window.addEventListener('message', handleMessage);
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [chat, style, onReady, onResize, isReady, isResized]);
+  }, [
+    chat,
+    style,
+    onReady,
+    onResize,
+    isReady,
+    isResized,
+    chatVariant,
+    controlled,
+    hasPlaybookFiredOnce,
+    onPlaybookFired,
+    setPlaybookFiredOnce,
+  ]);
 
   if (chat) {
-    return { enabled: true, src: chat.chatURL, ref, style, isReady, isResized };
+    return {
+      enabled: true,
+      src: chat.chatURL,
+      ref,
+      style,
+      isReady,
+      isResized,
+    };
   }
 
   return { enabled: false };

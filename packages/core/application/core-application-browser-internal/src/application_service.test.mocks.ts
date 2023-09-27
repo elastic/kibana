@@ -7,6 +7,7 @@
  */
 
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { Observable } from 'rxjs';
 
 export const MockCapabilitiesService = capabilitiesServiceMock.create();
 export const CapabilitiesServiceConstructor = jest
@@ -26,7 +27,7 @@ jest.doMock('history', () => ({
 }));
 
 export const parseAppUrlMock = jest.fn();
-export const getLocationObservableMock = jest.fn();
+export const getLocationObservableMock = jest.fn(() => new Observable());
 jest.doMock('./utils', () => {
   const original = jest.requireActual('./utils');
 

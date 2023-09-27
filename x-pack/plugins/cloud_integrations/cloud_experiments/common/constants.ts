@@ -27,6 +27,12 @@ export enum FEATURE_FLAG_NAMES {
    * defined by type { GuideConfig } from '@kbn/guided-onboarding';
    */
   'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
+
+  /**
+   * Used in cloud chat plugin to switch between the chat variants.
+   * Options are: 'header-menu-item' (the chat button appears as part of the kibana header) and 'floating-bubble' (floating chat button at the bottom of the screen).
+   */
+  'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
 }
 
 /**

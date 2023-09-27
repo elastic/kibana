@@ -6,27 +6,33 @@
  */
 
 import React, { type FC } from 'react';
+import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { CloudChatProviderPluginSetup } from '@kbn/cloud-chat-provider-plugin/public';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, first } from 'rxjs';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
 import { isTodayInDateWindow } from '../common/util';
-import { Chat } from './components';
+import {
+  ChatExperimentSwitcher,
+  ChatVariantExperiment,
+} from './components/chat_experiment_switcher';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
   security?: SecurityPluginSetup;
-  cloudChatProvider: CloudChatProviderPluginSetup;
 }
 
 interface CloudChatStartDeps {
   cloud: CloudStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 interface SetupChatDeps extends CloudChatSetupDeps {
@@ -38,16 +44,9 @@ interface CloudChatConfig {
   trialBuffer: number;
 }
 
-export interface CloudChatPluginStart {
-  Chat: React.ComponentType;
-}
-
-export class CloudChatPlugin
-  implements Plugin<void, CloudChatPluginStart, CloudChatSetupDeps, CloudChatStartDeps>
-{
+export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, CloudChatStartDeps> {
   private readonly config: CloudChatConfig;
   private chatConfig$ = new ReplaySubject<ChatConfig>(1);
-  private Chat: React.ComponentType | undefined;
   private kbnVersion: string;
   private kbnBuildNum: number;
 
@@ -57,31 +56,64 @@ export class CloudChatPlugin
     this.config = initializerContext.config.get();
   }
 
-  public setup(core: CoreSetup, { cloud, security, cloudChatProvider }: CloudChatSetupDeps) {
-    this.setupChat({ http: core.http, cloud, security, cloudChatProvider }).catch((e) =>
+  public setup(core: CoreSetup, { cloud, security }: CloudChatSetupDeps) {
+    this.setupChat({ http: core.http, cloud, security }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up Chat: ${e.toString()}`)
     );
+  }
+
+  public start(core: CoreStart, { cloud, cloudExperiments }: CloudChatStartDeps) {
     const CloudChatContextProvider: FC = ({ children }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);
       return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
     };
-    cloud.registerCloudService(CloudChatContextProvider);
-    cloudChatProvider.registerChatProvider(() => this.Chat);
-  }
+    function ConnectedChat() {
+      const [variant, setVariant] = React.useState<ChatVariantExperiment | null>(null);
+      React.useEffect(() => {
+        if (cloudExperiments) {
+          cloudExperiments
+            .getVariation<ChatVariantExperiment>('cloud-chat.chat-variant', 'header-menu-item')
+            .then((_variant) => {
+              setVariant(_variant === 'floating-bubble' ? 'floating-bubble' : 'header-menu-item');
+            })
+            .catch(() => {
+              setVariant('header-menu-item');
+            });
+        } else {
+          setVariant('header-menu-item');
+        }
+      }, []);
 
-  public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
-    const CloudContextProvider = cloud.CloudContextProvider;
-    this.Chat = () => (
-      <CloudContextProvider>
-        <Chat />
-      </CloudContextProvider>
-    );
-    return {
-      Chat: this.Chat,
-    };
+      return (
+        <CloudChatContextProvider>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <I18nProvider>
+              {variant && (
+                <ChatExperimentSwitcher
+                  location$={core.application.currentLocation$}
+                  variant={variant}
+                />
+              )}
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </CloudChatContextProvider>
+      );
+    }
+
+    this.chatConfig$.pipe(first((config) => config != null)).subscribe(() => {
+      core.chrome.navControls.registerExtension({
+        order: 50,
+        mount: (e) => {
+          ReactDOM.render(<ConnectedChat />, e);
+          return () => {
+            ReactDOM.unmountComponentAtNode(e);
+          };
+        },
+      });
+    });
   }
 
   public stop() {}
