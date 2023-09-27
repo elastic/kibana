@@ -76,7 +76,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Explore', 'Alerts', 'Rules']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Content', 'Index Management']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Content',
+        'Index Management',
+        'Indices',
+      ]);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Content', 'Ingest Pipelines']);

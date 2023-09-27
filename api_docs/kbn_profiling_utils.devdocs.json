@@ -1876,6 +1876,67 @@
       },
       {
         "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.ProfilingStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfilingStatus",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_setup",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_setup",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_data",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_data",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.pre_8_9_1_data",
+            "type": "boolean",
+            "tags": [],
+            "label": "pre_8_9_1_data",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.unauthorized",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unauthorized",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
         "id": "def-common.ProfilingStatusResponse",
         "type": "Interface",
         "tags": [],

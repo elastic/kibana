@@ -46,7 +46,13 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const fleetPluginStart = await plugins.fleet.start();
     const agentClient = fleetPluginStart.agentService.asInternalUser;
 
-    const includeCurrentVersion = !kibanaVersion.endsWith('-SNAPSHOT');
+    // If undefined, we will follow fleet's strategy to select latest available version:
+    // for serverless we will use the latest published version, for statefull we will use
+    // current Kibana version. If false, irrespective of fleet flags and logic, we are
+    // explicitly deciding to not append the current version.
+    const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT')
+      ? false
+      : undefined;
 
     const elasticAgentVersion =
       await agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);

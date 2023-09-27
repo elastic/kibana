@@ -33,7 +33,6 @@
     "@kbn/custom-integrations",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/utility-types",
     "@kbn/fleet-plugin",
   ],
   "exclude": [
