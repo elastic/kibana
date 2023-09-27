@@ -412,6 +412,13 @@ const prepareDefinitionSectionListItems = (
         description: <Filters filters={savedQuery.attributes.filters as Filter[]} />,
       });
     }
+
+    if (typeof savedQuery.attributes.query.query === 'string') {
+      definitionSectionListItems.push({
+        title: descriptionStepI18n.SAVED_QUERY_LABEL,
+        description: <Query query={savedQuery.attributes.query.query} />,
+      });
+    }
   }
 
   if ('filters' in rule && 'data_view_id' in rule && rule.filters?.length) {
