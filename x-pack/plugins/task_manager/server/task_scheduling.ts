@@ -152,20 +152,13 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | true) {
+  public async bulkDisable(taskIds: string[], clearState?: boolean) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !!task.enabled,
-      map: (task) => ({
-        ...task,
-        enabled: false,
-        ...((Array.isArray(clearStateIdsOrBoolean) && clearStateIdsOrBoolean.includes(task.id)) ||
-        clearStateIdsOrBoolean === true
-          ? { state: {} }
-          : {}),
-      }),
+      map: (task) => ({ ...task, enabled: false, ...(clearState ? { state: {} } : {}) }),
       validate: false,
     });
   }

@@ -253,7 +253,7 @@ describe('bulkDisableRules', () => {
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], ['id1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], true);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       rules: [returnedDisabledRule1],
@@ -453,7 +453,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], ['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], true);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -479,7 +479,7 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], ['id1']);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], true);
     });
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
