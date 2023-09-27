@@ -209,5 +209,12 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     }
   }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
 
-  return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+  const result = { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+
+  // after the feature flag was removed, we will need to remove isDeprecated, because it is not used anymore
+  if (riskScoreEngineStatus?.isNewRiskScoreModuleAvailable) {
+    result.isDeprecated = false;
+  }
+
+  return result;
 };

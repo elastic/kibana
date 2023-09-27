@@ -26,7 +26,7 @@ import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
-  deleteConfiguration,
+  deleteRiskEngineConfiguration,
   interceptRiskPreviewError,
   interceptRiskPreviewSuccess,
   interceptRiskInitError,
@@ -55,7 +55,7 @@ describe(
     beforeEach(() => {
       login();
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
-      deleteConfiguration();
+      deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 

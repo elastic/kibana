@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const deleteConfiguration = () => {
+export const deleteRiskEngineConfiguration = () => {
   cy.request({
     method: 'GET',
     url: `/api/saved_objects/_find?type=risk-engine-configuration`,
@@ -42,16 +42,5 @@ export const interceptRiskPreviewSuccess = () => {
 export const interceptRiskInitError = () => {
   cy.intercept('POST', '/internal/risk_score/engine/init', {
     statusCode: 500,
-  });
-};
-
-export const interceptNewRiskEngineStatusWithEnabledState = () => {
-  return cy.intercept('GET', '/internal/risk_score/engine/status', {
-    statusCode: 200,
-    body: {
-      risk_engine_status: 'ENABLED',
-      legacy_risk_engine_status: 'NOT_INSTALLED',
-      is_max_amount_of_risk_engines_reached: false,
-    },
   });
 };

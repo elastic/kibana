@@ -11,7 +11,8 @@ import {
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
 } from '../screens/entity_analytics';
-import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
+import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
+import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
 import {
   RISK_SCORE_UPDATE_CONFIRM,
   RISK_SCORE_UDATE_BUTTON,
@@ -40,6 +41,12 @@ export const navigateToNextPage = () => {
 export const riskEngineStatusChange = () => {
   cy.get(RISK_SCORE_SWITCH).should('not.have.attr', 'disabled');
   cy.get(RISK_SCORE_SWITCH).click();
+};
+
+export const enableRiskEngine = () => {
+  cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+  riskEngineStatusChange();
 };
 
 export const updateRiskEngine = () => {

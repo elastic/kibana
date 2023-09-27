@@ -95,10 +95,6 @@ export const HostRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
-  // if (riskScoreEngineStatus?.isUpdateAvailable) {
-  //   return <RiskScoreUpdatePanel />;
-  // }
-
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EuiPanel hasBorder>

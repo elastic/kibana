@@ -30,7 +30,8 @@ import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { interceptNewRiskEngineStatusWithEnabledState } from '../../tasks/api_calls/risk_engine';
+import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine';
+import { enableRiskEngine } from '../../tasks/entity_analytics';
 
 const CURRENT_HOST_RISK_CLASIFICATION = 'Current host risk classification';
 const ORIGINAL_HOST_RISK_CLASIFICATION = 'Original host risk classification';
@@ -56,6 +57,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
         deleteAlertsAndRules();
         createRule(getNewRule({ rule_id: 'rule1' }));
         login();
+        deleteRiskEngineConfiguration();
         visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
@@ -93,12 +95,12 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
     describe('from new risk scores', () => {
       beforeEach(() => {
-        interceptNewRiskEngineStatusWithEnabledState();
         disableExpandableFlyout();
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         deleteAlertsAndRules();
         createRule(getNewRule({ rule_id: 'rule1' }));
         login();
+        enableRiskEngine();
         visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
@@ -106,6 +108,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
       afterEach(() => {
         cy.task('esArchiverUnload', 'risk_scores_new');
         cy.task('esArchiverUnload', 'risk_scores_new_updated');
+        deleteRiskEngineConfiguration();
       });
 
       it('Should has enrichment fields from legacy risk', function () {

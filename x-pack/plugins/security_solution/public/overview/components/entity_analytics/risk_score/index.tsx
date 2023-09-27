@@ -126,8 +126,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     includeAlertsCount: true,
   });
 
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-
   useQueryInspector({
     queryId: entity.tableQueryId,
     loading: isTableLoading,

@@ -13,6 +13,8 @@ export const UPGRADE_HOST_RISK_SCORE_BUTTON = '[data-test-subj="host-risk-score-
 
 export const UPGRADE_USER_RISK_SCORE_BUTTON = '[data-test-subj="user-risk-score-upgrade"]';
 
+export const UPGRADE_RISK_SCORE_BUTTON = '[data-test-subj="update-risk-score-button"]';
+
 export const HOST_RISK_SCORE_NO_DATA_DETECTED =
   '[data-test-subj="host-risk-score-no-data-detected"]';
 

@@ -22,13 +22,14 @@ export const useInvalidateRiskEngineStatusQuery = () => {
 };
 
 export const useRiskEngineStatus = () => {
-  const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   return useQuery(FETCH_RISK_ENGINE_STATUS, async ({ signal }) => {
-    if (!isRiskEngineEnabled) {
+    if (!isNewRiskScoreModuleAvailable) {
       return {
         isUpdateAvailable: false,
         isNewRiskScoreModuleInstalled: false,
+        isNewRiskScoreModuleAvailable,
       };
     }
     const response = await fetchRiskEngineStatus({ signal });
@@ -40,6 +41,7 @@ export const useRiskEngineStatus = () => {
     return {
       isUpdateAvailable,
       isNewRiskScoreModuleInstalled,
+      isNewRiskScoreModuleAvailable,
       ...response,
     };
   });

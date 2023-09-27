@@ -74,6 +74,7 @@ const RiskScoreEnableButtonComponent = ({
           color="primary"
           fill
           deepLinkId={SecurityPageName.entityAnalyticsManagement}
+          data-test-subj={`enable_${riskScoreEntity}_risk_score`}
         >
           <FormattedMessage
             id="xpack.securitySolution.riskScore.enableButtonTitle"
