@@ -543,7 +543,7 @@ export class FleetPlugin
           },
           {
             // We only retry when this feature flag is enabled
-            numOfAttempts: this.configInitialValue.internal.retrySetupOnBoot ? Infinity : 1,
+            numOfAttempts: this.configInitialValue.internal?.retrySetupOnBoot ? Infinity : 1,
             // 250ms initial backoff
             startingDelay: 250,
             // 5m max backoff
