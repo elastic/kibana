@@ -7,14 +7,15 @@
 
 import type { PackageInfo } from '../types';
 
-/**
- * Get the cloud formation template url from the PackageInfo
- * It looks for a input var with a object containing cloud_formation_template_url present in
- * the package_policies inputs of the given integration type
- */
-export const getCloudFormationTemplateUrlFromPackageInfo = (
+export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
+  CLOUD_FORMATION: 'cloud_formation_template',
+  ARM_TEMPLATE: 'arm_template_url',
+};
+
+export const getTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
-  integrationType: string
+  integrationType: string,
+  templateUrlFieldName: string
 ): string | undefined => {
   if (!packageInfo?.policy_templates) return undefined;
 
@@ -24,7 +25,7 @@ export const getCloudFormationTemplateUrlFromPackageInfo = (
   if ('inputs' in policyTemplate) {
     const cloudFormationTemplate = policyTemplate.inputs?.reduce((acc, input): string => {
       if (!input.vars) return acc;
-      const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+      const template = input.vars.find((v) => v.name === templateUrlFieldName)?.default;
       return template ? String(template) : acc;
     }, '');
     return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
