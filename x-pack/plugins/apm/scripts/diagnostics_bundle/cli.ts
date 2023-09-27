@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import { URL } from 'url';
 import datemath from '@elastic/datemath';
 import { errors } from '@elastic/elasticsearch';
 import axios, { AxiosError } from 'axios';
@@ -164,18 +165,30 @@ async function getHostnameWithBasePath(kibanaHostname?: string) {
     return;
   }
 
+  const parsedHostName = parseHostName(kibanaHostname);
+
   try {
-    await axios.get(kibanaHostname, { maxRedirects: 0 });
+    await axios.get(parsedHostName, { maxRedirects: 0 });
   } catch (e) {
     if (isAxiosError(e) && e.response?.status === 302) {
       const location = e.response?.headers?.location ?? '';
-      return `${kibanaHostname}${location}`;
+      return `${parsedHostName}${location}`;
     }
 
     throw e;
   }
 
-  return kibanaHostname;
+  return parsedHostName;
+}
+
+function parseHostName(hostname: string) {
+  // replace localhost with 127.0.0.1
+  // https://github.com/node-fetch/node-fetch/issues/1624#issuecomment-1235826631
+  hostname = hostname.replace('localhost', '127.0.0.1');
+
+  // extract just the hostname in case user provided a full URL
+  const parsedUrl = new URL(hostname);
+  return parsedUrl.origin;
 }
 
 export function isAxiosError(e: AxiosError | Error): e is AxiosError {
