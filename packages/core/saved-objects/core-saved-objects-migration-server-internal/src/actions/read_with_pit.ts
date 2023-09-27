@@ -24,6 +24,7 @@ export interface ReadWithPit {
   outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
   readonly totalHits: number | undefined;
+  readonly contentLength: number;
 }
 
 /** @internal */
@@ -79,9 +80,9 @@ export const readWithPit =
           track_total_hits: typeof searchAfter === 'undefined',
           query,
         },
-        { maxResponseSize: maxResponseSizeBytes }
+        { maxResponseSize: maxResponseSizeBytes, meta: true }
       )
-      .then((body) => {
+      .then(({ body, headers }) => {
         const totalHits =
           typeof body.hits.total === 'number'
             ? body.hits.total // This format is to be removed in 8.0
@@ -94,6 +95,7 @@ export const readWithPit =
             outdatedDocuments: hits as SavedObjectsRawDoc[],
             lastHitSortValue: hits[hits.length - 1].sort as number[],
             totalHits,
+            contentLength: Number.parseInt(headers['content-length'] ?? '0', 10),
           });
         }
 

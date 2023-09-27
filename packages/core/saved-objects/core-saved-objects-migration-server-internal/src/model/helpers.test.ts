@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
 import { FetchIndexResponse } from '../actions/fetch_indices';
 import { BaseState } from '../state';
 import {
@@ -21,6 +22,7 @@ import {
   createBulkIndexOperationTuple,
   hasLaterVersionAlias,
   aliasVersion,
+  adjustBatchSize,
   getIndexTypes,
 } from './helpers';
 
@@ -444,6 +446,119 @@ describe('getMigrationType', () => {
 describe('getTempIndexName', () => {
   it('composes a temporary index name for reindexing', () => {
     expect(getTempIndexName('.kibana_cases', '8.8.0')).toEqual('.kibana_cases_8.8.0_reindex_temp');
+  });
+});
+
+describe('adjustBatchSize', () => {
+  const baseState: BaseState = {
+    controlState: '',
+    legacyIndex: '.kibana',
+    kibanaVersion: '7.11.0',
+    logs: [],
+    retryCount: 0,
+    retryDelay: 0,
+    retryAttempts: 15,
+    batchSize: 1000,
+    maxBatchSize: 1000,
+    maxBatchSizeBytes: 1e8,
+    maxReadBatchSizeBytes: 1234,
+    discardUnknownObjects: false,
+    discardCorruptObjects: false,
+    indexPrefix: '.kibana',
+    outdatedDocumentsQuery: {},
+    targetIndexMappings: { properties: {} },
+    tempIndexMappings: { properties: {} },
+    preMigrationScript: Option.none,
+    currentAlias: '.kibana',
+    versionAlias: '.kibana_7.11.0',
+    versionIndex: '.kibana_7.11.0_001',
+    tempIndex: '.kibana_7.11.0_reindex_temp',
+    tempIndexAlias: '.kibana_7.11.0_reindex_temp_alias',
+    excludeOnUpgradeQuery: {
+      bool: {
+        must_not: [
+          {
+            term: {
+              type: 'unused-fleet-agent-events',
+            },
+          },
+        ],
+      },
+    },
+    knownTypes: ['dashboard', 'config'],
+    excludeFromUpgradeFilterHooks: {},
+    migrationDocLinks: {
+      resolveMigrationFailures: 'https://someurl.co/',
+      repeatedTimeoutRequests: 'repeatedTimeoutRequests',
+      routingAllocationDisabled: 'routingAllocationDisabled',
+      clusterShardLimitExceeded: 'clusterShardLimitExceeded',
+    },
+    waitForMigrationCompletion: false,
+    mustRelocateDocuments: false,
+    indexTypesMap: { '.kibana': ['action'] },
+  };
+
+  test('should increase batchSize by 20% up to maxBatchSize', () => {
+    const state: BaseState = {
+      ...baseState,
+      batchSize: 10,
+      maxBatchSize: 20,
+      maxReadBatchSizeBytes: 100,
+    };
+    const newState = adjustBatchSize(state, 50);
+    expect(newState).toEqual(Either.right({ ...state, batchSize: 12 }));
+  });
+
+  test('should not increase batchSize above maxBatchSize', () => {
+    const state: BaseState = {
+      ...baseState,
+      batchSize: 19,
+      maxBatchSize: 20,
+      maxReadBatchSizeBytes: 100,
+    };
+    const newState = adjustBatchSize(state, 50);
+    expect(newState).toEqual(Either.right({ ...state, batchSize: 20 }));
+  });
+
+  test('should halve batchSize if contentLength exceeds maxReadBatchSizeBytes', () => {
+    const state: BaseState = {
+      ...baseState,
+      batchSize: 20,
+      maxBatchSize: 40,
+      maxReadBatchSizeBytes: 100,
+    };
+    const newState = adjustBatchSize(state, 150);
+    expect(newState).toEqual(
+      Either.right({
+        ...state,
+        batchSize: 10,
+        logs: [
+          {
+            level: 'warning',
+            message:
+              'Read a batch with a response content length of 150 bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to 10.',
+          },
+        ],
+      })
+    );
+  });
+
+  test('should set controlState to FATAL if batchSize is 1 and contentLength still exceeds maxReadBatchSizeBytes', () => {
+    const state: BaseState = {
+      ...baseState,
+      batchSize: 1,
+      maxBatchSize: 5,
+      maxReadBatchSizeBytes: 10,
+    };
+    const newState = adjustBatchSize(state, 20);
+    expect(newState).toEqual(
+      Either.left({
+        ...state,
+        controlState: 'FATAL' as const,
+        reason:
+          'After reducing the read batch size to a single document, the Elasticsearch response content length was 20 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.',
+      })
+    );
   });
 });
 

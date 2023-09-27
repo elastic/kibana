@@ -46,7 +46,7 @@ describe('migration v2 - read batch size', () => {
     logs = await fs.readFile(logFilePath, 'utf-8');
 
     expect(logs).toMatch(
-      /Read a batch with a response content length of \d+ bytes which exceeds migrations\.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 15/
+      /Read a batch with a response content length of \d+ bytes which exceeds migrations\.maxReadBatchSizeBytes, halving the batch size to 15/
     );
     expect(logs).toMatch('[.kibana] Migration completed');
   });
@@ -60,7 +60,7 @@ describe('migration v2 - read batch size', () => {
     // Check for migration steps present in the logs
     logs = await fs.readFile(logFilePath, 'utf-8');
 
-    expect(logs).not.toMatch('retrying by reducing the batch size in half to');
+    expect(logs).not.toMatch('halving the batch size');
     expect(logs).toMatch('[.kibana] Migration completed');
   });
 });

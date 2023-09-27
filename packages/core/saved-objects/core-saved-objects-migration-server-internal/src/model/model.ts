@@ -10,9 +10,10 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
+import { pipe } from 'fp-ts/lib/function';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
-import type { AllActionStates, State } from '../state';
+import type { AllActionStates, BaseState, State, FatalState } from '../state';
 import type { ResponseType } from '../next';
 import {
   createInitialProgress,
@@ -43,10 +44,10 @@ import {
   versionMigrationCompleted,
   buildRemoveAliasActions,
   MigrationType,
-  increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  adjustBatchSize,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -862,19 +863,29 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // we carry through any failures we've seen with transforming documents on state
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      // Update and log progress from the previously processed batch
       const progress = setProgressTotal(stateP.progress, res.right.totalHits);
-      logs = logProgress(stateP.logs, progress);
+      stateP = {
+        ...stateP,
+        progress,
+        logs: [...stateP.logs, ...logProgress(stateP.logs, progress)],
+      };
+
       if (res.right.outdatedDocuments.length > 0) {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
-          outdatedDocuments: res.right.outdatedDocuments,
-          lastHitSortValue: res.right.lastHitSortValue,
-          progress,
-          logs,
-          // We succeeded in reading this batch, so increase the batch size for the next request.
-          batchSize: increaseBatchSize(stateP),
-        };
+        return pipe(
+          adjustBatchSize({ ...stateP, logs: [...stateP.logs, ...logs] }, res.right.contentLength),
+          Either.fold(
+            (fatalState: FatalState) => fatalState,
+            (state: BaseState) => {
+              return {
+                ...state,
+                controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
+                outdatedDocuments: res.right.outdatedDocuments,
+                lastHitSortValue: res.right.lastHitSortValue,
+              } as State;
+            }
+          )
+        );
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
@@ -918,27 +929,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
-        if (stateP.batchSize === 1) {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: `After reducing the read batch size to a single document, the Elasticsearch response content length was ${left.contentLength}bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
-          };
-        } else {
-          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
-          return {
-            ...stateP,
-            batchSize,
-            controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'warning',
-                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
-              },
-            ],
-          };
-        }
+        return pipe(
+          adjustBatchSize(stateP, left.contentLength),
+          Either.fold(
+            (fatalState: FatalState) => fatalState,
+            (state: BaseState) => {
+              return {
+                ...state,
+                controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+              } as State;
+            }
+          )
+        );
       } else {
         throwBadResponse(stateP, left);
       }
@@ -1207,19 +1209,28 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       if (res.right.outdatedDocuments.length > 0) {
+        // Update and log progress
         const progress = setProgressTotal(stateP.progress, res.right.totalHits);
-        logs = logProgress(stateP.logs, progress);
-
-        return {
+        stateP = {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
-          outdatedDocuments: res.right.outdatedDocuments,
-          lastHitSortValue: res.right.lastHitSortValue,
           progress,
-          logs,
-          // We succeeded in reading this batch, so increase the batch size for the next request.
-          batchSize: increaseBatchSize(stateP),
+          logs: [...stateP.logs, ...logProgress(stateP.logs, progress)],
         };
+
+        return pipe(
+          adjustBatchSize(stateP, res.right.contentLength),
+          Either.fold(
+            (fatalState: FatalState) => fatalState,
+            (state: BaseState) => {
+              return {
+                ...state,
+                controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
+                outdatedDocuments: res.right.outdatedDocuments,
+                lastHitSortValue: res.right.lastHitSortValue,
+              } as State;
+            }
+          )
+        );
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
@@ -1261,27 +1272,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       const left = res.left;
       if (isTypeof(left, 'es_response_too_large')) {
-        if (stateP.batchSize === 1) {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: `After reducing the read batch size to a single document, the response content length was ${left.contentLength} bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
-          };
-        } else {
-          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
-          return {
-            ...stateP,
-            batchSize,
-            controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'warning',
-                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
-              },
-            ],
-          };
-        }
+        return pipe(
+          adjustBatchSize(stateP, left.contentLength),
+          Either.fold(
+            (fatalState: FatalState) => fatalState,
+            (state: BaseState) => {
+              return {
+                ...state,
+                controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+              } as State;
+            }
+          )
+        );
       } else {
         throwBadResponse(stateP, left);
       }

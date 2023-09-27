@@ -17,7 +17,11 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
+<<<<<<< HEAD
+import { BaseState, FatalState } from '../state';
+=======
 import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
+>>>>>>> main
 
 /** @internal */
 export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
@@ -317,11 +321,50 @@ export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): st
   `${indexPrefix}_${kibanaVersion}${REINDEX_TEMP_SUFFIX}`;
 
 /** Increase batchSize by 20% until a maximum of maxBatchSize */
-export const increaseBatchSize = (
-  stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
-) => {
+const increaseBatchSize = (stateP: BaseState) => {
   const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
   return increasedBatchSize > stateP.maxBatchSize ? stateP.maxBatchSize : increasedBatchSize;
+};
+
+/**
+ * Adjusts the batch size according to the contentLength of the last received batch
+ *  - If the contentLength is less than or equal to the maxReadBatchSizeBytes,
+ *    the batchSize is increased by 20% up to the maxBatchSize
+ *  - If the batchSize is already 1, the controlState is set to 'FATAL' and the
+ *    reason is set to a message indicating that the maxReadBatchSizeBytes should be increased
+ *  - If the contentLength is greater than the maxReadBatchSizeBytes, the
+ *    batchSize is reduced by half
+ *
+ * @param state current state
+ * @param contentLength content length of the last received batch
+ * @returns updated state
+ */
+export const adjustBatchSize = (
+  state: BaseState,
+  contentLength: number
+): Either.Either<FatalState, BaseState> => {
+  if (contentLength <= state.maxReadBatchSizeBytes) {
+    return Either.right({ ...state, batchSize: increaseBatchSize(state) });
+  } else if (state.batchSize === 1) {
+    return Either.left({
+      ...state,
+      controlState: 'FATAL' as const,
+      reason: `After reducing the read batch size to a single document, the Elasticsearch response content length was ${contentLength} bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
+    });
+  } else {
+    const batchSize = Math.max(Math.floor(state.batchSize / 2), 1);
+    return Either.right({
+      ...state,
+      batchSize,
+      logs: [
+        ...state.logs,
+        {
+          level: 'warning',
+          message: `Read a batch with a response content length of ${contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to ${batchSize}.`,
+        },
+      ],
+    });
+  }
 };
 
 export const getIndexTypes = (state: BaseState): string[] => {

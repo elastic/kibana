@@ -1849,6 +1849,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments,
           lastHitSortValue,
           totalHits: 1,
+          contentLength: 1, // dummy value
         });
         const newState = model(state, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
@@ -1876,6 +1877,7 @@ describe('migrations v2 model', () => {
           lastHitSortValue,
           totalHits: 1,
           processedDocs: 1,
+          contentLength: 1, // dummy value
         });
         let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(600);
@@ -1885,6 +1887,26 @@ describe('migrations v2 model', () => {
         expect(newState.batchSize).toBe(864);
         newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM halves batchSize if content length exceeds maxReadBatchSizeBytes', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: 1,
+          contentLength: 3456, // dummy value
+        });
+        let newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(300);
+        newState = model({ ...state, batchSize: 300 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(150);
+        newState = model({ ...state, batchSize: 150 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(75);
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
         expect(newState.maxBatchSize).toBe(1000);
       });
@@ -1904,7 +1926,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to 500.",
             },
           ]
         `);
@@ -1925,7 +1947,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to 1.",
             },
           ]
         `);
@@ -1941,7 +1963,7 @@ describe('migrations v2 model', () => {
         expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
         expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
         expect(newState.reason).toMatchInlineSnapshot(
-          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
         );
       });
 
@@ -1950,6 +1972,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments: [],
           lastHitSortValue: undefined,
           totalHits: undefined,
+          contentLength: 0, // dummy value
         });
         const newState = model(state, res) as ReindexSourceToTempClosePit;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
@@ -1968,6 +1991,7 @@ describe('migrations v2 model', () => {
             outdatedDocuments: [],
             lastHitSortValue: undefined,
             totalHits: undefined,
+            contentLength: 1, // dummy value
           });
           const newState = model(testState, res) as FatalState;
           expect(newState.controlState).toBe('FATAL');
@@ -1992,6 +2016,7 @@ describe('migrations v2 model', () => {
             outdatedDocuments: [],
             lastHitSortValue: undefined,
             totalHits: undefined,
+            contentLength: 1, // dummy value
           });
           const newState = model(testState, res) as ReindexSourceToTempClosePit;
           expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
@@ -2401,6 +2426,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments,
           lastHitSortValue,
           totalHits: 10,
+          contentLength: 1, // dummy value
         });
         const newState = model(state, res) as OutdatedDocumentsTransform;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
@@ -2427,6 +2453,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments,
           lastHitSortValue,
           totalHits: undefined,
+          contentLength: 1, // dummy value
         });
         const testState = {
           ...state,
@@ -2459,6 +2486,7 @@ describe('migrations v2 model', () => {
           lastHitSortValue,
           totalHits: 1,
           processedDocs: [],
+          contentLength: 1, // dummy value
         });
         let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(600);
@@ -2468,6 +2496,26 @@ describe('migrations v2 model', () => {
         expect(newState.batchSize).toBe(864);
         newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
         expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM halves batchSize if content length exceeds maxReadBatchSizeBytes', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: [],
+          contentLength: 3456, // dummy value
+        });
+        let newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(300);
+        newState = model({ ...state, batchSize: 300 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(150);
+        newState = model({ ...state, batchSize: 150 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(75);
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
         expect(newState.maxBatchSize).toBe(1000);
       });
@@ -2487,7 +2535,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to 500.",
             },
           ]
         `);
@@ -2508,7 +2556,7 @@ describe('migrations v2 model', () => {
           Array [
             Object {
               "level": "warning",
-              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, halving the batch size to 1.",
             },
           ]
         `);
@@ -2524,7 +2572,7 @@ describe('migrations v2 model', () => {
         expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
         expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
         expect(newState.reason).toMatchInlineSnapshot(
-          `"After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
         );
       });
 
@@ -2533,6 +2581,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments: [],
           lastHitSortValue: undefined,
           totalHits: undefined,
+          contentLength: 0, // dummy value
         });
         const newState = model(state, res) as OutdatedDocumentsSearchClosePit;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT');
@@ -2554,6 +2603,7 @@ describe('migrations v2 model', () => {
           outdatedDocuments: [],
           lastHitSortValue: undefined,
           totalHits: undefined,
+          contentLength: 0, // dummy value
         });
         const transformErrorsState: OutdatedDocumentsSearchRead = {
           ...state,
