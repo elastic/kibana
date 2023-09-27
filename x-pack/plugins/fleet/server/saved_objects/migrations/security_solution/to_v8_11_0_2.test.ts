@@ -14,7 +14,7 @@ import type { PackagePolicy } from '../../../../common';
 import { migratePackagePolicyToV81102 as migration } from './to_v8_11_0_2';
 import { migratePackagePolicyEvictionsFromV81102 as eviction } from './to_v8_11_0_2';
 
-describe('8.10.3 Endpoint Package Policy migration', () => {
+describe('8.11.0-2 Endpoint Package Policy migration', () => {
   const policyDoc = ({ meta = {} }) => {
     return {
       id: 'mock-saved-object-id',
