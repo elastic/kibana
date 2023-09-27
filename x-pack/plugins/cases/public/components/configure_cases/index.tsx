@@ -34,6 +34,7 @@ import { CustomFields } from '../custom_fields';
 import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { useLicense } from '../../common/use_license';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -57,6 +58,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
+  const license = useLicense();
+  const isPlatinumLicense = license.isAtLeastPlatinum();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -336,26 +339,30 @@ export const ConfigureCases: React.FC = React.memo(() => {
               </EuiCallOut>
             </SectionWrapper>
           )}
-          <SectionWrapper>
-            <ClosureOptions
-              closureTypeSelected={closureType}
-              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
-              onChangeClosureType={onChangeClosureType}
-            />
-          </SectionWrapper>
-          <SectionWrapper>
-            <Connectors
-              actionTypes={actionTypes}
-              connectors={connectors ?? []}
-              disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
-              handleShowEditFlyout={onClickUpdateConnector}
-              isLoading={isLoadingAny}
-              mappings={mappings}
-              onChangeConnector={onChangeConnector}
-              selectedConnector={connector}
-              updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
-            />
-          </SectionWrapper>
+          {isPlatinumLicense && (
+            <>
+              <SectionWrapper>
+                <ClosureOptions
+                  closureTypeSelected={closureType}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  onChangeClosureType={onChangeClosureType}
+                />
+              </SectionWrapper>
+              <SectionWrapper>
+                <Connectors
+                  actionTypes={actionTypes}
+                  connectors={connectors ?? []}
+                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  handleShowEditFlyout={onClickUpdateConnector}
+                  isLoading={isLoadingAny}
+                  mappings={mappings}
+                  onChangeConnector={onChangeConnector}
+                  selectedConnector={connector}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+                />
+              </SectionWrapper>
+            </>
+          )}
           <SectionWrapper>
             <EuiFlexItem grow={false}>
               <CustomFields
