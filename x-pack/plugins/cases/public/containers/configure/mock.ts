@@ -11,6 +11,7 @@ import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConnectorMapping } from './types';
 import type { CasesConfigurationUI } from '../types';
+import { customFieldsConfigurationMock } from '../mock';
 
 export const mappings: CaseConnectorMapping[] = [
   {
@@ -47,7 +48,7 @@ export const caseConfigurationResponseMock: Configuration = {
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   owner: SECURITY_SOLUTION_OWNER,
   version: 'WzHJ12',
-  customFields: [],
+  customFields: customFieldsConfigurationMock,
 };
 
 export const caseConfigurationRequest: ConfigurationRequest = {
@@ -72,5 +73,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   closureType: 'close-by-pushing',
   mappings: [],
   version: 'WzHJ12',
-  customFields: [],
+  customFields: customFieldsConfigurationMock,
 };

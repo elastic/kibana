@@ -751,6 +751,15 @@ export const getUserAction = (
         },
         ...overrides,
       };
+    case UserActionTypes.customFields:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.customFields,
+        payload: {
+          customFields: customFieldsMock,
+        },
+        ...overrides,
+      };
 
     default:
       return {
