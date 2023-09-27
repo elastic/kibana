@@ -107,7 +107,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarningShared.noMLNodesAvailableDescription"
-            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for autoscaling to add ML capacity. This may take several minutes."
+            defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start after autoscaling has increased ML capacity. This may take several minutes."
             values={{
               jobCount: unassignedJobCount,
             }}
