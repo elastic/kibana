@@ -198,7 +198,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     if (showFrozenDataTierChoice === false) {
       return (
         <FormattedMessage
-          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
+          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullData"
           defaultMessage="Use full range of data."
         />
       );
