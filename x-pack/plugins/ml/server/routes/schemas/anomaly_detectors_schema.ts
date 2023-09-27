@@ -213,7 +213,7 @@ export const forceQuerySchema = schema.object({
 });
 
 export const jobForCloningSchema = schema.object({
-  /** retainCreatedBy boolean */
+  /** Whether to retain the created_by custom setting. */
   retainCreatedBy: schema.maybe(schema.boolean()),
   /** Job ID */
   jobId: schema.string(),
