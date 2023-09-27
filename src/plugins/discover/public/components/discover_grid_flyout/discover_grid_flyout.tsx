@@ -21,6 +21,7 @@ import {
   EuiPortal,
   EuiPagination,
   keys,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
