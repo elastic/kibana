@@ -112,7 +112,10 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       if (attributes.scheduledTaskId !== id) {
         await context.taskManager.removeIfExists(attributes.scheduledTaskId);
       } else {
-        await context.taskManager.bulkDisable([attributes.scheduledTaskId], isLifecycleAlert);
+        await context.taskManager.bulkDisable(
+          [attributes.scheduledTaskId],
+          Boolean(isLifecycleAlert)
+        );
       }
     }
   }
