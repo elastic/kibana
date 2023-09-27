@@ -13,12 +13,8 @@ const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const { dashboard, discover, common, timePicker } = getPageObjects([
-    'dashboard',
-    'discover',
-    'common',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['dashboard', 'discover', 'common', 'timePicker']);
+  const { dashboard, discover, timePicker } = PageObjects;
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
