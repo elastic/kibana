@@ -17,7 +17,7 @@ import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http } = useKibana().services;
+  const { http, theme } = useKibana().services;
   const {
     appMountParameters: { setHeaderActionMenu },
   } = usePluginContext();
@@ -25,7 +25,7 @@ export function HeaderMenu(): React.ReactElement | null {
   const aiAssistant = useObservabilityAIAssistantOptional();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
