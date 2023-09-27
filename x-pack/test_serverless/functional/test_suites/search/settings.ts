@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { isEditorFieldSetting } from '../common/advanced_settings';
+import { isEditorFieldSetting } from '../common/settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Security project settings', function () {
+  describe('Search project settings', function () {
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('settings');
@@ -31,8 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders security settings', () => {
-      for (const settingId of SECURITY_PROJECT_SETTINGS) {
+    describe('renders search settings', () => {
+      for (const settingId of SEARCH_PROJECT_SETTINGS) {
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;

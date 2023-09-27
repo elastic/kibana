@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
+import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { isEditorFieldSetting } from '../common/settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -15,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Search project settings', function () {
+  describe('Observability project settings', function () {
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('settings');
@@ -30,8 +31,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders search settings', () => {
-      for (const settingId of SEARCH_PROJECT_SETTINGS) {
+    describe('renders observability settings', () => {
+      for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
+        // Code editors don't have their test subjects rendered
+        if (isEditorFieldSetting(settingId)) {
+          continue;
+        }
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
