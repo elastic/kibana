@@ -70,7 +70,8 @@ export function extractWarnings(
           },
           {
             options: {
-              requestId: inspector?.id,
+              initialRequestId: inspector?.id,
+              initialTabs: ['clusters', 'response'],
             }
           }
         );

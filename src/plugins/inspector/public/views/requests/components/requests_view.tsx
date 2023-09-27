@@ -31,7 +31,8 @@ function getInitialRequest(requests: Request[], initialRequestId?: string) {
 }
 
 interface RequestViewOptions {
-  requestId?: string;
+  initialRequestId?: string;
+  initialTabs?: string[];
 }
 
 interface RequestSelectorState {
@@ -48,7 +49,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     const requests = this.getRequests();
     this.state = {
       requests,
-      request: getInitialRequest(requests, (this.props.options as RequestViewOptions).requestId),
+      request: getInitialRequest(requests, (this.props.options as RequestViewOptions | undefined)?.initialRequestId),
     };
   }
 
@@ -178,7 +179,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
 
         <EuiSpacer size="m" />
 
-        {this.state.request && <RequestDetails request={this.state.request} />}
+        {this.state.request && <RequestDetails initialTabs={(this.props.options as RequestViewOptions | undefined)?.initialTabs} request={this.state.request} />}
       </>
     );
   }

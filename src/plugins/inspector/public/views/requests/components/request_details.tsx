@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
+import { Request } from '../../../../common/adapters/request/types';
 
 import {
   ClustersView,
@@ -17,14 +17,13 @@ import {
   RequestDetailsResponse,
   RequestDetailsStats,
 } from './details';
-import { RequestDetailsProps } from './types';
 
-interface RequestDetailsState {
-  availableDetails: DetailViewData[];
-  selectedDetail: DetailViewData | null;
+interface Props {
+  initialTabs?: string[];
+  request: Request;
 }
 
-export interface DetailViewData {
+interface DetailViewData {
   name: string;
   label: string;
   component: any;
@@ -32,7 +31,7 @@ export interface DetailViewData {
 
 const DETAILS: DetailViewData[] = [
   {
-    name: 'Statistics',
+    name: 'statistics',
     label: i18n.translate('inspector.requests.statisticsTabLabel', {
       defaultMessage: 'Statistics',
     }),
@@ -46,14 +45,14 @@ const DETAILS: DetailViewData[] = [
     component: ClustersView,
   },
   {
-    name: 'Request',
+    name: 'request',
     label: i18n.translate('inspector.requests.requestTabLabel', {
       defaultMessage: 'Request',
     }),
     component: RequestDetailsRequest,
   },
   {
-    name: 'Response',
+    name: 'response',
     label: i18n.translate('inspector.requests.responseTabLabel', {
       defaultMessage: 'Response',
     }),
@@ -61,72 +60,56 @@ const DETAILS: DetailViewData[] = [
   },
 ];
 
-export class RequestDetails extends Component<RequestDetailsProps, RequestDetailsState> {
-  static propTypes = {
-    request: PropTypes.object.isRequired,
-  };
-
-  state = {
-    availableDetails: [],
-    selectedDetail: null,
-  };
-
-  static getDerivedStateFromProps(nextProps: RequestDetailsProps, prevState: RequestDetailsState) {
-    const selectedDetail = prevState && prevState.selectedDetail;
-    const availableDetails = DETAILS.filter(
+export function RequestDetails(props: Props) {
+  const [availableDetails, setAvailableDetails] = useState<DetailViewData[]>([]);
+  const [selectedDetail, setSelectedDetail] = useState<DetailViewData | null>(null);
+  
+  useEffect(() => {
+    const nextAvailableDetails = DETAILS.filter(
       (detail: DetailViewData) =>
-        !detail.component.shouldShow || detail.component.shouldShow(nextProps.request)
+        detail.component.shouldShow?.(props.request)
     );
+    setAvailableDetails(nextAvailableDetails);
+
     // If the previously selected detail is still available we want to stay
     // on this tab and not set another selectedDetail.
-    if (selectedDetail && availableDetails.includes(selectedDetail)) {
-      return { availableDetails };
+    if (selectedDetail && nextAvailableDetails.find(({ name }) => name === selectedDetail.name)) {
+      return;
     }
 
-    return {
-      availableDetails,
-      selectedDetail: availableDetails[0],
-    };
-  }
+    const firstDetail = nextAvailableDetails.length ? nextAvailableDetails[0] : null;
+    const initialTabName = props.initialTabs
+      ? props.initialTabs.find(tabName => {
+          return nextAvailableDetails.some(({ name }) => tabName === name);
+      })
+      : undefined;
+    const initialDetail = initialTabName
+      ? nextAvailableDetails.find(({ name }) => initialTabName === name)
+      : undefined;
 
-  selectDetailsTab = (detail: DetailViewData) => {
-    if (detail !== this.state.selectedDetail) {
-      this.setState({
-        selectedDetail: detail,
-      });
-    }
-  };
+    const nextSelectedDetail = !selectedDetail && initialDetail ? initialDetail : firstDetail;
+    setSelectedDetail(nextSelectedDetail);
+  }, [props.initialTabs, props.request]);
 
-  static getSelectedDetailComponent(detail: DetailViewData | null) {
-    return detail ? detail.component : null;
-  }
-
-  renderDetailTab = (detail: DetailViewData) => {
-    return (
-      <EuiTab
-        key={detail.name}
-        isSelected={detail === this.state.selectedDetail}
-        onClick={() => this.selectDetailsTab(detail)}
-        data-test-subj={`inspectorRequestDetail${detail.name}`}
-      >
-        {detail.label}
-      </EuiTab>
-    );
-  };
-
-  render() {
-    const { selectedDetail, availableDetails } = this.state;
-    const DetailComponent = RequestDetails.getSelectedDetailComponent(selectedDetail);
-
-    if (!availableDetails.length || !DetailComponent) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiTabs size="s">{this.state.availableDetails.map(this.renderDetailTab)}</EuiTabs>
-        <DetailComponent request={this.props.request} />
-      </>
-    );
-  }
+  return selectedDetail ? (
+    <>
+      <EuiTabs size="s">
+        {availableDetails.map(detail => (
+          <EuiTab
+            key={detail.name}
+            isSelected={detail.name === selectedDetail.name}
+            onClick={() => {
+              if (detail.name !== selectedDetail.name) {
+                setSelectedDetail(detail);
+              }
+            }}
+            data-test-subj={`inspectorRequestDetail${detail.name}`}
+          >
+            {detail.label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <selectedDetail.component request={props.request} />
+    </>
+  ) : null;
 }
