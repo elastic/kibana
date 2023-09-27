@@ -12,7 +12,6 @@ import type {
   FormulaPublicApi,
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
-  DataLayerConfig,
   PieLayerState,
   TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';

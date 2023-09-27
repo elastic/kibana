@@ -352,7 +352,8 @@ export function registerLensFunction({
                 type: 'string',
               },
             },
-            description: 'this is required setting for pie chart and optional for other charts. For heatmap chart it defines breakdown on the Y axis.',
+            description:
+              'this is required setting for pie chart and optional for other charts. For heatmap chart it defines breakdown on the Y axis.',
             required: ['field'],
           },
           legend: {
@@ -373,7 +374,8 @@ export function registerLensFunction({
           },
           timeField: {
             type: 'string',
-            description: 'time field to use on the x axis if XY chart is used or string field to use on x axis if heatmap chart is used. For other chart types this option should not be set.',
+            description:
+              'time field to use on the x axis if XY chart is used or string field to use on x axis if heatmap chart is used. For other chart types this option should not be set.',
           },
           start: {
             type: 'string',
@@ -397,7 +399,9 @@ export function registerLensFunction({
         content: {},
       };
     },
-    ({ arguments: { layers, indexPattern, breakdown, timeField, legend, start, end, chartType } }) => {
+    ({
+      arguments: { layers, indexPattern, breakdown, timeField, legend, start, end, chartType },
+    }) => {
       return (
         <Lens
           indexPattern={indexPattern}
