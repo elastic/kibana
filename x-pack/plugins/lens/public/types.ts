@@ -507,6 +507,8 @@ export interface Datasource<T = unknown, P = unknown> {
     references?: SavedObjectReference[],
     dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
+
+  injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
 }
 
 export interface DatasourceFixAction<T> {
@@ -1009,6 +1011,7 @@ interface AddLayerButtonProps {
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+  isInlineEditing?: boolean;
 }
 
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {

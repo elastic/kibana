@@ -420,7 +420,8 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 A configuration URL that varies by connector:
 +
 --
-* For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security API request URL.
+* For a <<d3security-action-type,D3 Security connector>>, specifies the D3 Security API request URL.
+* For a <<tines-action-type,Tines connector>>, specifies the Tines tenant URL.
 * For a <<webhook-action-type,webhook connector>>, specifies the web service request URL.
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
@@ -470,7 +471,12 @@ NOTE: The client secret must be URL-encoded.
 --
 
 `xpack.actions.preconfigured.<connector-id>.secrets.email`::
-For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP basic authentication.
+An email address that varies by connector:
++
+--
+* For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP basic authentication.
+* For a <<tines-action-type,Tines connector>>, specifies the email used to sign in to Tines.
+--
 
 `xpack.actions.preconfigured.<connector-id>.secrets.password`::
 A password secret that varies by connector:
@@ -495,6 +501,7 @@ A token secret that varies by connector:
 --
 * For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
 * For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
+* For a <<tines-action-type,Tines connector>>, specifies the Tines API token.
 * For a <<torq-action-type,Torq connector>>, specifies the secret of the webhook authentication header.
 --
 
