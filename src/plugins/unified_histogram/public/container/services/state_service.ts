@@ -120,7 +120,7 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setlensEmbeddableOutput$: (
+  setLensEmbeddableOutput$: (
     lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
   ) => void;
   /**
@@ -207,7 +207,7 @@ export const createStateService = (
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
     },
-    setlensEmbeddableOutput$: (
+    setLensEmbeddableOutput$: (
       lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
     ) => {
       updateState({ lensEmbeddableOutput$ });

@@ -139,7 +139,7 @@ describe('UnifiedHistogramStateService', () => {
     stateService.setLensAdapters(undefined);
     newState = { ...newState, lensAdapters: undefined };
     expect(state).toEqual(newState);
-    stateService.setlensEmbeddableOutput$(undefined);
+    stateService.setLensEmbeddableOutput$(undefined);
     newState = { ...newState, lensEmbeddableOutput$: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
