@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   showSaveModal,
   OnSaveProps,
@@ -14,11 +15,18 @@ import {
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 
-import { APP_NAME } from '../../common';
+import { CONTENT_ID } from '../../common';
 import { LinksAttributes } from '../../common/content_management';
 import { LinksByReferenceInput, LinksInput } from '../embeddable/types';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { getLinksAttributeService } from '../services/attribute_service';
+
+const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
+  defaultMessage: `Save {contentId} panel to library`,
+  values: {
+    contentId: CONTENT_ID,
+  },
+});
 
 export const runSaveToLibrary = async (
   newAttributes: LinksAttributes,
@@ -68,10 +76,11 @@ export const runSaveToLibrary = async (
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newAttributes.title}
+        customModalTitle={modalTitle}
         description={newAttributes.description}
         showDescription
         showCopyOnSave={false}
-        objectType={APP_NAME}
+        objectType={CONTENT_ID}
       />
     );
     showSaveModal(saveModal);
