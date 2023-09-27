@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  FieldRowProvider,
-  FieldRowKibanaProvider,
-} from '@kbn/management-settings-components-field-row';
 import React, { FC, useContext } from 'react';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
 
+import {
+  FieldCategoryKibanaProvider,
+  FieldCategoryProvider,
+} from '@kbn/management-settings-components-field-category';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 
@@ -33,7 +33,7 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
 
   return (
     <FormContext.Provider value={{ saveChanges, showError, showReloadPagePrompt }}>
-      <FieldRowProvider {...rest}>{children}</FieldRowProvider>
+      <FieldCategoryProvider {...rest}>{children}</FieldCategoryProvider>
     </FormContext.Provider>
   );
 };
@@ -57,7 +57,9 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
         showReloadPagePrompt: () => toasts.add(reloadPageToast(theme, i18nStart)),
       }}
     >
-      <FieldRowKibanaProvider {...{ docLinks, toasts }}>{children}</FieldRowKibanaProvider>
+      <FieldCategoryKibanaProvider {...{ docLinks, toasts }}>
+        {children}
+      </FieldCategoryKibanaProvider>
     </FormContext.Provider>
   );
 };

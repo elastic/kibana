@@ -960,6 +960,8 @@
       "@kbn/management-cards-navigation/*": ["packages/kbn-management/cards_navigation/*"],
       "@kbn/management-plugin": ["src/plugins/management"],
       "@kbn/management-plugin/*": ["src/plugins/management/*"],
+      "@kbn/management-settings-components-field-category": ["packages/kbn-management/settings/components/field_category"],
+      "@kbn/management-settings-components-field-category/*": ["packages/kbn-management/settings/components/field_category/*"],
       "@kbn/management-settings-components-field-input": ["packages/kbn-management/settings/components/field_input"],
       "@kbn/management-settings-components-field-input/*": ["packages/kbn-management/settings/components/field_input/*"],
       "@kbn/management-settings-components-field-row": ["packages/kbn-management/settings/components/field_row"],

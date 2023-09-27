@@ -9,9 +9,10 @@
 import React, { Fragment } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
-import { FieldRow } from '@kbn/management-settings-components-field-row';
+import { FieldCategories } from '@kbn/management-settings-components-field-category';
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
+import { categorizeFields } from '@kbn/management-settings-utilities';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -63,15 +64,16 @@ export const Form = (props: FormProps) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  const fieldRows = fields.map((field) => {
-    const { id: key } = field;
-    const unsavedChange = unsavedChanges[key];
-    return <FieldRow {...{ key, field, unsavedChange, onFieldChange, isSavingEnabled }} />;
-  });
+  const categorizedFields = categorizeFields(fields);
+
+  /** TODO - Querying is not enabled yet. */
+  const onClearQuery = () => {};
 
   return (
     <Fragment>
-      <div>{fieldRows}</div>
+      <FieldCategories
+        {...{ categorizedFields, isSavingEnabled, onFieldChange, onClearQuery, unsavedChanges }}
+      />
       {!isEmpty(unsavedChanges) && (
         <BottomBar
           onSaveAll={saveAll}

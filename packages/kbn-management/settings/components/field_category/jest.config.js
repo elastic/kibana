@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { isSettingDefaultValue, normalizeSettings } from './setting';
-
-export {
-  getFieldInputValue,
-  hasUnsavedChange,
-  isFieldDefaultValue,
-  useUpdate,
-  type UseUpdateParameters,
-} from './field';
-
-export { categorizeFields, getCategoryName } from './category';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/packages/kbn-management/settings/components/field_category'],
+};

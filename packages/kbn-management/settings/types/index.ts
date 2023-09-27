@@ -65,6 +65,8 @@ export type {
   Value,
 } from './setting_type';
 
+export type { CategorizedFields } from './category';
+
 /**
  * A React `ref` that indicates an input can be reset using an
  * imperative handle.

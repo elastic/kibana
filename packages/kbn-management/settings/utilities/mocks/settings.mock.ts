@@ -8,8 +8,13 @@
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
 
+const defaults = {
+  requiresPageReload: false,
+  readonly: false,
+};
+
 type Settings = {
-  [key in Exclude<SettingType, 'json' | 'markdown'>]: KnownTypeToMetadata<key>;
+  [key in SettingType]: KnownTypeToMetadata<key>;
 };
 
 /**
@@ -17,19 +22,17 @@ type Settings = {
  * @param requirePageReload The value of the `requirePageReload` param for all settings.
  */
 export const getSettingsMock = (requirePageReload: boolean = false): Settings => {
-  const defaults = {
-    requiresPageReload: requirePageReload,
-    readonly: false,
-  };
-
+  if (requirePageReload) {
+    defaults.requiresPageReload = true;
+  }
   return {
     array: {
       description: 'Description for Array test setting',
       name: 'array:test:setting',
       type: 'array',
       userValue: null,
-      value: ['example_value'],
-      category: ['general'],
+      value: ['foo', 'bar', 'baz'],
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     boolean: {
@@ -38,7 +41,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'boolean',
       userValue: null,
       value: true,
-      category: ['general'],
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     color: {
@@ -47,7 +50,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'color',
       userValue: null,
       value: '#FF00CC',
-      category: ['general'],
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     image: {
@@ -56,7 +59,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'image',
       userValue: null,
       value: '',
-      category: ['dashboard'],
+      category: ['dashboard', 'discover'],
       ...defaults,
     },
     number: {
@@ -65,25 +68,27 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'number',
       userValue: null,
       value: 1,
-      category: ['dashboard'],
+      category: ['dashboard', 'discover'],
       ...defaults,
     },
-    // json: {
-    //   name: 'json:test:setting',
-    //   description: 'Description for Json test setting',
-    //   type: 'json',
-    //   userValue: null,
-    //   value: '{"foo": "bar"}',
-    //   ...defaults,
-    // },
-    // markdown: {
-    //   name: 'markdown:test:setting',
-    //   description: 'Description for Markdown test setting',
-    //   type: 'markdown',
-    //   userValue: null,
-    //   value: '',
-    //   ...defaults,
-    // },
+    json: {
+      name: 'json:test:setting',
+      description: 'Description for Json test setting',
+      type: 'json',
+      userValue: null,
+      value: '{"foo": "bar"}',
+      category: ['dashboard', 'discover'],
+      ...defaults,
+    },
+    markdown: {
+      name: 'markdown:test:setting',
+      description: 'Description for Markdown test setting',
+      type: 'markdown',
+      userValue: null,
+      value: '',
+      category: ['notifications', 'search'],
+      ...defaults,
+    },
     select: {
       description: 'Description for Select test setting',
       name: 'select:test:setting',
@@ -96,7 +101,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'select',
       userValue: null,
       value: 'apple',
-      category: ['securitySolution'],
+      category: ['notifications', 'search'],
       ...defaults,
     },
     string: {
@@ -105,7 +110,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'string',
       userValue: null,
       value: 'hello world',
-      category: ['securitySolution'],
+      category: ['notifications', 'search'],
       ...defaults,
     },
     undefined: {
@@ -114,7 +119,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'undefined',
       userValue: null,
       value: undefined,
-      category: ['someCategory'],
+      category: ['notifications', 'search'],
       ...defaults,
     },
   };

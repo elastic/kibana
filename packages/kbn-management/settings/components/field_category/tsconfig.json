@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -16,7 +16,10 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-components-field-row",
     "@kbn/management-settings-types",
-    "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }

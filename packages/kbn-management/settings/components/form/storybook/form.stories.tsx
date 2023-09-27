@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
 import { FieldDefinition } from '@kbn/management-settings-types';
@@ -37,12 +36,15 @@ export default {
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
       >
-        <EuiPanel>
-          <Story />
-        </EuiPanel>
+        <Story />
       </FormProvider>
     ),
   ],
+  parameters: {
+    backgrounds: {
+      default: 'ghost',
+    },
+  },
 } as ComponentMeta<typeof Component>;
 
 interface FormStoryProps {

@@ -6,14 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { isSettingDefaultValue, normalizeSettings } from './setting';
-
-export {
-  getFieldInputValue,
-  hasUnsavedChange,
-  isFieldDefaultValue,
-  useUpdate,
-  type UseUpdateParameters,
-} from './field';
-
-export { categorizeFields, getCategoryName } from './category';
+export { categorizeFields } from './categorize_fields';
+export { getCategoryName } from './get_category_name';
