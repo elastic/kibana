@@ -124,7 +124,17 @@ fi
 
 echo "Running scripts/type_check for each found tsconfig.json file..."
 
+finalExitCode=0
+
 for tsconfig in "${uniq_tsconfigs[@]}"
 do
+  set +e
   node scripts/type_check --project $tsconfig
+  exitCode=$?
+  set -e
+  if [ "$exitCode" -gt "$finalExitCode" ]; then
+    finalExitCode=$exitCode
+  fi
 done
+
+exit $finalExitCode
