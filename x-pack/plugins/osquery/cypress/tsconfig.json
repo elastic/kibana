@@ -7,7 +7,7 @@
     "../../../test_serverless/shared/lib"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
   ],
   "compilerOptions": {
     "outDir": "target/types",
@@ -19,6 +19,9 @@
     "resolveJsonModule": true,
   },
   "kbn_references": [
+    {
+      "path": "../../../test_serverless/tsconfig.json"
+    },
     "@kbn/cypress-config",
     // cypress projects that are nested inside of other ts project use code
     // from the parent ts project in ways that can't be automatically deteceted
