@@ -27,6 +27,10 @@ import { getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from './use_perform_evaluation';
 
+/**
+ * See AGENT_EXECUTOR_MAP in `x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts`
+ * for the agent name -> executor mapping
+ */
 const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
 const DEFAULT_EVAL_TYPES = ['correctness', 'esql-validator', 'custom'];
 
