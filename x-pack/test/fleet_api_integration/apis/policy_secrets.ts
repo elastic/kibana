@@ -11,7 +11,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
+import { FullAgentPolicy, LogstashOutput } from '@kbn/fleet-plugin/common';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -90,6 +90,29 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       return agentPolicyId;
+    };
+
+    const createOutputWithSecret = async () => {
+      const res = await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Kafka Output With Password Secret',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          topics: [{ topic: 'topic1' }],
+          config_yaml: 'shipper: {}',
+          shipper: {
+            disk_queue_enabled: true,
+            disk_queue_path: 'path/to/disk/queue',
+            disk_queue_encryption_enabled: true,
+          },
+          secrets: { password: 'pass' },
+        });
+
+      return res.body.item;
     };
 
     const createPolicyWithSecrets = async () => {
@@ -281,6 +304,7 @@ export default function (providerContext: FtrProviderContext) {
     let updatedPackageVarId: string;
     let inputVarId: string;
     let streamVarId: string;
+    let outputWithSecret: LogstashOutput;
     let expectedCompiledStream: any;
     let expectedCompiledInput: any;
 
@@ -325,6 +349,7 @@ export default function (providerContext: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       fleetServerAgentPolicyId = await createFleetServerAgentPolicy();
+      outputWithSecret = await createOutputWithSecret();
     });
 
     after(async () => {
@@ -435,6 +460,28 @@ export default function (providerContext: FtrProviderContext) {
         true
       );
       expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(streamVarId);
+    });
+
+    it('Should return output secrets if policy uses output with secrets', async () => {
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `Test policy ${uuidv4()}`,
+          namespace: 'default',
+          data_output_id: outputWithSecret.id,
+          monitoring_output_id: outputWithSecret.id,
+        })
+        .expect(200);
+
+      const fullAgentPolicy = await getFullAgentPolicyById(agentPolicyResponse.item.id);
+
+      const passwordSecretId = outputWithSecret!.secrets?.password?.id;
+
+      expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
+
+      const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+      expect(output.secrets.password.id).to.eql(passwordSecretId);
     });
 
     it('should have correctly created the secrets', async () => {

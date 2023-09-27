@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { OutputSecretPath } from '../../common/types';
+import type { Output, OutputSecretPath } from '../../common/types';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
@@ -286,6 +286,27 @@ function getOutputSecretPaths(output: NewOutput): OutputSecretPath[] {
     outputSecretPaths.push({
       path: 'secrets.password',
       value: output.secrets.password,
+    });
+  }
+
+  return outputSecretPaths;
+}
+
+export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
+  const outputSecretPaths: PolicySecretReference[] = [];
+
+  if (
+    (output.type === 'kafka' || output.type === 'logstash') &&
+    typeof output.secrets?.ssl?.key === 'object'
+  ) {
+    outputSecretPaths.push({
+      id: output.secrets.ssl.key.id,
+    });
+  }
+
+  if (output.type === 'kafka' && typeof output?.secrets?.password === 'object') {
+    outputSecretPaths.push({
+      id: output.secrets.password.id,
     });
   }
 

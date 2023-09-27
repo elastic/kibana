@@ -1037,7 +1037,6 @@ export default function (providerContext: FtrProviderContext) {
             secrets: { password: 'pass' },
           });
 
-        console.log('//////// ', JSON.stringify(res.body));
         const secretId = res.body.item.secrets.password.id;
         const searchRes = await getSecrets([secretId]);
         // @ts-ignore _source unknown type
