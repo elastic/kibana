@@ -91,7 +91,7 @@ export const VisualizeTab: FC = memo(() => {
         color="primary"
         name="coarsness"
         legend={i18n.translate(
-          'xpack.securitySolution.flyout.left.visualize.buttonGroupButtonLabel',
+          'xpack.securitySolution.flyout.left.visualize.buttonGroupLegendLabel',
           {
             defaultMessage: 'Visualize options',
           }
