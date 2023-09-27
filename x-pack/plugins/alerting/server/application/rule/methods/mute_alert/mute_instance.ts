@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import { Rule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { MuteOptions } from '../types';
-import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
+import Boom from '@hapi/boom';
+import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
+import { muteAlertParamsSchema } from './schemas';
+import type { MuteAlertParams } from './types';
+import { Rule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteOptions
+  params: MuteAlertParams
 ): Promise<void> {
+  try {
+    muteAlertParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate params: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.muteInstance('${alertId}')`,
-    async () => await muteInstanceWithOCC(context, { alertId, alertInstanceId })
+    `rulesClient.muteInstance('${params.alertId}')`,
+    async () => await muteInstanceWithOCC(context, params)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteOptions
+  { alertId, alertInstanceId }: MuteAlertParams
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     'alert',
@@ -68,15 +77,15 @@ async function muteInstanceWithOCC(
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
-    await context.unsecuredSavedObjectsClient.update(
-      'alert',
-      alertId,
-      updateMeta(context, {
+    await updateRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      savedObjectsUpdateOptions: { version },
+      id: alertId,
+      updateRuleAttributes: updateMeta(context, {
         mutedInstanceIds,
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
       }),
-      { version }
-    );
+    });
   }
 }
