@@ -15,7 +15,7 @@ import type { SavedObjectModelVersionForwardCompatibilityFn } from '@kbn/core-sa
 
 import type { PackagePolicy } from '../../../../common';
 
-export const migratePackagePolicyToV8103: SavedObjectModelDataBackfillFn<
+export const migratePackagePolicyToV81102: SavedObjectModelDataBackfillFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
@@ -44,7 +44,7 @@ export const migratePackagePolicyToV8103: SavedObjectModelDataBackfillFn<
   };
 };
 
-export const migratePackagePolicyEvictionsFromV8103: SavedObjectModelVersionForwardCompatibilityFn =
+export const migratePackagePolicyEvictionsFromV81102: SavedObjectModelVersionForwardCompatibilityFn =
   (unknownAttributes) => {
     const attributes = unknownAttributes as PackagePolicy;
     if (attributes.package?.name !== 'endpoint') {
