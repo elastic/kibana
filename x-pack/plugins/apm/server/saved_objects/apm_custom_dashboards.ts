@@ -22,7 +22,7 @@ export const apmCustomDashboards: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
     icon: 'apmApp',
     getTitle: () =>
       i18n.translate('xpack.apm.apmServiceDashboards.title', {
