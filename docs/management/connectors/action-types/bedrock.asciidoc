@@ -19,7 +19,7 @@ You can create connectors in *{stack-manage-app} > {connectors-ui}*.  For exampl
 
 [role="screenshot"]
 // TODO: need logo before screenshot
-image::management/connectors/images/gen-ai-connector.png[AWS Bedrock connector]
+image::management/connectors/images/bedrock-connector.png[AWS Bedrock connector]
 
 [float]
 [[bedrock-connector-configuration]]
@@ -43,7 +43,7 @@ as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 // TODO: need logo before screenshot
-image::management/connectors/images/gen-ai-params-test.png[AWS Bedrock params test]
+image::management/connectors/images/bedrock-params.png[AWS Bedrock params test]
 
 The AWS Bedrock actions have the following configuration properties.
 
