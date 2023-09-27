@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: Remove before merging!
+set -x
 set -euo pipefail
 
 if [[ "${CI-}" == "true" ]]; then
