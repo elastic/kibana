@@ -469,15 +469,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const intervalErrorMessage1 = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          let errorMessage = await intervalErrorMessage1.getVisibleText();
-          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+          const errorMessage1 = await intervalErrorMessage1.getVisibleText();
+          expect(errorMessage1).to.be('Invalid calendar interval: 2w, value must be 1');
 
+          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
           const intervalErrorMessage2 = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
-          errorMessage = await intervalErrorMessage2.getVisibleText();
-          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+          const errorMessage2 = await intervalErrorMessage2.getVisibleText();
+          expect(errorMessage2).to.be('Invalid calendar interval: 3w, value must be 1');
         });
       });
     });
