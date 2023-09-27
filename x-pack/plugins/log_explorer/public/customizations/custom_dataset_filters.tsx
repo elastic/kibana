@@ -7,10 +7,10 @@
 import React from 'react';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useControlPanels } from '../hooks/use_control_panels';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { ControlGroupContainer } from './control_group_container';
 
 const DATASET_FILTERS_CUSTOMIZATION_ID = 'datasetFiltersCustomization';
 
@@ -40,12 +40,6 @@ const CustomDatasetFilters = ({
     </ControlGroupContainer>
   );
 };
-
-const ControlGroupContainer = euiStyled.div`
-  .controlGroup {
-    min-height: unset;
-  }
-`;
 
 // eslint-disable-next-line import/no-default-export
 export default CustomDatasetFilters;
