@@ -11,12 +11,7 @@ import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { EntitiesDetails } from './entities_details';
-import {
-  ENTITIES_DETAILS_NO_DATA_TEST_ID,
-  ENTITIES_DETAILS_TEST_ID,
-  HOST_DETAILS_TEST_ID,
-  USER_DETAILS_TEST_ID,
-} from './test_ids';
+import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
@@ -40,6 +35,8 @@ jest.mock('react-redux', () => {
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
 
+const NO_DATA_MESSAGE = 'Host and user information are unavailable for this alert.';
+
 const renderEntitiesDetails = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
@@ -51,11 +48,11 @@ const renderEntitiesDetails = (contextValue: LeftPanelContext) =>
 
 describe('<EntitiesDetails />', () => {
   it('renders entities details correctly', () => {
-    const { getByTestId, queryByTestId } = renderEntitiesDetails(mockContextValue);
+    const { getByTestId, queryByText } = renderEntitiesDetails(mockContextValue);
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should render no data message if user name and host name are not available', () => {
@@ -64,11 +61,8 @@ describe('<EntitiesDetails />', () => {
       getFieldsData: (fieldName: string) =>
         fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
     };
-    const { getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
-    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
-      'Host and user information are unavailable for this alert.'
-    );
+    const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
@@ -87,11 +81,8 @@ describe('<EntitiesDetails />', () => {
         }
       },
     };
-    const { getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
-    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
-      'Host and user information are unavailable for this alert.'
-    );
+    const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
