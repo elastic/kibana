@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '@ftrProviderContext';
+import type { FtrProviderContext } from '../../test_serverless/api_integration/ftr_provider_context';
 
 export type { FtrProviderContext };

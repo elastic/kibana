@@ -1,9 +1,0 @@
-{
-     "extends": "../../../tsconfig.base.json",
-     "compilerOptions": {
-     "paths": {
-        "@testServerlessAPIIntergration/*":["x-pack/test_serverless/api_integration/*"],
-        "@ftrProviderContext":["x-pack/test_serverless/api_integration/ftr_provider_context"]
-     },
-     }
-}
