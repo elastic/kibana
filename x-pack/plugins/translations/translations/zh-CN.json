@@ -37762,7 +37762,6 @@
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel": "告警导航",
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason": "原因",
     "xpack.triggersActionsUI.sections.alertsTable.column.actions": "操作",
-    "xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails": "查看详情",
     "xpack.triggersActionsUI.sections.alertsTable.title": "告警表",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel": "取消",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.confirmConnectorCloseMessage": "您无法恢复未保存更改。",

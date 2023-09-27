@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { AlertConsumers, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
@@ -313,7 +312,6 @@ describe('AlertsTableState', () => {
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
     query: {},
-    showExpandToDetails: true,
   };
 
   const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
@@ -653,104 +651,6 @@ describe('AlertsTableState', () => {
     });
   });
 
-  describe('flyout', () => {
-    it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-
-      const result = await wrapper.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-
-      // Should paginate too
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
-
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-    });
-
-    it('should refetch data if flyout pagination exceeds the current page', async () => {
-      const wrapper = render(
-        <AlertsTableWithLocale
-          {...{
-            ...tableProps,
-            pageSize: 1,
-          }}
-        />
-      );
-
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-      const result = await wrapper.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      hookUseFetchAlerts.mockClear();
-
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: {
-            pageIndex: 1,
-            pageSize: 1,
-          },
-        })
-      );
-
-      hookUseFetchAlerts.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: {
-            pageIndex: 0,
-            pageSize: 1,
-          },
-        })
-      );
-    });
-
-    it('Should be able to go back from last page to n - 1', async () => {
-      const wrapper = render(
-        <AlertsTableWithLocale
-          {...{
-            ...tableProps,
-            pageSize: 2,
-          }}
-        />
-      );
-
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-      const result = await wrapper.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      hookUseFetchAlerts.mockClear();
-
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: {
-            pageIndex: 1,
-            pageSize: 2,
-          },
-        })
-      );
-
-      hookUseFetchAlerts.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: {
-            pageIndex: 0,
-            pageSize: 2,
-          },
-        })
-      );
-    });
-  });
-
   describe('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
@@ -850,7 +750,7 @@ describe('AlertsTableState', () => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
         expect(
           getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });

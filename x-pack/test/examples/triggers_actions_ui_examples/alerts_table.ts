@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitAndClickByTestId('close');
 
       const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
-      expect(headers.length).to.be(7);
+      expect(headers.length).to.be(6);
     });
 
     it('should take into account the column type when sorting', async () => {
@@ -107,57 +107,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    it('should open a flyout and paginate through the flyout', async () => {
-      await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
-      await waitFlyoutOpen();
-      await waitFlyoutIsLoaded();
-
-      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
-        'APM Failed Transaction Rate (one)'
-      );
-      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
-        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
-      );
-
-      await testSubjects.click('alertsFlyoutPagination > pagination-button-next');
-
-      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
-        'APM Failed Transaction Rate (one)'
-      );
-      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
-        'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
-      );
-
-      await testSubjects.click('alertsFlyoutPagination > pagination-button-previous');
-
-      await waitTableIsLoaded();
-
-      const rows = await getRows();
-      expect(rows[0].status).to.be('active');
-      expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:38.749Z');
-      expect(rows[0].duration).to.be('1197194000');
-      expect(rows[0].reason).to.be(
-        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
-      );
-    });
-
     async function waitTableIsLoaded() {
       return await retry.try(async () => {
         const exists = await testSubjects.exists('internalAlertsPageLoading');
-        if (exists) throw new Error('Still loading...');
-      });
-    }
-
-    async function waitFlyoutOpen() {
-      return await retry.try(async () => {
-        const exists = await testSubjects.exists('alertsFlyout');
-        if (!exists) throw new Error('Still loading...');
-      });
-    }
-
-    async function waitFlyoutIsLoaded() {
-      return await retry.try(async () => {
-        const exists = await testSubjects.exists('alertsFlyoutLoading');
         if (exists) throw new Error('Still loading...');
       });
     }
