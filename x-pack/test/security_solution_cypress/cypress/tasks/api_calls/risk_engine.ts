@@ -44,3 +44,14 @@ export const interceptRiskInitError = () => {
     statusCode: 500,
   });
 };
+
+export const interceptNewRiskEngineStatusWithEnabledState = () => {
+  return cy.intercept('GET', '/internal/risk_score/engine/status', {
+    statusCode: 200,
+    body: {
+      risk_engine_status: 'ENABLED',
+      legacy_risk_engine_status: 'NOT_INSTALLED',
+      is_max_amount_of_risk_engines_reached: false,
+    },
+  });
+};
