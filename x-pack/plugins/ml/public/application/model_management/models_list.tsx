@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
+  EuiToolTip,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -512,7 +513,21 @@ export const ModelsList: FC<Props> = ({
             </EuiFlexGroup>
             {recommended ? (
               <EuiFlexItem>
-                <EuiBadge color="accent">Recommended</EuiBadge>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                      defaultMessage="Recommended model version for your cluster's hardware configuration"
+                    />
+                  }
+                >
+                  <EuiBadge color="accent">
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                      defaultMessage="recommended"
+                    />
+                  </EuiBadge>
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
