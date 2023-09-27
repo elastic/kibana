@@ -11,8 +11,10 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { telemetryMockData, MockTelemetryFindings } from './mock_data';
+import {
+  data as telemetryMockData,
+  MockTelemetryFindings,
+} from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 

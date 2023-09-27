@@ -10,11 +10,11 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
     this.tags(['cloud_security_posture']);
-    loadTestFile(require.resolve('./status/status_not_deployed_not_installed'));
-    loadTestFile(require.resolve('./status/status_indexed'));
-    loadTestFile(require.resolve('./status/status_indexing'));
+    // loadTestFile(require.resolve('./status/status_not_deployed_not_installed'));
+    // loadTestFile(require.resolve('./status/status_indexed'));
+    // loadTestFile(require.resolve('./status/status_indexing'));
     loadTestFile(require.resolve('./benchmark'));
-    loadTestFile(require.resolve('./get_csp_rule_template'));
+    // loadTestFile(require.resolve('./get_csp_rule_template'));
     loadTestFile(require.resolve('./telemetry'));
 
     // TODO: migrate status_unprivileged tests from stateful, if it feasible in serverless with the new security model

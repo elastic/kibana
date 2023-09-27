@@ -17,9 +17,15 @@ import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { deleteIndex, addIndex, createPackagePolicy } from '../helper';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { findingsMockData, vulnerabilityMockData } from '../mock_data';
+import {
+  deleteIndex,
+  addIndex,
+  createPackagePolicy,
+} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import {
+  findingsMockData,
+  vulnerabilityMockData,
+} from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
