@@ -464,20 +464,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(isIntervalErrorMessageExists).to.be(true);
         });
 
-        it('should show error when calendar interval invalid', async () => {
+        it('should show error when calendar interval invalid - 2w', async () => {
           await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
-          const intervalErrorMessage1 = await find.byCssSelector(
+          const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          const errorMessage1 = await intervalErrorMessage1.getVisibleText();
-          expect(errorMessage1).to.be('Invalid calendar interval: 2w, value must be 1');
+          const errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+        });
 
+        it('should show error when calendar interval invalid - 3w', async () => {
           await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
-          const intervalErrorMessage2 = await find.byCssSelector(
+          const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          const errorMessage2 = await intervalErrorMessage2.getVisibleText();
-          expect(errorMessage2).to.be('Invalid calendar interval: 3w, value must be 1');
+          const errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
         });
       });
     });
