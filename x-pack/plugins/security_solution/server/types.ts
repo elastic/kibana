@@ -18,6 +18,8 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+
 import type { Readable } from 'stream';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
@@ -48,6 +50,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
+  getUser: () => AuthenticatedUser | null;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
