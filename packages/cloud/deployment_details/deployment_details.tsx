@@ -22,6 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDeploymentDetails } from './services';
 
+const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
+  return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+};
+
 export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) => {
   const { cloudId, elasticsearchUrl, managementUrl, learnMoreUrl, navigateToUrl } =
     useDeploymentDetails();
@@ -101,9 +105,11 @@ export const DeploymentDetails = ({ closeModal }: { closeModal?: () => void }) =
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 href={managementUrl}
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  navigateToUrl(managementUrl);
+                onClick={(e: React.MouseEvent) => {
+                  if (!hasActiveModifierKey(e)) {
+                    e.preventDefault();
+                    navigateToUrl(managementUrl);
+                  }
                   if (closeModal) {
                     closeModal();
                   }
