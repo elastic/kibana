@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Skip until we enable the Advanced settings app in serverless
-  describe.skip('Search advanced settings', function () {
+  describe('Search project settings', function () {
     before(async () => {
-      await pageObjects.common.navigateToApp('advancedSettings');
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.common.navigateToApp('settings');
     });
 
     it('renders the page', async () => {
@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('renders search settings', () => {
       for (const settingId of SEARCH_PROJECT_SETTINGS) {
         it('renders ' + settingId + ' edit field', async () => {
-          const fieldTestSubj = 'advancedSetting-editField-' + settingId;
+          const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
         });
       }

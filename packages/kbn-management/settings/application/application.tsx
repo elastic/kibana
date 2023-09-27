@@ -14,7 +14,7 @@ import { EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFields } from './hooks/use_fields';
 
-const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
+const title = i18n.translate('management.settings.advancedSettingsLabel', {
   defaultMessage: 'Settings',
 });
 
