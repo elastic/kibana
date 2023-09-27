@@ -216,7 +216,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 
-  it('should display the callout if the category ids does have the select category', async () => {
+  it('should display the callout if the category ids contains the specified category', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       {
         ...RUNNING_MAINTENANCE_WINDOW_1,
