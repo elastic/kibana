@@ -8,8 +8,6 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { TimelineItem } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
 import { timelineActions } from '../../../store/timeline';
@@ -19,7 +17,6 @@ import { EventsTrSupplement } from '../styles';
 import { NoteCards } from '../../notes/note_cards';
 import { eventIsPinned } from '../body/helpers';
 import type { TimelineResultNote } from '../../open_timeline/types';
-import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { timelineBodySelector } from '../body/selectors';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
