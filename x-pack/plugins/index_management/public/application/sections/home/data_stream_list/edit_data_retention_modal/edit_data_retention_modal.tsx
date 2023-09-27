@@ -180,7 +180,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   } = useAppContext();
 
   const { form } = useForm({
-    defaultValue: { dataRetention: size, timeUnit: unit || 'd', infiniteRetentionPeriod: !dataRetention },
+    defaultValue: {
+      dataRetention: size,
+      timeUnit: unit || 'd',
+      infiniteRetentionPeriod: !dataRetention,
+    },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
