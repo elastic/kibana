@@ -36,7 +36,6 @@ export function SystemIntegrationBanner({
 
   const onIntegrationCreationSuccess = useCallback(
     ({ version }: { version?: string }) => {
-      console.log(requestState.state)
       setIntegrationVersion(version);
       onStatusChange('resolved');
     },
