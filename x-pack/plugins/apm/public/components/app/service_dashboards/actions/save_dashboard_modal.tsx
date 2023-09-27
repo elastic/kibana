@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiToolTip,
   EuiIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
@@ -47,6 +48,7 @@ export function SaveDashboardModal({
     core: { notifications },
   } = useApmPluginContext();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
+
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
   const [useServiceFilters, setUseServiceFilters] = useState(
@@ -204,10 +206,9 @@ export function SaveDashboardModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton
+        <EuiButtonEmpty
           data-test-subj="apmSelectDashboardCancelButton"
           onClick={onClose}
-          fill
         >
           {i18n.translate(
             'xpack.apm.serviceDashboards.selectDashboard.cancel',
@@ -215,7 +216,7 @@ export function SaveDashboardModal({
               defaultMessage: 'Cancel',
             }
           )}
-        </EuiButton>
+        </EuiButtonEmpty>
         <EuiButton
           data-test-subj="apmSelectDashboardButton"
           onClick={onSave}

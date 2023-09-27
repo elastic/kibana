@@ -53,18 +53,23 @@ export async function getServicesWithDashboards({
     ])
   );
 
-  const allResponses = (
-    await apmEventClient.msearch('get_services_with_dashboards', ...allSearches)
-  ).responses;
-
   const filteredDashboards = [];
 
-  for (let index = 0; index < allLinkedCustomDashboards.length; index++) {
-    const responsePerDashboard = allResponses[index];
-    const dashboard = allLinkedCustomDashboards[index];
+  if (allSearches.length > 0) {
+    const allResponses = (
+      await apmEventClient.msearch(
+        'get_services_with_dashboards',
+        ...allSearches
+      )
+    ).responses;
 
-    if (responsePerDashboard.hits.hits.length > 0) {
-      filteredDashboards.push(dashboard);
+    for (let index = 0; index < allLinkedCustomDashboards.length; index++) {
+      const responsePerDashboard = allResponses[index];
+      const dashboard = allLinkedCustomDashboards[index];
+
+      if (responsePerDashboard.hits.hits.length > 0) {
+        filteredDashboards.push(dashboard);
+      }
     }
   }
 
