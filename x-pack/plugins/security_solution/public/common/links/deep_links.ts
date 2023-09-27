@@ -13,7 +13,7 @@ import type { AppLinkItems } from './types';
 
 export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
 
-const formatDeepLinks: DeepLinksFormatter = (appLinks) =>
+const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
   appLinks.map((appLink) => ({
     id: appLink.id,
     path: appLink.path,
@@ -25,7 +25,7 @@ const formatDeepLinks: DeepLinksFormatter = (appLinks) =>
     ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
     ...(appLink.links && appLink.links?.length
       ? {
-          deepLinks: formatDeepLinks(appLink.links),
+          deepLinks: defaultDeepLinksFormatter(appLink.links),
         }
       : {}),
   }));
@@ -35,12 +35,12 @@ const formatDeepLinks: DeepLinksFormatter = (appLinks) =>
  */
 export const registerDeepLinksUpdater = (
   appUpdater$: Subject<AppUpdater>,
-  formatter?: DeepLinksFormatter
+  formatter: DeepLinksFormatter = defaultDeepLinksFormatter // custom formatter allowed, defaults to defaultDeepLinksFormatter
 ): Subscription => {
   return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
-      deepLinks: formatter ? formatter(appLinks) : formatDeepLinks(appLinks),
+      deepLinks: formatter(appLinks),
     }));
   });
 };
