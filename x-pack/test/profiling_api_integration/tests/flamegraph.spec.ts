@@ -71,7 +71,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         });
       });
 
-      (['SamplingRate', 'Size'] as BaseFlameGraphKeys[]).forEach((item) => {
+      (['SamplingRate', 'Size', 'TotalSeconds'] as BaseFlameGraphKeys[]).forEach((item) => {
         it(`returns correct ${item}`, async () => {
           expectSnapshot(flamegraph[item]).toMatch();
         });

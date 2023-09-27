@@ -35,10 +35,9 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
 
     const profilingEsClient = createProfilingEsClient({ esClient });
 
+    const totalSeconds = rangeToSecs - rangeFromSecs;
     // Use legacy stack traces API to fetch the flamegraph
     if (useLegacyFlamegraphAPI) {
-      const totalSeconds = rangeToSecs - rangeFromSecs;
-
       const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
         await searchStackTraces({
           client: profilingEsClient,
@@ -62,7 +61,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       });
     }
 
-    return await profilingEsClient.profilingFlamegraph({
+    const flamegraph = await profilingEsClient.profilingFlamegraph({
       query: {
         bool: {
           filter: [
@@ -82,5 +81,6 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       },
       sampleSize: targetSampleSize,
     });
+    return { ...flamegraph, TotalSeconds: totalSeconds };
   };
 }

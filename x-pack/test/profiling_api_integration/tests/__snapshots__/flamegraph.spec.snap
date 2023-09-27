@@ -93315,3 +93315,5 @@ Array [
   0,
 ]
 `;
+
+exports[`Profiling API tests flamegraph.spec.ts cloud Loading profiling data Flamegraph api With data returns correct TotalSeconds 1`] = `30`;
