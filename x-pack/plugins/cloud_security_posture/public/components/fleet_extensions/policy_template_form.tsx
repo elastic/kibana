@@ -84,8 +84,8 @@ interface IntegrationInfoFieldsProps {
 
 export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
-export const GCP_SINGLE_ACCOUNT = 'single-account-gcp';
-export const GCP_ORGANIZATION_ACCOUNT = 'organization-account-gcp';
+export const GCP_SINGLE_ACCOUNT = 'single-account';
+export const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
 
@@ -268,7 +268,7 @@ const GcpAccountTypeSelect = ({
   const fieldsSnapshot = useRef({});
   const lastSetupAccessType = useRef<string | undefined>(undefined);
   const onSetupFormatChange = (newSetupFormat: string) => {
-    if (newSetupFormat === 'single-account-gcp') {
+    if (newSetupFormat === 'single-account') {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fieldsToHide.map((field) => [field.id, { value: field.value }])
@@ -279,7 +279,7 @@ const GcpAccountTypeSelect = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
-            value: 'single-account-gcp',
+            value: 'single-account',
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -292,7 +292,7 @@ const GcpAccountTypeSelect = ({
         getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || 'organization-account-gcp',
+            value: lastSetupAccessType.current || 'organization-account',
             type: 'text',
           },
           // Restoring fields from manual setup format if any

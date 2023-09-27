@@ -93,7 +93,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
-        isBeta: true,
       },
       {
         type: CLOUDBEAT_AZURE,

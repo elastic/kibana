@@ -364,9 +364,8 @@ export const GcpCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastSetupAccessType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
-
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
-  const isOrganization = accountType === 'organization-account-gcp';
+  const isOrganization = accountType === 'organization-account';
   // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
     const isInvalidPolicy = isInvalid;
