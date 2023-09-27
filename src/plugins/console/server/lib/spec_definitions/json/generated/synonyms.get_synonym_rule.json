@@ -1,5 +1,5 @@
 {
-  "synonym_rule.delete": {
+  "synonyms.get_synonym_rule": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,12 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "DELETE"
+      "GET"
     ],
     "patterns": [
-      "_synonyms/{synonyms_set}/{synonym_rule}"
+      "_synonyms/{set_id}/{rule_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonym-rule.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-synonym-rule.html",
     "availability": {
       "stack": true,
       "serverless": true

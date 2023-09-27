@@ -1,5 +1,5 @@
 {
-  "synonyms.delete": {
+  "synonyms.delete_synonym_rule": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -10,9 +10,9 @@
       "DELETE"
     ],
     "patterns": [
-      "_synonyms/{synonyms_set}"
+      "_synonyms/{set_id}/{rule_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonyms-set.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonym-rule.html",
     "availability": {
       "stack": true,
       "serverless": true

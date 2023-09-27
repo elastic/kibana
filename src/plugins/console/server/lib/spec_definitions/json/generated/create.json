@@ -13,6 +13,7 @@
       ],
       "routing": "",
       "timeout": [
+        "1m",
         "-1",
         "0"
       ],
@@ -24,6 +25,7 @@
         "force"
       ],
       "wait_for_active_shards": [
+        "1",
         "all",
         "index-setting"
       ]

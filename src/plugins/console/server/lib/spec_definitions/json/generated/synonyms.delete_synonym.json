@@ -1,5 +1,5 @@
 {
-  "synonyms.put": {
+  "synonyms.delete_synonym": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,12 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "PUT"
+      "DELETE"
     ],
     "patterns": [
-      "_synonyms/{synonyms_set}"
+      "_synonyms/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-synonyms-set.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonyms-set.html",
     "availability": {
       "stack": true,
       "serverless": true
