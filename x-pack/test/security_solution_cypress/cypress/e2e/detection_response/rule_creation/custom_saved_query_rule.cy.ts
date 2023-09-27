@@ -26,7 +26,7 @@ import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detectio
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRule,
+  createEnabledRuleGoToRuleDetails,
   fillAboutRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectAndLoadSavedQuery,
@@ -86,7 +86,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       cy.intercept('POST', '/api/detection_engine/rules').as('savedQueryRule');
-      createAndEnableRule();
+      createEnabledRuleGoToRuleDetails();
 
       cy.wait('@savedQueryRule').then(({ response }) => {
         // created rule should have saved_query type

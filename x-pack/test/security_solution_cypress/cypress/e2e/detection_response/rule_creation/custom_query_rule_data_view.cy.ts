@@ -54,17 +54,20 @@ import {
 } from '../../../tasks/alerts_detection_rules';
 import { postDataView } from '../../../tasks/common';
 import {
-  createAndEnableRule,
-  createRuleWithoutEnabling,
+  createEnabledRuleGoToRuleDetails,
+  createDisabledRuleGoToRuleDetails,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
-  waitForAlertsToPopulate,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  getDetails,
+  waitForAlertsToPopulate,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
@@ -96,7 +99,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      createAndEnableRule();
+      createEnabledRuleGoToRuleDetails();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -160,7 +163,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
 
       fillScheduleRuleAndContinue(rule);
-      createRuleWithoutEnabling();
+      createDisabledRuleGoToRuleDetails();
 
       goToRuleDetailsOf(rule.name);
 

@@ -25,6 +25,12 @@ export const ALERT_SUPPRESSION_FIELDS =
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
 
+export const ALERT_SUPPRESSION_TOGGLE =
+  '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxToggleListButton"]';
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS =
+  '[data-test-subj="suppressionMissingFieldsOptions"]';
+
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
@@ -106,6 +112,9 @@ export const INVESTIGATION_NOTES_TEXTAREA =
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
 
+export const FALSE_POSITIVES_DELETE =
+  '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] [aria-label="Delete"]';
+
 export const LOOK_BACK_INTERVAL =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
 
@@ -135,6 +144,9 @@ export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAt
 
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
+
+export const REFERENCE_URLS_DELETE =
+  '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] [aria-label="Delete"]';
 
 export const DEFAULT_RISK_SCORE_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
@@ -204,6 +216,9 @@ export const TAGS_CLEAR_BUTTON =
 export const INVESTIGATIONS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleInvestigationFields"] [data-test-subj="comboBoxSearchInput"]';
 
+export const INVESTIGATIONS_INPUT_CLEAR_BUTTON =
+  '[data-test-subj="detectionEngineStepAboutRuleInvestigationFields"] [data-test-subj="comboBoxClearButton"]';
+
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
@@ -237,4 +252,17 @@ export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
 export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
+export const RULE_INDICES_CLEAR =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxClearButton"]';
+
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
+
+export const AUTHOR_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleAuthor"] [data-test-subj="comboBoxSearchInput"]';
+
+export const TIMELINE_TEMPLATE = '[data-test-subj="detectionEngineStepDefineRuleTimeline"]';
+
+export const TIMELINE_TEMPLATE_INPUT = '[data-test-subj="timeline-super-select-search-box"]';
+
+export const LICENSE_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleLicense"] [data-test-subj="input"]';

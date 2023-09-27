@@ -45,7 +45,7 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_deta
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRule,
+  createEnabledRuleGoToRuleDetails,
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -84,7 +84,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      createAndEnableRule();
+      createEnabledRuleGoToRuleDetails();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -161,7 +161,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
-      createAndEnableRule();
+      createEnabledRuleGoToRuleDetails();
       goToRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

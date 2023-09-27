@@ -43,7 +43,7 @@ import { getDetails } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../../tasks/common';
 import {
-  createAndEnableRule,
+  createEnabledRuleGoToRuleDetails,
   fillAboutRuleAndContinue,
   fillDefineMachineLearningRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -77,7 +77,7 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInSer
     fillDefineMachineLearningRuleAndContinue(mlRule);
     fillAboutRuleAndContinue(mlRule);
     fillScheduleRuleAndContinue(mlRule);
-    createAndEnableRule();
+    createEnabledRuleGoToRuleDetails();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

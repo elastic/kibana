@@ -21,7 +21,7 @@ import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRuleOnly,
+  createEnabledRule,
   expandAdvancedSettings,
   fillCustomInvestigationFields,
   fillDescription,
@@ -37,7 +37,7 @@ import {
   fillThreatSubtechnique,
   fillThreatTechnique,
   importSavedQuery,
-} from '../../../tasks/create_new_rule';
+} from '../../../tasks/rule_creation';
 import { login } from '../../../tasks/login';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { visit } from '../../../tasks/navigation';
@@ -93,7 +93,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
-    createAndEnableRuleOnly();
+    createEnabledRule();
 
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
   });

@@ -147,3 +147,30 @@ export const BACK_TO_RULES_TABLE =
 
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
+
+export const SUPPRESS_ALERTS_BY = 'Suppress alerts by';
+
+export const SUPPRESS_ALERTS_FOR = 'Suppress alerts for';
+
+export const SUPPRESS_ALERTS_MISSING = 'If a suppression field is missing';
+
+export const RULE_DETAILS_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-details"]';
+
+export const AUTHOR_DETAILS = 'Author';
+
+export const BUILDING_BLOCK_DETAILS = 'Building block';
+
+export const BUILDING_BLOCK_TEXT_DETAILS =
+  'All generated alerts will be marked as "building block" alerts';
+
+export const SEVERITY_OVERRIDE_DETAILS = 'Severity override';
+
+export const ACTION_DETAILS =
+  '[data-test-subj=actionsRule] [data-test-subj="listItemColumnStepRuleDescription"]';
+
+export const ACTION_DETAILS_CONNECTOR_NAME = '[data-test-subj=ruleActionsDetailsConnectorName]';
+
+export const ACTION_DETAILS_CONNECTOR_FREQUENCY =
+  '[data-test-subj=ruleActionsDetailsConnectorFrequency]';
+
+export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';

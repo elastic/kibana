@@ -70,7 +70,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../../tasks/common';
 import {
-  createAndEnableRule,
+  createEnabledRuleGoToRuleDetails,
   fillAboutRuleAndContinue,
   fillDefineIndicatorMatchRuleAndContinue,
   fillIndexAndIndicatorIndexPattern,
@@ -434,7 +434,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         fillDefineIndicatorMatchRuleAndContinue(rule);
         fillAboutRuleAndContinue(rule);
         fillScheduleRuleAndContinue(rule);
-        createAndEnableRule();
+        createEnabledRuleGoToRuleDetails();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

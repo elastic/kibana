@@ -50,7 +50,7 @@ import {
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
-  createAndEnableRule,
+  createEnabledRuleGoToRuleDetails,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -81,7 +81,7 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
-    createAndEnableRule();
+    createEnabledRuleGoToRuleDetails();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
