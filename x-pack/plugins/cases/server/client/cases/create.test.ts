@@ -453,7 +453,7 @@ describe('create', () => {
       {
         key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
-        value: [true],
+        value: true,
       },
     ];
 
@@ -552,7 +552,7 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TOGGLE,
-                value: [true],
+                value: true,
               },
             ],
           },
@@ -615,7 +615,7 @@ describe('create', () => {
               {
                 key: 'first_key',
                 type: CustomFieldTypes.TOGGLE,
-                value: [true],
+                value: true,
               },
               {
                 key: 'second_key',
@@ -654,7 +654,7 @@ describe('create', () => {
         {
           key: 'second_customField_key',
           type: CustomFieldTypes.TOGGLE,
-          value: [true],
+          value: true,
         },
       ],
     };

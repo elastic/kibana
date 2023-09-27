@@ -126,7 +126,7 @@ describe('Case View Page files tab', () => {
           key: 'test_key_1',
           value: null,
         },
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: [true] },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
       ]);
     });
   });
@@ -135,7 +135,7 @@ describe('Case View Page files tab', () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
-        customFields={[{ type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: [true] }]}
+        customFields={[{ type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true }]}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
       />
@@ -150,7 +150,7 @@ describe('Case View Page files tab', () => {
           key: 'test_key_1',
           value: null,
         },
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: [false] },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
       ]);
     });
   });
@@ -176,7 +176,7 @@ describe('Case View Page files tab', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: [false] },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
       ]);
     });
   });
@@ -196,7 +196,7 @@ describe('Case View Page files tab', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
         customFieldsMock[0],
-        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: [false] },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
       ]);
     });
   });

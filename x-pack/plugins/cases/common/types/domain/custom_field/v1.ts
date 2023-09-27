@@ -14,23 +14,22 @@ export enum CustomFieldTypes {
 export const CustomFieldTextTypeRt = rt.literal(CustomFieldTypes.TEXT);
 export const CustomFieldToggleTypeRt = rt.literal(CustomFieldTypes.TOGGLE);
 
-export const createCustomFieldValueRt = <C extends rt.Mixed>(codec: C) =>
-  rt.union([rt.array(codec), rt.null]);
-
-const CaseCustomFieldText = rt.strict({
+const CaseCustomFieldTextRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  value: createCustomFieldValueRt(rt.string),
+  value: rt.union([rt.array(rt.string), rt.null]),
 });
 
-export const CaseCustomFieldToggle = rt.strict({
+export const CaseCustomFieldToggleRt = rt.strict({
   key: rt.string,
   type: CustomFieldToggleTypeRt,
-  value: createCustomFieldValueRt(rt.boolean),
+  value: rt.union([rt.boolean, rt.null]),
 });
 
-export const CaseCustomFieldRt = rt.union([CaseCustomFieldText, CaseCustomFieldToggle]);
+export const CaseCustomFieldRt = rt.union([CaseCustomFieldTextRt, CaseCustomFieldToggleRt]);
 export const CaseCustomFieldsRt = rt.array(CaseCustomFieldRt);
 
 export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
+export type CaseCustomFieldToggle = rt.TypeOf<typeof CaseCustomFieldToggleRt>;
+export type CaseCustomFieldText = rt.TypeOf<typeof CaseCustomFieldTextRt>;

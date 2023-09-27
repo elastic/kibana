@@ -57,7 +57,7 @@ describe('Edit ', () => {
     userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({ ...customField, value: [false] });
+      expect(onSubmit).toBeCalledWith({ ...customField, value: false });
     });
   });
 
@@ -115,7 +115,7 @@ describe('Edit ', () => {
          * Initial value is false when the custom field is undefined.
          * By clicking to the switch it is set to true
          */
-        value: [true],
+        value: true,
       });
     });
   });

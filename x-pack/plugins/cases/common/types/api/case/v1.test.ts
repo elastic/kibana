@@ -110,7 +110,7 @@ const basicCase: Case = {
     {
       key: 'second_custom_field_key',
       type: CustomFieldTypes.TOGGLE,
-      value: [true],
+      value: true,
     },
     {
       key: 'second_custom_field_key',
@@ -146,7 +146,7 @@ describe('CasePostRequestRt', () => {
       {
         key: 'second_custom_field_key',
         type: CustomFieldTypes.TOGGLE,
-        value: [true],
+        value: true,
       },
     ],
   };
@@ -601,7 +601,7 @@ describe('CasePatchRequestRt', () => {
       {
         key: 'second_custom_field_key',
         type: 'toggle',
-        value: [true],
+        value: true,
       },
     ],
   };

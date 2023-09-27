@@ -1392,7 +1392,7 @@ describe('utils', () => {
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
           ],
           customFieldsConfiguration,
@@ -1402,7 +1402,7 @@ describe('utils', () => {
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE,
-          value: [true],
+          value: true,
         },
       ]);
     });
@@ -1415,12 +1415,12 @@ describe('utils', () => {
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
             {
               key: 'third_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
           ],
           customFieldsConfiguration,
@@ -1430,12 +1430,12 @@ describe('utils', () => {
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE,
-          value: [true],
+          value: true,
         },
         {
           key: 'third_key',
           type: CustomFieldTypes.TOGGLE,
-          value: [true],
+          value: true,
         },
       ]);
     });

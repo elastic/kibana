@@ -84,7 +84,7 @@ describe('Create case', () => {
         {
           key: 'second_custom_field_key',
           type: 'toggle',
-          value: [true],
+          value: true,
         },
       ];
 
@@ -196,7 +196,7 @@ describe('Create case', () => {
         {
           key: 'second_custom_field_key',
           type: 'toggle',
-          value: [true],
+          value: true,
         },
       ];
 

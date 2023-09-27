@@ -83,7 +83,7 @@ const basicCase = {
     {
       key: 'second_custom_field_key',
       type: 'toggle',
-      value: [true],
+      value: true,
     },
   ],
 };
@@ -191,7 +191,7 @@ describe('CaseAttributesRt', () => {
       {
         key: 'second_custom_field_key',
         type: 'toggle',
-        value: [true],
+        value: true,
       },
     ],
   };

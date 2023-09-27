@@ -19,7 +19,7 @@ describe('View ', () => {
   const customField = {
     type: CustomFieldTypes.TOGGLE as const,
     key: 'test_key_1',
-    value: [true],
+    value: true,
   };
 
   it('renders correctly', async () => {

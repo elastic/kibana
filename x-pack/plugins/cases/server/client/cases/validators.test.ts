@@ -89,7 +89,7 @@ describe('validators', () => {
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
           ],
 
@@ -125,7 +125,7 @@ describe('validators', () => {
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
             {
               key: 'third_key',
@@ -343,7 +343,7 @@ describe('validators', () => {
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              value: [true],
+              value: true,
             },
           ],
 

@@ -20,10 +20,10 @@ const EditComponent: CustomFieldType['Edit'] = ({
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = Boolean(customField?.value?.[0]);
+  const initialValue = Boolean(customField?.value);
   const title = customFieldConfiguration.label;
 
-  const { form } = useForm({
+  const { form } = useForm<{ value: boolean }>({
     defaultValue: { value: initialValue },
   });
 
@@ -35,7 +35,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TOGGLE,
-        value: [data.value],
+        value: data.value,
       });
     }
   };

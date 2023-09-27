@@ -208,7 +208,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'valid_key_2',
                 type: CustomFieldTypes.TOGGLE,
-                value: [true],
+                value: true,
               },
             ],
           })
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'valid_key_2',
             type: CustomFieldTypes.TOGGLE,
-            value: [true],
+            value: true,
           },
         ]);
       });
@@ -258,14 +258,14 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'valid_key_2',
                 type: CustomFieldTypes.TOGGLE,
-                value: [true],
+                value: true,
               },
             ],
           })
         );
 
         expect(res.customFields).to.eql([
-          { key: 'valid_key_2', type: 'toggle', value: [true] },
+          { key: 'valid_key_2', type: 'toggle', value: true },
           { key: 'valid_key_1', type: 'text', value: null },
         ]);
       });
@@ -511,7 +511,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'test_custom_field',
                   type: CustomFieldTypes.TOGGLE,
-                  value: [true],
+                  value: true,
                 },
               ],
             }),
@@ -542,7 +542,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'test_custom_field',
                   type: CustomFieldTypes.TOGGLE,
-                  value: [true],
+                  value: true,
                 },
               ],
             }),

@@ -395,7 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           key: 'test_custom_field_2',
           type: CustomFieldTypes.TOGGLE,
-          value: [true],
+          value: true,
         },
         {
           key: 'test_custom_field_3',

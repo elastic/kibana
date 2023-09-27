@@ -1172,7 +1172,7 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TOGGLE,
-                    value: [true],
+                    value: true,
                   },
                   {
                     key: 'second_key',

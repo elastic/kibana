@@ -23,6 +23,7 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -30,11 +31,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import {
-  CaseCustomFieldToggle,
-  CustomFieldTextTypeRt,
-  createCustomFieldValueRt,
-} from '../../domain';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -47,19 +44,24 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
-const CustomFieldText = rt.strict({
-  key: rt.string,
-  type: CustomFieldTextTypeRt,
-  value: createCustomFieldValueRt(
-    limitedStringSchema({
-      fieldName: 'value',
-      min: 0,
-      max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-    })
-  ),
+const CaseCustomFieldWithValidationValueRt = limitedArraySchema({
+  codec: limitedStringSchema({
+    fieldName: 'value',
+    min: 0,
+    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  }),
+  fieldName: 'value',
+  min: 0,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
 });
 
-const CustomFieldRt = rt.union([CustomFieldText, CaseCustomFieldToggle]);
+const CaseCustomFieldTextWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  value: rt.union([CaseCustomFieldWithValidationValueRt, rt.null]),
+});
+
+const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
 
 const CustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,

@@ -31,7 +31,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'toggle_custom_field_1',
         type: 'toggle',
-        value: [true],
+        value: true,
       },
     ],
     [

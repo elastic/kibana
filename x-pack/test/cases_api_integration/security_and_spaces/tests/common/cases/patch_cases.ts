@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     key: 'test_custom_field_2',
                     type: CustomFieldTypes.TOGGLE,
-                    value: [true],
+                    value: true,
                   },
                 ],
               },
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
-            value: [true],
+            value: true,
           },
         ]);
       });
@@ -403,7 +403,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   {
                     key: 'test_custom_field_2',
                     type: CustomFieldTypes.TOGGLE,
-                    value: [true],
+                    value: true,
                   },
                 ],
               },
@@ -412,7 +412,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(patchedCases[0].customFields).to.eql([
-          { key: 'test_custom_field_2', type: 'toggle', value: [true] },
+          { key: 'test_custom_field_2', type: 'toggle', value: true },
           { key: 'test_custom_field_1', type: 'text', value: null },
         ]);
       });
@@ -1078,7 +1078,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     {
                       key: 'test_custom_field',
                       type: CustomFieldTypes.TOGGLE,
-                      value: [true],
+                      value: true,
                     },
                   ],
                 },
