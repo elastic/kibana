@@ -19,6 +19,7 @@ interface CustomFieldValidationParams {
 export const validateCustomFields = (params: CustomFieldValidationParams) => {
   validateDuplicatedCustomFieldKeysInRequest(params);
   validateCustomFieldKeysAgainstConfiguration(params);
+  validateRequiredCustomFields(params);
   validateCustomFieldTypesInRequest(params);
 };
 
@@ -68,8 +69,8 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
   requestCustomFields,
   customFieldsConfiguration,
 }: CustomFieldValidationParams) => {
-  if (!Array.isArray(requestCustomFields)) {
-    return;
+  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+    return [];
   }
 
   if (customFieldsConfiguration === undefined) {
@@ -82,17 +83,37 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
     (requestVal, configurationVal) => requestVal.key === configurationVal.key
   ).map((e) => e.key);
 
-  const missingCustomFieldKeys = differenceWith(
-    customFieldsConfiguration,
-    requestCustomFields,
-    (configurationVal, requestVal) => configurationVal.key === requestVal.key
-  ).map((e) => e.key);
-
   if (invalidCustomFieldKeys.length) {
     throw Boom.badRequest(`Invalid custom field keys: ${invalidCustomFieldKeys}`);
   }
+};
 
-  if (missingCustomFieldKeys.length) {
-    throw Boom.badRequest(`Missing custom field keys: ${missingCustomFieldKeys}`);
+/**
+ * Returns a list of required custom fields missing from the request
+ */
+export const validateRequiredCustomFields = ({
+  requestCustomFields,
+  customFieldsConfiguration,
+}: CustomFieldValidationParams) => {
+  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+    return;
+  }
+
+  if (customFieldsConfiguration === undefined) {
+    throw Boom.badRequest('No custom fields configured.');
+  }
+
+  const requiredCustomFields = customFieldsConfiguration.filter(
+    (customField) => customField.required
+  );
+
+  const invalidCustomFieldKeys = differenceWith(
+    requiredCustomFields,
+    requestCustomFields,
+    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
+  ).map((e) => e.key);
+
+  if (invalidCustomFieldKeys.length) {
+    throw Boom.badRequest(`Missing required custom fields: ${invalidCustomFieldKeys}`);
   }
 };

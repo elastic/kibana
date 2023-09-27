@@ -27,7 +27,7 @@ import {
   mapCaseFieldsToExternalSystemFields,
   formatComments,
   addKibanaInformationToDescription,
-  compareCustomFieldKeysAgainstConfiguration,
+  fillMissingCustomFields,
 } from './utils';
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { CaseStatuses, CustomFieldTypes, UserActionActions } from '../../../common/types/domain';
@@ -1344,20 +1344,16 @@ describe('utils', () => {
     });
   });
 
-  describe('compareCustomFieldKeysAgainstConfiguration', () => {
-    const requestCustomFields: CaseCustomFields = [
+  describe('fillMissingCustomFields', () => {
+    const customFields: CaseCustomFields = [
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
         value: ['this is a text field value', 'this is second'],
       },
-      {
-        key: 'second_key',
-        type: CustomFieldTypes.TOGGLE,
-        value: [true],
-      },
     ];
-    const configurationCustomFields = [
+
+    const customFieldsConfiguration = [
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
@@ -1372,47 +1368,103 @@ describe('utils', () => {
       },
     ];
 
-    it('returns empty array when no key is missing', () => {
+    it('adds missing custom fields correctly', () => {
       expect(
-        compareCustomFieldKeysAgainstConfiguration({
-          requestCustomFields,
-          configurationCustomFields,
+        fillMissingCustomFields({
+          customFields,
+          customFieldsConfiguration,
         })
-      ).toEqual([]);
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
     });
 
-    it('returns an empty array if request has no custom fields', () => {
+    it('does not set to null custom fields that exists', () => {
       expect(
-        compareCustomFieldKeysAgainstConfiguration({
-          requestCustomFields: [],
-          configurationCustomFields,
-        })
-      ).toEqual([]);
-    });
-
-    it('returns missing keys', () => {
-      expect(
-        compareCustomFieldKeysAgainstConfiguration({
-          requestCustomFields: [
-            ...requestCustomFields,
+        fillMissingCustomFields({
+          customFields: [
+            customFields[0],
             {
-              key: 'missing_key',
+              key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
               value: [true],
             },
           ],
-          configurationCustomFields,
+          customFieldsConfiguration,
         })
-      ).toEqual(['missing_key']);
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: [true],
+        },
+      ]);
     });
 
-    it('returns every key if no configurationCustomFields', () => {
+    it('returns all custom fields if they are more than the configuration', () => {
       expect(
-        compareCustomFieldKeysAgainstConfiguration({
-          requestCustomFields,
-          configurationCustomFields: [],
+        fillMissingCustomFields({
+          customFields: [
+            customFields[0],
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: [true],
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: [true],
+            },
+          ],
+          customFieldsConfiguration,
         })
-      ).toEqual(['first_key', 'second_key']);
+      ).toEqual([
+        customFields[0],
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: [true],
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: [true],
+        },
+      ]);
+    });
+
+    it('adds missing custom fields if the customFields is undefined', () => {
+      expect(
+        fillMissingCustomFields({
+          customFieldsConfiguration,
+        })
+      ).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
+    });
+
+    it('does not add missing fields if the customFieldsConfiguration is undefined', () => {
+      expect(
+        fillMissingCustomFields({
+          customFields,
+        })
+      ).toEqual(customFields);
     });
   });
 });

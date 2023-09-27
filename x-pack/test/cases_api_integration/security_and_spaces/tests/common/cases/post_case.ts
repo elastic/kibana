@@ -195,7 +195,8 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           })
         );
-        await createCase(
+
+        const res = await createCase(
           supertest,
           getPostCaseRequest({
             customFields: [
@@ -210,9 +211,63 @@ export default ({ getService }: FtrProviderContext): void => {
                 value: [true],
               },
             ],
-          }),
-          400
+          })
         );
+
+        expect(res.customFields).to.eql([
+          {
+            key: 'valid_key_1',
+            type: CustomFieldTypes.TEXT,
+            value: ['this is a text field value'],
+          },
+          {
+            key: 'valid_key_2',
+            type: CustomFieldTypes.TOGGLE,
+            value: [true],
+          },
+        ]);
+      });
+
+      it('should fill out missing custom fields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const res = await createCase(
+          supertest,
+          getPostCaseRequest({
+            customFields: [
+              {
+                key: 'valid_key_2',
+                type: CustomFieldTypes.TOGGLE,
+                value: [true],
+              },
+            ],
+          })
+        );
+
+        expect(res.customFields).to.eql([
+          { key: 'valid_key_2', type: 'toggle', value: [true] },
+          { key: 'valid_key_1', type: 'text', value: null },
+        ]);
       });
     });
 
@@ -427,7 +482,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('400s when trying to create case with a missing custom field', async () => {
+        it('400s when trying to create case with a required custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -454,7 +509,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getPostCaseRequest({
               customFields: [
                 {
-                  key: 'toggle_custom_field',
+                  key: 'test_custom_field',
                   type: CustomFieldTypes.TOGGLE,
                   value: [true],
                 },

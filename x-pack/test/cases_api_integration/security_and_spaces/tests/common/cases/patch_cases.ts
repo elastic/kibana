@@ -354,12 +354,67 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        expect(data).to.eql({
-          ...postCaseResp(),
-          title: 'new title',
-          updated_by: defaultUser,
+        expect(patchedCases[0].customFields).to.eql([
+          {
+            key: 'test_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: ['this is a text field value'],
+          },
+          {
+            key: 'test_custom_field_2',
+            type: CustomFieldTypes.TOGGLE,
+            value: [true],
+          },
+        ]);
+      });
+
+      it('should fill out missing custom fields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'test_custom_field_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                customFields: [
+                  {
+                    key: 'test_custom_field_2',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: [true],
+                  },
+                ],
+              },
+            ],
+          },
         });
+
+        expect(patchedCases[0].customFields).to.eql([
+          { key: 'test_custom_field_2', type: 'toggle', value: [true] },
+          { key: 'test_custom_field_1', type: 'text', value: null },
+        ]);
       });
 
       describe('duration', () => {
@@ -961,7 +1016,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when trying to create case with a missing custom field', async () => {
+        it('400s when trying to create case with a missing required custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -971,7 +1026,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     key: 'test_custom_field',
                     label: 'text',
                     type: CustomFieldTypes.TEXT,
-                    required: false,
+                    required: true,
                   },
                 ],
               },

@@ -23,6 +23,7 @@ import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
 import { validateCustomFields } from './validators';
+import { fillMissingCustomFields } from './utils';
 
 /**
  * Creates a new case.
@@ -43,10 +44,11 @@ export const create = async (
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
     const configurations = await casesClient.configure.get({ owner: data.owner });
+    const customFieldsConfiguration = configurations[0]?.customFields;
 
     const customFieldsValidationParams = {
       requestCustomFields: data.customFields,
-      ...(configurations.length && { customFieldsConfiguration: configurations[0].customFields }),
+      customFieldsConfiguration,
     };
 
     validateCustomFields(customFieldsValidationParams);
@@ -75,21 +77,27 @@ export const create = async (
     }
 
     /**
-     * Trim title, category, description and tags before saving to ES
+     * Trim title, category, description and tags
+     * and fill out missing custom fields
+     * before saving to ES
      */
 
-    const trimmedQuery = {
+    const normalizedQuery = {
       ...query,
       title: query.title.trim(),
       description: query.description.trim(),
       category: query.category?.trim() ?? null,
       tags: query.tags?.map((tag) => tag.trim()) ?? [],
+      customFields: fillMissingCustomFields({
+        customFields: query.customFields,
+        customFieldsConfiguration,
+      }),
     };
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
         user,
-        newCase: trimmedQuery,
+        newCase: normalizedQuery,
       }),
       id: savedObjectID,
       refresh: false,

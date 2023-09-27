@@ -390,17 +390,17 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           key: 'test_custom_field_1',
           type: CustomFieldTypes.TEXT,
-          field: { value: ['this is a text field value'] },
+          value: ['this is a text field value'],
         },
         {
           key: 'test_custom_field_2',
           type: CustomFieldTypes.TOGGLE,
-          field: { value: [true] },
+          value: [true],
         },
         {
           key: 'test_custom_field_3',
           type: CustomFieldTypes.TEXT,
-          field: { value: ['this is a text field value 3'] },
+          value: ['this is a text field value 3'],
         },
       ];
 
@@ -420,9 +420,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'test_custom_field_1',
                   type: CustomFieldTypes.TEXT,
-                  field: { value: ['new value'] },
+                  value: ['new value'],
                 },
-                customFields[1],
               ],
             },
           ],
@@ -430,12 +429,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      expect(userActions.length).to.eql(4);
+      expect(userActions.length).to.eql(3);
 
       const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
       const updateCustomFieldCaseUserAction = userActions[1];
       const updateCustomFieldCaseUserAction2 = userActions[2];
-      const deleteCustomFieldCaseUserAction = userActions[3];
 
       expect(createCaseUserAction.payload.customFields).to.eql([customFields[0], customFields[2]]);
 
@@ -446,7 +444,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'test_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['new value'] },
+            value: ['new value'],
           },
         ],
       });
@@ -454,13 +452,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(updateCustomFieldCaseUserAction2.type).to.eql('customFields');
       expect(updateCustomFieldCaseUserAction2.action).to.eql('update');
       expect(updateCustomFieldCaseUserAction2.payload).to.eql({
-        customFields: [customFields[1]],
-      });
-
-      expect(deleteCustomFieldCaseUserAction.type).to.eql('customFields');
-      expect(deleteCustomFieldCaseUserAction.action).to.eql('delete');
-      expect(deleteCustomFieldCaseUserAction.payload).to.eql({
-        customFields: [customFields[2]],
+        customFields: [
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.TEXT,
+            value: null,
+          },
+        ],
       });
     });
 
