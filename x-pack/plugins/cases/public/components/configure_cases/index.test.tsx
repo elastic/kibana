@@ -66,12 +66,11 @@ describe('ConfigureCases', () => {
 
     useKibanaMock().services.triggersActionsUi.getEditConnectorFlyout =
       getEditConnectorFlyoutMock.mockReturnValue(<div data-test-subj="edit-connector-flyout" />);
-
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
   describe('rendering', () => {
@@ -799,6 +798,37 @@ describe('ConfigureCases', () => {
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('rendering with license limitations', () => {
+    let appMockRender: AppMockRenderer;
+    let persistCaseConfigure: jest.Mock;
+
+    beforeEach(() => {
+      // Default setup
+      jest.clearAllMocks();
+      useGetConnectorsMock.mockImplementation(() => ({ useConnectorsResponse }));
+      appMockRender = createAppMockRenderer();
+      persistCaseConfigure = jest.fn();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+
+      // Updated
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    });
+
+    it('should hide connectors and closure options', () => {
+      appMockRender.render(<ConfigureCases />);
+      expect(screen.queryByTestId('dropdown-connectors')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('closure-options-radio-group')).not.toBeInTheDocument();
+    });
+
+    it('renders custom field section', () => {
+      appMockRender.render(<ConfigureCases />);
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
   });
 });
