@@ -6,13 +6,13 @@
  */
 
 import {
-  AppDeepLink,
-  AppMountParameters,
-  AppNavLinkStatus,
-  AppUpdater,
-  CoreStart,
+  type AppDeepLink,
+  type AppMountParameters,
+  type AppNavLinkStatus,
+  type AppUpdater,
+  type CoreStart,
+  type PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
@@ -20,7 +20,7 @@ import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common'
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
-import { InfraPublicConfig } from '../common/plugin_config_types';
+import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
@@ -32,7 +32,7 @@ import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/lo
 import {
   DiscoverLogsLocatorDefinition,
   DiscoverNodeLogsLocatorDefinition,
-  InfraLocators,
+  type InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
 } from '../common/locators';
@@ -41,7 +41,7 @@ import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
-import {
+import type {
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
