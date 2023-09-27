@@ -62,6 +62,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
+    runtimePluginDependencies,
     enabledOnAnonymousPages,
     type,
     __category__,
@@ -98,6 +99,14 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   if (optionalPlugins !== undefined && !isArrOfIds(optionalPlugins)) {
     throw err(
       `plugin.requiredPlugins`,
+      optionalPlugins,
+      `must be an array of strings in camel or snake case`
+    );
+  }
+
+  if (runtimePluginDependencies !== undefined && !isArrOfIds(runtimePluginDependencies)) {
+    throw err(
+      `plugin.runtimePluginDependencies`,
       optionalPlugins,
       `must be an array of strings in camel or snake case`
     );
@@ -154,6 +163,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
+    runtimePluginDependencies,
     enabledOnAnonymousPages,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
