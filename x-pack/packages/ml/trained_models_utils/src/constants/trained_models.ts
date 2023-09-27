@@ -108,6 +108,7 @@ export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
   DOWNLOADING: 'downloading',
   DOWNLOADED: 'downloaded',
+  NOT_DOWNLOADED: 'notDownloaded',
 } as const;
 
 export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;

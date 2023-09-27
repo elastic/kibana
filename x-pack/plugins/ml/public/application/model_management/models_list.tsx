@@ -12,8 +12,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
+  type EuiHealthProps,
   EuiInMemoryTable,
-  EuiSearchBarProps,
+  type EuiSearchBarProps,
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
@@ -94,6 +96,57 @@ interface Props {
   pageState?: ListingPageUrlState;
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
+
+export const getModelStateColor = (
+  state: ModelState
+): { color: EuiHealthProps['color']; name: string } | null => {
+  switch (state) {
+    case MODEL_STATE.DOWNLOADED:
+      return {
+        color: 'subdued',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadedName', {
+          defaultMessage: 'Ready to deploy',
+        }),
+      };
+    case MODEL_STATE.DOWNLOADING:
+      return {
+        color: 'warning',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
+          defaultMessage: 'Downloading...',
+        }),
+      };
+    case MODEL_STATE.STARTED:
+      return {
+        color: 'success',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startedName', {
+          defaultMessage: 'Deployed',
+        }),
+      };
+    case MODEL_STATE.STARTING:
+      return {
+        color: 'success',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startingName', {
+          defaultMessage: 'Starting deployment...',
+        }),
+      };
+    case MODEL_STATE.STOPPING:
+      return {
+        color: 'accent',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.stoppingName', {
+          defaultMessage: 'Stopping deployment...',
+        }),
+      };
+    case MODEL_STATE.NOT_DOWNLOADED:
+      return {
+        color: 'subdued',
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.notDownloadedName', {
+          defaultMessage: 'Not downloaded',
+        }),
+      };
+    default:
+      return null;
+  }
+};
 
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
@@ -237,6 +290,7 @@ export const ModelsList: FC<Props> = ({
               tags: [ELASTIC_MODEL_TAG],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
+              state: MODEL_STATE.NOT_DOWNLOADED,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -436,7 +490,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       field: ModelsTableToConfigMapping.description,
-      width: '350px',
+      width: '35%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
@@ -482,8 +536,13 @@ export const ModelsList: FC<Props> = ({
       }),
       align: 'left',
       truncateText: false,
-      render: (state: string) => {
-        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+      render: (state: ModelState) => {
+        const config = getModelStateColor(state);
+        return config ? (
+          <EuiHealth textSize={'xs'} color={config.color}>
+            {config.name}
+          </EuiHealth>
+        ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
