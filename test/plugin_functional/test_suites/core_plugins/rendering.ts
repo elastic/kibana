@@ -249,11 +249,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
-        /**
-         * xpack.infra.logs is conditional and will resolve to an object of properties
-         * - xpack.infra.logs.app_target (string)
-         */
-        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
