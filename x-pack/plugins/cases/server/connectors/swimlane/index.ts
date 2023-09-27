@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UserActionTypes } from '../../../common/types/domain';
 import { getMapping } from './mapping';
 import { format } from './format';
 import type { SwimlaneCaseConnector } from './types';
@@ -12,4 +13,10 @@ import type { SwimlaneCaseConnector } from './types';
 export const getCaseConnector = (): SwimlaneCaseConnector => ({
   getMapping,
   format,
+  getSupportedUserActions: () => [
+    UserActionTypes.comment,
+    UserActionTypes.description,
+    UserActionTypes.tags,
+    UserActionTypes.title,
+  ],
 });

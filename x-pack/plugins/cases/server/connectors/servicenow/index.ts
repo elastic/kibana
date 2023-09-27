@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UserActionTypes } from '../../../common/types/domain';
 import { getMapping as getServiceNowITSMMapping } from './itsm_mapping';
 import { format as formatServiceNowITSM } from './itsm_format';
 import { getMapping as getServiceNowSIRMapping } from './sir_mapping';
@@ -15,9 +16,21 @@ import type { ServiceNowITSMCasesConnector, ServiceNowSIRCasesConnector } from '
 export const getServiceNowITSMCaseConnector = (): ServiceNowITSMCasesConnector => ({
   getMapping: getServiceNowITSMMapping,
   format: formatServiceNowITSM,
+  getSupportedUserActions: () => [
+    UserActionTypes.comment,
+    UserActionTypes.description,
+    UserActionTypes.tags,
+    UserActionTypes.title,
+  ],
 });
 
 export const getServiceNowSIRCaseConnector = (): ServiceNowSIRCasesConnector => ({
   getMapping: getServiceNowSIRMapping,
   format: formatServiceNowSIR,
+  getSupportedUserActions: () => [
+    UserActionTypes.comment,
+    UserActionTypes.description,
+    UserActionTypes.tags,
+    UserActionTypes.title,
+  ],
 });

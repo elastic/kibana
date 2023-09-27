@@ -164,6 +164,7 @@ export interface PushTimeFrameInfo {
 
 export interface CaseConnectorActivity {
   connectorId: string;
+  // actionTypeId: string;
   fields: UserActionSavedObjectTransformed;
   push?: PushTimeFrameInfo;
 }

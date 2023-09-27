@@ -32,8 +32,9 @@ import type {
   CaseConnector,
   ExternalService,
   UserActionAttributes,
+  UserActionType,
 } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { casesConnectors } from '../../connectors';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
@@ -47,9 +48,14 @@ export const getConnectors = async (
   } = clientArgs;
 
   try {
+    const supportedUserActions = casesConnectors
+      .getConnectorTotalTypes()
+      .map((connectorType) => casesConnectors.get(connectorType)?.getSupportedUserActions() ?? [])
+      .flat();
+
     const [connectors, latestUserAction] = await Promise.all([
       userActionService.getCaseConnectorInformation(caseId),
-      userActionService.getMostRecentUserAction(caseId),
+      userActionService.getMostRecentUserAction(caseId, supportedUserActions),
     ]);
 
     await checkConnectorsAuthorization({ authorization, connectors, latestUserAction });
@@ -143,22 +149,11 @@ const getConnectorsInfo = async ({
     await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
-  const hasCasesWebhookConnector = actionConnectors.some(
-    (actionConnector) => actionConnector.actionTypeId === ConnectorTypes.casesWebhook
-  );
-  let latestUserActionCasesWebhook: SavedObject<UserActionAttributes> | undefined;
-  if (hasCasesWebhookConnector) {
-    // if cases webhook connector, we need to fetch latestUserAction again because
-    // the cases webhook connector includes extra fields other case connectors do not track
-    latestUserActionCasesWebhook = await userActionService.getMostRecentUserAction(caseId, true);
-  }
-
   return createConnectorInfoResult({
     actionConnectors,
     connectors,
     pushInfo,
     latestUserAction,
-    latestUserActionCasesWebhook,
   });
 };
 
@@ -284,13 +279,11 @@ const createConnectorInfoResult = ({
   connectors,
   pushInfo,
   latestUserAction,
-  latestUserActionCasesWebhook,
 }: {
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
   latestUserAction?: SavedObject<UserActionAttributes>;
-  latestUserActionCasesWebhook?: SavedObject<UserActionAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(
@@ -301,18 +294,17 @@ const createConnectorInfoResult = ({
     const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
-    const latestUserActionCreatedAt = getDate(
-      connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook
-        ? latestUserActionCasesWebhook?.attributes.created_at
-        : latestUserAction?.attributes.created_at
-    );
+    const connectorSupportedUserActions = connectorDetails?.actionTypeId
+      ? casesConnectors.get(connectorDetails.actionTypeId)?.getSupportedUserActions()
+      : [];
 
     if (connector != null) {
       const enrichedPushInfo = pushInfo.get(aggregationConnector.connectorId);
       const needsToBePushed = hasDataToPush({
         connector,
         pushInfo: enrichedPushInfo,
-        latestUserActionDate: latestUserActionCreatedAt,
+        latestUserAction,
+        connectorSupportedUserActions,
       });
 
       const pushDetails = convertEnrichedPushInfoToDetails(enrichedPushInfo);
@@ -337,19 +329,26 @@ const createConnectorInfoResult = ({
  * 1. Check to see if the connector has been used to push, if it hasn't then we need to push
  * 2. Check to see if the most recent connector fields are different than the connector fields used in the most recent push,
  *  if they are different then we need to push
- * 3. Check to see if the most recent valid user action (a valid user action is one that changes the title, description,
- *  tags, or creation of a comment) was created after the most recent push (aka did the user do something new that needs
- *  to be pushed)
+ * 3. Check to see if the most recent valid user action (a valid user action is one that is supported by the connector)
+ *  was created after the most recent push (aka did the user do something new that needs to be pushed)
  */
 const hasDataToPush = ({
   connector,
   pushInfo,
-  latestUserActionDate,
+  latestUserAction,
+  connectorSupportedUserActions = [],
 }: {
   connector: CaseConnector;
   pushInfo?: EnrichedPushInfo;
-  latestUserActionDate?: Date;
+  latestUserAction?: SavedObject<UserActionAttributes>;
+  connectorSupportedUserActions?: UserActionType[];
 }): boolean => {
+  const latestUserActionDate = getDate(latestUserAction?.attributes.created_at);
+  const supportedUserActions = new Set(connectorSupportedUserActions);
+  const isSupportedUserAction = latestUserAction?.attributes.type
+    ? supportedUserActions.has(latestUserAction.attributes.type)
+    : false;
+
   return (
     /**
      * This isEqual call satisfies the first two steps of the algorithm above because if a push never occurred then the
@@ -357,6 +356,7 @@ const hasDataToPush = ({
      */
     !isEqual(connector, pushInfo?.connectorFieldsUsedInPush) ||
     (pushInfo != null &&
+      isSupportedUserAction &&
       latestUserActionDate != null &&
       latestUserActionDate > pushInfo.latestPushDate)
   );

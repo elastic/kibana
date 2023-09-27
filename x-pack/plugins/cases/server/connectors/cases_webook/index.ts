@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UserActionTypes } from '../../../common/types/domain';
 import { getMapping } from './mapping';
 import { format } from './format';
 import type { CasesWebhookCaseConnector } from './types';
@@ -12,4 +13,12 @@ import type { CasesWebhookCaseConnector } from './types';
 export const getCaseConnector = (): CasesWebhookCaseConnector => ({
   getMapping,
   format,
+  getSupportedUserActions: () => [
+    UserActionTypes.comment,
+    UserActionTypes.description,
+    UserActionTypes.tags,
+    UserActionTypes.title,
+    UserActionTypes.severity,
+    UserActionTypes.status,
+  ],
 });
