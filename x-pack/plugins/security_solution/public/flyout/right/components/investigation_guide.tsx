@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
@@ -75,6 +76,12 @@ export const InvestigationGuide: React.FC = () => {
             onClick={goToInvestigationsTab}
             iconType="documentation"
             data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel',
+              {
+                defaultMessage: 'Show investigation guide',
+              }
+            )}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
