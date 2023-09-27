@@ -34,9 +34,11 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     deleteTimelines();
     login();
     visitWithTimeRange(hostsUrl('allHosts'), {
-      onLoad: () => {
-        waitForWelcomePanelToBeLoaded();
-        waitForAllHostsToBeLoaded();
+      visitOptions: {
+        onLoad: () => {
+          waitForWelcomePanelToBeLoaded();
+          waitForAllHostsToBeLoaded();
+        },
       },
     });
     openTimelineUsingToggle();
