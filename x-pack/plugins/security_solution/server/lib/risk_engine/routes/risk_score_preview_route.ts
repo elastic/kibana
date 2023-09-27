@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
+import {
+  APP_ID,
+  DEFAULT_RISK_SCORE_PAGE_SIZE,
+  RISK_SCORE_PREVIEW_URL,
+} from '../../../../common/constants';
 import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
@@ -22,7 +26,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
       access: 'internal',
       path: RISK_SCORE_PREVIEW_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
