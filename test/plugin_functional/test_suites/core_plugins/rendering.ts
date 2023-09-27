@@ -282,7 +282,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
-        'xpack.securitySolution.hostDiscvoer (boolean)',
+        'xpack.securitySolution.hostDiscover (boolean)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.stack_connectors.enableExperimental (array)',
