@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { KibanaServices } from './types';
+import type { KibanaServices, MaintenanceWindow } from './types';
 
 export const fetchActiveMaintenanceWindows = async (
   http: KibanaServices['http'],
   signal?: AbortSignal
-) =>
+): Promise<MaintenanceWindow[]> =>
   http.fetch(INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH, {
     method: 'GET',
     signal,

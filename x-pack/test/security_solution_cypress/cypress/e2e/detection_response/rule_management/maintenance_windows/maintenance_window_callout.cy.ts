@@ -27,6 +27,7 @@ describe(
       const body: AsApiContract<MaintenanceWindowCreateBody> = {
         title: 'My maintenance window',
         duration: 60000, // 1 minute
+        category_ids: ['securitySolution'],
         r_rule: {
           dtstart: new Date().toISOString(),
           tzid: 'Europe/Amsterdam',
