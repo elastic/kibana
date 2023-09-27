@@ -15,20 +15,30 @@ import { i18n } from '@kbn/i18n';
 import { useFields } from './hooks/use_fields';
 
 const title = i18n.translate('management.settings.advancedSettingsLabel', {
-  defaultMessage: 'Settings',
+  defaultMessage: 'Advanced Settings',
 });
 
+export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
+
+/**
+ * Props for a {@link SettingsApplication} component.
+ */
 export interface SettingsApplicationProps {
+  /** Start contract of the uiSettings service. */
   settingsStart: SettingsStart;
 }
 
+/**
+ * Component for displaying a {@link Form} component.
+ * @param props The {@link SettingsApplicationProps} for the {@link SettingsApplication} component.
+ */
 export const SettingsApplication = ({ settingsStart }: SettingsApplicationProps) => {
   const fields = useFields(settingsStart.client);
 
   return (
     <div>
       <EuiText>
-        <h1 data-test-subj="managementSettingsTitle">{title}</h1>
+        <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>{title}</h1>
       </EuiText>
       <EuiSpacer size="xxl" />
       <Form fields={fields} isSavingEnabled={true} />

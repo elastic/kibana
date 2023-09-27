@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
+import { DATA_TEST_SUBJ_SETTINGS_TITLE } from '@kbn/management-settings-application/application';
 import * as settings from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Common settings', function () {
+  describe('Common advanced settings', function () {
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('settings');
@@ -38,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the page', async () => {
       await retry.waitFor('title to be visible', async () => {
-        return await testSubjects.exists('managementSettingsTitle');
+        return await testSubjects.exists(DATA_TEST_SUBJ_SETTINGS_TITLE);
       });
 
       const url = await browser.getCurrentUrl();

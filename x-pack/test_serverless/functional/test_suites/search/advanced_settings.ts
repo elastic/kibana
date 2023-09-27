@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
+import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
+import { DATA_TEST_SUBJ_SETTINGS_TITLE } from '@kbn/management-settings-application/application';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { isEditorFieldSetting } from '../common/settings';
+import { isEditorFieldSetting } from '../common/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -16,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Observability project settings', function () {
+  describe('Search advanced settings', function () {
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('settings');
@@ -24,15 +25,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the page', async () => {
       await retry.waitFor('title to be visible', async () => {
-        return await testSubjects.exists('managementSettingsTitle');
+        return await testSubjects.exists(DATA_TEST_SUBJ_SETTINGS_TITLE);
       });
 
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders observability settings', () => {
-      for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
+    describe('renders search settings', () => {
+      for (const settingId of SEARCH_PROJECT_SETTINGS) {
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;

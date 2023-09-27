@@ -16,6 +16,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboards/build_dashboard'));
     loadTestFile(require.resolve('./dashboards/import_dashboard'));
-    loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./advanced_settings'));
   });
 }

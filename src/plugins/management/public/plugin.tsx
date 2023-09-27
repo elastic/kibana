@@ -176,7 +176,7 @@ export class ManagementPlugin
     // Otherwise, it will be double registered from the Advanced settings plugin
     if (_plugins.serverless) {
       const title = kbnI18n.translate('management.settings.settingsLabel', {
-        defaultMessage: 'Settings',
+        defaultMessage: 'Advanced Settings',
       });
 
       this.managementSections.definedSections.kibana.registerApp({
