@@ -10,6 +10,7 @@ import type { GetCspRuleTemplateResponse } from '@kbn/cloud-security-posture-plu
 import type { SuperTest, Test } from 'supertest';
 import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { createPackagePolicy } from './helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -231,64 +232,4 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
   });
-}
-
-export async function createPackagePolicy(
-  supertest: SuperTest<Test>,
-  agentPolicyId: string,
-  policyTemplate: string,
-  input: string,
-  deployment: string,
-  posture: string
-) {
-  const version = posture === 'kspm' || posture === 'cspm' ? '1.2.8' : '1.3.0-preview2';
-  const title = 'Security Posture Management';
-  const streams = [
-    {
-      enabled: false,
-      data_stream: {
-        type: 'logs',
-        dataset: 'cloud_security_posture.vulnerabilities',
-      },
-    },
-  ];
-
-  const inputTemplate = {
-    enabled: true,
-    type: input,
-    policy_template: policyTemplate,
-  };
-
-  const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
-
-  const { body: postPackageResponse } = await supertest
-    .post(`/api/fleet/package_policies`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({
-      force: true,
-      name: 'cloud_security_posture-1',
-      description: '',
-      namespace: 'default',
-      policy_id: agentPolicyId,
-      enabled: true,
-      inputs: [inputs],
-      package: {
-        name: 'cloud_security_posture',
-        title,
-        version,
-      },
-      vars: {
-        deployment: {
-          value: deployment,
-          type: 'text',
-        },
-        posture: {
-          value: posture,
-          type: 'text',
-        },
-      },
-    })
-    .expect(200);
-
-  return postPackageResponse.item;
 }
