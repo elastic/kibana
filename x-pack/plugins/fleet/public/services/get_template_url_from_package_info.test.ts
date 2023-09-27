@@ -7,7 +7,10 @@
 
 import type { PackageInfo } from '../types';
 
-import { getTemplateUrlFromPackageInfo } from './get_template_url_from_package_info';
+import {
+  getTemplateUrlFromPackageInfo,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+} from './get_template_url_from_package_info';
 
 describe('getTemplateUrlFromPackageInfo', () => {
   test('returns undefined when packageInfo is undefined', () => {
@@ -67,7 +70,12 @@ describe('getTemplateUrlFromPackageInfo', () => {
             { name: 'input1', vars: [] },
             {
               name: 'input2',
-              vars: [{ name: 'cloud_formation_template', default: 'cloud_formation_template_url' }],
+              vars: [
+                {
+                  name: SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION,
+                  default: 'cloud_formation_template_url',
+                },
+              ],
             },
           ],
         },
@@ -77,7 +85,7 @@ describe('getTemplateUrlFromPackageInfo', () => {
     const result = getTemplateUrlFromPackageInfo(
       packageInfo,
       'template1',
-      'cloud_formation_template'
+      SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION
     );
     expect(result).toBe('cloud_formation_template_url');
   });

@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { CloudSecurityIntegrationAzureAccountType } from './agent_enrollment_flyout/types';
 
-const AzureResourceManagerLink =
-  'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager/?OCID=AIDcmm5edswduu_SEM__k_CjwKCAjwxOymBhAFEiwAnodBLBHx_IB6zMNtNiK3A6rPLhhUPeftXrN3px5mwTO739pWUndPzt27aRoCMKIQAvD_BwE_k_&gad=1';
+const azureResourceManagerLink =
+  'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager';
 
 export const AzureArmTemplateGuide = ({
   azureAccountType,
@@ -28,7 +28,7 @@ export const AzureArmTemplateGuide = ({
           values={{
             learnMore: (
               <EuiLink
-                href={AzureResourceManagerLink}
+                href={azureResourceManagerLink}
                 target="_blank"
                 rel="noopener nofollow noreferrer"
                 data-test-subj="azure-resource-manager-link"

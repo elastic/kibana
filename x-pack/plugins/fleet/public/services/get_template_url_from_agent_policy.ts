@@ -7,6 +7,11 @@
 
 import type { AgentPolicy } from '../types';
 
+export const SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG = {
+  CLOUD_FORMATION: 'cloud_formation_template_url',
+  ARM_TEMPLATE: 'arm_template_url',
+};
+
 export const getTemplateUrlFromAgentPolicy = (
   templateUrlFieldName: string,
   selectedPolicy?: AgentPolicy

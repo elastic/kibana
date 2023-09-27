@@ -7,6 +7,11 @@
 
 import type { PackageInfo } from '../types';
 
+export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
+  CLOUD_FORMATION: 'cloud_formation_template',
+  ARM_TEMPLATE: 'arm_template_url',
+};
+
 export const getTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
   integrationType: string,

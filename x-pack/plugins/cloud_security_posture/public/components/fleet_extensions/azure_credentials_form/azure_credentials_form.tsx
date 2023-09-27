@@ -123,7 +123,7 @@ const ArmTemplateSetup = ({
           <li>
             <FormattedMessage
               id="xpack.csp.azureIntegration.armTemplateSetupStep.save"
-              defaultMessage="Click the Save tand continue button on the bottom right of this page."
+              defaultMessage="Click the Save and continue button on the bottom right of this page."
             />
           </li>
           <li>

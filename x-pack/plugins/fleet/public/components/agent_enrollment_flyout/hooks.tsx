@@ -7,6 +7,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS } from '../../services/get_template_url_from_package_info';
+
+import { SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG } from '../../services/get_template_url_from_agent_policy';
+
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import {
@@ -111,12 +115,12 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     if (!integrationType) return undefined;
 
     const cloudFormationTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
-      'cloud_formation_template_url',
+      SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG.CLOUD_FORMATION,
       agentPolicy
     );
 
     const azureArmTemplateFromAgentPolicy = getTemplateUrlFromAgentPolicy(
-      'arm_template_url',
+      SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG.ARM_TEMPLATE,
       agentPolicy
     );
 
@@ -129,7 +133,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       ? getTemplateUrlFromPackageInfo(
           packageInfoData.item,
           integrationType,
-          'cloud_formation_template'
+          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION
         )
       : cloudFormationTemplateFromAgentPolicy;
 
@@ -139,7 +143,11 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       ]?.value;
 
     const azureArmTemplateUrl = packageInfoData?.item
-      ? getTemplateUrlFromPackageInfo(packageInfoData.item, integrationType, 'arm_template_url')
+      ? getTemplateUrlFromPackageInfo(
+          packageInfoData.item,
+          integrationType,
+          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.ARM_TEMPLATE
+        )
       : azureArmTemplateFromAgentPolicy;
 
     const azureArmTemplateAccountType: CloudSecurityIntegrationAzureAccountType | undefined =
