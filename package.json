@@ -426,6 +426,7 @@
     "@kbn/expression-xy-plugin": "link:src/plugins/chart_expressions/expression_xy",
     "@kbn/expressions-explorer-plugin": "link:examples/expressions_explorer",
     "@kbn/expressions-plugin": "link:src/plugins/expressions",
+    "@kbn/feature-controls-examples-plugin": "link:examples/feature_control_examples",
     "@kbn/feature-usage-test-plugin": "link:x-pack/test/plugin_api_integration/plugins/feature_usage_test",
     "@kbn/features-plugin": "link:x-pack/plugins/features",
     "@kbn/fec-alerts-test-plugin": "link:x-pack/test/functional_execution_context/plugins/alerts",
