@@ -13,7 +13,7 @@ import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAgentVersion, useAuthz } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -34,7 +34,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
@@ -102,7 +102,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
         onClick={() => {
           setIsUpgradeModalOpen(true);
         }}
