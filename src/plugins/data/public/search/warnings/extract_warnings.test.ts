@@ -7,7 +7,10 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { extractWarnings } from './extract_warnings';
+
+const mockInspectorService = {} as InspectorStartContract;
 
 describe('extract search response warnings', () => {
   describe('single cluster', () => {
@@ -37,7 +40,7 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -62,7 +65,7 @@ describe('extract search response warnings', () => {
         _shards: {} as estypes.ShardStatistics,
         hits: { hits: [] },
       };
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -87,7 +90,7 @@ describe('extract search response warnings', () => {
           failed: 0,
           total: 9000,
         },
-      } as estypes.SearchResponse);
+      } as estypes.SearchResponse, mockInspectorService);
 
       expect(warnings).toEqual([]);
     });
@@ -177,7 +180,7 @@ describe('extract search response warnings', () => {
         aggregations: {},
       };
 
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -230,7 +233,7 @@ describe('extract search response warnings', () => {
         },
         hits: { hits: [] },
       };
-      expect(extractWarnings(response)).toEqual([
+      expect(extractWarnings(response, mockInspectorService)).toEqual([
         {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
@@ -281,7 +284,7 @@ describe('extract search response warnings', () => {
           },
         },
         hits: { hits: [] },
-      } as estypes.SearchResponse);
+      } as estypes.SearchResponse, mockInspectorService);
 
       expect(warnings).toEqual([]);
     });
