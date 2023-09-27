@@ -13,10 +13,10 @@ import numeral from '@elastic/numeral';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { useKibana } from '../../utils/kibana_react';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { paths } from '../../../common/locators/paths';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { useKibana } from '../../../utils/kibana_react';
+import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
+import { paths } from '../../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 

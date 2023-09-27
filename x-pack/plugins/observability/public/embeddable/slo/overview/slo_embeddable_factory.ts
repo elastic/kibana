@@ -14,7 +14,7 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
-import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../..';
+import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;

@@ -10,7 +10,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 
 interface Props {
   initialSlo?: SLOWithSummaryResponse;

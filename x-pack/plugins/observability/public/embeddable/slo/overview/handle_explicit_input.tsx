@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { EmbeddableSloProps, SloEmbeddableInput } from './types';
 
-import { ObservabilityPublicPluginsStart } from '../..';
+import { ObservabilityPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
 export async function resolveEmbeddableSloUserInput(
   coreStart: CoreStart,

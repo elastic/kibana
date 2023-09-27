@@ -35,7 +35,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
   const [hasError, setHasError] = useState(false);
 
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 500 }}>
+    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
