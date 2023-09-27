@@ -112,7 +112,8 @@ export const CardsNavigation = ({
           defaultMessage: 'Management',
         })}
         description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
-          defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
+          defaultMessage:
+            'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.',
         })}
       />
 

@@ -76,7 +76,7 @@ export const ManagementLandingPage = ({
           <p>
             <FormattedMessage
               id="management.landing.subhead"
-              defaultMessage="Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location."
+              defaultMessage="Manage your indices, data views, saved objects, Kibana settings, and more."
             />
           </p>
           <EuiHorizontalRule />
