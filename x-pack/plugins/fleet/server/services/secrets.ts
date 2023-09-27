@@ -10,9 +10,16 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
+import type { OutputSecretPath } from '../../common/types';
+
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
-import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../common';
+import type {
+  NewOutput,
+  NewPackagePolicy,
+  RegistryStream,
+  UpdatePackagePolicy,
+} from '../../common';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import {
@@ -235,6 +242,54 @@ export async function extractAndWriteSecrets(opts: {
     packagePolicy: policyWithSecretRefs,
     secretReferences: secrets.map(({ id }) => ({ id })),
   };
+}
+
+export async function extractAndWriteOutputSecrets(opts: {
+  output: NewOutput;
+  esClient: ElasticsearchClient;
+}): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
+  const { output, esClient } = opts;
+
+  const secretPaths = getOutputSecretPaths(output).filter((path) => typeof path.value === 'string');
+
+  if (secretPaths.length === 0) {
+    return { output, secretReferences: [] };
+  }
+
+  const secrets = await createSecrets({
+    esClient,
+    values: secretPaths.map(({ value }) => value as string),
+  });
+
+  const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
+  secretPaths.forEach((secretPath, i) => {
+    set(outputWithSecretRefs, secretPath.path + '.value', { id: secrets[i].id });
+  });
+
+  return {
+    output: outputWithSecretRefs,
+    secretReferences: secrets.map(({ id }) => ({ id })),
+  };
+}
+
+function getOutputSecretPaths(output: NewOutput): OutputSecretPath[] {
+  const outputSecretPaths: OutputSecretPath[] = [];
+
+  if ((output.type === 'kafka' || output.type === 'logstash') && output.secrets?.ssl?.key) {
+    outputSecretPaths.push({
+      path: 'secrets.ssl.key',
+      value: output.secrets.ssl.key,
+    });
+  }
+
+  if (output.type === 'kafka' && output?.secrets?.password) {
+    outputSecretPaths.push({
+      path: 'secrets.password',
+      value: output.secrets.password,
+    });
+  }
+
+  return outputSecretPaths;
 }
 
 export async function extractAndUpdateSecrets(opts: {

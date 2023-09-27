@@ -53,6 +53,7 @@ import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
+import { extractAndWriteOutputSecrets } from './secrets';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -407,7 +408,7 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
+    const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
@@ -526,6 +527,10 @@ class OutputService {
     }
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({ output, esClient });
+
+    if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -692,7 +697,7 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(

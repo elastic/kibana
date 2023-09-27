@@ -146,10 +146,16 @@ interface OutputSoBaseAttributes {
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['Elasticsearch'];
+  secrets?: {};
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
   type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
@@ -191,6 +197,12 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?: { id: string };
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 export type OutputSOAttributes =
