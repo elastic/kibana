@@ -10,7 +10,6 @@
     "@kbn/i18n",
     "@kbn/inspector-plugin",
     "@kbn/core",
-    "@kbn/i18n-react",
   ],
   "exclude": ["target/**/*"]
 }
