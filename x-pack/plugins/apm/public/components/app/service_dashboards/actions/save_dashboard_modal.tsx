@@ -49,8 +49,8 @@ export function SaveDashboardModal({
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
-  const [useContextFilter, setUseContextFilter] = useState(
-    currentDashboard?.useContextFilter ?? true
+  const [useServiceFilters, setUseServiceFilters] = useState(
+    currentDashboard?.useServiceFilters ?? true
   );
 
   if (currentDashboard) {
@@ -93,7 +93,7 @@ export function SaveDashboardModal({
               query: { serviceDashboardId: currentDashboard?.id },
               body: {
                 dashboardSavedObjectId: newDashboard.value,
-                useContextFilter,
+                useServiceFilters,
                 kuery: `${SERVICE_NAME}: ${serviceName}`,
               },
             },
@@ -125,7 +125,7 @@ export function SaveDashboardModal({
     [
       selectedDashboard,
       notifications.toasts,
-      useContextFilter,
+      useServiceFilters,
       onClose,
       reloadServiceDashboards,
       isEditMode,
@@ -197,8 +197,8 @@ export function SaveDashboardModal({
                 </EuiToolTip>
               </p>
             }
-            onChange={() => setUseContextFilter(!useContextFilter)}
-            checked={useContextFilter}
+            onChange={() => setUseServiceFilters(!useServiceFilters)}
+            checked={useServiceFilters}
           />
         </EuiFlexGroup>
       </EuiModalBody>

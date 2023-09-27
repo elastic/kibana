@@ -18,7 +18,7 @@ export const apmCustomDashboards: SavedObjectsType = {
     properties: {
       dashboardSavedObjectId: { type: 'keyword' },
       kuery: { type: 'text' },
-      useContextFilter: { type: 'boolean' },
+      useServiceFilters: { type: 'boolean' },
     },
   },
   management: {
@@ -36,7 +36,7 @@ export const apmCustomDashboards: SavedObjectsType = {
         create: schema.object({
           dashboardSavedObjectId: schema.string(),
           kuery: schema.maybe(schema.string()),
-          useContextFilter: schema.boolean(),
+          useServiceFilters: schema.boolean(),
         }),
       },
     },

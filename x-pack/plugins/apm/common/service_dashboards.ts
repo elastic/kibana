@@ -9,7 +9,7 @@ export const APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'apm-custom-dashboards';
 
 export interface ServiceDashboard {
   dashboardSavedObjectId: string;
-  useContextFilter: boolean;
+  useServiceFilters: boolean;
   kuery?: string;
 }
 

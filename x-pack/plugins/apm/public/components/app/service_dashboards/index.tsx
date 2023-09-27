@@ -112,7 +112,7 @@ export function ServiceDashboards() {
 
     dashboard.updateInput({
       filters:
-        dataView && currentDashboard?.useContextFilter
+        dataView && currentDashboard?.useServiceFilters
           ? getFilters(serviceName, environment, dataView)
           : [],
       timeRange: { from: rangeFrom, to: rangeTo },

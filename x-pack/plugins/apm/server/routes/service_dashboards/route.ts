@@ -26,7 +26,7 @@ const serviceDashboardSaveRoute = createApmServerRoute({
     body: t.type({
       dashboardSavedObjectId: t.string,
       kuery: t.union([t.string, t.undefined]),
-      useContextFilter: t.boolean,
+      useServiceFilters: t.boolean,
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
