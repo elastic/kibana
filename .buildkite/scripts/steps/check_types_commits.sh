@@ -106,10 +106,12 @@ done
 
 echo "Looking for related tsconfig.json files..."
 
-for dir in "${uniq_dirs[@]}"
-do
-  find_tsconfig $dir
-done
+if [ ${#uniq_dirs[@]} -gt 0 ]; then
+  for dir in "${uniq_dirs[@]}"
+  do
+    find_tsconfig $dir
+  done
+fi
 
 if [ ${#uniq_tsconfigs[@]} -eq 0 ]; then
   if [[ "$sha1" == "--cached" ]]; then
