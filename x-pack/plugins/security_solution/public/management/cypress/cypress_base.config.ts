@@ -59,6 +59,7 @@ export const getCypressBaseConfig = (
         supportFile: 'public/management/cypress/support/e2e.ts',
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
+        experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           dataLoaders(on, config);
