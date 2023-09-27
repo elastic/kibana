@@ -37,8 +37,8 @@ discover-app {
 
   &:not(:hover):not(:focus) {
     &:before, &:after {
-    width: 0;
-  }
+      width: 0;
+    }
   }
 }
 
