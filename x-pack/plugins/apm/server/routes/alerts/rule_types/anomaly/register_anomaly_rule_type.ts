@@ -96,13 +96,7 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({
-        params,
-        services,
-        spaceId,
-        startedAt,
-        getTimeRange,
-      }) => {
+      executor: async ({ params, services, spaceId, getTimeRange }) => {
         if (!ml) {
           return { state: {} };
         }
@@ -317,8 +311,7 @@ export function registerAnomalyRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt =
-            getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? dateStart;
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,
