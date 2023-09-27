@@ -297,9 +297,38 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           'Create rule button',
           async () => await testSubjects.exists('createRuleButton')
         );
+        await retry.waitFor(
+          'Create rule button is enabled',
+          async () => await testSubjects.isEnabled('createRuleButton')
+        );
       });
 
       it(`shows the no permission prompt when the user has no permissions`, async () => {
+        await observability.users.setTestUserRole({
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [
+            {
+              base: [],
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await observability.alerts.common.navigateToRulesPage();
+        await retry.waitFor(
+          'No permissions prompt',
+          async () => await testSubjects.exists('noPermissionPrompt')
+        );
+        await observability.users.restoreDefaultTestUserRole();
+      });
+
+      it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             logs: ['read'],
@@ -307,10 +336,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
-          'No permissions prompt',
-          async () => await testSubjects.exists('noPermissionPrompt')
+          'Read-only rules list is visible',
+          async () => await testSubjects.exists('rulesList')
         );
-
+        await retry.waitFor(
+          'Create rule button is disabled',
+          async () => !(await testSubjects.isEnabled('createRuleButton'))
+        );
         await observability.users.restoreDefaultTestUserRole();
       });
     });

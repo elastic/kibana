@@ -287,6 +287,7 @@ export const RulesList = ({
 
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToReadAnyRules,
+    authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
     isLoadingRuleTypes: ruleTypesState.isLoading,

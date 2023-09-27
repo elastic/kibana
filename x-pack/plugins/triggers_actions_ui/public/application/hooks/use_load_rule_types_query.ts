@@ -61,12 +61,12 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
 
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
   const authorizedRuleTypes = [...filteredIndex.values()];
-  const authorizedToReadAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read
-  );
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
+  const authorizedToReadAnyRules =
+    authorizedToCreateAnyRules ||
+    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
 
   return {
     ruleTypesState: {
