@@ -15,7 +15,7 @@ import {
   data as telemetryMockData,
   MockTelemetryFindings,
 } from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { createPackagePolicy } from './benchmark';
+import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
