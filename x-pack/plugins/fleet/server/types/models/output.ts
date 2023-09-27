@@ -217,10 +217,15 @@ export const KafkaSchema = {
     schema.never()
   ),
   password: schema.conditional(
-    schema.siblingRef('username'),
-    schema.string(),
-    schema.string(),
-    schema.never()
+    schema.siblingRef('secrets.password'),
+    secretRefSchema,
+    schema.never(),
+    schema.conditional(
+      schema.siblingRef('username'),
+      schema.string(),
+      schema.string(),
+      schema.never()
+    )
   ),
   sasl: schema.maybe(
     schema.object({

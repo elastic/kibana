@@ -1013,7 +1013,35 @@ export default function (providerContext: FtrProviderContext) {
 
         const secretId = res.body.item.secrets.ssl.key.id;
         const searchRes = await getSecrets([secretId]);
+        // @ts-ignore _source unknown type
         expect(searchRes.hits.hits[0]._source.value).to.equal('KEY');
+      });
+
+      it('should create ssl.password secret correctly', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output With Password Secret',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+            secrets: { password: 'pass' },
+          });
+
+        console.log('//////// ', JSON.stringify(res.body));
+        const secretId = res.body.item.secrets.password.id;
+        const searchRes = await getSecrets([secretId]);
+        // @ts-ignore _source unknown type
+        expect(searchRes.hits.hits[0]._source.value).to.equal('pass');
       });
     });
 
