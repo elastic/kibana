@@ -51,6 +51,7 @@ export type {
   StringUnsavedFieldChange,
   UndefinedUnsavedFieldChange,
   UnsavedFieldChange,
+  UnsavedFieldChanges,
 } from './unsaved_change';
 
 export type {
@@ -76,4 +77,6 @@ export type ResetInputRef = {
  * A function that is called when the value of a {@link FieldInput} changes.
  * @param change The {@link UnsavedFieldChange} passed to the handler.
  */
-export type OnChangeFn<T extends SettingType> = (change?: UnsavedFieldChange<T>) => void;
+export type OnChangeFn<T extends SettingType = SettingType> = (
+  change?: UnsavedFieldChange<T>
+) => void;

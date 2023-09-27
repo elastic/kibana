@@ -35,7 +35,7 @@ import { FieldInputFooter } from './footer';
 
 export const DATA_TEST_SUBJ_SCREEN_READER_MESSAGE = 'fieldRowScreenReaderMessage';
 
-type Definition<T extends SettingType> = Pick<
+type Definition<T extends SettingType = SettingType> = Pick<
   FieldDefinition<T>,
   | 'ariaAttributes'
   | 'defaultValue'
@@ -57,18 +57,18 @@ type Definition<T extends SettingType> = Pick<
  */
 export interface FieldRowProps {
   /** The {@link FieldDefinition} corresponding the setting. */
-  field: Definition<SettingType>;
+  field: Definition;
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
   /** The {@link OnChangeFn} handler. */
-  onChange: RowOnChangeFn<SettingType>;
+  onChange: RowOnChangeFn;
   /**
    * The onClear handler, if a value is cleared to an empty or default state.
    * @param id The id relating to the field to clear.
    */
   onClear?: (id: string) => void;
   /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
-  unsavedChange?: UnsavedFieldChange<SettingType>;
+  unsavedChange?: UnsavedFieldChange;
 }
 
 /**
@@ -87,7 +87,7 @@ export const FieldRow = (props: FieldRowProps) => {
   const ref = useRef<ResetInputRef>(null);
 
   // Route any change to the `onChange` handler, along with the field id.
-  const onChange: OnChangeFn<SettingType> = (update) => {
+  const onChange: OnChangeFn = (update) => {
     onChangeProp(id, update);
   };
 

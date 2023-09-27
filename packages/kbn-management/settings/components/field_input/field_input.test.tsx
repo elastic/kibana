@@ -191,7 +191,7 @@ describe('FieldInput', () => {
         ...defaultProps.field,
         type: 'foobar',
       },
-    } as unknown as FieldInputProps<SettingType>;
+    } as unknown as FieldInputProps;
 
     expect(() => render(wrap(<FieldInput {...props} />))).toThrowError(
       'Unknown or incompatible field type: foobar'

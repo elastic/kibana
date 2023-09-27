@@ -49,7 +49,7 @@ export type FieldRowKibanaDependencies = KibanaDependencies & FieldInputKibanaDe
  * @param id A unique id corresponding to the particular setting being changed.
  * @param change The {@link UnsavedFieldChange} corresponding to any unsaved change to the field.
  */
-export type RowOnChangeFn<T extends SettingType> = (
+export type RowOnChangeFn<T extends SettingType = SettingType> = (
   id: string,
   change?: UnsavedFieldChange<T>
 ) => void;

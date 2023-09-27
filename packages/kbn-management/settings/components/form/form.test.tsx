@@ -19,10 +19,7 @@ import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bott
 import { FormServices } from './types';
 
 const settingsMock = getSettingsMock();
-const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
-  settingsMock,
-  uiSettingsClientMock
-);
+const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);
 
 describe('Form', () => {
   beforeEach(() => {
@@ -122,7 +119,7 @@ describe('Form', () => {
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
     const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
-    const testFields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+    const testFields: FieldDefinition[] = getFieldDefinitions(
       getSettingsMock(true),
       uiSettingsClientMock
     );

@@ -103,10 +103,7 @@ export const storyArgs = {
  * @param type The type of the UiSetting for this {@link FieldRow}.
  * @returns A Storybook Story.
  */
-export const getFieldRowStory = (
-  type: SettingType,
-  settingFields?: Partial<UiSettingMetadata<SettingType>>
-) => {
+export const getFieldRowStory = (type: SettingType, settingFields?: Partial<UiSettingMetadata>) => {
   const Story = ({
     isCustom,
     isDeprecated,

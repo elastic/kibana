@@ -11,7 +11,7 @@ import {
   FieldRowKibanaProvider,
 } from '@kbn/management-settings-components-field-row';
 import React, { FC, useContext } from 'react';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
@@ -47,7 +47,7 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
   return (
     <FormContext.Provider
       value={{
-        saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
+        saveChanges: (changes: Record<string, UnsavedFieldChange>) => {
           const arr = Object.entries(changes).map(([key, value]) =>
             settings.client.set(key, value.unsavedValue)
           );

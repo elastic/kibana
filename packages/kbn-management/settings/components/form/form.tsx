@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
@@ -20,7 +20,7 @@ import { useSave } from './use_save';
  */
 export interface FormProps {
   /** A list of {@link FieldDefinition} corresponding to settings to be displayed in the form. */
-  fields: Array<FieldDefinition<SettingType>>;
+  fields: FieldDefinition[];
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
 }
@@ -32,9 +32,9 @@ export interface FormProps {
 export const Form = (props: FormProps) => {
   const { fields, isSavingEnabled } = props;
 
-  const [unsavedChanges, setUnsavedChanges] = React.useState<
-    Record<string, UnsavedFieldChange<SettingType>>
-  >({});
+  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
+    {}
+  );
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -53,7 +53,7 @@ export const Form = (props: FormProps) => {
     setIsLoading(false);
   };
 
-  const onChange: RowOnChangeFn<SettingType> = (id, change) => {
+  const onChange: RowOnChangeFn = (id, change) => {
     if (!change) {
       const { [id]: unsavedChange, ...rest } = unsavedChanges;
       setUnsavedChanges(rest);
