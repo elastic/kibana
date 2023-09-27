@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
