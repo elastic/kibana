@@ -86,6 +86,8 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
+        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
+            otherwise, there is a race condition where the panels can end up being squashed */}
         {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
     </div>
