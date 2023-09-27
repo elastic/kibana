@@ -64,8 +64,11 @@ export const PanelsResizable = ({
     () => setResizeWithPortalsHackIsResizing(false),
     []
   );
-  const resizeWithPortalsHackButtonCss = css`
+  const defaultButtonCss = css`
     z-index: 3;
+  `;
+  const resizeWithPortalsHackButtonCss = css`
+    z-index: 4;
   `;
   const resizeWithPortalsHackOverlayCss = css`
     position: absolute;
@@ -73,7 +76,7 @@ export const PanelsResizable = ({
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 3;
   `;
 
   // We convert the top panel size from a percentage of the container size
@@ -204,7 +207,9 @@ export const PanelsResizable = ({
           </EuiResizablePanel>
           <EuiResizableButton
             className={resizeButtonClassName}
-            css={resizeWithPortalsHackIsResizing && resizeWithPortalsHackButtonCss}
+            css={
+              resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss
+            }
             data-test-subj={`${dataTestSubj}ResizableButton`}
           />
           <EuiResizablePanel
