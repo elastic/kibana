@@ -247,7 +247,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean)',
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
         'xpack.license_management.ui.enabled (boolean)',
