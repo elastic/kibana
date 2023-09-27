@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiIcon,
   EuiButtonIcon,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
@@ -27,11 +26,11 @@ import { DeleteConfirmationModal } from '../delete_confirmation_modal';
 export interface Props {
   customFields: CustomFieldsConfiguration;
   onDeleteCustomField: (key: string) => void;
+  onEditCustomField: (key: string) => void;
 }
 
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
-  const { customFields, onDeleteCustomField } = props;
-  const { euiTheme } = useEuiTheme();
+  const { customFields, onDeleteCustomField, onEditCustomField } = props;
   const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
@@ -90,9 +89,17 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                               </EuiFlexItem>
                               <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
                             </EuiFlexGroup>
-                          </EuiFlexItem>
+                          </EuiFlexItem>{' '}
                           <EuiFlexItem grow={false}>
                             <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  data-test-subj={`${customField.key}-custom-field-edit`}
+                                  iconType="pencil"
+                                  color="primary"
+                                  onClick={() => onEditCustomField(customField.key)}
+                                />
+                              </EuiFlexItem>
                               <EuiFlexItem grow={false}>
                                 <EuiButtonIcon
                                   data-test-subj={`${customField.key}-custom-field-delete`}

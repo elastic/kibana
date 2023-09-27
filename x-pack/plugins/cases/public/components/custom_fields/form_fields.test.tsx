@@ -56,9 +56,6 @@ describe('FormFields ', () => {
         {
           label: 'hello',
           type: 'toggle',
-          options: {
-            required: false,
-          },
         },
         true
       );

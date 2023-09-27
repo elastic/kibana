@@ -24,20 +24,22 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 
-export interface AddFieldFlyoutProps {
+export interface CustomFieldFlyoutProps {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
   onSaveField: (data: CustomFieldConfiguration) => void;
+  customField: CustomFieldConfiguration | null;
 }
 
-const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
+const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
+  customField,
 }) => {
-  const dataTestSubj = 'add-custom-field-flyout';
+  const dataTestSubj = 'custom-field-flyout';
 
   const [formState, setFormState] = useState<CustomFieldFormState>({
     isValid: undefined,
@@ -65,7 +67,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <CustomFieldsForm onChange={setFormState} />
+        <CustomFieldsForm initialValue={customField} onChange={setFormState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj={`${dataTestSubj}-footer`}>
         <EuiFlexGroup justifyContent="flexStart">
@@ -99,6 +101,6 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   );
 };
 
-AddFieldFlyoutComponent.displayName = 'AddFieldFlyout';
+CustomFieldFlyoutComponent.displayName = 'CustomFieldFlyout';
 
-export const AddFieldFlyout = React.memo(AddFieldFlyoutComponent);
+export const CustomFieldFlyout = React.memo(CustomFieldFlyoutComponent);

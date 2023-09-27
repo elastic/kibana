@@ -23,6 +23,7 @@ export interface CustomFieldFormState {
 
 interface Props {
   onChange: (state: CustomFieldFormState) => void;
+  initialValue: CustomFieldConfiguration | null;
 }
 
 // Form -> API
@@ -49,17 +50,27 @@ const formDeserializer = ({
 }: CustomFieldConfiguration): CustomFieldsConfigurationFormProps => {
   return {
     key,
+    options: { required: Boolean(required) },
     label,
     type,
-    options: { required: Boolean(required) },
   };
 };
 
-const FormComponent: React.FC<Props> = ({ onChange }) => {
-  const keyDefaultValue = useMemo(() => uuidv4(), []);
+const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
+  const keyDefaultValue = useMemo<string>(() => {
+    if (initialValue) {
+      return '';
+    }
+    return uuidv4();
+  }, [initialValue]);
 
   const { form } = useForm({
-    defaultValue: { key: keyDefaultValue, label: '', type: CustomFieldTypes.TEXT, required: false },
+    defaultValue: initialValue ?? {
+      key: keyDefaultValue,
+      label: '',
+      type: CustomFieldTypes.TEXT,
+      required: false,
+    },
     options: { stripEmptyFields: false },
     schema,
     serializer: formSerializer,

@@ -15,10 +15,16 @@ import { CustomFieldsForm } from './form';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 import userEvent from '@testing-library/user-event';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 
 describe('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
   const onChange = jest.fn();
+
+  const props = {
+    onChange,
+    initialValue: null,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,14 +32,14 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<CustomFieldsForm onChange={onChange} />);
+    appMockRender.render(<CustomFieldsForm {...props} />);
 
     expect(screen.getByTestId('custom-field-label-input')).toBeInTheDocument();
     expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
   });
 
   it('renders text as default custom field type', async () => {
-    appMockRender.render(<CustomFieldsForm onChange={onChange} />);
+    appMockRender.render(<CustomFieldsForm {...props} />);
 
     expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
     expect(screen.getByText('Text')).toBeInTheDocument();
@@ -42,14 +48,14 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('renders custom field type options', async () => {
-    appMockRender.render(<CustomFieldsForm onChange={onChange} />);
+    appMockRender.render(<CustomFieldsForm {...props} />);
 
     expect(screen.getByText('Text')).toBeInTheDocument();
     expect(screen.getByText('Toggle')).toBeInTheDocument();
   });
 
   it('renders toggle custom field type', async () => {
-    appMockRender.render(<CustomFieldsForm onChange={onChange} />);
+    appMockRender.render(<CustomFieldsForm {...props} />);
 
     fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
       target: { value: CustomFieldTypes.TOGGLE },
@@ -64,7 +70,7 @@ describe('CustomFieldsForm ', () => {
 
     const onChangeState = (state: CustomFieldFormState) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} />);
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -90,7 +96,7 @@ describe('CustomFieldsForm ', () => {
 
     const onChangeState = (state: CustomFieldFormState) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} />);
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -107,6 +113,58 @@ describe('CustomFieldsForm ', () => {
         required: false,
         type: 'text',
       });
+    });
+  });
+
+  it('deserializes the data correctly if required is selected', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(
+      <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[0]} />
+    );
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
+      'value',
+      customFieldsConfigurationMock[0].label
+    );
+    expect(await screen.findByTestId('text-custom-field-options')).toHaveAttribute('checked');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual(customFieldsConfigurationMock[0]);
+    });
+  });
+
+  it('deserializes the data correctly if required not selected', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(
+      <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[1]} />
+    );
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
+      'value',
+      customFieldsConfigurationMock[1].label
+    );
+    expect(await screen.findByTestId('text-custom-field-options')).not.toHaveAttribute('checked');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual(customFieldsConfigurationMock[1]);
     });
   });
 });

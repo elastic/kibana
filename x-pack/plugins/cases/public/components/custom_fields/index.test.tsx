@@ -25,6 +25,7 @@ describe('CustomFields', () => {
     isLoading: false,
     handleAddCustomField: jest.fn(),
     handleDeleteCustomField: jest.fn(),
+    handleEditCustomField: jest.fn(),
     customFields: [],
   };
 

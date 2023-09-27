@@ -13,7 +13,10 @@ import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import type {
+  CustomFieldConfiguration,
+  CustomFieldsConfiguration,
+} from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -31,7 +34,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { CustomFields } from '../custom_fields';
-import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
+import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
@@ -64,7 +67,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
-  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
+  const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
+  const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
 
   const {
     data: {
@@ -239,8 +243,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   const onAddCustomFields = useCallback(() => {
-    setAddFieldFlyoutVisibility(true);
-  }, [setAddFieldFlyoutVisibility]);
+    setCustomFieldFlyoutVisibility(true);
+  }, [setCustomFieldFlyoutVisibility]);
 
   const onDeleteCustomField = useCallback(
     (key: string) => {
@@ -264,21 +268,47 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const onCloseAddFieldFlyout = useCallback(() => {
-    setAddFieldFlyoutVisibility(false);
-  }, [setAddFieldFlyoutVisibility]);
+  const onEditCustomField = useCallback(
+    (key: string) => {
+      const selectedCustomField = customFields.find((item) => item.key === key);
 
-  const onCustomFieldCreated = useCallback(
+      if (selectedCustomField) {
+        setCustomFieldToEdit(selectedCustomField);
+      }
+      setCustomFieldFlyoutVisibility(true);
+    },
+    [setCustomFieldFlyoutVisibility, setCustomFieldToEdit, customFields]
+  );
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setCustomFieldFlyoutVisibility(false);
+    setCustomFieldToEdit(null);
+  }, [setCustomFieldFlyoutVisibility, setCustomFieldToEdit]);
+
+  const onSaveCustomField = useCallback(
     (customFieldData: CustomFieldConfiguration) => {
+      let updatedFields: CustomFieldsConfiguration = [];
+      const isExistingCustomField = customFields.find((field) => field.key === customFieldData.key);
+
+      if (isExistingCustomField) {
+        updatedFields = customFields.map((item) => {
+          if (item.key === customFieldData.key) {
+            return customFieldData;
+          }
+          return item;
+        });
+      }
+
       persistCaseConfigure({
         connector,
-        customFields: [...customFields, customFieldData],
+        customFields: isExistingCustomField ? updatedFields : [...customFields, customFieldData],
         id: configurationId,
         version: configurationVersion,
         closureType,
       });
 
-      setAddFieldFlyoutVisibility(false);
+      setCustomFieldFlyoutVisibility(false);
+      setCustomFieldToEdit(null);
     },
     [
       closureType,
@@ -290,8 +320,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
-    <AddFieldFlyout
+  const CustomFieldAddFlyout = customFieldFlyoutVisible ? (
+    <CustomFieldFlyout
       isLoading={loadingCaseConfigure || isPersistingConfiguration}
       disabled={
         !permissions.create ||
@@ -299,8 +329,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         loadingCaseConfigure ||
         isPersistingConfiguration
       }
+      customField={customFieldToEdit}
       onCloseFlyout={onCloseAddFieldFlyout}
-      onSaveField={onCustomFieldCreated}
+      onSaveField={onSaveCustomField}
     />
   ) : null;
 
@@ -364,6 +395,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 disabled={isPersistingConfiguration || loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}
                 handleDeleteCustomField={onDeleteCustomField}
+                handleEditCustomField={onEditCustomField}
               />
             </EuiFlexItem>
           </SectionWrapper>
