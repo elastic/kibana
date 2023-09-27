@@ -651,12 +651,8 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const draggable = screen.getByTestId('draggable');
-
       expect(
-        within(draggable).getByTestId(
-          `custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`
-        )
+        screen.getByTestId(`custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`)
       ).toBeInTheDocument();
     });
 
@@ -680,11 +676,11 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       for (const field of customFieldsConfigurationMock) {
         expect(
-          within(droppable).getByTestId(`custom-field-${field.label}-${field.type}`)
+          within(list).getByTestId(`custom-field-${field.label}-${field.type}`)
         ).toBeInTheDocument();
       }
     });
@@ -709,10 +705,10 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
@@ -755,10 +751,10 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();

@@ -7,9 +7,6 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,71 +50,59 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
 
   const showModal = Boolean(selectedItem);
 
-  return (
+  return customFields.length ? (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="flexStart">
+      <EuiFlexGroup justifyContent="flexStart" data-test-subj="custom-fields-list">
         <EuiFlexItem>
-          {customFields.length ? (
-            <EuiDragDropContext onDragEnd={() => {}}>
-              <EuiDroppable droppableId="custom-fields-list-droppable" spacing="m">
-                {customFields.map((customField, idx) => (
-                  <EuiDraggable
-                    spacing="m"
-                    key={customField.key}
-                    index={idx}
-                    draggableId={customField.key}
-                    customDragHandle={true}
-                    hasInteractiveChildren={true}
-                  >
-                    {() => (
-                      <EuiPanel
-                        paddingSize="s"
-                        data-test-subj={`custom-field-${customField.label}-${customField.type}`}
-                        hasShadow={false}
-                      >
-                        <EuiFlexGroup alignItems="center" gutterSize="s">
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon type="grab" />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={true}>
-                            <EuiFlexGroup alignItems="center" gutterSize="s">
-                              <EuiFlexItem grow={false}>
-                                <EuiText>
-                                  <h4>{customField.label}</h4>
-                                </EuiText>
-                              </EuiFlexItem>
-                              <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
-                            </EuiFlexGroup>
-                          </EuiFlexItem>{' '}
-                          <EuiFlexItem grow={false}>
-                            <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonIcon
-                                  data-test-subj={`${customField.key}-custom-field-edit`}
-                                  iconType="pencil"
-                                  color="primary"
-                                  onClick={() => onEditCustomField(customField.key)}
-                                />
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonIcon
-                                  data-test-subj={`${customField.key}-custom-field-delete`}
-                                  iconType="minusInCircle"
-                                  color="danger"
-                                  onClick={() => setSelectedItem(customField)}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    )}
-                  </EuiDraggable>
-                ))}
-              </EuiDroppable>
-            </EuiDragDropContext>
-          ) : null}
+          {customFields.map((customField) => (
+            <React.Fragment key={customField.key}>
+              <EuiPanel
+                paddingSize="s"
+                data-test-subj={`custom-field-${customField.label}-${customField.type}`}
+                hasShadow={false}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="grab" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={true}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText>
+                          <h4>{customField.label}</h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          data-test-subj={`${customField.key}-custom-field-edit`}
+                          aria-label={`${customField.key}-custom-field-edit`}
+                          iconType="pencil"
+                          color="primary"
+                          onClick={() => onEditCustomField(customField.key)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          data-test-subj={`${customField.key}-custom-field-delete`}
+                          aria-label={`${customField.key}-custom-field-delete`}
+                          iconType="minusInCircle"
+                          color="danger"
+                          onClick={() => setSelectedItem(customField)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
         </EuiFlexItem>
         {showModal && selectedItem ? (
           <DeleteConfirmationModal
@@ -128,7 +113,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
         ) : null}
       </EuiFlexGroup>
     </>
-  );
+  ) : null;
 };
 
 CustomFieldsListComponent.displayName = 'CustomFieldsList';

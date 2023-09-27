@@ -47,7 +47,7 @@ describe('CustomFields', () => {
     );
 
     expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
-    expect(screen.getByTestId('droppable')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {

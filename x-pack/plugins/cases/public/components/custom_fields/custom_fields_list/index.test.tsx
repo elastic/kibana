@@ -31,14 +31,17 @@ describe('CustomFieldsList', () => {
   it('renders correctly', () => {
     appMockRender.render(<CustomFieldsList {...props} />);
 
-    expect(screen.getByTestId('droppable')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
   it('shows CustomFieldsList correctly', async () => {
     appMockRender.render(<CustomFieldsList {...props} />);
 
-    expect(screen.getByTestId('droppable')).toBeInTheDocument();
-    expect(screen.getAllByTestId('draggable').length).toEqual(2);
+    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
+
+    for (const field of customFieldsConfigurationMock) {
+      expect(screen.getByTestId(`custom-field-${field.label}-${field.type}`)).toBeInTheDocument();
+    }
   });
 
   it('shows single CustomFieldsList correctly', async () => {
@@ -46,19 +49,23 @@ describe('CustomFieldsList', () => {
       <CustomFieldsList {...{ ...props, customFields: [customFieldsConfigurationMock[0]] }} />
     );
 
-    const droppable = screen.getByTestId('droppable');
+    const list = screen.getByTestId('custom-fields-list');
 
-    expect(droppable).toBeInTheDocument();
-    expect(screen.getAllByTestId('draggable').length).toEqual(1);
+    expect(list).toBeInTheDocument();
     expect(
-      within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      screen.getByTestId(
+        `custom-field-${customFieldsConfigurationMock[0].label}-${customFieldsConfigurationMock[0].type}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
     ).toBeInTheDocument();
   });
 
-  it('does not show droppable field when no custom fields', () => {
+  it('does not show any panel when custom fields', () => {
     appMockRender.render(<CustomFieldsList {...{ ...props, customFields: [] }} />);
 
-    expect(screen.queryByTestId('droppable')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId(`custom-field-`, { exact: false })).toHaveLength(0);
   });
 
   describe('Delete', () => {
@@ -69,10 +76,10 @@ describe('CustomFieldsList', () => {
     it('shows confirmation modal when deleting a field ', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
@@ -81,10 +88,10 @@ describe('CustomFieldsList', () => {
     it('calls onDeleteCustomField when confirm', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
@@ -102,10 +109,10 @@ describe('CustomFieldsList', () => {
     it('does not call onDeleteCustomField when cancel', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
@@ -127,10 +134,10 @@ describe('CustomFieldsList', () => {
     it('calls onEditCustomField correctly', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       await waitFor(() => {
