@@ -8,13 +8,15 @@
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
+  LensEmbeddableOutput,
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
@@ -86,7 +88,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the hits count -- leave undefined to hide the hits count
    */
   hits?: UnifiedHistogramHitsContext;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -188,7 +191,8 @@ export const UnifiedHistogramLayout = ({
   columns,
   request,
   hits,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
   chart: originalChart,
   breakdown,
   container,
@@ -295,7 +299,8 @@ export const UnifiedHistogramLayout = ({
           onChartLoad={onChartLoad}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
-          lensTablesAdapter={lensTablesAdapter}
+          lensAdapters={lensAdapters}
+          lensEmbeddableOutput$={lensEmbeddableOutput$}
           isOnHistogramMode={isOnHistogramMode}
           withDefaultActions={withDefaultActions}
         />
