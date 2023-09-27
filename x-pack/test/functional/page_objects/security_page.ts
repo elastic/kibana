@@ -661,10 +661,6 @@ export class SecurityPageObject extends FtrService {
   }
 
   async selectRole(role: string) {
-    const dropdown = await this.testSubjects.find('rolesDropdown');
-    const input = await dropdown.findByCssSelector('input');
-    await input.type(role);
-    await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
-    await this.testSubjects.click('comboBoxToggleListButton');
+    await this.comboBox.set('rolesDropdown', role);
   }
 }

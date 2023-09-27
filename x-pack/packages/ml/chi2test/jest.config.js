@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { DetailPanel } from './detail_panel.container';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/chi2test'],
+};
