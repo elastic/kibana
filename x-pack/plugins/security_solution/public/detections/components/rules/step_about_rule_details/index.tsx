@@ -29,6 +29,7 @@ import type {
   AboutStepRule,
   AboutStepRuleDetails,
 } from '../../../pages/detection_engine/rules/types';
+import { castRuleAsRuleResponse } from '../../../../detection_engine/rule_details_ui/pages/rule_details/cast_rule_as_rule_response';
 import * as i18n from './translations';
 import { fullHeight } from './styles';
 
@@ -127,7 +128,11 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <RuleAboutSection rule={rule} hideName hideDescription />
+                    <RuleAboutSection
+                      rule={castRuleAsRuleResponse(rule)}
+                      hideName
+                      hideDescription
+                    />
                   </div>
                 )}
               </EuiResizeObserver>

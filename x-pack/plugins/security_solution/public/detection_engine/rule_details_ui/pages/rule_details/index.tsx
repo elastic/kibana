@@ -140,6 +140,7 @@ import { RuleScheduleSection } from '../../../rule_management/components/rule_de
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { castRuleAsRuleResponse } from './cast_rule_as_rule_response';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -634,27 +635,34 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                  <StepAboutRuleToggleDetails
-                    loading={isLoading}
-                    stepData={aboutRuleData}
-                    stepDataDetails={modifiedAboutRuleDetailsData}
-                    rule={rule}
-                  />
+                  {rule !== null && (
+                    <StepAboutRuleToggleDetails
+                      loading={isLoading}
+                      stepData={aboutRuleData}
+                      stepDataDetails={modifiedAboutRuleDetailsData}
+                      rule={rule}
+                    />
+                  )}
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={1}>
                   <EuiFlexGroup direction="column">
                     <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
                       <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {rule != null && !isStartingJobs && (
-                          <RuleDefinitionSection rule={rule} isInteractive />
+                        {rule !== null && !isStartingJobs && (
+                          <RuleDefinitionSection
+                            rule={castRuleAsRuleResponse(rule)}
+                            isInteractive
+                          />
                         )}
                       </StepPanel>
                     </EuiFlexItem>
                     <EuiSpacer />
                     <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                       <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {rule != null && <RuleScheduleSection rule={rule} />}
+                        {rule != null && (
+                          <RuleScheduleSection rule={castRuleAsRuleResponse(rule)} />
+                        )}
                       </StepPanel>
                     </EuiFlexItem>
                     {hasActions && (

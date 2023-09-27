@@ -28,10 +28,14 @@ const From = ({ from, interval }: FromProps) => (
 );
 
 export interface RuleScheduleSectionProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
 }
 
 export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
+  if (!rule.interval || !rule.from) {
+    return null;
+  }
+
   const ruleSectionListItems = [];
 
   ruleSectionListItems.push(
