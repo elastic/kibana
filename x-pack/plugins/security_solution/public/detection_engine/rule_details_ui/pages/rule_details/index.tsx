@@ -653,6 +653,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           <RuleDefinitionSection
                             rule={castRuleAsRuleResponse(rule)}
                             isInteractive
+                            dataTestSubj="definitionRule"
                           />
                         )}
                       </StepPanel>
