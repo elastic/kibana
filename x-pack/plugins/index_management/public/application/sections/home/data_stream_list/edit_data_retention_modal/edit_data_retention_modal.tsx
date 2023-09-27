@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useForm,
   useFormData,
+  useFormIsModified,
   Form,
   fieldFormatters,
   FormSchema,
@@ -42,8 +43,6 @@ interface Props {
   configuredByILM: boolean;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
-
-const DEFAULT_DATA_RETENTION_PERIOD = '7d';
 
 export const timeUnits = [
   {
@@ -175,17 +174,18 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   configuredByILM,
   onClose,
 }) => {
-  const { size, unit } = splitSizeAndUnits(dataRetention || DEFAULT_DATA_RETENTION_PERIOD);
+  const { size, unit } = splitSizeAndUnits(dataRetention);
   const {
     services: { notificationService },
   } = useAppContext();
 
   const { form } = useForm({
-    defaultValue: { dataRetention: size, timeUnit: unit, infiniteRetentionPeriod: !dataRetention },
+    defaultValue: { dataRetention: size, timeUnit: unit || 'd', infiniteRetentionPeriod: !dataRetention },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
   });
   const [formData] = useFormData({ form });
+  const isDirty = useFormIsModified({ form });
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -307,7 +307,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             fill
             type="submit"
             isLoading={false}
-            disabled={form.isValid === false}
+            disabled={(form.isSubmitted && form.isValid === false) || !isDirty}
             data-test-subj="saveButton"
             onClick={onSubmitForm}
           >

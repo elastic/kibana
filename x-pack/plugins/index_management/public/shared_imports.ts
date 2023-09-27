@@ -40,6 +40,7 @@ export {
   VALIDATION_TYPES,
   useForm,
   useFormData,
+  useFormIsModified,
   Form,
   getUseField,
   UseField,
