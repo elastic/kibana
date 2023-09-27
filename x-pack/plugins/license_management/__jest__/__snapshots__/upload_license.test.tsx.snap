@@ -160,7 +160,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <ul>
             <li
@@ -297,7 +300,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <ul>
             <li
@@ -434,7 +440,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <ul>
             <li
@@ -571,7 +580,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <ul>
             <li
