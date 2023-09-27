@@ -5,9 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "detectionEngine:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/serverless.config.ts",
-    "detectionEngine:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/serverless.config.ts --grep @serverless --grep  @brokenInServerless --invert",
-    "detectionEngine:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/ess.config.ts",
-    "detectionEngine:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/ess.config.ts --grep @ess"
+    "detectionResponse:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/serverless.config.ts",
+    "detectionResponse:runner:serverless": "node ../../../scripts/functional_test_runner  --config=test_suites/detections_response/serverless.config.ts --grep @serverless --grep  @brokenInServerless --invert",
+    "detectionResponse:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/ess.config.ts",
+    "detectionResponse:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/ess.config.ts --grep @ess"
   }
 }

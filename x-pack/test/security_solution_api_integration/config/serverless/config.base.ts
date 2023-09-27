@@ -30,6 +30,7 @@ export function createTestConfig(options: Partial<CreateTestConfigOptions>) {
           ...(options.kbnServerArgs || []),
         ],
         env: {
+          ...svlSharedConfig.get('kbnTestServer').env,
           ELASTICSEARCH_USERNAME: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username,
         },
       },
