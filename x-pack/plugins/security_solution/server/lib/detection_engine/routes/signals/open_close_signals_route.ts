@@ -7,8 +7,13 @@
 
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_UPDATED_AT,
+  ALERT_WORKFLOW_USER,
+} from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import {
   setSignalStatusValidateTypeDependents,
   setSignalsStatusSchema,
@@ -97,9 +102,11 @@ export const setSignalsStatusRoute = (
           }
         }
 
+        const user = (await context.securitySolution).getUser();
+
         try {
           if (signalIds) {
-            const body = await updateSignalsStatusByIds(status, signalIds, spaceId, esClient);
+            const body = await updateSignalsStatusByIds(status, signalIds, spaceId, esClient, user);
             return response.ok({ body });
           } else {
             const body = await updateSignalsStatusByQuery(
@@ -107,7 +114,8 @@ export const setSignalsStatusRoute = (
               query,
               { conflicts: conflicts ?? 'abort' },
               spaceId,
-              esClient
+              esClient,
+              user
             );
             return response.ok({ body });
           }
@@ -127,13 +135,14 @@ const updateSignalsStatusByIds = async (
   status: SetSignalsStatusSchemaDecoded['status'],
   signalsId: string[],
   spaceId: string,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  user: AuthenticatedUser | null
 ) =>
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     refresh: true,
     body: {
-      script: getUpdateSignalStatusScript(status),
+      script: getUpdateSignalStatusScript(status, user),
       query: {
         bool: {
           filter: { terms: { _id: signalsId } },
@@ -153,14 +162,15 @@ const updateSignalsStatusByQuery = async (
   query: object | undefined,
   options: { conflicts: 'abort' | 'proceed' },
   spaceId: string,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  user: AuthenticatedUser | null
 ) =>
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
     body: {
-      script: getUpdateSignalStatusScript(status),
+      script: getUpdateSignalStatusScript(status, user),
       query: {
         bool: {
           filter: query,
@@ -170,9 +180,14 @@ const updateSignalsStatusByQuery = async (
     ignore_unavailable: true,
   });
 
-const getUpdateSignalStatusScript = (status: SetSignalsStatusSchemaDecoded['status']) => ({
-  source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
+const getUpdateSignalStatusScript = (
+  status: SetSignalsStatusSchemaDecoded['status'],
+  user: AuthenticatedUser | null
+) => ({
+  source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
+      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
+      ctx._source['${ALERT_WORKFLOW_USER}'] = '${user?.username ?? 'unknown'}';
+      ctx._source['${ALERT_WORKFLOW_UPDATED_AT}'] = '${new Date().toISOString()}';
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
       ctx._source.signal.status = '${status}'

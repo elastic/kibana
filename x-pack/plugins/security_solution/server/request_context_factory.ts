@@ -9,6 +9,8 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -141,6 +143,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             namespace: getSpaceId(),
           })
       ),
+
+      getUser: (): AuthenticatedUser | null => startPlugins.security.authc.getCurrentUser(request),
     };
   }
 }
