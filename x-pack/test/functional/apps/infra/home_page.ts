@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/167071
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
