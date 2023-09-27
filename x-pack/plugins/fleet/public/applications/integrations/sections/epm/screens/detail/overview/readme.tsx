@@ -7,6 +7,7 @@
 
 import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import type { MutableRefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -18,10 +19,12 @@ export function Readme({
   packageName,
   version,
   markdown,
+  refs,
 }: {
   packageName: string;
   version: string;
   markdown: string | undefined;
+  refs: MutableRefObject<Map<string, HTMLDivElement | null>>;
 }) {
   const { toRelativeImage } = useLinks();
   const handleImageUri = React.useCallback(
@@ -40,7 +43,7 @@ export function Readme({
         <EuiText grow={true}>
           <ReactMarkdown
             transformImageUri={handleImageUri}
-            components={markdownRenderers}
+            components={markdownRenderers(refs)}
             remarkPlugins={[remarkGfm]}
           >
             {markdown}

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo, useEffect, useState, useCallback } from 'react';
+import React, { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import type { MouseEventHandler } from 'react';
 
 import styled from 'styled-components';
 import {
@@ -47,8 +48,9 @@ interface Item {
   id: string;
   name: string;
   items?: Item[];
-  href: string;
+  isSelected?: boolean;
   forceOpen: boolean;
+  onClick: MouseEventHandler<HTMLElement | HTMLButtonElement>;
 }
 
 const LeftColumn = styled(EuiFlexItem)`
@@ -134,8 +136,10 @@ const PrereleaseCallout: React.FC<{
 };
 
 // some names are too long so they're trimmed at 12 characters long
-export const getAnchorId = (name: string) =>
-  `${name.replaceAll(' ', '-').toLowerCase().slice(0, 12)}`;
+export const getAnchorId = (name: string | undefined) => {
+  if (!name) return '';
+  return `${name.replaceAll(' ', '-').toLowerCase().slice(0, 12)}`;
+};
 
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
@@ -147,8 +151,14 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
-
+    const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+    const anchorsRefs = useRef(new Map<string, HTMLDivElement | null>());
+
+    const selectItem = (id: string) => {
+      setSelectedItem(id);
+      anchorsRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const toggleOpenOnMobile = () => {
       setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
@@ -173,16 +183,21 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const getName = (heading: string) => heading.replace(/^#+\s*/, '');
 
-    const createItem = useCallback((name: string, index: number, options: any = {}): Item => {
-      // NOTE: Duplicate `name` values will cause `id` collisions
-      const id = getAnchorId(name);
-      return {
-        id,
-        name,
-        href: `#${id}`,
-        ...options,
-      };
-    }, []);
+    const createItem = useCallback(
+      (name: string, index: number, options: any = {}): Item => {
+        // NOTE: Duplicate `name` values will cause `id` collisions
+        const id = getAnchorId(name);
+        return {
+          id,
+          name,
+          isSelected: selectedItemId === id,
+          onClick: () => selectItem(id),
+          ...options,
+        };
+      },
+      [selectedItemId]
+    );
+
     // get the headings and creates a nested structure as requested by EuiSideNav
     const headingsToNavItems = useCallback(
       (headings: string[]): Item[] => {
@@ -259,6 +274,7 @@ export const OverviewPage: React.FC<Props> = memo(
               markdown={markdown}
               packageName={packageInfo.name}
               version={packageInfo.version}
+              refs={anchorsRefs}
             />
           ) : null}
         </EuiFlexItem>
