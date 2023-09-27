@@ -8,6 +8,8 @@
     "ftr:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./config/serverless/config.ts",
     "ftr:runner:serverless": "node ../../../scripts/functional_test_runner --config=config/serverless/config.ts --grep @serverless --grep  @brokenInServerless --invert",
     "ftr:server:ess": "node ../../../scripts/functional_tests_server.js --config ./config/ess/config.ts",
-    "ftr:runner:ess": "node ../../../scripts/functional_test_runner --config=config/ess/config.ts --grep @ess"
+    "ftr:runner:ess": "node ../../../scripts/functional_test_runner --config=config/ess/config.ts --grep @ess",
+    "detectionEngine:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/detections_response/serverless.config.ts",
+    "detectionEngine:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/detections_response/serverless.config.ts --grep @serverless --grep  @brokenInServerless --invert"
   }
 }

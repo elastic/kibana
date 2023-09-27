@@ -432,6 +432,8 @@ enabled:
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/serverless.config.ts
+
 
 
 
