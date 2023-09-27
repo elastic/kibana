@@ -65,6 +65,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
+export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
+
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
   'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
