@@ -20,7 +20,7 @@ interface BetterTestOptions {
   body?: any;
 }
 
-interface BetterTestResponse<T> {
+export interface BetterTestResponse<T> {
   status: number;
   body: T;
 }
@@ -72,7 +72,7 @@ export class BetterTestError extends Error {
     const req = res.req as any;
     super(
       `Unhandled BetterTestError:
-Status: "${res.status}"      
+Status: "${res.status}"
 Path: "${req.method} ${req.path}"
 Body: ${JSON.stringify(res.body)}`
     );
