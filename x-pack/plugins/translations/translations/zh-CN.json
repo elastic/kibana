@@ -19476,7 +19476,6 @@
     "xpack.infra.nodeDetails.tabs.logs": "日志",
     "xpack.infra.nodeDetails.tabs.logs.title": "日志",
     "xpack.infra.nodeDetails.tabs.metadata.seeLess": "显示更少",
-    "xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip": "使用筛选查看事件",
     "xpack.infra.nodeDetails.tabs.metadata.title": "元数据",
     "xpack.infra.nodeDetails.tabs.osquery": "Osquery",
     "xpack.infra.nodeDetails.yes": "是",
