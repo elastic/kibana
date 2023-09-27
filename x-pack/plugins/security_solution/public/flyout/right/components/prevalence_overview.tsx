@@ -92,7 +92,7 @@ export const PrevalenceOverview: FC = () => {
           uncommonData.map((d) => (
             <InsightsSummaryRow
               icon={'warning'}
-              text={`${d.field}, ${d.value} ${PREVALENCE_ROW_UNCOMMON}`}
+              text={`${d.field}, ${d.values} ${PREVALENCE_ROW_UNCOMMON}`}
               data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}${d.field}`}
             />
           ))
