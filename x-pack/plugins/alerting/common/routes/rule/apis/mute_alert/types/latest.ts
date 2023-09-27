@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { useMlKibana } from './kibana_context';
-
-export function useIsServerless(): boolean {
-  return useMlKibana().services.mlServices.isServerless;
-}
+export type { MuteAlertRequestParams } from './v1';
