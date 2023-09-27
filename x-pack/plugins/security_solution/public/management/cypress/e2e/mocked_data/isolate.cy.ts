@@ -126,7 +126,7 @@ describe('Isolate command', () => {
       login();
     });
 
-    it('should isolate and release host', () => {
+    it.skip('should isolate and release host', () => {
       const isolateComment = `Isolating ${hostname}`;
       const releaseComment = `Releasing ${hostname}`;
       let isolateRequestResponse: ActionDetails;

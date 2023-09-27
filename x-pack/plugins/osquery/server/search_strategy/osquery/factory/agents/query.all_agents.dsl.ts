@@ -12,7 +12,7 @@ import { createQueryFilterClauses } from '../../../../../common/utils/build_quer
 
 export const buildAgentsQuery = ({
   filterQuery,
-  pagination: { cursorStart, querySize },
+  pagination: { cursorStart },
   sort,
   aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
@@ -21,7 +21,7 @@ export const buildAgentsQuery = ({
     ...createQueryFilterClauses(filterQuery),
   ];
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: AGENTS_INDEX,
     ignore_unavailable: true,
@@ -40,10 +40,8 @@ export const buildAgentsQuery = ({
           },
         },
       ],
-      size: querySize,
+      size: 0,
       from: cursorStart,
     },
   };
-
-  return dslQuery;
 };
