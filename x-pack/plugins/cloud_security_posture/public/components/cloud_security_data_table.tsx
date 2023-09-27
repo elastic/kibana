@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
@@ -16,26 +16,34 @@ import {
 } from '@kbn/discover-utils';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { EuiDataGridStyle, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDataGridStyle, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { cx } from '@emotion/css';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { useKibana } from '../common/hooks/use_kibana';
 import { CloudPostureTableResult } from '../common/hooks/use_cloud_posture_table';
 import { FindingsGroupBySelector } from '../pages/configurations/layout/findings_group_by_selector';
-import { vulnerabilitiesPathnameHandler } from '../pages/vulnerabilities/utils/vulnerabilities_pathname_handler';
 import { CspEvaluationBadge } from './csp_evaluation_badge';
 import { TimestampTableCell } from './timestamp_table_cell';
-import { i18n } from '@kbn/i18n';
+
+const ariaLabelledBy = i18n.translate('xpack.cloudSecurityPosture.dataTableAriaLabelledBy', {
+  defaultMessage: 'Findings',
+});
 
 export interface CloudSecurityDefaultColumn {
   id: string;
   displayName?: string;
   cellRenderer?(rows: DataTableRecord[], rowIndex: number): React.Component;
 }
+
+const formatNumber = (value: number) => {
+  return value < 1000 ? value : numeral(value).format('0.0a');
+};
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -123,46 +131,8 @@ interface CloudSecurityDataGridProps {
   sort: SortOrder[];
   flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   cloudPostureTable: CloudPostureTableResult;
+  loadMore: () => void;
 }
-
-const cloudSecurityFieldLabels: Record<DataViewField['name'], string> = {
-  'result.evaluation': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
-    {
-      defaultMessage: 'Result',
-    }
-  ),
-  'resource.id': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
-    { defaultMessage: 'Resource ID' }
-  ),
-  'resource.name': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
-    { defaultMessage: 'Resource Name' }
-  ),
-  'resource.sub_type': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
-    { defaultMessage: 'Resource Type' }
-  ),
-  'rule.benchmark.rule_number': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
-    {
-      defaultMessage: 'Rule Number',
-    }
-  ),
-  'rule.name': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
-    { defaultMessage: 'Rule Name' }
-  ),
-  'rule.section': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
-    { defaultMessage: 'CIS Section' }
-  ),
-  '@timestamp': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
-    { defaultMessage: 'Last Checked' }
-  ),
-} as const;
 
 // export const CloudSecurityDataTableComponent = ({
 export const CloudSecurityDataTable = ({
@@ -174,6 +144,7 @@ export const CloudSecurityDataTable = ({
   total,
   flyoutComponent,
   cloudPostureTable,
+  loadMore,
 }: CloudSecurityDataGridProps) => {
   const [columns, setColumns] = useLocalStorage(
     'localStorageKey',
@@ -188,15 +159,6 @@ export const CloudSecurityDataTable = ({
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
-
-  console.log({ dataView });
-  useEffect(() => {
-    dataView.fields.forEach((field, idx) => {
-      if (dataView?.fields[idx]?.spec) {
-        dataView.fields[idx].spec.customLabel = cloudSecurityFieldLabels[field.name] ?? field.name;
-      }
-    });
-  });
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -274,8 +236,6 @@ export const CloudSecurityDataTable = ({
     setSettings(newGrid);
   };
 
-  const ariaLabelledBy = 'Findings';
-
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div style={{ height: 'calc(100vh - 420px)' }}>
@@ -305,9 +265,7 @@ export const CloudSecurityDataTable = ({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             showTimeCol={false}
             settings={settings}
-            onFetchMoreRecords={() => {
-              console.log('onFetchMoreRecords');
-            }}
+            onFetchMoreRecords={loadMore}
             externalCustomRenderers={{
               'result.evaluation': (props) => {
                 return (
@@ -322,14 +280,25 @@ export const CloudSecurityDataTable = ({
             }}
             rowHeightState={0}
             externalAdditionalControls={
-              <EuiFlexItem grow={false} className={styles.groupBySelector}>
-                <FindingsGroupBySelector
-                  type="default"
-                  pathnameHandler={vulnerabilitiesPathnameHandler}
-                />
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    color="text"
+                    style={{ cursor: 'default', textDecoration: 'none' }}
+                  >
+                    {i18n.translate('xpack.csp.findings.totalFindings', {
+                      defaultMessage: '{total} Findings',
+                      values: { total: formatNumber(total) },
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                  <FindingsGroupBySelector type="default" />
+                </EuiFlexItem>
+              </>
             }
-            gridStyle={gridStyle}
+            gridStyleOverride={gridStyle}
           />
         </div>
       </div>

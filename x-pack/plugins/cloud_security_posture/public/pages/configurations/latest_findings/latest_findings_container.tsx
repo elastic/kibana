@@ -58,10 +58,15 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     enabled: !queryError,
   });
 
-  const rows = useMemo(
-    () => findingsGroupByNone.data?.page || [],
-    [findingsGroupByNone.data?.page]
-  );
+  const rows = useMemo(() => {
+    return (
+      findingsGroupByNone.data?.pages
+        ?.map(({ page }) => {
+          return page;
+        })
+        .flat() || []
+    );
+  }, [findingsGroupByNone.data?.pages]);
 
   const error = findingsGroupByNone.error || queryError;
 
@@ -91,7 +96,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   return (
     <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       <FindingsSearchBar
-        dataView={dataView!}
+        dataView={dataView}
         setQuery={(newQuery) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
@@ -101,14 +106,14 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
+          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.pages[0].page.length && (
             <FindingsDistributionBar
               distributionOnClick={handleDistributionClick}
               type={i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
                 defaultMessage: 'Findings',
               })}
-              passed={findingsGroupByNone.data.count.passed}
-              failed={findingsGroupByNone.data.count.failed}
+              passed={findingsGroupByNone.data.pages[0].count.passed}
+              failed={findingsGroupByNone.data.pages[0].count.failed}
             />
           )}
           <EuiSpacer />
@@ -118,9 +123,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             defaultColumns={defaultColumns}
             sort={sort}
             rows={rows}
-            total={findingsGroupByNone.data?.total || 0}
+            total={findingsGroupByNone.data?.pages[0].total || 0}
             flyoutComponent={flyoutComponent}
             cloudPostureTable={cloudPostureTable}
+            loadMore={() => findingsGroupByNone.fetchNextPage()}
           />
         </>
       )}

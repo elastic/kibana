@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
@@ -39,13 +39,14 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
+export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam: any) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   query,
   sort: Object.hasOwn(sort, 'field') ? getSortField(sort) : getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
+  ...(pageParam ? { search_after: pageParam } : {}),
 });
 
 const getMultiFieldsSort = (sort: string[][]) => {
@@ -91,14 +92,14 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  return useQuery(
+  return useInfiniteQuery(
     ['csp_findings', { params: options }],
-    async () => {
+    async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options),
+          params: getFindingsQuery(options, pageParam),
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
@@ -115,6 +116,9 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       enabled: options.enabled,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
+      getNextPageParam: (lastPage) => {
+        return lastPage.page[lastPage.page.length - 1].raw.sort;
+      },
     }
   );
 };

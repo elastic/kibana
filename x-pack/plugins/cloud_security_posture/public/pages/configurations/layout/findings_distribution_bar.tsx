@@ -23,12 +23,9 @@ import { statusColors } from '../../../common/constants';
 import type { Evaluation } from '../../../../common/types';
 
 interface Props {
-  total: number;
   passed: number;
   failed: number;
   distributionOnClick: (evaluation: Evaluation) => void;
-  pageStart: number;
-  pageEnd: number;
   type: string;
 }
 
@@ -38,22 +35,16 @@ export const FindingsDistributionBar = (props: Props) => (
   <div>
     <Counters {...props} />
     <EuiSpacer size="s" />
-    {<DistributionBar {...props} />}
+    <DistributionBar {...props} />
   </div>
 );
 
 const Counters = (props: Props) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
+  <EuiFlexGroup justifyContent="flexEnd">
     <EuiFlexItem>
-      <CurrentPageOfTotal {...props} />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={1}
-      css={css`
-        align-items: flex-end;
-      `}
-    >
-      <PassedFailedCounters {...props} />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <PassedFailedCounters {...props} />
+      </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -55,6 +55,7 @@ import { findingsNavigation } from '../../common/navigation/constants';
 import { VulnerabilitiesByResource } from './vulnerabilities_by_resource/vulnerabilities_by_resource';
 import { ResourceVulnerabilities } from './vulnerabilities_by_resource/resource_vulnerabilities/resource_vulnerabilities';
 import { getVulnerabilitiesGridCellActions } from './utils/get_vulnerabilities_grid_cell_actions';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -453,7 +454,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 };
 
 export const Vulnerabilities = () => {
-  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  // const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const { data, isLoading, error } = useLatestFindingsDataView(
+    LATEST_VULNERABILITIES_INDEX_PATTERN
+  );
+
   const getSetupStatus = useCspSetupStatusApi();
 
   if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
