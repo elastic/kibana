@@ -44,9 +44,6 @@ import {
 describe(
   'Entity analytics management page',
   {
-    env: {
-      ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
-    },
     tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
   () => {
