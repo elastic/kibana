@@ -28,6 +28,7 @@ import {
 } from '../lib';
 import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
 import { tryToRemoveTasks } from '../common';
+import { RuleAttributes } from '../../data/rule/types';
 
 export const bulkDisableRules = async (context: RulesClientContext, options: BulkOptions) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);
@@ -218,7 +219,8 @@ const bulkDisableRulesWithOCC = async (
 
   return {
     errors,
-    rules: disabledRules,
+    // TODO: delete the casting when we do versioning of bulk disable api
+    rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
     accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete],
   };
 };
