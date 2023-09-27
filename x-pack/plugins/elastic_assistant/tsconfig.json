@@ -30,6 +30,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
     "@kbn/std",
+    "@kbn/stack-connectors-plugin",
   ],
   "exclude": [
     "target/**/*",
