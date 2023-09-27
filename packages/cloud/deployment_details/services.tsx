@@ -8,7 +8,7 @@
 
 import React, { FC, useContext } from 'react';
 
-export interface Services {
+export interface DeploymentDetailsContextValue {
   cloudId?: string;
   elasticsearchUrl?: string;
   managementUrl?: string;
@@ -16,12 +16,15 @@ export interface Services {
   navigateToUrl(url: string): Promise<void>;
 }
 
-const DeploymentDetailsContext = React.createContext<Services | null>(null);
+const DeploymentDetailsContext = React.createContext<DeploymentDetailsContextValue | null>(null);
 
 /**
  * Abstract external service Provider.
  */
-export const DeploymentDetailsProvider: FC<Services> = ({ children, ...services }) => {
+export const DeploymentDetailsProvider: FC<DeploymentDetailsContextValue> = ({
+  children,
+  ...services
+}) => {
   return (
     <DeploymentDetailsContext.Provider value={services}>
       {children}
