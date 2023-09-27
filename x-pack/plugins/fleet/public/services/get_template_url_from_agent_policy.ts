@@ -7,12 +7,15 @@
 
 import type { AgentPolicy } from '../types';
 
-/**
- * Get the cloud formation template url from a agent policy
- * It looks for a config with a cloud_formation_template_url object present in
- * the enabled package_policies inputs of the agent policy
- */
-export const getCloudFormationTemplateUrlFromAgentPolicy = (selectedPolicy?: AgentPolicy) => {
+export const SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG = {
+  CLOUD_FORMATION: 'cloud_formation_template_url',
+  ARM_TEMPLATE: 'arm_template_url',
+};
+
+export const getTemplateUrlFromAgentPolicy = (
+  templateUrlFieldName: string,
+  selectedPolicy?: AgentPolicy
+) => {
   const cloudFormationTemplateUrl = selectedPolicy?.package_policies?.reduce(
     (acc, packagePolicy) => {
       const findCloudFormationTemplateUrlConfig = packagePolicy.inputs?.reduce(
@@ -20,8 +23,8 @@ export const getCloudFormationTemplateUrlFromAgentPolicy = (selectedPolicy?: Age
           if (accInput !== '') {
             return accInput;
           }
-          if (input?.enabled && input?.config?.cloud_formation_template_url) {
-            return input.config.cloud_formation_template_url.value;
+          if (input?.enabled && input?.config?.[templateUrlFieldName]) {
+            return input.config[templateUrlFieldName].value;
           }
           return accInput;
         },
