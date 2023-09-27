@@ -388,6 +388,7 @@ src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 examples/expressions_explorer @elastic/kibana-app-services
 src/plugins/expressions @elastic/kibana-visualizations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
+examples/feature_control_examples @elastic/kibana-security
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/plugins/features @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
