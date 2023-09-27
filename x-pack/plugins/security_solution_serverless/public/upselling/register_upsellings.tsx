@@ -44,7 +44,7 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName; path?: string }>;
+type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
