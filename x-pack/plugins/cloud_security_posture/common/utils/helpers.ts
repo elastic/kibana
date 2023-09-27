@@ -27,6 +27,7 @@ import type {
   BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
+  RuleSection,
 } from '../types';
 
 /**
@@ -46,8 +47,12 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+    section
+      ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      : ''
+  }`;
 
 export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
   input.enabled;

@@ -679,7 +679,7 @@ describe('embeddable', () => {
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
-    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters, embeddable.getOutput$());
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
@@ -698,7 +698,7 @@ describe('embeddable', () => {
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);
-    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters, embeddable.getOutput$());
   });
 
   it('should call onFilter event on filter call ', async () => {
