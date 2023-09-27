@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { v4 } from 'uuid';
-import { Subject, distinctUntilKeyChanged } from 'rxjs';
+import { Subject } from 'rxjs';
 import { cloneDeep, identity, pickBy } from 'lodash';
 
 import {
@@ -181,42 +181,37 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
-  const initialViewMode = loadDashboardReturn.dashboardCreated
-    ? ViewMode.EDIT
-    : dashboardBackup.getViewMode();
+  const initialViewMode = (() => {
+    if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
+    if (
+      loadDashboardReturn.dashboardCreated ||
+      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+    ) {
+      return ViewMode.EDIT;
+    }
+
+    return dashboardBackup.getViewMode();
+  })();
+
   const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
 
-    ...(initialViewMode && useSessionStorageIntegration ? { viewMode: initialViewMode } : {}),
+    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
     ...overrideInput,
   });
+
+  // Back up any view mode passed in explicitly.
+  if (overrideInput?.viewMode) {
+    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+  }
 
   initialInput.executionContext = {
     type: 'dashboard',
     description: initialInput.title,
   };
-
-  // --------------------------------------------------------------------------------------
-  // Store view mode in local storage to keep all Dashboards in the same view mode.
-  // --------------------------------------------------------------------------------------
-  dashboardBackup.storeViewMode(initialInput.viewMode);
-
-  // Some Dashboards are always in view mode, but we don't want opening these Dashboards to overwrite the backed up view mode.
-  if (loadDashboardReturn.managed || !showWriteControls) {
-    initialInput.viewMode = ViewMode.VIEW;
-  } else {
-    untilDashboardReady().then((dashboard) => {
-      dashboard.integrationSubscriptions.add(
-        dashboard
-          .getInput$()
-          .pipe(distinctUntilKeyChanged('viewMode'))
-          .subscribe(({ viewMode }) => dashboardBackup.storeViewMode(viewMode))
-      );
-    });
-  }
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.

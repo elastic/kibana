@@ -71,7 +71,7 @@ export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management
 // Default State
 // ------------------------------------------------------------------
 export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
-  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+  viewMode: ViewMode.VIEW,
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',

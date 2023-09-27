@@ -118,12 +118,12 @@ test('pulls view mode from dashboard backup', async () => {
   pluginServices.getServices().dashboardBackup.getViewMode = jest
     .fn()
     .mockReturnValue(ViewMode.EDIT);
-  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
 });
 
-test('new dashboards start in edit mode, overriding the backup value', async () => {
+test('new dashboards start in edit mode', async () => {
   pluginServices.getServices().dashboardBackup.getViewMode = jest
     .fn()
     .mockReturnValue(ViewMode.VIEW);
@@ -139,14 +139,9 @@ test('new dashboards start in edit mode, overriding the backup value', async () 
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
-
-  // opening a new dashboard sets the backup view mode to EDIT.
-  expect(pluginServices.getServices().dashboardBackup.storeViewMode).toHaveBeenLastCalledWith(
-    ViewMode.EDIT
-  );
 });
 
-test('managed dashboards start in view mode, without setting the backup value', async () => {
+test('managed dashboards start in view mode', async () => {
   pluginServices.getServices().dashboardBackup.getViewMode = jest
     .fn()
     .mockReturnValue(ViewMode.EDIT);
@@ -160,11 +155,6 @@ test('managed dashboards start in view mode, without setting the backup value', 
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().componentState.managed).toBe(true);
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.VIEW);
-
-  // managed dashboards should open in view mode without overriding the backed up value.
-  expect(pluginServices.getServices().dashboardBackup.storeViewMode).not.toHaveBeenCalledWith(
-    ViewMode.VIEW
-  );
 });
 
 test('pulls state from backup which overrides state from saved object', async () => {
