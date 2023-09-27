@@ -9,10 +9,6 @@ import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from '../common';
 
-const ADVANCED_SETTINGS = {
-  DISCOVER_SQL: 'discover:enableSql',
-};
-
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
   rootRequest({
     method: 'POST',
