@@ -12,7 +12,7 @@ import { format } from 'util';
 import axios, { AxiosResponse } from 'axios';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { KibanaServer } from '@kbn/ftr-common-functional-services';
+import { KibanaServer } from '.';
 
 export interface Credentials {
   username: string;

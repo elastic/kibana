@@ -9,7 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 
 import { createEsClientForFtrConfig, ProvidedType } from '@kbn/test';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext } from './ftr_context_provider';
 
 export function EsProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');

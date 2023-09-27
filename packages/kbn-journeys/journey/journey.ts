@@ -12,12 +12,8 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import {
-  FtrProviderContext,
-  KibanaServer,
-  RetryService,
-} from '@kbn/ftr-common-functional-services';
-import { Es } from '../services/es';
+import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, RetryService } from '../services';
 
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';

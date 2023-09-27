@@ -15,13 +15,13 @@ import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request 
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer, Es, RetryService } from '@kbn/ftr-common-functional-services';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
 import { AxiosError } from 'axios';
+import { Es, EsArchiver, KibanaServer, RetryService } from '../services';
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
