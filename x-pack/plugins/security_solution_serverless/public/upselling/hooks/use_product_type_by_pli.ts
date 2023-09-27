@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppFeatureKeyType } from '@kbn/security-solution-features/keys';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import { PLI_APP_FEATURES } from '../../../common/pli/pli_config';
 
 export const getProductTypeByPLI = (requiredPLI: AppFeatureKeyType): string | null => {
