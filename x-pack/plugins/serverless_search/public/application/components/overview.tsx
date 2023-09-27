@@ -153,7 +153,7 @@ export const ElasticsearchOverview = () => {
                 <EuiTitle size="xxxs">
                   <h6>
                     {i18n.translate('xpack.serverlessSearch.cloudIdDetails.url.title', {
-                      defaultMessage: 'Cloud URL',
+                      defaultMessage: 'Elasticsearch Endpoint',
                     })}
                   </h6>
                 </EuiTitle>
