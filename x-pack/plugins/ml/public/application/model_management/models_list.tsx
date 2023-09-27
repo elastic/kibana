@@ -502,7 +502,7 @@ export const ModelsList: FC<Props> = ({
         if (!description) return null;
         const isTechPreview = description.includes('(Tech Preview)');
         return (
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
               <EuiFlexItem grow={false}>{description.replace('(Tech Preview)', '')}</EuiFlexItem>
               {isTechPreview ? (
