@@ -433,9 +433,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isFieldErrorMessageExists).to.be(false);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/160913
-      describe.skip('interval errors', () => {
+      describe('interval errors', () => {
         before(async () => {
+          await PageObjects.visEditor.selectField('@timestamp');
           // to trigger displaying of error messages
           await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
           // this will avoid issues with the play tooltip covering the interval field
@@ -466,14 +466,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show error when calendar interval invalid', async () => {
           await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
-          const intervalErrorMessage = await find.byCssSelector(
+          const intervalErrorMessage1 = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          let errorMessage = await intervalErrorMessage.getVisibleText();
+          let errorMessage = await intervalErrorMessage1.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
 
+          const intervalErrorMessage2 = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
           await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
-          errorMessage = await intervalErrorMessage.getVisibleText();
+          errorMessage = await intervalErrorMessage2.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
         });
       });
