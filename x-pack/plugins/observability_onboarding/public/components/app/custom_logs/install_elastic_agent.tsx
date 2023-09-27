@@ -41,6 +41,8 @@ import { BackButton } from './back_button';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
+const defaultDatasetName = '';
+
 export function InstallElasticAgent() {
   const {
     services: { share },
@@ -63,7 +65,8 @@ export function InstallElasticAgent() {
     useState<ElasticAgentPlatform>('linux-tar');
 
   const enforcedDatasetName =
-    (integration === dataset ? dataset : `${integration}.${dataset}`) || '';
+    (integration === dataset ? dataset : `${integration}.${dataset}`) ??
+    defaultDatasetName;
 
   async function onContinue() {
     await singleDatasetLocator!.navigate({
@@ -109,11 +112,15 @@ export function InstallElasticAgent() {
         customConfigurations,
         logFilePaths,
       } = getState();
-      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+      if (
+        !hasAlreadySavedFlow(getState()) &&
+        monitoringRole?.hasPrivileges &&
+        datasetName
+      ) {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
-              name: datasetName || '',
+              name: datasetName,
               type: 'logFiles',
               state: {
                 datasetName,
