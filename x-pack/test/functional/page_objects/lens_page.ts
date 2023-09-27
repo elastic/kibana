@@ -1491,7 +1491,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.selectOptionFromComboBox('text-based-dimension-field', opts.field);
 
       if (!opts.keepOpen) {
-        await testSubjects.click('collapseFlyoutButton');
+        await this.closeDimensionEditor();
+        await testSubjects.click('applyFlyoutButton');
       }
     },
 
