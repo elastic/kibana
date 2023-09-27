@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { debounce, isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -40,10 +40,9 @@ const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
 
 interface DiscoverTabContentProps {
   timelineId: string;
-  esqlOnly?: boolean;
 }
 
-export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, timelineId }) => {
+export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
   const history = useHistory();
   const {
     services: {
@@ -57,9 +56,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   const dispatch = useDispatch();
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const currentQuery = discoverDataService.query.queryString.getQuery() as AggregateQuery & {
-    esql: string;
-  };
+  const currentQuery = discoverDataService.query.queryString.getQuery();
 
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
@@ -116,14 +113,14 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
   );
 
   useEffect(() => {
-    if (!isTimelineLoading && esqlOnly && !currentQuery?.esql && dataView) {
+    if (!isTimelineLoading && dataView && !('esql' in currentQuery)) {
       // By setting the query string to esql and locking the esql selection via
       // use_data_view_customization.tsx we lock the tab to the ESQL experience
       discoverDataService.query.queryString.setQuery({
         esql: `from ${dataView?.getIndexPattern()} | limit 10`,
       });
     }
-  }, [currentQuery, dataView, discoverDataService.query.queryString, esqlOnly, isTimelineLoading]);
+  }, [currentQuery, dataView, discoverDataService.query.queryString, isTimelineLoading]);
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],

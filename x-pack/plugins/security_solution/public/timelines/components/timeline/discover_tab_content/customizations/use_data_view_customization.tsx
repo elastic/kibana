@@ -13,7 +13,7 @@ export const useDataViewCustomization = () => {
   const setDataViewCustomization: CustomizationCallback = ({ customizations }) => {
     customizations.set({
       id: 'data_view',
-      disableDataViewPicker: !isDiscoverInTimelineEnabled,
+      disableDataViewPicker: isDiscoverInTimelineEnabled,
     });
   };
 

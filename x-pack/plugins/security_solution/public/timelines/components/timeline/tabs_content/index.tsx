@@ -229,12 +229,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             )}
           </HideShowContainer>
         )}
-        <HideShowContainer
-          $isVisible={TimelineTabs.discover === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-        >
-          <DiscoverTab timelineId={timelineId} esqlOnly={!isDiscoverInTimelineEnabled} />
-        </HideShowContainer>
+        {isDiscoverInTimelineEnabled && (
+          <HideShowContainer
+            $isVisible={TimelineTabs.discover === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
+          >
+            <DiscoverTab timelineId={timelineId} />
+          </HideShowContainer>
+        )}
       </>
     );
   }
@@ -386,19 +388,17 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
-            onClick={setDiscoverAsActiveTab}
-            isSelected={activeTab === TimelineTabs.discover}
-            disabled={false}
-            key={TimelineTabs.discover}
-          >
-            <span>
-              {isDiscoverInTimelineEnabled
-                ? i18n.DISCOVER_IN_TIMELINE_TAB
-                : i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}
-            </span>
-          </StyledEuiTab>
+          {isDiscoverInTimelineEnabled && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
+              onClick={setDiscoverAsActiveTab}
+              isSelected={activeTab === TimelineTabs.discover}
+              disabled={false}
+              key={TimelineTabs.discover}
+            >
+              <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+            </StyledEuiTab>
+          )}
           {timelineType === TimelineType.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
