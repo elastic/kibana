@@ -13,6 +13,7 @@
       "charts",
       "cloud",
       "data",
+      "dataViewEditor",
       "dataViews",
       "dataVisualizer",
       "discover",
@@ -33,7 +34,6 @@
     ],
     "optionalPlugins": [
       "alerting",
-      "dataViewEditor",
       "dashboard",
       "home",
       "licenseManagement",

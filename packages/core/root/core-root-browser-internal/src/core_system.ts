@@ -239,7 +239,7 @@ export class CoreSystem {
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
-      const notifications = this.notifications.setup({ uiSettings });
+      const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
 
       const application = this.application.setup({ http, analytics });
@@ -305,6 +305,7 @@ export class CoreSystem {
         targetDomElement: overlayTargetDomElement,
       });
       const notifications = await this.notifications.start({
+        analytics,
         i18n,
         overlays,
         theme,

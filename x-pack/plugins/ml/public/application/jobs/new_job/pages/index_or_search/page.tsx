@@ -18,8 +18,9 @@ export interface PageProps {
   nextStepPath: string;
 }
 
+const RESULTS_PER_PAGE = 20;
+
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
-  const RESULTS_PER_PAGE = 20;
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 

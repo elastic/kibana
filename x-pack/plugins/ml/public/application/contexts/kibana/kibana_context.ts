@@ -34,7 +34,7 @@ import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
-  dataViewEditor?: DataViewEditorStart;
+  dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
