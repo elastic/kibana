@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFocusTrap,
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
@@ -60,45 +61,47 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} {...rest}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={titleId}>{title}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>{children}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="formFlyoutCancelButton"
-                flush="right"
-                isDisabled={isLoading}
-                onClick={onCancel}
-              >
-                <FormattedMessage
-                  id="xpack.security.formFlyout.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {!isSubmitButtonHidden && (
+      <EuiFocusTrap onClickOutside={onCancel}>
+        <EuiFlyout onClose={onCancel} aria-labelledby={titleId} {...rest}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id={titleId}>{title}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>{children}</EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="formFlyoutSubmitButton"
-                  isLoading={isLoading}
-                  isDisabled={isDisabled}
-                  color={submitButtonColor}
-                  fill
-                  onClick={onSubmit}
+                <EuiButtonEmpty
+                  data-test-subj="formFlyoutCancelButton"
+                  flush="right"
+                  isDisabled={isLoading}
+                  onClick={onCancel}
                 >
-                  {submitButtonText}
-                </EuiButton>
+                  <FormattedMessage
+                    id="xpack.security.formFlyout.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+              {!isSubmitButtonHidden && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="formFlyoutSubmitButton"
+                    isLoading={isLoading}
+                    isDisabled={isDisabled}
+                    color={submitButtonColor}
+                    fill
+                    onClick={onSubmit}
+                  >
+                    {submitButtonText}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </EuiFocusTrap>
     </EuiPortal>
   );
 };
