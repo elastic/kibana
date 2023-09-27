@@ -52,6 +52,10 @@ interface Item {
   forceOpen: boolean;
   onClick: MouseEventHandler<HTMLElement | HTMLButtonElement>;
 }
+interface HeadingWithPosition {
+  line: string;
+  position: number;
+}
 
 const LeftColumn = styled(EuiFlexItem)`
   position: sticky;
@@ -136,9 +140,10 @@ const PrereleaseCallout: React.FC<{
 };
 
 // some names are too long so they're trimmed at 12 characters long
-export const getAnchorId = (name: string | undefined) => {
+export const getAnchorId = (name: string | undefined, index?: number) => {
   if (!name) return '';
-  return `${name.replaceAll(' ', '-').toLowerCase().slice(0, 12)}`;
+  const baseId = `${name.replaceAll(' ', '-').toLowerCase().slice(0, 12)}`;
+  return index ? `${baseId}-${index}` : baseId;
 };
 
 export const OverviewPage: React.FC<Props> = memo(
@@ -175,18 +180,27 @@ export const OverviewPage: React.FC<Props> = memo(
       });
     }, [readmePath]);
 
-    const extractHeadings = (markDown: string | undefined) => {
+    const extractHeadingsWithIndices = (markDown: string | undefined): HeadingWithPosition[] => {
       if (!markDown) return [];
       const regex = /^\s*#+\s+(.+)/;
-      return markDown.split('\n').filter((line) => line.match(regex));
+      return markDown
+        .split('\n')
+        .map((line, position) => {
+          return {
+            line,
+            position,
+          };
+        })
+        .filter((obj) => obj.line.match(regex));
     };
 
     const getName = (heading: string) => heading.replace(/^#+\s*/, '');
 
     const createItem = useCallback(
-      (name: string, index: number, options: any = {}): Item => {
+      (heading: HeadingWithPosition, options: any = {}): Item => {
         // NOTE: Duplicate `name` values will cause `id` collisions
-        const id = getAnchorId(name);
+        const name = getName(heading.line);
+        const id = getAnchorId(name, heading.position + 1);
         return {
           id,
           name,
@@ -200,17 +214,17 @@ export const OverviewPage: React.FC<Props> = memo(
 
     // get the headings and creates a nested structure as requested by EuiSideNav
     const headingsToNavItems = useCallback(
-      (headings: string[]): Item[] => {
+      (headings: HeadingWithPosition[]): Item[] => {
         const options = { forceOpen: true };
-        return headings.reduce((acc: Item[], heading: string, index: number) => {
-          if (heading.startsWith('## ')) {
-            const item = createItem(getName(heading), index, options);
+        return headings.reduce((acc: Item[], heading: HeadingWithPosition, index: number) => {
+          if (heading.line.startsWith('## ')) {
+            const item = createItem(heading, options);
             acc.push(item);
-          } else if (heading.startsWith('### ')) {
-            const subGroup = createItem(getName(heading), index, options);
+          } else if (heading.line.startsWith('### ')) {
+            const subGroup = createItem(heading, options);
             let i = index + 1;
-            while (i < headings.length && headings[i].startsWith('#### ')) {
-              const subGroupItem = createItem(getName(headings[i]), i, options);
+            while (i < headings.length && headings[i].line.startsWith('#### ')) {
+              const subGroupItem = createItem(headings[i], options);
               if (!subGroup?.items) subGroup.items = [];
               subGroup.items?.push(subGroupItem);
               i++;
@@ -222,7 +236,7 @@ export const OverviewPage: React.FC<Props> = memo(
               acc[prevIndex]?.items?.push(subGroup);
             } else {
               // this handles a case where the headings only have ### and no ##
-              const fakeItem = createItem(getName(''), i, options);
+              const fakeItem = createItem({ line: '', position: heading.position }, options);
               acc.push(fakeItem);
               if (!acc[0]?.items) acc[0].items = [];
               acc[0]?.items?.push(subGroup);
@@ -235,14 +249,17 @@ export const OverviewPage: React.FC<Props> = memo(
     );
 
     const sideNavItems = useMemo(() => {
-      const headings = extractHeadings(markdown);
-      const navItems = headingsToNavItems(headings);
-      const h1 = headings.find((h) => h.startsWith('# '));
-      const title = h1 ? getName(h1) : '';
+      const headingsWithIndices = extractHeadingsWithIndices(markdown);
+      const navItems = headingsToNavItems(headingsWithIndices);
+
+      const h1 = headingsWithIndices.find((h) => h.line.startsWith('# '));
+      const title = h1 ? getName(h1.line) : '';
+      const id = h1?.line && h1?.position ? getAnchorId(h1.line, h1.position + 1) : '';
       return [
         {
           name: `${title}`,
-          id: getAnchorId(title),
+          id,
+          onClick: () => selectItem(id),
           items: navItems,
         },
       ];

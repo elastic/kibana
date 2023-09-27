@@ -63,21 +63,21 @@ export const markdownRenderers = (
     th: ({ children }) => <EuiTableHeaderCell>{children}</EuiTableHeaderCell>,
     td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
     // the headings used in markdown don't match our page so mapping them to the appropriate one
-    h1: ({ children }) => {
-      const id = getAnchorId(children[0]?.toString());
-      return <StyledH3 ref={(el) => refs.current.set(id, el)}>{children}</StyledH3>;
+    h1: ({ children, node }) => {
+      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      return <StyledH3 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH3>;
     },
-    h2: ({ children }) => {
-      const id = getAnchorId(children[0]?.toString());
-      return <StyledH4 ref={(el) => refs.current.set(id, el)}>{children}</StyledH4>;
+    h2: ({ children, node }) => {
+      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      return <StyledH4 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH4>;
     },
-    h3: ({ children }) => {
-      const id = getAnchorId(children[0]?.toString());
-      return <StyledH5 ref={(el) => refs.current.set(id, el)}>{children}</StyledH5>;
+    h3: ({ children, node }) => {
+      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      return <StyledH5 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH5>;
     },
-    h4: ({ children }) => {
-      const id = getAnchorId(children[0]?.toString());
-      return <StyledH6 ref={(el) => refs.current.set(id, el)}>{children}</StyledH6>;
+    h4: ({ children, node }) => {
+      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      return <StyledH6 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH6>;
     },
     h5: ({ children }) => <h6>{children}</h6>,
     h6: ({ children }) => <h6>{children}</h6>,
