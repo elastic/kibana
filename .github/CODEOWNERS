@@ -226,6 +226,8 @@ test/plugin_functional/plugins/core_plugin_b @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_chromeless @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_deep_links @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_deprecations @elastic/kibana-core
+test/plugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
+test/plugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
 test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
