@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '@ftrProviderContext';
+import { createTestConfig } from './config.base';
 
-export type { FtrProviderContext };
+// eslint-disable-next-line import/no-default-export
+export default createTestConfig({
+  license: 'trial',
+  ssl: true,
+});
