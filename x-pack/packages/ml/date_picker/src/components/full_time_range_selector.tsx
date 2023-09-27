@@ -72,10 +72,6 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   apiPath?: SetFullTimeRangeApiPath;
-  /**
-   * Optional flag to disable the frozen data tier choice.
-   */
-  hideFrozenDataTierChoice?: boolean;
 }
 
 /**
@@ -96,13 +92,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     disabled,
     callback,
     apiPath,
-    hideFrozenDataTierChoice = false,
   } = props;
 
   const {
     http,
     notifications: { toasts },
-    isServerless,
+    showFrozenDataTierChoice,
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
@@ -114,9 +109,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        isServerless || hideFrozenDataTierChoice
-          ? false
-          : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        showFrozenDataTierChoice ? frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE : false,
         apiPath
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
@@ -138,8 +131,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     toasts,
     http,
     query,
-    isServerless,
-    hideFrozenDataTierChoice,
+    showFrozenDataTierChoice,
     frozenDataPreference,
     apiPath,
     callback,
@@ -230,7 +222,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {isServerless || hideFrozenDataTierChoice ? null : (
+      {showFrozenDataTierChoice ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
@@ -256,7 +248,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             {popoverContent}
           </EuiPopover>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   );
 };
