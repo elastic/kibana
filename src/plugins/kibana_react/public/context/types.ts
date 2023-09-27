@@ -7,16 +7,14 @@
  */
 
 import * as React from 'react';
-import { CoreStart, MountPoint } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaReactOverlays } from '../overlays';
 import { KibanaReactNotifications } from '../notifications';
 
 export type KibanaServices = Partial<CoreStart>;
 
 export interface KibanaReactContextValue<Services extends KibanaServices> {
-  readonly services: Services & {
-    setHeaderActionMenu: (menuMount: MountPoint<HTMLElement> | undefined) => void;
-  };
+  readonly services: Services;
   readonly overlays: KibanaReactOverlays;
   readonly notifications: KibanaReactNotifications;
 }

@@ -11,11 +11,10 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
-import type { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
@@ -28,6 +27,7 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { AssistantHeaderLink } from '../../../assistant/header_link';
+import { SecurityPageName } from '../../../../common/constants';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -37,63 +37,68 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  * This component uses the reverse portal to add the Add Data, ML job settings, and AI Assistant buttons on the
  * right hand side of the Kibana global header
  */
-export const GlobalHeader = React.memo(
-  ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const portalNode = useMemo(() => createHtmlPortalNode(), []);
-    const { theme } = useKibana().services;
-    const { pathname } = useLocation();
+export const GlobalHeader = React.memo(() => {
+  const portalNode = useMemo(() => createHtmlPortalNode(), []);
+  const { theme, setHeaderActionMenu } = useKibana().services;
+  const { pathname } = useLocation();
 
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const showTimeline = useShallowEqualSelector(
-      (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
-    );
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const showTimeline = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
+  );
 
-    const sourcererScope = getScopeFromPath(pathname);
-    const showSourcerer = showSourcererByPath(pathname);
+  const sourcererScope = getScopeFromPath(pathname);
+  const showSourcerer = showSourcererByPath(pathname);
+  const shouldRestoreActionMenu =
+    matchPath(pathname, {
+      path: `/${SecurityPageName.dashboards}/:id`,
+      exact: true,
+      strict: false,
+    }) != null;
 
-    const { href, onClick } = useAddIntegrationsUrl();
+  const { href, onClick } = useAddIntegrationsUrl();
 
-    useEffect(() => {
-      setHeaderActionMenu((element) => {
-        const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$: theme.theme$ });
-        return mount(element);
-      });
+  useEffect(() => {
+    setHeaderActionMenu((element) => {
+      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$: theme.theme$ });
+      return mount(element);
+    });
 
-      return () => {
-        portalNode.unmount();
-        setHeaderActionMenu(undefined);
-      };
-    }, [portalNode, setHeaderActionMenu, theme.theme$]);
+    return () => {
+      portalNode.unmount();
+      setHeaderActionMenu(undefined);
+    };
+    /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
+  }, [portalNode, setHeaderActionMenu, theme.theme$, shouldRestoreActionMenu]);
 
-    return (
-      <InPortal node={portalNode}>
-        <EuiHeaderSection side="right">
-          {isDetectionsPath(pathname) && (
-            <EuiHeaderSectionItem>
-              <MlPopover />
-            </EuiHeaderSectionItem>
-          )}
-
+  return (
+    <InPortal node={portalNode}>
+      <EuiHeaderSection side="right">
+        {isDetectionsPath(pathname) && (
           <EuiHeaderSectionItem>
-            <EuiHeaderLinks>
-              <EuiHeaderLink
-                color="primary"
-                data-test-subj="add-data"
-                href={href}
-                iconType="indexOpen"
-                onClick={onClick}
-              >
-                {BUTTON_ADD_DATA}
-              </EuiHeaderLink>
-              {showSourcerer && !showTimeline && (
-                <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-              )}
-              <AssistantHeaderLink />
-            </EuiHeaderLinks>
+            <MlPopover />
           </EuiHeaderSectionItem>
-        </EuiHeaderSection>
-      </InPortal>
-    );
-  }
-);
+        )}
+
+        <EuiHeaderSectionItem>
+          <EuiHeaderLinks>
+            <EuiHeaderLink
+              color="primary"
+              data-test-subj="add-data"
+              href={href}
+              iconType="indexOpen"
+              onClick={onClick}
+            >
+              {BUTTON_ADD_DATA}
+            </EuiHeaderLink>
+            {showSourcerer && !showTimeline && (
+              <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
+            )}
+            <AssistantHeaderLink />
+          </EuiHeaderLinks>
+        </EuiHeaderSectionItem>
+      </EuiHeaderSection>
+    </InPortal>
+  );
+});
 GlobalHeader.displayName = 'GlobalHeader';

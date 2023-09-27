@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -153,6 +153,7 @@ export type StartServices = CoreStart &
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onAppLeave: (handler: AppLeaveHandler) => void;
 
     /**

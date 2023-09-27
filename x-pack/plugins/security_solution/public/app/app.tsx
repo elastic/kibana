@@ -37,7 +37,6 @@ interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -45,7 +44,6 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
-  setHeaderActionMenu,
   onAppLeave,
   store,
   theme$,
@@ -56,6 +54,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
     application: { capabilities },
     uiActions,
     upselling,
+    setHeaderActionMenu,
   } = services;
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -77,11 +76,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
                               <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
+                                <PageRouter history={history} onAppLeave={onAppLeave}>
                                   {children}
                                 </PageRouter>
                               </UpsellingProvider>
@@ -131,17 +126,10 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       services={{
         appName: APP_NAME,
         ...services,
-        setHeaderActionMenu,
       }}
     >
       <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
+        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>
