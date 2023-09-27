@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { useServices } from '../services';
 import { useSettings } from './use_settings';
 
 /**
- * React hook which retrieves settings from a particular {@link IUiSettingsClient},
- * and returns an observed collection of {@link FieldDefinition} objects derived from
- * those settings.
+ * React hook which retrieves settings and returns an observed collection of
+ * {@link FieldDefinition} objects derived from those settings.
  */
-export const useFields = (client: IUiSettingsClient): Array<FieldDefinition<SettingType>> => {
-  const settings = useSettings(client);
-  return getFieldDefinitions(settings, client);
+export const useFields = (): Array<FieldDefinition<SettingType>> => {
+  const { isCustomSetting: isCustom, isOverriddenSetting: isOverridden } = useServices();
+  const settings = useSettings();
+  return getFieldDefinitions(settings, { isCustom, isOverridden });
 };

@@ -9,35 +9,25 @@
 import { useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { SettingType, UiSettingMetadata } from '@kbn/management-settings-types';
+import { useServices } from '../services';
 
 /**
  * React hook which retrieves settings from a particular {@link IUiSettingsClient},
  * normalizes them to a predictable format, {@link UiSettingMetadata}, and returns
  * them as an observed collection.
  */
-export const useSettings = (client: IUiSettingsClient) => {
-  const getAllowlistedSettings = (settingsClient: IUiSettingsClient) => {
-    return Object.fromEntries(
-      Object.entries(settingsClient.getAll())
-        .filter(([settingId, settingDef]) => !settingDef.readonly)
-        .filter(([settingId, settingDef]) => !client.isCustom(settingId))
-    );
-  };
+export const useSettings = () => {
+  const { getAllowlistedSettings, subscribeToUpdates } = useServices();
 
-  const [settings, setSettings] = useState<Record<string, UiSettingMetadata<SettingType>>>(
-    normalizeSettings(getAllowlistedSettings(client))
-  );
+  const [settings, setSettings] = useState(getAllowlistedSettings());
 
   useEffectOnce(() => {
-    const clientSubscription = client.getUpdate$().subscribe(() => {
-      setSettings(normalizeSettings(getAllowlistedSettings(client)));
+    const subscription = subscribeToUpdates(() => {
+      setSettings(getAllowlistedSettings());
     });
 
     return () => {
-      clientSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
   });
 

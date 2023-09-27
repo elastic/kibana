@@ -157,7 +157,7 @@ export class ManagementPlugin
     };
   }
 
-  public start(core: CoreStart, _plugins: ManagementStartDependencies): ManagementStart {
+  public start(core: CoreStart, plugins: ManagementStartDependencies): ManagementStart {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -174,7 +174,7 @@ export class ManagementPlugin
 
     // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
     // Otherwise, it will be double registered from the Advanced settings plugin
-    if (_plugins.serverless) {
+    if (plugins.serverless) {
       const title = kbnI18n.translate('management.settings.settingsLabel', {
         defaultMessage: 'Advanced Settings',
       });
@@ -185,25 +185,11 @@ export class ManagementPlugin
         order: 3,
         async mount({ element, setBreadcrumbs }) {
           setBreadcrumbs([{ text: title }]);
-          const {
-            i18n,
-            docLinks,
-            notifications: { toasts },
-            settings,
-            theme,
-          } = core;
 
           ReactDOM.render(
             <KibanaRenderContextProvider {...core}>
-              <SettingsApplicationKibanaProvider
-                settings={{
-                  client: settings.client,
-                }}
-                theme={theme}
-                i18nStart={i18n}
-                {...{ i18n, toasts, docLinks }}
-              >
-                <SettingsApplication settingsStart={settings} />
+              <SettingsApplicationKibanaProvider {...core}>
+                <SettingsApplication />
               </SettingsApplicationKibanaProvider>
             </KibanaRenderContextProvider>,
             element

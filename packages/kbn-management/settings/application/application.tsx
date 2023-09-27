@@ -32,8 +32,8 @@ export interface SettingsApplicationProps {
  * Component for displaying a {@link Form} component.
  * @param props The {@link SettingsApplicationProps} for the {@link SettingsApplication} component.
  */
-export const SettingsApplication = ({ settingsStart }: SettingsApplicationProps) => {
-  const fields = useFields(settingsStart.client);
+export const SettingsApplication = () => {
+  const fields = useFields();
 
   return (
     <div>
