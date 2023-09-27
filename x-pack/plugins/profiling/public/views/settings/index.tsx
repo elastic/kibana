@@ -13,7 +13,7 @@ import {
   profilingDatacenterPUE,
   profilingPerCoreWatt,
 } from '@kbn/observability-plugin/common';
-import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -23,6 +23,7 @@ import { BottomBarActions } from './bottom_bar_actions';
 const settingKeys = [profilingCo2PerKWH, profilingDatacenterPUE, profilingPerCoreWatt];
 
 export function Settings() {
+  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
   const {
     start: {
       core: { docLinks, notifications },
@@ -43,7 +44,8 @@ export function Settings() {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
         return settingsEditableConfig[key].requiresPageReload;
       });
-      await saveAll({ trackMetricName: 'general_settings_save' });
+      await saveAll();
+      trackProfilingEvent({ metric: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }

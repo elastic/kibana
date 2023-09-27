@@ -23,7 +23,10 @@ import {
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import {
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { BottomBarActions } from '../bottom_bar_actions';
 
@@ -42,6 +45,7 @@ const apmSettingsKeys = [
 ];
 
 export function GeneralSettings() {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
   const {
     handleFieldChange,
@@ -57,7 +61,8 @@ export function GeneralSettings() {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
         return settingsEditableConfig[key].requiresPageReload;
       });
-      await saveAll({ trackMetricName: 'general_settings_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }
