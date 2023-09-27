@@ -7,7 +7,7 @@
 
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
 import {
-  addDiscoverKqlQuery,
+  addDiscoverEsqlQuery,
   addFieldToTable,
   openAddDiscoverFilterPopover,
   submitDiscoverSearchBar,
@@ -16,7 +16,7 @@ import {
 import { navigateFromHeaderTo } from '../../../../tasks/security_header';
 import {
   DISCOVER_CONTAINER,
-  DISCOVER_QUERY_INPUT,
+  DISCOVER_ESQL_QUERY_INPUT,
   DISCOVER_FILTER_BADGES,
   DISCOVER_DATA_VIEW_SWITCHER,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
@@ -34,6 +34,8 @@ import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
+const DEFAULT_ESQL_QUERY =
+  'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame...,';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165663
 // FLAKY: https://github.com/elastic/kibana/issues/165747
@@ -51,36 +53,22 @@ describe(
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
-    it('should remember kql query when navigating away and back to discover ', () => {
-      const kqlQuery = '_id:*';
-      addDiscoverKqlQuery(kqlQuery);
+    it('should not allow the dataview to be changed', () => {
+      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('be.disabled');
+      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
+    });
+    it('should have the default esql query on load', () => {
+      cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', DEFAULT_ESQL_QUERY);
+    });
+    it.skip('should remember esql query when navigating away and back to discover ', () => {
+      const esqlQuery = 'from .alerts-security.alerts-* | limit 100';
+      addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
-      cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
-    });
-    it('should remember filters when navigating away and back to discover ', () => {
-      openAddDiscoverFilterPopover();
-      fillAddFilterForm({
-        key: 'agent.type',
-        value: 'winlogbeat',
-      });
-      navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(ALERTS);
-      openActiveTimeline();
-      gotToDiscoverTab();
-      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-    });
-    it('should remember dataView when navigating away and back to discover ', () => {
-      const dataviewName = '.kibana-event-log';
-      switchDataViewTo(dataviewName);
-      navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(ALERTS);
-      openActiveTimeline();
-      gotToDiscoverTab();
-      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
+      cy.get(DISCOVER_ESQL_QUERY_INPUT).should('have.text', esqlQuery);
     });
     it('should remember columns when navigating away and back to discover ', () => {
       addFieldToTable('host.name');

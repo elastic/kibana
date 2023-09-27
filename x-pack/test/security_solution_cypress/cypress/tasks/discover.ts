@@ -10,7 +10,7 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_GRID_UPDATING,
   DISCOVER_DATA_VIEW_SWITCHER,
-  DISCOVER_QUERY_INPUT,
+  DISCOVER_ESQL_QUERY_INPUT,
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   DISCOVER_FIELD_SEARCH,
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
@@ -43,8 +43,9 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const addDiscoverKqlQuery = (kqlQuery: string) => {
-  cy.get(DISCOVER_QUERY_INPUT).type(`${kqlQuery}{enter}`);
+export const addDiscoverEsqlQuery = (kqlQuery: string) => {
+  cy.get(DISCOVER_ESQL_QUERY_INPUT).type('{selectall}{backspace}');
+  cy.get(DISCOVER_ESQL_QUERY_INPUT).type(`${kqlQuery}{enter}`);
 };
 
 export const submitDiscoverSearchBar = () => {
