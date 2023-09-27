@@ -171,6 +171,15 @@ export const Controls: FC<Props> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [share.url.locators, nodeLabel]);
 
+    const onAnalyzeDataDrift = useCallback(async () => {
+      closePopover();
+      const path = await mlLocator.getUrl({
+        page: ML_PAGES.DATA_DRIFT_CUSTOM,
+        pageState: { comparison: nodeLabel },
+      });
+      await navigateToPath(path);
+    }, [nodeLabel, navigateToPath, mlLocator]);
+
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -259,6 +268,21 @@ export const Controls: FC<Props> = React.memo(
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
                 defaultMessage="Clone job"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
+      ...(nodeType === JOB_MAP_NODE_TYPES.INDEX
+        ? [
+            <EuiContextMenuItem
+              disabled={!canCreateDataFrameAnalytics}
+              key={`${nodeId}-drift-data`}
+              icon="visTagCloud"
+              onClick={onAnalyzeDataDrift}
+            >
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.flyout.analyzeDrift"
+                defaultMessage="Analyze data drift"
               />
             </EuiContextMenuItem>,
           ]

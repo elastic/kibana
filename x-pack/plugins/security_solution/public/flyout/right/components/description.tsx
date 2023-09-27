@@ -11,6 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -65,6 +66,12 @@ export const Description: FC = () => {
             onClick={openRulePreview}
             iconSide="right"
             data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel',
+              {
+                defaultMessage: 'Show rule summary',
+              }
+            )}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"

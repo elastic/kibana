@@ -32,7 +32,7 @@ export const buildAllDashboardActions = async ({
   plugins,
   allowByValueEmbeddables,
 }: BuildAllDashboardActionsProps) => {
-  const { uiActions, share, presentationUtil, savedObjectsTaggingOss, contentManagement } = plugins;
+  const { uiActions, share, savedObjectsTaggingOss, contentManagement } = plugins;
 
   const clonePanelAction = new ClonePanelAction();
   uiActions.registerAction(clonePanelAction);
@@ -73,7 +73,7 @@ export const buildAllDashboardActions = async ({
     uiActions.registerAction(libraryNotificationAction);
     uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
-    const copyToDashboardAction = new CopyToDashboardAction(presentationUtil.ContextProvider);
+    const copyToDashboardAction = new CopyToDashboardAction(core);
     uiActions.registerAction(copyToDashboardAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
   }
