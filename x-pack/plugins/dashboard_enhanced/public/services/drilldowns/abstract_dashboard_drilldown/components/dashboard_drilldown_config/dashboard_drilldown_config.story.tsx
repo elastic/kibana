@@ -9,7 +9,13 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
+import {
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+} from '@kbn/presentation-util-plugin/public';
+
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
+import { Config as DrilldownConfig } from '../../types';
 
 export const dashboards = [
   { value: 'dashboard1', label: 'Dashboard 1' },
@@ -19,18 +25,24 @@ export const dashboards = [
 
 const InteractiveDemo: React.FC = () => {
   const [activeDashboardId, setActiveDashboardId] = React.useState('dashboard1');
-  const [currentFilters, setCurrentFilters] = React.useState(false);
-  const [keepRange, setKeepRange] = React.useState(false);
+  const [options, setOptions] = React.useState<DashboardDrilldownOptions>(
+    DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS
+  );
+  // const [currentFilters, setCurrentFilters] = React.useState(false);
+  // const [keepRange, setKeepRange] = React.useState(false);
 
   return (
     <DashboardDrilldownConfig
-      activeDashboardId={activeDashboardId}
       dashboards={dashboards}
-      currentFilters={currentFilters}
-      keepRange={keepRange}
+      config={{ dashboardId: activeDashboardId, ...options }}
+      onConfigChange={(changes) => {
+        if (changes.dashboardId) {
+          setActiveDashboardId(changes.dashboardId);
+          delete changes.dashboardId;
+        }
+        setOptions({ ...options, ...changes });
+      }}
       onDashboardSelect={(id) => setActiveDashboardId(id)}
-      onCurrentFiltersToggle={() => setCurrentFilters((old) => !old)}
-      onKeepRangeToggle={() => setKeepRange((old) => !old)}
       onSearchChange={() => {}}
       isLoading={false}
     />
@@ -41,23 +53,13 @@ storiesOf(
   'services/drilldowns/dashboard_to_dashboard_drilldown/components/dashboard_drilldown_config',
   module
 )
-  .add('default', () => (
-    <DashboardDrilldownConfig
-      activeDashboardId={'dashboard2'}
-      dashboards={dashboards}
-      onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
-      onSearchChange={() => {}}
-      isLoading={false}
-    />
-  ))
   .add('with switches', () => (
     <DashboardDrilldownConfig
-      activeDashboardId={'dashboard2'}
       dashboards={dashboards}
+      config={{ dashboardId: 'dashboard2', ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS }}
       onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
-      onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
-      onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
       onSearchChange={() => {}}
+      onConfigChange={(e) => console.log('onConfigChange', e)}
       isLoading={false}
     />
   ))
