@@ -26,12 +26,14 @@ interface AddLayerButtonProps {
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
+  isInlineEditing?: boolean;
 }
 
 export function AddLayerButton({
   supportedLayers,
   addLayer,
   eventAnnotationService,
+  isInlineEditing,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -162,6 +164,7 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
+          isInlineEditing={isInlineEditing}
           addLayer={(extraArg) => {
             addLayer(LayerTypes.ANNOTATIONS, extraArg);
           }}
