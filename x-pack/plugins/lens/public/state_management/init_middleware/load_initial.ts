@@ -91,10 +91,12 @@ export function loadInitial(
     redirectCallback,
     initialInput,
     history,
+    inlineEditing,
   }: {
     redirectCallback?: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
+    inlineEditing?: boolean;
   },
   autoApplyDisabled: boolean
 ) {
@@ -291,9 +293,13 @@ export function loadInitial(
             {}
           );
 
-          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(filters);
+          // when the embeddable is initialized from the dashboard we don't want to inject the filters
+          // as this will replace the parent application filters (such as a dashboard)
+          if (!Boolean(inlineEditing)) {
+            const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(filters);
+          }
 
           const docVisualizationState = {
             activeId: doc.visualizationType,
