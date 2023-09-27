@@ -69,6 +69,7 @@ const DashboardRendererComponent = ({
         getEmbeddableContainerContext: (dashboardId?: string) => ({
           getCurrentPath: () =>
             dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`,
+          currentAppId: APP_UI_ID,
         }),
       }),
     [embeddable, filters, query, timeRange, viewMode]

@@ -24,7 +24,7 @@ import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_das
 
 export function DashboardEditingToolbar({
   isDisabled,
-  originatingApp = DASHBOARD_APP_ID,
+  originatingApp,
 }: {
   isDisabled?: boolean;
   originatingApp?: string;
@@ -74,7 +74,7 @@ export function DashboardEditingToolbar({
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp,
+          originatingApp: originatingApp ?? dashboard.getEmbeddableContainerContext()?.currentAppId,
           originatingPath: dashboard.getEmbeddableContainerContext()?.getCurrentPath?.(),
           searchSessionId: search.session.getSessionId(),
         },

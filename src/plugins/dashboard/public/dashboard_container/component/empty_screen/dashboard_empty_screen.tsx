@@ -44,6 +44,14 @@ export function DashboardEmptyScreen() {
     [getVisTypeAliases]
   );
 
+  const dashboardContainer = useDashboardContainer();
+  const isDarkTheme = useObservable(theme$)?.darkMode;
+  const isEditMode =
+    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+  const embeddableContainerContext = dashboardContainer.getEmbeddableContainerContext();
+  const originatingPath = embeddableContainerContext?.getCurrentPath?.() ?? '';
+  const originatingApp = embeddableContainerContext?.currentAppId;
+
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.aliasPath) return;
     const trackUiMetric = usageCollection.reportUiCounter?.bind(
@@ -57,16 +65,19 @@ export function DashboardEmptyScreen() {
     getStateTransfer().navigateToEditor(lensAlias.aliasApp, {
       path: lensAlias.aliasPath,
       state: {
-        originatingApp: DASHBOARD_APP_ID,
+        originatingApp,
+        originatingPath,
         searchSessionId: search.session.getSessionId(),
       },
     });
-  }, [getStateTransfer, lensAlias, search.session, usageCollection]);
-
-  const dashboardContainer = useDashboardContainer();
-  const isDarkTheme = useObservable(theme$)?.darkMode;
-  const isEditMode =
-    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+  }, [
+    getStateTransfer,
+    lensAlias,
+    originatingApp,
+    originatingPath,
+    search.session,
+    usageCollection,
+  ]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = basePath.prepend(

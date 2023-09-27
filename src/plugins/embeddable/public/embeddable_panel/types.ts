@@ -24,6 +24,7 @@ export interface EmbeddableContainerContext {
    * Current app's path including query and hash starting from {appId}
    */
   getCurrentPath?: () => string;
+  currentAppId?: string;
 }
 
 /**
