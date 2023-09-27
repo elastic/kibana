@@ -4483,6 +4483,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-usage-test-plugin@link:x-pack/test/plugin_api_integration/plugins/feature_usage_test":
   version "0.0.0"
   uid ""
