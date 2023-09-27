@@ -4939,6 +4939,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-chi2test@link:x-pack/packages/ml/chi2test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
