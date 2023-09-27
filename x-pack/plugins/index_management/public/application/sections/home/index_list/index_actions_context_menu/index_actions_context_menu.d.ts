@@ -37,12 +37,6 @@ export interface IndexActionsContextMenuProps {
   forcemergeIndices: (maxNumSegments: string) => Promise<void>;
   deleteIndices: () => Promise<void>;
 
-  // following 4 actions are only added when on the list view and only 1 index is selected
-  showSettings?: () => void; // opens the settings tab for the 1st index in the indexNames array
-  showMapping?: () => void; // opens the mapping tab for the 1st index in the indexNames array
-  showStats?: () => void; // opens the stats tab for the 1st index in the indexNames array
-  editIndex?: () => void; // opens the edit settings tab for the 1st index in the indexNames array
-
   // used to determine if all indices are open
   indexStatusByName: {
     [indexName: string]: Index['status'] | undefined;

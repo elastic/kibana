@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
@@ -28,14 +27,12 @@ import { InvestigateInTimelineButton } from '../../../common/components/event_de
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
-  PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
@@ -77,7 +74,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     width: '20%',
   },
   {
-    field: 'value',
+    field: 'values',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.insights.prevalence.valueColumnLabel"
@@ -85,7 +82,15 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       />
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    render: (values: string[]) => (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {values.map((value) => (
+          <EuiFlexItem key={value}>
+            <EuiText size="xs">{value}</EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
     width: '20%',
   },
   {
@@ -116,9 +121,9 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        getDataProvider(data.field, `timeline-indicator-${data.field}-${data.value}`, data.value),
-      ];
+      const dataProviders = data.values.map((value) =>
+        getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value)
+      );
       return data.alertCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
@@ -162,24 +167,18 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
-      const dataProviders = [
-        {
-          ...getDataProvider(
-            data.field,
-            `timeline-indicator-${data.field}-${data.value}`,
-            data.value
+      const dataProviders = data.values.map((value) => ({
+        ...getDataProvider(data.field, `timeline-indicator-${data.field}-${value}`, value),
+        and: [
+          getDataProviderAnd(
+            'event.kind',
+            `timeline-indicator-event.kind-not-signal`,
+            'signal',
+            IS_OPERATOR,
+            true
           ),
-          and: [
-            getDataProviderAnd(
-              'event.kind',
-              `timeline-indicator-event.kind-not-signal`,
-              'signal',
-              IS_OPERATOR,
-              true
-            ),
-          ],
-        },
-      ];
+        ],
+      }));
       return data.docCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
@@ -319,19 +318,6 @@ export const PrevalenceDetails: React.FC = () => {
     [data, absoluteStart, absoluteEnd]
   );
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="spaceAround"
-        data-test-subj={PREVALENCE_DETAILS_LOADING_TEST_ID}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   const upsell = (
     <>
       <EuiCallOut data-test-subj={PREVALENCE_DETAILS_UPSELL_TEST_ID}>
@@ -366,20 +352,18 @@ export const PrevalenceDetails: React.FC = () => {
           width="full"
         />
         <EuiSpacer size="m" />
-        {data.length > 0 ? (
-          <EuiInMemoryTable
-            items={items}
-            columns={columns}
-            data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          />
-        ) : (
-          <p data-test-subj={PREVALENCE_DETAILS_NO_DATA_TEST_ID}>
+        <EuiInMemoryTable
+          items={error ? [] : items}
+          columns={columns}
+          loading={loading}
+          data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+          message={
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."
             />
-          </p>
-        )}
+          }
+        />
       </EuiPanel>
     </>
   );
