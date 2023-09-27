@@ -125,9 +125,6 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   inventory: {
     compositeSize: 2000,
   },
-  logs: {
-    app_target: 'logs-ui',
-  },
   sources,
   enabled: true,
 });
