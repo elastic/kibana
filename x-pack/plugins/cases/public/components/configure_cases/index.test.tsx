@@ -35,12 +35,14 @@ import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../common/use_license');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -50,6 +52,7 @@ const useGetUrlSearchMock = jest.fn();
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
+const useLicenseMock = useLicense as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeAll(() => {
@@ -63,6 +66,8 @@ describe('ConfigureCases', () => {
 
     useKibanaMock().services.triggersActionsUi.getEditConnectorFlyout =
       getEditConnectorFlyoutMock.mockReturnValue(<div data-test-subj="edit-connector-flyout" />);
+
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
   beforeEach(() => {
