@@ -16,7 +16,7 @@ import type { EventFieldsData } from '../types';
 import { getFieldTypeName } from './get_field_type_name';
 
 export interface FieldNameCellProps {
-  data: EventFieldsData;
+  data: Pick<EventFieldsData, 'type' | 'description' | 'example'>;
   field: string;
   fieldMapping?: DataViewField;
   scripted?: boolean;

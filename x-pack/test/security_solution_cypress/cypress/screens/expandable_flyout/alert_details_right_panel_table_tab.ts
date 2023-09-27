@@ -14,14 +14,16 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT =
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER = getClassSelector('euiFieldSearch');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER =
   getDataTestSubjectSelector('clearSearchButton');
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-@timestamp'
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_FIELD = getDataTestSubjectSelector(
+  'event-fields-browser-@timestamp-field'
 );
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_VALUE =
+  getDataTestSubjectSelector('event-field-@timestamp');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-_id'
+  'event-fields-browser-_id-field'
 );
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-event.type'
+  'event-fields-browser-event-type-field'
 );
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN = getDataTestSubjectSelector(
   'actionItem-security-detailsFlyout-cellActions-filterIn'
