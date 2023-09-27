@@ -114,9 +114,9 @@ export const defaultNavigation: MlNodeDefinition = {
         },
         {
           title: i18n.translate('defaultNavigation.ml.dataComparison', {
-            defaultMessage: 'Data comparison',
+            defaultMessage: 'Data drift',
           }),
-          link: 'ml:dataComparison',
+          link: 'ml:dataDrift',
         },
       ],
     },

@@ -61,6 +61,7 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-switch');
           cy.getByTestSubj('protection-updates-manifest-name-title');
           cy.getByTestSubj('protection-updates-manifest-name');
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
 
           cy.getByTestSubj('protection-updates-manifest-switch').click();
 
@@ -72,17 +73,18 @@ describe(
           });
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note');
-          cy.getByTestSubj('policyDetailsSaveButton');
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.enabled');
         });
 
         it('should successfully update the manifest version to custom date', () => {
           loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
           cy.getByTestSubj('protection-updates-manifest-switch').click();
           cy.getByTestSubj('protection-updates-manifest-note').type(testNote);
 
           cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy');
-          cy.intercept('POST', `/api/endpoint/protection_updates_note/*`).as('note');
-          cy.getByTestSubj('policyDetailsSaveButton').click();
+          cy.intercept('POST', `/api/endpoint/protection_updates_note/${policy.id}`).as('note');
+          cy.getByTestSubj('protectionUpdatesSaveButton').click();
           cy.wait('@policy').then(({ request, response }) => {
             expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
               today.format('YYYY-MM-DD')
@@ -98,6 +100,7 @@ describe(
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-deployed-version').contains(formattedToday);
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
       });
 
@@ -131,9 +134,13 @@ describe(
         it('should update manifest version to latest when enabling automatic updates', () => {
           loadProtectionUpdatesUrl(policy.id);
           cy.getByTestSubj('protection-updates-manifest-outdated');
-          cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy_latest');
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
 
           cy.getByTestSubj('protection-updates-manifest-switch').click();
+          cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy_latest');
+
+          cy.getByTestSubj('protectionUpdatesSaveButton').click();
+
           cy.wait('@policy_latest').then(({ request, response }) => {
             expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
               'latest'
@@ -142,6 +149,7 @@ describe(
           });
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
       });
 
@@ -175,18 +183,23 @@ describe(
 
         it('should update note on save', () => {
           loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
+
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
           cy.getByTestSubj('protection-updates-manifest-note').clear();
           cy.getByTestSubj('protection-updates-manifest-note').type(updatedTestNote);
 
-          cy.intercept('POST', `/api/endpoint/protection_updates_note/*`).as('note_updated');
-          cy.getByTestSubj('policyDetailsSaveButton').click();
+          cy.intercept('POST', `/api/endpoint/protection_updates_note/${policy.id}`).as(
+            'note_updated'
+          );
+          cy.getByTestSubj('protectionUpdatesSaveButton').click();
           cy.wait('@note_updated').then(({ request, response }) => {
             expect(request.body.note).to.equal(updatedTestNote);
             expect(response?.statusCode).to.equal(200);
           });
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
           cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
       });
 
@@ -238,7 +251,7 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
           cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
-          cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
+          cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
       });
     });

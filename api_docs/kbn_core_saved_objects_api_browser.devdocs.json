@@ -1628,10 +1628,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
@@ -2982,18 +2978,6 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
           },
           {
             "plugin": "visualizations",

@@ -58,6 +58,7 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
+    section: undefined,
     search: '',
     page: 0,
     perPage: pageSize || 10,
@@ -65,6 +66,7 @@ export const RulesContainer = () => {
 
   const { data, status, error } = useFindCspRuleTemplates(
     {
+      section: rulesQuery.section,
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
@@ -77,12 +79,31 @@ export const RulesContainer = () => {
     [data, error, status, rulesQuery]
   );
 
+  // We need to make this call again without the filters. this way the section list is always full
+  const allRules = useFindCspRuleTemplates(
+    {
+      page: 1,
+      perPage: MAX_ITEMS_PER_PAGE,
+    },
+    params.packagePolicyId
+  );
+
+  const sectionList = useMemo(
+    () => allRules.data?.items.map((rule) => rule.metadata.section),
+    [allRules.data]
+  );
+  const cleanedSectionList = [...new Set(sectionList)];
+
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
+          onSectionChange={(value) =>
+            setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
+          }
+          sectionSelectOptions={cleanedSectionList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search}
+          searchValue={rulesQuery.search || ''}
           totalRulesCount={rulesPageData.all_rules.length}
           pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
