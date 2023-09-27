@@ -8,6 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import type { ClusterDetails } from '@kbn/es-types';
 import { SearchResponseWarning } from '../types';
 
 /**
@@ -16,53 +17,38 @@ import { SearchResponseWarning } from '../types';
 export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
-  if (rawResponse.timed_out === true) {
+  const isPartial = rawResponse._clusters
+    ? Object.values(
+        (
+          rawResponse._clusters as estypes.ClusterStatistics & {
+            details: Record<string, ClusterDetails>;
+          }
+        ).details
+      ).some((clusterDetails) => clusterDetails.status !== 'successful')
+    : rawResponse.timed_out || rawResponse._shards.failed > 0;
+  if (isPartial) {
     warnings.push({
-      type: 'timed_out',
-      message: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
-        defaultMessage: 'Data might be incomplete because your request timed out',
+      type: 'incomplete',
+      message: i18n.translate('data.search.searchSource.fetch.incompleteResultsMessage', {
+        defaultMessage: 'The data might be incomplete or wrong.',
       }),
-      reason: undefined, // exists so that callers do not have to cast when working with shard warnings.
-    });
-  }
-
-  if (rawResponse._shards && rawResponse._shards.failed) {
-    const message = i18n.translate(
-      'data.search.searchSource.fetch.shardsFailedNotificationMessage',
-      {
-        defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-        values: {
-          shardsFailed: rawResponse._shards.failed,
-          shardsTotal: rawResponse._shards.total,
-        },
-      }
-    );
-    const text = i18n.translate(
-      'data.search.searchSource.fetch.shardsFailedNotificationDescription',
-      { defaultMessage: 'The data might be incomplete or wrong.' }
-    );
-
-    if (rawResponse._shards.failures) {
-      rawResponse._shards.failures?.forEach((f) => {
-        warnings.push({
-          type: 'shard_failure',
-          message,
-          text,
-          reason: {
-            type: f.reason.type,
-            reason: f.reason.reason,
+      clusters: rawResponse._clusters
+        ? (
+            rawResponse._clusters as estypes.ClusterStatistics & {
+              details: Record<string, ClusterDetails>;
+            }
+          ).details
+        : {
+            '(local)': {
+              status: 'partial',
+              indices: '',
+              took: rawResponse.took,
+              timed_out: rawResponse.timed_out,
+              _shards: rawResponse._shards,
+              failures: rawResponse._shards.failures,
+            },
           },
-        });
-      });
-    } else {
-      // unknown type and reason
-      warnings.push({
-        type: 'shard_failure',
-        message,
-        text,
-        reason: { type: 'generic_shard_warning' },
-      });
-    }
+    });
   }
 
   return warnings;

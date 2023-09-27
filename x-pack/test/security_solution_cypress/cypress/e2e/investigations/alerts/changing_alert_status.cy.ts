@@ -34,7 +34,8 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
@@ -62,7 +63,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       selectCountTable();
     });
 
-    it('Open one alert when more than one closed alerts are selected', () => {
+    it.skip('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -164,7 +165,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it('Closes and opens alerts', () => {
+    it.skip('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')

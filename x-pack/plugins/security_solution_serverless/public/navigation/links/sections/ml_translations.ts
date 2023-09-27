@@ -69,6 +69,18 @@ export const NOTIFICATIONS_DESC = i18n.translate(
     defaultMessage: 'Notifications page',
   }
 );
+export const MEMORY_USAGE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.title',
+  {
+    defaultMessage: 'Memory usage',
+  }
+);
+export const MEMORY_USAGE_DESC = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.desc',
+  {
+    defaultMessage: 'Memory usage page',
+  }
+);
 export const ANOMALY_DETECTION_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.title',
   {
@@ -90,7 +102,7 @@ export const ANOMALY_EXPLORER_TITLE = i18n.translate(
 export const ANOMALY_EXPLORER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyExplorer.desc',
   {
-    defaultMessage: 'Anomaly explorer Page',
+    defaultMessage: 'Anomaly explorer page',
   }
 );
 export const SINGLE_METRIC_VIEWER_TITLE = i18n.translate(
@@ -156,13 +168,13 @@ export const ANALYTICS_MAP_DESC = i18n.translate(
 export const NODES_OVERVIEW_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.title',
   {
-    defaultMessage: 'Model Management',
+    defaultMessage: 'Trained models',
   }
 );
 export const NODES_OVERVIEW_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.desc',
   {
-    defaultMessage: 'Model Management page',
+    defaultMessage: 'Trained models page',
   }
 );
 export const NODES_TITLE = i18n.translate(
@@ -201,16 +213,16 @@ export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
     defaultMessage: 'Data view data visualizer page',
   }
 );
-export const DATA_COMPARISON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.datComparison.title',
+export const DATA_DRIFT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.dataDrift.title',
   {
-    defaultMessage: 'Data comparison',
+    defaultMessage: 'Data drift',
   }
 );
 export const DATA_COMPARISON_DESC = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.datComparison.desc',
+  'xpack.securitySolutionServerless.navLinks.ml.dataDrift.desc',
   {
-    defaultMessage: 'Data comparison page',
+    defaultMessage: 'Data drift page',
   }
 );
 export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(

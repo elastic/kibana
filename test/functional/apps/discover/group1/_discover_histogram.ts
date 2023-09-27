@@ -15,7 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'timePicker',
+    'dashboard',
+    'settings',
+    'discover',
+    'common',
+    'header',
+  ]);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
     'dateFormat:tz': 'Europe/Berlin',
@@ -253,7 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // go to dashboard
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // go to discover

@@ -93,7 +93,7 @@ ${JSON.stringify(argv, null, 2)}
 ----------------------------------------------
 `);
 
-      const isOpen = argv._[0] === 'open';
+      const isOpen = argv._.includes('open');
 
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
@@ -128,7 +128,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
       const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
-      const { grepFilterSpecs } = cypressConfigFile.env;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
 
       // IMPORTANT!
       // When grep returns the same spec pattern as it gets in its arguments, we treat it as
@@ -263,7 +263,17 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
 
-${JSON.stringify(config.getAll(), null, 2)}
+${JSON.stringify(
+  config.getAll(),
+  (key, v) => {
+    if (Array.isArray(v) && v.length > 32) {
+      return v.slice(0, 32).concat('... trimmed after 32 items.');
+    } else {
+      return v;
+    }
+  },
+  2
+)}
 
 ----------------------------------------------
 `);
@@ -402,7 +412,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,

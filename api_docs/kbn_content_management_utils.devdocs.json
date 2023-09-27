@@ -2986,6 +2986,20 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
             "id": "def-common.SOWithMetadata.attributes",
             "type": "Uncategorized",
             "tags": [],

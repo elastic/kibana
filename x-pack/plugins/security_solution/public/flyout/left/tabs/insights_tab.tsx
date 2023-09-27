@@ -10,6 +10,8 @@ import React, { memo, useCallback, useState, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
@@ -19,13 +21,6 @@ import {
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInsightsTab } from '..';
-import {
-  INSIGHTS_BUTTONGROUP_OPTIONS,
-  ENTITIES_BUTTON,
-  THREAT_INTELLIGENCE_BUTTON,
-  PREVALENCE_BUTTON,
-  CORRELATIONS_BUTTON,
-} from './translations';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
@@ -37,22 +32,42 @@ import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlat
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: ENTITIES_TAB_ID,
-    label: ENTITIES_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
+        defaultMessage="Entities"
+      />
+    ),
     'data-test-subj': INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   },
   {
     id: THREAT_INTELLIGENCE_TAB_ID,
-    label: THREAT_INTELLIGENCE_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.threatIntelligenceButtonLabel"
+        defaultMessage="Threat intelligence"
+      />
+    ),
     'data-test-subj': INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   },
   {
     id: PREVALENCE_TAB_ID,
-    label: PREVALENCE_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
+        defaultMessage="Prevalence"
+      />
+    ),
     'data-test-subj': INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   },
   {
     id: CORRELATIONS_TAB_ID,
-    label: CORRELATIONS_BUTTON,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlationsButtonLabel"
+        defaultMessage="Correlations"
+      />
+    ),
     'data-test-subj': INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
   },
 ];
@@ -97,7 +112,12 @@ export const InsightsTab: React.FC = memo(() => {
       <EuiButtonGroup
         color="primary"
         name="coarsness"
-        legend={INSIGHTS_BUTTONGROUP_OPTIONS}
+        legend={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel',
+          {
+            defaultMessage: 'Insights options',
+          }
+        )}
         options={insightsButtons}
         idSelected={activeInsightsId}
         onChange={onChangeCompressed}

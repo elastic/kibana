@@ -2360,7 +2360,7 @@
             }
           }
         },
-        "enterpriseSearchEsre": {
+        "enterpriseSearchAISearch": {
           "properties": {
             "appId": {
               "type": "keyword",

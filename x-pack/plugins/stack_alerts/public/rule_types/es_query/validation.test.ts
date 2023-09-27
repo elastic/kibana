@@ -103,6 +103,46 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
   });
 
+  test('if termField property is an array but has no items should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: [],
+    };
+    expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
+  });
+
+  test('if termField property is an array but has more than 4 items, should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: ['term', 'term2', 'term3', 'term4', 'term5'],
+    };
+    expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termField[0]).toBe(
+      'Cannot select more than 4 terms'
+    );
+  });
+
   test('if esQuery property is invalid JSON should return proper error message', () => {
     const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
