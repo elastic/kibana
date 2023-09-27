@@ -16,44 +16,44 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
-import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
-import type { DataComparisonField, Feature, TimeRange } from './types';
-import { DataComparisonOverviewTable } from './data_comparison_overview_table';
+import {
+  getDataComparisonType,
+  type InitialSettings,
+  useFetchDataComparisonResult,
+} from './use_data_drift_result';
+import type { DataDriftField, Feature, TimeRange } from './types';
+import { DataDriftOverviewTable } from './data_drift_overview_table';
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
-  'xpack.dataVisualizer.dataComparison.showOnlyDriftedFieldsOptionLabel',
+  'xpack.dataVisualizer.dataDrift.showOnlyDriftedFieldsOptionLabel',
   { defaultMessage: 'Show only fields with drifted data' }
 );
 
-interface DataComparisonViewProps {
+interface DataDriftViewProps {
   windowParameters?: WindowParameters;
   dataView: DataView;
   searchString: Query['query'];
-  searchQuery: QueryDslQueryContainer;
   searchQueryLanguage: SearchQueryLanguage;
   isBrushCleared: boolean;
   runAnalysisDisabled?: boolean;
   onReset: () => void;
   lastRefresh: number;
-  forceRefresh: () => void;
-  randomSampler: RandomSampler;
+  onRefresh: () => void;
+  initialSettings: InitialSettings;
 }
 // Data drift view
-export const DataComparisonView = ({
+export const DataDriftView = ({
   windowParameters,
   dataView,
   searchString,
-  searchQuery,
   searchQueryLanguage,
   onReset,
   isBrushCleared,
   lastRefresh,
-  forceRefresh,
-  randomSampler,
-}: DataComparisonViewProps) => {
+  onRefresh,
+  initialSettings,
+}: DataDriftViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
@@ -62,16 +62,16 @@ export const DataComparisonView = ({
 
   const [fetchInfo, setFetchIno] = useState<
     | {
-        fields: DataComparisonField[];
+        fields: DataDriftField[];
         currentDataView: DataView;
-        timeRanges?: { reference: TimeRange; production: TimeRange };
+        timeRanges?: { reference: TimeRange; comparison: TimeRange };
       }
     | undefined
   >();
 
-  const onRefresh = useCallback(() => {
+  const refresh = useCallback(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
-    const mergedFields: DataComparisonField[] = [];
+    const mergedFields: DataDriftField[] = [];
     if (dataView) {
       mergedFields.push(
         ...dataView.fields
@@ -101,7 +101,7 @@ export const DataComparisonView = ({
                 start: windowParameters.baselineMin,
                 end: windowParameters.baselineMax,
               },
-              production: {
+              comparison: {
                 start: windowParameters.deviationMin,
                 end: windowParameters.deviationMax,
               },
@@ -109,18 +109,17 @@ export const DataComparisonView = ({
           }
         : {}),
     });
-    if (forceRefresh) {
-      forceRefresh();
+    if (onRefresh) {
+      onRefresh();
     }
-  }, [dataView, windowParameters, forceRefresh]);
+  }, [dataView, windowParameters, onRefresh]);
 
   const { result, cancelRequest } = useFetchDataComparisonResult({
     ...fetchInfo,
+    initialSettings,
     lastRefresh,
-    randomSampler,
     searchString,
     searchQueryLanguage,
-    searchQuery,
   });
 
   const filteredData = useMemo(() => {
@@ -152,7 +151,9 @@ export const DataComparisonView = ({
     setPageIndex(0);
   };
 
-  return windowParameters === undefined ? (
+  const requiresWindowParameters = dataView?.isTimeBased() && windowParameters === undefined;
+
+  return requiresWindowParameters ? (
     <EuiEmptyPrompt
       color="subdued"
       hasShadow={false}
@@ -161,7 +162,7 @@ export const DataComparisonView = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.dataVisualizer.dataComparison.emptyPromptTitle"
+            id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
             defaultMessage="Select a time range for reference and comparison data in the histogram chart to compare data distribution."
           />
         </h2>
@@ -170,13 +171,12 @@ export const DataComparisonView = ({
       body={
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.dataComparison.emptyPromptBody"
-            defaultMessage="The Data Comparison View compares the statistical properties of features in the 'reference' and 'comparison' data sets.
-"
+            id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
+            defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
           />
         </p>
       }
-      data-test-subj="dataVisualizerNoWindowParametersEmptyPrompt"
+      data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
     />
   ) : (
     <div>
@@ -186,10 +186,10 @@ export const DataComparisonView = ({
         progress={result.loaded}
         progressMessage={result.progressMessage ?? ''}
         isRunning={result.loaded > 0 && result.loaded < 1}
-        onRefresh={onRefresh}
+        onRefresh={refresh}
         onCancel={cancelRequest}
         shouldRerunAnalysis={shouldRerunAnalysis}
-        runAnalysisDisabled={!dataView || !windowParameters}
+        runAnalysisDisabled={!dataView || requiresWindowParameters}
       >
         <EuiFlexItem grow={false}>
           <EuiFormRow display="columnCompressedSwitch">
@@ -214,7 +214,7 @@ export const DataComparisonView = ({
           body={<span>{result.errorBody}</span>}
         />
       ) : (
-        <DataComparisonOverviewTable
+        <DataDriftOverviewTable
           data={filteredData}
           onTableChange={onTableChange}
           pagination={pagination}

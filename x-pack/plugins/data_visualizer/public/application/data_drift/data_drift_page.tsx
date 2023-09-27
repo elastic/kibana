@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiPageHeader,
-  EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -35,13 +35,11 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RANDOM_SAMPLER_OPTION, RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { MIN_SAMPLER_PROBABILITY } from '../index_data_visualizer/constants/random_sampler';
+import type { InitialSettings } from './use_data_drift_result';
+import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
-  DV_RANDOM_SAMPLER_P_VALUE,
-  DV_RANDOM_SAMPLER_PREFERENCE,
   DVKey,
   DVStorageMapped,
 } from '../index_data_visualizer/types/storage';
@@ -49,7 +47,7 @@ import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataComparisonView } from './data_comparison_view';
+import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
@@ -124,40 +122,39 @@ export const PageHeader: FC = () => {
   );
 };
 
-export const DataComparisonPage: FC = () => {
+const getDataDriftDataLabel = (label: string, indexPattern?: string) =>
+  i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
+    defaultMessage: '{label} data',
+    values: { label },
+  }) + (indexPattern ? `: ${indexPattern}` : '');
+
+interface Props {
+  initialSettings: InitialSettings;
+}
+
+export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService },
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
-  const [dataComparisonListState, setAiopsListState] = usePageUrlState<{
-    pageKey: 'DV_DATA_COMP';
+  const { reference: referenceStateManager, comparison: comparisonStateManager } =
+    useDataDriftStateManagerContext();
+
+  const [dataComparisonListState, setDataComparisonListState] = usePageUrlState<{
+    pageKey: 'DV_DATA_DRIFT';
     pageUrlState: DataComparisonFullAppState;
-  }>('DV_DATA_COMP', getDefaultDataComparisonState());
+  }>('DV_DATA_DRIFT', getDefaultDataComparisonState());
 
-  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
-  >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
-
-  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
-  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
   const [lastRefresh, setLastRefresh] = useState(0);
 
   const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
 
-  const randomSampler = useMemo(
-    () =>
-      new RandomSampler(
-        randomSamplerMode,
-        setRandomSamplerMode,
-        randomSamplerProbability,
-        setRandomSamplerProbability
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
+
+  const randomSamplerProd = useMemo(
+    () => comparisonStateManager.randomSampler,
+    [comparisonStateManager]
   );
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -183,7 +180,7 @@ export const DataComparisonPage: FC = () => {
         setSelectedSavedSearch(null);
       }
 
-      setAiopsListState({
+      setDataComparisonListState({
         ...dataComparisonListState,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
@@ -191,7 +188,7 @@ export const DataComparisonPage: FC = () => {
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, dataComparisonListState, setAiopsListState]
+    [selectedSavedSearch, dataComparisonListState, setDataComparisonListState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
@@ -199,11 +196,14 @@ export const DataComparisonPage: FC = () => {
     dataComparisonListState
   );
 
-  const { documentStats, timefilter } = useData(
+  const { documentStats, documentStatsProd, timefilter } = useData(
+    initialSettings,
     dataView,
     'data_drift',
-    searchQuery,
+    searchString,
+    searchQueryLanguage,
     randomSampler,
+    randomSamplerProd,
     setGlobalState,
     undefined
   );
@@ -243,7 +243,7 @@ export const DataComparisonPage: FC = () => {
   const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
-    productionColor: euiTheme.euiColorVis1,
+    comparisonColor: euiTheme.euiColorVis1,
   };
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
@@ -280,7 +280,7 @@ export const DataComparisonPage: FC = () => {
         return colors.referenceColor;
       }
       if (start >= windowParameters.deviationMin && end <= windowParameters.deviationMax) {
-        return colors.productionColor;
+        return colors.comparisonColor;
       }
 
       return null;
@@ -289,12 +289,15 @@ export const DataComparisonPage: FC = () => {
     [JSON.stringify({ windowParameters, colors })]
   );
 
+  const referenceIndexPatternLabel = initialSettings?.reference
+    ? getDataDriftDataLabel(REFERENCE_LABEL, initialSettings.reference)
+    : getDataDriftDataLabel(REFERENCE_LABEL);
+  const comparisonIndexPatternLabel = initialSettings?.comparison
+    ? getDataDriftDataLabel(COMPARISON_LABEL, initialSettings?.comparison)
+    : getDataDriftDataLabel(COMPARISON_LABEL);
+
   return (
-    <EuiPageBody
-      data-test-subj="dataComparisonDataComparisonPage"
-      paddingSize="none"
-      panelled={false}
-    >
+    <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
       <PageHeader />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
@@ -308,84 +311,97 @@ export const DataComparisonPage: FC = () => {
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {documentCountStats !== undefined && (
-            <EuiFlexItem>
-              <EuiPanel paddingSize="m">
-                <DocumentCountWithDualBrush
-                  randomSampler={randomSampler}
-                  reload={forceRefresh}
-                  brushSelectionUpdateHandler={brushSelectionUpdate}
-                  documentCountStats={documentCountStats}
-                  documentCountStatsSplit={documentCountStatsCompare}
-                  isBrushCleared={isBrushCleared}
-                  totalCount={totalCount}
-                  approximate={sampleProbability < 1}
-                  sampleProbability={sampleProbability}
-                  initialAnalysisStart={initialAnalysisStart}
-                  barStyleAccessor={barStyleAccessor}
-                  baselineBrush={{
-                    label: REFERENCE_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.referenceColor,
-                      fill: colors.referenceColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 80,
-                  }}
-                  deviationBrush={{
-                    label: COMPARISON_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.productionColor,
-                      fill: colors.productionColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 90,
-                  }}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <EuiPanel paddingSize="m">
+              <DocumentCountWithDualBrush
+                id={REFERENCE_LABEL}
+                label={referenceIndexPatternLabel}
+                randomSampler={randomSampler}
+                reload={forceRefresh}
+                brushSelectionUpdateHandler={brushSelectionUpdate}
+                documentCountStats={documentCountStats}
+                documentCountStatsSplit={documentCountStatsCompare}
+                isBrushCleared={isBrushCleared}
+                totalCount={totalCount}
+                approximate={sampleProbability < 1}
+                sampleProbability={sampleProbability}
+                initialAnalysisStart={initialAnalysisStart}
+                barStyleAccessor={barStyleAccessor}
+                baselineBrush={{
+                  label: REFERENCE_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.referenceColor,
+                    fill: colors.referenceColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 80,
+                }}
+                deviationBrush={{
+                  label: COMPARISON_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.comparisonColor,
+                    fill: colors.comparisonColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 90,
+                }}
+                stateManager={referenceStateManager}
+              />
+              <EuiHorizontalRule />
+              <DocumentCountWithDualBrush
+                id={COMPARISON_LABEL}
+                label={comparisonIndexPatternLabel}
+                randomSampler={randomSamplerProd}
+                reload={forceRefresh}
+                brushSelectionUpdateHandler={brushSelectionUpdate}
+                documentCountStats={documentStatsProd.documentCountStats}
+                documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
+                isBrushCleared={isBrushCleared}
+                totalCount={documentStatsProd.totalCount}
+                approximate={documentStatsProd.sampleProbability < 1}
+                sampleProbability={documentStatsProd.sampleProbability}
+                initialAnalysisStart={initialAnalysisStart}
+                barStyleAccessor={barStyleAccessor}
+                baselineBrush={{
+                  label: REFERENCE_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.referenceColor,
+                    fill: colors.referenceColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 80,
+                }}
+                deviationBrush={{
+                  label: COMPARISON_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.comparisonColor,
+                    fill: colors.comparisonColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 90,
+                }}
+                stateManager={comparisonStateManager}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              {!dataView?.isTimeBased() ? (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.dataVisualizer.dataViewNotBasedOnTimeSeriesWarning.title',
-                    {
-                      defaultMessage:
-                        'The data view "{dataViewTitle}" is not based on a time series.',
-                      values: { dataViewTitle: dataView.getName() },
-                    }
-                  )}
-                  color="danger"
-                  iconType="warning"
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.dataVisualizer.dataComparisonTimeSeriesWarning.description',
-                      {
-                        defaultMessage: 'Data comparison only runs over time-based indices.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-              ) : (
-                <DataComparisonView
-                  isBrushCleared={isBrushCleared}
-                  onReset={clearSelection}
-                  windowParameters={windowParameters}
-                  dataView={dataView}
-                  searchString={searchString ?? ''}
-                  searchQuery={searchQuery}
-                  searchQueryLanguage={searchQueryLanguage}
-                  lastRefresh={lastRefresh}
-                  randomSampler={randomSampler}
-                  forceRefresh={forceRefresh}
-                />
-              )}
+              <DataDriftView
+                initialSettings={initialSettings}
+                isBrushCleared={isBrushCleared}
+                onReset={clearSelection}
+                windowParameters={windowParameters}
+                dataView={dataView}
+                searchString={searchString ?? ''}
+                searchQueryLanguage={searchQueryLanguage}
+                lastRefresh={lastRefresh}
+                onRefresh={forceRefresh}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
