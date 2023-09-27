@@ -166,16 +166,25 @@ function getESServerlessOptions(esServerlessImageFromArg: string | undefined, co
     esTestConfig.getESServerlessImage() ||
     (config.has('esTestCluster.esServerlessImage') &&
       config.get('esTestCluster.esServerlessImage'));
+  const serverlessResources: string[] =
+    (config.has('esServerlessOptions.resources') && config.get('esServerlessOptions.resources')) ||
+    [];
 
   if (esServerlessImageUrlOrTag) {
     if (esServerlessImageUrlOrTag.includes(':')) {
       return {
+        resources: serverlessResources,
         image: esServerlessImageUrlOrTag,
       };
     } else {
       return {
+        resources: serverlessResources,
         tag: esServerlessImageUrlOrTag,
       };
     }
   }
+
+  return {
+    resources: serverlessResources,
+  };
 }
