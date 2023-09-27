@@ -52,10 +52,11 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     it('creates an ES|QL rule', function () {
       visit(CREATE_RULE_URL);
 
+      selectEsqlRuleType();
+
       // ensures ES|QL rule in technical preview on create page
       cy.get(ESQL_TYPE).contains('Technical Preview');
 
-      selectEsqlRuleType();
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);

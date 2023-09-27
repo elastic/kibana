@@ -134,18 +134,19 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
+    const isEsql = filterQuery?.language === 'esql';
     const query = useMemo(() => {
-      if (filterQuery?.language === 'esql' && typeof filterQuery.query === 'string') {
+      if (isEsql && typeof filterQuery.query === 'string') {
         return { esql: filterQuery.query };
       }
       return filterQuery;
-    }, [filterQuery]);
+    }, [filterQuery, isEsql]);
 
     useEffect(() => {
       let dv: DataView;
       if (isDataView(indexPattern)) {
         setDataView(indexPattern);
-      } else {
+      } else if (!isEsql) {
         const createDataView = async () => {
           dv = await data.dataViews.create({ title: indexPattern.title });
           setDataView(dv);
@@ -157,7 +158,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern]);
+    }, [data.dataViews, indexPattern, isEsql]);
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);

@@ -33,20 +33,21 @@ describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(getEsqlRule()).then((createdRule) => {
-      visit(ruleDetailsUrl(createdRule.body.id));
-    });
   });
 
   it('displays ES|QL rule specific fields', function () {
-    cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+    createRule(getEsqlRule()).then((createdRule) => {
+      visit(ruleDetailsUrl(createdRule.body.id));
 
-    cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 
-      getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
-      // ensures ES|QL rule in technical preview
-      getDetails(RULE_TYPE_DETAILS).contains('Technical Preview');
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+
+        getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
+        // ensures ES|QL rule in technical preview
+        getDetails(RULE_TYPE_DETAILS).contains('Technical Preview');
+      });
     });
   });
 });

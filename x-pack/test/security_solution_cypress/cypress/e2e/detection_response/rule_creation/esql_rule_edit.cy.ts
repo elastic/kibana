@@ -37,7 +37,6 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(rule);
-    login();
   });
 
   it('edits ES|QL rule and checks details page', () => {
