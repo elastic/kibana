@@ -61,16 +61,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     esql: string;
   };
 
-  useEffect(() => {
-    if (esqlOnly && !currentQuery?.esql && dataViewId) {
-      dataViewService.get(dataViewId).then((dataView) => {
-        discoverDataService.query.queryString.setQuery({
-          esql: `from ${dataView?.getIndexPattern()} | limit 10`,
-        });
-      });
-    }
-  }, [currentQuery, dataViewId, dataViewService, discoverDataService.query.queryString, esqlOnly]);
-
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
@@ -106,6 +96,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     status,
     savedSearchId,
     activeTab,
+    isLoading: isTimelineLoading,
     savedObjectId,
     title,
     description,
@@ -123,6 +114,16 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
     },
     [dispatch, timelineId]
   );
+
+  useEffect(() => {
+    if (!isTimelineLoading && esqlOnly && !currentQuery?.esql && dataView) {
+      // By setting the query string to esql and locking the esql selection via
+      // use_data_view_customization.tsx we lock the tab to the ESQL experience
+      discoverDataService.query.queryString.setQuery({
+        esql: `from ${dataView?.getIndexPattern()} | limit 10`,
+      });
+    }
+  }, [currentQuery, dataView, discoverDataService.query.queryString, esqlOnly, isTimelineLoading]);
 
   const { data: savedSearchById, isFetching } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
@@ -308,7 +309,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ esqlOnly, time
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = Boolean(!dataView);
+  const isLoading = Boolean(!dataView) || isTimelineLoading;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
