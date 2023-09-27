@@ -11,7 +11,7 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
 } from '../../../constants';
-import { limitedArraySchema, limitedStringSchema } from '../../../schema';
+import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
@@ -21,7 +21,11 @@ export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
    * key of custom field
    */
-  key: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_CUSTOM_FIELD_KEY_LENGTH }),
+  key: regexStringRt({
+    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_CUSTOM_FIELD_KEY_LENGTH }),
+    pattern: '^[a-z0-9_-]+$',
+    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+  }),
   /**
    * label of custom field
    */
