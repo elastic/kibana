@@ -58,14 +58,14 @@ describe('CaseCustomFieldRt', () => {
       value: [1],
     });
 
-    expect(PathReporter.report(query)[0]).toContain('Invalid value 666 supplied');
+    expect(PathReporter.report(query)[0]).toContain('Invalid value 1 supplied');
   });
 
   it('fails if toggle type and value do not match expected attributes in request', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'list_custom_field_1',
       type: 'toggle',
-      value: ['hello'],
+      value: 'hello',
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');

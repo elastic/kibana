@@ -82,7 +82,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+const EditComponent: CustomFieldType['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
