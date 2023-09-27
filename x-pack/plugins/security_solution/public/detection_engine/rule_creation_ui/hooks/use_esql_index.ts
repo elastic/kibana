@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexListFromIndexString } from '@kbn/securitysolution-utils';
+
 import type { Query } from '@kbn/es-query';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -17,10 +19,11 @@ import { isEsqlRule } from '../../../../common/detection_engine/utils';
  * @returns
  */
 export const useEsqlIndex = (query: Query['query'], ruleType: Type) => {
-  const index = useMemo(() => {
+  const indexString = useMemo(() => {
     const esqlQuery = typeof query === 'string' && isEsqlRule(ruleType) ? query : undefined;
-    return getIndexListFromEsqlQuery(esqlQuery);
+    return getIndexPatternFromESQLQuery(esqlQuery);
   }, [query, ruleType]);
 
+  const index = useMemo(() => getIndexListFromIndexString(indexString), [indexString]);
   return index;
 };

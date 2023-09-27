@@ -12,6 +12,15 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
  */
 export const getIndexListFromEsqlQuery = (query: string | undefined): string[] => {
   const indexString = getIndexPatternFromESQLQuery(query);
+
+  return getIndexListFromIndexString(indexString);
+};
+
+/**
+ * transforms sting of indices, separated by commas to array
+ * index*, index2* => [index*, index2*]
+ */
+export const getIndexListFromIndexString = (indexString: string | undefined): string[] => {
   if (!indexString) {
     return [];
   }
