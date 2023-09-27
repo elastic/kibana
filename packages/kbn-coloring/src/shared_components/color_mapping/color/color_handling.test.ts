@@ -62,8 +62,8 @@ describe('Color mapping - color generation', () => {
         categories: ['cat1', 'cat2', 'cat3', 'cat4'],
       }
     );
-    expect(colorFactory('cat1')).toBe('red');
-    expect(colorFactory('cat2')).toBe('blue');
+    expect(colorFactory('cat1')).toBe('#ff0000');
+    expect(colorFactory('cat2')).toBe('#0000ff');
     // return a palette color only up to the max number of color in the palette
     expect(colorFactory('cat3')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
     expect(colorFactory('cat4')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
