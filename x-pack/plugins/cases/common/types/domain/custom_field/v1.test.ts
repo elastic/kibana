@@ -51,17 +51,17 @@ describe('CaseCustomFieldRt', () => {
     });
   });
 
-  it('fails if text type and value dont match expected attributes in request', () => {
+  it('fails if text type and value do not match expected attributes in request', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'text_custom_field_1',
       type: 'text',
-      value: [666],
+      value: [1],
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value 666 supplied');
   });
 
-  it('fails if toggle type and value dont match expected attributes in request', () => {
+  it('fails if toggle type and value do not match expected attributes in request', () => {
     const query = CaseCustomFieldRt.decode({
       key: 'list_custom_field_1',
       type: 'toggle',
