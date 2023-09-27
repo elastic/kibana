@@ -137,7 +137,7 @@ export const DetailsPageMappings: FunctionComponent<{ indexName: string }> = ({ 
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-              defaultMessage="Learn more"
+              defaultMessage="Learn more about mappings"
             />
           </EuiLink>
         </EuiPanel>

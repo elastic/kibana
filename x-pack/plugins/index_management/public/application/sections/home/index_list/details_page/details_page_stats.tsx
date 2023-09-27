@@ -168,7 +168,7 @@ export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpe
                   <h2>
                     <FormattedMessage
                       id="xpack.idxMgmt.indexDetails.stats.indexStatsTitle"
-                      defaultMessage="About index stats"
+                      defaultMessage="About index statistics"
                     />
                   </h2>
                 </EuiTitle>
@@ -199,7 +199,7 @@ export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpe
             >
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.stats.learnMoreLink"
-                defaultMessage="Learn more"
+                defaultMessage="Learn more about statistics"
               />
             </EuiLink>
           </EuiPanel>
