@@ -56,6 +56,7 @@ import {
   getDocumentationSections,
   MonacoError,
   getWrappedInPipesCode,
+  getIndicesForAutocomplete,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -381,12 +382,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
     useCallback(async () => {
-      const indices = await dataViews.getIndices({
-        showAllIndices: false,
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-      return indices.map((i) => i.name);
+      return await getIndicesForAutocomplete(dataViews);
     }, [dataViews]);
 
   const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = useCallback(
