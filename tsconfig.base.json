@@ -770,6 +770,8 @@
       "@kbn/expressions-plugin/*": ["src/plugins/expressions/*"],
       "@kbn/failed-test-reporter-cli": ["packages/kbn-failed-test-reporter-cli"],
       "@kbn/failed-test-reporter-cli/*": ["packages/kbn-failed-test-reporter-cli/*"],
+      "@kbn/feature-controls-examples-plugin": ["examples/feature_control_examples"],
+      "@kbn/feature-controls-examples-plugin/*": ["examples/feature_control_examples/*"],
       "@kbn/feature-usage-test-plugin": ["x-pack/test/plugin_api_integration/plugins/feature_usage_test"],
       "@kbn/feature-usage-test-plugin/*": ["x-pack/test/plugin_api_integration/plugins/feature_usage_test/*"],
       "@kbn/features-plugin": ["x-pack/plugins/features"],
