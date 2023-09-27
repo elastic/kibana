@@ -37,9 +37,12 @@ export class UpdateSLO {
     validateSLO(updatedSlo);
 
     await this.deleteObsoleteSLORevisionData(originalSlo);
+
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
     await this.transformManager.install(updatedSlo);
-    await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+    await this.transformManager.preview(updatedSloTransformId);
+    await this.transformManager.start(updatedSloTransformId);
 
     await this.esClient.index({
       index: SLO_SUMMARY_TEMP_INDEX_NAME,

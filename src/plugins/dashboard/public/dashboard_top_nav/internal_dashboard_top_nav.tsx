@@ -90,6 +90,7 @@ export function InternalDashboardTopNav({
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
@@ -356,9 +357,9 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar originatingApp={originatingApp} />
+        <DashboardEditingToolbar originatingApp={originatingApp} isDisabled={!!focusedPanelId} />
       ) : null}
-      {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
+      <EuiHorizontalRule margin="none" />
     </div>
   );
 }

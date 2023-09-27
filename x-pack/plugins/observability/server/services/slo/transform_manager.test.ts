@@ -47,7 +47,7 @@ describe('TransformManager', () => {
 
         await expect(
           service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
-        ).rejects.toThrowError('Unsupported SLI type: sli.apm.transactionErrorRate');
+        ).rejects.toThrowError('Unsupported indicator type [sli.apm.transactionErrorRate]');
       });
 
       it('throws when transform generator fails', async () => {
@@ -77,6 +77,20 @@ describe('TransformManager', () => {
 
       expect(esClientMock.transform.putTransform).toHaveBeenCalledTimes(1);
       expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
+    });
+  });
+
+  describe('Preview', () => {
+    it('previews the transform', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+      };
+      const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
+
+      await transformManager.preview('slo-transform-id');
+
+      expect(esClientMock.transform.previewTransform).toHaveBeenCalledTimes(1);
     });
   });
 
