@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { SettingsApplication } from '@kbn/management-settings-application';
+import { SettingsApplicationKibanaProvider } from '@kbn/management-settings-application';
 import {
   CoreSetup,
   CoreStart,
@@ -23,6 +27,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -99,10 +104,10 @@ export class ManagementPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'stack-management',
-        title: i18n.translate('management.stackManagement.managementLabel', {
+        title: kbnI18n.translate('management.stackManagement.managementLabel', {
           defaultMessage: 'Stack Management',
         }),
-        description: i18n.translate('management.stackManagement.managementDescription', {
+        description: kbnI18n.translate('management.stackManagement.managementDescription', {
           defaultMessage: 'Your center console for managing the Elastic Stack.',
         }),
         icon: 'managementApp',
@@ -115,7 +120,7 @@ export class ManagementPlugin
 
     core.application.register({
       id: MANAGEMENT_APP_ID,
-      title: i18n.translate('management.stackManagement.title', {
+      title: kbnI18n.translate('management.stackManagement.title', {
         defaultMessage: 'Stack Management',
       }),
       order: 9040,
@@ -164,6 +169,49 @@ export class ManagementPlugin
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         };
+      });
+    }
+
+    // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
+    // Otherwise, it will be double registered from the Advanced settings plugin
+    if (_plugins.serverless) {
+      const title = kbnI18n.translate('management.settings.settingsLabel', {
+        defaultMessage: 'Settings',
+      });
+
+      this.managementSections.definedSections.kibana.registerApp({
+        id: 'settings',
+        title,
+        order: 3,
+        async mount({ element, setBreadcrumbs }) {
+          setBreadcrumbs([{ text: title }]);
+          const {
+            i18n,
+            docLinks,
+            notifications: { toasts },
+            settings,
+            theme,
+          } = core;
+
+          ReactDOM.render(
+            <KibanaRenderContextProvider {...core}>
+              <SettingsApplicationKibanaProvider
+                settings={{
+                  client: settings.client,
+                }}
+                theme={theme}
+                i18nStart={i18n}
+                {...{ i18n, toasts, docLinks }}
+              >
+                <SettingsApplication settingsStart={settings} />
+              </SettingsApplicationKibanaProvider>
+            </KibanaRenderContextProvider>,
+            element
+          );
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
       });
     }
 

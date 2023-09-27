@@ -4867,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-application@link:packages/kbn-management/settings/application":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-components-field-category@link:packages/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
