@@ -87,7 +87,8 @@
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-application-common"
   ],
   "exclude": [
     "target/**/*"
