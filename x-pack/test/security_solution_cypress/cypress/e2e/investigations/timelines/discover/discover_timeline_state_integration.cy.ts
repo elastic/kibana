@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { visit } from '../../../../tasks/navigation';
 import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import { goToSavedObjectSettings } from '../../../../tasks/stack_management';
@@ -33,7 +34,7 @@ import {
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
