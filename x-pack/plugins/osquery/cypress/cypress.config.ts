@@ -11,9 +11,8 @@ import path from 'path';
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 
-import type { YamlRoleDefinitions } from '../../test_serverless/shared/lib';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
+import type { YamlRoleDefinitions } from '../../../test_serverless/shared/lib';
+import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 const ROLES_YAML_FILE_PATH = path.join(
   `${__dirname}/cypress/support`,
   'project_controller_osquery_roles.yml'

@@ -23,17 +23,20 @@
 // ***********************************************************
 
 // force ESM in this module
-import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-
 export {};
 
-import 'cypress-react-selector';
+// This module has some interesting ways of importing, check out the options in:
+// https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import registerCypressGrep from '@cypress/grep';
+registerCypressGrep();
 
-import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
 import type { ServerlessRoleName } from './roles';
 
-registerCypressGrep();
+import 'cypress-react-selector';
+import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -72,7 +75,7 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', login);
+Cypress.Commands.add('login', () => login());
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
