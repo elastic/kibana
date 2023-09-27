@@ -36,6 +36,13 @@ const constructValidationError = (error: Error) => {
 };
 
 /**
+ * checks whether query has [metadata _id] operator
+ */
+export const computeHasMetadataOperator = (esqlQuery: string) => {
+  return /(?<!\|[\s\S.]*)\[\s*metadata[\s\S.]*_id[\s\S.]*\]/i.test(esqlQuery);
+};
+
+/**
  * form validator for ES|QL queryBar
  */
 export const esqlValidator = async (
@@ -54,6 +61,16 @@ export const esqlValidator = async (
   try {
     const services = KibanaServices.get();
 
+    const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
+
+    // non-aggregating query which does not have [metadata], is not a valid one
+    if (!isEsqlQueryAggregating && !computeHasMetadataOperator(query)) {
+      return {
+        code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
+        message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
+      };
+    }
+
     const data = await securitySolutionQueryClient.fetchQuery(
       getEsqlQueryConfig({ esqlQuery: query, expressions: services.expressions })
     );
@@ -62,11 +79,10 @@ export const esqlValidator = async (
       return constructValidationError(data.error);
     }
 
-    // for non-aggregating fields we want to disable queries w/o _id property
-    if (
-      !computeIsESQLQueryAggregating(query) &&
-      !(data?.columns ?? []).find(({ id }) => '_id' === id)
-    ) {
+    // check whether _id field is present in response
+    const isIdFieldPresent = (data?.columns ?? []).find(({ id }) => '_id' === id);
+    // for non-aggregating query, we want to disable queries w/o _id property returned in response
+    if (!isEsqlQueryAggregating && !isIdFieldPresent) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
         message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
