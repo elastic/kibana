@@ -122,7 +122,7 @@ export interface SearchResponseIncompleteWarning {
   /**
    * openInInspector: callback to open warning in inspector
    */
-  openInInspector: () => {};
+  openInInspector: () => void;
 }
 
 /**

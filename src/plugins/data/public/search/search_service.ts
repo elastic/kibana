@@ -252,6 +252,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           handleWarnings({
             request: request.body,
             response: rawResponse,
+            theme,
             requestId: request.id,
             inspector: options.inspector,
             inspectorService: inspector,
@@ -299,6 +300,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           handleWarnings({
             request: request.json as SearchRequest,
             response: rawResponse,
+            theme,
             callback,
             requestId: request.id,
             inspector: {

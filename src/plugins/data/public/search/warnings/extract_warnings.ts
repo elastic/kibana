@@ -9,7 +9,9 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { IInspectorInfo } from '../../../common/search/search_source';
 import { SearchResponseWarning } from '../types';
 
 /**
@@ -61,12 +63,12 @@ export function extractWarnings(
               defaultMessage: 'Request',
             })
           );
-          requestResponder.ok(rawResponse);
+          requestResponder.ok({ json: rawResponse });
         }
 
         inspectorService.open(
           {
-            requests: inspector.adapter,
+            requests: adapter,
           },
           {
             options: {

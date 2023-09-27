@@ -9,9 +9,12 @@
 import React from 'react';
 import { EuiTextAlign } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
+import type { IInspectorInfo } from '../../../common/search/search_source';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
@@ -27,6 +30,7 @@ import { ViewWarningButton } from './view_warning_button';
 export function handleWarnings({
   request,
   response,
+  theme,
   callback,
   requestId,
   inspector,
@@ -34,6 +38,7 @@ export function handleWarnings({
 }: {
   request: SearchRequest;
   response: estypes.SearchResponse;
+  theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
   requestId?: string;
   inspector?: IInspectorInfo;
@@ -60,10 +65,11 @@ export function handleWarnings({
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
   getNotifications().toasts.addWarning({
     title: incompleteWarning.message,
-    text: (
+    text: toMountPoint(
       <EuiTextAlign textAlign="right">
         <ViewWarningButton onClick={incompleteWarning.openInInspector} />
-      </EuiTextAlign>
+      </EuiTextAlign>,
+      { theme$: theme.theme$ }
     ),
   });
 }
