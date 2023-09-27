@@ -6,12 +6,12 @@
  */
 
 import {
-  type AppDeepLink,
   type AppMountParameters,
-  type AppNavLinkStatus,
   type AppUpdater,
   type CoreStart,
   type PluginInitializerContext,
+  AppDeepLink,
+  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
