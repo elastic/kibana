@@ -4,26 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  rule_id: schema.string(),
-  alert_id: schema.string(),
-});
-
-const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
-  rule_id: alertId,
-  alert_id: alertInstanceId,
-}) => ({
-  alertId,
-  alertInstanceId,
-});
+import { transformRequestParamsToApplicationV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  muteAlertParamsSchemaV1,
+  MuteAlertRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/mute_alert';
 
 export const muteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -33,15 +22,15 @@ export const muteAlertRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/alert/{alert_id}/_mute`,
       validate: {
-        params: paramSchema,
+        params: muteAlertParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = rewriteParamsReq(req.params);
+        const params: MuteAlertRequestParamsV1 = req.params;
         try {
-          await rulesClient.muteInstance(params);
+          await rulesClient.muteInstance(transformRequestParamsToApplicationV1(params));
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
