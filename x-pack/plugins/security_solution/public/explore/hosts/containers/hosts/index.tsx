@@ -22,7 +22,7 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export const ID = 'hostsAllQuery';
 
@@ -62,9 +62,7 @@ export const useAllHost = ({
     getHostsSelector(state, type)
   );
 
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled =
-    riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
 

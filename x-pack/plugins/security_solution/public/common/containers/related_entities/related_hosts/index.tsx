@@ -12,7 +12,7 @@ import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/se
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import { useSearchStrategy } from '../../use_search_strategy';
 import { FAIL_RELATED_HOSTS } from './translations';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface UseUserRelatedHostsResult {
   inspect: InspectResponse;
@@ -50,8 +50,8 @@ export const useUserRelatedHosts = ({
     errorMessage: FAIL_RELATED_HOSTS,
     abort: skip,
   });
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled = riskScoreEngineStatus?.isNewRiskScoreModuleInstalled;
+
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
   const userRelatedHostsResponse = useMemo(
     () => ({

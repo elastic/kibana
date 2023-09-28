@@ -95,7 +95,6 @@ const RiskDetailsTabBodyComponent: React.FC<
   });
 
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled = riskScoreEngineStatus?.isNewRiskScoreModuleInstalled;
 
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
@@ -153,7 +152,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   return (
     <>
       {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
-      {isNewRiskScoreModuleInstalled ? (
+      {riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ? (
         <StyledEuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             {data?.[0] && (

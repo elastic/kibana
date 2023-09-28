@@ -21,6 +21,12 @@ export const useInvalidateRiskEngineStatusQuery = () => {
   }, [queryClient]);
 };
 
+export const useIsNewRiskScoreModuleInstalled = () => {
+  const { data: riskEngineStatus } = useRiskEngineStatus();
+
+  return riskEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+};
+
 export const useRiskEngineStatus = () => {
   const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 

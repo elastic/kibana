@@ -15,7 +15,7 @@ import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 import type { inputsModel } from '../../../../common/store';
 import * as overviewI18n from '../../../../overview/components/entity_analytics/common/translations';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const RiskScoresNoDataDetectedComponent = ({
   entityType,
@@ -24,8 +24,7 @@ const RiskScoresNoDataDetectedComponent = ({
   entityType: RiskScoreEntity;
   refetch: inputsModel.Refetch;
 }) => {
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled = riskScoreEngineStatus?.isNewRiskScoreModuleInstalled;
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
   const translations = useMemo(
     () => ({

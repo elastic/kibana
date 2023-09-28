@@ -25,7 +25,7 @@ import { useSearchStrategy } from '../../../../common/containers/use_search_stra
 import type { InspectResponse } from '../../../../types';
 import type { inputsModel } from '../../../../common/store';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -53,9 +53,7 @@ export const useRiskScoreKpi = ({
   const { addError } = useAppToasts();
   const spaceId = useSpaceId();
   const featureEnabled = useMlCapabilities().isPlatinumOrTrialLicense;
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const isNewRiskScoreModuleInstalled =
-    riskScoreEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
       ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
