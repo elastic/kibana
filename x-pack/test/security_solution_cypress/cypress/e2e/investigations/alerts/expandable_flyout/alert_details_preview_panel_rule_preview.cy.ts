@@ -35,7 +35,7 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe('Alert details expandable flyout rule preview panel', () => {
+describe('Alert details expandable flyout rule preview panel', { tags: ['@ess'] }, () => {
   const rule = getNewRule();
 
   beforeEach(() => {
