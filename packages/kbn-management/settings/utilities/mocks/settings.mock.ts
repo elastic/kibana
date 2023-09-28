@@ -14,13 +14,15 @@ type Settings = {
 
 /**
  * A utility function returning a representative set of UiSettings.
- * @param requirePageReload The value of the `requirePageReload` param for all settings.
+ * @param requiresPageReload The value of the `requirePageReload` param for all settings.
  */
-export const getSettingsMock = (requirePageReload: boolean = false): Settings => {
+export const getSettingsMock = (
+  requiresPageReload: boolean = false,
+  readonly: boolean = false
+): Settings => {
   const defaults = {
-    requiresPageReload: requirePageReload,
-    readonly: false,
-    category: ['category'],
+    requiresPageReload,
+    readonly,
   };
 
   return {
@@ -29,7 +31,8 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       name: 'array:test:setting',
       type: 'array',
       userValue: null,
-      value: ['example_value'],
+      value: ['foo', 'bar', 'baz'],
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     boolean: {
@@ -38,6 +41,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'boolean',
       userValue: null,
       value: true,
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     color: {
@@ -46,6 +50,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'color',
       userValue: null,
       value: '#FF00CC',
+      category: ['general', 'dashboard'],
       ...defaults,
     },
     image: {
@@ -54,6 +59,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'image',
       userValue: null,
       value: '',
+      category: ['dashboard', 'discover'],
       ...defaults,
     },
     number: {
@@ -62,6 +68,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'number',
       userValue: null,
       value: 1,
+      category: ['dashboard', 'discover'],
       ...defaults,
     },
     json: {
@@ -70,6 +77,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'json',
       userValue: null,
       value: '{"foo": "bar"}',
+      category: ['dashboard', 'discover'],
       ...defaults,
     },
     markdown: {
@@ -78,6 +86,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'markdown',
       userValue: null,
       value: '',
+      category: ['notifications', 'search'],
       ...defaults,
     },
     select: {
@@ -92,6 +101,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'select',
       userValue: null,
       value: 'apple',
+      category: ['notifications', 'search'],
       ...defaults,
     },
     string: {
@@ -100,6 +110,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'string',
       userValue: null,
       value: 'hello world',
+      category: ['notifications', 'search'],
       ...defaults,
     },
     undefined: {
@@ -108,6 +119,7 @@ export const getSettingsMock = (requirePageReload: boolean = false): Settings =>
       type: 'undefined',
       userValue: null,
       value: undefined,
+      category: ['notifications', 'search'],
       ...defaults,
     },
   };
