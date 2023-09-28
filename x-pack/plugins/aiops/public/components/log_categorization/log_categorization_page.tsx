@@ -24,9 +24,11 @@ import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -39,7 +41,7 @@ import {
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
+import type { EventRate } from './use_categorize_request';
 import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
