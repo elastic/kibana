@@ -6,6 +6,23 @@
  */
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import {
+  ALERT_RULE_TAGS,
+  SPACE_IDS,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  EVENT_ACTION,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+  ALERT_END,
+  ALERT_TIME_RANGE,
+} from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
@@ -60,56 +77,48 @@ export const buildRecoveredAlert = <
       alert,
       cleanedPayload,
       {
+        // Set latest rule configuration
+        ...rule,
         // Update the timestamp to reflect latest update time
-        '@timestamp': timestamp,
-        event: {
-          action: 'close',
-        },
-        kibana: {
-          alert: {
-            // Set the recovery action group
-            action_group: recoveryActionGroup,
-            // Set latest flapping state
-            flapping: legacyAlert.getFlapping(),
-            // Set latest flapping_history
-            flapping_history: legacyAlert.getFlappingHistory(),
-            // Set latest maintenance window IDs
-            maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-            // Set latest rule configuration
-            rule: rule.kibana?.alert.rule,
-            // Set status to 'recovered'
-            status: 'recovered',
-            // Set latest duration as recovered alerts should have updated duration
-            ...(legacyAlert.getState().duration
-              ? { duration: { us: legacyAlert.getState().duration } }
-              : {}),
-            // Set end time
-            ...(legacyAlert.getState().end
-              ? {
-                  end: legacyAlert.getState().end,
-                  time_range: {
-                    // this should get merged with a time_range.gte
-                    lte: legacyAlert.getState().end,
-                  },
-                }
-              : {}),
-
-            // Fields that are explicitly not updated:
-            // instance.id
-            // action_group
-            // uuid - recovered alerts should carry over previous UUID
-            // start - recovered alerts should keep the initial start time
-            // workflow_status - recovered alerts should keep the initial workflow_status
-          },
-          space_ids: rule.kibana?.space_ids,
-          // Set latest kibana version
-          version: kibanaVersion,
-        },
-        tags: Array.from(
+        [TIMESTAMP]: timestamp,
+        [EVENT_ACTION]: 'close',
+        // Set the recovery action group
+        [ALERT_ACTION_GROUP]: recoveryActionGroup,
+        // Set latest flapping state
+        [ALERT_FLAPPING]: legacyAlert.getFlapping(),
+        // Set latest flapping_history
+        [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+        [ALERT_INSTANCE_ID]: legacyAlert.getId(),
+        // Set latest maintenance window IDs
+        [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+        // Set status to 'recovered'
+        [ALERT_STATUS]: 'recovered',
+        // Set latest duration as recovered alerts should have updated duration
+        ...(legacyAlert.getState().duration
+          ? { [ALERT_DURATION]: legacyAlert.getState().duration }
+          : {}),
+        // Set end time
+        ...(legacyAlert.getState().end
+          ? {
+              [ALERT_END]: legacyAlert.getState().end,
+              // this should get merged with a ALERT_TIME_RANGE_GTE
+              [ALERT_TIME_RANGE]: { lte: legacyAlert.getState().end },
+            }
+          : {}),
+        // Fields that are explicitly not updated:
+        // instance.id
+        // action_group
+        // uuid - recovered alerts should carry over previous UUID
+        // start - recovered alerts should keep the initial start time
+        // workflow_status - recovered alerts should keep the initial workflow_status
+        [SPACE_IDS]: rule[SPACE_IDS],
+        // Set latest kibana version
+        [VERSION]: kibanaVersion,
+        [TAGS]: Array.from(
           new Set([
             ...((cleanedPayload?.tags as string[]) ?? []),
             ...(alert.tags ?? []),
-            ...(rule.kibana?.alert.rule.tags ?? []),
+            ...(rule[ALERT_RULE_TAGS] ?? []),
           ])
         ),
       },

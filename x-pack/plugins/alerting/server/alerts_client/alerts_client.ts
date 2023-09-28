@@ -7,13 +7,14 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { chunk, flatMap, isEmpty, keys } from 'lodash';
+import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -92,7 +93,7 @@ export class AlertsClient<
     primaryTerm: Record<string, number | undefined>;
   };
 
-  private rule: AlertRule = {};
+  private rule?: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
   private indexTemplateAndPattern: IIndexPatternString;
@@ -173,8 +174,8 @@ export class AlertsClient<
 
       for (const hit of results.flat()) {
         const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
-        const alertUuid = alertHit.kibana.alert.uuid;
-        const alertId = alertHit.kibana.alert.instance.id;
+        const alertUuid = get(alertHit, ALERT_UUID);
+        const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
         // Keep track of existing alert document so we can copy over data if alert is ongoing
         this.fetchedAlerts.data[alertId] = alertHit;
@@ -350,7 +351,7 @@ export class AlertsClient<
       if (!!activeAlerts[id]) {
         if (
           this.fetchedAlerts.data.hasOwnProperty(id) &&
-          this.fetchedAlerts.data[id].kibana.alert.status === 'active'
+          get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
           activeAlertsToIndex.push(
             buildOngoingAlert<
@@ -362,7 +363,7 @@ export class AlertsClient<
             >({
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
-              rule: this.rule,
+              rule: this.rule!,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -378,7 +379,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               legacyAlert: activeAlerts[id],
-              rule: this.rule,
+              rule: this.rule!,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -408,7 +409,7 @@ export class AlertsClient<
               >({
                 alert: this.fetchedAlerts.data[id],
                 legacyAlert: recoveredAlerts[id],
-                rule: this.rule,
+                rule: this.rule!,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -418,7 +419,7 @@ export class AlertsClient<
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
                 timestamp: currentTime,
-                rule: this.rule,
+                rule: this.rule!,
               })
         );
       } else {
@@ -432,12 +433,13 @@ export class AlertsClient<
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
       (alert: Alert & AlertData) => {
-        const alertIndex = this.fetchedAlerts.indices[alert.kibana.alert.uuid];
+        const alertUuid = get(alert, ALERT_UUID);
+        const alertIndex = this.fetchedAlerts.indices[alertUuid];
         if (!alertIndex) {
           return true;
         } else if (!isValidAlertIndexName(alertIndex)) {
           this.options.logger.warn(
-            `Could not update alert ${alert.kibana.alert.uuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
+            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
           );
           return false;
         }
@@ -446,16 +448,19 @@ export class AlertsClient<
     );
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
-        alertsToIndex.map((alert: Alert & AlertData) => [
-          getBulkMeta(
-            alert.kibana.alert.uuid,
-            this.fetchedAlerts.indices[alert.kibana.alert.uuid],
-            this.fetchedAlerts.seqNo[alert.kibana.alert.uuid],
-            this.fetchedAlerts.primaryTerm[alert.kibana.alert.uuid],
-            this.isUsingDataStreams()
-          ),
-          alert,
-        ])
+        alertsToIndex.map((alert: Alert & AlertData) => {
+          const alertUuid = get(alert, ALERT_UUID);
+          return [
+            getBulkMeta(
+              alertUuid,
+              this.fetchedAlerts.indices[alertUuid],
+              this.fetchedAlerts.seqNo[alertUuid],
+              this.fetchedAlerts.primaryTerm[alertUuid],
+              this.isUsingDataStreams()
+            ),
+            alert,
+          ];
+        })
       );
 
       try {

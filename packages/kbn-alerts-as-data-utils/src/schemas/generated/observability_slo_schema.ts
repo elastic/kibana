@@ -70,20 +70,12 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilitySloAlertRequired = rt.type({
 });
 const ObservabilitySloAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
-  slo: rt.partial({
-    id: schemaString,
-    instanceId: schemaString,
-    revision: schemaStringOrNumber,
-  }),
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'slo.id': schemaString,
+  'slo.instanceId': schemaString,
+  'slo.revision': schemaStringOrNumber,
 });
 
 // prettier-ignore

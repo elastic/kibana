@@ -8,6 +8,35 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { AlertRule } from '../types';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+  ALERT_TIME_RANGE,
+} from '@kbn/rule-data-utils';
 
 const rule = {
   category: 'My test rule',
@@ -26,12 +55,17 @@ const rule = {
   uuid: '1',
 };
 const alertRule: AlertRule = {
-  kibana: {
-    alert: {
-      rule,
-    },
-    space_ids: ['default'],
-  },
+  [ALERT_RULE_CATEGORY]: rule.category,
+  [ALERT_RULE_CONSUMER]: rule.consumer,
+  [ALERT_RULE_EXECUTION_UUID]: rule.execution.uuid,
+  [ALERT_RULE_NAME]: rule.name,
+  [ALERT_RULE_PARAMETERS]: rule.parameters,
+  [ALERT_RULE_PRODUCER]: rule.producer,
+  [ALERT_RULE_REVISION]: rule.revision,
+  [ALERT_RULE_TYPE_ID]: rule.rule_type_id,
+  [ALERT_RULE_TAGS]: rule.tags,
+  [ALERT_RULE_UUID]: rule.uuid,
+  [SPACE_IDS]: ['default'],
 };
 
 describe('buildNewAlert', () => {
@@ -47,29 +81,21 @@ describe('buildNewAlert', () => {
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -86,36 +112,24 @@ describe('buildNewAlert', () => {
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          duration: {
-            us: '0',
-          },
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          start: now,
-          rule,
-          status: 'active',
-          time_range: {
-            gte: now,
-          },
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [ALERT_DURATION]: '0',
+      [ALERT_START]: now,
+      [ALERT_TIME_RANGE]: { gte: now },
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -133,29 +147,21 @@ describe('buildNewAlert', () => {
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [true, false, false, false, true, true],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: ['maint-1', 'maint-321'],
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -165,7 +171,7 @@ describe('buildNewAlert', () => {
 
     expect(
       buildNewAlert<
-        { count: number; url: string; kibana: { alert: { nested_field: number } } },
+        { count: number; url: string; 'kibana.alert.nested_field': number },
         {},
         {},
         'default',
@@ -174,36 +180,28 @@ describe('buildNewAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-28T12:27:28.159Z',
-        payload: { count: 1, url: `https://url1`, kibana: { alert: { nested_field: 2 } } },
+        payload: { count: 1, url: `https://url1`, 'kibana.alert.nested_field': 2 },
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
+      ...alertRule,
       count: 1,
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          nested_field: 2,
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
       url: `https://url1`,
+      'kibana.alert.nested_field': 2,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -213,7 +211,7 @@ describe('buildNewAlert', () => {
 
     expect(
       buildNewAlert<
-        Alert & { count: number; url: string; kibana: { alert: { nested_field: number } } },
+        Alert & { count: number; url: string; 'kibana.alert.nested_field': number },
         {},
         {},
         'default',
@@ -225,37 +223,30 @@ describe('buildNewAlert', () => {
         payload: {
           count: 1,
           url: `https://url1`,
-          kibana: { alert: { nested_field: 2, workflow_status: 'custom_workflow' } },
+          'kibana.alert.nested_field': 2,
+          [ALERT_WORKFLOW_STATUS]: 'custom_workflow',
         },
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
+      ...alertRule,
       count: 1,
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          nested_field: 2,
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'custom_workflow',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
       url: `https://url1`,
+      'kibana.alert.nested_field': 2,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'custom_workflow',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -268,7 +259,8 @@ describe('buildNewAlert', () => {
         {
           count: number;
           url: string;
-          kibana: { alert: { action_group: string; nested_field: number } };
+          [ALERT_ACTION_GROUP]: string;
+          'kibana.alert.nested_field': number;
         },
         {},
         {},
@@ -281,37 +273,30 @@ describe('buildNewAlert', () => {
         payload: {
           count: 1,
           url: `https://url1`,
-          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+          [ALERT_ACTION_GROUP]: 'bad action group',
+          'kibana.alert.nested_field': 2,
         },
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
+      ...alertRule,
       count: 1,
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          nested_field: 2,
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['rule-', '-tags'],
       url: `https://url1`,
+      'kibana.alert.nested_field': 2,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
     });
   });
 
@@ -324,7 +309,8 @@ describe('buildNewAlert', () => {
         {
           count: number;
           url: string;
-          kibana: { alert: { action_group: string; nested_field: number } };
+          [ALERT_ACTION_GROUP]: string;
+          'kibana.alert.nested_field': number;
           tags: string[];
         },
         {},
@@ -338,38 +324,31 @@ describe('buildNewAlert', () => {
         payload: {
           count: 1,
           url: `https://url1`,
-          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+          [ALERT_ACTION_GROUP]: 'bad action group',
+          'kibana.alert.nested_field': 2,
           tags: ['custom-tag1', '-tags'],
         },
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      '@timestamp': '2023-03-28T12:27:28.159Z',
+      ...alertRule,
       count: 1,
-      event: {
-        action: 'open',
-        kind: 'signal',
-      },
-      kibana: {
-        alert: {
-          action_group: 'default',
-          flapping: false,
-          flapping_history: [],
-          instance: {
-            id: 'alert-A',
-          },
-          maintenance_window_ids: [],
-          nested_field: 2,
-          rule,
-          status: 'active',
-          uuid: legacyAlert.getUuid(),
-          workflow_status: 'open',
-        },
-        space_ids: ['default'],
-        version: '8.9.0',
-      },
-      tags: ['custom-tag1', '-tags', 'rule-'],
       url: `https://url1`,
+      'kibana.alert.nested_field': 2,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['custom-tag1', '-tags', 'rule-'],
     });
   });
 });

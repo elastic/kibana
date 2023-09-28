@@ -31,7 +31,7 @@ export const createSchemaFromFieldMap = ({
   useAlert = false,
   useEcs = false,
   useLegacyAlerts = false,
-  flattened = false,
+  flattened = true,
 }: CreateSchemaFromFieldMapOpts) => {
   const lineWriters = {
     IMPORTS: createLineWriter(),

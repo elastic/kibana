@@ -7,7 +7,26 @@
 import deepmerge from 'deepmerge';
 import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_TAGS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  SPACE_IDS,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
@@ -57,44 +76,31 @@ export const buildNewAlert = <
     [
       cleanedPayload,
       {
-        '@timestamp': timestamp,
-        event: {
-          action: 'open',
-          kind: 'signal',
-        },
-        kibana: {
-          alert: {
-            action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
-            flapping: legacyAlert.getFlapping(),
-            flapping_history: legacyAlert.getFlappingHistory(),
-            instance: {
-              id: legacyAlert.getId(),
-            },
-            maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-            rule: rule.kibana?.alert.rule,
-            status: 'active',
-            uuid: legacyAlert.getUuid(),
-            workflow_status: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
-            ...(legacyAlert.getState().duration
-              ? { duration: { us: legacyAlert.getState().duration } }
-              : {}),
-            ...(legacyAlert.getState().start
-              ? {
-                  start: legacyAlert.getState().start,
-                  time_range: {
-                    gte: legacyAlert.getState().start,
-                  },
-                }
-              : {}),
-          },
-          space_ids: rule.kibana?.space_ids,
-          version: kibanaVersion,
-        },
-        tags: Array.from(
-          new Set([
-            ...((cleanedPayload?.tags as string[]) ?? []),
-            ...(rule.kibana?.alert.rule.tags ?? []),
-          ])
+        ...rule,
+        [TIMESTAMP]: timestamp,
+        [EVENT_ACTION]: 'open',
+        [EVENT_KIND]: 'signal',
+        [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
+        [ALERT_FLAPPING]: legacyAlert.getFlapping(),
+        [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+        [ALERT_INSTANCE_ID]: legacyAlert.getId(),
+        [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+        [ALERT_STATUS]: 'active',
+        [ALERT_UUID]: legacyAlert.getUuid(),
+        [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
+        ...(legacyAlert.getState().duration
+          ? { [ALERT_DURATION]: legacyAlert.getState().duration }
+          : {}),
+        ...(legacyAlert.getState().start
+          ? {
+              [ALERT_START]: legacyAlert.getState().start,
+              [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+            }
+          : {}),
+        [SPACE_IDS]: rule[SPACE_IDS],
+        [VERSION]: kibanaVersion,
+        [TAGS]: Array.from(
+          new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])
         ),
       },
     ],

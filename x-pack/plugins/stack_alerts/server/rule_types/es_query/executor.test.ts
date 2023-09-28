@@ -303,22 +303,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '491',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 491
 - Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query",
-              evaluation: {
-                conditions: 'Number of matching documents is greater than or equal to 200',
-                value: 491,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -389,23 +385,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '291',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 291
 - Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-1",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-1" is greater than or equal to 200',
-                value: 291,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(2, {
@@ -432,23 +423,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-2" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '477',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 477
 - Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-2",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-2" is greater than or equal to 200',
-                value: 477,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-2",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(3, {
@@ -475,23 +461,18 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          kibana: {
-            alert: {
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-3" is greater than or equal to 200',
+          'kibana.alert.evaluation.value': '999',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 999
-- Conditions Met: Number of matching documents for group \"host-3\" is greater than or equal to 200 over 5m
+- Conditions Met: Number of matching documents for group "host-3" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query for group host-3",
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-3" is greater than or equal to 200',
-                value: 999,
-              },
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-3",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -543,22 +524,17 @@ describe('es_query executor', () => {
         },
         id: 'query matched',
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions: 'Query matched documents',
-                value: 198,
-              },
-              reason: `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions': 'Query matched documents',
+          'kibana.alert.evaluation.value': '198',
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 198
 - Conditions Met: Query matched documents over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' matched query",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
         state: {
           dateEnd: new Date(mockNow).toISOString(),
@@ -664,22 +640,18 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions: 'Number of matching documents is NOT greater than or equal to 500',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is NOT greater than or equal to 500',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents is NOT greater than or equal to 500 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -737,23 +709,18 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group \"host-1\" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetAlertData).toHaveBeenNthCalledWith(2, {
@@ -773,23 +740,18 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions:
-                  'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group \"host-2\" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -842,22 +804,17 @@ describe('es_query executor', () => {
           value: 0,
         },
         payload: {
-          kibana: {
-            alert: {
-              evaluation: {
-                conditions: 'Query did NOT match documents',
-                value: 0,
-              },
-              reason: `rule 'test-rule-name' is recovered:
+          'kibana.alert.evaluation.conditions': 'Query did NOT match documents',
+          'kibana.alert.evaluation.value': '0',
+          'kibana.alert.reason': `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Query did NOT match documents over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-              title: "rule 'test-rule-name' recovered",
-              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-            },
-          },
+          'kibana.alert.title': "rule 'test-rule-name' recovered",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
