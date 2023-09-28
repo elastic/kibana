@@ -6,6 +6,7 @@
  */
 
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { Asset } from '../../common/types_api';
 import { AssetManagerConfig } from '../types';
@@ -21,6 +22,7 @@ interface AssetAccessorClassOptions {
   sourceIndices: AssetManagerConfig['sourceIndices'];
   source: AssetManagerConfig['lockedSource'];
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
+  metricsClient: MetricsDataClient;
 }
 
 export class AssetAccessor {
@@ -31,6 +33,7 @@ export class AssetAccessor {
       ...options,
       sourceIndices: this.options.sourceIndices,
       getApmIndices: this.options.getApmIndices,
+      metricsClient: this.options.metricsClient,
     };
   }
 
