@@ -12,10 +12,10 @@ import {
   JOB_MAP_NODE_TYPES,
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import type { MlFeatures, RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,

@@ -13,7 +13,6 @@ import React from 'react';
 import { HeaderActionMenu } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
-  isOpen: boolean;
   headerActionMenuMounter: { mount: MountPoint<HTMLElement> | undefined };
 }
 export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {

@@ -32,7 +32,7 @@ import { JobsExportService } from './jobs_export_service';
 import type { JobDependencies } from './jobs_export_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../../contexts/ml';
 
 interface Props {
   isDisabled: boolean;
@@ -68,7 +68,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     () => toastNotificationServiceProvider(toasts),
     [toasts]
   );
-  const [isADEnabled, isDFAEnabled] = usePermissionCheck(['isADEnabled', 'isDFAEnabled']);
+  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
 
   const [jobDependencies, setJobDependencies] = useState<JobDependencies>([]);
   const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);

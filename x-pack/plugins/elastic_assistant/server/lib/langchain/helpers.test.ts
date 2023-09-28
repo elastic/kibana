@@ -8,12 +8,7 @@
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
-import {
-  getLangChainMessage,
-  getLangChainMessages,
-  getMessageContentAndRole,
-  unsafeGetAssistantMessagesFromRequest,
-} from './helpers';
+import { getLangChainMessage, getLangChainMessages, getMessageContentAndRole } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {
@@ -108,78 +103,6 @@ describe('helpers', () => {
 
         expect(result).toEqual(expectedOutput);
       });
-    });
-  });
-
-  describe('unsafeGetAssistantMessagesFromRequest', () => {
-    const rawSubActionParamsBody = {
-      messages: [
-        { role: 'user', content: '\n\n\n\nWhat is my name?' },
-        {
-          role: 'assistant',
-          content:
-            "Hello! Since we are communicating through text, I do not have the information about your name. Please feel free to share your name with me, if you'd like.",
-        },
-        { role: 'user', content: '\n\nMy name is Andrew' },
-        {
-          role: 'assistant',
-          content:
-            "Hi, Andrew! It's nice to meet you. How can I help you or what would you like to talk about today?",
-        },
-        { role: 'user', content: '\n\nDo you know my name?' },
-      ],
-    };
-
-    it('returns the expected assistant messages from a conversation', () => {
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(rawSubActionParamsBody));
-
-      const expected = [
-        { role: 'user', content: '\n\n\n\nWhat is my name?' },
-        {
-          role: 'assistant',
-          content:
-            "Hello! Since we are communicating through text, I do not have the information about your name. Please feel free to share your name with me, if you'd like.",
-        },
-        { role: 'user', content: '\n\nMy name is Andrew' },
-        {
-          role: 'assistant',
-          content:
-            "Hi, Andrew! It's nice to meet you. How can I help you or what would you like to talk about today?",
-        },
-        { role: 'user', content: '\n\nDo you know my name?' },
-      ];
-
-      expect(result).toEqual(expected);
-    });
-
-    it('returns an empty array when the rawSubActionParamsBody is undefined', () => {
-      const result = unsafeGetAssistantMessagesFromRequest(undefined);
-
-      expect(result).toEqual([]);
-    });
-
-    it('returns an empty array when the rawSubActionParamsBody messages[] array is empty', () => {
-      const hasEmptyMessages = {
-        messages: [],
-      };
-
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(hasEmptyMessages));
-
-      expect(result).toEqual([]);
-    });
-
-    it('returns an empty array when the rawSubActionParamsBody shape is unexpected', () => {
-      const unexpected = { invalidKey: 'some_value' };
-
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(unexpected));
-
-      expect(result).toEqual([]);
-    });
-
-    it('returns an empty array when the rawSubActionParamsBody is invalid JSON', () => {
-      const result = unsafeGetAssistantMessagesFromRequest('[]');
-
-      expect(result).toEqual([]);
     });
   });
 });
