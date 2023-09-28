@@ -35,7 +35,4 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
-  dev: {
-    enableIndexDetailsPage?: boolean;
-  };
 }
