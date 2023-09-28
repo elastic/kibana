@@ -9,7 +9,7 @@ export const SCOPE = ['securitySolution'];
 export const TYPE = 'risk_engine:risk_scoring';
 export const VERSION = '0.0.1';
 export const INTERVAL = '1h';
-export const TIMEOUT = '5m';
+export const TIMEOUT = '10m';
 
 export const RISK_SCORING_TASK_CONSTANTS = {
   SCOPE,
