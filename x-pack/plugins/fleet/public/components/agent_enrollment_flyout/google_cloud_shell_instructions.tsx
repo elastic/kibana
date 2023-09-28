@@ -24,7 +24,7 @@ export const GoogleCloudShellInstructions: React.FunctionComponent<Props> = ({
 }) => {
   return (
     <>
-      <GoogleCloudShellGuide commandText={cloudShellCommand} prjIdGiven={!!projectId}/>
+      <GoogleCloudShellGuide commandText={cloudShellCommand} prjIdGiven={!!projectId} />
       <EuiSpacer size="m" />
       <EuiButton
         color="primary"
