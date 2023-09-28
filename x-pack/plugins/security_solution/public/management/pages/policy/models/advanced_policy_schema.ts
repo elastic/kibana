@@ -1362,4 +1362,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.document_enrichment.fields',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.document_enrichment.fields',
+      {
+        defaultMessage:
+          'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
 ];
