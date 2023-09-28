@@ -241,7 +241,7 @@ export default function AlertDetailsAppSection({
   };
 
   const relatedEventsTimeRangeEnd = moment(alert.start).add(
-    ruleParams.criteria[0].timeSize ?? 5,
+    (ruleParams.criteria[0].timeSize ?? 5) * 2,
     ruleParams.criteria[0].timeUnit ?? 'minutes'
   );
 
