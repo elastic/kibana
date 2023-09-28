@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { initGenAiDashboard } from './create_dashboard';
-import { getGenAiDashboard } from './dashboard';
+import { initDashboard } from './create_dashboard';
+import { getDashboard } from './dashboard';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Logger } from '@kbn/logging';
@@ -24,7 +24,7 @@ describe('createDashboard', () => {
   });
   it('fetches the Gen Ai Dashboard saved object', async () => {
     const dashboardId = 'test-dashboard-id';
-    const result = await initGenAiDashboard({ logger, savedObjectsClient, dashboardId });
+    const result = await initDashboard({ logger, savedObjectsClient, dashboardId });
     expect(result.success).toBe(true);
     expect(logger.error).not.toHaveBeenCalled();
     expect(savedObjectsClient.get).toHaveBeenCalledWith('dashboard', dashboardId);
@@ -46,12 +46,12 @@ describe('createDashboard', () => {
         },
       }),
     };
-    const result = await initGenAiDashboard({ logger, savedObjectsClient: soClient, dashboardId });
+    const result = await initDashboard({ logger, savedObjectsClient: soClient, dashboardId });
 
     expect(soClient.get).toHaveBeenCalledWith('dashboard', dashboardId);
     expect(soClient.create).toHaveBeenCalledWith(
       'dashboard',
-      getGenAiDashboard(dashboardId).attributes,
+      getDashboard(dashboardId).attributes,
       { overwrite: true, id: dashboardId }
     );
     expect(result.success).toBe(true);
@@ -73,7 +73,7 @@ describe('createDashboard', () => {
       }),
     };
     const dashboardId = 'test-dashboard-id';
-    const result = await initGenAiDashboard({ logger, savedObjectsClient: soClient, dashboardId });
+    const result = await initDashboard({ logger, savedObjectsClient: soClient, dashboardId });
     expect(result.success).toBe(false);
     expect(result.error?.message).toBe('Internal Server Error: Error happened');
     expect(result.error?.statusCode).toBe(500);
