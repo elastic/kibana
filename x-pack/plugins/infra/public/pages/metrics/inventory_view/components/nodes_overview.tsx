@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
@@ -22,7 +21,6 @@ import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
-import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -63,15 +61,10 @@ export const NodesOverview = ({
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
 
-  const [isAlertFlyoutVisible, setIsAlertFlyoutVisible] = useState(false);
-
   const closeFlyout = useCallback(
     () => setFlyoutUrlState({ detailsItemId: null }),
     [setFlyoutUrlState]
   );
-  const handleCreateRuleClick = () => {
-    setIsAlertFlyoutVisible(true);
-  };
 
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -149,24 +142,12 @@ export const NodesOverview = ({
         staticHeight={isStatic}
       />
       {nodeType === 'host' && detailsItemId && (
-        <>
-          {isAlertFlyoutVisible && (
-            <AlertFlyout
-              filter={`${findInventoryFields(nodeType).id}: "${detailsItemId}"`}
-              options={options}
-              nodeType={nodeType}
-              setVisible={(isOpen) => setIsAlertFlyoutVisible(isOpen)}
-              visible={isAlertFlyoutVisible}
-            />
-          )}
-          <AssetDetailsFlyout
-            onCreateRuleClick={handleCreateRuleClick}
-            closeFlyout={closeFlyout}
-            assetName={detailsItemId}
-            assetType={nodeType}
-            currentTime={currentTime}
-          />
-        </>
+        <AssetDetailsFlyout
+          closeFlyout={closeFlyout}
+          assetName={detailsItemId}
+          assetType={nodeType}
+          currentTime={currentTime}
+        />
       )}
       <Legend
         formatter={formatter}

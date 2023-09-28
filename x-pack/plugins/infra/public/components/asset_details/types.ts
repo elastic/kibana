@@ -37,7 +37,6 @@ export interface OverridableTabState {
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
-    inventoryRuleLabel?: string;
   };
 }
 

@@ -17,7 +17,6 @@ interface Props {
   assetName: string;
   assetType: InventoryItemType;
   closeFlyout: () => void;
-  onCreateRuleClick: () => void;
   currentTime: number;
 }
 
@@ -33,13 +32,7 @@ const flyoutTabs = [
   },
 ];
 
-export const AssetDetailsFlyout = ({
-  assetName,
-  assetType,
-  closeFlyout,
-  onCreateRuleClick,
-  currentTime,
-}: Props) => {
+export const AssetDetailsFlyout = ({ assetName, assetType, closeFlyout, currentTime }: Props) => {
   const { source } = useSourceContext();
 
   return source ? (
@@ -50,15 +43,9 @@ export const AssetDetailsFlyout = ({
         metadata: {
           showActionsColumn: false,
         },
-        alertRule: {
-          onCreateRuleClick,
-          inventoryRuleLabel: i18n.translate('xpack.infra.infra.nodeDetails.createAlertLink', {
-            defaultMessage: 'Create inventory rule',
-          }),
-        },
       }}
       tabs={flyoutTabs}
-      links={['alertRule', 'nodeDetails']}
+      links={['nodeDetails']}
       renderMode={{
         mode: 'flyout',
         closeFlyout,
