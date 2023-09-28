@@ -14,11 +14,6 @@ import { LinksReduxState } from './types';
 import { LinksAttributes } from '../../common/content_management';
 
 export const linksReducers = {
-  /**
-   * TODO: Right now, we aren't using any reducers - but, I'm keeping this here as a draft
-   * just in case we need them later on. As a final cleanup, we could remove this if we never
-   * end up using reducers
-   */
   setLoading: (state: WritableDraft<LinksReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },

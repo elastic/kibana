@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/links-plugin",
   "owner": "@elastic/kibana-presentation",
-  "description": "An dashboard panel for creating links to dashboards or external links.",
+  "description": "A dashboard panel for creating links to dashboards or external links.",
   "plugin": {
     "id": "links",
     "server": true,

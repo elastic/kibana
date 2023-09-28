@@ -52,6 +52,10 @@ export class LinksEmbeddable
   private subscriptions: Subscription = new Subscription();
 
   // state management
+  /**
+   * TODO: Keep track of the necessary state without the redux embeddable tools; it's kind of overkill here.
+   *       Related issue: https://github.com/elastic/kibana/issues/167577
+   */
   public select: LinksReduxEmbeddableTools['select'];
   public getState: LinksReduxEmbeddableTools['getState'];
   public dispatch: LinksReduxEmbeddableTools['dispatch'];

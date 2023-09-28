@@ -56,9 +56,7 @@ export const getPanelLayoutsAreEqual = (
     ];
     for (const key of keys) {
       if (key === undefined) continue;
-      if (!defaultDiffFunction(originalObj[key], newObj[key])) {
-        differences[key] = newObj[key];
-      }
+      if (!defaultDiffFunction(originalObj[key], newObj[key])) differences[key] = newObj[key];
     }
     return differences;
   };
