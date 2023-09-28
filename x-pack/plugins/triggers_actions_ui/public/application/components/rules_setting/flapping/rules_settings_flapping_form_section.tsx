@@ -28,7 +28,6 @@ import {
   MAX_LOOK_BACK_WINDOW,
   MAX_STATUS_CHANGE_THRESHOLD,
 } from '@kbn/alerting-plugin/common';
-import { useKibana } from '../../../common/lib/kibana';
 
 type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;
 
@@ -149,23 +148,14 @@ export interface RulesSettingsFlappingFormSectionProps {
   flappingSettings: RulesSettingsFlappingProperties;
   compressed?: boolean;
   onChange: (key: OnChangeKey, value: number) => void;
+  canWrite: boolean;
 }
 
 export const RulesSettingsFlappingFormSection = memo(
   (props: RulesSettingsFlappingFormSectionProps) => {
-    const { flappingSettings, compressed = false, onChange } = props;
+    const { flappingSettings, compressed = false, onChange, canWrite } = props;
 
     const { lookBackWindow, statusChangeThreshold } = flappingSettings;
-
-    const {
-      application: { capabilities },
-    } = useKibana().services;
-
-    const {
-      rulesSettings: { writeFlappingSettingsUI },
-    } = capabilities;
-
-    const canWriteFlappingSettings = writeFlappingSettingsUI;
 
     return (
       <EuiFlexGroup direction="column">
@@ -193,7 +183,7 @@ export const RulesSettingsFlappingFormSection = memo(
             onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
             label={lookBackWindowLabel}
             labelPopoverText={lookBackWindowHelp}
-            disabled={!canWriteFlappingSettings}
+            disabled={!canWrite}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -205,7 +195,7 @@ export const RulesSettingsFlappingFormSection = memo(
             onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
             label={statusChangeThresholdLabel}
             labelPopoverText={statusChangeThresholdHelp}
-            disabled={!canWriteFlappingSettings}
+            disabled={!canWrite}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

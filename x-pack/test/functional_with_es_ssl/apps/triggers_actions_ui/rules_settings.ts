@@ -78,9 +78,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping enabled by default
-      await testSubjects.missingOrFail('rulesSettingsModalFlappingOffPrompt');
+      await testSubjects.missingOrFail('rulesSettingsFlappingOffPrompt');
 
-      await testSubjects.existOrFail('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingEnableSwitch');
       await testSubjects.existOrFail('lookBackWindowRangeInput');
       await testSubjects.existOrFail('statusChangeThresholdRangeInput');
 
@@ -110,8 +110,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
 
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
 
       // Save
       await testSubjects.click('rulesSettingsModalSaveButton');
@@ -123,8 +123,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping initially disabled
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
 
       lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');

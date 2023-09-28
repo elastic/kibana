@@ -16,6 +16,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettings,
+  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../../common';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';
@@ -32,6 +33,13 @@ const getMockRulesSettings = (): RulesSettings => {
       createdAt: '2023-03-24T00:00:00.000Z',
       updatedBy: 'test name',
       updatedAt: '2023-03-24T00:00:00.000Z',
+    },
+    queryDelay: {
+      delay: DEFAULT_QUERY_DELAY_SETTINGS.delay,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   };
 };
@@ -129,6 +137,9 @@ describe('RulesSettingsFlappingClient', () => {
           updatedBy: 'updated-user',
           createdBy: 'test name',
           createdAt: '2023-03-24T00:00:00.000Z',
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 15,
         }),
       },
       { version: '123' }

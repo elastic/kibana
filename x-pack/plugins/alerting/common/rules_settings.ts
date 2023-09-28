@@ -42,7 +42,7 @@ export const MAX_QUERY_DELAY = 60;
 export const RULES_SETTINGS_FEATURE_ID = 'rulesSettings';
 export const ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'allFlappingSettings';
 export const READ_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'readFlappingSettings';
-export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'queryDelaySettings';
+export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'allQueryDelaySettings';
 export const READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'readQueryDelaySettings';
 
 export const API_PRIVILEGES = {

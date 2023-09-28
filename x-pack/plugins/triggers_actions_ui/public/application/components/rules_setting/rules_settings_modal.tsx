@@ -14,142 +14,17 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchProps,
-  EuiPanel,
-  EuiText,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  RulesSettingsFlappingFormSection,
-  RulesSettingsFlappingFormSectionProps,
-  RulesSettingsFlappingTitle,
-} from './rules_settings_flapping_form_section';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 import { useUpdateFlappingSettings } from '../../hooks/use_update_flapping_settings';
-import { CenterJustifiedSpinner } from '../center_justified_spinner';
-
-const flappingDescription = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
-  {
-    defaultMessage:
-      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
-  }
-);
-
-const flappingOnLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOnLabel',
-  {
-    defaultMessage: 'On (recommended)',
-  }
-);
-
-const flappingOffLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOffLabel',
-  {
-    defaultMessage: 'Off',
-  }
-);
-
-export const RulesSettingsErrorPrompt = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      data-test-subj="rulesSettingsErrorPrompt"
-      color="danger"
-      iconType="warning"
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptTitle"
-            defaultMessage="Unable to load your rules settings"
-          />
-        </h4>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptBody"
-            defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
-          />
-        </p>
-      }
-    />
-  );
-});
-
-interface RulesSettingsModalFormLeftProps {
-  settings: RulesSettingsFlappingProperties;
-  onChange: EuiSwitchProps['onChange'];
-  isSwitchDisabled: boolean;
-}
-
-export const RulesSettingsModalFormLeft = memo((props: RulesSettingsModalFormLeftProps) => {
-  const { settings, onChange, isSwitchDisabled } = props;
-
-  return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            <p>{flappingDescription}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            data-test-subj="rulesSettingsModalEnableSwitch"
-            label={settings!.enabled ? flappingOnLabel : flappingOffLabel}
-            checked={settings!.enabled}
-            disabled={isSwitchDisabled}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-});
-
-interface RulesSettingsModalFormRightProps {
-  settings: RulesSettingsFlappingProperties;
-  onChange: RulesSettingsFlappingFormSectionProps['onChange'];
-}
-
-export const RulesSettingsModalFormRight = memo((props: RulesSettingsModalFormRightProps) => {
-  const { settings, onChange } = props;
-
-  if (!settings) {
-    return null;
-  }
-  if (!settings.enabled) {
-    return (
-      <EuiFlexItem data-test-subj="rulesSettingsModalFlappingOffPrompt">
-        <EuiPanel borderRadius="none" color="subdued" grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
-              defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval, which might result in higher alert volumes."
-            />
-          </EuiText>
-        </EuiPanel>
-      </EuiFlexItem>
-    );
-  }
-
-  return (
-    <EuiFlexItem>
-      <RulesSettingsFlappingFormSection flappingSettings={settings} onChange={onChange} />
-    </EuiFlexItem>
-  );
-});
+import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 
 export interface RulesSettingsModalProps {
   isVisible: boolean;
@@ -165,7 +40,14 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     application: { capabilities },
   } = useKibana().services;
   const {
-    rulesSettings: { show, save, writeFlappingSettingsUI, readFlappingSettingsUI },
+    rulesSettings: {
+      show,
+      save,
+      writeFlappingSettingsUI,
+      readFlappingSettingsUI,
+      // writeQueryDelaySettingsUI,
+      // readQueryDelaySettingsUI,
+    },
   } = capabilities;
 
   const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
@@ -194,6 +76,8 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // sub-feature capabilities (writeXSettingsUI).
   const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
   const canShowFlappingSettings = show && readFlappingSettingsUI;
+  // const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasError;
+  // const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
 
   const handleSettingsChange = (
     key: keyof RulesSettingsFlappingProperties,
@@ -228,36 +112,6 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     return null;
   }
 
-  const maybeRenderForm = () => {
-    if (hasError || !canShowFlappingSettings) {
-      return <RulesSettingsErrorPrompt />;
-    }
-    if (!settings || isLoading) {
-      return <CenterJustifiedSpinner />;
-    }
-    return (
-      <EuiForm>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <RulesSettingsFlappingTitle />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
-          <RulesSettingsModalFormLeft
-            isSwitchDisabled={!canWriteFlappingSettings}
-            settings={settings}
-            onChange={(e) => handleSettingsChange('enabled', e.target.checked)}
-          />
-          <RulesSettingsModalFormRight
-            settings={settings}
-            onChange={(key, value) => handleSettingsChange(key, value)}
-          />
-        </EuiFlexGroup>
-      </EuiForm>
-    );
-  };
-
   return (
     <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
       <EuiModalHeader>
@@ -276,7 +130,14 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           })}
         />
         <EuiHorizontalRule />
-        {maybeRenderForm()}
+        <RulesSettingsFlappingSection
+          onChange={(key, value) => handleSettingsChange(key, value)}
+          settings={settings}
+          canWrite={canWriteFlappingSettings}
+          canShow={canShowFlappingSettings}
+          hasError={hasError}
+          isLoading={isLoading}
+        />
         <EuiSpacer />
         <EuiHorizontalRule margin="none" />
       </EuiModalBody>

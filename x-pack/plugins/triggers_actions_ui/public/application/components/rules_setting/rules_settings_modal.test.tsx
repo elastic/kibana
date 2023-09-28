@@ -113,9 +113,9 @@ describe('rules_settings_modal', () => {
     await waitFor(() => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
-    expect(result.getByTestId('rulesSettingsModalEnableSwitch').getAttribute('aria-checked')).toBe(
-      'true'
-    );
+    expect(
+      result.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
+    ).toBe('true');
     expect(result.getByTestId('lookBackWindowRangeInput').getAttribute('value')).toBe('10');
     expect(result.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('10');
 
@@ -207,9 +207,9 @@ describe('rules_settings_modal', () => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
 
-    expect(result.queryByTestId('rulesSettingsModalFlappingOffPrompt')).toBe(null);
-    userEvent.click(result.getByTestId('rulesSettingsModalEnableSwitch'));
-    expect(result.queryByTestId('rulesSettingsModalFlappingOffPrompt')).not.toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
+    userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
+    expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).not.toBe(null);
   });
 
   test('form elements are disabled when provided with insufficient write permissions', async () => {
@@ -232,7 +232,7 @@ describe('rules_settings_modal', () => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
 
-    expect(result.getByTestId('rulesSettingsModalEnableSwitch')).toBeDisabled();
+    expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
     expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
     expect(result.getByTestId('statusChangeThresholdRangeInput')).toBeDisabled();
     expect(result.getByTestId('rulesSettingsModalSaveButton')).toBeDisabled();
@@ -259,6 +259,6 @@ describe('rules_settings_modal', () => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
 
-    expect(result.getByTestId('rulesSettingsErrorPrompt')).toBeInTheDocument();
+    expect(result.queryByTestId('rulesSettingsFlappingSection')).toBe(null);
   });
 });

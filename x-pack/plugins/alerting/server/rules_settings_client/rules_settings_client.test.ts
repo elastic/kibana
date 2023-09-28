@@ -18,6 +18,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettings,
+  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../common';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';
@@ -36,6 +37,13 @@ const getMockRulesSettings = (): RulesSettings => {
       enabled: DEFAULT_FLAPPING_SETTINGS.enabled,
       lookBackWindow: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
       statusChangeThreshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    queryDelay: {
+      delay: DEFAULT_QUERY_DELAY_SETTINGS.delay,
       createdBy: 'test name',
       updatedBy: 'test name',
       createdAt: new Date().toISOString(),
@@ -85,6 +93,13 @@ describe('RulesSettingsClient', () => {
           enabled: mockAttributes.flapping.enabled,
           lookBackWindow: mockAttributes.flapping.lookBackWindow,
           statusChangeThreshold: mockAttributes.flapping.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 15,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -156,6 +171,13 @@ describe('RulesSettingsClient', () => {
           enabled: mockAttributes.flapping.enabled,
           lookBackWindow: mockAttributes.flapping.lookBackWindow,
           statusChangeThreshold: mockAttributes.flapping.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 15,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
@@ -249,6 +271,13 @@ describe('RulesSettingsClient', () => {
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
+        queryDelay: expect.objectContaining({
+          delay: 15,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
       },
       {
         id: RULES_SETTINGS_SAVED_OBJECT_ID,
@@ -265,6 +294,13 @@ describe('RulesSettingsClient', () => {
           enabled: false,
           lookBackWindow: 5,
           statusChangeThreshold: 5,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+        queryDelay: expect.objectContaining({
+          delay: 15,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
