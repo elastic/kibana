@@ -393,6 +393,21 @@ describe('Risk Scoring Task', () => {
           );
         });
       });
+
+      describe('when the task timeout has been exceeded', () => {
+        it('stops task execution', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: true,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+          });
+
+          expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
+        });
+
+        it.todo('reports an execution error');
+      });
     });
   });
 });

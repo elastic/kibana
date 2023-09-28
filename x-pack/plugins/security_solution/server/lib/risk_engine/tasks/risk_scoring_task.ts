@@ -151,10 +151,12 @@ export const removeRiskScoringTask = async ({
 
 export const runTask = async ({
   getRiskScoreService,
+  isCancelled,
   logger,
   taskInstance,
 }: {
   logger: Logger;
+  isCancelled?: boolean;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
 }): Promise<{
@@ -215,7 +217,7 @@ export const runTask = async ({
     : [RiskScoreEntity.host, RiskScoreEntity.user];
 
   await asyncForEach(identifierTypes, async (identifierType) => {
-    let isWorkComplete = false;
+    let isWorkComplete = !!isCancelled;
     let afterKeys: AfterKeys = {};
     while (!isWorkComplete) {
       const result = await riskScoreService.calculateAndPersistScores({
@@ -229,7 +231,7 @@ export const runTask = async ({
         weights: [],
       });
 
-      isWorkComplete = isRiskScoreCalculationComplete(result);
+      isWorkComplete = isRiskScoreCalculationComplete(result) || !!isCancelled;
       afterKeys = result.after_keys;
       scoresWritten += result.scores_written;
     }
@@ -243,11 +245,20 @@ export const runTask = async ({
   };
 };
 
-const createTaskRunnerFactory =
-  ({ logger, getRiskScoreService }: { logger: Logger; getRiskScoreService: GetRiskScoreService }) =>
-  ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+const createTaskRunnerFactory = ({
+  logger,
+  getRiskScoreService,
+}: {
+  logger: Logger;
+  getRiskScoreService: GetRiskScoreService;
+}) => {
+  let isCancelled = false;
+  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     return {
-      run: async () => runTask({ getRiskScoreService, logger, taskInstance }),
-      cancel: async () => {},
+      run: async () => runTask({ getRiskScoreService, isCancelled, logger, taskInstance }),
+      cancel: async () => {
+        isCancelled = true;
+      },
     };
   };
+};
