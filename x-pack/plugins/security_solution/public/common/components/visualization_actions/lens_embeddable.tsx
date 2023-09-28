@@ -187,7 +187,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
         return;
       }
       // Update timerange when clicking on a dot in an area chart
@@ -299,6 +299,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { hasData } from '../../../common/components/event_details/insights/helpers';
+import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
+import { ORIGINAL_EVENT_ID } from '../constants/field_names';
+import { getField } from '../utils';
 
 export interface ShowRelatedAlertsBySameSourceEventParams {
   /**
-   * An array of field objects with category and value
+   * Retrieves searchHit values for the provided field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  getFieldsData: GetFieldsData;
+}
+
+export interface ShowRelatedAlertsBySameSourceEventResult {
+  /**
+   * Returns true if the document has kibana.alert.original_event.id field with values
+   */
+  show: boolean;
+  /**
+   * Value of the kibana.alert.original_event.id field
+   */
+  originalEventId?: string;
 }
 
 /**
  * Returns true if document has kibana.alert.original.event.id field with values
  */
 export const useShowRelatedAlertsBySameSourceEvent = ({
-  dataFormattedForFieldBrowser,
-}: ShowRelatedAlertsBySameSourceEventParams): boolean => {
-  const sourceEventField = find(
-    { category: 'kibana', field: 'kibana.alert.original_event.id' },
-    dataFormattedForFieldBrowser
-  );
-
-  return hasData(sourceEventField);
+  getFieldsData,
+}: ShowRelatedAlertsBySameSourceEventParams): ShowRelatedAlertsBySameSourceEventResult => {
+  const originalEventId = getField(getFieldsData(ORIGINAL_EVENT_ID));
+  return {
+    show: originalEventId != null,
+    ...(originalEventId && { originalEventId }),
+  };
 };

@@ -23,7 +23,7 @@ export interface UseThreatIntelligenceParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
 export interface UseThreatIntelligenceResult {
@@ -31,10 +31,6 @@ export interface UseThreatIntelligenceResult {
    * Returns true while the threat intelligence data is being queried
    */
   loading: boolean;
-  /**
-   * Returns true if the dataFormattedForFieldBrowser property is null
-   */
-  error: boolean;
   /**
    * Threat matches (from an indicator match rule)
    */
@@ -99,7 +95,6 @@ export const useFetchThreatIntelligence = ({
 
   return {
     loading,
-    error: !dataFormattedForFieldBrowser,
     threatMatches,
     threatMatchesCount: (threatMatches || []).length,
     threatEnrichments,

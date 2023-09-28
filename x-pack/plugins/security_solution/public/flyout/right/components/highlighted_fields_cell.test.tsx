@@ -15,8 +15,12 @@ import {
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { TestProviders } from '../../../common/mock';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useGetEndpointDetails } from '../../../management/hooks';
+
+jest.mock('../../../management/hooks');
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -61,7 +65,7 @@ describe('<HighlightedFieldsCell />', () => {
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
@@ -71,6 +75,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render agent status cell if field is agent.status', () => {
+    (useGetEndpointDetails as jest.Mock).mockReturnValue({});
     const { getByTestId } = render(
       <TestProviders>
         <HighlightedFieldsCell values={['value']} field={'agent.status'} />

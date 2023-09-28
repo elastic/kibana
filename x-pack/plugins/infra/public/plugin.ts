@@ -7,7 +7,6 @@
 
 import {
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -18,7 +17,6 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -29,8 +27,6 @@ import { createLazyPodMetricsTable } from './components/infrastructure_node_metr
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
-  DiscoverLogsLocatorDefinition,
-  DiscoverNodeLogsLocatorDefinition,
   InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
@@ -57,7 +53,6 @@ export class Plugin implements InfraClientPluginClass {
   private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
-  private appTarget: string;
   private kibanaVersion: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -67,7 +62,6 @@ export class Plugin implements InfraClientPluginClass {
     this.inventoryViews = new InventoryViewsService();
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
-    this.appTarget = this.config.logs.app_target;
     this.kibanaVersion = context.env.packageInfo.version;
   }
 
@@ -130,6 +124,12 @@ export class Plugin implements InfraClientPluginClass {
                     label: 'Logs',
                     sortKey: 200,
                     entries: [
+                      {
+                        label: 'Explorer',
+                        app: 'observability-log-explorer',
+                        path: '/',
+                        isBetaFeature: true,
+                      },
                       { label: 'Stream', app: 'logs', path: '/stream' },
                       { label: 'Anomalies', app: 'logs', path: '/anomalies' },
                       { label: 'Categories', app: 'logs', path: '/log-categories' },
@@ -157,89 +157,63 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // Register Locators
-    let logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
-    let nodeLogsLocator = pluginsSetup.share.url.locators.create(
+    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
+    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
       new NodeLogsLocatorDefinition({ core })
     );
-
-    if (this.appTarget === DISCOVER_APP_TARGET) {
-      // Register Locators
-      logsLocator = pluginsSetup.share.url.locators.create(
-        new DiscoverLogsLocatorDefinition({ core })
-      );
-      nodeLogsLocator = pluginsSetup.share.url.locators.create(
-        new DiscoverNodeLogsLocatorDefinition({ core })
-      );
-
-      core.application.register({
-        id: 'logs-to-discover',
-        title: '',
-        navLinkStatus: AppNavLinkStatus.hidden,
-        appRoute: '/app/logs',
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, , pluginStart] = await core.getStartServices();
-          const { renderApp } = await import('./apps/discover_app');
-
-          return renderApp(coreStart, pluginStart, params);
-        },
-      });
-    }
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, logsLocator)
     );
 
-    if (this.appTarget === LOGS_APP_TARGET) {
-      core.application.register({
-        id: 'logs',
-        title: i18n.translate('xpack.infra.logs.pluginTitle', {
-          defaultMessage: 'Logs',
-        }),
-        euiIconType: 'logoObservability',
-        order: 8100,
-        appRoute: '/app/logs',
-        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
-        deepLinks: [
-          {
-            id: 'stream',
-            title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-              defaultMessage: 'Stream',
-            }),
-            path: '/stream',
-          },
-          {
-            id: 'anomalies',
-            title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-              defaultMessage: 'Anomalies',
-            }),
-            path: '/anomalies',
-          },
-          {
-            id: 'log-categories',
-            title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-              defaultMessage: 'Categories',
-            }),
-            path: '/log-categories',
-          },
-          {
-            id: 'settings',
-            title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-              defaultMessage: 'Settings',
-            }),
-            path: '/settings',
-          },
-        ],
-        category: DEFAULT_APP_CATEGORIES.observability,
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
-
-          const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+    core.application.register({
+      id: 'logs',
+      title: i18n.translate('xpack.infra.logs.pluginTitle', {
+        defaultMessage: 'Logs',
+      }),
+      euiIconType: 'logoObservability',
+      order: 8100,
+      appRoute: '/app/logs',
+      // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
+      deepLinks: [
+        {
+          id: 'stream',
+          title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
+            defaultMessage: 'Stream',
+          }),
+          path: '/stream',
         },
-      });
-    }
+        {
+          id: 'anomalies',
+          title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+            defaultMessage: 'Anomalies',
+          }),
+          path: '/anomalies',
+        },
+        {
+          id: 'log-categories',
+          title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+            defaultMessage: 'Categories',
+          }),
+          path: '/log-categories',
+        },
+        {
+          id: 'settings',
+          title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+            defaultMessage: 'Settings',
+          }),
+          path: '/settings',
+        },
+      ],
+      category: DEFAULT_APP_CATEGORIES.observability,
+      mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
+
+        const { renderApp } = await import('./apps/logs_app');
+        return renderApp(coreStart, plugins, pluginStart, params);
+      },
+    });
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
     const infraDeepLinks = [

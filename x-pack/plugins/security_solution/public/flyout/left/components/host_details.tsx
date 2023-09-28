@@ -12,17 +12,19 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiInMemoryTable,
-  EuiHorizontalRule,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
+  EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getSourcererScopeId } from '../../../helpers';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntityPanel } from '../../right/components/entity_panel';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
@@ -49,7 +51,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
 import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
 import { USER_RISK_TOOLTIP } from '../../../explore/users/components/all_users/translations';
-import * as i18n from './translations';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
@@ -67,11 +68,16 @@ export interface HostDetailsProps {
    * timestamp of alert or event
    */
   timestamp: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
 }
+
 /**
  * Host details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp }) => {
+export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
@@ -122,18 +128,25 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
     () => [
       {
         field: 'user',
-        name: i18n.RELATED_ENTITIES_NAME_COLUMN_TITLE,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersNameColumnLabel"
+            defaultMessage="Name"
+          />
+        ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
             <SecurityCellActions
-              mode={CellActionsMode.HOVER_RIGHT}
-              visibleCellActions={5}
-              showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
               data={{
                 field: 'user.name',
                 value: user,
               }}
+              mode={CellActionsMode.HOVER_RIGHT}
+              triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+              visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+              sourcererScopeId={getSourcererScopeId(scopeId)}
+              metadata={{ scopeId }}
+              showActionTooltips
             >
               {user}
             </SecurityCellActions>
@@ -142,7 +155,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
       },
       {
         field: 'ip',
-        name: i18n.RELATED_ENTITIES_IP_COLUMN_TITLE,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersIpColumnLabel"
+            defaultMessage="Ip addresses"
+          />
+        ),
         render: (ips: string[]) => {
           return (
             <DefaultFieldRenderer
@@ -180,7 +198,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized]
+    [isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedUsersCount = useMemo(
@@ -191,7 +209,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <EuiText>{`${i18n.RELATED_USERS_TITLE}: ${totalCount}`}</EuiText>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersCountLabel"
+                defaultMessage="Related users: {count}"
+                values={{ count: totalCount }}
+              />
+            </EuiText>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -207,19 +231,30 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   return (
     <>
       <EuiTitle size="xs">
-        <h4>{i18n.HOSTS_TITLE}</h4>
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+            defaultMessage="Host"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EntityPanel
-        title={hostName}
-        iconType={'storage'}
-        expandable={true}
-        expanded={true}
-        headerContent={relatedUsersCount}
+      <ExpandablePanel
+        header={{
+          title: hostName,
+          iconType: 'storage',
+          headerContent: relatedUsersCount,
+        }}
+        expand={{ expandable: true, expandedOnFirstRender: true }}
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
-          <h5>{i18n.HOSTS_INFO_TITLE}</h5>
+          <h4>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsInfoTitle"
+              defaultMessage="Host information"
+            />
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
@@ -249,42 +284,68 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
             />
           )}
         </AnomalyTableProvider>
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h5>{i18n.RELATED_USERS_TITLE}</h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
-              <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <RelatedUsersManage
-          id={relatedUsersQueryId}
-          inspect={inspectRelatedUsers}
-          loading={isRelatedUsersLoading}
-          setQuery={setQuery}
-          deleteQuery={deleteQuery}
-          refetch={refetchRelatedUsers}
-        >
-          <EuiInMemoryTable
-            columns={relatedUsersColumns}
-            items={relatedUsers}
+        <EuiPanel hasBorder={true}>
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTitle"
+                    defaultMessage="Related users"
+                  />
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
+                    defaultMessage="After this alert was generated, these users logged into {hostName}. Check if this activity is normal."
+                    values={{ hostName }}
+                  />
+                }
+              >
+                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <RelatedUsersManage
+            id={relatedUsersQueryId}
+            inspect={inspectRelatedUsers}
             loading={isRelatedUsersLoading}
-            data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
-            pagination={pagination}
-          />
-          <InspectButton
-            queryId={relatedUsersQueryId}
-            title={i18n.RELATED_USERS_TITLE}
-            inspectIndex={0}
-          />
-        </RelatedUsersManage>
-      </EntityPanel>
+            setQuery={setQuery}
+            deleteQuery={deleteQuery}
+            refetch={refetchRelatedUsers}
+          >
+            <EuiInMemoryTable
+              columns={relatedUsersColumns}
+              items={relatedUsers}
+              loading={isRelatedUsersLoading}
+              data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
+              pagination={pagination}
+              message={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersNoDataDescription"
+                  defaultMessage="No users identified"
+                />
+              }
+            />
+            <InspectButton
+              queryId={relatedUsersQueryId}
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersInspectButtonTitle"
+                  defaultMessage="Related users"
+                />
+              }
+              inspectIndex={0}
+            />
+          </RelatedUsersManage>
+        </EuiPanel>
+      </ExpandablePanel>
     </>
   );
 };

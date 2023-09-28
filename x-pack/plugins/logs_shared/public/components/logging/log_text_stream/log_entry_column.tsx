@@ -156,3 +156,6 @@ export const useColumnWidths = ({
     [columnWidths, CharacterDimensionsProbe]
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryColumn;

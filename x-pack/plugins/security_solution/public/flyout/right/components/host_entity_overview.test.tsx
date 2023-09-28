@@ -10,19 +10,39 @@ import { TestProviders } from '../../../common/mock';
 import { HostEntityOverview } from './host_entity_overview';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
+import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
-  ENTITIES_HOST_OVERVIEW_IP_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
+import { RightPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 const hostName = 'host';
-const ip = '10.200.000.000';
+const osFamily = 'Windows';
+const lastSeen = '2022-04-08T18:35:45.064Z';
+const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
-const hostData = { host: { ip: [ip] } };
+const hostData = { host: { os: { family: [osFamily] } } };
 const riskLevel = [{ host: { risk: { calculated_level: 'Medium' } } }];
+
+const panelContextValue = {
+  ...mockContextValue,
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+};
+
+const flyoutContextValue = {
+  openLeftPanel: jest.fn(),
+} as unknown as ExpandableFlyoutContext;
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../common/containers/use_global_time', () => {
@@ -44,20 +64,29 @@ jest.mock('../../../explore/hosts/containers/hosts/details');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 jest.mock('../../../explore/containers/risk_score');
 
+const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
+jest.mock('../../../common/containers/use_first_last_seen');
+
+const renderHostEntityContent = () =>
+  render(
+    <TestProviders>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProviders>
+  );
+
 describe('<HostEntityContent />', () => {
   describe('license is valid', () => {
-    it('should render ip addresses and host risk classification', () => {
+    it('should render os family and host risk classification', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview hostName={hostName} />
-        </TestProviders>
-      );
+      const { getByTestId } = renderHostEntityContent();
 
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_IP_TEST_ID)).toHaveTextContent(ip);
-      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
     });
 
@@ -65,42 +94,80 @@ describe('<HostEntityContent />', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview hostName={hostName} />
-        </TestProviders>
-      );
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_IP_TEST_ID)).toHaveTextContent('—');
-      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Unknown');
+      const { getByTestId } = renderHostEntityContent();
+
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent('—');
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('—');
     });
   });
 
+  it('should render loading if loading for host details is true', () => {
+    mockUseHostDetails.mockReturnValue([true, { hostDetails: null }]);
+    mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render loading if loading for risk score is true', () => {
+    mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
+    mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true, loading: true });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HostEntityOverview hostName={hostName} />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+    expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
   describe('license is not valid', () => {
-    it('should render ip but not host risk classification', () => {
+    it('should render os family and last seen', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview hostName={hostName} />
-        </TestProviders>
-      );
+      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen }]);
 
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_IP_TEST_ID)).toHaveTextContent(ip);
+      const { getByTestId, queryByTestId } = renderHostEntityContent();
+
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
       expect(queryByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render correctly if returned data is null', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview hostName={hostName} />
-        </TestProviders>
-      );
+      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
 
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_IP_TEST_ID)).toHaveTextContent('—');
-      expect(queryByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).not.toBeInTheDocument();
+      const { getByTestId } = renderHostEntityContent();
+
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent('—');
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
+    });
+
+    it('should navigate to left panel entities tab when clicking on title', () => {
+      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+
+      const { getByTestId } = renderHostEntityContent();
+
+      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
+      expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+        id: LeftPanelKey,
+        path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
+        params: {
+          id: panelContextValue.eventId,
+          indexName: panelContextValue.indexName,
+          scopeId: panelContextValue.scopeId,
+        },
+      });
     });
   });
 });

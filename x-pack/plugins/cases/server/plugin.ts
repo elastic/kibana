@@ -121,7 +121,9 @@ export class CasePlugin {
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+    if (this.caseConfig.stack.enabled) {
+      plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+    }
 
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({

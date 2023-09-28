@@ -33,7 +33,11 @@ export type TrustedAppConditionEntryField =
   | 'process.hash.*'
   | 'process.executable.caseless'
   | 'process.Ext.code_signature';
-export type BlocklistConditionEntryField = 'file.hash.*' | 'file.path' | 'file.Ext.code_signature';
+export type BlocklistConditionEntryField =
+  | 'file.hash.*'
+  | 'file.path'
+  | 'file.Ext.code_signature'
+  | 'file.path.caseless';
 export type AllConditionEntryFields =
   | TrustedAppConditionEntryField
   | BlocklistConditionEntryField

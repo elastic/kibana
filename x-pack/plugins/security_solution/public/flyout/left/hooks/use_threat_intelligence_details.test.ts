@@ -19,6 +19,7 @@ import {
   type GetBasicDataFromDetailsData,
   useBasicDataFromDetailsData,
 } from '../../../timelines/components/side_panel/event_details/helpers';
+import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');
@@ -63,19 +64,7 @@ describe('useThreatIntelligenceDetails', () => {
         () => {},
       ]);
 
-    jest.mocked(useLeftPanelContext).mockReturnValue({
-      indexName: 'test-index',
-      eventId: 'test-event-id',
-      getFieldsData: () => null,
-      dataFormattedForFieldBrowser: null,
-      scopeId: 'test-scope-id',
-      browserFields: null,
-      searchHit: {
-        _id: 'testId',
-        _index: 'testIndex',
-      },
-      dataAsNestedObject: null,
-    });
+    jest.mocked(useLeftPanelContext).mockReturnValue(mockContextValue);
   });
 
   afterEach(() => {

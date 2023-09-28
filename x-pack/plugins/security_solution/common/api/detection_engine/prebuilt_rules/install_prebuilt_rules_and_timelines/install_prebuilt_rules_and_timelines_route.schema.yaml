@@ -16,31 +16,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InstallPrebuiltRulesResponse'
-
-components:
-  schemas:
-    InstallPrebuiltRulesResponse:
-      type: object
-      properties:
-        rules_installed:
-          type: integer
-          description: The number of rules installed
-          minimum: 0
-        rules_updated:
-          type: integer
-          description: The number of rules updated
-          minimum: 0
-        timelines_installed:
-          type: integer
-          description: The number of timelines installed
-          minimum: 0
-        timelines_updated:
-          type: integer
-          description: The number of timelines updated
-          minimum: 0
-      required:
-        - rules_installed
-        - rules_updated
-        - timelines_installed
-        - timelines_updated
+                type: object
+                properties:
+                  rules_installed:
+                    type: integer
+                    description: The number of rules installed
+                    minimum: 0
+                  rules_updated:
+                    type: integer
+                    description: The number of rules updated
+                    minimum: 0
+                  timelines_installed:
+                    type: integer
+                    description: The number of timelines installed
+                    minimum: 0
+                  timelines_updated:
+                    type: integer
+                    description: The number of timelines updated
+                    minimum: 0
+                required:
+                  - rules_installed
+                  - rules_updated
+                  - timelines_installed
+                  - timelines_updated

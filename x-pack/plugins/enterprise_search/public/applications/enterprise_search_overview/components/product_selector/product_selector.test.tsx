@@ -11,15 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ErrorStateCallout } from '../../../shared/error_state';
 
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import { BehavioralAnalyticsProductCard } from './behavioral_analytics_product_card';
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { SearchApplicationsProductCard } from './search_applications_product_card';
+import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 
 import { ProductSelector } from '.';
 
@@ -29,8 +27,7 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-    expect(wrapper.find(SearchApplicationsProductCard)).toHaveLength(1);
-    expect(wrapper.find(BehavioralAnalyticsProductCard)).toHaveLength(1);
+    expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
   });
 
@@ -58,23 +55,6 @@ describe('ProductSelector', () => {
     expect(wrapper.find(ErrorStateCallout)).toHaveLength(1);
   });
 
-  it('renders add content', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
-  });
-
-  it('does not render add content when theres a connection error', () => {
-    setMockValues({
-      config: { canDeployEntSearch: true, host: 'localhost' },
-      errorConnectingMessage: '502 Bad Gateway',
-    });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
-  });
-
   describe('access checks when host is set', () => {
     beforeEach(() => {
       setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
@@ -84,8 +64,7 @@ describe('ProductSelector', () => {
       const wrapper = shallow(<ProductSelector />);
 
       expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-      expect(wrapper.find(SearchApplicationsProductCard)).toHaveLength(1);
-      expect(wrapper.find(BehavioralAnalyticsProductCard)).toHaveLength(1);
+      expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
       expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
   });

@@ -29,6 +29,9 @@ export function getRoutePaths() {
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
+    StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
+    StorageExplorerHostStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_storage_details`,
+    StorageExplorerIndicesStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/indices_storage_details`,
   };
 }
 
@@ -36,18 +39,6 @@ export function timeRangeFromRequest(request: any): [number, number] {
   const timeFrom = parseInt(request.query.timeFrom!, 10);
   const timeTo = parseInt(request.query.timeTo!, 10);
   return [timeFrom, timeTo];
-}
-
-// Converts from a Map object to a Record object since Map objects are not
-// serializable to JSON by default
-export function fromMapToRecord<K extends string, V>(m: Map<K, V>): Record<string, V> {
-  const output: Record<string, V> = {};
-
-  for (const [key, value] of m) {
-    output[key] = value;
-  }
-
-  return output;
 }
 
 export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableLabel', {

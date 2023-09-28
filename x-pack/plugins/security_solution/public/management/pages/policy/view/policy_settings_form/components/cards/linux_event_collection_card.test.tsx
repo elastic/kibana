@@ -97,8 +97,7 @@ describe('Policy Linux Event Collection Card', () => {
             'Session data' +
             'Collect session data' +
             'Capture terminal output' +
-            'Info' +
-            'beta'
+            'Info'
         )
       );
     });

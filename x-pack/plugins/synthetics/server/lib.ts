@@ -170,7 +170,7 @@ export class UptimeEsClient {
     const showInspectData =
       (isInspectorEnabled || this.isDev) && path !== SYNTHETICS_API_URLS.DYNAMIC_SETTINGS;
 
-    if (showInspectData) {
+    if (showInspectData && this.inspectableEsQueries.length > 0) {
       return { _inspect: this.inspectableEsQueries };
     }
     return {};

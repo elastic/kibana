@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useSideNavItems } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { mockServices, mockProjectNavLinks } from '../../common/services/__mocks__/services.mock';
+import { ExternalPageName } from '../links/constants';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../../common/services');
@@ -104,6 +105,31 @@ describe('useSideNavItems', () => {
         onClick: expect.any(Function),
         iconType: 'launch',
         appendSeparator: true,
+      },
+    ]);
+  });
+
+  it('should openInNewTab for external (cloud) links', async () => {
+    mockProjectNavLinks.mockReturnValueOnce([
+      {
+        id: ExternalPageName.cloudUsersAndRoles,
+        externalUrl: 'https://cloud.elastic.co/users_roles',
+        title: 'Users & Roles',
+        sideNavIcon: 'someicon',
+      },
+    ]);
+    const { result } = renderHook(useSideNavItems);
+
+    const items = result.current;
+
+    expect(items).toEqual([
+      {
+        id: ExternalPageName.cloudUsersAndRoles,
+        href: 'https://cloud.elastic.co/users_roles',
+        label: 'Users & Roles',
+        openInNewTab: true,
+        iconType: 'someicon',
+        position: 'top',
       },
     ]);
   });

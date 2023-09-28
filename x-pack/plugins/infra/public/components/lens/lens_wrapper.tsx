@@ -5,35 +5,29 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import { parseDateRange } from '../../utils/datemath';
-import { LensAttributes } from '../../common/visualizations';
-
-export type LensWrapperProps = Omit<
-  TypedLensByValueInput,
-  'timeRange' | 'attributes' | 'viewMode'
-> & {
-  attributes: LensAttributes | null;
-  dateRange: TimeRange;
-  extraActions: Action[];
-  loading?: boolean;
-};
+import type { LensWrapperProps } from './types';
 
 export const LensWrapper = ({
   attributes,
   dateRange,
   filters,
   lastReloadRequestTime,
-  loading,
+  loading = false,
+  onLoad,
   query,
   ...props
 }: LensWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   const [intersectionObserverEntry, setIntersectionObserverEntry] =
     useState<IntersectionObserverEntry>();
   const [embeddableLoaded, setEmbeddableLoaded] = useState(false);
@@ -83,11 +77,17 @@ export const LensWrapper = ({
     query,
   ]);
 
-  const onLoad = useCallback(() => {
-    if (!embeddableLoaded) {
-      setEmbeddableLoaded(true);
-    }
-  }, [embeddableLoaded]);
+  const handleOnLoad = useCallback(
+    (isLoading: boolean) => {
+      if (!embeddableLoaded) {
+        setEmbeddableLoaded(true);
+      }
+      if (onLoad) {
+        onLoad(isLoading);
+      }
+    },
+    [embeddableLoaded, onLoad]
+  );
 
   const parsedDateRange: TimeRange = useMemo(() => {
     const { from = state.dateRange.from, to = state.dateRange.to } = parseDateRange(
@@ -96,11 +96,21 @@ export const LensWrapper = ({
 
     return { from, to };
   }, [state.dateRange]);
-
   const isLoading = loading || !state.attributes;
 
   return (
-    <Container ref={ref}>
+    <div
+      css={css`
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        .echMetric {
+          border-radius: ${euiTheme.border.radius.medium};
+          pointer-events: none;
+        }
+      `}
+      ref={ref}
+    >
       <>
         {isLoading && !embeddableLoaded ? (
           <ChartPlaceholder style={props.style} />
@@ -112,7 +122,7 @@ export const LensWrapper = ({
               attributes={state.attributes}
               filters={state.filters}
               lastReloadRequestTime={state.lastReloadRequestTime}
-              onLoad={onLoad}
+              onLoad={handleOnLoad}
               query={state.query}
               timeRange={parsedDateRange}
               viewMode={ViewMode.VIEW}
@@ -120,7 +130,7 @@ export const LensWrapper = ({
           </>
         )}
       </>
-    </Container>
+    </div>
   );
 };
 
@@ -142,13 +152,3 @@ const EmbeddableComponentMemo = React.memo(
     return <EmbeddableComponent {...props} attributes={attributes} />;
   }
 );
-
-const Container = euiStyled.div`
-  position: relative;
-  border-radius: ${({ theme }) => theme.eui.euiSizeS};
-  overflow: hidden;
-  height: 100%;
-  .echLegend .echLegendList {
-    display: flex;
-  }
-`;

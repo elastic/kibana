@@ -874,6 +874,9 @@ export const buildRuleExceptionWithConditions = ({
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -884,18 +887,24 @@ export const buildExceptionEntriesFromAlertFields = ({
 }): EntriesArray => {
   return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
     const fieldKey = field.id;
-    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue) {
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
-        type: Array.isArray(fieldValue)
-          ? ListOperatorTypeEnum.MATCH_ANY
-          : ListOperatorTypeEnum.MATCH,
-        value: fieldValue,
+        type: listOperatorType,
+        value: fieldValueAsString,
       });
     }
+
     return acc;
   }, []);
 };
@@ -908,14 +917,19 @@ export const buildExceptionEntriesFromAlertFields = ({
 export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   alertData,
   exceptionItemName,
+  ruleCustomHighlightedFields,
 }: {
   alertData: AlertData;
   exceptionItemName: string;
+  ruleCustomHighlightedFields: string[];
 }): ExceptionsBuilderExceptionItem | null => {
-  const highlightedFields = getAlertHighlightedFields(alertData);
+  const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
   if (!highlightedFields.length) return null;
 
-  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
   if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
@@ -951,11 +965,13 @@ export const filterHighlightedFields = (
  * * Alert field ids filters
  * @param alertData The Alert data object
  */
-export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
+export const getAlertHighlightedFields = (
+  alertData: AlertData,
+  ruleCustomHighlightedFields: string[]
+): EventSummaryField[] => {
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
@@ -965,6 +981,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: ruleCustomHighlightedFields,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };

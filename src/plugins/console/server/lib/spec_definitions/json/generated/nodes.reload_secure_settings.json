@@ -1,7 +1,14 @@
 {
   "nodes.reload_secure_settings": {
     "url_params": {
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -10,6 +17,10 @@
       "_nodes/reload_secure_settings",
       "_nodes/{node_id}/reload_secure_settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/secure-settings.html#reloadable-secure-settings"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/secure-settings.html#reloadable-secure-settings",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

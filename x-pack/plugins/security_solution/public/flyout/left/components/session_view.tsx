@@ -7,18 +7,17 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  ANCESTOR_INDEX,
+  ENTRY_LEADER_ENTITY_ID,
+  ENTRY_LEADER_START,
+} from '../../shared/constants/field_names';
 import { getField } from '../../shared/utils';
-import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
-import { SESSION_VIEW_ERROR_MESSAGE } from './translations';
-import { SESSION_VIEW_ERROR_TEST_ID, SESSION_VIEW_TEST_ID } from './test_ids';
+import { SESSION_VIEW_TEST_ID } from './test_ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { useLeftPanelContext } from '../context';
 
-export const SESSION_VIEW_ID = 'session_view';
-export const SESSION_ENTITY_ID = 'process.entry_leader.entity_id';
-export const SESSION_START_TIME = 'process.entry_leader.start';
-export const KIBANA_ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
+export const SESSION_VIEW_ID = 'session-view';
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
@@ -27,22 +26,13 @@ export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
   const { getFieldsData, indexName } = useLeftPanelContext();
 
-  const ancestorIndex = getField(getFieldsData(KIBANA_ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
-  const sessionEntityId = getField(getFieldsData(SESSION_ENTITY_ID));
-  const sessionStartTime = getField(getFieldsData(SESSION_START_TIME));
+  const ancestorIndex = getField(getFieldsData(ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
+  const sessionEntityId = getField(getFieldsData(ENTRY_LEADER_ENTITY_ID)) || '';
+  const sessionStartTime = getField(getFieldsData(ENTRY_LEADER_START)) || '';
   const index = ancestorIndex || indexName;
 
-  if (!index || !sessionEntityId || !sessionStartTime) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE(SESSION_VIEW_ERROR_MESSAGE)}</h2>}
-        body={<p>{ERROR_MESSAGE(SESSION_VIEW_ERROR_MESSAGE)}</p>}
-        data-test-subj={SESSION_VIEW_ERROR_TEST_ID}
-      />
-    );
-  }
+  // TODO as part of https://github.com/elastic/security-team/issues/7031
+  //  bring back no data message if needed
 
   return (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>

@@ -7,7 +7,7 @@
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -507,6 +507,8 @@ export interface Datasource<T = unknown, P = unknown> {
     references?: SavedObjectReference[],
     dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
+
+  injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
 }
 
 export interface DatasourceFixAction<T> {
@@ -814,6 +816,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
+  isBreakdownDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };
@@ -860,7 +863,12 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
-  mainPalette?: PaletteOutput;
+  /**
+   * Passing the legacy palette or the new color mapping if available
+   */
+  mainPalette?:
+    | { type: 'legacyPalette'; value: PaletteOutput }
+    | { type: 'colorMapping'; value: ColorMapping.Config };
   isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
@@ -1008,6 +1016,7 @@ interface AddLayerButtonProps {
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+  isInlineEditing?: boolean;
 }
 
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
@@ -1022,11 +1031,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * - When using suggestions, the suggested state is passed in
    */
   initialize: {
-    (addNewLayer: () => string, nonPersistedState?: T, mainPalette?: PaletteOutput): T;
+    (
+      addNewLayer: () => string,
+      nonPersistedState?: T,
+      mainPalette?: SuggestionRequest['mainPalette']
+    ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
-      mainPalette?: PaletteOutput,
+      mainPalette?: SuggestionRequest['mainPalette'],
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
     ): T;
@@ -1038,7 +1051,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getUsedDataViews?: (state?: T) => string[];
 
-  getMainPalette?: (state: T) => undefined | PaletteOutput;
+  getMainPalette?: (state: T) => undefined | SuggestionRequest['mainPalette'];
 
   /**
    * Supported triggers of this visualization type when embedded somewhere
@@ -1330,6 +1343,12 @@ export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];
 }
+
+export type TriggerEvent =
+  | BrushTriggerEvent
+  | ClickTriggerEvent
+  | MultiClickTriggerEvent
+  | LensTableRowContextMenuEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';

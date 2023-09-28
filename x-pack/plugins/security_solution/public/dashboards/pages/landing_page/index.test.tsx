@@ -31,6 +31,13 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
   };
 });
 
+const mockUseObservable = jest.fn();
+
+jest.mock('react-use', () => ({
+  ...jest.requireActual('react-use'),
+  useObservable: () => mockUseObservable(),
+}));
+
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
 const mockUseCapabilities = useCapabilities as jest.Mock;
 mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
@@ -157,6 +164,16 @@ describe('Dashboards landing', () => {
       expect(screen.queryByTestId('dashboardsTable')).not.toBeInTheDocument();
     });
 
+    it('should not render loading icon if no read capability', async () => {
+      mockUseCapabilities.mockReturnValue({
+        ...DEFAULT_DASHBOARD_CAPABILITIES,
+        show: false,
+      });
+      await renderDashboardLanding();
+
+      expect(screen.queryByTestId('dashboardLoadingIcon')).not.toBeInTheDocument();
+    });
+
     describe('Create Security Dashboard button', () => {
       it('should render', async () => {
         await renderDashboardLanding();
@@ -199,5 +216,14 @@ describe('Dashboards landing', () => {
         expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.CREATE_DASHBOARD);
       });
     });
+  });
+
+  it('should render callout when available', async () => {
+    const DummyComponent = () => <span data-test-subj="test" />;
+    mockUseObservable.mockReturnValue(<DummyComponent />);
+
+    await renderDashboardLanding();
+
+    expect(screen.queryByTestId('test')).toBeInTheDocument();
   });
 });

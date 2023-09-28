@@ -16,8 +16,8 @@ import { ConnectorSelectorBase } from '../connector_selector/connector_selector_
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { FeedbackButtons } from '../feedback_buttons';
-import { RegenerateResponseButton } from '../regenerate_response_button';
-import { StartChatButton } from '../start_chat_button';
+import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
+import { StartChatButton } from '../buttons/start_chat_button';
 
 export default {
   component: Component,
@@ -64,6 +64,7 @@ Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, f
 
 Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursus dolor. Pellentesque pellentesque lorem eu odio auctor convallis. Sed sodales felis at velit tempus tincidunt. Nulla sed ante cursus nibh mollis blandit. In mattis imperdiet tellus. Vestibulum nisl turpis, efficitur quis sollicitudin id, mollis in arcu. Vestibulum pulvinar tincidunt magna, vitae facilisis massa congue quis. Cras commodo efficitur tellus, et commodo risus rutrum at.`}
           loading={false}
+          onActionClick={async () => {}}
         />
       }
       controls={

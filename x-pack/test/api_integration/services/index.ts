@@ -20,6 +20,7 @@ import { InfraOpsSourceConfigurationProvider } from './infraops_source_configura
 import { MachineLearningProvider } from './ml';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
+import { IngestPipelinesProvider } from './ingest_pipelines';
 
 export const services = {
   ...commonServices,
@@ -35,4 +36,5 @@ export const services = {
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
   transform: TransformProvider,
+  ingestPipelines: IngestPipelinesProvider,
 };

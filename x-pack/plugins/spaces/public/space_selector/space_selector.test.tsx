@@ -13,9 +13,9 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-moc
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { SpaceSelector } from './space_selector';
 import type { Space } from '../../common';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { SpaceSelector } from './space_selector';
 
 function getSpacesManager(spaces: Space[] = []) {
   const manager = spacesManagerMock.create();

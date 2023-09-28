@@ -7,9 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { flatten, without } from 'lodash';
-import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
+import { debug } from '../../common/debug_log';
+import { Asset, AssetType, AssetKind, Relation, RelationField } from '../../common/types_api';
 import { getAssets } from './get_assets';
-import { getRelatedAssets } from './get_related_assets';
+import { getIndirectlyRelatedAssets } from './get_indirectly_related_assets';
 import { AssetNotFoundError } from './errors';
 import { toArray } from './utils';
 
@@ -19,6 +20,7 @@ interface GetAllRelatedAssetsOptions {
   to?: string;
   relation: Relation;
   type?: AssetType[];
+  kind?: AssetKind[];
   maxDistance: number;
   size: number;
 }
@@ -28,7 +30,7 @@ export async function getAllRelatedAssets(
   options: GetAllRelatedAssetsOptions
 ) {
   // How to put size into this?
-  const { ean, from, to, relation, maxDistance, type = [] } = options;
+  const { ean, from, to, relation, maxDistance, kind = [] } = options;
 
   const primary = await findPrimary(esClient, { ean, from, to });
 
@@ -42,10 +44,10 @@ export async function getAllRelatedAssets(
       to,
       visitedEans: [primary['asset.ean'], ...relatedAssets.map((asset) => asset['asset.ean'])],
     };
-    // if we enforce the type filter before the last query we'll miss nodes with
-    // possible edges to the requested types
-    if (currentDistance === maxDistance && type.length) {
-      queryOptions.type = type;
+    // if we enforce the kind filter before the last query we'll miss nodes with
+    // possible edges to the requested kind values
+    if (currentDistance === maxDistance && kind.length) {
+      queryOptions.kind = kind;
     }
 
     const results = flatten(
@@ -66,8 +68,8 @@ export async function getAllRelatedAssets(
 
   return {
     primary,
-    [relation]: type.length
-      ? relatedAssets.filter((asset) => type.includes(asset['asset.type']))
+    [relation]: kind.length
+      ? relatedAssets.filter((asset) => asset['asset.kind'] && kind.includes(asset['asset.kind']))
       : relatedAssets,
   };
 }
@@ -95,35 +97,43 @@ async function findPrimary(
 
 type FindRelatedAssetsOptions = Pick<
   GetAllRelatedAssetsOptions,
-  'relation' | 'type' | 'from' | 'to'
+  'relation' | 'kind' | 'from' | 'to'
 > & { visitedEans: string[] };
 
 async function findRelatedAssets(
   esClient: ElasticsearchClient,
   primary: Asset,
-  { relation, from, to, type, visitedEans }: FindRelatedAssetsOptions
+  { relation, from, to, kind, visitedEans }: FindRelatedAssetsOptions
 ): Promise<Asset[]> {
   const relationField = relationToDirectField(relation);
-  const directlyRelatedEans = toArray(primary[relationField]);
+  const directlyRelatedEans = toArray<string>(primary[relationField]);
+
+  debug('Directly Related EAN values found on primary asset', directlyRelatedEans);
 
   let directlyRelatedAssets: Asset[] = [];
-  if (directlyRelatedEans.length) {
-    // get the directly related assets we haven't visited already
+
+  // get the directly related assets we haven't visited already
+  const remainingEansToFind = without(directlyRelatedEans, ...visitedEans);
+  if (remainingEansToFind.length > 0) {
     directlyRelatedAssets = await getAssets({
       esClient,
-      filters: { ean: without(directlyRelatedEans, ...visitedEans), from, to, type },
+      filters: { ean: remainingEansToFind, from, to, kind },
     });
   }
 
-  const indirectlyRelatedAssets = await getRelatedAssets({
+  debug('Directly related assets found:', JSON.stringify(directlyRelatedAssets));
+
+  const indirectlyRelatedAssets = await getIndirectlyRelatedAssets({
     esClient,
     ean: primary['asset.ean'],
     excludeEans: visitedEans.concat(directlyRelatedEans),
     relation,
     from,
     to,
-    type,
+    kind,
   });
+
+  debug('Indirectly related assets found:', JSON.stringify(indirectlyRelatedAssets));
 
   return [...directlyRelatedAssets, ...indirectlyRelatedAssets];
 }

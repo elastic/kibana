@@ -317,6 +317,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
             markAllFieldsCompatible={selectionStyle === 'field'}
             onDeleteColumn={onDeleteColumn}
             onChoose={onChooseField}
+            showTimeSeriesDimensions={false}
           />
         </FormRow>
       ) : null}

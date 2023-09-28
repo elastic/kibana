@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-
 import {
   ConnectorStatus,
   DisplayType,
@@ -15,7 +13,10 @@ import {
   FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
-} from '../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [

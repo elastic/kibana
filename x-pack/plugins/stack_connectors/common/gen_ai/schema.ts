@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
-export const GenAiConfigSchema = schema.oneOf([
+export const ConfigSchema = schema.oneOf([
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
@@ -21,50 +21,78 @@ export const GenAiConfigSchema = schema.oneOf([
   }),
 ]);
 
-export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
+export const SecretsSchema = schema.object({ apiKey: schema.string() });
 
 // Run action schema
-export const GenAiRunActionParamsSchema = schema.object({
+export const RunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+// Run action schema
+export const InvokeAIActionParamsSchema = schema.object({
+  messages: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.string(),
+    })
+  ),
+  model: schema.maybe(schema.string()),
+  n: schema.maybe(schema.number()),
+  stop: schema.maybe(
+    schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
+  ),
+  temperature: schema.maybe(schema.number()),
+});
+
+export const InvokeAIActionResponseSchema = schema.string();
+
 // Execute action schema
-export const GenAiStreamActionParamsSchema = schema.object({
+export const StreamActionParamsSchema = schema.object({
   body: schema.string(),
   stream: schema.boolean({ defaultValue: false }),
 });
 
-export const GenAiStreamingResponseSchema = schema.any();
-export const GenAiRunActionResponseSchema = schema.object(
+export const StreamingResponseSchema = schema.any();
+
+export const RunActionResponseSchema = schema.object(
   {
-    id: schema.string(),
-    object: schema.string(),
-    created: schema.number(),
-    model: schema.string(),
-    usage: schema.object({
-      prompt_tokens: schema.number(),
-      completion_tokens: schema.number(),
-      total_tokens: schema.number(),
-    }),
+    id: schema.maybe(schema.string()),
+    object: schema.maybe(schema.string()),
+    created: schema.maybe(schema.number()),
+    model: schema.maybe(schema.string()),
+    usage: schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    ),
     choices: schema.arrayOf(
-      schema.object({
-        message: schema.object({
-          role: schema.string(),
-          content: schema.string(),
-        }),
-        finish_reason: schema.string(),
-        index: schema.number(),
-      })
+      schema.object(
+        {
+          message: schema.object(
+            {
+              role: schema.string(),
+              content: schema.string(),
+            },
+            { unknowns: 'ignore' }
+          ),
+          finish_reason: schema.maybe(schema.string()),
+          index: schema.maybe(schema.number()),
+        },
+        { unknowns: 'ignore' }
+      )
     ),
   },
   { unknowns: 'ignore' }
 );
 
 // Run action schema
-export const GenAiDashboardActionParamsSchema = schema.object({
+export const DashboardActionParamsSchema = schema.object({
   dashboardId: schema.string(),
 });
 
-export const GenAiDashboardActionResponseSchema = schema.object({
+export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });

@@ -136,7 +136,7 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore,
     shouldLogAlerts,
     flappingSettings,
-    notifyWhen,
+    notifyOnActionGroupChange,
     maintenanceWindowIds,
   }: ProcessAndLogAlertsOpts) {
     const {
@@ -163,7 +163,7 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
-      notifyWhen,
+      notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,
@@ -232,4 +232,8 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {}
+
+  public async setAlertStatusToUntracked() {
+    return;
+  }
 }

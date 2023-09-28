@@ -14,11 +14,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('List connectors', () => {
     it('Returns a 2xx for enterprise license', async () => {
-      const res = await observabilityAIAssistantAPIClient.readUser({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
-      });
-
-      expect(res.status).to.be(200);
+      await observabilityAIAssistantAPIClient
+        .readUser({
+          endpoint: 'GET /internal/observability_ai_assistant/connectors',
+        })
+        .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {

@@ -72,6 +72,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    experimentalFeatures,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -168,14 +169,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           };
 
           const {
-            actions,
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const refresh = actions.length ? 'wait_for' : false;
+          const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug('[+] Starting Signal Rule execution');
-          ruleExecutionLogger.debug(`interval: ${interval}`);
+          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatus.running,
@@ -340,7 +339,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
-              ruleExecutionLogger
+              ruleExecutionLogger,
+              experimentalFeatures
             );
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -453,11 +453,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const createdSignalsCount = result.createdSignals.length;
 
             if (result.success) {
-              ruleExecutionLogger.debug('[+] Signal Rule execution completed.');
+              ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexNameWithNamespace(
+                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )}`
+                )} ${
+                  !isEmpty(tuples)
+                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    : ''
+                }`
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
@@ -471,18 +475,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
               }
-
-              ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} ${
-                  !isEmpty(tuples)
-                    ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
-                    : ''
-                }`
-              );
             } else {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus.failed,
-                message: `Bulk Indexing of signals failed: ${truncateList(result.errors).join()}`,
+                message: `Bulk Indexing of alerts failed: ${truncateList(result.errors).join()}`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,

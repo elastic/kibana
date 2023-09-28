@@ -1,12 +1,26 @@
 {
   "cluster.reroute": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "dry_run": "__flag__",
       "explain": "__flag__",
+      "metric": [
+        "all"
+      ],
       "retry_failed": "__flag__",
-      "metric": [],
-      "master_timeout": "",
-      "timeout": ""
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -14,6 +28,10 @@
     "patterns": [
       "_cluster/reroute"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-reroute.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-reroute.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

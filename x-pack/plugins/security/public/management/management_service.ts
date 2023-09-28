@@ -14,13 +14,13 @@ import type {
   ManagementSetup,
 } from '@kbn/management-plugin/public';
 
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
-import type { PluginStartDependencies } from '../plugin';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { PluginStartDependencies } from '../plugin';
 
 export interface ManagementAppConfigType {
   userManagementEnabled: boolean;

@@ -34,6 +34,10 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/core",
+            "path": "src/core/server/index.ts"
+          },
+          {
             "plugin": "@kbn/core-lifecycle-browser",
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
           },
@@ -66,14 +70,6 @@
             "path": "src/plugins/visualizations/public/services.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },
@@ -96,10 +92,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/server/index.ts"
           }
         ],
         "children": [

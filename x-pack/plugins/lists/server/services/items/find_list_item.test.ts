@@ -31,6 +31,7 @@ describe('find_list_item', () => {
           {
             _id: 'some-list-item-id',
             _source: {
+              '@timestamp': '2020-04-20T15:25:31.830Z',
               _version: 'undefined',
               created_at: '2020-04-20T15:25:31.830Z',
               created_by: 'some user',

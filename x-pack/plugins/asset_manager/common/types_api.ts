@@ -15,7 +15,17 @@ export const assetTypeRT = rt.union([
 
 export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
-export type AssetKind = 'unknown' | 'node';
+export const assetKindRT = rt.union([
+  rt.literal('cluster'),
+  rt.literal('host'),
+  rt.literal('pod'),
+  rt.literal('container'),
+  rt.literal('service'),
+  rt.literal('alert'),
+]);
+
+export type AssetKind = rt.TypeOf<typeof assetKindRT>;
+
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -47,17 +57,20 @@ export interface ECSDocument extends WithTimestamp {
   'orchestrator.cluster.version'?: string;
 
   'cloud.provider'?: CloudProviderName;
+  'cloud.instance.id'?: string;
   'cloud.region'?: string;
   'cloud.service.name'?: string;
+
+  'service.environment'?: string;
 }
 
 export interface Asset extends ECSDocument {
   'asset.collection_version'?: string;
   'asset.ean': string;
   'asset.id': string;
-  'asset.kind'?: AssetKind;
+  'asset.kind': AssetKind;
   'asset.name'?: string;
-  'asset.type': AssetType;
+  'asset.type'?: AssetType;
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
@@ -121,14 +134,15 @@ export interface K8sCluster extends WithTimestamp {
 
 export interface AssetFilters {
   type?: AssetType | AssetType[];
-  kind?: AssetKind;
+  kind?: AssetKind | AssetKind[];
   ean?: string | string[];
   id?: string;
   typeLike?: string;
+  kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
-  from?: string;
-  to?: string;
+  from?: string | number;
+  to?: string | number;
 }
 
 export const relationRT = rt.union([

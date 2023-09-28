@@ -134,6 +134,26 @@ describe('EditCategory ', () => {
     await waitFor(() => expect(onSubmit).toBeCalledWith('new'));
   });
 
+  it('should trim category', async () => {
+    appMockRender.render(<EditCategory {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+    });
+
+    userEvent.click(screen.getByTestId('edit-category-submit'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith('category-with-space'));
+  });
+
   it('should not save category on cancel click', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 

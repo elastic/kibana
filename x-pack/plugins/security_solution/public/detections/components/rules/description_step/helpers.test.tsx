@@ -27,6 +27,7 @@ import {
   buildUrlsDescription,
   buildNoteDescription,
   buildRuleTypeDescription,
+  buildHighlightedFieldsOverrideDescription,
 } from './helpers';
 import type { ListItems } from './types';
 
@@ -506,6 +507,30 @@ describe('helpers', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
 
       expect(result.description).toEqual('Indicator Match');
+    });
+  });
+
+  describe('buildHighlightedFieldsOverrideDescription', () => {
+    test('returns ListItem with passed in label and custom highlighted fields', () => {
+      const result: ListItems[] = buildHighlightedFieldsOverrideDescription('Test label', [
+        'foo',
+        'bar',
+      ]);
+      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      const element = wrapper.find(
+        '[data-test-subj="customHighlightedFieldsStringArrayDescriptionBadgeItem"]'
+      );
+
+      expect(result[0].title).toEqual('Test label');
+      expect(element.exists()).toBeTruthy();
+      expect(element.at(0).text()).toEqual('foo');
+      expect(element.at(1).text()).toEqual('bar');
+    });
+
+    test('returns empty array if passed in note is empty string', () => {
+      const result: ListItems[] = buildHighlightedFieldsOverrideDescription('Test label', []);
+
+      expect(result).toHaveLength(0);
     });
   });
 });

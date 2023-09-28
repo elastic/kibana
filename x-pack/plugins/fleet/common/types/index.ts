@@ -49,8 +49,17 @@ export interface FleetConfigType {
     disableILMPolicies: boolean;
     disableProxies: boolean;
     fleetServerStandalone: boolean;
+    onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
-    capabilities: string[];
+    retrySetupOnBoot: boolean;
+    registry: {
+      kibanaVersionCheckEnabled: boolean;
+      capabilities: string[];
+      spec?: {
+        min?: string;
+        max?: string;
+      };
+    };
   };
   createArtifactsBulkBatchSize?: number;
 }

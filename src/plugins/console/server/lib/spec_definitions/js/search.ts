@@ -222,6 +222,37 @@ export const search = (specService: SpecDefinitionsService) => {
       timeout: '1s',
       version: { __one_of: [true, false] },
       track_total_hits: { __one_of: [true, false] },
+      knn: {
+        __template: {
+          field: '',
+          k: 10,
+          num_candidates: 100,
+        },
+        __one_of: [
+          {
+            field: '{field}',
+            filter: { __scope_link: 'GLOBAL.filter' },
+            k: 10,
+            num_candidates: 100,
+            query_vector: [],
+            query_vector_builder: {},
+            similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+            boost: 1.0,
+          },
+          [
+            {
+              field: '{field}',
+              filter: { __scope_link: 'GLOBAL.filter' },
+              k: 10,
+              num_candidates: 100,
+              query_vector: [],
+              query_vector_builder: {},
+              similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+              boost: 1.0,
+            },
+          ],
+        ],
+      },
     },
   });
 

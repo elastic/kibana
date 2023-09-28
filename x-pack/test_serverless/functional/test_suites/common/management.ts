@@ -11,7 +11,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const commonPage = getPageObject('common');
   const testSubjects = getService('testSubjects');
 
-  describe('Management', function () {
+  // Flaky in serverless tests
+  describe.skip('Management', function () {
     describe('Disabled UIs', () => {
       const DISABLED_PLUGINS = [
         {
@@ -49,6 +50,22 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         {
           appName: 'License Management',
           url: 'stack/license_management',
+        },
+        {
+          appName: 'Watcher',
+          url: 'insightsAndAlerting/watcher',
+        },
+        {
+          appName: 'Users',
+          url: 'security/users',
+        },
+        {
+          appName: 'Roles',
+          url: 'security/roles',
+        },
+        {
+          appName: 'Role Mappings',
+          url: 'security/role_mappings',
         },
       ];
 

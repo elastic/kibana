@@ -26,6 +26,10 @@ import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/pu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
+import { CustomizeSpace } from './customize_space';
+import { DeleteSpacesButton } from './delete_spaces_button';
+import { EnabledFeatures } from './enabled_features';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -34,10 +38,6 @@ import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { CustomizeSpace } from './customize_space';
-import { DeleteSpacesButton } from './delete_spaces_button';
-import { EnabledFeatures } from './enabled_features';
 
 export interface FormValues extends Partial<Space> {
   customIdentifier?: boolean;

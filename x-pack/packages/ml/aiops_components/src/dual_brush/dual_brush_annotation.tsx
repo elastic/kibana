@@ -21,11 +21,12 @@ interface BrushAnnotationProps {
 /**
  * DualBrushAnnotation React Component
  * Dual brush annotation component that overlays the document count chart
- * @type {FC<BrushAnnotationProps>}
- * @param props - `BrushAnnotationProps` component props
- * @returns {React.ReactElement} The DualBrushAnnotation component.
+ *
+ * @param props BrushAnnotationProps component props
+ * @returns The DualBrushAnnotation component.
  */
-export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max, style }) => {
+export const DualBrushAnnotation: FC<BrushAnnotationProps> = (props) => {
+  const { id, min, max, style } = props;
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
 

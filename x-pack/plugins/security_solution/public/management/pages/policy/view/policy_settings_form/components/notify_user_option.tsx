@@ -40,13 +40,6 @@ export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
   }
 );
 
-export const DO_NOT_NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.doNotNotifyUser',
-  {
-    defaultMessage: "Don't notify user",
-  }
-);
-
 const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
   {
@@ -82,9 +75,6 @@ export const NotifyUserOption = React.memo(
     const selected = policy.windows[protection].mode;
     const userNotificationSelected = policy.windows.popup[protection].enabled;
     const userNotificationMessage = policy.windows.popup[protection].message;
-    const checkboxLabel = userNotificationSelected
-      ? NOTIFY_USER_CHECKBOX_LABEL
-      : DO_NOT_NOTIFY_USER_CHECKBOX_LABEL;
 
     const handleUserNotificationCheckbox = useCallback(
       (event) => {
@@ -184,10 +174,10 @@ export const NotifyUserOption = React.memo(
             onChange={handleUserNotificationCheckbox}
             checked={userNotificationSelected}
             disabled={!isEditMode || selected === ProtectionModes.off}
-            label={checkboxLabel}
+            label={NOTIFY_USER_CHECKBOX_LABEL}
           />
         ) : (
-          <>{checkboxLabel}</>
+          <>{NOTIFY_USER_CHECKBOX_LABEL}</>
         )}
 
         {userNotificationSelected &&

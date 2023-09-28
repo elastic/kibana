@@ -15,6 +15,7 @@ describe('fetchIndicesStats lib function', () => {
         get: jest.fn(),
         stats: jest.fn(),
       },
+      msearch: jest.fn(),
     },
     asInternalUser: {},
   };
@@ -53,6 +54,18 @@ describe('fetchIndicesStats lib function', () => {
     },
   ];
 
+  const msearchResponse = {
+    responses: [
+      {
+        hits: {
+          total: {
+            value: 200,
+          },
+        },
+      },
+    ],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -60,6 +73,7 @@ describe('fetchIndicesStats lib function', () => {
   it('should return hydrated indices for all available and open indices', async () => {
     mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockResolvedValueOnce(indexStats);
+    mockClient.asCurrentUser.msearch.mockImplementationOnce(() => msearchResponse);
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
@@ -77,6 +91,7 @@ describe('fetchIndicesStats lib function', () => {
     );
 
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
+    mockClient.asCurrentUser.msearch.mockImplementationOnce(() => msearchResponse);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, [
@@ -95,6 +110,7 @@ describe('fetchIndicesStats lib function', () => {
   it('should return count : null, health: unknown for deleted index ', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getAllAvailableIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
+    mockClient.asCurrentUser.msearch.mockImplementationOnce(() => msearchResponse);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, [

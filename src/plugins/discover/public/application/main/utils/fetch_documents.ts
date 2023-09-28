@@ -11,7 +11,8 @@ import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import type { RecordsFetchResponse } from '../../../types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
+import type { RecordsFetchResponse } from '../../types';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -34,25 +35,31 @@ export const fetchDocuments = (
     searchSource.setOverwriteDataViewType(undefined);
   }
   const dataView = searchSource.getField('index')!;
+  const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
 
   const executionContext = {
-    description: 'fetch documents',
+    description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
-      sessionId: searchSessionId,
+      sessionId: isFetchingMore ? undefined : searchSessionId,
       inspector: {
         adapter: inspectorAdapters.requests,
-        title: i18n.translate('discover.inspectorRequestDataTitleDocuments', {
-          defaultMessage: 'Documents',
-        }),
+        title: isFetchingMore // TODO: show it as a separate request in Inspect flyout
+          ? i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+              defaultMessage: 'More documents',
+            })
+          : i18n.translate('discover.inspectorRequestDataTitleDocuments', {
+              defaultMessage: 'Documents',
+            }),
         description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
           defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
         }),
       },
       executionContext,
+      disableWarningToasts: true,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -61,5 +68,18 @@ export const fetchDocuments = (
       })
     );
 
-  return lastValueFrom(fetch$).then((records) => ({ records }));
+  return lastValueFrom(fetch$).then((records) => {
+    const adapter = inspectorAdapters.requests;
+    const interceptedWarnings = adapter
+      ? getSearchResponseInterceptedWarnings({
+          services,
+          adapter,
+        })
+      : [];
+
+    return {
+      records,
+      interceptedWarnings,
+    };
+  });
 };

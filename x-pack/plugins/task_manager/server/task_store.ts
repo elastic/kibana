@@ -477,7 +477,7 @@ export class TaskStore {
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: ensureAggregationOnlyReturnsTaskObjects({
+      body: ensureAggregationOnlyReturnsEnabledTaskObjects({
         query,
         aggs,
         runtime_mappings,
@@ -595,11 +595,11 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
   };
 }
 
-function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): AggregationOpts {
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: 'task' } }],
+      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
     },
   };
   const query = originalQuery

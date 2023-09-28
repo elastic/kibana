@@ -14,13 +14,6 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
-export const SAVED_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
-  {
-    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
-  }
-);
-
 export const EQL_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
   {
@@ -176,5 +169,12 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
   {
     defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);
+
+export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning',
+  {
+    defaultMessage: 'Alert suppression is enabled with Platinum license or above',
   }
 );

@@ -1,16 +1,29 @@
 {
   "search_mvt": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "exact_bounds": "__flag__",
-      "extent": 0,
-      "grid_precision": 0,
+      "extent": [
+        "4096"
+      ],
+      "grid_agg": [
+        "geotile",
+        "geohex"
+      ],
+      "grid_precision": [
+        "8"
+      ],
       "grid_type": [
         "grid",
         "point",
         "centroid"
       ],
-      "size": 0,
-      "track_total_hits": "",
+      "size": [
+        "10000"
+      ],
       "with_labels": "__flag__"
     },
     "methods": [
@@ -20,6 +33,10 @@
     "patterns": [
       "{index}/_mvt/{field}/{zoom}/{x}/{y}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

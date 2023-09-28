@@ -22,6 +22,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
+import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
@@ -53,8 +55,10 @@ export interface SearchAndFilterBarProps {
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  totalAgents: number;
+  shownAgents: number;
+  inactiveShownAgents: number;
   totalInactiveAgents: number;
+  totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -80,8 +84,10 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   tags,
   selectedTags,
   onSelectedTagsChange,
-  totalAgents,
+  shownAgents,
+  inactiveShownAgents,
   totalInactiveAgents,
+  totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -94,6 +100,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
 }) => {
   const { euiTheme } = useEuiTheme();
   const { isFleetServerStandalone } = useFleetServerStandalone();
+  const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
+    useIsFirstTimeAgentUserQuery();
   const showAddFleetServerBtn = !isFleetServerStandalone;
 
   // Policies state for filtering
@@ -126,7 +134,9 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
       <EuiFlexGroup direction="column">
         {/* Top Buttons and Links */}
         <EuiFlexGroup>
-          <EuiFlexItem>{totalAgents > 0 && <DashboardsButtons />}</EuiFlexItem>
+          <EuiFlexItem>
+            {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
+          </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <AgentActivityButton
@@ -324,11 +334,12 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               </EuiFilterGroup>
             </EuiFlexItem>
             {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && totalAgents > 0) ? (
+            (selectionMode === 'query' && shownAgents > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  totalAgents={totalAgents}
-                  totalInactiveAgents={totalInactiveAgents}
+                  shownAgents={shownAgents}
+                  inactiveShownAgents={inactiveShownAgents}
+                  totalManagedAgentIds={totalManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}

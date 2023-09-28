@@ -1,0 +1,43 @@
+{
+  "id": "@kbn/serverless-security-settings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/serverless-security-settings",
+        "id": "def-common.SECURITY_PROJECT_SETTINGS",
+        "type": "Array",
+        "tags": [],
+        "label": "SECURITY_PROJECT_SETTINGS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/serverless/settings/security_project/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

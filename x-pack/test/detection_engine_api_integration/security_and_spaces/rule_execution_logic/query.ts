@@ -237,51 +237,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]?._source?.user?.risk).to.eql(undefined);
     });
 
-    describe('with host risk index', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
-      });
-
-      it('should host have risk score field and do not have user risk score', async () => {
-        const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
-          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
-        };
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        const firstAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'suricata-zeek-sensor-toronto'
-        );
-        const secondAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'suricata-sensor-london'
-        );
-        const thirdAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'IE11WIN8_1'
-        );
-
-        expect(firstAlert?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(firstAlert?._source?.host?.risk?.calculated_score_norm).to.eql(96);
-        expect(firstAlert?._source?.user?.risk).to.eql(undefined);
-        expect(secondAlert?._source?.host?.risk?.calculated_level).to.eql('Low');
-        expect(secondAlert?._source?.host?.risk?.calculated_score_norm).to.eql(20);
-        expect(thirdAlert?._source?.host?.risk).to.eql(undefined);
-      });
-    });
-
     describe('with host and user risk indices', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/user_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/user_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should have host and user risk score fields', async () => {

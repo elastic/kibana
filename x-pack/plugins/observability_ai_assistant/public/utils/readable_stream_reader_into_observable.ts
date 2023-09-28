@@ -13,7 +13,7 @@ export function readableStreamReaderIntoObservable(
   return new Observable<string>((subscriber) => {
     let lineBuffer: string = '';
 
-    async function read() {
+    async function read(): Promise<void> {
       const { done, value } = await readableStreamReader.read();
       if (done) {
         if (lineBuffer) {
@@ -35,13 +35,13 @@ export function readableStreamReaderIntoObservable(
         subscriber.next(line);
       }
 
-      read();
+      return read();
     }
 
     read().catch((err) => subscriber.error(err));
 
     return () => {
-      readableStreamReader.cancel();
+      readableStreamReader.cancel().catch(() => {});
     };
   }).pipe(share());
 }

@@ -10,6 +10,7 @@ export type {
   ObservabilitySharedPlugin,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
+  ProfilingLocators,
 } from './plugin';
 export const plugin = () => {
   return new ObservabilitySharedPlugin();
@@ -77,3 +78,10 @@ export {
   casesFeatureId,
   sloFeatureId,
 } from '../common';
+
+export {
+  EMBEDDABLE_FLAMEGRAPH,
+  EMBEDDABLE_FUNCTIONS,
+  EmbeddableFlamegraph,
+  EmbeddableFunctions,
+} from './components/profiling/embeddables';

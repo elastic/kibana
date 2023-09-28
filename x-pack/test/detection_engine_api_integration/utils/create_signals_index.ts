@@ -22,7 +22,11 @@ export const createSignalsIndex = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await supertest
+        .post(DETECTION_ENGINE_INDEX_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .send();
       return {
         passed: true,
       };

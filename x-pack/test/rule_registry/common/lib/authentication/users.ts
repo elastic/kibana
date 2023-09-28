@@ -29,6 +29,7 @@ import {
   observabilityOnlyReadSpace2,
   observabilityMinReadAlertsAllSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
+  securitySolutionOnlyAllSpacesAllWithReadESIndices,
 } from './roles';
 import { User } from './types';
 
@@ -157,6 +158,12 @@ export const secOnlyReadSpacesAll: User = {
   roles: [securitySolutionOnlyReadSpacesAll.name],
 };
 
+export const secOnlySpacesAllEsReadAll: User = {
+  username: 'sec_only_all_spaces_all_with_read_es_indices',
+  password: 'sec_only_all_spaces_all_with_read_es_indices',
+  roles: [securitySolutionOnlyAllSpacesAllWithReadESIndices.name],
+};
+
 export const obsOnlySpacesAll: User = {
   username: 'obs_only_all_spaces_all',
   password: 'obs_only_all_spaces_all',
@@ -279,6 +286,7 @@ export const allUsers = [
   noKibanaPrivileges,
   obsOnlyReadSpacesAll,
   secOnlySpacesAll,
+  secOnlySpacesAllEsReadAll,
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
   logsOnlySpacesAll,

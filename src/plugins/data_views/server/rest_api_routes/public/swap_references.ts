@@ -27,8 +27,10 @@ interface GetDataViewArgs {
 
 interface SwapRefResponse {
   result: Array<{ id: string; type: string }>;
-  preview: boolean;
-  deleteSuccess?: boolean;
+  deleteStatus?: {
+    remainingRefs: number;
+    deletePerformed: boolean;
+  };
 }
 
 export const swapReference = async ({
@@ -43,135 +45,147 @@ export const swapReference = async ({
 
 const idSchema = schema.string();
 
-export const swapReferencesRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >,
-  usageCollection?: UsageCounter
-) => {
-  router.versioned.post({ path: DATA_VIEW_SWAP_REFERENCES_PATH, access: 'public' }).addVersion(
-    {
-      version: INITIAL_REST_VERSION,
-      validate: {
-        request: {
-          body: schema.object({
-            from_id: idSchema,
-            from_type: schema.maybe(schema.string()),
-            to_id: idSchema,
-            for_id: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
-            for_type: schema.maybe(schema.string()),
-            preview: schema.maybe(schema.boolean()),
-            delete: schema.maybe(schema.boolean()),
-          }),
-        },
-        response: {
-          200: {
+export const swapReferencesRoute =
+  ({ previewRoute }: { previewRoute: boolean }) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >,
+    usageCollection?: UsageCounter
+  ) => {
+    const path = previewRoute
+      ? `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`
+      : DATA_VIEW_SWAP_REFERENCES_PATH;
+    router.versioned.post({ path, access: 'public' }).addVersion(
+      {
+        version: INITIAL_REST_VERSION,
+        validate: {
+          request: {
             body: schema.object({
-              result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
-              preview: schema.boolean(),
-              deleteSuccess: schema.maybe(schema.boolean()),
+              fromId: idSchema,
+              fromType: schema.maybe(schema.string()),
+              toId: idSchema,
+              forId: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
+              forType: schema.maybe(schema.string()),
+              delete: schema.maybe(schema.boolean()),
             }),
+          },
+          response: {
+            200: {
+              body: schema.object({
+                result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+                deleteStatus: schema.maybe(
+                  schema.object({
+                    remainingRefs: schema.number(),
+                    deletePerformed: schema.boolean(),
+                  })
+                ),
+              }),
+            },
           },
         },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = (await ctx.core).savedObjects.client;
-        const [core] = await getStartServices();
-        const types = core.savedObjects.getTypeRegistry().getAllTypes();
-        const type = req.body.from_type || DATA_VIEW_SAVED_OBJECT_TYPE;
-        const preview = req.body.preview !== undefined ? req.body.preview : true;
-        const searchId =
-          !Array.isArray(req.body.for_id) && req.body.for_id !== undefined
-            ? [req.body.for_id]
-            : req.body.for_id;
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = (await ctx.core).savedObjects.client;
+          const [core] = await getStartServices();
+          const types = core.savedObjects.getTypeRegistry().getAllTypes();
+          const type = req.body.fromType || DATA_VIEW_SAVED_OBJECT_TYPE;
+          const searchId =
+            !Array.isArray(req.body.forId) && req.body.forId !== undefined
+              ? [req.body.forId]
+              : req.body.forId;
 
-        usageCollection?.incrementCounter({ counterName: 'swap_references' });
+          usageCollection?.incrementCounter({ counterName: 'swap_references' });
 
-        // verify 'to' object actually exists
-        try {
-          await savedObjectsClient.get(type, req.body.to_id);
-        } catch (e) {
-          throw new Error(`Could not find object with type ${type} and id ${req.body.to_id}`);
-        }
+          // verify 'to' object actually exists
+          try {
+            await savedObjectsClient.get(type, req.body.toId);
+          } catch (e) {
+            throw new Error(`Could not find object with type ${type} and id ${req.body.toId}`);
+          }
 
-        // assemble search params
-        const findParams: SavedObjectsFindOptions = {
-          type: types.map((t) => t.name),
-          hasReference: { type, id: req.body.from_id },
-        };
+          // assemble search params
+          const findParams: SavedObjectsFindOptions = {
+            type: types.map((t) => t.name),
+            hasReference: { type, id: req.body.fromId },
+          };
 
-        if (req.body.for_type) {
-          findParams.type = [req.body.for_type];
-        }
+          if (req.body.forType) {
+            findParams.type = [req.body.forType];
+          }
 
-        const { saved_objects: savedObjects } = await savedObjectsClient.find(findParams);
+          const { saved_objects: savedObjects } = await savedObjectsClient.find(findParams);
 
-        const filteredSavedObjects = searchId
-          ? savedObjects.filter((so) => searchId?.includes(so.id))
-          : savedObjects;
+          const filteredSavedObjects = searchId
+            ? savedObjects.filter((so) => searchId?.includes(so.id))
+            : savedObjects;
 
-        // create summary of affected objects
-        const resultSummary = filteredSavedObjects.map((savedObject) => ({
-          id: savedObject.id,
-          type: savedObject.type,
-        }));
+          // create summary of affected objects
+          const resultSummary = filteredSavedObjects.map((savedObject) => ({
+            id: savedObject.id,
+            type: savedObject.type,
+          }));
 
-        const body: SwapRefResponse = {
-          result: resultSummary,
-          preview,
-        };
+          const body: SwapRefResponse = {
+            result: resultSummary,
+          };
 
-        // bail if preview
-        if (preview) {
+          // bail if preview
+          if (previewRoute) {
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          }
+
+          // iterate over list and update references
+          for (const savedObject of filteredSavedObjects) {
+            const updatedRefs = savedObject.references.map((ref) => {
+              if (ref.type === type && ref.id === req.body.fromId) {
+                return { ...ref, id: req.body.toId };
+              } else {
+                return ref;
+              }
+            });
+
+            await savedObjectsClient.update(
+              savedObject.type,
+              savedObject.id,
+              {},
+              {
+                references: updatedRefs,
+              }
+            );
+          }
+
+          if (req.body.delete) {
+            const verifyNoMoreRefs = await savedObjectsClient.find(findParams);
+            if (verifyNoMoreRefs.total > 0) {
+              body.deleteStatus = {
+                remainingRefs: verifyNoMoreRefs.total,
+                deletePerformed: false,
+              };
+            } else {
+              await savedObjectsClient.delete(type, req.body.fromId, { refresh: 'wait_for' });
+              body.deleteStatus = {
+                remainingRefs: verifyNoMoreRefs.total,
+                deletePerformed: true,
+              };
+            }
+          }
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
             body,
           });
-        }
-
-        // iterate over list and update references
-        for (const savedObject of filteredSavedObjects) {
-          const updatedRefs = savedObject.references.map((ref) => {
-            if (ref.type === type && ref.id === req.body.from_id) {
-              return { ...ref, id: req.body.to_id };
-            } else {
-              return ref;
-            }
-          });
-
-          await savedObjectsClient.update(
-            savedObject.type,
-            savedObject.id,
-            {},
-            {
-              references: updatedRefs,
-            }
-          );
-        }
-
-        if (req.body.delete) {
-          const verifyNoMoreRefs = await savedObjectsClient.find(findParams);
-          if (verifyNoMoreRefs.total > 0) {
-            body.deleteSuccess = false;
-          } else {
-            await savedObjectsClient.delete(type, req.body.from_id);
-            body.deleteSuccess = true;
-          }
-        }
-
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body,
-        });
-      })
-    )
-  );
-};
+        })
+      )
+    );
+  };

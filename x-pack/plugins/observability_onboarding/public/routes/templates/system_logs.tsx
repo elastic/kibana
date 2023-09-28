@@ -46,7 +46,14 @@ export function SystemLogs({ children }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          {children}
+          <div
+            style={{
+              display: 'flex',
+              flexFlow: 'column nowrap',
+            }}
+          >
+            {children}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </WizardProvider>

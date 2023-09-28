@@ -41,18 +41,17 @@ export const OptionsListPopoverActionBar = ({
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
   const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
 
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
   );
 
-  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
-
   return (
     <div className="optionsList__actions">
       <EuiFormRow fullWidth>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup className="optionsList__searchSortRow" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
               isInvalid={!searchString.valid}
@@ -68,7 +67,7 @@ export const OptionsListPopoverActionBar = ({
             />
           </EuiFlexItem>
           {!hideSort && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem className="optionsList__sortButtonWrapper" grow={false}>
               <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
             </EuiFlexItem>
           )}

@@ -66,6 +66,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
               type: 'object',
               properties: {
                 content: text,
+                event: text,
                 role: keyword,
                 data: {
                   type: 'object',
@@ -75,7 +76,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                   type: 'object',
                   properties: {
                     name: keyword,
-                    args: {
+                    arguments: {
                       type: 'object',
                       enabled: false,
                     },
@@ -85,6 +86,9 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
               },
             },
           },
+        },
+        public: {
+          type: 'boolean',
         },
       },
     },

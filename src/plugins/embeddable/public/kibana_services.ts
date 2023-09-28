@@ -19,6 +19,7 @@ export let inspector: EmbeddableStartDependencies['inspector'];
 export let usageCollection: EmbeddableStartDependencies['usageCollection'];
 export let savedObjectsManagement: EmbeddableStartDependencies['savedObjectsManagement'];
 export let savedObjectsTaggingOss: EmbeddableStartDependencies['savedObjectsTaggingOss'];
+export let contentManagement: EmbeddableStartDependencies['contentManagement'];
 
 const servicesReady$ = new BehaviorSubject(false);
 export const untilPluginStartServicesReady = () => {
@@ -45,6 +46,7 @@ export const setKibanaServices = (
   usageCollection = deps.usageCollection;
   savedObjectsManagement = deps.savedObjectsManagement;
   savedObjectsTaggingOss = deps.savedObjectsTaggingOss;
+  contentManagement = deps.contentManagement;
 
   servicesReady$.next(true);
 };

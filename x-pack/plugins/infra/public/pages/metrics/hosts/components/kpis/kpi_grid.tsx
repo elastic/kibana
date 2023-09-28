@@ -4,33 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { CSSProperties } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { HostMetricsDocsLink } from '../../../../../components/lens';
-import { Tile } from './tile';
+import { Kpi } from './kpi';
 import { HostCountProvider } from '../../hooks/use_host_count';
-import { HostsTile } from './hosts_tile';
-import { KPI_CHART_MIN_HEIGHT } from '../../constants';
-import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
-
-const lensStyle: CSSProperties = {
-  height: KPI_CHART_MIN_HEIGHT,
-};
+import { HostCountKpi } from './host_count_kpi';
+import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 
 export const KPIGrid = () => {
   return (
     <HostCountProvider>
-      <HostMetricsDocsLink />
+      <HostMetricsDocsLink type="metrics" />
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>
-          <HostsTile style={lensStyle} />
+          <HostCountKpi height={KPI_CHART_HEIGHT} />
         </EuiFlexItem>
-        {KPI_CHARTS.map((chartProp, index) => (
+        {assetDetailsDashboards.host.hostKPICharts.map((chartProp, index) => (
           <EuiFlexItem key={index}>
-            <Tile {...chartProp} style={lensStyle} />
+            <Kpi {...chartProp} height={KPI_CHART_HEIGHT} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

@@ -43,6 +43,8 @@ get:
                   $ref: '../components/schemas/is_missing_secrets.yaml'  
                 is_preconfigured:
                   $ref: '../components/schemas/is_preconfigured.yaml'
+                is_system_action:
+                  $ref: '../components/schemas/is_system_action.yaml'
                 name:
                   type: string
                   description: The display name for the connector.

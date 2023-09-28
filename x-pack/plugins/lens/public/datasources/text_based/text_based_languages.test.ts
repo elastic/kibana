@@ -365,10 +365,26 @@ describe('Textbased Data Source', () => {
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
     (generateId as jest.Mock).mockReturnValue(`newid`);
     it('should create the correct layers', () => {
+      const textBasedQueryColumns = [
+        {
+          id: 'bytes',
+          name: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'dest',
+          name: 'dest',
+          meta: {
+            type: 'string',
+          },
+        },
+      ];
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           dataViewSpec: {
             title: 'foo',
@@ -385,34 +401,19 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
-        fieldList: [
-          {
-            id: 'newid',
-            meta: {
-              type: 'number',
-            },
-            name: 'bytes',
-          },
-          {
-            id: 'newid',
-            meta: {
-              type: 'string',
-            },
-            name: 'dest',
-          },
-        ],
+        fieldList: textBasedQueryColumns,
         layers: {
           newid: {
             allColumns: [
               {
-                columnId: 'newid',
+                columnId: 'bytes',
                 fieldName: 'bytes',
                 meta: {
                   type: 'number',
                 },
               },
               {
-                columnId: 'newid',
+                columnId: 'dest',
                 fieldName: 'dest',
                 meta: {
                   type: 'string',
@@ -421,14 +422,14 @@ describe('Textbased Data Source', () => {
             ],
             columns: [
               {
-                columnId: 'newid',
+                columnId: 'bytes',
                 fieldName: 'bytes',
                 meta: {
                   type: 'number',
                 },
               },
               {
-                columnId: 'newid',
+                columnId: 'dest',
                 fieldName: 'dest',
                 meta: {
                   type: 'string',
@@ -447,7 +448,7 @@ describe('Textbased Data Source', () => {
         changeType: 'initial',
         columns: [
           {
-            columnId: 'newid',
+            columnId: 'bytes',
             operation: {
               dataType: 'number',
               isBucketed: false,
@@ -455,7 +456,7 @@ describe('Textbased Data Source', () => {
             },
           },
           {
-            columnId: 'newid',
+            columnId: 'dest',
             operation: {
               dataType: 'string',
               isBucketed: true,
@@ -472,7 +473,22 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: [
+            {
+              id: 'bytes',
+              name: 'bytes',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              id: 'dest',
+              name: 'dest',
+              meta: {
+                type: 'string',
+              },
+            },
+          ],
           dataViewSpec: {
             title: 'foo',
             id: '1',

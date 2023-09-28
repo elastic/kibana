@@ -101,6 +101,8 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    serverless,
+    contentManagement,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -113,6 +115,7 @@ export async function getLensServices(
     storage,
     inspector: getLensInspectorService(inspector),
     navigation,
+    contentManagement,
     fieldFormats,
     stateTransfer,
     usageCollection,
@@ -128,7 +131,7 @@ export async function getLensServices(
     settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -147,6 +150,7 @@ export async function getLensServices(
     unifiedSearch,
     docLinks: coreStart.docLinks,
     locator,
+    serverless,
   };
 }
 

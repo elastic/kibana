@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
+import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 
 interface Props {
@@ -22,10 +23,18 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   mockHttp.get.mockResolvedValue([]);
+  const mockAssistantAvailability: AssistantAvailability = {
+    hasAssistantPrivilege: false,
+    hasConnectorsAllPrivilege: true,
+    hasConnectorsReadPrivilege: true,
+    isAssistantEnabled: true,
+  };
 
   return (
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
+      assistantAvailability={mockAssistantAvailability}
+      assistantLangChain={false}
       augmentMessageCodeBlocks={jest.fn(() => [])}
       baseAllow={[]}
       baseAllowReplacement={[]}

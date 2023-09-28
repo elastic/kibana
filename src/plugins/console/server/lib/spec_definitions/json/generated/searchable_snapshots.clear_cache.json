@@ -1,15 +1,19 @@
 {
   "searchable_snapshots.clear_cache": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
-      "allow_no_indices": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
-        "none",
-        "all"
+        "hidden",
+        "none"
       ],
-      "index": []
+      "allow_no_indices": "__flag__",
+      "ignore_unavailable": "__flag__"
     },
     "methods": [
       "POST"
@@ -18,6 +22,10 @@
       "_searchable_snapshots/cache/clear",
       "{index}/_searchable_snapshots/cache/clear"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

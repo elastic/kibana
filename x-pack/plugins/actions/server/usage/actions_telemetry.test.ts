@@ -7,7 +7,12 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
+import {
+  getCounts,
+  getExecutionsPerDayCount,
+  getInUseTotalCount,
+  getTotalCount,
+} from './actions_telemetry';
 
 const mockLogger = loggingSystemMock.create().get();
 
@@ -111,6 +116,7 @@ describe('actions telemetry', () => {
           "another.type__": 1,
           "some.type": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 4,
         "hasErrors": false,
       }
@@ -130,6 +136,7 @@ describe('actions telemetry', () => {
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
         "countByType": Object {},
+        "countGenAiProviderTypes": Object {},
         "countTotal": 0,
         "errorMessage": "oh no",
         "hasErrors": true,
@@ -451,6 +458,7 @@ describe('actions telemetry', () => {
           "another.type__": 1,
           "some.type": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 6,
         "hasErrors": false,
       }
@@ -494,6 +502,7 @@ describe('actions telemetry', () => {
         "countByType": Object {
           "test.system-action": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 1,
         "hasErrors": false,
       }
@@ -956,5 +965,22 @@ describe('actions telemetry', () => {
         "hasErrors": true,
       }
     `);
+  });
+
+  it('getCounts', () => {
+    const aggs = {
+      '.d3security': 2,
+      '.gen-ai__Azure OpenAI': 3,
+      '.gen-ai__OpenAI': 1,
+    };
+    const { countByType, countGenAiProviderTypes } = getCounts(aggs);
+    expect(countByType).toEqual({
+      __d3security: 2,
+      '__gen-ai': 4,
+    });
+    expect(countGenAiProviderTypes).toEqual({
+      'Azure OpenAI': 3,
+      OpenAI: 1,
+    });
   });
 });

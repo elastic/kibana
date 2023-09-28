@@ -62,6 +62,9 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -85,6 +88,8 @@ describe('listAlertTypesRoute', () => {
             "authorizedConsumers": Object {},
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
             "id": "1",
             "isExportable": true,
             "minimumLicenseRequired": "basic",
@@ -94,6 +99,7 @@ describe('listAlertTypesRoute', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         ],
       }
@@ -137,6 +143,9 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -190,6 +199,9 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
