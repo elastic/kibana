@@ -32,7 +32,10 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
-    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
+    dev: schema.object({
+      // deprecated as unused after index details page has been implemented
+      enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
+    }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
@@ -47,13 +50,10 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
-    dev: {
-      enableIndexDetailsPage: true,
-    },
     enableIndexStats: true,
   },
   schema: schemaLatest,
-  deprecations: () => [],
+  deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],
 };
 
 export type IndexManagementConfig = TypeOf<typeof schemaLatest>;
