@@ -173,6 +173,15 @@ export class TagsClient implements ITagInternalClient {
     return response;
   }
 
+  public async findByName(name: string, { exact }: { exact?: boolean } = { exact: false }) {
+    const { tags = [] } = await this.find({ page: 1, perPage: 10000, search: name });
+    if (exact) {
+      const tag = tags.find((t) => t.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+      return tag ?? null;
+    }
+    return tags.length > 0 ? tags[0] : null;
+  }
+
   public async bulkDelete(tagIds: string[]) {
     const startTime = window.performance.now();
     await this.http.post<{}>('/internal/saved_objects_tagging/tags/_bulk_delete', {
