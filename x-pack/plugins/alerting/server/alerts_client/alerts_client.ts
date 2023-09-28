@@ -55,6 +55,7 @@ import {
   getContinualAlertsQuery,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -467,15 +468,17 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
-          const errorsInResponse = (response.items ?? [])
-            .map((item) => item?.index?.error || item?.create?.error)
-            .filter((item) => item != null);
-
-          this.options.logger.error(
-            `Error writing ${errorsInResponse.length} out of ${
-              alertsToIndex.length
-            } alerts - ${JSON.stringify(errorsInResponse)}`
-          );
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
+            bulkResponse: response,
+          });
         }
       } catch (err) {
         this.options.logger.error(
