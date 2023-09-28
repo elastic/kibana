@@ -29,7 +29,7 @@ export function createEMSClient(
     language: i18n.getLocale(),
     appVersion: kbnVersion,
     appName: EMS_APP_NAME,
-    tileApiUrl: 'https://tiles.maps.elastic.dev',
+    tileApiUrl: emsSettings!.getEMSTileApiUrl(),
     fileApiUrl: emsSettings!.getEMSFileApiUrl(),
     landingPageUrl,
     fetchFunction(url: string) {
