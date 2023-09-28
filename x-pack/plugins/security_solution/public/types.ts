@@ -77,6 +77,8 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { DataQualityPanelConfig } from './overview/types';
+import type { SetComponents, GetComponent$ } from './contract_components';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -139,11 +141,10 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
-  getStartedComponent$: Observable<React.ComponentType | null>;
-  dashboardsLandingCalloutComponent$: Observable<React.ComponentType | null>;
+  getComponent$: GetComponent$;
   upselling: UpsellingService;
+  dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
 
 export type StartServices = CoreStart &
@@ -171,15 +172,14 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
-  setDashboardsLandingCallout: (dashboardsLandingCallout: React.ComponentType) => void;
+  setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
 }

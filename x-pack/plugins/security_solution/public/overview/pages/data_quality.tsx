@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import useObservable from 'react-use/lib/useObservable';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
@@ -55,8 +54,10 @@ import type {
   ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
+import type { DataQualityPanelConfig } from '../types';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
+const defaultDataQualityPanelConfig: DataQualityPanelConfig = { isILMAvailable: true };
 
 const comboBoxStyle: React.CSSProperties = {
   width: '322px',
@@ -157,8 +158,8 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { isILMAvailable$, cases } = useKibana().services;
-  const isILMAvailable = useObservable(isILMAvailable$);
+  const { dataQualityPanelConfig = defaultDataQualityPanelConfig, cases } = useKibana().services;
+  const { isILMAvailable } = dataQualityPanelConfig;
 
   const [startDate, setStartTime] = useState<string>();
   const [endDate, setEndTime] = useState<string>();
@@ -172,7 +173,7 @@ const DataQualityComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isILMAvailable != null && isILMAvailable === false) {
+    if (isILMAvailable === false) {
       setStartTime(DEFAULT_START_TIME);
       setEndTime(DEFAULT_END_TIME);
     }
@@ -255,7 +256,7 @@ const DataQualityComponent: React.FC = () => {
 
   return (
     <>
-      {indicesExist && isILMAvailable != null ? (
+      {indicesExist ? (
         <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
           <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
             {isILMAvailable && (

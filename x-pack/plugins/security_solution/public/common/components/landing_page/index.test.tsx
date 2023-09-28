@@ -39,7 +39,7 @@ describe('LandingPageComponent', () => {
         securityLayout: {
           getPluginWrapper: jest.fn().mockReturnValue(mockSecuritySolutionTemplateWrapper),
         },
-        getStartedComponent$: mockGetStartedComponent,
+        getComponent$: mockGetStartedComponent,
       },
     });
   });

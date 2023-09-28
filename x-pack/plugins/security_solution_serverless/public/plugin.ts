@@ -41,7 +41,9 @@ export class SecuritySolutionServerlessPlugin
     _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+    const { securitySolution } = setupDeps;
+    securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+    securitySolution.setDataQualityPanelConfig({ isILMAvailable: false });
 
     return {};
   }
@@ -57,9 +59,10 @@ export class SecuritySolutionServerlessPlugin
 
     registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
-    securitySolution.setDashboardsLandingCallout(getDashboardsLandingCallout(services));
-    securitySolution.setIsILMAvailable(false);
+    securitySolution.setComponents({
+      getStarted: getSecurityGetStartedComponent(services, productTypes),
+      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+    });
 
     configureNavigation(services, this.config);
     setRoutes(services);
