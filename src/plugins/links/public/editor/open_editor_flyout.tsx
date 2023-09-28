@@ -51,7 +51,7 @@ export async function openEditorFlyout(
      *
      * This does not apply to editing existing links panels, since there is no tooltip for this action.
      */
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
   return new Promise((resolve, reject) => {
