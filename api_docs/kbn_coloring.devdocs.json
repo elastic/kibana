@@ -1715,7 +1715,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"system_palette\" | \"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "packages/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
