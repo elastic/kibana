@@ -246,7 +246,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
             ) : null
           ) : null}
 
-          <Form>
+          <Form
+            onSubmit={(e) => {
+              if (formik.isSubmitting) {
+                e.preventDefault();
+                e.stopPropagation();
+              } else {
+                return formik.handleSubmit(e);
+              }
+            }}
+          >
             <FormRow
               label={
                 <FormattedMessage
@@ -271,12 +280,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   ),
                 }}
                 fullWidth
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === 'Enter' && formik.submitCount > 0) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
+                // onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                //   if (e.key === 'Enter' && formik.submitCount > 0) {
+                //     e.preventDefault();
+                //     e.stopPropagation();
+                //   }
+                // }}
               />
             </FormRow>
 
