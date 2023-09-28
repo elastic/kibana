@@ -23,7 +23,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // TODO enable once the visualize tabs are back
 describe.skip(
   'Alert details expandable flyout left panel session view',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cleanKibana();
