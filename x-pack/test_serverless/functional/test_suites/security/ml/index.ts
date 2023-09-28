@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./anomaly_detection_jobs_list'));
     loadTestFile(require.resolve('./data_frame_analytics_jobs_list'));
     loadTestFile(require.resolve('./trained_models_list'));
+    loadTestFile(require.resolve('./search_bar_features'));
   });
 }

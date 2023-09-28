@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const svlMml = getService('svlMl');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['svlCommonPage']);
   const adJobId = 'fq_single_permission';
 
   describe('Anomaly detection jobs list', () => {

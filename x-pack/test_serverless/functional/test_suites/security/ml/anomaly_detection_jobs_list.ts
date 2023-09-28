@@ -9,12 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const svlMml = getService('svlMl');
-  const PageObjects = getPageObjects([
-    'discover',
-    'observabilityLogExplorer',
-    'svlCommonPage',
-    'svlCommonNavigation',
-  ]);
+  const PageObjects = getPageObjects(['svlCommonPage']);
   const adJobId = 'fq_single_permission';
 
   describe('Anomaly detection jobs list', () => {
@@ -55,6 +50,3 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   });
 }
-// await svlCommonNavigation.search.searchFor('discover');
-// await svlCommonNavigation.search.clickOnOption(0);
-// await svlCommonNavigation.search.hideSearch();

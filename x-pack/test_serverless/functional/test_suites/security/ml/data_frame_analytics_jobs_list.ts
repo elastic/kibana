@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const svlMml = getService('svlMl');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['svlCommonPage']);
   const dfaJobId = 'iph_outlier_permission';
 
   describe('Data frame analytics jobs list', () => {

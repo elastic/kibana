@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const svlMml = getService('svlMl');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['svlCommonPage']);
 
   describe('Trained models list', () => {
     before(async () => {
