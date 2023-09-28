@@ -126,10 +126,10 @@ describe('fetchCpuUsageNodeStats', () => {
                         value: 45,
                       },
                       quota_micros_max: {
-                        value: -1,
+                        value: 2000,
                       },
                       quota_micros_min: {
-                        value: -1,
+                        value: 2000,
                       },
                       name: {
                         buckets: [
@@ -366,7 +366,6 @@ describe('fetchCpuUsageNodeStats', () => {
 
       expect(stats).toEqual([
         {
-          missingLimits: true,
           clusterUuid: 'my-test-cluster',
           nodeId: 'my-test-node',
           nodeName: 'test-node',
@@ -446,84 +445,6 @@ describe('fetchCpuUsageNodeStats', () => {
       expect(stats).toEqual([
         {
           limitsChanged: true,
-          clusterUuid: 'my-test-cluster',
-          nodeId: 'my-test-node',
-          nodeName: 'test-node',
-          ccs: undefined,
-          cpuUsage: undefined,
-        },
-      ]);
-    });
-
-    it('warns about failing to compute usage due to values missing', async () => {
-      esClient.search.mockResponse({
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: 'my-test-cluster',
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'my-test-node',
-                      min_usage_nanos: {
-                        value: null,
-                      },
-                      max_usage_nanos: {
-                        value: null,
-                      },
-                      min_periods: {
-                        value: null,
-                      },
-                      max_periods: {
-                        value: null,
-                      },
-                      quota_micros_min: {
-                        value: 10000,
-                      },
-                      quota_micros_max: {
-                        value: 10000,
-                      },
-                      average_cpu_usage_percent: {
-                        value: 45,
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'test-node',
-                          },
-                        ],
-                      },
-                      index: {
-                        buckets: [
-                          {
-                            key: 'a-local-index',
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      } as any);
-
-      const stats = await fetchCpuUsageNodeStats(
-        {
-          esClient,
-          clusterUuids: ['my-test-cluster'],
-          startMs: 0,
-          endMs: 10,
-          filterQuery,
-          logger: loggerMock.create(),
-        },
-        configSlice
-      );
-
-      expect(stats).toEqual([
-        {
           clusterUuid: 'my-test-cluster',
           nodeId: 'my-test-node',
           nodeName: 'test-node',
