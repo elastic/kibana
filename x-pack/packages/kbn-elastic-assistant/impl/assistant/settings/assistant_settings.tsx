@@ -23,7 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/open_ai/constants';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';

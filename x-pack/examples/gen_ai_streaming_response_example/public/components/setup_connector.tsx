@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { GenAiLogo } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import { EuiFlexGroup, EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -20,11 +20,11 @@ export const SetupConnector = ({ setIsConnectorModalVisible }: SetupConnectorPro
       <EuiFlexItem grow={false}>
         <EuiCard
           layout="horizontal"
-          icon={<EuiIcon size="xl" type={GenAiLogo} />}
+          icon={<EuiIcon size="xl" type={OpenAILogo} />}
           title={i18n.translate(
             'genAiStreamingResponseExample.app.component.addConnectorCardTitle',
             {
-              defaultMessage: 'Add Generative AI Connector',
+              defaultMessage: 'Add OpenAI Connector',
             }
           )}
           description={i18n.translate(

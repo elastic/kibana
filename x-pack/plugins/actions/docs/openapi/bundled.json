@@ -1768,7 +1768,7 @@
         }
       },
       "config_properties_genai": {
-        "title": "Connector request properties for a generative AI connector",
+        "title": "Connector request properties for an OpenAI connector",
         "description": "Defines properties for connectors when type is `.gen-ai`.",
         "oneOf": [
           {
@@ -1821,7 +1821,7 @@
         }
       },
       "secrets_properties_genai": {
-        "title": "Connector secrets properties for a generative AI connector",
+        "title": "Connector secrets properties for an OpenAI connector",
         "description": "Defines secrets for connectors when type is `.gen-ai`.",
         "type": "object",
         "properties": {
@@ -1832,8 +1832,8 @@
         }
       },
       "create_connector_request_genai": {
-        "title": "Create generative AI connector request",
-        "description": "The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
+        "title": "Create OpenAI connector request",
+        "description": "The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
         "type": "object",
         "required": [
           "config",

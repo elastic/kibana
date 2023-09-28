@@ -1208,9 +1208,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
 ## Explore owner connectors
-/x-pack/plugins/stack_connectors/public/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/server/connector_types/gen_ai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/public/connector_types/open_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/server/connector_types/open_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/common/open_ai @elastic/security-threat-hunting-explore
 
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
