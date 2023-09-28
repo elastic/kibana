@@ -173,6 +173,7 @@
     "@kbn/chart-expressions-common": "link:src/plugins/chart_expressions/common",
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
+    "@kbn/cloud": "link:packages/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat",
     "@kbn/cloud-chat-provider-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat_provider",
     "@kbn/cloud-data-migration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_data_migration",
