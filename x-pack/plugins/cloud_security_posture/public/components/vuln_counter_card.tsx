@@ -10,7 +10,7 @@ import { EuiPanel, EuiStat, useEuiTheme, EuiIcon } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface VulnCounterCardProps {
+export interface VulnCounterCardProps {
   id: string;
   title: EuiStatProps['title'];
   titleColor?: EuiStatProps['titleColor'];
