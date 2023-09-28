@@ -43,13 +43,15 @@ const validChannelIds = async (
 
 export function useValidChannels(props: UseValidChannelsProps) {
   const { authToken, channelId } = props;
-  const [channels, setChannels] = useState<string[]>([]);
+  const [channels, setChannels] = useState<Array<{ id: string; name: string }>>([]);
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const channelIdToValidate = channels.includes(channelId) ? '' : channelId;
+  const channelIdToValidate = channels.some((c: { id: string }) => c.id === channelId)
+    ? ''
+    : channelId;
   const queryFn = () => {
     return validChannelIds(http, authToken, channelIdToValidate);
   };
@@ -59,10 +61,10 @@ export function useValidChannels(props: UseValidChannelsProps) {
   };
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['fetchChannels', authToken, channelIdToValidate],
+    queryKey: ['validChannels', authToken, channelIdToValidate],
     queryFn,
     onError: onErrorFn,
-    enabled: authToken.length > 0 && channelIdToValidate.length > 0,
+    enabled: (authToken || '').length > 0 && (channelIdToValidate || '').length > 0,
     refetchOnWindowFocus: false,
   });
 
@@ -72,21 +74,24 @@ export function useValidChannels(props: UseValidChannelsProps) {
     }
     if ((data?.validChannels ?? []).length > 0) {
       setChannels((prevChannels) => {
-        return prevChannels.concat(data?.validChannels.map((vc) => vc.id) ?? []);
+        return prevChannels.concat(data?.validChannels ?? []);
       });
     }
   }, [data, toasts]);
 
-  const resetChannelsToValidate = useCallback((channelsToReset: string[]) => {
-    if (channelsToReset.length === 0) {
-      setChannels([]);
-    } else {
-      setChannels((prevChannels) => {
-        if (prevChannels.length === 0) return channelsToReset;
-        return prevChannels.filter((c) => channelsToReset.includes(c));
-      });
-    }
-  }, []);
+  const resetChannelsToValidate = useCallback(
+    (channelsToReset: Array<{ id: string; name: string }>) => {
+      if (channelsToReset.length === 0) {
+        setChannels([]);
+      } else {
+        setChannels((prevChannels) => {
+          if (prevChannels.length === 0) return channelsToReset;
+          return prevChannels.filter((c) => channelsToReset.some((cTr) => cTr.id === c.id));
+        });
+      }
+    },
+    []
+  );
 
   return {
     channels,

@@ -12,7 +12,15 @@ export const SlackApiSecretsSchema = schema.object({
 });
 
 export const SlackApiConfigSchema = schema.object({
-  allowedChannelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 25 })),
+  allowedChannels: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string({ minLength: 1 }),
+        name: schema.string({ minLength: 1 }),
+      }),
+      { maxSize: 25 }
+    )
+  ),
 });
 
 export const ValidChannelIdSubActionParamsSchema = schema.object({
@@ -25,8 +33,8 @@ export const ValidChannelIdParamsSchema = schema.object({
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
-  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelId: schema.maybe(schema.string({ minLength: 1 })),
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 0 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
   text: schema.string({ minLength: 1 }),
 });
 
@@ -35,12 +43,7 @@ export const PostMessageParamsSchema = schema.object({
   subActionParams: PostMessageSubActionParamsSchema,
 });
 
-export const GetAllowedChannelsSchema = schema.object({
-  subAction: schema.literal('getAllowedChannels'),
-});
-
 export const SlackApiParamsSchema = schema.oneOf([
-  GetAllowedChannelsSchema,
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
 ]);

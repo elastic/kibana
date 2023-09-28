@@ -42,16 +42,29 @@ const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => 
   },
 ];
 
-const getConfigFormSchemaAfterSecrets = (
-  options: EuiComboBoxOptionOption[],
-  isLoading: boolean,
-  isDisabled: boolean,
-  onChange: (options: EuiComboBoxOptionOption[]) => void,
-  onCreateOption: (searchValue: string, options: EuiComboBoxOptionOption[]) => void
-): ConfigFieldSchema[] => [
+interface AllowedChannels {
+  id: string;
+  name: string;
+}
+
+const getConfigFormSchemaAfterSecrets = ({
+  options,
+  isLoading,
+  isDisabled,
+  onChange,
+  onCreateOption,
+  selectedOptions,
+}: {
+  options: Array<EuiComboBoxOptionOption<AllowedChannels>>;
+  isLoading: boolean;
+  isDisabled: boolean;
+  onChange: (options: Array<EuiComboBoxOptionOption<AllowedChannels>>) => void;
+  onCreateOption: (searchValue: string, options: EuiComboBoxOptionOption[]) => void;
+  selectedOptions: Array<EuiComboBoxOptionOption<AllowedChannels>>;
+}): ConfigFieldSchema[] => [
   {
-    id: 'allowedChannelIds',
-    isRequired: false,
+    id: 'allowedChannels',
+    isRequired: true,
     label: i18n.ALLOWED_CHANNELS,
     helpText: (
       <FormattedMessage
@@ -67,12 +80,13 @@ const getConfigFormSchemaAfterSecrets = (
       options,
       onChange,
       onCreateOption,
+      selectedOptions,
     },
   },
 ];
 
 const NO_SCHEMA: ConfigFieldSchema[] = [];
-
+const SEPARATOR = ' - ';
 export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
@@ -97,24 +111,31 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
     setChannelsToValidate(searchValue);
   }, []);
   const onChange = useCallback(
-    (options: EuiComboBoxOptionOption[]) => {
-      resetChannelsToValidate(options.map((opt: EuiComboBoxOptionOption) => opt.label));
+    (options: Array<EuiComboBoxOptionOption<AllowedChannels>>) => {
+      const tempChannelIds: AllowedChannels[] = options.map(
+        (opt: EuiComboBoxOptionOption<AllowedChannels>) => {
+          return opt.value!;
+        }
+      );
+      resetChannelsToValidate(tempChannelIds);
     },
     [resetChannelsToValidate]
   );
 
   const configFormSchemaAfterSecrets = useMemo(() => {
     const validChannelsFormatted = validChannels.map((channel) => ({
-      label: channel,
+      label: `${channel.id}${SEPARATOR}${channel.name}`,
+      value: channel,
     }));
-    return getConfigFormSchemaAfterSecrets(
-      validChannelsFormatted,
+    return getConfigFormSchemaAfterSecrets({
+      options: validChannelsFormatted,
       isLoading,
-      authToken.length === 0,
+      isDisabled: (authToken || '').length === 0,
       onChange,
-      onCreateOption
-    );
-  }, [validChannels, isLoading, authToken.length, onChange, onCreateOption]);
+      onCreateOption,
+      selectedOptions: validChannelsFormatted,
+    });
+  }, [validChannels, isLoading, authToken, onChange, onCreateOption]);
 
   const debounceSetToken = debounce(setAuthToken, INPUT_TIMEOUT);
   useEffect(() => {
@@ -126,13 +147,13 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
 
   useEffect(() => {
     if (isEmpty(authToken) && validChannels.length > 0) {
-      setFieldValue('config.allowedChannelIds', []);
+      setFieldValue('config.allowedChannels', []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken]);
 
   useEffect(() => {
-    setFieldValue('config.allowedChannelIds', validChannels);
+    setFieldValue('config.allowedChannels', validChannels);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validChannels]);
 
@@ -141,12 +162,12 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
     if (
       !isInitialyzed.current &&
       formData.config &&
-      formData.config.allowedChannelIds &&
-      formData.config.allowedChannelIds.length > 0 &&
-      !isEqual(formData.config.allowedChannelIds, validChannels)
+      formData.config.allowedChannels &&
+      formData.config.allowedChannels.length > 0 &&
+      !isEqual(formData.config.allowedChannels, validChannels)
     ) {
       isInitialyzed.current = true;
-      resetChannelsToValidate(formData.config.allowedChannelIds);
+      resetChannelsToValidate(formData.config.allowedChannels);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.config]);

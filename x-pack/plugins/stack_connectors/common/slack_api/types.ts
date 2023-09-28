@@ -65,9 +65,6 @@ export interface ChannelResponse {
   is_private: boolean;
 }
 
-export interface GetAllowedChannelsResponse extends SlackAPiResponse {
-  channels?: ChannelResponse[];
-}
 export interface ValidChannelResponse extends SlackAPiResponse {
   channel?: ChannelResponse;
 }
@@ -87,8 +84,7 @@ export interface SlackApiService {
   ) => Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>>;
   postMessage: ({
     channels,
-    channelId,
+    channelIds,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
-  getAllowedChannels: () => Promise<ConnectorTypeExecutorResult<GetAllowedChannelsResponse | void>>;
 }

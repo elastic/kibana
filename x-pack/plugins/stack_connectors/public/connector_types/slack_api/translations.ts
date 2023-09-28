@@ -16,7 +16,7 @@ export const MESSAGE_REQUIRED = i18n.translate(
 export const CHANNEL_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.requiredSlackChannel',
   {
-    defaultMessage: 'Channel is required.',
+    defaultMessage: 'Channel id is required.',
   }
 );
 export const TOKEN_LABEL = i18n.translate(

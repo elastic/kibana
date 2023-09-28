@@ -19,22 +19,15 @@ const validChannelIdHandler = async ({
   params: ValidChannelIdSubActionParams;
 }) => await externalService.validChannelId(channelId ?? '');
 
-const getAllowedChannelsHandler = async ({
-  externalService,
-}: {
-  externalService: SlackApiService;
-}) => await externalService.getAllowedChannels();
-
 const postMessageHandler = async ({
   externalService,
-  params: { channelId, channels, text },
+  params: { channelIds, channels, text },
 }: {
   externalService: SlackApiService;
   params: PostMessageSubActionParams;
-}) => await externalService.postMessage({ channelId, channels, text });
+}) => await externalService.postMessage({ channelIds, channels, text });
 
 export const api = {
   validChannelId: validChannelIdHandler,
-  getAllowedChannels: getAllowedChannelsHandler,
   postMessage: postMessageHandler,
 };

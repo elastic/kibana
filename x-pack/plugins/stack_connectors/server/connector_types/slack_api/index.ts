@@ -118,12 +118,6 @@ const slackApiExecutor = async ({
     });
   }
 
-  if (subAction === 'getAllowedChannels') {
-    return await api.getAllowedChannels({
-      externalService,
-    });
-  }
-
   if (subAction === 'postMessage') {
     return await api.postMessage({
       externalService,

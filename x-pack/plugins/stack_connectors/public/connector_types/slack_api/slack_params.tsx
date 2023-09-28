@@ -17,16 +17,13 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce } from 'lodash';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
-  GetAllowedChannelsResponse,
   PostMessageParams,
+  SlackApiConfig,
   ValidChannelIdSubActionParams,
   ValidChannelResponse,
 } from '../../../common/slack_api/types';
-
-/** wait this many ms after the user completes typing before applying the filter input */
-const INPUT_TIMEOUT = 250;
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessageParams>> = ({
   actionConnector,
@@ -38,45 +35,37 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   defaultMessage,
   useDefaultMessage,
 }) => {
+  const [connectorId, setConnectorId] = useState<string>();
   const { subAction, subActionParams } = actionParams;
-  const { channels = [], text, channelId = '' } = subActionParams ?? {};
+  const { channels = [], text, channelIds = [] } = subActionParams ?? {};
+  const [tempChannelId, setTempChannelId] = useState(
+    channels.length > 0
+      ? channels[0]
+      : channelIds.length > 0 && channelIds[0].length > 0
+      ? channelIds[0]
+      : ''
+  );
   const [validChannelId, setValidChannelId] = useState('');
   const { toasts } = useKibana().notifications;
-
-  useEffect(() => {
-    if (useDefaultMessage || !text) {
-      editAction('subActionParams', { channels, text: defaultMessage }, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage, useDefaultMessage]);
-
-  if (!subAction) {
-    editAction('subAction', 'postMessage', index);
-  }
-  if (!subActionParams) {
-    editAction(
-      'subActionParams',
-      {
-        channels,
-        text,
-      },
-      index
-    );
-  }
-
-  const {
-    response: { channels: channelsInfo = [] } = {},
-    isLoading: isLoadingChannels,
-    error: channelsError,
-  } = useSubAction<void, GetAllowedChannelsResponse>({
-    connectorId: actionConnector?.id,
-    subAction: 'getAllowedChannels',
-  });
-
+  const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
+    (channelIds ?? []).map((c) => {
+      const allowedChannels = (
+        actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>
+      )?.config?.allowedChannels;
+      const allowedChannelSelected = allowedChannels?.find((ac) => ac.id === c);
+      return {
+        value: c,
+        label: allowedChannelSelected
+          ? `${allowedChannelSelected.id} - ${allowedChannelSelected.name}`
+          : c,
+      };
+    })
+  );
+  const [channelValidError, setChannelValidError] = useState<string[]>([]);
   const {
     response: { channel: channelValidInfo } = {},
     isLoading: isValidatingChannel,
-    error: channelValidError,
+    error: channelValidErrorResp,
   } = useSubAction<ValidChannelIdSubActionParams, ValidChannelResponse>({
     connectorId: actionConnector?.id,
     subAction: 'validChannelId',
@@ -87,136 +76,203 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   });
 
   useEffect(() => {
-    if (channelsError) {
+    if (useDefaultMessage || !text) {
+      editAction('subActionParams', { channels, channelIds, text: defaultMessage }, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultMessage, useDefaultMessage]);
+
+  useEffect(() => {
+    if (
+      !isValidatingChannel &&
+      !channelValidErrorResp &&
+      channelValidInfo &&
+      validChannelId === channelValidInfo.id
+    ) {
+      editAction(
+        'subActionParams',
+        { channels: undefined, channelIds: [channelValidInfo.id], text },
+        index
+      );
+      setValidChannelId('');
+      setChannelValidError([]);
+    }
+  }, [
+    channelValidInfo,
+    validChannelId,
+    channelValidErrorResp,
+    isValidatingChannel,
+    editAction,
+    text,
+    index,
+  ]);
+
+  useEffect(() => {
+    if (channelValidErrorResp && validChannelId.length > 0) {
+      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
+      const errorMessage = i18n.translate(
+        'xpack.stackConnectors.slack.params.componentError.validChannelsRequestFailed',
+        {
+          defaultMessage: '{validChannelId} is not a valid Slack channel',
+          values: {
+            validChannelId,
+          },
+        }
+      );
+      setChannelValidError([errorMessage]);
+      setValidChannelId('');
       toasts.danger({
-        title: i18n.translate(
-          'xpack.stackConnectors.slack.params.componentError.getChannelsRequestFailed',
-          {
-            defaultMessage: 'Failed to retrieve Slack channels list',
-          }
-        ),
-        body: channelsError.message,
+        title: errorMessage,
+        body: channelValidErrorResp.message,
       });
     }
-  }, [toasts, channelsError]);
+  }, [toasts, channelValidErrorResp, validChannelId, editAction, text, index]);
 
-  const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
-    (channels ?? []).map((c) => ({ label: c }))
-  );
+  useEffect(() => {
+    // Reset channel id input when we changes connector
+    if (connectorId && connectorId !== actionConnector?.id) {
+      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
+      setTempChannelId('');
+      setValidChannelId('');
+      setChannelValidError([]);
+      setSelectedChannels([]);
+    }
+    setConnectorId(actionConnector?.id ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector?.id]);
 
-  const slackChannels = useMemo(
-    () =>
-      channelsInfo
-        ?.filter((slackChannel) => slackChannel.is_channel)
-        .map((slackChannel) => ({
-          label: `${slackChannel.id} - ${slackChannel.name}`,
-          value: slackChannel.id,
-        })) ?? [],
-    [channelsInfo]
-  );
-
+  if (!subAction) {
+    editAction('subAction', 'postMessage', index);
+  }
+  if (!subActionParams) {
+    editAction(
+      'subActionParams',
+      {
+        channels,
+        channelIds,
+        text,
+      },
+      index
+    );
+  }
   const typeChannelInput = useMemo(() => {
-    if (channels.length > 0 && channelId.length === 0) {
+    if (channels.length > 0 && channelIds.length === 0) {
       return 'channel-name';
-    } else if (channelsInfo.length > 0) {
-      return 'channel-allowed-id';
+    } else if (
+      (
+        (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
+          ?.allowedChannels ?? []
+      ).length > 0
+    ) {
+      return 'channel-allowed-ids';
     }
     return 'channel-id';
-  }, [channelId.length, channels.length, channelsInfo.length]);
+  }, [actionConnector, channelIds.length, channels.length]);
 
-  const onChange = useCallback(
+  const slackChannelsOptions = useMemo(() => {
+    return (
+      (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
+        ?.allowedChannels ?? []
+    ).map((ac) => ({
+      label: `${ac.id} - ${ac.name}`,
+      value: ac.id,
+    }));
+  }, [actionConnector]);
+
+  const onChangeComboBox = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
-      const newSelectedChannels = newOptions.map((option) => option.label);
+      const newSelectedChannels = newOptions.map<string>((option) => option.value!.toString());
 
       setSelectedChannels(newOptions);
-      editAction('subActionParams', { channels: newSelectedChannels, text }, index);
+      editAction(
+        'subActionParams',
+        { channels: undefined, channelIds: newSelectedChannels, text },
+        index
+      );
     },
     [editAction, index, text]
   );
-  const debounceSetToken = debounce((validThisChannelId: string) => {
-    setValidChannelId(validThisChannelId);
-  }, INPUT_TIMEOUT);
+  const onBlurChannelIds = useCallback(() => {
+    if (tempChannelId === '') {
+      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
+    }
+    setValidChannelId(tempChannelId);
+  }, [editAction, index, tempChannelId, text]);
 
-  const ChannelInput = useCallback(() => {
-    if (typeChannelInput === 'channel-name') {
-      return (
-        <EuiFieldText
-          data-test-subj="slackApiChannelName"
-          name="slackApiChannelName"
-          value={channels[0]}
-          onChange={(e) => {
-            editAction('subActionParams', { channels: [e.target.value], text }, index);
-          }}
-          isInvalid={false}
-          fullWidth={true}
-        />
-      );
-    } else if (typeChannelInput === 'channel-id') {
-      // TO DO validate
+  const onChangeTextField = useCallback(
+    (evt) => {
+      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
+      setTempChannelId(evt.target.value);
+    },
+    [editAction, index, text]
+  );
+
+  const channelInput = useMemo(() => {
+    if (typeChannelInput === 'channel-name' || typeChannelInput === 'channel-id') {
       return (
         <EuiFieldText
           data-test-subj="slackApiChannelId"
           name="slackApiChannelId"
-          value={channelId}
+          value={tempChannelId}
           isLoading={isValidatingChannel}
-          onChange={(e) => {
-            debounceSetToken(e.target.value);
-            editAction(
-              'subActionParams',
-              { channels: undefined, channelId: e.target.value, text },
-              index
-            );
-          }}
-          isInvalid={false}
+          onChange={onChangeTextField}
+          onBlur={onBlurChannelIds}
+          isInvalid={channelValidError.length > 0}
           fullWidth={true}
         />
       );
-    } else if (typeChannelInput === 'channel-allowed-id') {
-      return (
-        <EuiComboBox
-          noSuggestions={false}
-          data-test-subj="slackChannelsComboBox"
-          isLoading={isLoadingChannels}
-          options={slackChannels}
-          selectedOptions={selectedChannels}
-          onChange={onChange}
-          singleSelection={true}
-        />
-      );
     }
-    return null;
+    return (
+      <EuiComboBox
+        noSuggestions={false}
+        data-test-subj="slackChannelsComboBox"
+        options={slackChannelsOptions}
+        selectedOptions={selectedChannels}
+        onChange={onChangeComboBox}
+        singleSelection={true}
+        fullWidth={true}
+      />
+    );
   }, [
-    channelId,
-    channels,
-    debounceSetToken,
-    editAction,
-    index,
-    isLoadingChannels,
+    channelValidError.length,
     isValidatingChannel,
-    onChange,
+    onBlurChannelIds,
+    onChangeComboBox,
+    onChangeTextField,
     selectedChannels,
-    slackChannels,
-    text,
+    slackChannelsOptions,
+    tempChannelId,
     typeChannelInput,
   ]);
 
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
-          defaultMessage: 'Channels',
-        })}
+        label={
+          typeChannelInput === 'channel-name'
+            ? i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
+                defaultMessage: 'Channel',
+              })
+            : i18n.translate('xpack.stackConnectors.slack.params.channelIdComboBoxLabel', {
+                defaultMessage: 'Channel Id',
+              })
+        }
         fullWidth
-        error={errors.channels}
-        isInvalid={errors.channels?.length > 0 && channels.length === 0}
+        error={channelValidError.length > 0 ? channelValidError : errors.channels}
+        isInvalid={errors.channels?.length > 0 || channelValidError.length > 0}
+        helpText={
+          channelIds.length > 0 && channelValidInfo
+            ? `${channelValidInfo.id} - ${channelValidInfo.name}`
+            : ''
+        }
       >
-        <ChannelInput />
+        {channelInput}
       </EuiFormRow>
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
         editAction={(key: string, value: any) =>
-          editAction('subActionParams', { channels, text: value }, index)
+          editAction('subActionParams', { channels, channelIds, text: value }, index)
         }
         messageVariables={messageVariables}
         paramsProperty="webApi"
