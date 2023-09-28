@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-  AlertStatus,
-} from '@kbn/rule-data-utils';
+
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -205,12 +201,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await alertsTab.click();
     },
 
-    setAlertStatusFilter(alertStatus?: Exclude<AlertStatus, typeof ALERT_STATUS_UNTRACKED>) {
-      const buttons: {
-        [key in Exclude<AlertStatus, typeof ALERT_STATUS_UNTRACKED> | 'all']: string;
-      } = {
-        [ALERT_STATUS_ACTIVE]: 'hostsView-alert-status-filter-active-button',
-        [ALERT_STATUS_RECOVERED]: 'hostsView-alert-status-filter-recovered-button',
+    setAlertStatusFilter(alertStatus?: AlertStatus) {
+      const buttons: Record<AlertStatus | 'all', string> = {
+        active: 'hostsView-alert-status-filter-active-button',
+        recovered: 'hostsView-alert-status-filter-recovered-button',
+        untracked: 'hostsView-alert-status-filter-untracked-button',
         all: 'hostsView-alert-status-filter-show-all-button',
       };
 
