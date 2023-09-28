@@ -3026,6 +3026,53 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.hit).toBeUndefined();
         });
       });
+
+      describe('setAlertStatusToUntracked()', () => {
+        test('should call updateByQuery on provided ruleIds', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          const opts = {
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {},
+            recoveredAlertsFromState: {},
+          };
+          await alertsClient.initializeExecution(opts);
+
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+        });
+
+        test('should retry updateByQuery on failure', async () => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            total: 10,
+            updated: 8,
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          const opts = {
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {},
+            recoveredAlertsFromState: {},
+          };
+          await alertsClient.initializeExecution(opts);
+
+          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
+          expect(logger.warn).toHaveBeenCalledWith(
+            'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
+          );
+        });
+      });
     });
   }
 });
