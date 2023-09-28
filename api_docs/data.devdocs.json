@@ -4971,7 +4971,9 @@
         "type": "Function",
         "tags": [],
         "label": "isErrorResponse",
-        "description": [],
+        "description": [
+          "\nFrom https://github.com/elastic/elasticsearch/issues/55572: \"When is_running is false, the query has stopped, which\nmay happen due to ... the search failed, in which case is_partial is set to true to indicate that any results that\nmay be included in the search response come only from a subset of the shards that the query should have hit.\""
+        ],
         "signature": [
           "(response?: ",
           {
@@ -8216,6 +8218,23 @@
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              "ConnectionRequestParams",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8837,46 +8856,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
               },
               {
                 "plugin": "fleet",
@@ -12830,6 +12809,10 @@
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
             },
             {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
+            },
+            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
@@ -13395,7 +13378,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -13588,14 +13571,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -13798,6 +13773,10 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
@@ -13970,6 +13949,14 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
               },
               {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
+              },
+              {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
               },
@@ -13992,10 +13979,6 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -21140,7 +21123,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -21333,14 +21316,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
-              },
-              {
-                "plugin": "@kbn/event-annotation-components",
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -21543,6 +21518,10 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
@@ -21715,6 +21694,14 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
               },
               {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/group_editor_flyout/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotationListing",
+                "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
+              },
+              {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
               },
@@ -21737,10 +21724,6 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -27758,46 +27741,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
               },
               {
                 "plugin": "fleet",

@@ -9,14 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import {
-  METADATA_DATASTREAM,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_DATASTREAM,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
   metadataTransformPrefix,
-  ENDPOINT_DEFAULT_SORT_FIELD,
-  ENDPOINT_DEFAULT_SORT_DIRECTION,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -29,19 +29,20 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataDatastream,
-  stopTransform,
-  startTransform,
+  bulkIndex,
   deleteAllDocsFromFleetAgents,
   deleteAllDocsFromIndex,
-  bulkIndex,
+  deleteAllDocsFromMetadataCurrentIndex,
+  deleteAllDocsFromMetadataDatastream,
+  startTransform,
+  stopTransform,
 } from './data_stream_helper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
+  const log = getService('log');
 
   describe('test metadata apis', () => {
     describe('list endpoints GET route', () => {
@@ -54,7 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteAllDocsFromFleetAgents(getService);
         await deleteAllDocsFromMetadataDatastream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        try {
+          await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        } catch (err) {
+          log.warning(`Unable to delete index: ${err}`);
+        }
 
         const customIndexFn = async (): Promise<IndexedHostsAndAlertsResponse> => {
           // generate an endpoint policy and attach id to agents since

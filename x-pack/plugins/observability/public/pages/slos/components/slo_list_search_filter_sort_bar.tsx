@@ -16,6 +16,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { useState } from 'react';
@@ -103,9 +104,13 @@ export function SloListSearchFilterSortBar({
             unifiedSearch,
           }}
           disableAutoFocus
-          onSubmit={() => onChangeQuery(query)}
+          onSubmit={(value: Query) => {
+            setQuery(String(value.query));
+            onChangeQuery(String(value.query));
+          }}
           disableLanguageSwitcher
           isDisabled={loading}
+          autoSubmit
           indexPatterns={dataView ? [dataView] : []}
           placeholder={i18n.translate('xpack.observability.slo.list.search', {
             defaultMessage: 'Search your SLOs...',

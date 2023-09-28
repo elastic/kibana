@@ -56,6 +56,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
   maxScheduledPerMinute: 1000,
   internalSavedObjectsRepository,
 };
@@ -82,6 +84,7 @@ describe('aggregate()', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -166,6 +169,7 @@ describe('aggregate()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );

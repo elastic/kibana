@@ -574,10 +574,6 @@
                 "path": "src/plugins/unified_search/public/types.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },

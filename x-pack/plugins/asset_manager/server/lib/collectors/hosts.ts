@@ -16,6 +16,10 @@ export async function collectHosts({
   sourceIndices,
   afterKey,
 }: CollectorOptions) {
+  if (!sourceIndices?.metrics || !sourceIndices?.logs) {
+    throw new Error('missing required metrics/logs indices');
+  }
+
   const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
     index: [metrics, logs],
