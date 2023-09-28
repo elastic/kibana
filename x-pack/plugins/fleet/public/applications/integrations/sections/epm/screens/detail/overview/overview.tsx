@@ -57,13 +57,18 @@ interface HeadingWithPosition {
   position: number;
 }
 
-const LeftColumn = styled(EuiFlexItem)`
+const SideBar = styled(EuiFlexItem)`
   position: sticky;
   top: 70px;
   padding-top: 50px;
   padding-left: 10px;
   text-overflow: ellipsis;
   max-width: 180px;
+  max-height: 1200px;
+`;
+const StyledSideNav = styled(EuiSideNav)`
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 const UnverifiedCallout: React.FC = () => {
@@ -247,36 +252,43 @@ export const OverviewPage: React.FC<Props> = memo(
       },
       [createItem]
     );
+    const headingsWithIndices = useMemo(() => extractHeadingsWithIndices(markdown), [markdown]);
+
+    const navItems = useMemo(
+      () => headingsToNavItems(headingsWithIndices),
+      [headingsToNavItems, headingsWithIndices]
+    );
+
+    const h1: HeadingWithPosition | undefined = useMemo(
+      () => headingsWithIndices.find((h) => h.line.startsWith('# ')),
+      [headingsWithIndices]
+    );
 
     const sideNavItems = useMemo(() => {
-      const headingsWithIndices = extractHeadingsWithIndices(markdown);
-      const navItems = headingsToNavItems(headingsWithIndices);
-
-      const h1 = headingsWithIndices.find((h) => h.line.startsWith('# '));
-      const title = h1 ? getName(h1.line) : '';
-      const id = h1?.line && h1?.position ? getAnchorId(h1.line, h1.position + 1) : '';
+      const name = `${h1 ? getName(h1.line) : ''}`;
+      const id = getAnchorId(name, h1 ? h1?.position + 1 : 1);
       return [
         {
-          name: `${title}`,
+          name,
           id,
           onClick: () => selectItem(id),
           items: navItems,
         },
       ];
-    }, [headingsToNavItems, markdown]);
+    }, [h1, navItems]);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
-        <LeftColumn grow={2}>
+        <SideBar grow={2}>
           {sideNavItems ? (
-            <EuiSideNav
+            <StyledSideNav
               mobileTitle="Nav Items"
               toggleOpenOnMobile={toggleOpenOnMobile}
               isOpenOnMobile={isSideNavOpenOnMobile}
               items={sideNavItems}
             />
           ) : null}
-        </LeftColumn>
+        </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
           {isPrerelease && (
