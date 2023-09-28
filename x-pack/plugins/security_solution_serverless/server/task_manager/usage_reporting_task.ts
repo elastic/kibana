@@ -124,7 +124,8 @@ export class SecurityUsageReportingTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
-    const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
+    const lastSuccessfulReport =
+      taskInstance.state.lastSuccessfulReport && new Date(taskInstance.state.lastSuccessfulReport);
 
     let usageRecords: UsageRecord[] = [];
     // save usage record query time so we can use it to know where
@@ -168,14 +169,13 @@ export class SecurityUsageReportingTask {
     }
 
     const state = {
-      lastSuccessfulReport:
-        usageReportResponse?.status === 201
-          ? meteringCallbackTime
-          : this.getFailedLastSuccessfulReportTime(
-              meteringCallbackTime,
-              taskInstance.state.lastSuccessfulReport,
-              lookBackLimitMinutes
-            ),
+      lastSuccessfulReport: this.shouldUpdateLastSuccessfulReport(usageRecords, usageReportResponse)
+        ? meteringCallbackTime.toISOString()
+        : this.getFailedLastSuccessfulReportTime(
+            meteringCallbackTime,
+            lastSuccessfulReport,
+            lookBackLimitMinutes
+          ).toISOString(),
     };
     return { state };
   };
@@ -201,6 +201,13 @@ export class SecurityUsageReportingTask {
       `lastSuccessfulReport time of ${nextLastSuccessfulReport.toISOString()} is past the limit of ${lookBackLimitMinutes} minutes, adjusting lastSuccessfulReport to ${lookBackLimitTime.toISOString()}`
     );
     return lookBackLimitTime;
+  }
+
+  private shouldUpdateLastSuccessfulReport(
+    usageRecords: UsageRecord[],
+    usageReportResponse: Response | undefined
+  ): boolean {
+    return !usageRecords.length || usageReportResponse?.status === 201;
   }
 
   private get taskId() {
