@@ -67,13 +67,13 @@ const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    deleteRiskEngineConfiguration();
   });
 
   describe('legcay risk score', () => {
     describe('Without data', () => {
       beforeEach(() => {
         login();
+        deleteRiskEngineConfiguration();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
