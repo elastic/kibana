@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
@@ -44,14 +45,14 @@ interface ProtectionUpdatesLayoutProps {
 const AUTOMATIC_UPDATES_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdates',
   {
-    defaultMessage: 'Use automatic updates',
+    defaultMessage: 'Automatic updates enabled',
   }
 );
 
 const AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdatesOff',
   {
-    defaultMessage: "Don't use automatic updates",
+    defaultMessage: 'Automatic updates disabled.',
   }
 );
 
@@ -78,6 +79,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       packagePolicyId: _policy.id,
     });
     const [note, setNote] = useState('');
+    const [showWarningPanel, setShowWarningPanel] = useState(true);
 
     useEffect(() => {
       if (fetchedNote && !getNoteInProgress) {
@@ -358,6 +360,11 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     return (
       <>
+        <ProtectionUpdatesWarningPanel
+          showCallout={showWarningPanel}
+          onClose={() => setShowWarningPanel(false)}
+        />
+        <EuiSpacer size="m" />
         <EuiPanel
           data-test-subject="protection-updates-layout"
           hasBorder
@@ -373,23 +380,22 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             <EuiFlexItem grow={1}>
               <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-title'}>
                 <h5>
-                  {i18n.translate(
-                    'xpack.securitySolution.endpoint.protectionUpdates.manifestName',
-                    {
-                      defaultMessage: 'Manifest name',
-                    }
-                  )}
+                  {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.title', {
+                    defaultMessage: 'Manage protection updates',
+                  })}
                 </h5>
               </EuiTitle>
-              <EuiText size="m" data-test-subj="protection-updates-manifest-name">
-                {'artifactsec'}
-              </EuiText>
             </EuiFlexItem>
             <EuiShowFor sizes={['l', 'xl', 'm']}>
               {canWritePolicyManagement ? (
                 <EuiSwitch
                   disabled={isUpdating || createNoteInProgress || getNoteInProgress}
-                  label={'Update manifest automatically'}
+                  label={i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.enableAutomaticUpdates',
+                    {
+                      defaultMessage: 'Enable automatic updates',
+                    }
+                  )}
                   labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
                   checked={automaticUpdatesEnabled}
                   onChange={toggleAutomaticUpdates}
