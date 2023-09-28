@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, useEuiBackgroundColor } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
 import { tabs } from './tabs';
 
@@ -27,7 +28,15 @@ export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
     return tabs.filter((tab) => tab.visible).find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId]);
 
-  return <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>;
+  return (
+    <EuiFlyoutBody
+      css={css`
+        background-color: ${useEuiBackgroundColor('subdued')};
+      `}
+    >
+      {selectedTabContent}
+    </EuiFlyoutBody>
+  );
 };
 
 PanelContent.displayName = 'PanelContent';

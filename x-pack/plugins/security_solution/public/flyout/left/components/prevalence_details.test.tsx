@@ -79,7 +79,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -87,7 +87,7 @@ describe('PrevalenceDetails', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,
@@ -124,7 +124,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: 'field1',
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1000,
           docCount: 2000000,
           hostPrevalence: 0.05,
@@ -154,6 +154,35 @@ describe('PrevalenceDetails', () => {
     );
   });
 
+  it('should render multiple values in value column', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: 'field1',
+          values: ['value1', 'value2'],
+          alertCount: 1000,
+          docCount: 2000000,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <LeftPanelContext.Provider value={panelContextValue}>
+          <PrevalenceDetails />
+        </LeftPanelContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value2');
+  });
+
   it('should render the table with only basic columns if license is not platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
@@ -163,7 +192,7 @@ describe('PrevalenceDetails', () => {
       data: [
         {
           field: field1,
-          value: 'value1',
+          values: ['value1'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.05,
@@ -171,7 +200,7 @@ describe('PrevalenceDetails', () => {
         },
         {
           field: field2,
-          value: 'value2',
+          values: ['value2'],
           alertCount: 1,
           docCount: 1,
           hostPrevalence: 0.5,

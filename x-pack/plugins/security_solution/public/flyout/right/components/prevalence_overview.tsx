@@ -99,7 +99,7 @@ export const PrevalenceOverview: FC = () => {
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
                   defaultMessage="{field}, {value} is uncommon"
-                  values={{ field: d.field, value: d.value }}
+                  values={{ field: d.field, value: d.values.toString() }}
                 />
               }
               data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
