@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { visit } from '../../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import { goToSavedObjectSettings } from '../../../../tasks/stack_management';
@@ -109,7 +109,7 @@ describe(
         }
       });
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);

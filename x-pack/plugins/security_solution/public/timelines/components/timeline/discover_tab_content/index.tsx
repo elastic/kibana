@@ -169,7 +169,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
 
   const debouncedUpdateSavedSearch = useMemo(
-    () => debounce(updateSavedSearch, 1000),
+    () => debounce(updateSavedSearch, 500),
     [updateSavedSearch]
   );
 
@@ -221,7 +221,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
       if (savedSearchId) {
-        const localSavedSearch = await stateContainer.savedSearchState.load(savedSearchId);
+        const localSavedSearch = await savedSearchService.get(savedSearchId);
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
@@ -275,6 +275,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       getAppStateFromSavedSearch,
       discoverDataService.query.timefilter.timefilter,
       savedSearchId,
+      savedSearchService,
     ]
   );
 
@@ -294,7 +295,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = Boolean(!dataView);
+  const isLoading = Boolean(!dataView) || !isDiscoverSavedSearchLoaded;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
