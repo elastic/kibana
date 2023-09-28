@@ -83,7 +83,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
       <EuiModalBody>
         <GoogleCloudShellGuide
           commandText={installManagedCommands.googleCloudShell}
-          prjIdGiven={!!gcpProjectId}
+          hasProjectId={!!gcpProjectId}
         />
         {error && isError && (
           <>
