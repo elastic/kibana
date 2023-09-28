@@ -20,8 +20,6 @@ import {
   HOSTS_DONUT_CHART,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
-  UPGRADE_HOST_RISK_SCORE_BUTTON,
-  UPGRADE_USER_RISK_SCORE_BUTTON,
   USERS_DONUT_CHART,
   USERS_TABLE,
   USERS_TABLE_ROWS,
@@ -74,6 +72,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
   describe('legcay risk score', () => {
     describe('Without data', () => {
       beforeEach(() => {
+        login();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
@@ -127,12 +126,12 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
         cy.task('esArchiverUnload', 'risk_users_legacy_data');
       });
 
-      it('shows upgrade host risk button', () => {
-        cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
+      it('shows enable host risk button', () => {
+        cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
       });
 
-      it('shows upgrade user risk button', () => {
-        cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
+      it('shows enable user risk button', () => {
+        cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
       });
     });
 
