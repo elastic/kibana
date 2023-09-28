@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  describe('links panel', () => {
+  describe('links panel create and edit', () => {
     describe('creation', async () => {
       before(async () => {
         await dashboard.navigateToApp();

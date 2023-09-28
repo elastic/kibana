@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
   const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
 
-  describe('links panel', () => {
+  describe('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles([
