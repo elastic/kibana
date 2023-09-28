@@ -41,13 +41,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
   /**
-   * to separate docs between rules run. as ESQL doesn't support return of _id, yet
-   * @param id
-   * @returns
+   * to separate docs between rules runs
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('Esql type rules', () => {
+  describe.only('ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -282,7 +280,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should deduplicate alerts correctly based on source document _id', async () => {
         const id = uuidv4();
-        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         // document will fall into 2 rule execution windows
         const doc1 = {
           id,
@@ -298,11 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
           interval: '30m',
         };
 
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval,
-          id,
-        });
+        await indexListOfDocuments([doc1]);
 
         const { previewId } = await previewRule({
           supertest,
@@ -423,7 +416,6 @@ export default ({ getService }: FtrProviderContext) => {
       // but for now the following test fixes current behaviour when alerts are not suppressed
       it('should generate 2 alerts if events falls into 2 rule executions', async () => {
         const id = uuidv4();
-        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         // document will fall into 2 rule execution windows
         const doc1 = {
           id,
@@ -433,19 +425,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant ${internalIdPipe(id)} | stats count(agent.name)`,
+          query: `from ecs_compliant ${internalIdPipe(id)} | stats _counted=count(agent.name)`,
           from: 'now-45m',
           interval: '30m',
         };
 
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval,
-          id,
-        });
+        await indexListOfDocuments([doc1]);
 
-        const { previewId } = await previewRule({
+        const { previewId, logs } = await previewRule({
           supertest,
           rule,
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
@@ -459,6 +446,37 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(previewAlerts.length).toBe(2);
+        expect(previewAlerts[0]._source).toHaveProperty(['_counted'], 1);
+        expect(previewAlerts[1]._source).toHaveProperty(['_counted'], 1);
+      });
+
+      // ES|QL query can return row in results when data set is empty
+      // to prevent this, query should be written in a way that does not allow such cases
+      // but it might be useful to trigger alerts, when there is gap in data injection
+      it('should generate 1 alert on empty data set', async () => {
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant | stats _counted=count(agent.name)`,
+          from: 'now-45m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2012-03-16T06:30:00.000Z'),
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        // no data has been injected during rule execution interval
+        expect(previewAlerts[0]._source).toHaveProperty(['_counted'], 0);
       });
     });
 
@@ -695,6 +713,82 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(previewAlerts.length).toBe(150);
+      });
+
+      it('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the executions', async () => {
+        const id = uuidv4();
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+            id
+          )} | keep _id, agent.name | sort agent.name`,
+          from: 'now-45m',
+          interval: '30m',
+          max_signals: 100,
+        };
+
+        // docs fall in first rule executions
+        await indexGeneratedDocuments({
+          docsCount: 10,
+          seed: (i) => ({
+            id,
+            '@timestamp': '2020-10-28T05:40:00.000Z',
+            agent: {
+              name: `00${i}`,
+            },
+          }),
+        });
+
+        // docs fall in both rule executions
+        await indexGeneratedDocuments({
+          docsCount: 90,
+          seed: (i) => ({
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: {
+              name: `0${10 + i}`,
+            },
+          }),
+        });
+
+        // docs fall in both rule executions
+        await indexGeneratedDocuments({
+          docsCount: 30,
+          seed: (i) => ({
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: {
+              name: 100 + i,
+            },
+          }),
+        });
+
+        // docs fall in second rule execution
+        await indexGeneratedDocuments({
+          docsCount: 30,
+          seed: (i) => ({
+            id,
+            '@timestamp': '2020-10-28T06:20:00.000Z',
+            agent: {
+              name: 130 + i,
+            },
+          }),
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 200,
+        });
+
+        // should generate 160 alerts
+        expect(previewAlerts.length).toBe(160);
       });
     });
 

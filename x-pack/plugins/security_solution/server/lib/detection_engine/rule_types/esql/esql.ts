@@ -35,6 +35,11 @@ import {
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
+/**
+ * ES|QL returns results as a single page. max size of 10,000
+ */
+const ESQL_SINGLE_PAGE_SIZE = 10000;
+
 export const esqlExecutor = async ({
   runOpts: {
     completeRule,
@@ -63,72 +68,92 @@ export const esqlExecutor = async ({
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
+    let size = tuple.maxSignals;
+    while (result.createdSignalsCount <= tuple.maxSignals && size <= ESQL_SINGLE_PAGE_SIZE) {
+      const esqlRequest = buildEsqlSearchRequest({
+        query: ruleParams.query,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        size,
+        filters: [],
+        primaryTimestamp,
+        secondaryTimestamp,
+        exceptionFilter,
+      });
 
-    const esqlRequest = buildEsqlSearchRequest({
-      query: ruleParams.query,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      size: ruleParams.maxSignals,
-      filters: [],
-      primaryTimestamp,
-      secondaryTimestamp,
-      exceptionFilter,
-    });
+      ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
 
-    ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
-    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
-    if (exceptionsWarning) {
-      result.warningMessages.push(exceptionsWarning);
-    }
+      const esqlSignalSearchStart = performance.now();
 
-    const esqlSignalSearchStart = performance.now();
+      const response = await performEsqlRequest({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        requestParams: esqlRequest,
+      });
 
-    const response = await performEsqlRequest({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      requestParams: esqlRequest,
-    });
+      const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
+      result.searchAfterTimes = [esqlSearchDuration];
 
-    const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
-    result.searchAfterTimes = [esqlSearchDuration];
+      ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
-    ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
+      const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
-    const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
-    const results = response.values.map((row) => rowToDocument(response.columns, row));
+      const results = response.values
+        // slicing already processed results in previous iterations
+        .slice(size - tuple.maxSignals)
+        .map((row) => rowToDocument(response.columns, row));
 
-    const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
+      const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
-    const sourceDocuments = await fetchSourceDocuments({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      results,
-      index,
-      isRuleAggregating,
-    });
+      const sourceDocuments = await fetchSourceDocuments({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        results,
+        index,
+        isRuleAggregating,
+      });
 
-    const wrappedAlerts = wrapEsqlAlerts({
-      sourceDocuments,
-      isRuleAggregating,
-      results,
-      spaceId,
-      completeRule,
-      mergeStrategy,
-      alertTimestampOverride,
-      ruleExecutionLogger,
-      publicBaseUrl,
-      tuple,
-    });
+      const wrappedAlerts = wrapEsqlAlerts({
+        sourceDocuments,
+        isRuleAggregating,
+        results,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        publicBaseUrl,
+        tuple,
+      });
 
-    const enrichAlerts = createEnrichEventsFunction({
-      services,
-      logger: ruleExecutionLogger,
-    });
-    const bulkCreateResult = await bulkCreate(wrappedAlerts, tuple.maxSignals, enrichAlerts);
+      const enrichAlerts = createEnrichEventsFunction({
+        services,
+        logger: ruleExecutionLogger,
+      });
+      const bulkCreateResult = await bulkCreate(
+        wrappedAlerts,
+        tuple.maxSignals - result.createdSignalsCount,
+        enrichAlerts
+      );
 
-    addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-    ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+      ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
 
-    if (bulkCreateResult.alertsWereTruncated) {
-      result.warningMessages.push(getMaxSignalsWarning());
+      if (bulkCreateResult.alertsWereTruncated) {
+        result.warningMessages.push(getMaxSignalsWarning());
+      }
+
+      // no more results will be found
+      if (response.values.length < size) {
+        ruleExecutionLogger.debug(
+          `End of search: Found ${response.values.length} results with page size ${size}`
+        );
+        break;
+      }
+      // ES|QL does not support pagination so we need to increase size of response to be able to catch all events
+      size += tuple.maxSignals;
     }
 
     return { ...result, state };

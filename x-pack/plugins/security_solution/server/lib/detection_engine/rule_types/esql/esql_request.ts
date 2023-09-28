@@ -32,7 +32,7 @@ export const performEsqlRequest = async ({
     try {
       const rawResponse = await esClient.transport.request<EsqlTable>({
         method: 'POST',
-        path: '/_esql',
+        path: '/_query',
         body: {
           ...requestParams,
         },
