@@ -7,6 +7,7 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
+xpack.fleet.internal.retrySetupOnBoot: true
 
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
