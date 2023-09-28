@@ -29,7 +29,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
-    parallelism: 6
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '*'
