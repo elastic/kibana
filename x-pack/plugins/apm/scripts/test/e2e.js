@@ -49,6 +49,6 @@ if (server) {
 const config = open ? './cypress_open.ts' : './cypress_run.ts';
 
 childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
+  `NODE_OPTIONS=--openssl-legacy-provider node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
   { cwd: e2eDir, stdio: 'inherit' }
 );
