@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
@@ -14,6 +14,12 @@ import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 
 export class LinksServerPlugin implements Plugin<object, object> {
+  private readonly logger: Logger;
+
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   public setup(
     core: CoreSetup,
     plugins: {
@@ -22,7 +28,10 @@ export class LinksServerPlugin implements Plugin<object, object> {
   ) {
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new LinksStorage(),
+      storage: new LinksStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

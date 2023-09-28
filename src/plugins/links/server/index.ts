@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { LinksServerPlugin } from './plugin';
 
-export const plugin = () => new LinksServerPlugin();
+export const plugin = (initContext: PluginInitializerContext) => new LinksServerPlugin(initContext);

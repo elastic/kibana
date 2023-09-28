@@ -25,7 +25,9 @@
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/logging",
+    "@kbn/core-plugins-server"
   ],
   "exclude": ["target/**/*"]
 }
