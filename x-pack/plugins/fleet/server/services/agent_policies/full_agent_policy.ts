@@ -363,7 +363,7 @@ export function transformOutputToFullPolicyOutput(
             topic: topicName,
             when: {
               [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value.replace(/\s/g, ''),
+                [keyName.replace(/\s/g, '')]: value,
               },
             },
           };

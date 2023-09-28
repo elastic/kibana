@@ -7,19 +7,23 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  GenAiConfigSchema,
-  GenAiSecretsSchema,
-  GenAiRunActionParamsSchema,
-  GenAiRunActionResponseSchema,
-  GenAiDashboardActionParamsSchema,
-  GenAiDashboardActionResponseSchema,
-  GenAiStreamActionParamsSchema,
+  ConfigSchema,
+  SecretsSchema,
+  RunActionParamsSchema,
+  RunActionResponseSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
+  StreamActionParamsSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
 } from './schema';
 
-export type GenAiConfig = TypeOf<typeof GenAiConfigSchema>;
-export type GenAiSecrets = TypeOf<typeof GenAiSecretsSchema>;
-export type GenAiRunActionParams = TypeOf<typeof GenAiRunActionParamsSchema>;
-export type GenAiRunActionResponse = TypeOf<typeof GenAiRunActionResponseSchema>;
-export type GenAiDashboardActionParams = TypeOf<typeof GenAiDashboardActionParamsSchema>;
-export type GenAiDashboardActionResponse = TypeOf<typeof GenAiDashboardActionResponseSchema>;
-export type GenAiStreamActionParams = TypeOf<typeof GenAiStreamActionParamsSchema>;
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
+export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
+export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
+export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
