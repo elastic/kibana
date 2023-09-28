@@ -557,98 +557,110 @@ export const WorkplaceSearchGate: React.FC = () => {
         {feature && <EducationPanel featureContent={feature} />}
         <EuiSpacer />
 
-        <EuiFormLabel>
-          {i18n.translate(
+        <EuiFormRow
+          label={i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.Label',
             {
-              defaultMessage: 'Would you like to share any additional feedback? (Optional)',
+              defaultMessage: 'Would you like to share any additional feedback?',
             }
           )}
-        </EuiFormLabel>
-
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiTextArea
-              onChange={(e) => {
-                setAdditionalFeedback(e.target.value);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="xs">
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
-                defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
-                    using the details you provide above. See {privacyStatementLink} for more
-                    details or to opt-out at any time."
-                values={{
-                  contact: (
-                    <EuiLink href="#">
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
-                        defaultMessage="contact you"
-                      />
-                    </EuiLink>
-                  ),
-                  privacyStatementLink: (
-                    <EuiLink href="#">
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
-                        defaultMessage="Elastic’s Privacy Statement"
-                      />
-                    </EuiLink>
-                  ),
-                  termsOfService: (
-                    <EuiLink href="#">
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
-                        defaultMessage="Terms of Service"
-                      />
-                    </EuiLink>
-                  ),
+          labelAppend={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.optionalLabel',
+            {
+              defaultMessage: 'Optional',
+            }
+          )}
+        >
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTextArea
+                onChange={(e) => {
+                  setAdditionalFeedback(e.target.value);
                 }}
               />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.description"
+                  defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
+                    using the details you provide above. See {privacyStatementLink} for more
+                    details or to opt-out at any time."
+                  values={{
+                    contact: (
+                      <EuiLink href="#">
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
+                          defaultMessage="contact you"
+                        />
+                      </EuiLink>
+                    ),
+                    privacyStatementLink: (
+                      <EuiLink href="#">
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
+                          defaultMessage="Elastic’s Privacy Statement"
+                        />
+                      </EuiLink>
+                    ),
+                    termsOfService: (
+                      <EuiLink href="#">
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
+                          defaultMessage="Terms of Service"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+
         <EuiSpacer />
 
-        <EuiFormLabel>
-          {i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label',
+        <EuiFormRow
+          labelAppend={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.optionalLabel',
             {
-              defaultMessage: 'Join our user research studies to improve Elasticsearch? (Optional)',
+              defaultMessage: 'Optional',
             }
           )}
-        </EuiFormLabel>
+          label={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label',
+            {
+              defaultMessage: 'Join our user research studies to improve Elasticsearch?',
+            }
+          )}
+        >
+          <EuiSelect
+            hasNoInitialSelection
+            options={[
+              {
+                text: i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.Yes',
+                  {
+                    defaultMessage: 'Yes',
+                  }
+                ),
+                value: 'yes',
+              },
+              {
+                text: i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.No',
+                  {
+                    defaultMessage: 'No',
+                  }
+                ),
+                value: 'no',
+              },
+            ]}
+            onChange={(e) => setParticipateInUXLabs(e.target.value)}
+            value={participateInUXLabs}
+          />
+        </EuiFormRow>
 
-        <EuiSpacer size="xs" />
-        <EuiSelect
-          hasNoInitialSelection
-          options={[
-            {
-              text: i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.Yes',
-                {
-                  defaultMessage: 'Yes',
-                }
-              ),
-              value: 'yes',
-            },
-            {
-              text: i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.gateForm.participateUxLab.Label.No',
-                {
-                  defaultMessage: 'No',
-                }
-              ),
-              value: 'no',
-            },
-          ]}
-          onChange={(e) => setParticipateInUXLabs(e.target.value)}
-          value={participateInUXLabs}
-        />
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
