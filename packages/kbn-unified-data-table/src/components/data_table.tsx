@@ -27,6 +27,7 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -59,7 +60,7 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
-import { DiscoverGridSettingsPopover } from './discover_grid_settings_popover';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 
 export type SortOrder = [string, string];
 
@@ -675,12 +676,6 @@ export const UnifiedDataTable = ({
   const additionalControls = useMemo(
     () => (
       <>
-        {onUpdateSampleSize ? (
-          <DiscoverGridSettingsPopover
-            sampleSize={sampleSizeState}
-            onChangeSampleSize={onUpdateSampleSize}
-          />
-        ) : null}
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
             isFilterActive={isFilterActive}
@@ -696,16 +691,26 @@ export const UnifiedDataTable = ({
     [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]
   );
 
-  const showDisplaySelector = useMemo(
-    () =>
-      !!onUpdateRowHeight
-        ? {
-            allowDensity: false,
-            allowRowHeight: true,
-          }
-        : undefined,
-    [onUpdateRowHeight]
-  );
+  const showDisplaySelector = useMemo(() => {
+    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
+
+    if (onUpdateRowHeight) {
+      options.allowDensity = false;
+      options.allowRowHeight = true;
+    }
+
+    if (onUpdateSampleSize) {
+      options.allowResetButton = false;
+      options.additionalDisplaySettings = (
+        <UnifiedDataTableAdditionalDisplaySettings
+          sampleSize={sampleSizeState}
+          onChangeSampleSize={onUpdateSampleSize}
+        />
+      );
+    }
+
+    return Object.keys(options).length ? options : undefined;
+  }, [sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length
