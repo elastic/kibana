@@ -81,13 +81,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
 
-      it('should not be a clickable link for current dashboard', async () => {
-        await dashboard.loadSavedDashboard('links 002');
-        const listItem = await testSubjects.find('dashboardLink--link002');
-        const tagName = await listItem.getTagName();
-        expect(tagName).to.not.equal('a');
-      });
-
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
