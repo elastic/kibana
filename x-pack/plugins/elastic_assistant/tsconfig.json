@@ -25,6 +25,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
+    "@kbn/ml-plugin",
   ],
   "exclude": [
     "target/**/*",
