@@ -50,7 +50,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.daysLabel',
       {
-        defaultMessage: 'Days',
+        defaultMessage: 'days',
       }
     ),
   },
@@ -59,7 +59,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.hoursLabel',
       {
-        defaultMessage: 'Hours',
+        defaultMessage: 'hours',
       }
     ),
   },
@@ -68,7 +68,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.minutesLabel',
       {
-        defaultMessage: 'Minutes',
+        defaultMessage: 'minutes',
       }
     ),
   },
@@ -77,7 +77,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.secondsLabel',
       {
-        defaultMessage: 'Seconds',
+        defaultMessage: 'seconds',
       }
     ),
   },
@@ -86,7 +86,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.millisecondsLabel',
       {
-        defaultMessage: 'Milliseconds',
+        defaultMessage: 'milliseconds',
       }
     ),
   },
@@ -95,7 +95,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.microsecondsLabel',
       {
-        defaultMessage: 'Microseconds',
+        defaultMessage: 'microseconds',
       }
     ),
   },
@@ -104,7 +104,7 @@ export const timeUnits = [
     text: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.nanosecondsLabel',
       {
-        defaultMessage: 'Nanoseconds',
+        defaultMessage: 'nanoseconds',
       }
     ),
   },
@@ -162,7 +162,7 @@ const configurationFormSchema: FormSchema = {
     label: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
       {
-        defaultMessage: 'Never delete data',
+        defaultMessage: 'Keep data indefinitely',
       }
     ),
   },
