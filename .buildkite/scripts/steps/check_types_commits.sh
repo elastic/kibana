@@ -2,17 +2,19 @@
 
 set -euo pipefail
 
-argv=${@}
+argv=( "$@" )
 diffArgs=("--name-only")
 uniq_dirs=()
 uniq_tsconfigs=()
 
 is_flag_set () {
   flag=$1
-  if [[ ${argv[@]} =~ $flag ]]; then
-    true
-  else
-    false
+  if [ ${#argv[@]} -gt 0 ]; then
+    if [[ ${argv[@]} =~ $flag ]]; then
+      true
+    else
+      false
+    fi
   fi
 }
 
