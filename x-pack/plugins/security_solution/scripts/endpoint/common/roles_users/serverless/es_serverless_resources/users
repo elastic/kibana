@@ -1,0 +1,13 @@
+elastic_serverless:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+system_indices_superuser:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+t1_analyst:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+t2_analyst:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+t3_analyst:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+threat_intelligence_analyst:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+rule_author:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+soc_manager:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+detections_admin:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+platform_engineer:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+endpoint_operations_analyst:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+endpoint_policy_manager:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
+reader:$2a$10$nN6sRtQl2KX9Gn8kV/.NpOLSk6Jwn8TehEDnZ7aaAgzyl/dy5PYzW
