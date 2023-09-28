@@ -8,11 +8,11 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-import { ResponseBody } from '../helpers';
+import { ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { mockActionResultData } from '../../../__mocks__/action_result_data';
+import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
-import { executeCustomLlmChain } from '.';
+import { callAgentExecutor } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
@@ -23,9 +23,16 @@ const mockConversationChain = {
 };
 
 jest.mock('langchain/chains', () => ({
-  ConversationalRetrievalQAChain: {
+  RetrievalQAChain: {
     fromLLM: jest.fn().mockImplementation(() => mockConversationChain),
   },
+}));
+
+const mockCall = jest.fn();
+jest.mock('langchain/agents', () => ({
+  initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
+    call: mockCall,
+  })),
 }));
 
 const mockConnectorId = 'mock-connector-id';
@@ -42,17 +49,17 @@ const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 const mockLogger = loggerMock.create();
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
-describe('executeCustomLlmChain', () => {
+describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     ActionsClientLlm.prototype.getActionResultData = jest
       .fn()
-      .mockReturnValueOnce(mockActionResultData);
+      .mockReturnValueOnce(mockActionResponse);
   });
 
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
       esClient: esClientMock,
@@ -70,7 +77,7 @@ describe('executeCustomLlmChain', () => {
   });
 
   it('kicks off the chain with (only) the last message', async () => {
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
       esClient: esClientMock,
@@ -79,15 +86,15 @@ describe('executeCustomLlmChain', () => {
       request: mockRequest,
     });
 
-    expect(mockConversationChain.call).toHaveBeenCalledWith({
-      question: '\n\nDo you know my name?',
+    expect(mockCall).toHaveBeenCalledWith({
+      input: '\n\nDo you know my name?',
     });
   });
 
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
     const onlyOneMessage = [langChainMessages[0]];
 
-    await executeCustomLlmChain({
+    await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
       esClient: esClientMock,
@@ -96,13 +103,13 @@ describe('executeCustomLlmChain', () => {
       request: mockRequest,
     });
 
-    expect(mockConversationChain.call).toHaveBeenCalledWith({
-      question: 'What is my name?',
+    expect(mockCall).toHaveBeenCalledWith({
+      input: 'What is my name?',
     });
   });
 
   it('returns the expected response body', async () => {
-    const result: ResponseBody = await executeCustomLlmChain({
+    const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
       connectorId: mockConnectorId,
       esClient: esClientMock,
@@ -113,7 +120,7 @@ describe('executeCustomLlmChain', () => {
 
     expect(result).toEqual({
       connector_id: 'mock-connector-id',
-      data: mockActionResultData,
+      data: mockActionResponse,
       status: 'ok',
     });
   });

@@ -20,7 +20,7 @@ import { SuppressedAlerts } from './suppressed_alerts';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { CORRELATIONS_NO_DATA_TEST_ID, CORRELATIONS_TEST_ID } from './test_ids';
+import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
@@ -90,7 +90,15 @@ export const CorrelationsOverview: React.FC = () => {
             defaultMessage="Correlations"
           />
         ),
-        callback: goToCorrelationsTab,
+        link: {
+          callback: goToCorrelationsTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+              defaultMessage="Show all correlations"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
@@ -112,12 +120,10 @@ export const CorrelationsOverview: React.FC = () => {
           )}
         </EuiFlexGroup>
       ) : (
-        <p data-test-subj={CORRELATIONS_NO_DATA_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.insights.correlations.noDataDescription"
-            defaultMessage="No correlations data available."
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.correlations.noDataDescription"
+          defaultMessage="No correlations data available."
+        />
       )}
     </ExpandablePanel>
   );

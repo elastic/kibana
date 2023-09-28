@@ -265,7 +265,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: Generative AI. Connector type: .gen-ai`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: OpenAI. Connector type: .gen-ai`,
           });
         });
       });

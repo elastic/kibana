@@ -59,6 +59,7 @@ export class AssetManagerServerPlugin
       source: this.config.lockedSource,
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
+      metricsClient: plugins.metricsDataAccess.client,
     });
 
     const router = core.http.createRouter();
