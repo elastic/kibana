@@ -9,6 +9,8 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
+  // Failing: See https://github.com/elastic/kibana/issues/167496
+  skipped: true,
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
   esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
 })
