@@ -55,7 +55,7 @@ export const DeployModel = ({
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title',
-                    { defaultMessage: 'Improve your results with ELSER' }
+                    { defaultMessage: 'Improve your results with ELSER v2' }
                   )}
                 </h3>
               </EuiText>
@@ -73,7 +73,7 @@ export const DeployModel = ({
               <EuiText size="s">
                 <FormattedHTMLMessage
                   id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
-                  defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
+                  defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our trained machine learning model designed to efficiently use context in natural language queries, with version 2 now available. This model delivers better results than BM25 without further training on your data."
                   tagName="p"
                 />
               </EuiText>

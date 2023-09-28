@@ -183,8 +183,18 @@
           "\nProvides a URL to ML plugin page\nTODO remove basePath parameter"
         ],
         "signature": [
-          "(ml: { locator: ",
-          "MlLocator",
+          "(ml: { locator?: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "MlLocatorParams",
+          "> | undefined; elasticModels?: ",
+          "ElasticModels",
           " | undefined; } | undefined, basePath: string | undefined, params: ",
           "MlLocatorParams",
           ", dependencies?: React.DependencyList | undefined) => string"
@@ -201,8 +211,18 @@
             "label": "ml",
             "description": [],
             "signature": [
-              "{ locator: ",
-              "MlLocator",
+              "{ locator?: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "MlLocatorParams",
+              "> | undefined; elasticModels?: ",
+              "ElasticModels",
               " | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
@@ -1033,24 +1053,6 @@
         "initialIsOpen": false
       }
     ],
-    "setup": {
-      "parentPluginId": "ml",
-      "id": "def-public.MlPluginSetup",
-      "type": "Type",
-      "tags": [],
-      "label": "MlPluginSetup",
-      "description": [],
-      "signature": [
-        "{ locator: ",
-        "MlLocator",
-        " | undefined; }"
-      ],
-      "path": "x-pack/plugins/ml/public/plugin.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
     "start": {
       "parentPluginId": "ml",
       "id": "def-public.MlPluginStart",
@@ -1059,9 +1061,17 @@
       "label": "MlPluginStart",
       "description": [],
       "signature": [
-        "{ locator: ",
-        "MlLocator",
-        " | undefined; elasticModels: ",
+        "{ locator?: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "MlLocatorParams",
+        "> | undefined; elasticModels?: ",
         "ElasticModels",
         " | undefined; }"
       ],
