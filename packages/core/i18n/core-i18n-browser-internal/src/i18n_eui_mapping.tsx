@@ -119,6 +119,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Breadcrumbs',
       description: 'Label on the breadcrumbs nav element',
     }),
+    'euiCallOut.dismissAriaLabel': i18n.translate('core.euiCallOut.dismissAriaLabel', {
+      defaultMessage: 'Dismiss this callout',
+    }),
     'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
       defaultMessage: 'Select',
       description: 'Displayed button text when a card option can be selected.',
@@ -1508,6 +1511,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
       defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+    }),
+    'euiSearchBox.ariaLabel': i18n.translate('core.euiSearchBox.ariaLabel', {
+      defaultMessage:
+        'This is a search bar. After typing your query, hit enter to filter the results lower in the page.',
+    }),
+    'euiSearchBox.incrementalAriaLabel': i18n.translate('core.euiSearchBox.incrementalAriaLabel', {
+      defaultMessage:
+        'This is a search bar. As you type, the results lower in the page will automatically filter.',
+    }),
+    'euiSearchBox.placeholder': i18n.translate('core.euiSearchBox.placeholder', {
+      defaultMessage: 'Search...',
     }),
     'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
       defaultMessage: 'Loading options',
