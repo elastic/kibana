@@ -29,13 +29,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
   icon: 'gear',
   children: [
     {
-      id: 'root',
-      title: '',
-      children: [
-        {
-          link: 'monitoring',
-        },
-      ],
+      link: 'monitoring',
     },
     {
       id: 'integration_management',
