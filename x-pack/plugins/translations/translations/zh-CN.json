@@ -7091,7 +7091,6 @@
     "xpack.actions.availableConnectorFeatures.cases": "案例",
     "xpack.actions.availableConnectorFeatures.compatibility.alertingRules": "告警规则",
     "xpack.actions.availableConnectorFeatures.compatibility.cases": "案例",
-    "xpack.actions.availableConnectorFeatures.compatibility.general": "常规",
     "xpack.actions.availableConnectorFeatures.securitySolution": "安全解决方案",
     "xpack.actions.availableConnectorFeatures.uptime": "运行时间",
     "xpack.actions.builtin.cases.jiraTitle": "Jira",
