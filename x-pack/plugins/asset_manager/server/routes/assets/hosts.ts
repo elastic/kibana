@@ -36,7 +36,6 @@ export function hostsRoutes<T extends RequestHandlerContext>({
   router,
   assetAccessor,
 }: SetupRouteOptions<T>) {
-  // GET /assets/hosts
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/hosts`,
