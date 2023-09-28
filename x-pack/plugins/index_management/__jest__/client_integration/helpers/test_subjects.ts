@@ -64,6 +64,7 @@ export type TestSubjects =
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
   | 'viewButton'
+  | 'indexTableRowCheckbox'
   | 'enrichPoliciesTable'
   | 'deletePolicyModal'
   | 'executePolicyModal'
