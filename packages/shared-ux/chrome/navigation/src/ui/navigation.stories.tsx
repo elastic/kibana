@@ -46,7 +46,7 @@ const NavigationWrapper: FC<
     <>
       <EuiHeader position="fixed">
         <EuiHeaderSection side={props?.side}>
-          <EuiCollapsibleNavBeta {...props} />
+          <EuiCollapsibleNavBeta {...props} style={{ overflow: 'visible' }} />
         </EuiHeaderSection>
       </EuiHeader>
       <EuiPageTemplate>
@@ -83,12 +83,16 @@ const createDeepLink = (id: string, title: string = baseDeeplink.title) => {
 const deepLinks: ChromeNavLink[] = [
   createDeepLink('item1'),
   createDeepLink('item2', 'Foo'),
+  createDeepLink('item3'),
   createDeepLink('group1:item1'),
   createDeepLink('group1:groupA:groupI:item1'),
   createDeepLink('group1:groupA', 'Group title from deep link'),
   createDeepLink('group2', 'Group title from deep link'),
   createDeepLink('group2:item1'),
   createDeepLink('group2:item3'),
+  createDeepLink('group:settings.logs'),
+  createDeepLink('group:settings.signals'),
+  createDeepLink('group:settings.tracing'),
 ];
 
 const simpleNavigationDefinition: ProjectNavigationDefinition = {
@@ -177,15 +181,15 @@ const navigationDefinition: ProjectNavigationDefinition = {
         defaultIsCollapsed: false,
         children: [
           {
-            id: 'item1',
+            link: 'item1',
             title: 'Get started',
           },
           {
-            id: 'item2',
+            link: 'item2',
             title: 'Alerts',
           },
           {
-            id: 'item3',
+            link: 'item3',
             title: 'Some other node',
           },
           {
@@ -193,21 +197,21 @@ const navigationDefinition: ProjectNavigationDefinition = {
             title: 'Settings',
             children: [
               {
-                id: 'logs',
+                link: 'group:settings.logs',
                 title: 'Logs',
               },
               {
-                id: 'signals',
+                link: 'group:settings.signals',
                 title: 'Signals',
               },
               {
-                id: 'tracing',
+                link: 'group:settings.tracing',
                 title: 'Tracing',
               },
             ],
           },
         ],
-      },
+      } as GroupDefinition<any>,
       // Add ml
       {
         type: 'navGroup',
@@ -397,17 +401,6 @@ export const MinimalUI = (args: NavigationServices) => {
     </NavigationWrapper>
   );
 };
-
-export default {
-  title: 'Chrome/Navigation',
-  description: 'Navigation container to render items for cross-app linking',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
-  component: WithUIComponents,
-} as ComponentMeta<typeof WithUIComponents>;
 
 export const CreativeUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
@@ -632,3 +625,14 @@ export const UpdatingState = (args: NavigationServices) => {
     </NavigationWrapper>
   );
 };
+
+export default {
+  title: 'Chrome/Navigation',
+  description: 'Navigation container to render items for cross-app linking',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+  component: WithUIComponents,
+} as ComponentMeta<typeof WithUIComponents>;
