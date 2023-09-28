@@ -18,7 +18,6 @@ export const maintenanceWindowCategoryIdsSchema = schema.maybe(
   schema.nullable(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal(maintenanceWindowCategoryIdTypes.KIBANA),
         schema.literal(maintenanceWindowCategoryIdTypes.OBSERVABILITY),
         schema.literal(maintenanceWindowCategoryIdTypes.SECURITY_SOLUTION),
         schema.literal(maintenanceWindowCategoryIdTypes.MANAGEMENT),

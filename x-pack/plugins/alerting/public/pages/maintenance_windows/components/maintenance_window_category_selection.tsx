@@ -50,8 +50,8 @@ export const MaintenanceWindowCategorySelection = (
   props: MaintenanceWindowCategorySelectionProps
 ) => {
   const {
-    selectedCategories = [],
-    availableCategories = [],
+    selectedCategories,
+    availableCategories,
     errors = [],
     isLoading = false,
     onChange,

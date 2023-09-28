@@ -6,7 +6,6 @@
  */
 
 export const maintenanceWindowCategoryIdTypes = {
-  KIBANA: 'kibana',
   OBSERVABILITY: 'observability',
   SECURITY_SOLUTION: 'securitySolution',
   MANAGEMENT: 'management',

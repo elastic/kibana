@@ -154,6 +154,41 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
   });
 
+  it('should initialize MWs without category ids properly', async () => {
+    const result = appMockRenderer.render(
+      <CreateMaintenanceWindowForm
+        {...formProps}
+        initialValue={{
+          title: 'test',
+          startDate: '2023-03-24',
+          endDate: '2023-03-26',
+          timezone: ['America/Los_Angeles'],
+          recurring: true,
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    const observabilityInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('checkbox-observability');
+    const securityInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('checkbox-securitySolution');
+    const managementInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('checkbox-management');
+
+    expect(observabilityInput).toBeChecked();
+    expect(securityInput).toBeChecked();
+    expect(managementInput).toBeChecked();
+  });
+
   it('can select category IDs', async () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 

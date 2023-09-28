@@ -22,7 +22,7 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
-  categoryIds: string[];
+  categoryIds?: string[];
 }
 
 export interface RecurringScheduleFormProps {
@@ -47,7 +47,6 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   categoryIds: {
-    defaultValue: [],
     validations: [
       {
         validator: emptyField(i18n.CREATE_FORM_CATEGORY_IDS_REQUIRED),

@@ -29,6 +29,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
@@ -70,7 +71,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
-    const hasSetInitialCategories = useRef<boolean>(isEditMode);
+    const hasSetInitialCategories = useRef<boolean>(false);
 
     const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
       useCreateMaintenanceWindow();
@@ -133,6 +134,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const onCategoryIdsChange = useCallback(
       (id: string) => {
+        if (!categoryIds) {
+          return;
+        }
         if (categoryIds.includes(id)) {
           setFieldValue(
             'categoryIds',
@@ -178,18 +182,44 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
     }, [ruleTypes]);
 
+    // For create mode, we want to initialize options to the rule type category the
+    // user has access
     useEffect(() => {
-      if (!ruleTypes) {
+      if (isEditMode) {
         return;
       }
       if (hasSetInitialCategories.current) {
         return;
       }
-
+      if (!ruleTypes) {
+        return;
+      }
       setFieldValue('categoryIds', [...new Set(ruleTypes.map((ruleType) => ruleType.category))]);
       hasSetInitialCategories.current = true;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ruleTypes]);
+    }, [isEditMode, ruleTypes]);
+
+    // For edit mode, if a maintenance window => category_ids is not an array, this means
+    // the maintenance window was created before the introduction of category filters.
+    // For backwards compat we will initialize all options for these.
+    useEffect(() => {
+      if (!isEditMode) {
+        return;
+      }
+      if (hasSetInitialCategories.current) {
+        return;
+      }
+      if (Array.isArray(categoryIds)) {
+        return;
+      }
+      setFieldValue('categoryIds', [
+        DEFAULT_APP_CATEGORIES.observability.id,
+        DEFAULT_APP_CATEGORIES.security.id,
+        DEFAULT_APP_CATEGORIES.management.id,
+      ]);
+      hasSetInitialCategories.current = true;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditMode, categoryIds]);
 
     return (
       <Form form={form}>
@@ -297,7 +327,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <UseField path="categoryIds">
               {(field) => (
                 <MaintenanceWindowCategorySelection
-                  selectedCategories={categoryIds}
+                  selectedCategories={categoryIds || []}
                   availableCategories={availableCategories}
                   isLoading={isLoadingRuleTypes}
                   errors={field.errors.map((error) => error.message)}

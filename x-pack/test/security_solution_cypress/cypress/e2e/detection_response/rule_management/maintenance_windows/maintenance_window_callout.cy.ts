@@ -49,11 +49,18 @@ describe(
 
     after(() => {
       // Delete a test maintenance window
-      cy.request({
-        method: 'DELETE',
-        url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-      });
+      if (maintenanceWindowId) {
+        cy.request({
+          method: 'DELETE',
+          url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
+          headers: {
+            'kbn-xsrf': 'cypress-creds',
+            'x-elastic-internal-origin': 'security-solution',
+          },
+        }).then(() => {
+          maintenanceWindowId = '';
+        });
+      }
     });
 
     it('Displays the callout when there are running maintenance windows', () => {
