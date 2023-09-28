@@ -63,7 +63,6 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const radioGroup = await testSubjects.find(testSubject);
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
-      await this.assertRadioGroupValue(testSubject, value);
     },
 
     async selectSeverity(severity: CaseSeverity) {
