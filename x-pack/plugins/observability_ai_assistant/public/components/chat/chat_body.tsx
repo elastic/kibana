@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef, useState } from 'react';
+import { last } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,24 +14,23 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useTimeline } from '../../hooks/use_timeline';
-import { ObservabilityAIAssistantService } from '../../types';
-import { HideExpandConversationListButton } from '../buttons/hide_expand_conversation_list_button';
-import { MissingCredentialsCallout } from '../missing_credentials_callout';
+import { useLicense } from '../../hooks/use_license';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { InitialSetupPanel } from './initial_setup_panel';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-
-const containerClassName = css`
-  max-height: 100%;
-`;
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -39,68 +40,162 @@ const loadingSpinnerContainerClassName = css`
   align-self: center;
 `;
 
+const incorrectLicenseContainer = css`
+  height: 100%;
+  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+`;
+
 export function ChatBody({
   title,
+  loading,
   messages,
   connectors,
-  currentUser,
-  service,
+  knowledgeBase,
   connectorsManagementHref,
-  isConversationListExpanded,
-  onToggleExpandConversationList,
+  modelsManagementHref,
+  conversationId,
+  currentUser,
+  startedFrom,
   onChatUpdate,
   onChatComplete,
+  onSaveTitle,
 }: {
   title: string;
+  loading: boolean;
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  service: ObservabilityAIAssistantService;
+  knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
-  isConversationListExpanded?: boolean;
-  onToggleExpandConversationList?: () => void;
+  modelsManagementHref: string;
+  conversationId?: string;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  startedFrom?: StartedFrom;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
+  onSaveTitle: (title: string) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const license = useLicense();
+  const hasCorrectLicense = license?.hasAtLeast('enterprise');
+
+  const chatService = useObservabilityAIAssistantChatService();
 
   const timeline = useTimeline({
-    messages,
+    chatService,
     connectors,
     currentUser,
-    service,
+    messages,
+    startedFrom,
     onChatUpdate,
     onChatComplete,
   });
 
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+
   let footer: React.ReactNode;
 
-  if (connectors.loading || connectors.connectors?.length === 0) {
+  const isLoading = Boolean(
+    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+  );
+
+  const containerClassName = css`
+    max-height: 100%;
+    max-width: ${startedFrom === 'conversationView'
+      ? 1200 - 250 + 'px' // page template max width - conversation list width.
+      : '100%'};
+  `;
+
+  const [stickToBottom, setStickToBottom] = useState(true);
+
+  const isAtBottom = (parent: HTMLElement) =>
+    parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    function onScroll() {
+      setStickToBottom(isAtBottom(parent!));
+    }
+
+    parent.addEventListener('scroll', onScroll);
+
+    return () => {
+      parent.removeEventListener('scroll', onScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineContainerRef.current]);
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    if (stickToBottom) {
+      parent.scrollTop = parent.scrollHeight;
+    }
+  });
+
+  const handleCopyConversation = () => {
+    const content = JSON.stringify({ title, messages });
+
+    navigator.clipboard?.writeText(content || '');
+  };
+
+  if (!hasCorrectLicense && !conversationId) {
     footer = (
       <>
-        <EuiSpacer size="l" />
-        {connectors.connectors?.length === 0 ? (
-          <MissingCredentialsCallout connectorsManagementHref={connectorsManagementHref} />
-        ) : (
-          <EuiFlexItem className={loadingSpinnerContainerClassName}>
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow className={incorrectLicenseContainer}>
+          <IncorrectLicensePanel />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+            <ChatPromptEditor loading={isLoading} disabled onSubmit={timeline.onSubmit} />
+            <EuiSpacer size="s" />
+          </EuiPanel>
+        </EuiFlexItem>
       </>
+    );
+  } else if (connectors.loading || knowledgeBase.status.loading) {
+    footer = (
+      <EuiFlexItem className={loadingSpinnerContainerClassName}>
+        <EuiLoadingSpinner />
+      </EuiFlexItem>
+    );
+  } else if (connectors.connectors?.length === 0 && !conversationId) {
+    footer = (
+      <InitialSetupPanel
+        connectors={connectors}
+        connectorsManagementHref={connectorsManagementHref}
+        knowledgeBase={knowledgeBase}
+        startedFrom={startedFrom}
+      />
     );
   } else {
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatTimeline
-              items={timeline.items}
-              onEdit={timeline.onEdit}
-              onFeedback={timeline.onFeedback}
-              onRegenerate={timeline.onRegenerate}
-              onStopGenerating={timeline.onStopGenerating}
-            />
-          </EuiPanel>
+          <div ref={timelineContainerRef}>
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+              <ChatTimeline
+                items={timeline.items}
+                knowledgeBase={knowledgeBase}
+                onEdit={timeline.onEdit}
+                onFeedback={timeline.onFeedback}
+                onRegenerate={timeline.onRegenerate}
+                onStopGenerating={timeline.onStopGenerating}
+                onActionClick={(payload) => {
+                  setStickToBottom(true);
+                  return timeline.onActionClick(payload);
+                }}
+              />
+            </EuiPanel>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="none" />
@@ -108,10 +203,14 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              loading={false}
-              disabled={!connectors.selectedConnector}
-              onSubmit={timeline.onSubmit}
+              loading={isLoading}
+              disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              onSubmit={(message) => {
+                setStickToBottom(true);
+                return timeline.onSubmit(message);
+              }}
             />
+            <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
@@ -120,25 +219,26 @@ export function ChatBody({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
+      {connectors.selectedConnector ? (
+        <EuiFlexItem grow={false}>
+          <ExperimentalFeatureBanner />
+        </EuiFlexItem>
+      ) : null}
+
       <EuiFlexItem grow={false}>
-        {onToggleExpandConversationList ? (
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            borderRadius="none"
-            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
-          >
-            <HideExpandConversationListButton
-              isExpanded={Boolean(isConversationListExpanded)}
-              onClick={onToggleExpandConversationList}
-            />
-          </EuiPanel>
-        ) : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader title={title} connectors={connectors} />
-        </EuiPanel>
+        <ChatHeader
+          connectors={connectors}
+          conversationId={conversationId}
+          connectorsManagementHref={connectorsManagementHref}
+          modelsManagementHref={modelsManagementHref}
+          knowledgeBase={knowledgeBase}
+          licenseInvalid={!hasCorrectLicense && !conversationId}
+          loading={loading}
+          startedFrom={startedFrom}
+          title={title}
+          onCopyConversation={handleCopyConversation}
+          onSaveTitle={onSaveTitle}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />

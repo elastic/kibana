@@ -15,7 +15,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('navigation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165629
+  describe.skip('navigation', function () {
     before(async () => {
       await svlSecNavigation.navigateToLandingPage();
     });
@@ -42,6 +43,20 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.hideSearch();
 
       await expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
+    });
+
+    it('shows cases in sidebar navigation', async () => {
+      await svlSecLandingPage.assertSvlSecSideNavExists();
+      await svlCommonNavigation.expectExists();
+
+      expect(await testSubjects.existOrFail('solutionSideNavItemLink-cases'));
+    });
+
+    it('navigates to cases app', async () => {
+      await testSubjects.click('solutionSideNavItemLink-cases');
+
+      expect(await browser.getCurrentUrl()).contain('/app/security/cases');
+      await testSubjects.existOrFail('cases-all-title');
     });
   });
 }

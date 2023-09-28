@@ -401,7 +401,7 @@
               },
               " = never>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
               "SortOptions",
-              "[] | undefined; track_total_hits?: boolean | undefined; _source?: string[] | undefined; }) => Promise<",
+              "[] | undefined; track_total_hits?: number | boolean | undefined; _source?: string[] | undefined; }) => Promise<",
               "SearchResponse",
               "<OutputOf<SetOptional<{ readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, Record<string, ",
               "AggregationsAggregate",
@@ -529,7 +529,7 @@
                     "label": "track_total_hits",
                     "description": [],
                     "signature": [
-                      "boolean | undefined"
+                      "number | boolean | undefined"
                     ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
@@ -881,6 +881,22 @@
             "type": "Function",
             "tags": [],
             "label": "isWriteEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1719,7 +1735,7 @@
             "section": "def-common.RuleTypeState",
             "text": "RuleTypeState"
           },
-          " = never, InstanceState extends { [x: string]: unknown; } = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
+          " = never, InstanceState extends Record<string, any> = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1844,7 +1860,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ", TAlertInstanceState extends { [x: string]: unknown; }, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
+          ", TAlertInstanceState extends Record<string, any>, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1987,7 +2003,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; producer: string; validate: { params: ",
+          "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; producer: string; validate: { params: ",
           "RuleTypeParamsValidator",
           "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
@@ -2532,6 +2548,22 @@
             "type": "Function",
             "tags": [],
             "label": "isWriteEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.isUsingDataStreams",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingDataStreams",
             "description": [],
             "signature": [
               "() => boolean"
@@ -3741,6 +3773,17 @@
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.isUsingDataStreams",
+            "type": "boolean",
+            "tags": [],
+            "label": "isUsingDataStreams",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3791,7 +3834,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string, never>, \"executor\"> & { executor: ",
+          "<TParams, TParams, TState, Record<string, any>, TAlertInstanceContext, string, string, never>, \"executor\"> & { executor: ",
           "AlertTypeExecutor",
           "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
@@ -3856,7 +3899,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never, never>"
+          "<TParams, TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never, never>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -4174,7 +4217,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never, never>, \"executor\"> & { executor: (options: ",
+          "<TParams, TParams, TState, Record<string, any>, TInstanceContext, TActionGroupIds, never, never>, \"executor\"> & { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4182,7 +4225,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
+          "<TParams, TState, Record<string, any>, TInstanceContext, ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4519,7 +4562,7 @@
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
-            ", TAlertInstanceState extends { [x: string]: unknown; }, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
+            ", TAlertInstanceState extends Record<string, any>, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
             {
               "pluginId": "ruleRegistry",
               "scope": "server",

@@ -10,6 +10,7 @@ export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  assets = 'assets',
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -30,6 +31,7 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
    */
+  cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',
@@ -44,7 +46,7 @@ export enum SecurityPageName {
   hostsAnomalies = 'hosts-anomalies',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
-  investigate = 'investigate',
+  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
   mlLanding = 'machine_learning-landing', // serverless only
@@ -57,6 +59,7 @@ export enum SecurityPageName {
   noPage = '',
   overview = 'overview',
   policies = 'policy',
+  projectSettings = 'project_settings',
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',

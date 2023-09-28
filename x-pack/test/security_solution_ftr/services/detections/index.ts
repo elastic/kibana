@@ -63,6 +63,7 @@ export class DetectionsTestService extends FtrService {
     return this.supertest
       .get(DETECTION_ENGINE_RULES_URL)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .query({ rule_id: ELASTIC_SECURITY_RULE_ID })
       .send()
       .then(this.getHttpResponseFailureHandler())
@@ -82,6 +83,7 @@ export class DetectionsTestService extends FtrService {
     await this.supertest
       .post(DETECTION_ENGINE_RULES_BULK_ACTION)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         action: 'disable',
         ids: [endpointSecurityRule.id],
@@ -95,6 +97,7 @@ export class DetectionsTestService extends FtrService {
     await this.supertest
       .post(DETECTION_ENGINE_RULES_BULK_ACTION)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         action: 'enable',
         ids: [endpointSecurityRule.id],

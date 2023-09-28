@@ -16,7 +16,6 @@ import {
   SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
-  RuleNotifyWhenType,
   WithoutReservedActionGroups,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -64,6 +63,7 @@ export interface IAlertsClient<
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
   };
+  setAlertStatusToUntracked(indices: string[], ruleIds: string[]): Promise<void>;
   factory(): PublicAlertFactory<
     State,
     Context,
@@ -82,7 +82,7 @@ export interface ProcessAndLogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
 }
 

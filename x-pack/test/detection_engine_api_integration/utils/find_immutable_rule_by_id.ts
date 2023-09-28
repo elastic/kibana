@@ -31,6 +31,7 @@ export const findImmutableRuleById = async (
       `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.params.immutable: true AND alert.attributes.params.ruleId: "${ruleId}"`
     )
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send();
   if (response.status !== 200) {
     log.error(

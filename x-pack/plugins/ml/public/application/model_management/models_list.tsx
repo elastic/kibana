@@ -63,6 +63,7 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
+import { useEnabledFeatures } from '../contexts/ml';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -104,6 +105,8 @@ export const ModelsList: FC<Props> = ({
     },
   } = useMlKibana();
 
+  const { isNLPEnabled } = useEnabledFeatures();
+
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
@@ -131,6 +134,7 @@ export const ModelsList: FC<Props> = ({
 
   const { displayErrorToast } = useToastNotificationService();
 
+  const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
@@ -183,7 +187,7 @@ export const ModelsList: FC<Props> = ({
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
-        size: 1000,
+        with_indices: true,
       });
 
       const newItems: ModelItem[] = [];
@@ -235,6 +239,7 @@ export const ModelsList: FC<Props> = ({
         })
       );
     }
+    setIsInitialized(true);
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap]);
@@ -267,7 +272,7 @@ export const ModelsList: FC<Props> = ({
     try {
       if (models) {
         const { trained_model_stats: modelsStatsResponse } =
-          await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
+          await trainedModelsApiService.getTrainedModelStats();
 
         const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
 
@@ -581,6 +586,11 @@ export const ModelsList: FC<Props> = ({
   };
 
   const resultItems = useMemo<ModelItem[]>(() => {
+    if (isNLPEnabled === false) {
+      // don't add any of the built in models (e.g. elser) if NLP is disabled
+      return items;
+    }
+
     const idSet = new Set(items.map((i) => i.model_id));
     const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
       .filter(([modelId]) => !idSet.has(modelId))
@@ -593,8 +603,12 @@ export const ModelsList: FC<Props> = ({
           description: modelDefinition.description,
         } as ModelItem;
       });
-    return [...items, ...notDownloaded];
-  }, [items]);
+    const result = [...items, ...notDownloaded];
+
+    return result;
+  }, [isNLPEnabled, items]);
+
+  if (!isInitialized) return null;
 
   return (
     <>

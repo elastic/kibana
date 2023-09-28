@@ -34,7 +34,13 @@
             "text": "LensEmbeddableInput"
           },
           ", ",
-          "LensEmbeddableOutput",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensEmbeddableOutput",
+            "text": "LensEmbeddableOutput"
+          },
           ", any> implements ",
           {
             "pluginId": "embeddable",
@@ -350,7 +356,9 @@
             "type": "Function",
             "tags": [],
             "label": "updateVisualization",
-            "description": [],
+            "description": [
+              "\nGets the Lens embeddable's datasource and visualization states\nupdates the embeddable input"
+            ],
             "signature": [
               "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
             ],
@@ -382,6 +390,38 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateByRefInput",
+            "type": "Function",
+            "tags": [],
+            "label": "updateByRefInput",
+            "description": [],
+            "signature": [
+              "(savedObjectId: string) => void"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateByRefInput.$1",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -650,6 +690,22 @@
             "description": [],
             "signature": [
               "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getIsEditable",
+            "type": "Function",
+            "tags": [],
+            "label": "getIsEditable",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1345,7 +1401,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"bar\" | \"line\" | \"area\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2451,7 +2507,7 @@
               },
               " | undefined; reducedTimeRange?: string | undefined; timeScale?: ",
               "TimeScaleUnit",
-              " | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }, layer: ",
+              " | undefined; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; }, layer: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -2594,7 +2650,7 @@
                     "label": "format",
                     "description": [],
                     "signature": [
-                      "{ id: string; params?: { decimals: number; } | undefined; } | undefined"
+                      "{ id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false,
@@ -3104,6 +3160,58 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensEmbeddableOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensEmbeddableOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensEmbeddableOutput",
+            "text": "LensEmbeddableOutput"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          }
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensEmbeddableOutput.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8459,7 +8567,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { debug?: boolean | undefined; theme?: ",
+              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -8475,7 +8583,7 @@
               "LegendPositionConfig",
               " | undefined; rotation?: ",
               "Rotation",
-              " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+              " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
               "Rendering",
               " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
               "MakeOverridesSerializable",
@@ -8560,7 +8668,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -8872,7 +8980,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -9653,6 +9761,37 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.EmbeddableComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddableComponent",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.EmbeddableComponentProps",
+            "text": "EmbeddableComponentProps"
+          },
+          ", any> | React.FunctionComponent<",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.EmbeddableComponentProps",
+            "text": "EmbeddableComponentProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.EmbeddableComponentProps",
         "type": "Type",
         "tags": [],
@@ -10275,7 +10414,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -10410,7 +10549,7 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { debug?: boolean | undefined; theme?: ",
+          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -10426,7 +10565,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",

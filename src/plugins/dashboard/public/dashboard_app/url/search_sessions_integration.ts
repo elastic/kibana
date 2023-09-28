@@ -77,7 +77,6 @@ function getLocatorParams({
       },
       search: { session },
     },
-    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   const {
@@ -102,9 +101,6 @@ function getLocatorParams({
       : undefined,
     panels: lastSavedId
       ? undefined
-      : (convertPanelMapToSavedPanels(
-          panels,
-          kibanaVersion
-        ) as DashboardAppLocatorParams['panels']),
+      : (convertPanelMapToSavedPanels(panels) as DashboardAppLocatorParams['panels']),
   };
 }

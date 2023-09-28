@@ -79,6 +79,7 @@ export {
   MESSAGE_SIGNING_SERVICE_API_ROUTES,
   // secrets
   SECRETS_ENDPOINT_PATH,
+  SECRETS_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../common/constants';
 
 export {

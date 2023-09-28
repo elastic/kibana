@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { CreateRuleParams } from './create_rule';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -43,6 +47,10 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
+jest.mock('../get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -50,6 +58,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -63,14 +72,18 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -1540,6 +1553,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1727,6 +1741,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const data = getMockData({
       params: ruleParams,
@@ -2546,6 +2561,7 @@ describe('create()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validLegacyConsumers: [],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -3020,6 +3036,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const createdAttributes = {
       ...data,
@@ -3092,6 +3109,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({ schedule: { interval: '1s' } });
@@ -3129,6 +3147,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3221,6 +3240,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3270,6 +3290,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3332,6 +3353,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3412,6 +3434,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3616,6 +3639,7 @@ describe('create()', () => {
         mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         shouldWrite: true,
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({
@@ -3668,6 +3692,7 @@ describe('create()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
 
     const data = getMockData({

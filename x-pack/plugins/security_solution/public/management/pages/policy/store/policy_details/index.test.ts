@@ -269,12 +269,14 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
+                  global_manifest_version: 'latest',
                   meta: {
                     license: '',
                     cloud: false,
                     license_uid: '',
                     cluster_name: '',
                     cluster_uuid: '',
+                    serverless: false,
                   },
                   windows: {
                     events: {

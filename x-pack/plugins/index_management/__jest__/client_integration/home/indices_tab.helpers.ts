@@ -30,16 +30,21 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
+    clickIndexNameAt: (index: number) => Promise<void>;
+    findIndexDetailsPageTitle: () => string;
     selectIndexDetailsTab: (
       tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
     ) => Promise<void>;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
-    clickDataStreamAt: (index: number) => void;
+    clickDataStreamAt: (index: number) => Promise<void>;
     dataStreamLinkExistsAt: (index: number) => boolean;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
     clickModalConfirm: () => void;
+    clickCreateIndexButton: () => void;
+    clickCreateIndexCancelButton: () => void;
+    clickCreateIndexSaveButton: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -87,6 +92,11 @@ export const setup = async (
     return Boolean(props['aria-checked']);
   };
 
+  const findIndexDetailsPageTitle = () => {
+    const { find } = testBed;
+    return find('indexDetailsHeader').text();
+  };
+
   const selectIndexDetailsTab = async (
     tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
   ) => {
@@ -95,6 +105,18 @@ export const setup = async (
     await act(async () => {
       find('detailPanelTab').at(indexDetailsTabs.indexOf(tab)).simulate('click');
     });
+    component.update();
+  };
+
+  const clickIndexNameAt = async (index: number) => {
+    const { component, table } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    const indexNameLink = findTestSubject(rows[index].reactWrapper, 'indexTableIndexNameLink');
+
+    await act(async () => {
+      indexNameLink.simulate('click');
+    });
+
     component.update();
   };
 
@@ -135,9 +157,40 @@ export const setup = async (
     return find('dataStreamDetailPanelTitle').text();
   };
 
+  const clickCreateIndexButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('createIndexButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const clickCreateIndexCancelButton = async () => {
+    const { find, exists, component } = testBed;
+
+    expect(exists('createIndexCancelButton')).toBe(true);
+    await act(async () => {
+      find('createIndexCancelButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const clickCreateIndexSaveButton = async () => {
+    const { find, exists, component } = testBed;
+
+    expect(exists('createIndexSaveButton')).toBe(true);
+    await act(async () => {
+      find('createIndexSaveButton').simulate('click');
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
+      clickIndexNameAt,
+      findIndexDetailsPageTitle,
       selectIndexDetailsTab,
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
@@ -146,6 +199,9 @@ export const setup = async (
       clickManageContextMenuButton,
       clickContextMenuOption,
       clickModalConfirm,
+      clickCreateIndexButton,
+      clickCreateIndexCancelButton,
+      clickCreateIndexSaveButton,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

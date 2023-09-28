@@ -1494,6 +1494,17 @@
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-common.ClusterInfo.cluster_build_flavor",
+            "type": "string",
+            "tags": [],
+            "label": "cluster_build_flavor",
+            "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

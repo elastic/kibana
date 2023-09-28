@@ -45,7 +45,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"serverlessElasticsearch\" | \"serverlessIndexingApi\""
+          "\"serverlessElasticsearch\" | \"serverlessConnectors\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -69,13 +69,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SERVERLESS_ES_INDEXING_API_ID",
+        "id": "def-common.SERVERLESS_ES_CONNECTORS_ID",
         "type": "string",
         "tags": [],
-        "label": "SERVERLESS_ES_INDEXING_API_ID",
+        "label": "SERVERLESS_ES_CONNECTORS_ID",
         "description": [],
         "signature": [
-          "\"serverlessIndexingApi\""
+          "\"serverlessConnectors\""
         ],
         "path": "packages/deeplinks/search/constants.ts",
         "deprecated": false,

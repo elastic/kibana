@@ -507,6 +507,8 @@ export interface Datasource<T = unknown, P = unknown> {
     references?: SavedObjectReference[],
     dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
+
+  injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
 }
 
 export interface DatasourceFixAction<T> {
@@ -814,6 +816,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
+  isBreakdownDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };
@@ -1008,6 +1011,7 @@ interface AddLayerButtonProps {
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+  isInlineEditing?: boolean;
 }
 
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
@@ -1330,6 +1334,12 @@ export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];
 }
+
+export type TriggerEvent =
+  | BrushTriggerEvent
+  | ClickTriggerEvent
+  | MultiClickTriggerEvent
+  | LensTableRowContextMenuEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';

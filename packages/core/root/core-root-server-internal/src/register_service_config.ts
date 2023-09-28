@@ -16,6 +16,7 @@ import { pidConfig } from '@kbn/core-environment-server-internal';
 import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
 import { config as httpConfig, cspConfig, externalUrlConfig } from '@kbn/core-http-server-internal';
 import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
+import { config as coreAppConfig } from '@kbn/core-apps-server-internal';
 import { opsConfig } from '@kbn/core-metrics-server-internal';
 import {
   savedObjectsConfig,
@@ -37,6 +38,7 @@ export function registerServiceConfig(configService: ConfigService) {
     cspConfig,
     deprecationConfig,
     elasticsearchConfig,
+    coreAppConfig,
     elasticApmConfig,
     executionContextConfig,
     externalUrlConfig,

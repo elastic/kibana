@@ -16,18 +16,25 @@ import type {
 } from './types';
 import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
+export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
+
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
   public setup(
-    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
-    { embeddable, cases, licensing }: AiopsPluginSetupDeps
+    core: AiopsCoreSetup,
+    { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
     firstValueFrom(licensing.license$).then(async (license) => {
       if (license.hasAtLeast('platinum')) {
         if (embeddable) {
           const { registerEmbeddable } = await import('./embeddable/register_embeddable');
           registerEmbeddable(core, embeddable);
+        }
+
+        if (uiActions) {
+          const { registerAiopsUiActions } = await import('./ui_actions');
+          registerAiopsUiActions(uiActions, core);
         }
 
         if (cases) {

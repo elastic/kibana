@@ -166,7 +166,10 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
           <EuiPortal>
-            <EditDownloadSourceFlyout onClose={onCloseCallback} />
+            <EditDownloadSourceFlyout
+              onClose={onCloseCallback}
+              proxies={proxies?.data?.items || []}
+            />
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
@@ -183,6 +186,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
                 <EditDownloadSourceFlyout
                   onClose={onCloseCallback}
                   downloadSource={downloadSource}
+                  proxies={proxies?.data?.items || []}
                 />
               </EuiPortal>
             );

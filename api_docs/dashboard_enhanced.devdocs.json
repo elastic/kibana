@@ -212,7 +212,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,

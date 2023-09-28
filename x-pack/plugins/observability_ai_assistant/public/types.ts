@@ -24,6 +24,13 @@ import type {
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -32,6 +39,7 @@ import type {
   RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import type { PendingMessage } from '../common/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -43,47 +51,68 @@ export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionRespons
   >;
 };
 
-export interface PendingMessage {
-  message: Message['message'];
-  aborted?: boolean;
-  error?: any;
-}
-
-export interface ObservabilityAIAssistantService {
-  isEnabled: () => boolean;
-  chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
-  callApi: ObservabilityAIAssistantAPIClient;
-  getCurrentUser: () => Promise<AuthenticatedUser>;
+export interface ObservabilityAIAssistantChatService {
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    function?: 'none' | 'auto';
+  }) => Observable<PendingMessage>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
-  executeFunction: (
-    name: string,
-    args: string | undefined,
-    signal: AbortSignal
-  ) => Promise<{ content?: Serializable; data?: Serializable }>;
+  hasRenderFunction: (name: string) => boolean;
+  executeFunction: ({}: {
+    name: string;
+    args: string | undefined;
+    messages: Message[];
+    signal: AbortSignal;
+    connectorId: string;
+  }) => Promise<{ content?: Serializable; data?: Serializable } | Observable<PendingMessage>>;
   renderFunction: (
     name: string,
-    response: { data?: Serializable; content?: Serializable }
+    args: string | undefined,
+    response: { data?: string; content?: string }
   ) => React.ReactNode;
 }
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
-  registerContext: RegisterContextDefinition;
+export type ChatRegistrationFunction = ({}: {
+  signal: AbortSignal;
   registerFunction: RegisterFunctionDefinition;
+  registerContext: RegisterContextDefinition;
+}) => Promise<void>;
+
+export interface ObservabilityAIAssistantService {
+  isEnabled: () => boolean;
+  callApi: ObservabilityAIAssistantAPIClient;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+  getLicense: () => Observable<ILicense>;
+  getLicenseManagementLocator: () => SharePluginStart;
+  start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
+}
+
+export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
+  register: (fn: ChatRegistrationFunction) => void;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  security: SecurityPluginSetup;
+  dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
+  lens: LensPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  security: SecurityPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
-  security: SecurityPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ConfigSchema {}
+
+export type { PendingMessage };

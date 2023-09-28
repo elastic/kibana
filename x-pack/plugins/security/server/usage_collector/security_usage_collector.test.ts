@@ -12,10 +12,10 @@ import {
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 
+import { registerSecurityUsageCollector } from './security_usage_collector';
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
-import { registerSecurityUsageCollector } from './security_usage_collector';
 
 describe('Security UsageCollector', () => {
   const createSecurityConfig = (config: TypeOf<typeof ConfigSchema>) => {

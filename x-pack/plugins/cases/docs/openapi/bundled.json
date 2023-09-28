@@ -5471,7 +5471,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true,
@@ -5488,7 +5489,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true

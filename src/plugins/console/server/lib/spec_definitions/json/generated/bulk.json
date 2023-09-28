@@ -1,19 +1,28 @@
 {
   "bulk": {
     "url_params": {
-      "wait_for_active_shards": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "pipeline": "",
       "refresh": [
         "true",
         "false",
         "wait_for"
       ],
       "routing": "",
-      "timeout": "",
-      "type": "",
-      "_source": [],
+      "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
-      "pipeline": "",
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
+      ],
       "require_alias": "__flag__"
     },
     "methods": [
@@ -24,6 +33,10 @@
       "_bulk",
       "{index}/_bulk"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-bulk.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/docs-bulk.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

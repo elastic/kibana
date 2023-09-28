@@ -39,6 +39,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
       <EuiSpacer />
 
       <EuiButton
+        data-test-subj="observabilityAiAssistantTemplateAddMessageButton"
         onClick={() => setCount(count >= 0 && count < props.items.length - 1 ? count + 1 : 0)}
       >
         Add message
@@ -48,6 +49,18 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 };
 
 const defaultProps: ComponentProps<typeof Component> = {
+  knowledgeBase: {
+    status: {
+      loading: false,
+      value: {
+        ready: true,
+      },
+      refresh: () => {},
+    },
+    isInstalling: false,
+    installError: undefined,
+    install: async () => {},
+  },
   items: [
     buildChatInitItem(),
     buildUserChatItem(),
@@ -77,12 +90,22 @@ const defaultProps: ComponentProps<typeof Component> = {
         arguments: '{ "foo": "bar" }',
         trigger: MessageRole.Assistant,
       },
-      canEdit: true,
+      actions: {
+        canEdit: false,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
+      },
     }),
     buildFunctionChatItem({
       content: '{ "message": "The arguments are wrong" }',
       error: new Error(),
-      canRegenerate: false,
+      actions: {
+        canRegenerate: false,
+        canEdit: true,
+        canGiveFeedback: false,
+        canCopy: true,
+      },
     }),
     buildAssistantChatItem({
       content: '',
@@ -92,7 +115,12 @@ const defaultProps: ComponentProps<typeof Component> = {
         arguments: '{ "bar": "foo" }',
         trigger: MessageRole.Assistant,
       },
-      canEdit: true,
+      actions: {
+        canEdit: true,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
+      },
     }),
     buildFunctionChatItem({
       content: '',
@@ -100,10 +128,11 @@ const defaultProps: ComponentProps<typeof Component> = {
       loading: true,
     }),
   ],
-  onEdit: () => {},
+  onEdit: async () => {},
   onFeedback: () => {},
   onRegenerate: () => {},
   onStopGenerating: () => {},
+  onActionClick: async () => {},
 };
 
 export const ChatTimeline = Template.bind({});

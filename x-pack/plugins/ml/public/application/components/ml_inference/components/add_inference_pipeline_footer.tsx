@@ -47,7 +47,10 @@ export const AddInferencePipelineFooter: FC<Props> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          data-test-subj="mlTrainedModelsInferencePipelineCloseButton"
+        >
           {pipelineCreated ? CLOSE_BUTTON_LABEL : CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -66,6 +69,7 @@ export const AddInferencePipelineFooter: FC<Props> = ({
       <EuiFlexItem grow={false}>
         {nextStep !== undefined ? (
           <EuiButton
+            data-test-subj="mlTrainedModelsInferencePipelineContinueButton"
             iconType="arrowRight"
             iconSide="right"
             onClick={() => setStep(nextStep as AddInferencePipelineSteps)}
@@ -76,6 +80,7 @@ export const AddInferencePipelineFooter: FC<Props> = ({
           </EuiButton>
         ) : (
           <EuiButton
+            data-test-subj="mlTrainedModelsInferencePipelineCreateButton"
             color="success"
             disabled={!isContinueButtonEnabled || creatingPipeline || pipelineCreated}
             fill

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
@@ -78,23 +78,16 @@ export function getKqlQueryValues({
 }
 
 function getInitSearchInputState({
-  filterActive,
   queryString,
+  searchInput,
 }: {
-  filterActive: boolean;
   queryString?: string;
+  searchInput?: Query;
 }) {
-  if (queryString !== undefined && filterActive === true) {
-    return {
-      language: SEARCH_QUERY_LANGUAGE.KUERY,
-      query: queryString,
-    };
-  } else {
-    return {
-      query: '',
-      language: DEFAULT_QUERY_LANG,
-    };
-  }
+  return {
+    language: searchInput?.language ?? DEFAULT_QUERY_LANG,
+    query: queryString ?? '',
+  };
 }
 
 interface ExplorerQueryBarProps {
@@ -129,18 +122,17 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.
-  const [searchInput, setSearchInput] = useState<Query>(
-    getInitSearchInputState({ filterActive, queryString })
-  );
+  const [searchInput, setSearchInput] = useState<Query>(getInitSearchInputState({ queryString }));
   const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
     undefined
   );
 
   useEffect(
     function updateSearchInputFromFilter() {
-      setSearchInput(getInitSearchInputState({ filterActive, queryString }));
+      setSearchInput(getInitSearchInputState({ queryString, searchInput }));
     },
-    [filterActive, queryString]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queryString, searchInput.language]
   );
 
   const searchChangeHandler = (query: Query) => {

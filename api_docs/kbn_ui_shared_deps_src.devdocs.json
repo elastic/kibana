@@ -289,6 +289,61 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reduxjstoolkit",
+            "type": "string",
+            "tags": [],
+            "label": "'@reduxjs/toolkit'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactredux",
+            "type": "string",
+            "tags": [],
+            "label": "'react-redux'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.redux",
+            "type": "string",
+            "tags": [],
+            "label": "redux",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.immer",
+            "type": "string",
+            "tags": [],
+            "label": "immer",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reselect",
+            "type": "string",
+            "tags": [],
+            "label": "reselect",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.rxjs",
             "type": "string",
             "tags": [],
@@ -401,10 +456,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.reactbeautifuldnd",
+            "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],
-            "label": "'react-beautiful-dnd'",
+            "label": "'@hello-pangea/dnd'",
             "description": [
               "// transient dep of eui"
             ],

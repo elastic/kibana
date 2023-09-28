@@ -6,6 +6,7 @@
  */
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -100,8 +101,9 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
-  cy.contains(ruleName).click();
+  clickRuleName(ruleName);
   cy.getBySel('alertsTable').within(() => {
     cy.getBySel('expand-event')
       .first()
@@ -167,4 +169,8 @@ export const takeOsqueryActionWithParams = () => {
   cy.wait(1000);
   submitQuery();
   cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
+};
+
+export const clickRuleName = (ruleName: string) => {
+  cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
 };

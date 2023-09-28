@@ -54,12 +54,13 @@ export function useModelActions({
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
 
-  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState(false);
+  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState<boolean>(false);
 
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
@@ -82,9 +83,11 @@ export function useModelActions({
         cluster: ['manage_ingest_pipelines'],
       })
       .then((result) => {
-        const canManagePipelines = result.cluster?.manage_ingest_pipelines;
         if (isMounted) {
-          setCanManageIngestPipelines(canManagePipelines);
+          setCanManageIngestPipelines(
+            result.hasPrivileges === undefined ||
+              result.hasPrivileges.cluster?.manage_ingest_pipelines === true
+          );
         }
       });
     return () => {
@@ -93,14 +96,19 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme),
-    [overlays, theme]
+    () => getUserConfirmationProvider(overlays, theme, i18nStart),
+    [i18nStart, overlays, theme]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
-      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
-    [overlays, theme.theme$, startModelDeploymentDocUrl]
+      getUserInputModelDeploymentParamsProvider(
+        overlays,
+        theme,
+        i18nStart,
+        startModelDeploymentDocUrl
+      ),
+    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -450,7 +458,11 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel = item.metadata?.analytics_config !== undefined;
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.classification !== undefined;
+
           return (
             isDfaTrainedModel &&
             !isBuiltInModel(item) &&
@@ -524,7 +536,43 @@ export function useModelActions({
         isPrimary: true,
         available: isTestable,
         onClick: (item) => onTestAction(item),
-        enabled: (item) => canTestTrainedModels && isTestable(item, true) && !isLoading,
+        enabled: (item) => {
+          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+        },
+      },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
+        icon: 'visTagCloud',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => {
+          return (
+            item?.metadata?.analytics_config !== undefined ||
+            (Array.isArray(item.indices) && item.indices.length > 0)
+          );
+        },
+        onClick: async (item) => {
+          let indexPatterns: string[] | undefined = item?.indices
+            ?.map((o) => Object.keys(o))
+            .flat();
+
+          if (item?.metadata?.analytics_config?.dest?.index !== undefined) {
+            const destIndex = item.metadata.analytics_config.dest?.index;
+            indexPatterns = [destIndex];
+          }
+          const path = await urlLocator.getUrl({
+            page: ML_PAGES.DATA_DRIFT_CUSTOM,
+            pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
+          });
+
+          await navigateToPath(path, false);
+        },
       },
     ],
     [

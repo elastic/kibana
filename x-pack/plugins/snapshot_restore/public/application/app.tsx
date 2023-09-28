@@ -8,7 +8,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -87,27 +86,25 @@ export const App: React.FunctionComponent = () => {
             </Routes>
           </div>
         ) : (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-            <NotAuthorizedSection
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
-                  defaultMessage="You're missing cluster privileges"
-                />
-              }
-              message={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
-                  defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                  values={{
-                    missingPrivileges: privilegesMissing.cluster!.join(', '),
-                    privilegesCount: privilegesMissing.cluster!.length,
-                  }}
-                />
-              }
-            />
-          </EuiPageContent>
+          <NotAuthorizedSection
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
+                defaultMessage="You're missing cluster privileges"
+              />
+            }
+            message={
+              <FormattedMessage
+                id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
+                defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
+                  plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                values={{
+                  missingPrivileges: privilegesMissing.cluster!.join(', '),
+                  privilegesCount: privilegesMissing.cluster!.length,
+                }}
+              />
+            }
+          />
         )
       }
     </WithPrivileges>

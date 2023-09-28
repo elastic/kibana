@@ -20,8 +20,7 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
@@ -32,7 +31,6 @@ import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 
@@ -216,6 +214,7 @@ export function AlertActions({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="o11yAlertActionsButton"
               aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
                 defaultMessage: 'View in app',
               })}
@@ -248,7 +247,11 @@ export function AlertActions({
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+          <EuiContextMenuPanel
+            size="s"
+            items={actionsMenuItems}
+            data-test-subj="alertsTableActionsMenu"
+          />
         </EuiPopover>
       </EuiFlexItem>
     </>

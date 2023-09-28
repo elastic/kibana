@@ -10,8 +10,8 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import type { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+import type { RawKibanaPrivileges } from '../../common/model';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (

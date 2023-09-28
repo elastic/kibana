@@ -51,12 +51,30 @@ test('throws error when provided validation function returns invalid', async () 
   }).rejects.toThrow('Dashboard failed saved object result validation');
 });
 
-test('returns undefined when provided validation function returns redireted', async () => {
+test('returns undefined when provided validation function returns redirected', async () => {
   const creationOptions: DashboardCreationOptions = {
     validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
   };
   const dashboard = await createDashboard(creationOptions, 0, 'test-id');
   expect(dashboard).toBeUndefined();
+});
+
+/**
+ * Because the getInitialInput function may have side effects, we only want to call it once we are certain that the
+ * the loaded saved object passes validation.
+ *
+ * This is especially relevant in the Dashboard App case where calling the getInitialInput function removes the _a
+ * param from the URL. In alais match situations this caused a bug where the state from the URL wasn't properly applied
+ * after the redirect.
+ */
+test('does not get initial input when provided validation function returns redirected', async () => {
+  const creationOptions: DashboardCreationOptions = {
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
+    getInitialInput: jest.fn(),
+  };
+  const dashboard = await createDashboard(creationOptions, 0, 'test-id');
+  expect(dashboard).toBeUndefined();
+  expect(creationOptions.getInitialInput).not.toHaveBeenCalled();
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
@@ -74,6 +92,21 @@ test('pulls state from dashboard saved object when given a saved object id', asy
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
+});
+
+test('passes managed state from the saved object into the Dashboard component state', async () => {
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+      managed: true,
+    });
+  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().componentState.managed).toBe(true);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
@@ -244,7 +277,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     .fn()
     .mockReturnValue(mockContactCardFactory);
 
-  await createDashboard({
+  const dashboard = await createDashboard({
     getIncomingEmbeddable: () => incomingEmbeddable,
     getInitialInput: () => ({
       panels: {
@@ -268,6 +301,75 @@ test('creates new embeddable with incoming embeddable if id does not match exist
     }),
     expect.any(Object)
   );
+  expect(dashboard!.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_match',
+      firstName: 'wow look at this new panel wow',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.i_do_not_match.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'i_do_not_match',
+      firstName: 'phew... I will not be replaced',
+    })
+  );
+
+  // expect panel to be created with the default size.
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.w).toBe(24);
+  expect(dashboard!.getState().explicitInput.panels.i_match.gridData.h).toBe(15);
+});
+
+test('creates new embeddable with specified size if size is provided', async () => {
+  const incomingEmbeddable: EmbeddablePackageState = {
+    type: CONTACT_CARD_EMBEDDABLE,
+    input: {
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    } as ContactCardEmbeddableInput,
+    size: { width: 1, height: 1 },
+    embeddableId: 'new_panel',
+  };
+  const mockContactCardFactory = {
+    create: jest.fn().mockReturnValue({ destroy: jest.fn() }),
+    getDefaultInput: jest.fn().mockResolvedValue({}),
+  };
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockContactCardFactory);
+
+  const dashboard = await createDashboard({
+    getIncomingEmbeddable: () => incomingEmbeddable,
+    getInitialInput: () => ({
+      panels: {
+        i_do_not_match: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: {
+            id: 'i_do_not_match',
+            firstName: 'phew... I will not be replaced',
+          },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    }),
+  });
+
+  // flush promises
+  await new Promise((r) => setTimeout(r, 1));
+
+  expect(mockContactCardFactory.create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    }),
+    expect.any(Object)
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.explicitInput).toStrictEqual(
+    expect.objectContaining({
+      id: 'new_panel',
+      firstName: 'what a tiny lil panel',
+    })
+  );
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.w).toBe(1);
+  expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
 });
 
 test('creates a control group from the control group factory and waits for it to be initialized', async () => {

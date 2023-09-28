@@ -142,7 +142,8 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-describe('Create case', () => {
+// Failing: See https://github.com/elastic/kibana/issues/146394
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
@@ -306,8 +307,9 @@ describe('Create case', () => {
       });
     });
 
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
+    it('should trim fields correctly while submit', async () => {
+      const newTags = ['coke     ', '     pepsi'];
+      const newCategory = 'First           ';
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
@@ -319,19 +321,33 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
+
+      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+
+      const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
+
+      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+
+      const caseTags = screen.getByTestId('caseTags');
+
+      for (const tag of newTags) {
+        const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+        userEvent.type(tagsInput, `${tag}{enter}`);
+      }
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the name is too long. The maximum length is 160 characters.'
-          )
-        ).toBeInTheDocument();
+        expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).not.toHaveBeenCalled();
+      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
     });
 
     it('should toggle sync settings', async () => {

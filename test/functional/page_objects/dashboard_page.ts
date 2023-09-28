@@ -51,12 +51,18 @@ export class DashboardPageObject extends FtrService {
     ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
+  public readonly APP_ID = 'dashboards';
+
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
     await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
-    await this.common.navigateToApp('dashboard');
+    await this.navigateToApp();
+  }
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
   }
 
   public async expectAppStateRemovedFromURL() {
@@ -138,7 +144,7 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async expectUnsavedChangesDoesNotExist(title: string) {
+  public async expectUnsavedChangesListingDoesNotExist(title: string) {
     this.log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
     await this.testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
@@ -174,11 +180,6 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardLandingPage');
   }
 
-  public async clickDashboardBreadcrumbLink() {
-    this.log.debug('clickDashboardBreadcrumbLink');
-    await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
-  }
-
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
       `last breadcrumb to have dashboard title: ${expectedTitle}`,
@@ -192,19 +193,21 @@ export class DashboardPageObject extends FtrService {
 
   public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
     this.log.debug('gotoDashboardLandingPage');
-    const onPage = await this.onDashboardLandingPage();
-    if (!onPage) {
-      await this.clickDashboardBreadcrumbLink();
-      await this.retry.try(async () => {
-        const warning = await this.testSubjects.exists('confirmModalTitleText');
-        if (warning) {
-          await this.testSubjects.click(
-            ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-          );
-        }
-      });
-      await this.expectExistsDashboardLandingPage();
-    }
+    if (await this.onDashboardLandingPage()) return;
+
+    const breadcrumbLink = this.config.get('serverless')
+      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+      : 'breadcrumb dashboardListingBreadcrumb first';
+    await this.testSubjects.click(breadcrumbLink);
+    await this.retry.try(async () => {
+      const warning = await this.testSubjects.exists('confirmModalTitleText');
+      if (warning) {
+        await this.testSubjects.click(
+          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+        );
+      }
+    });
+    await this.expectExistsDashboardLandingPage();
   }
 
   public async clickClone() {
@@ -333,6 +336,12 @@ export class DashboardPageObject extends FtrService {
   public async expectUnsavedChangesBadge() {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
+  }
+
+  public async expectMissingUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   }
 

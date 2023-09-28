@@ -14,7 +14,7 @@ import {
 
 const THREAT_INTEL_PATH = '/app/security/threat_intelligence/';
 
-describe('Empty Page', () => {
+describe('Empty Page', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
     visit(THREAT_INTEL_PATH);

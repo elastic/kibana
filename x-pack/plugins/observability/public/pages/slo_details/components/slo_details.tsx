@@ -13,19 +13,19 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { BurnRates } from './burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
-import { BurnRates } from './burn_rates';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -40,7 +40,9 @@ type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 
 export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
-  const { data: activeAlerts } = useFetchActiveAlerts({ sloIds: [slo.id] });
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
+  });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
       list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
@@ -104,7 +106,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       'data-test-subj': 'alertsTab',
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts[slo.id]?.count) ?? 0}
+          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
         </EuiNotificationBadge>
       ),
       content: <SloDetailsAlerts slo={slo} />,

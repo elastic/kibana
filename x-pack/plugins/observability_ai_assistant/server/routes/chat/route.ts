@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import type { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
+import { IncomingMessage } from 'http';
+import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
+import type { CreateChatCompletionResponse } from 'openai';
+import { MessageRole } from '../../../common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
 
@@ -15,21 +18,28 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: t.type({
-    body: t.type({
-      messages: t.array(messageRt),
-      connectorId: t.string,
-      functions: t.array(
+  params: t.intersection([
+    t.type({
+      body: t.intersection([
         t.type({
-          name: t.string,
-          description: t.string,
-          parameters: t.any,
-          contexts: t.array(t.string),
-        })
-      ),
+          messages: t.array(messageRt),
+          connectorId: t.string,
+          functions: t.array(
+            t.type({
+              name: t.string,
+              description: t.string,
+              parameters: t.any,
+            })
+          ),
+        }),
+        t.partial({
+          functionCall: t.string,
+        }),
+      ]),
     }),
-  }),
-  handler: async (resources): Promise<IncomingMessage> => {
+    t.partial({ query: t.type({ stream: toBooleanRt }) }),
+  ]),
+  handler: async (resources): Promise<IncomingMessage | CreateChatCompletionResponse> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
@@ -39,13 +49,35 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, functions },
+      body: { messages, connectorId, functions, functionCall: givenFunctionCall },
+      query = { stream: true },
     } = params;
+
+    const stream = query.stream;
+
+    let functionCall = givenFunctionCall;
+
+    if (!functionCall) {
+      const isStartOfConversation =
+        messages.some((message) => message.message.role === MessageRole.Assistant) === false;
+
+      const isRecallFunctionAvailable = functions.some((fn) => fn.name === 'recall') === true;
+
+      const willUseRecall = isStartOfConversation && isRecallFunctionAvailable;
+
+      functionCall = willUseRecall ? 'recall' : undefined;
+    }
 
     return client.chat({
       messages,
       connectorId,
-      functions,
+      stream,
+      ...(functions.length
+        ? {
+            functions,
+            functionCall,
+          }
+        : {}),
     });
   },
 });

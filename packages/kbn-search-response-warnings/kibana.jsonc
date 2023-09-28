@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/search-response-warnings",
+  "owner": "@elastic/kibana-data-discovery"
+}

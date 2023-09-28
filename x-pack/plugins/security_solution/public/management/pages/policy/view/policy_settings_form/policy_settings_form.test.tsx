@@ -12,7 +12,7 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { PolicySettingsFormProps } from './policy_settings_form';
 import { PolicySettingsForm } from './policy_settings_form';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import type { UpsellingService } from '../../../../../common/lib/upsellings';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 jest.mock('../../../../../common/hooks/use_license');
 
@@ -66,7 +66,7 @@ describe('Endpoint Policy Settings Form', () => {
 
   describe('and when policy protections are not available', () => {
     beforeEach(() => {
-      upsellingService.registerSections({
+      upsellingService.setSections({
         endpointPolicyProtections: () => <div data-test-subj="paywall">{'pay up!'}</div>,
       });
     });

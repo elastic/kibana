@@ -15,7 +15,7 @@ const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-defau
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
@@ -55,14 +55,20 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           refresh: true,
         }),
       ]),
-    add: async <T>(findingsMock: T[]) => {
+    add: async <
+      T extends {
+        '@timestamp'?: string;
+      }
+    >(
+      findingsMock: T[]
+    ) => {
       await Promise.all([
         ...findingsMock.map((finding) =>
           es.index({
             index: FINDINGS_INDEX,
             body: {
               ...finding,
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
             },
             refresh: true,
           })
@@ -72,7 +78,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
             index: FINDINGS_LATEST_INDEX,
             body: {
               ...finding,
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': finding['@timestamp'] ?? new Date().toISOString(),
             },
             refresh: true,
           })
@@ -81,10 +87,42 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   };
 
+  const detectionRuleApi = {
+    remove: async () => {
+      await supertest
+        .post('/api/detection_engine/rules/_bulk_action?dry_run=false')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .send({
+          action: 'delete',
+          query: '',
+        })
+        .expect(200);
+    },
+  };
+
   const distributionBar = {
     filterBy: async (type: 'passed' | 'failed') =>
       testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
+
+  const createNotInstalledObject = (notInstalledSubject: string) => ({
+    getElement() {
+      return testSubjects.find(notInstalledSubject);
+    },
+
+    async navigateToAction(actionTestSubject: string) {
+      return await retry.try(async () => {
+        await testSubjects.click(actionTestSubject);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
+
+        if (!result) {
+          throw new Error('Integration installation page not found');
+        }
+      });
+    },
+  });
 
   const createTableObject = (tableTestSubject: string) => ({
     getElement() {
@@ -185,12 +223,34 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         await nonStaleElement.click();
       }
     },
+
+    async openFlyoutAt(rowIndex: number) {
+      const table = await this.getElement();
+      const flyoutButton = await table.findAllByTestSubject('findings_table_expand_column');
+      await flyoutButton[rowIndex].click();
+    },
   });
 
   const navigateToLatestFindingsPage = async () => {
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
+  const navigateToVulnerabilities = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/vulnerabilities',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
+  const navigateToMisconfigurations = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/configurations',
       { shouldUseHashForSubUrl: false }
     );
   };
@@ -210,14 +270,58 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       await link.click();
     },
   };
+  const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
+  const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
+
+  const createFlyoutObject = (tableTestSubject: string) => ({
+    async getElement() {
+      return await testSubjects.find(tableTestSubject);
+    },
+    async clickTakeActionButton() {
+      const element = await this.getElement();
+      const button = await element.findByCssSelector('[data-test-subj="csp:take_action"] button');
+      await button.click();
+      return button;
+    },
+    async clickTakeActionCreateRuleButton() {
+      await this.clickTakeActionButton();
+      const button = await testSubjects.find('csp:create_rule');
+      await button.click();
+      return button;
+    },
+    async getVisibleText(testSubj: string) {
+      const element = await this.getElement();
+      return await (await element.findByTestSubject(testSubj)).getVisibleText();
+    },
+  });
+
+  const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
+
+  const toastMessage = async (testSubj = 'csp:toast-success') => ({
+    async getElement() {
+      return await testSubjects.find(testSubj);
+    },
+    async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
+      const element = await this.getElement();
+      const link = await element.findByTestSubject(linkTestSubj);
+      await link.click();
+    },
+  });
 
   return {
     navigateToLatestFindingsPage,
+    navigateToVulnerabilities,
+    navigateToMisconfigurations,
     latestFindingsTable,
     resourceFindingsTable,
     findingsByResourceTable,
+    notInstalledVulnerabilities,
+    notInstalledCSP,
     index,
     waitForPluginInitialized,
     distributionBar,
+    misconfigurationsFlyout,
+    toastMessage,
+    detectionRuleApi,
   };
 }

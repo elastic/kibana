@@ -16,7 +16,8 @@
       "embeddable",
       "presentationUtil",
       "dashboard",
-      "fieldFormats"
+      "fieldFormats",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "cases"

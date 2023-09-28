@@ -1,8 +1,12 @@
 {
   "tasks.cancel": {
     "url_params": {
-      "nodes": [],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "actions": [],
+      "nodes": "",
       "parent_task_id": "",
       "wait_for_completion": "__flag__"
     },
@@ -13,6 +17,10 @@
       "_tasks/_cancel",
       "_tasks/{task_id}/_cancel"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -13,6 +13,31 @@ test('getContainedAlertContext', () => {
     getContainedAlertContext({
       entityName: 'entity1',
       containment: {
+        location: [0, 0],
+        locationWkt: 'POINT (100 0)',
+        shapeLocationId: 'boundary1Id',
+        dateInShape: '2022-06-21T16:56:11.923Z',
+        docId: 'docId',
+      },
+      shapesIdsNamesMap: { boundary1Id: 'boundary1Name' },
+      windowEnd: new Date('2022-06-21T17:00:00.000Z'),
+    })
+  ).toEqual({
+    containingBoundaryId: 'boundary1Id',
+    containingBoundaryName: 'boundary1Name',
+    detectionDateTime: '2022-06-21T17:00:00.000Z',
+    entityDateTime: '2022-06-21T16:56:11.923Z',
+    entityDocumentId: 'docId',
+    entityId: 'entity1',
+    entityLocation: 'POINT (100 0)',
+  });
+});
+
+test('getContainedAlertContext for backwards compatible number[] location format', () => {
+  expect(
+    getContainedAlertContext({
+      entityName: 'entity1',
+      containment: {
         location: [100, 0],
         shapeLocationId: 'boundary1Id',
         dateInShape: '2022-06-21T16:56:11.923Z',
@@ -37,7 +62,8 @@ describe('getRecoveredAlertContext', () => {
     const activeEntities = new Map();
     activeEntities.set('entity1', [
       {
-        location: [100, 0],
+        location: [0, 0],
+        locationWkt: 'POINT (100 0)',
         shapeLocationId: 'boundary1Id',
         dateInShape: '2022-06-21T16:56:11.923Z',
         docId: 'docId',
@@ -63,7 +89,8 @@ describe('getRecoveredAlertContext', () => {
     const inactiveEntities = new Map();
     inactiveEntities.set('entity1', [
       {
-        location: [100, 0],
+        location: [0, 0],
+        locationWkt: 'POINT (100 0)',
         shapeLocationId: OTHER_CATEGORY,
         dateInShape: '2022-06-21T16:56:11.923Z',
         docId: 'docId',

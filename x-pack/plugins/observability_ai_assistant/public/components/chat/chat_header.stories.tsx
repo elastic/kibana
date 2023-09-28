@@ -29,6 +29,18 @@ export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
       ] as FindActionResult[],
       selectConnector: () => {},
     },
+    knowledgeBase: {
+      status: {
+        loading: false,
+        value: {
+          ready: true,
+        },
+        refresh: () => {},
+      },
+      isInstalling: false,
+      installError: undefined,
+      install: async () => {},
+    },
   },
   render: (props) => {
     return (

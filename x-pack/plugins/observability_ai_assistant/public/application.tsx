@@ -6,12 +6,13 @@
  */
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import type { History } from 'history';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { observabilityAIAssistantRouter } from './routes/config';
 import type {
@@ -32,9 +33,12 @@ export function Application({
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
   service: ObservabilityAIAssistantService;
 }) {
+  const theme = useMemo(() => {
+    return { theme$ };
+  }, [theme$]);
   return (
     <EuiErrorBoundary>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={theme}>
         <KibanaContextProvider
           services={{
             ...coreStart,

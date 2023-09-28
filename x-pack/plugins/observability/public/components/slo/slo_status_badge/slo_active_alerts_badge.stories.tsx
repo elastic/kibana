@@ -25,4 +25,4 @@ const Template: ComponentStory<typeof Component> = (props: Props) => (
 );
 
 export const Default = Template.bind({});
-Default.args = { activeAlerts: { count: 2 } };
+Default.args = { activeAlerts: 2 };

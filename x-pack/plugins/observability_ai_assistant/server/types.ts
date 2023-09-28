@@ -13,6 +13,10 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ObservabilityAIAssistantPluginStart {}
@@ -21,9 +25,11 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   security: SecurityPluginStart;
   features: FeaturesPluginStart;
+  taskManager: TaskManagerStartContract;
 }

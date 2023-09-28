@@ -21,6 +21,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
+  const SEARCH_LABS_URL = meta.searchLabsUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
@@ -34,6 +35,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
+  const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
+  const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
+  const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
@@ -65,6 +69,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
+      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -125,6 +130,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
+      aiSearchDoc: `${ESRE_DOCS}`,
+      aiSearchHelp: `${ESRE_DOCS}help.html`,
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
       behavioralAnalyticsCORS: `${ENTERPRISE_SEARCH_DOCS}analytics-cors-proxy.html`,
@@ -138,6 +145,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsConfluence: `${ENTERPRISE_SEARCH_DOCS}connectors-confluence.html`,
       connectorsDropbox: `${ENTERPRISE_SEARCH_DOCS}connectors-dropbox.html`,
       connectorsContentExtraction: `${ENTERPRISE_SEARCH_DOCS}connectors-content-extraction.html`,
+      connectorsGithub: `${ENTERPRISE_SEARCH_DOCS}connectors-github.html`,
+      connectorsGmail: `${ENTERPRISE_SEARCH_DOCS}connectors-gmail.html`,
       connectorsGoogleCloudStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-google-cloud.html`,
       connectorsGoogleDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-google-drive.html`,
       connectorsJira: `${ENTERPRISE_SEARCH_DOCS}connectors-jira.html`,
@@ -146,13 +155,16 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsMySQL: `${ENTERPRISE_SEARCH_DOCS}connectors-mysql.html`,
       connectorsNative: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-native`,
       connectorsNetworkDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-network-drive.html`,
+      connectorsOneDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-onedrive.html`,
       connectorsOracle: `${ENTERPRISE_SEARCH_DOCS}connectors-oracle.html`,
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
+      connectorsSalesforce: `${ENTERPRISE_SEARCH_DOCS}connectors-salesforce.html`,
       connectorsServiceNow: `${ENTERPRISE_SEARCH_DOCS}connectors-servicenow.html`,
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
-      connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
+      connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
+      connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
@@ -160,10 +172,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
       elser: `${ENTERPRISE_SEARCH_DOCS}elser-text-expansion.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
-      esre: `${ESRE_DOCS}index.html`,
-      esreFaq: `${ESRE_DOCS}faq.html`,
-      esreHelp: `${ESRE_DOCS}help.html`,
-      esreLearn: `${ESRE_DOCS}learn.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       ingestionApis: `${ENTERPRISE_SEARCH_DOCS}ingestion-apis.html`,
       ingestPipelines: `${ENTERPRISE_SEARCH_DOCS}ingest-pipelines.html`,
@@ -175,10 +183,13 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      mlDocumentEnrichmentUpdateMappings: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html#document-enrichment-update-mappings`,
       searchApplicationsTemplates: `${ENTERPRISE_SEARCH_DOCS}search-applications-templates.html`,
       searchApplicationsSearchApi: `${ENTERPRISE_SEARCH_DOCS}search-applications-safe-search.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
       searchApplicationsSearch: `${ENTERPRISE_SEARCH_DOCS}search-applications-search.html`,
+      searchLabs: `${SEARCH_LABS_URL}`,
+      searchLabsRepo: `${SEARCH_LABS_REPO}`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html`,
@@ -327,6 +338,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
       dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
       deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+      createEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
+      matchAllQuery: `${ELASTICSEARCH_DOCS}query-dsl-match-all-query.html`,
+      enrichPolicies: `${ELASTICSEARCH_DOCS}ingest-enriching-data.html#enrich-policy`,
       createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,
       gettingStarted: `${ELASTICSEARCH_DOCS}getting-started.html`,
@@ -391,6 +405,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
+      remoteClustersOnPremSetupTrustWithCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html`,
+      remoteClustersOnPremSetupTrustWithApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html`,
+      remoteClustersCloudSetupTrust: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
       rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
@@ -494,8 +511,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
-      // TODO add valid docs URL
-      alertingRules: `${MACHINE_LEARNING_DOCS}ml-configuring-alerts.html`,
+      alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -540,7 +556,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
-      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
+      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
       serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
       serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
@@ -610,6 +626,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     apis: {
       bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+      indexStats: `${ELASTICSEARCH_DOCS}indices-stats.html`,
       byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
       createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
@@ -638,6 +655,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
       securityApis: `${ELASTICSEARCH_DOCS}security-api.html`,
       simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
+      tasks: `${ELASTICSEARCH_DOCS}tasks.html`,
       timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
@@ -713,6 +731,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       fleetServer: `${FLEET_DOCS}fleet-server.html`,
       fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
       settings: `${FLEET_DOCS}fleet-settings.html`,
+      kafkaSettings: `${FLEET_DOCS}kafka-output-settings.html`,
+      logstashSettings: `${FLEET_DOCS}ls-output-settings.html`,
+      esSettings: `${FLEET_DOCS}es-output-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
@@ -794,8 +815,29 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
+    serverlessClients: {
+      goApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis-references`,
+      goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis`,
+      httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
+      httpApiReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis-references`,
+      jsApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-references`,
+      jsGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-getting-started`,
+      phpApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-references`,
+      phpGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-getting-started`,
+      pythonApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
+      pythonGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
+      pythonReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
+      rubyApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-references`,
+      rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
+    },
     serverlessSearch: {
-      integrations: `${ELASTIC_WEBSITE_URL}/integrations`,
+      integrations: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations`,
+      integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-logstash`,
+      integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
+      integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
+      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-explore`,
+      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-ingest`,
+      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-search`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,

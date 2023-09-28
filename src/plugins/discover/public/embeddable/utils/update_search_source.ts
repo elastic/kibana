@@ -17,13 +17,21 @@ export const updateSearchSource = (
   sampleSize: number | undefined,
   useNewFieldsApi: boolean,
   defaults: {
-    defaultSampleSize: number;
-    defaultSort: string;
+    sampleSize: number;
+    sortDir: string;
   }
 ) => {
-  const { defaultSampleSize, defaultSort } = defaults;
+  const { sampleSize: defaultSampleSize, sortDir } = defaults;
   searchSource.setField('size', sampleSize || defaultSampleSize);
-  searchSource.setField('sort', getSortForSearchSource(sort, dataView, defaultSort));
+  searchSource.setField(
+    'sort',
+    getSortForSearchSource({
+      sort,
+      dataView,
+      defaultSortDir: sortDir,
+      includeTieBreaker: true,
+    })
+  );
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
     const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };

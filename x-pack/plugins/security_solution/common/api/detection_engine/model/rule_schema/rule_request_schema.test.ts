@@ -1289,6 +1289,94 @@ describe('rules schema', () => {
       expect(message.schema).toEqual({});
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
     });
+
+    test('You can omit investigation_fields', () => {
+      // getCreateRulesSchemaMock doesn't include investigation_fields
+      const payload: RuleCreateProps = getCreateRulesSchemaMock();
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You cannot pass empty object for investigation_fields', () => {
+      const payload: Omit<RuleCreateProps, 'investigation_fields'> & {
+        investigation_fields: unknown;
+      } = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: {},
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "investigation_fields,field_names"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You can send in investigation_fields', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: ['field1', 'field2'] },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You cannot send in an empty array of investigation_fields.field_names', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: [] },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "[]" supplied to "investigation_fields,field_names"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You cannot send in an array of investigation_fields.field_names that are numbers', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: [0, 1, 2] },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "0" supplied to "investigation_fields,field_names"',
+        'Invalid value "1" supplied to "investigation_fields,field_names"',
+        'Invalid value "2" supplied to "investigation_fields,field_names"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You cannot send in investigation_fields without specifying fields', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { foo: true },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "investigation_fields,field_names"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
   });
 
   describe('response', () => {

@@ -19,7 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { Link, generatePath } from 'react-router-dom';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 import { findingsNavigation } from '../../../common/navigation/constants';
-import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
+import {
+  CloudPostureTableResult,
+  useCloudPostureTable,
+} from '../../../common/hooks/use_cloud_posture_table';
 import { ErrorCallout } from '../../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../../configurations/layout/findings_search_bar';
 import { useLimitProperties } from '../../../common/utils/get_limit_properties';
@@ -54,26 +57,31 @@ const VulnerabilitiesByResourceDataGrid = ({
   dataView,
   data,
   isFetching,
+  pageIndex,
+  sort,
+  pageSize,
+  onChangeItemsPerPage,
+  onChangePage,
+  onSort,
+  urlQuery,
+  setUrlQuery,
+  onResetFilters,
 }: {
   dataView: DataView;
   data: VulnerabilitiesByResourceQueryData | undefined;
   isFetching: boolean;
-}) => {
-  const {
-    pageIndex,
-    sort,
-    pageSize,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    urlQuery,
-    setUrlQuery,
-    onResetFilters,
-  } = useCloudPostureTable({
-    dataView,
-    defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-  });
+} & Pick<
+  CloudPostureTableResult,
+  | 'pageIndex'
+  | 'sort'
+  | 'pageSize'
+  | 'onChangeItemsPerPage'
+  | 'onChangePage'
+  | 'onSort'
+  | 'urlQuery'
+  | 'setUrlQuery'
+  | 'onResetFilters'
+>) => {
   const styles = useStyles();
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
@@ -109,7 +117,7 @@ const VulnerabilitiesByResourceDataGrid = ({
       if (isFetching) return null;
       if (!resourceVulnerabilityRow?.resource?.id) return null;
 
-      if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
+      if (columnId === vulnerabilitiesByResourceColumns.resourceId) {
         return (
           <Link
             to={generatePath(findingsNavigation.resource_vulnerabilities.path, {
@@ -122,7 +130,7 @@ const VulnerabilitiesByResourceDataGrid = ({
           </Link>
         );
       }
-      if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
+      if (columnId === vulnerabilitiesByResourceColumns.resourceName) {
         return <>{resourceVulnerabilityRow?.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.region) {
@@ -232,7 +240,19 @@ const VulnerabilitiesByResourceDataGrid = ({
 };
 
 export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) => {
-  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+  const {
+    pageIndex,
+    onChangeItemsPerPage,
+    onChangePage,
+    pageSize,
+    query,
+    sort,
+    onSort,
+    queryError,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
@@ -273,6 +293,15 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
           dataView={dataView}
           data={data}
           isFetching={isFetching}
+          pageIndex={pageIndex}
+          sort={sort}
+          pageSize={pageSize}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onSort={onSort}
+          urlQuery={urlQuery}
+          setUrlQuery={setUrlQuery}
+          onResetFilters={onResetFilters}
         />
       )}
     </>

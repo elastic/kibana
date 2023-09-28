@@ -31,7 +31,6 @@ const infrastructureRoute = createApmServerRoute({
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
-
     const { params } = resources;
 
     const {

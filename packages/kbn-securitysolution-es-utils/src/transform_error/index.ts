@@ -8,6 +8,7 @@
 
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import { ZodError } from 'zod';
 import { BadRequestError } from '../bad_request_error';
 
 export interface OutputError {
@@ -20,6 +21,15 @@ export const transformError = (err: Error & Partial<errors.ResponseError>): Outp
     return {
       message: err.output.payload.message,
       statusCode: err.output.statusCode,
+    };
+  } else if (err instanceof ZodError) {
+    const message = stringifyZodError(err);
+
+    return {
+      message,
+      // These errors can occur when handling requests after validation and can
+      // indicate of issues in business logic, so they are 500s instead of 400s
+      statusCode: 500,
     };
   } else {
     if (err.statusCode != null) {
@@ -50,3 +60,15 @@ export const transformError = (err: Error & Partial<errors.ResponseError>): Outp
     }
   }
 };
+
+export function stringifyZodError(err: ZodError<any>) {
+  return err.issues
+    .map((issue) => {
+      // If the path is empty, the error is for the root object
+      if (issue.path.length === 0) {
+        return issue.message;
+      }
+      return `${issue.path.join('.')}: ${issue.message}`;
+    })
+    .join(', ');
+}

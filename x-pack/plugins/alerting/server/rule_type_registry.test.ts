@@ -17,7 +17,6 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
-import { rawRuleSchema } from './raw_rule_schema';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -437,17 +436,12 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(taskManager.registerTaskDefinitions.mock.calls[0]).toEqual([
-        {
-          'alerting:test': {
-            createTaskRunner: expect.any(Function),
-            paramsSchema: expect.any(Object),
-            indirectParamsSchema: rawRuleSchema,
-            timeout: '20m',
-            title: 'Test',
-          },
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:test': {
+          timeout: '20m',
+          title: 'Test',
         },
-      ]);
+      });
     });
 
     test('shallow clones the given rule type', () => {
@@ -596,40 +590,41 @@ describe('Create Lifecycle', () => {
       });
       const ruleType = registry.get('test');
       expect(ruleType).toMatchInlineSnapshot(`
-              Object {
-                "actionGroups": Array [
-                  Object {
-                    "id": "default",
-                    "name": "Default",
-                  },
-                  Object {
-                    "id": "recovered",
-                    "name": "Recovered",
-                  },
-                ],
-                "actionVariables": Object {
-                  "context": Array [],
-                  "params": Array [],
-                  "state": Array [],
-                },
-                "defaultActionGroupId": "default",
-                "executor": [MockFunction],
-                "id": "test",
-                "isExportable": true,
-                "minimumLicenseRequired": "basic",
-                "name": "Test",
-                "producer": "alerts",
-                "recoveryActionGroup": Object {
-                  "id": "recovered",
-                  "name": "Recovered",
-                },
-                "validate": Object {
-                  "params": Object {
-                    "validate": [Function],
-                  },
-                },
-              }
-          `);
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "default",
+              "name": "Default",
+            },
+            Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          ],
+          "actionVariables": Object {
+            "context": Array [],
+            "params": Array [],
+            "state": Array [],
+          },
+          "defaultActionGroupId": "default",
+          "executor": [MockFunction],
+          "id": "test",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "Test",
+          "producer": "alerts",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+          "validate": Object {
+            "params": Object {
+              "validate": [Function],
+            },
+          },
+        }
+      `);
     });
 
     test(`should throw an error if type isn't registered`, () => {
@@ -719,6 +714,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "validLegacyConsumers": Array [],
           },
         }
       `);

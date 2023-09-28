@@ -64,6 +64,7 @@ describe('saved_searches_utils', () => {
               },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
+              "scriptedFieldsEnabled": true,
               "search": [MockFunction],
             },
             "fields": Object {},

@@ -14,28 +14,19 @@ import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
 
-export const {
-  uiPlugins: nonStatefulUiPlugins,
-  parsingPlugins,
-  processingPlugins,
-} = {
-  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
-  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
-};
+export const nonStatefulUiPlugins = getDefaultEuiMarkdownUiPlugins();
+export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
 export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
 export const uiPlugins = ({
-  licenseIsPlatinum,
   insightsUpsellingMessage,
 }: {
-  licenseIsPlatinum: boolean;
   insightsUpsellingMessage: string | null;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({
-    licenseIsPlatinum,
     insightsUpsellingMessage,
   });
   if (currentPlugins.includes(insightPluginWithLicense.name) === false) {

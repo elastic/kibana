@@ -7,13 +7,36 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import RuleStatusPanelWithApi, { RuleStatusPanel } from './rule_status_panel';
+import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: () => ({ total: 400 }),
+  loadExecutionLogAggregations: jest.fn(),
 }));
+
+const { loadExecutionLogAggregations } = jest.requireMock(
+  '../../../lib/rule_api/load_execution_log_aggregations'
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
+const RuleStatusPanelWithProvider = (props: RuleStatusPanelWithApiProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleStatusPanel {...props} />
+    </QueryClientProvider>
+  );
+};
+
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -32,15 +55,26 @@ const mockAPIs = {
   bulkDisableRules: jest.fn(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
-  loadExecutionLogAggregations: jest.fn(),
 };
 const requestRefresh = jest.fn();
 
 describe('rule status panel', () => {
+  beforeEach(() => {
+    loadExecutionLogAggregations.mockResolvedValue({
+      total: 400,
+      data: [],
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('fetches and renders the number of executions in the last 24 hours', async () => {
     const rule = mockRule();
     const wrapper = mountWithIntl(
-      <RuleStatusPanelWithApi
+      <RuleStatusPanelWithProvider
+        {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
@@ -48,13 +82,21 @@ describe('rule status panel', () => {
         requestRefresh={requestRefresh}
       />
     );
+
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
+
     const ruleExecutionsDescription = wrapper.find(
       '[data-test-subj="ruleStatus-numberOfExecutions"]'
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(ruleExecutionsDescription.first().text()).toBe('400 executions in the last 24 hr');
   });
 
@@ -62,7 +104,7 @@ describe('rule status panel', () => {
     const rule = mockRule({ enabled: true });
     const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
@@ -96,7 +138,7 @@ describe('rule status panel', () => {
     const rule = mockRule({ enabled: false });
     const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
@@ -130,7 +172,7 @@ describe('rule status panel', () => {
     const rule = mockRule({ enabled: false });
     const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
@@ -164,7 +206,7 @@ describe('rule status panel', () => {
     const rule = mockRule({ enabled: true });
     const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
@@ -204,7 +246,7 @@ describe('rule status panel', () => {
     }) as any;
 
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable

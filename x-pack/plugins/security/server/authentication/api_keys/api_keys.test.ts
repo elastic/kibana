@@ -15,10 +15,10 @@ import {
 } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
+import { APIKeys } from './api_keys';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
-import { APIKeys } from './api_keys';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 

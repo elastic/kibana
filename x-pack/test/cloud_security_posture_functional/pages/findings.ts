@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
+      '@timestamp': '1695819664234',
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -38,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
+      '@timestamp': '1695819673242',
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -54,6 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
+      '@timestamp': '1695819676242',
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -70,6 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
+      '@timestamp': '1695819680202',
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -95,7 +99,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  describe('Findings Page', () => {
+  describe('Findings Page', function () {
+    this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;

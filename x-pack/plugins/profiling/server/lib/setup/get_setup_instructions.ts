@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
-import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
+import { getCollectorPolicy, getSymbolizerPolicy } from '@kbn/profiling-data-access-plugin/common';
 
 export interface SetupDataCollectionInstructions {
   collector: {
@@ -21,16 +21,20 @@ export interface SetupDataCollectionInstructions {
   profilerAgent: {
     version: string;
   };
+
+  stackVersion: string;
 }
 
 export async function getSetupInstructions({
   packagePolicyClient,
   soClient,
   apmServerHost,
+  stackVersion,
 }: {
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
   apmServerHost?: string;
+  stackVersion: string;
 }): Promise<SetupDataCollectionInstructions> {
   const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
   const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
@@ -59,5 +63,6 @@ export async function getSetupInstructions({
     profilerAgent: {
       version: profilerAgent.version,
     },
+    stackVersion,
   };
 }

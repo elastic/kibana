@@ -38,9 +38,10 @@ uiSettings:
 
 [[client-side-usage]]
 === Client side usage
-On the client, the `uiSettings` service is exposed directly from `core` and the {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.iuisettingsclient.md[client] provides plugins access to the `config` entries stored in {es}.
+On the client, the `uiSettings` service is exposed directly from `core` and the {kib-repo}/blob/8.9/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts[client]
+provides plugins access to the `config` entries stored in {es}.
 
-In the interest of performance, `uiSettings` are cached. Any changes that require cache refreshes should register an instruction to reload the page when settings are configured in Advanced Settings using the `requiresPageReload` {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.uisettingsparams.md[parameter].
+In the interest of performance, `uiSettings` are cached. Any changes that require cache refreshes should register an instruction to reload the page when settings are configured in Advanced Settings using the `requiresPageReload` {kib-repo}/blob/8.9/packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts[parameter].
 
 [source,typescript]
 ----
@@ -77,7 +78,7 @@ export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
 === Server side usage
 On the server, `uiSettings` are exposed directly from `core`.
 
-The following example shows how to {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[register] a new `custom` setting with a default value of '42'. When registering a new setting, you must provide a schema against which validations are performed on read and write. All the other {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsparams.md[parameters] are optional.
+The following example shows how to register a new `custom` setting with a default value of '42'. When registering a new setting, you must provide a schema against which validations are performed on read and write. All the other {kib-repo}/blob/8.9/packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts[parameters] are optional.
 
 [source,typescript]
 ----
@@ -114,7 +115,7 @@ export class MyPlugin implements Plugin {
 Migrations for 3rd party plugin advanced settings are not currently supported. If a 3rd party plugin registers an advanced setting, the setting is essentially permanent and cannot be fixed without manual intervention.
 ==============================================
 
-To change or remove a `uiSetting`, the whole `config` Saved Object needs to be migrated. `uiSettings` {kib-repo}blob/{branch}/src/core/server/ui_settings/saved_objects/migrations.ts[migrations] are declared directly in the service.
+To change or remove a `uiSetting`, the whole `config` Saved Object needs to be migrated.
 
 For example, if we wanted to remove a `custom` setting, or rename `my_setting:fourtyTwo` to `my_other_setting:fourtyTwo`, we'd need two migration entries, one for each change targeting the version in which these changes apply:
 

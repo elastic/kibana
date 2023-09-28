@@ -24,8 +24,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/163207
-  describe.skip('embed mode', () => {
+  describe('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
@@ -50,7 +49,7 @@ export default function ({
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
 

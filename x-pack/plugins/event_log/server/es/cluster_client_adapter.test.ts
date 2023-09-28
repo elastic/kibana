@@ -35,7 +35,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
-    esNames: getEsNames('kibana', '1.2.3'),
+    esNames: getEsNames('kibana'),
     wait: () => Promise.resolve(true),
   });
 });
@@ -50,7 +50,7 @@ describe('indexDocument', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: [{ create: {} }, { message: 'foo' }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -103,7 +103,7 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -124,12 +124,12 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
       body: [{ create: {} }, { message: `foo 100` }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -158,7 +158,7 @@ describe('buffering documents', () => {
       }
 
       expect(clusterClient.bulk).toHaveBeenNthCalledWith(i + 1, {
-        index: 'kibana-event-log-1.2.3',
+        index: 'kibana-event-log-ds',
         body: expectedBody,
       });
     }
@@ -168,36 +168,15 @@ describe('buffering documents', () => {
 describe('doesIndexTemplateExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesIndexTemplateExist('foo');
-    expect(clusterClient.indices.existsTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
       name: 'foo',
     });
-  });
-
-  test('should return true when call cluster to legacy template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(true);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return true when call cluster to index template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResponse(false);
     clusterClient.indices.existsIndexTemplate.mockResponse(true);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
-  });
-
-  test('should return false when both call cluster calls returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(false);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when call cluster to legacy template API throws an error', async () => {
-    clusterClient.indices.existsTemplate.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIndexTemplateExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existence of index template: Fail"`
-    );
   });
 
   test('should throw error when call cluster to index template API throws an error', async () => {

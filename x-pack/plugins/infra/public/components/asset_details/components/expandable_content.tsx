@@ -31,7 +31,10 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
         {shouldShowMore && (
           <>
             {' ... '}
-            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={toggle}>
+            <EuiLink
+              data-test-subj="infraAssetDetailsExpandableContentCountMoreLink"
+              onClick={toggle}
+            >
               <FormattedMessage
                 id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"

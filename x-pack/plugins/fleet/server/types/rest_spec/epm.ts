@@ -138,6 +138,8 @@ export const InstallPackageFromRegistryRequestSchema = {
   }),
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
   }),
   body: schema.nullable(
     schema.object({
@@ -166,6 +168,8 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   }),
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
   }),
   body: schema.nullable(
     schema.object({
@@ -191,6 +195,10 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 };
 
 export const InstallPackageByUploadRequestSchema = {
+  query: schema.object({
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+  }),
   body: schema.buffer(),
 };
 
@@ -218,6 +226,10 @@ export const DeletePackageRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.boolean(),

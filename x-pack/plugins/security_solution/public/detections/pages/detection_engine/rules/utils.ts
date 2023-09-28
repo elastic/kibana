@@ -83,6 +83,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  investigationFields: [],
   references: [''],
   falsePositives: [''],
   license: '',

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { JSONSchema } from 'json-schema-to-ts';
 import React from 'react';
+import { Observable } from 'rxjs';
 
 export enum MessageRole {
   System = 'system',
@@ -18,12 +18,17 @@ export enum MessageRole {
   Elastic = 'elastic',
 }
 
+export interface PendingMessage {
+  message: Message['message'];
+  aborted?: boolean;
+  error?: any;
+}
+
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
     name?: string;
-    event?: string;
     role: MessageRole;
     function_call?: {
       name: string;
@@ -66,51 +71,67 @@ export interface KnowledgeBaseEntry {
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
+  labels: Record<string, string>;
 }
 
-type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
 
 export interface ContextDefinition {
   name: string;
   description: string;
 }
 
-interface FunctionResponse {
-  content?: Serializable;
-  data?: Serializable;
+type FunctionResponse =
+  | {
+      content?: any;
+      data?: any;
+    }
+  | Observable<PendingMessage>;
+
+export enum FunctionVisibility {
+  System = 'system',
+  User = 'user',
+  All = 'all',
 }
 
 interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
   name: string;
   description: string;
+  visibility?: FunctionVisibility;
+  descriptionForUser?: string;
   parameters: TParameters;
   contexts: string[];
 }
 
-type RespondFunction<
-  TParameters extends CompatibleJSONSchema,
-  TResponse extends FunctionResponse
-> = (options: { arguments: FromSchema<TParameters> }, signal: AbortSignal) => Promise<TResponse>;
+type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
+  options: { arguments: TArguments; messages: Message[]; connectorId: string },
+  signal: AbortSignal
+) => Promise<TResponse>;
 
-type RenderFunction<TResponse extends FunctionResponse> = (options: {
+type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
+  arguments: TArguments;
   response: TResponse;
 }) => React.ReactNode;
 
 export interface FunctionDefinition {
   options: FunctionOptions;
-  respond: (options: { arguments: any }, signal: AbortSignal) => Promise<FunctionResponse>;
-  render?: RenderFunction<any>;
+  respond: (
+    options: { arguments: any; messages: Message[]; connectorId: string },
+    signal: AbortSignal
+  ) => Promise<FunctionResponse>;
+  render?: RenderFunction<any, any>;
 }
 
 export type RegisterContextDefinition = (options: ContextDefinition) => void;
 
 export type RegisterFunctionDefinition = <
   TParameters extends CompatibleJSONSchema,
-  TResponse extends FunctionResponse
+  TResponse extends FunctionResponse,
+  TArguments = FromSchema<TParameters>
 >(
   options: FunctionOptions<TParameters>,
-  respond: RespondFunction<TParameters, TResponse>,
-  render?: RenderFunction<TResponse>
+  respond: RespondFunction<TArguments, TResponse>,
+  render?: RenderFunction<TArguments, TResponse>
 ) => void;
 
 export type ContextRegistry = Map<string, ContextDefinition>;

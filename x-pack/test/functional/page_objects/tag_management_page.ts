@@ -239,7 +239,6 @@ class TagAssignmentFlyout extends FtrService {
  */
 export class TagManagementPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
@@ -270,10 +269,7 @@ export class TagManagementPageObject extends FtrService {
    */
   async waitUntilTableIsLoaded() {
     return this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '*[data-test-subj="tagsManagementTable"]:not(.euiBasicTable-loading)'
-      );
-
+      const isLoaded = await this.testSubjects.exists('tagsManagementTable table-is-ready');
       if (isLoaded) {
         return true;
       } else {

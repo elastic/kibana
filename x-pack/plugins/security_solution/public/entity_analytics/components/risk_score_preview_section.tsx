@@ -20,10 +20,9 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import { RiskScoreEntity, type RiskScore } from '../../../common/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
-import type { RiskScore } from '../../../server/lib/risk_engine/types';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';

@@ -9,9 +9,8 @@ import React, { createContext, useContext, type FC } from 'react';
 
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreSetup, I18nStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
-import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 /**
  * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.
@@ -42,13 +41,13 @@ export interface DatePickerDependencies {
    */
   uiSettingsKeys: typeof UI_SETTINGS;
   /**
-   * helper to be used with notifications.
+   * Internationalisation service
    */
-  wrapWithTheme: typeof wrapWithTheme;
+  i18n: I18nStart;
   /**
-   * helper to be used with notifications.
+   * Optional flag to disable the frozen data tier choice.
    */
-  toMountPoint: typeof toMountPoint;
+  showFrozenDataTierChoice?: boolean;
 }
 
 /**

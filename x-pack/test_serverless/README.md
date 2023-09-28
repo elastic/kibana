@@ -5,6 +5,9 @@ The tests and helper methods (services, page objects) defined here in
  `serverless`, `serverless_observability`, `serverless_search` and
  `serverless_security` plugins.
 
+ For how to set up Docker for serverless ES images, please refer to
+ [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+
 ## Serverless testing structure and conventions
 
 ### Overview
@@ -97,6 +100,33 @@ tests that should run in a serverless environment have to be added to the
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
 
+### Testing with feature flags
+
+**tl;dr:** Tests specific to functionality behind a feature flag need special
+handling and are by default only tested locally / in CI but excluded from regular
+test runs in MKI.
+
+New features might be gated behind a feature flag and can only be enabled
+through a yml configuration entry. By default, these features are not enabled
+so they're not available in a regular serverless MKI project, which would make
+end-to-end tests for such a feature fail. In order to still have tests for
+features behind a feature flag, these tests need to be separated from the
+regular tests.
+
+For every project's `test_suites` directory, there are feature flags specific
+config (`config.feature_flags.ts`) and index (`index.feature_flags.ts`) files
+next to the regular `config.ts` and `index.ts`. These extra files are used to
+cover all feature flag tests of the respective area.
+If you want to add feature flag specific tests:
+- Add your feature flag(s) to the `kbnServerArgs` in the `config.feature_flags.ts` file
+- Load your test file(s) in the `index.feature_flags.ts` file
+
+As mentioned above, these tests are not part of the regular test run against MKI
+projects. If you still want to run feature flag tests against an MKI project,
+this requires a Kibana docker build that has the feature flags enabled by default.
+This docker image can then be used to create a project in serverless QA and the
+feature flags tests can be pointed to the project.
+
 ## Run tests
 Similar to how functional tests are run in `x-pack/test`, you can point the
 functional tests server and test runner to config files in this `x-pack/test_serverless`
@@ -106,3 +136,21 @@ node scripts/functional_tests_server.js --config test_serverless/api_integration
 
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
 ```
+
+## Run tests on MKI
+There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
+```
+TEST_CLOUD=1 TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
+```
+
+## Skipping tests for MKI run
+The tests that are listed in the the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
+Tag the tests with `skipMKI` to be excluded for MKI run. It works only for the `describe` block:
+```
+describe("my test suite", async function() {
+    this.tags(['skipMKI']);
+    ...
+});
+```
+
+If you are running tests from your local against MKI projects, make sure to add `--exclude-tag=skipMKI` to your FTR command.

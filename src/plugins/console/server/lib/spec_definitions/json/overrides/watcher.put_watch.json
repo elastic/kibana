@@ -1,5 +1,5 @@
 {
-  "xpack.watcher.put_watch": {
+  "watcher.put_watch": {
     "data_autocomplete_rules": {
       "metadata": {},
       "trigger": {},

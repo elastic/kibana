@@ -5,75 +5,54 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
-import {
-  isGetTransformNodesResponseSchema,
-  isGetTransformsResponseSchema,
-  isGetTransformsStatsResponseSchema,
-} from '../../../common/api_schemas/type_guards';
-import { TRANSFORM_MODE } from '../../../common/constants';
-import { isTransformStats } from '../../../common/types/transform_stats';
 
+import type { GetTransformsResponseSchema } from '../../../common/api_schemas/transforms';
 import {
-  type TransformListRow,
-  refreshTransformList$,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../common';
+  addInternalBasePath,
+  DEFAULT_REFRESH_INTERVAL_MS,
+  TRANSFORM_REACT_QUERY_KEYS,
+  TRANSFORM_MODE,
+} from '../../../common/constants';
 
-import { useApi } from './use_api';
+import { type TransformListRow } from '../common';
+import { useAppDependencies } from '../app_dependencies';
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
 
-export type GetTransforms = (forceRefresh?: boolean) => void;
+interface UseGetTransformsResponse {
+  transforms: TransformListRow[];
+  transformIds: string[];
+  transformIdsWithoutConfig?: string[];
+}
 
-export const useGetTransforms = (
-  setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
-  setTransformNodes: React.Dispatch<React.SetStateAction<number>>,
-  setErrorMessage: React.Dispatch<React.SetStateAction<IHttpFetchError | undefined>>,
-  setTransformIdsWithoutConfig: React.Dispatch<React.SetStateAction<string[] | undefined>>,
-  setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
-  blockRefresh: boolean
-): GetTransforms => {
-  const api = useApi();
+const getInitialData = (): UseGetTransformsResponse => ({
+  transforms: [],
+  transformIds: [],
+});
 
-  let concurrentLoads = 0;
+interface UseGetTransformsOptions {
+  enabled?: boolean;
+}
 
-  const getTransforms = async (forceRefresh = false) => {
-    if (forceRefresh === true || blockRefresh === false) {
-      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
-      concurrentLoads++;
+export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
+  const { http } = useAppDependencies();
 
-      if (concurrentLoads > 1) {
-        return;
-      }
+  const { data = getInitialData(), ...rest } = useQuery<UseGetTransformsResponse, IHttpFetchError>(
+    [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS],
+    async ({ signal }) => {
+      const update = getInitialData();
 
-      const fetchOptions = { asSystemRequest: true };
-      const transformNodes = await api.getTransformNodes();
-      const transformConfigs = await api.getTransforms(fetchOptions);
-      const transformStats = await api.getTransformsStats(fetchOptions);
-
-      if (
-        !isGetTransformsResponseSchema(transformConfigs) ||
-        !isGetTransformsStatsResponseSchema(transformStats) ||
-        !isGetTransformNodesResponseSchema(transformNodes)
-      ) {
-        // An error is followed immediately by setting the state to idle.
-        // This way we're able to treat ERROR as a one-time-event like REFRESH.
-        refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
-        refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
-        setTransformNodes(0);
-        setTransforms([]);
-
-        setIsInitialized(true);
-
-        if (!isGetTransformsResponseSchema(transformConfigs)) {
-          setErrorMessage(transformConfigs);
-        } else if (!isGetTransformsStatsResponseSchema(transformStats)) {
-          setErrorMessage(transformStats);
+      const transformConfigs = await http.get<GetTransformsResponseSchema>(
+        addInternalBasePath('transforms'),
+        {
+          version: '1',
+          asSystemRequest: true,
+          signal,
         }
-
-        return;
-      }
+      );
 
       // There might be some errors with fetching certain transforms
       // For example, when task exists and is running but the config is deleted
@@ -87,51 +66,32 @@ export const useGetTransforms = (
           })
           .filter(isDefined);
 
-        setTransformIdsWithoutConfig(
-          danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined
-        );
-      } else {
-        setTransformIdsWithoutConfig(undefined);
+        update.transformIdsWithoutConfig =
+          danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined;
       }
 
-      const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-        const stats = isGetTransformsStatsResponseSchema(transformStats)
-          ? transformStats.transforms.find((d) => config.id === d.id)
-          : undefined;
-
-        // A newly created transform might not have corresponding stats yet.
-        // If that's the case we just skip the transform and don't add it to the transform list yet.
-        if (!isTransformStats(stats)) {
-          return reducedtableRows;
-        }
-
-        // Table with expandable rows requires `id` on the outer most level
+      update.transforms = transformConfigs.transforms.reduce((reducedtableRows, config) => {
+        // Table with expandable rows requires `id` on the outermost level
         reducedtableRows.push({
           id: config.id,
           config,
           mode:
             typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
-          stats,
+          stats: undefined,
           alerting_rules: config.alerting_rules,
         });
         return reducedtableRows;
       }, [] as TransformListRow[]);
 
-      setTransformNodes(transformNodes.count);
-      setTransforms(tableRows);
-      setErrorMessage(undefined);
-      setIsInitialized(true);
-      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
+      update.transformIds = update.transforms.map(({ id }) => id);
 
-      concurrentLoads--;
-
-      if (concurrentLoads > 0) {
-        concurrentLoads = 0;
-        getTransforms(true);
-        return;
-      }
+      return update;
+    },
+    {
+      enabled,
+      refetchInterval: DEFAULT_REFRESH_INTERVAL_MS,
     }
-  };
+  );
 
-  return getTransforms;
+  return { data, ...rest };
 };

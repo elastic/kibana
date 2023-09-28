@@ -21,9 +21,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Link, useParams, generatePath } from 'react-router-dom';
 import type { BoolQuery } from '@kbn/es-query';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
-import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
+import {
+  CloudPostureTableResult,
+  useCloudPostureTable,
+} from '../../../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from '../../hooks/use_latest_vulnerabilities';
-import type { VulnerabilityRecord, VulnerabilitiesQueryData } from '../../types';
+import type { VulnerabilitiesQueryData } from '../../types';
 import { ErrorCallout } from '../../../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../../../configurations/layout/findings_search_bar';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../../../components/vulnerability_badges';
@@ -68,26 +71,31 @@ const ResourceVulnerabilitiesDataGrid = ({
   dataView,
   data,
   isFetching,
+  pageIndex,
+  sort,
+  pageSize,
+  onChangeItemsPerPage,
+  onChangePage,
+  onSort,
+  urlQuery,
+  setUrlQuery,
+  onResetFilters,
 }: {
   dataView: DataView;
   data: VulnerabilitiesQueryData;
   isFetching: boolean;
-}) => {
-  const {
-    pageIndex,
-    sort,
-    pageSize,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    urlQuery,
-    setUrlQuery,
-    onResetFilters,
-  } = useCloudPostureTable({
-    dataView,
-    defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-  });
+} & Pick<
+  CloudPostureTableResult,
+  | 'pageIndex'
+  | 'sort'
+  | 'pageSize'
+  | 'onChangeItemsPerPage'
+  | 'onChangePage'
+  | 'onSort'
+  | 'urlQuery'
+  | 'setUrlQuery'
+  | 'onResetFilters'
+>) => {
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
 
@@ -119,15 +127,13 @@ const ResourceVulnerabilitiesDataGrid = ({
   };
 
   const onOpenFlyout = useCallback(
-    (vulnerabilityRow: VulnerabilityRecord) => {
+    (vulnerabilityRow: VulnerabilitiesQueryData['page'][number]) => {
       const vulnerabilityIndex = data?.page.findIndex(
-        (vulnerabilityRecord: VulnerabilityRecord) =>
+        (vulnerabilityRecord: VulnerabilitiesQueryData['page'][number]) =>
           vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
           vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
-          vulnerabilityRecord.vulnerability.package.name ===
-            vulnerabilityRow.vulnerability.package.name &&
-          vulnerabilityRecord.vulnerability.package.version ===
-            vulnerabilityRow.vulnerability.package.version
+          vulnerabilityRecord.package.name === vulnerabilityRow.package.name &&
+          vulnerabilityRecord.package.version === vulnerabilityRow.package.version
       );
       setUrlQuery({
         vulnerabilityIndex,
@@ -146,6 +152,7 @@ const ResourceVulnerabilitiesDataGrid = ({
     if (!data?.page) {
       return [];
     }
+
     return getVulnerabilitiesGridCellActions({
       columnGridFn: getVulnerabilitiesColumnsGrid,
       columns: vulnerabilitiesColumns,
@@ -154,7 +161,11 @@ const ResourceVulnerabilitiesDataGrid = ({
       data: data.page,
       setUrlQuery,
       filters: urlQuery.filters,
-    }).filter((column) => column.id !== vulnerabilitiesColumns.resource);
+    }).filter(
+      (column) =>
+        column.id !== vulnerabilitiesColumns.resourceName &&
+        column.id !== vulnerabilitiesColumns.resourceId
+    );
   }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
@@ -169,7 +180,7 @@ const ResourceVulnerabilitiesDataGrid = ({
     }): React.ReactElement | null => {
       const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
 
-      const vulnerabilityRow = data?.page[rowIndexFromPage] as VulnerabilityRecord;
+      const vulnerabilityRow = data?.page[rowIndexFromPage];
 
       useEffect(() => {
         if (selectedVulnerabilityIndex === rowIndex) {
@@ -219,9 +230,6 @@ const ResourceVulnerabilitiesDataGrid = ({
           />
         );
       }
-      if (columnId === vulnerabilitiesColumns.resource) {
-        return <>{vulnerabilityRow.resource?.name}</>;
-      }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {
           return null;
@@ -230,13 +238,13 @@ const ResourceVulnerabilitiesDataGrid = ({
       }
 
       if (columnId === vulnerabilitiesColumns.package) {
-        return <>{vulnerabilityRow.vulnerability?.package?.name}</>;
+        return <>{vulnerabilityRow?.package?.name}</>;
       }
       if (columnId === vulnerabilitiesColumns.version) {
-        return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
+        return <>{vulnerabilityRow?.package?.version}</>;
       }
-      if (columnId === vulnerabilitiesColumns.fix_version) {
-        return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
+      if (columnId === vulnerabilitiesColumns.fixedVersion) {
+        return <>{vulnerabilityRow?.package?.fixed_version}</>;
       }
 
       return null;
@@ -355,7 +363,19 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
   const params = useParams<{ resourceId: string }>();
   const resourceId = decodeURIComponent(params.resourceId);
 
-  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+  const {
+    pageIndex,
+    pageSize,
+    onChangeItemsPerPage,
+    onChangePage,
+    query,
+    sort,
+    onSort,
+    queryError,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
@@ -457,7 +477,20 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
       <EuiSpacer size="m" />
       {error && <ErrorCallout error={error as Error} />}
       {!error && (
-        <ResourceVulnerabilitiesDataGrid dataView={dataView} data={data} isFetching={isFetching} />
+        <ResourceVulnerabilitiesDataGrid
+          dataView={dataView}
+          data={data}
+          isFetching={isFetching}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          urlQuery={urlQuery}
+          setUrlQuery={setUrlQuery}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onResetFilters={onResetFilters}
+          onSort={onSort}
+          sort={sort}
+        />
       )}
     </>
   );

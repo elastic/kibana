@@ -21,7 +21,7 @@ import {
 } from './links';
 import { createCapabilities } from './test_utils';
 import { hasCapabilities } from '../lib/capabilities';
-import { UpsellingService } from '../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
 
 const defaultAppLinks: AppLinkItems = [
@@ -182,9 +182,9 @@ describe('Security links', () => {
       expect(result.current).toStrictEqual([networkLinkItem]);
     });
 
-    it('should return unauthorized page when page has upselling', async () => {
+    it('should return unauthorized page when page has upselling (serverless)', async () => {
       const upselling = new UpsellingService();
-      upselling.registerPages({ [SecurityPageName.network]: () => <span /> });
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
 
       const { result, waitForNextUpdate } = renderUseAppLinks();
       const networkLinkItem = {
@@ -192,8 +192,6 @@ describe('Security links', () => {
         title: 'Network',
         path: '/network',
         capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${CASES_FEATURE_ID}.write_cases`],
-        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
-        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
         licenseType: 'basic' as const,
       };
 
@@ -248,6 +246,67 @@ describe('Security links', () => {
       });
 
       expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
+    });
+
+    it('should return unauthorized page when page has upselling (ESS)', async () => {
+      const upselling = new UpsellingService();
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const hostLinkItem = {
+        id: SecurityPageName.hosts,
+        title: 'Hosts',
+        path: '/hosts',
+        licenseType: 'platinum' as const,
+      };
+
+      mockUpselling.setPages({
+        [SecurityPageName.hosts]: () => <span />,
+      });
+
+      await act(async () => {
+        updateAppLinks([hostLinkItem], {
+          capabilities: mockCapabilities,
+          experimentalFeatures: mockExperimentalDefaults,
+          license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+          upselling: mockUpselling,
+        });
+        await waitForNextUpdate();
+      });
+      expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
+
+      // cleanup
+      mockUpselling.setPages({});
+    });
+
+    it('should filter out experimental page even if it has upselling', async () => {
+      const upselling = new UpsellingService();
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const hostLinkItem = {
+        id: SecurityPageName.hosts,
+        title: 'Hosts',
+        path: '/hosts',
+        licenseType: 'platinum' as const,
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+      };
+
+      mockUpselling.setPages({
+        [SecurityPageName.hosts]: () => <span />,
+      });
+
+      await act(async () => {
+        updateAppLinks([hostLinkItem], {
+          capabilities: mockCapabilities,
+          experimentalFeatures: mockExperimentalDefaults,
+          license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+          upselling: mockUpselling,
+        });
+        await waitForNextUpdate();
+      });
+      expect(result.current).toStrictEqual([]);
+
+      // cleanup
+      mockUpselling.setPages({});
     });
   });
 

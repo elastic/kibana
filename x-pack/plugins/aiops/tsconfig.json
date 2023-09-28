@@ -62,6 +62,7 @@
     "@kbn/core-theme-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/cases-plugin",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TopNFunctionSortField } from '../../../common/functions';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { StackFrameSummary } from '../stack_frame_summary';
@@ -64,10 +64,10 @@ export function FunctionRow({
     return (
       <EuiFlexGroup direction="row" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{functionRow.diff.rank}</EuiText>
+          <EuiIcon type={functionRow.diff.rank > 0 ? 'sortUp' : 'sortDown'} color={color} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={functionRow.diff.rank > 0 ? 'sortDown' : 'sortUp'} color={color} />
+          <EuiText size="s">{Math.abs(functionRow.diff.rank)}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -102,16 +102,16 @@ export function FunctionRow({
 
   if (
     columnId === TopNFunctionSortField.AnnualizedCo2 &&
-    functionRow.impactEstimates?.annualizedCo2
+    functionRow.impactEstimates?.selfCPU?.annualizedCo2
   ) {
-    return <div>{asWeight(functionRow.impactEstimates.annualizedCo2)}</div>;
+    return <div>{asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)}</div>;
   }
 
   if (
     columnId === TopNFunctionSortField.AnnualizedDollarCost &&
-    functionRow.impactEstimates?.annualizedDollarCost
+    functionRow.impactEstimates?.selfCPU?.annualizedDollarCost
   ) {
-    return <div>{asCost(functionRow.impactEstimates.annualizedDollarCost)}</div>;
+    return <div>{asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)}</div>;
   }
 
   return null;

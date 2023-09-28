@@ -93,6 +93,10 @@ export interface AiopsAppDependencies {
    */
   lens: LensPublicStart;
   /**
+   * Internationalisation service
+   */
+  i18n: CoreStart['i18n'];
+  /**
    * Deps for unified fields stats.
    */
   fieldStats?: {
@@ -110,6 +114,7 @@ export interface AiopsAppDependencies {
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
   cases?: CasesUiStart;
+  isServerless?: boolean;
 }
 
 /**

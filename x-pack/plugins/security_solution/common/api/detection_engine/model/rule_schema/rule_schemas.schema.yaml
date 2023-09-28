@@ -4,6 +4,7 @@ info:
   version: 'not applicable'
 paths: {}
 components:
+  x-codegen-enabled: false
   schemas:
     SortOrder:
       type: string
@@ -31,7 +32,6 @@ components:
       type: object
       description: |-
         Rule execution result is an aggregate that groups plain rule execution events by execution UUID.
-        It contains such information as execution UUID, date, status and metrics.
       properties:
         execution_uuid:
           type: string

@@ -9,29 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  emptyState: {
-    getBadge: () =>
-      i18n.translate('controls.controlGroup.emptyState.badgeText', {
-        defaultMessage: 'New',
-      }),
-    getCallToAction: () =>
-      i18n.translate('controls.controlGroup.emptyState.callToAction', {
-        defaultMessage:
-          'Filtering your data just got better with Controls, letting you display only the data you want to explore.',
-      }),
-    getAddControlButtonTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
-        defaultMessage: 'Add control',
-      }),
-    getTwoLineLoadingTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
-        defaultMessage: '...',
-      }),
-    getDismissButton: () =>
-      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
-        defaultMessage: 'Dismiss',
-      }),
-  },
   manageControl: {
     getFlyoutCreateTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {

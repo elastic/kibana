@@ -28,16 +28,24 @@ export interface DataViewAndSavedSearch {
   dataView: DataView;
 }
 
+export interface DataSourceContextProviderProps {
+  dataViewId?: string;
+  savedSearchId?: string;
+  /** Output resolves data view objects */
+  onChange?: (update: { dataViews: DataView[] }) => void;
+}
+
 /**
  * Context provider that resolves current data view and the saved search
  *
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?: string }> = ({
+export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
   dataViewId,
   savedSearchId,
   children,
+  onChange,
 }) => {
   const [value, setValue] = useState<DataViewAndSavedSearch>();
   const [error, setError] = useState<Error>();
@@ -59,7 +67,7 @@ export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?
     };
 
     // support only data views for now
-    if (dataViewId !== undefined) {
+    if (dataViewId) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     }
 
@@ -74,14 +82,18 @@ export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?
   useEffect(() => {
     resolveDataSource()
       .then((result) => {
+        setError(undefined);
         setValue(result);
+        if (onChange) {
+          onChange({ dataViews: [result.dataView] });
+        }
       })
       .catch((e) => {
         setError(e);
       });
-  }, [resolveDataSource]);
+  }, [resolveDataSource, onChange, dataViewId]);
 
-  if (!value && !error) return null;
+  if ((!value || !value?.dataView) && !error) return null;
 
   if (error) {
     return (

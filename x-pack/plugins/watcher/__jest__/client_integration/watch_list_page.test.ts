@@ -18,7 +18,7 @@ describe('<WatchListPage />', () => {
   let testBed: WatchListTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -79,7 +79,7 @@ describe('<WatchListPage />', () => {
         test('should show error callout if search is invalid', async () => {
           const { exists, actions } = testBed;
 
-          actions.searchWatches('or');
+          await actions.searchWatches('or');
 
           expect(exists('watcherListSearchError')).toBe(true);
         });
@@ -87,7 +87,7 @@ describe('<WatchListPage />', () => {
         test('should retain the search query', async () => {
           const { table, actions } = testBed;
 
-          actions.searchWatches(watch1.name);
+          await actions.searchWatches(watch1.name);
 
           const { tableCellsValues } = table.getMetaData('watchesTable');
 

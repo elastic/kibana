@@ -19,6 +19,7 @@ import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { SloEditForm } from './components/slo_edit_form';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloEditPage() {
   const {
@@ -83,6 +84,7 @@ export function SloEditPage() {
       }}
       data-test-subj="slosEditPage"
     >
+      <HeaderMenu />
       <SloEditForm slo={slo} />
     </ObservabilityPageTemplate>
   );
