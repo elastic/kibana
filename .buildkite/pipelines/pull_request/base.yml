@@ -56,38 +56,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      queue: n2-8-spot
-    key: linting
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      queue: n2-16-spot
-    key: linting_with_types
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
@@ -208,8 +176,39 @@ steps:
         - exit_status: '*'
           limit: 1
     artifact_paths:
-      - "target/kibana-osquery/**/*"
+      - 'target/kibana-osquery/**/*'
 
+  - command: .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      queue: n2-8-spot
+    key: linting
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      queue: n2-16-spot
+    key: linting_with_types
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 # TODO: Enable in #166813 after fixing types
 #  - command: .buildkite/scripts/steps/check_types.sh
 #    label: 'Check Types'
