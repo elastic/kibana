@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export const ASSETS_INDEX_PREFIX = 'assets';
+export interface GetHostsOptionsPublic {
+  from: string;
+  to: string;
+}
+
+export interface GetServicesOptionsPublic {
+  from: string;
+  to: string;
+  parent?: string;
+}

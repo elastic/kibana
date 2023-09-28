@@ -1,24 +1,6 @@
-# Asset Manager Documentation
+## Deprecated REST API docs
 
-_Note:_ To read about development guidance around testing, sample data, etc., see the
-[plugin's main README file](../README.md)
-
-## Alpha Configuration
-
-This plugin is NOT fully enabled by default, even though it's always enabled
-by Kibana's definition of "enabled". However, without the following configuration,
-it will bail before it sets up any routes or returns anything from its
-start, setup, or stop hooks.
-
-To fully enable the plugin, set the following config value in your kibana.yml file:
-
-```yaml
-xpack.assetManager.alphaEnabled: true
-```
-
-## APIs
-
-This plugin provides the following APIs.
+These docs are not being currently maintained because they pertain to an internal REST API. Please see [our docs for our API clients](./api.md) instead.
 
 ### Shared Types
 
@@ -58,16 +40,16 @@ Returns a list of assets present within a given time range. Can be limited by as
 
 ##### Request
 
-| Option  | Type          | Required? | Default | Description                                                                        |
-| :------ | :------------ | :-------- | :------ | :--------------------------------------------------------------------------------- |
-| from    | RangeDate     | No       | "now-24h"     | Starting point for date range to search for assets within                          |
-| to      | RangeDate     | No        | "now"   | End point for date range to search for assets                                      |
-| type    | AssetType[]   | No        | all     | Specify one or more types to restrict the query                                    |
-| ean     | AssetEan[]    | No        | all     | Specify one or more EANs (specific assets) to restrict the query                   |
-| size     | number    | No        | all     | Limit the amount of assets returned                  |
-
+| Option | Type        | Required? | Default   | Description                                                      |
+| :----- | :---------- | :-------- | :-------- | :--------------------------------------------------------------- |
+| from   | RangeDate   | No        | "now-24h" | Starting point for date range to search for assets within        |
+| to     | RangeDate   | No        | "now"     | End point for date range to search for assets                    |
+| type   | AssetType[] | No        | all       | Specify one or more types to restrict the query                  |
+| ean    | AssetEan[]  | No        | all       | Specify one or more EANs (specific assets) to restrict the query |
+| size   | number      | No        | all       | Limit the amount of assets returned                              |
 
 _Notes:_
+
 - User cannot specify both type and ean at the same time.
 - For array types such as `type` and `ean`, user should specify the query parameter multiple times, e.g. `type=k8s.pod&type=k8s.node`
 
@@ -410,15 +392,15 @@ GET kbn:/api/asset-manager/assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18
 
 Returns assets found in the two time ranges, split by what occurs in only either or in both.
 
-#### Request 
+#### Request
 
-| Option | Type | Required? | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| aFrom | RangeDate | Yes | N/A | Starting point for baseline date range to search for assets within |
-| aTo | RangeDate | Yes | N/A | End point for baseline date range to search for assets within |
-| bFrom | RangeDate | Yes | N/A | Starting point for comparison date range |
-| bTo | RangeDate | Yes | N/A | End point for comparison date range |
-| type | AssetType[] | No | all | Restrict results to one or more asset.type value |
+| Option | Type        | Required? | Default | Description                                                        |
+| :----- | :---------- | :-------- | :------ | :----------------------------------------------------------------- |
+| aFrom  | RangeDate   | Yes       | N/A     | Starting point for baseline date range to search for assets within |
+| aTo    | RangeDate   | Yes       | N/A     | End point for baseline date range to search for assets within      |
+| bFrom  | RangeDate   | Yes       | N/A     | Starting point for comparison date range                           |
+| bTo    | RangeDate   | Yes       | N/A     | End point for comparison date range                                |
+| type   | AssetType[] | No        | all     | Restrict results to one or more asset.type value                   |
 
 #### Responses
 
@@ -1044,14 +1026,14 @@ Returns assets related to the provided ean. The relation can be one of ancestors
 
 #### Request
 
-| Option | Type | Required? | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| relation | string | Yes | N/A | The type of related assets we're looking for. One of (ancestors|descendants|references) |
-| from | RangeDate | Yes | N/A | Starting point for date range to search for assets within |
-| to | RangeDate | No | "now" | End point for date range to search for assets |
-| ean | AssetEan | Yes | N/A | Single Elastic Asset Name representing the asset for which the related assets are being requested |
-| type | AssetType[] | No | all | Restrict results to one or more asset.type value |
-| maxDistance | number (1-5) | No | 1 | Maximum number of "hops" to search away from specified asset |
+| Option      | Type         | Required? | Default | Description                                                                                       |
+| :---------- | :----------- | :-------- | :------ | :------------------------------------------------------------------------------------------------ | ----------- | ----------- |
+| relation    | string       | Yes       | N/A     | The type of related assets we're looking for. One of (ancestors                                   | descendants | references) |
+| from        | RangeDate    | Yes       | N/A     | Starting point for date range to search for assets within                                         |
+| to          | RangeDate    | No        | "now"   | End point for date range to search for assets                                                     |
+| ean         | AssetEan     | Yes       | N/A     | Single Elastic Asset Name representing the asset for which the related assets are being requested |
+| type        | AssetType[]  | No        | all     | Restrict results to one or more asset.type value                                                  |
+| maxDistance | number (1-5) | No        | 1       | Maximum number of "hops" to search away from specified asset                                      |
 
 #### Responses
 
