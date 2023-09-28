@@ -48,7 +48,7 @@ export async function createPackagePolicy(
   input: string,
   deployment: string,
   posture: string,
-  packageName? = 'cloud_security_posture-1'
+  packageName: string = 'cloud_security_posture-1'
 ) {
   const version = '1.3.0';
   const title = 'Security Posture Management';
