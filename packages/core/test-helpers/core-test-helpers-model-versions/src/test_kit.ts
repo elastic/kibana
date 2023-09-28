@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import fs from 'fs/promises';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { Client } from '@elastic/elasticsearch';
@@ -33,7 +34,10 @@ import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
@@ -41,6 +45,7 @@ import { getTypeRegistries, type SavedObjectTestkitDefinition } from './type_reg
 
 export interface ModelVersionTestkitOptions {
   savedObjectDefinitions: SavedObjectTestkitDefinition[];
+  objectsToCreateBetween?: SavedObjectsBulkCreateObject[];
   logFilePath: string;
   settingOverrides?: Record<string, any>;
   kibanaVersion?: string;
@@ -62,12 +67,15 @@ const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks:
 
 export const prepareModelVersionTestKit = async ({
   savedObjectDefinitions,
+  objectsToCreateBetween = [],
   settingOverrides = {},
   kibanaBranch = currentBranch,
   kibanaVersion = currentVersion,
   kibanaIndex = defaultKibanaIndex,
   logFilePath,
 }: ModelVersionTestkitOptions): Promise<ModelVersionTestKit> => {
+  await fs.unlink(logFilePath).catch(() => {});
+
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -122,6 +130,11 @@ export const prepareModelVersionTestKit = async ({
   );
 
   await runMigrations(firstMigrator);
+
+  if (objectsToCreateBetween.length) {
+    await repositoryBefore.bulkCreate(objectsToCreateBetween, { refresh: 'wait_for' });
+  }
+
   await runMigrations(secondMigrator);
 
   return {
@@ -150,6 +163,10 @@ const getConfigService = (
       username: kibanaServerTestUser.username,
       password: kibanaServerTestUser.password,
     },
+    migrations: {
+      algorithm: 'v2',
+      skip: false,
+    },
     logging: {
       appenders: {
         file: {
@@ -169,7 +186,6 @@ const getConfigService = (
       ],
     },
     plugins: {},
-    migrations: { skip: false },
   };
 
   const rawConfigProvider = {

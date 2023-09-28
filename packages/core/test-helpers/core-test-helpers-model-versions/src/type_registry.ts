@@ -78,7 +78,7 @@ const removeKeysGreaterThan = <T extends Record<string, unknown>>(
 ): T => {
   return Object.fromEntries(
     Object.entries(record).filter(([key, value]) => {
-      return parseInt(key, 10) > version;
+      return parseInt(key, 10) <= version;
     })
   ) as T;
 };

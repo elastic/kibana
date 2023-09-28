@@ -36,6 +36,7 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
       throw new Error('Elasticsearch not started');
     }
     await elasticsearch.stop();
+    await delay(10);
     elasticsearch = undefined;
   };
 
@@ -53,3 +54,6 @@ export const createModelVersionTestBed = (): ModelVersionTestBed => {
     prepareTestKit: prepareModelVersionTestKit,
   };
 };
+
+const delay = (seconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
