@@ -19,13 +19,7 @@ import { CloudLinks } from '../../cloud_links';
 import { useNavigation as useNavigationServices } from '../../services';
 import { isAbsoluteLink } from '../../utils';
 import { useNavigation } from '../components/navigation';
-import {
-  ChromeProjectNavigationNodeEnhanced,
-  NodeProps,
-  NodePropsEnhanced,
-  RegisterFunction,
-  UnRegisterFunction,
-} from '../types';
+import { NodeProps, NodePropsEnhanced, RegisterFunction, UnRegisterFunction } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
 function getIdFromNavigationNode<
@@ -135,7 +129,7 @@ function createInternalNavNode<
   path: string[] | null,
   isActive: boolean,
   { cloudLinks }: { cloudLinks: CloudLinks }
-): ChromeProjectNavigationNodeEnhanced | null {
+): ChromeProjectNavigationNode | null {
   validateNodeProps(_navNode);
 
   const { children, link, cloudLink, ...navNode } = _navNode;
@@ -185,9 +179,9 @@ export const useInitNavNode = <
   /**
    * Map of children nodes
    */
-  const [childrenNodes, setChildrenNodes] = useState<
-    Record<string, ChromeProjectNavigationNodeEnhanced>
-  >({});
+  const [childrenNodes, setChildrenNodes] = useState<Record<string, ChromeProjectNavigationNode>>(
+    {}
+  );
 
   const isMounted = useRef(false);
 

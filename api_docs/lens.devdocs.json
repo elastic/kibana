@@ -34,7 +34,13 @@
             "text": "LensEmbeddableInput"
           },
           ", ",
-          "LensEmbeddableOutput",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensEmbeddableOutput",
+            "text": "LensEmbeddableOutput"
+          },
           ", any> implements ",
           {
             "pluginId": "embeddable",
@@ -350,7 +356,9 @@
             "type": "Function",
             "tags": [],
             "label": "updateVisualization",
-            "description": [],
+            "description": [
+              "\nGets the Lens embeddable's datasource and visualization states\nupdates the embeddable input"
+            ],
             "signature": [
               "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
             ],
@@ -382,6 +390,38 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateByRefInput",
+            "type": "Function",
+            "tags": [],
+            "label": "updateByRefInput",
+            "description": [],
+            "signature": [
+              "(savedObjectId: string) => void"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateByRefInput.$1",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -650,6 +690,22 @@
             "description": [],
             "signature": [
               "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getIsEditable",
+            "type": "Function",
+            "tags": [],
+            "label": "getIsEditable",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -3104,6 +3160,58 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensEmbeddableOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensEmbeddableOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.LensEmbeddableOutput",
+            "text": "LensEmbeddableOutput"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          }
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensEmbeddableOutput.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

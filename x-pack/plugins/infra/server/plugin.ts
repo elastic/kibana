@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -19,12 +19,7 @@ import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
-import {
-  DISCOVER_APP_TARGET,
-  LOGS_APP_TARGET,
-  LOGS_FEATURE_ID,
-  METRICS_FEATURE_ID,
-} from '../common/constants';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -61,18 +56,6 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
-    logs: offeringBasedSchema({
-      serverless: schema.object({
-        app_target: schema.oneOf(
-          [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
-          { defaultValue: LOGS_APP_TARGET }
-        ),
-      }),
-      options: {
-        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
-      },
-    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
