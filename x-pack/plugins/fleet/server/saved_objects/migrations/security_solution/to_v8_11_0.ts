@@ -57,33 +57,3 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
 
     return updatedAttributes;
   };
-
-  export const migrateGcpPackagePolicyToV8110: SavedObjectModelDataBackfillFn<
-  PackagePolicy,
-  PackagePolicy
-> = (packagePolicyDoc) => {
-  if (packagePolicyDoc.attributes.package?.name !== 'cloud_security_posture') {
-    return { attributes: packagePolicyDoc.attributes };
-  }
-
-  const updatedAttributes = packagePolicyDoc.attributes;
-
-  const gcpPackage = updatedAttributes.inputs.find((input) => input.type === 'cloudbeat/cis_gcp');
-
-  const gcpAccountTypeExist = gcpPackage?.streams[0]?.vars?.hasOwnProperty('gcp.account_type')
-
-  if (gcpAccountTypeExist || !gcpPackage) {
-    return {
-      attributes: updatedAttributes,
-    };
-  }
-
-  if(gcpPackage.streams[0].vars){
-    const migratedPolicy = {'gcp.account_type': {value: 'single-account', type: 'text'}}
-    gcpPackage.streams[0].vars = {...gcpPackage.streams[0].vars, ...migratedPolicy}
-  }
-
-  return {
-    attributes: updatedAttributes,
-  };
-};

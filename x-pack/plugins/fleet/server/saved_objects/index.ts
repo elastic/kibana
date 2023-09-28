@@ -30,6 +30,8 @@ import {
   migratePackagePolicyToV8110,
 } from './migrations/security_solution/to_v8_11_0';
 
+import { migrateCspPackagePolicyToV8110 } from './migrations/cloud_security_posture';
+
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 
 import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
@@ -344,12 +346,9 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         changes: [
           {
             type: 'data_backfill',
-            backfillFn: migratePackagePolicyToV81102,
+            backfillFn: migrateCspPackagePolicyToV8110,
           },
         ],
-        schemas: {
-          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
-        },
       },
     },
     migrations: {
