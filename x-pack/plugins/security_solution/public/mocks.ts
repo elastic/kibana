@@ -14,6 +14,7 @@ import type { PluginStart, PluginSetup } from './types';
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   setAppLinksSwitcher: jest.fn(),
+  setDataQualityPanelConfig: jest.fn(),
 });
 
 const upselling = new UpsellingService();
@@ -21,14 +22,12 @@ const upselling = new UpsellingService();
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setIsSidebarEnabled: jest.fn(),
-  setGetStartedPage: jest.fn(),
-  setIsILMAvailable: jest.fn(),
+  setComponents: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
   setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
-  setDashboardsLandingCallout: jest.fn(),
 });
 
 export const securitySolutionMock = {
