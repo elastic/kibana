@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 
 import { CustomFields } from './custom_fields';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
+import userEvent from '@testing-library/user-event';
+import { CustomFieldTypes } from '../../../../common/types/domain';
 
 describe('Case View Page files tab', () => {
   const onSubmit = jest.fn();
@@ -103,5 +105,99 @@ describe('Case View Page files tab', () => {
     expect(
       screen.queryByTestId('case-text-custom-field-edit-button-test_key_1')
     ).not.toBeInTheDocument();
+  });
+
+  it('adds missing custom fields with no custom fields in the case', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[]}
+        customFieldsConfiguration={customFieldsConfigurationMock}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: null,
+        },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+      ]);
+    });
+  });
+
+  it('adds missing custom fields with some custom fields in the case', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[{ type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true }]}
+        customFieldsConfiguration={customFieldsConfigurationMock}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: null,
+        },
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
+      ]);
+    });
+  });
+
+  it('removes extra custom fields', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={customFieldsMock}
+        customFieldsConfiguration={[
+          {
+            type: CustomFieldTypes.TOGGLE,
+            key: 'test_key_2',
+            label: 'My test label 2',
+            required: false,
+          },
+        ]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
+      ]);
+    });
+  });
+
+  it('updates an existing field correctly', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={customFieldsMock}
+        customFieldsConfiguration={customFieldsConfigurationMock}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        customFieldsMock[0],
+        { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
+      ]);
+    });
   });
 });

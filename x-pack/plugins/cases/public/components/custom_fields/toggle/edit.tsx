@@ -10,20 +10,21 @@ import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const EditComponent: CustomFieldType['Edit'] = ({
+const EditComponent: CustomFieldType<CaseCustomFieldToggle>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
   isLoading,
   canUpdate,
 }) => {
-  const initialValue = Boolean(customField?.field.value?.[0]);
+  const initialValue = Boolean(customField?.value);
   const title = customFieldConfiguration.label;
 
-  const { form } = useForm({
+  const { form } = useForm<{ value: boolean }>({
     defaultValue: { value: initialValue },
   });
 
@@ -35,7 +36,7 @@ const EditComponent: CustomFieldType['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TOGGLE,
-        field: { value: [data.value] },
+        value: data.value,
       });
     }
   };

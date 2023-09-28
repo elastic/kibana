@@ -13,6 +13,7 @@ import { Edit } from './edit';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
+import type { CaseCustomFieldText } from '../../../../common/types/domain';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();
@@ -21,7 +22,7 @@ describe('Edit ', () => {
     jest.clearAllMocks();
   });
 
-  const customField = customFieldsMock[0];
+  const customField = customFieldsMock[0] as CaseCustomFieldText;
   const customFieldConfiguration = customFieldsConfigurationMock[0];
 
   it('renders correctly', async () => {
@@ -114,7 +115,7 @@ describe('Edit ', () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
-          customField={{ ...customField, field: { value: null } }}
+          customField={{ ...customField, value: null }}
           customFieldConfiguration={customFieldConfiguration}
           onSubmit={onSubmit}
           isLoading={false}
@@ -145,7 +146,7 @@ describe('Edit ', () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
-          customField={{ ...customField, field: { value: null } }}
+          customField={{ ...customField, value: null }}
           customFieldConfiguration={customFieldConfiguration}
           onSubmit={onSubmit}
           isLoading={false}
@@ -208,7 +209,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        field: { value: ['My text test value 1!!!'] },
+        value: ['My text test value 1!!!'],
       });
     });
   });
@@ -240,7 +241,7 @@ describe('Edit ', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        field: { value: null },
+        value: null,
       });
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy, isEmpty, differenceWith } from 'lodash';
+import { uniqBy, isEmpty } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -458,16 +458,25 @@ export const getUserProfiles = async (
   }, new Map());
 };
 
-export const compareCustomFieldKeysAgainstConfiguration = ({
-  requestCustomFields,
-  configurationCustomFields = [],
+export const fillMissingCustomFields = ({
+  customFields = [],
+  customFieldsConfiguration = [],
 }: {
-  requestCustomFields: CaseRequestCustomFields;
-  configurationCustomFields?: CustomFieldsConfiguration;
-}): string[] => {
-  return differenceWith(
-    requestCustomFields,
-    configurationCustomFields,
-    (requestVal, configurationVal) => requestVal.key === configurationVal.key
-  ).map((e) => e.key);
+  customFields?: CaseRequestCustomFields;
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): CaseRequestCustomFields => {
+  const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
+  const missingCustomFields: CaseRequestCustomFields = [];
+
+  for (const confCustomField of customFieldsConfiguration) {
+    if (!customFieldsKeys.has(confCustomField.key)) {
+      missingCustomFields.push({
+        key: confCustomField.key,
+        type: confCustomField.type,
+        value: null,
+      });
+    }
+  }
+
+  return [...customFields, ...missingCustomFields];
 };

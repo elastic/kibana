@@ -105,17 +105,17 @@ const basicCase: Case = {
     {
       key: 'first_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     },
     {
       key: 'second_custom_field_key',
       type: CustomFieldTypes.TOGGLE,
-      field: { value: [true] },
+      value: true,
     },
     {
       key: 'second_custom_field_key',
       type: CustomFieldTypes.TEXT,
-      field: { value: ['www.example.com'] },
+      value: ['www.example.com'],
     },
   ],
 };
@@ -141,12 +141,12 @@ describe('CasePostRequestRt', () => {
       {
         key: 'first_custom_field_key',
         type: CustomFieldTypes.TEXT,
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       },
       {
         key: 'second_custom_field_key',
         type: CustomFieldTypes.TOGGLE,
-        field: { value: [true] },
+        value: true,
       },
     ],
   };
@@ -245,7 +245,7 @@ describe('CasePostRequestRt', () => {
     const customField = {
       key: 'first_custom_field_key',
       type: 'text',
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     };
 
     const query = CasePostRequestRt.decode({
@@ -263,12 +263,12 @@ describe('CasePostRequestRt', () => {
     const customField = {
       key: 'first_custom_field_key',
       type: 'text',
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     };
 
     const query = CasePostRequestRt.decode({
       ...defaultRequest,
-      customFields: [{ ...customField, field: { ...customField.field, foo: 'bar' } }],
+      customFields: [{ ...customField, foo: 'bar' }],
     });
 
     expect(query).toStrictEqual({
@@ -281,7 +281,7 @@ describe('CasePostRequestRt', () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
       type: 'text',
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     });
 
     expect(
@@ -311,7 +311,7 @@ describe('CasePostRequestRt', () => {
             {
               key: 'first_custom_field_key',
               type: 'text',
-              field: { value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)] },
+              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
             },
           ],
         })
@@ -596,12 +596,12 @@ describe('CasePatchRequestRt', () => {
       {
         key: 'first_custom_field_key',
         type: 'text',
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       },
       {
         key: 'second_custom_field_key',
         type: 'toggle',
-        field: { value: [true] },
+        value: true,
       },
     ],
   };
@@ -686,7 +686,7 @@ describe('CasePatchRequestRt', () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
       key: 'first_custom_field_key',
       type: 'text',
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     });
 
     expect(
@@ -710,7 +710,7 @@ describe('CasePatchRequestRt', () => {
             {
               key: 'first_custom_field_key',
               type: 'text',
-              field: { value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)] },
+              value: ['#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)],
             },
           ],
         })

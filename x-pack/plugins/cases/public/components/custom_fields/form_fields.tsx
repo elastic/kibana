@@ -13,12 +13,12 @@ import {
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { CustomFieldType } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
+  isEditMode?: boolean;
 }
 
 const fieldTypeSelectOptions = (): EuiSelectOption[] => {
@@ -32,7 +32,7 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
   return options;
 };
 
-const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
+const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMode }) => {
   const [selectedType, setSelectedType] = useState<CustomFieldTypes>(CustomFieldTypes.TEXT);
 
   const handleTypeChange = useCallback(
@@ -42,7 +42,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     [setSelectedType]
   );
 
-  const builtCustomField: CustomFieldType | null = useMemo(() => {
+  const builtCustomField = useMemo(() => {
     const builder = builderMap[selectedType];
 
     if (builder == null) {
@@ -80,6 +80,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
             options,
             'data-test-subj': 'custom-field-type-selector',
             isLoading: isSubmitting,
+            disabled: isEditMode,
           },
           onChange: handleTypeChange,
         }}

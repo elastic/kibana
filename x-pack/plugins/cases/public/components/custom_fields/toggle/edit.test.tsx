@@ -12,6 +12,7 @@ import { FormTestComponent } from '../../../common/test_utils';
 import { Edit } from './edit';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();
@@ -20,7 +21,7 @@ describe('Edit ', () => {
     jest.clearAllMocks();
   });
 
-  const customField = customFieldsMock[1];
+  const customField = customFieldsMock[1] as CaseCustomFieldToggle;
   const customFieldConfiguration = customFieldsConfigurationMock[1];
 
   it('renders correctly', async () => {
@@ -57,7 +58,7 @@ describe('Edit ', () => {
     userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({ ...customField, field: { value: [false] } });
+      expect(onSubmit).toBeCalledWith({ ...customField, value: false });
     });
   });
 
@@ -115,7 +116,7 @@ describe('Edit ', () => {
          * Initial value is false when the custom field is undefined.
          * By clicking to the switch it is set to true
          */
-        field: { value: [true] },
+        value: true,
       });
     });
   });

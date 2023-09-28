@@ -17,38 +17,34 @@ describe('Model versions', () => {
               "addedMappings": Object {
                 "customFields": Object {
                   "properties": Object {
-                    "field": Object {
-                      "properties": Object {
-                        "value": Object {
-                          "fields": Object {
-                            "boolean": Object {
-                              "ignore_malformed": true,
-                              "type": "boolean",
-                            },
-                            "date": Object {
-                              "ignore_malformed": true,
-                              "type": "date",
-                            },
-                            "ip": Object {
-                              "ignore_malformed": true,
-                              "type": "ip",
-                            },
-                            "number": Object {
-                              "ignore_malformed": true,
-                              "type": "long",
-                            },
-                            "string": Object {
-                              "type": "text",
-                            },
-                          },
-                          "type": "keyword",
-                        },
-                      },
-                    },
                     "key": Object {
                       "type": "keyword",
                     },
                     "type": Object {
+                      "type": "keyword",
+                    },
+                    "value": Object {
+                      "fields": Object {
+                        "boolean": Object {
+                          "ignore_malformed": true,
+                          "type": "boolean",
+                        },
+                        "date": Object {
+                          "ignore_malformed": true,
+                          "type": "date",
+                        },
+                        "ip": Object {
+                          "ignore_malformed": true,
+                          "type": "ip",
+                        },
+                        "number": Object {
+                          "ignore_malformed": true,
+                          "type": "long",
+                        },
+                        "string": Object {
+                          "type": "text",
+                        },
+                      },
                       "type": "keyword",
                     },
                   },

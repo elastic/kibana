@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType } from '../../../../common/types/domain';
-import type { AttachmentUI, CaseUICustomField } from '../../../containers/types';
+import type { AttachmentUI } from '../../../containers/types';
 
 export const getManualAlertIds = (comments: AttachmentUI[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUI) => {
@@ -51,25 +51,4 @@ export const getRegistrationContextFromIndex = (indexName: string): string | nul
     return `${found[1]}`;
   }
   return null;
-};
-
-export const addOrReplaceCustomField = (
-  customFields: CaseUICustomField[],
-  customFieldToAdd: CaseUICustomField
-): CaseUICustomField[] => {
-  const foundCustomField = customFields.find(
-    (customField) => customField.key === customFieldToAdd.key
-  );
-
-  if (foundCustomField == null) {
-    return [...customFields, customFieldToAdd];
-  }
-
-  return customFields.map((customField) => {
-    if (customField.key !== customFieldToAdd.key) {
-      return customField;
-    }
-
-    return customFieldToAdd;
-  });
 };

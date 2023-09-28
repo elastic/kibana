@@ -6,6 +6,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { v4 as uuidv4 } from 'uuid';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -248,6 +249,38 @@ describe('configure', () => {
           CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, key: longKey })
         )
       ).toContain('The length of the key is too long. The maximum length is 36.');
+    });
+
+    it('returns an error if they key is not in the expected format', () => {
+      const key = 'Not a proper key';
+
+      expect(
+        PathReporter.report(
+          CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, key })
+        )
+      ).toContain(`Key must be lower case, a-z, 0-9, '_', and '-' are allowed`);
+    });
+
+    it('accepts a uuid as a key', () => {
+      const key = uuidv4();
+
+      const query = CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, key });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, key },
+      });
+    });
+
+    it('accepts a slug as a key', () => {
+      const key = 'abc_key-1';
+
+      const query = CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, key });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, key },
+      });
     });
 
     it('limits label to 50 characters', () => {

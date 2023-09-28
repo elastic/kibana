@@ -25,6 +25,7 @@ describe('CustomFields', () => {
     isLoading: false,
     handleAddCustomField: jest.fn(),
     handleDeleteCustomField: jest.fn(),
+    handleEditCustomField: jest.fn(),
     customFields: [],
   };
 
@@ -46,7 +47,7 @@ describe('CustomFields', () => {
     );
 
     expect(screen.getByTestId('add-custom-field')).toBeInTheDocument();
-    expect(screen.getByTestId('droppable')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {
@@ -67,6 +68,18 @@ describe('CustomFields', () => {
     userEvent.click(screen.getByTestId('add-custom-field'));
 
     expect(props.handleAddCustomField).toBeCalled();
+  });
+
+  it('calls handleEditCustomField on edit option click', async () => {
+    appMockRender.render(
+      <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
+    );
+
+    userEvent.click(
+      screen.getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+    );
+
+    expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
   });
 
   it('shows the experimental badge', () => {

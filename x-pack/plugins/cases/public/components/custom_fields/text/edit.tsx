@@ -20,6 +20,7 @@ import {
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, UseField, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
 import type { CustomFieldType } from '../types';
@@ -81,7 +82,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType['Edit'] = ({
+const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
@@ -113,17 +114,17 @@ const EditComponent: CustomFieldType['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TEXT,
-        field: { value },
+        value,
       });
     }
 
     setIsEdit(false);
   };
 
-  const initialValue = (customField?.field.value?.[0] as string) ?? '';
+  const initialValue = customField?.value?.[0] ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
-  const isCustomFieldValueDefined = !isEmpty(customField?.field.value);
+  const isCustomFieldValueDefined = !isEmpty(customField?.value);
 
   return (
     <>

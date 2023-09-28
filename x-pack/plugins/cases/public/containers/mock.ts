@@ -751,6 +751,15 @@ export const getUserAction = (
         },
         ...overrides,
       };
+    case UserActionTypes.customFields:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.customFields,
+        payload: {
+          customFields: customFieldsMock,
+        },
+        ...overrides,
+      };
 
     default:
       return {
@@ -1139,8 +1148,8 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
 };
 
 export const customFieldsMock: CaseUICustomField[] = [
-  { type: CustomFieldTypes.TEXT, key: 'test_key_1', field: { value: ['My text test value 1'] } },
-  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', field: { value: [true] } },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: ['My text test value 1'] },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [

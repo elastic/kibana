@@ -99,7 +99,7 @@ describe('common utils', () => {
     {
       key: 'string_custom_field_1',
       type: CustomFieldTypes.TEXT as const,
-      field: { value: ['this is a text field value', 'this is second'] },
+      value: ['this is a text field value', 'this is second'],
     },
   ];
 
@@ -322,14 +322,12 @@ describe('common utils', () => {
           },
           "customFields": Array [
             Object {
-              "field": Object {
-                "value": Array [
-                  "this is a text field value",
-                  "this is second",
-                ],
-              },
               "key": "string_custom_field_1",
               "type": "text",
+              "value": Array [
+                "this is a text field value",
+                "this is second",
+              ],
             },
           ],
           "description": "A description",
@@ -607,14 +605,12 @@ describe('common utils', () => {
               },
               "customFields": Array [
                 Object {
-                  "field": Object {
-                    "value": Array [
-                      "this is a text field value",
-                      "this is second",
-                    ],
-                  },
                   "key": "string_custom_field_1",
                   "type": "text",
+                  "value": Array [
+                    "this is a text field value",
+                    "this is second",
+                  ],
                 },
               ],
               "description": "This is a brand new case of a bad meanie defacing data",
@@ -940,14 +936,12 @@ describe('common utils', () => {
           },
           "customFields": Array [
             Object {
-              "field": Object {
-                "value": Array [
-                  "this is a text field value",
-                  "this is second",
-                ],
-              },
               "key": "string_custom_field_1",
               "type": "text",
+              "value": Array [
+                "this is a text field value",
+                "this is second",
+              ],
             },
           ],
           "description": "This is a brand new case of a bad meanie defacing data",
