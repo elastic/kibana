@@ -9,12 +9,10 @@ uniq_tsconfigs=()
 
 is_flag_set () {
   flag=$1
-  if [ ${#argv[@]} -gt 0 ]; then
-    if [[ ${argv[@]} =~ $flag ]]; then
-      true
-    else
-      false
-    fi
+  if [ ${#argv[@]} -gt 0 ] && [[ ${argv[@]} =~ $flag ]]; then
+    true
+  else
+    false
   fi
 }
 
