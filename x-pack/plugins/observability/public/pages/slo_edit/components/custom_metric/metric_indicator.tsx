@@ -19,16 +19,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
-  indexFields: Field[];
+  metricFields: Field[];
   isLoadingIndex: boolean;
 }
 
@@ -47,9 +47,7 @@ function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
-const SUPPORTED_FIELD_TYPES = ['number', 'histogram'];
-
-export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricIndicatorProps) {
+export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIndicatorProps) {
   const metricLabel = i18n.translate(
     'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
     { defaultMessage: 'Metric' }
@@ -91,7 +89,11 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
   );
 
   const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
-  const metricFields = indexFields.filter((field) => SUPPORTED_FIELD_TYPES.includes(field.type));
+  const [options, setOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
+
+  useEffect(() => {
+    setOptions(createOptionsFromFields(metricFields));
+  }, [metricFields]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -184,7 +186,14 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
                             ]
                           : []
                       }
-                      options={createOptionsFromFields(metricFields)}
+                      onSearchChange={(searchValue: string) => {
+                        setOptions(
+                          createOptionsFromFields(metricFields, ({ value }) =>
+                            value.includes(searchValue)
+                          )
+                        );
+                      }}
+                      options={options}
                     />
                   )}
                 />
