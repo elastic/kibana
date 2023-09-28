@@ -72,6 +72,7 @@ export const Map: React.FC<Props> = ({
                       bounds={bounds}
                       nodeType={nodeType}
                       currentTime={currentTime}
+                      detailsItemId={detailsItemId}
                     />
                   );
                 }

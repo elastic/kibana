@@ -18755,7 +18755,6 @@
     "xpack.infra.hostsViewPage.tabs.metricsCharts.tx": "网络出站数据 (TX)",
     "xpack.infra.hostsViewPage.tooltip.whatAreTheseMetricsLink": "这些指标是什么？",
     "xpack.infra.infra.nodeDetails.apmTabLabel": "APM",
-    "xpack.infra.infra.nodeDetails.createAlertLink": "创建库存规则",
     "xpack.infra.infra.nodeDetails.openAsPage": "以页面形式打开",
     "xpack.infra.inventory.alerting.groupActionVariableDescription": "报告数据的组名称",
     "xpack.infra.inventoryModel.container.displayName": "Docker 容器",
