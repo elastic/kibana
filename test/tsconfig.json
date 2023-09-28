@@ -69,6 +69,7 @@
     "@kbn/discover-plugin",
     "@kbn/core-http-common",
     "@kbn/event-annotation-plugin",
-    "@kbn/event-annotation-common"
+    "@kbn/event-annotation-common",
+    "@kbn/links-plugin"
   ]
 }
