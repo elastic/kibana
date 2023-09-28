@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { Panels, PANELS_MODE } from './panels';
+import { ResizableLayoutExamplesPlugin } from './plugin';
+
+export function plugin() {
+  return new ResizableLayoutExamplesPlugin();
+}
