@@ -57,4 +57,3 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
 
     return updatedAttributes;
   };
-
