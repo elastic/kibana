@@ -335,10 +335,10 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and {click here} to view the results in Discover once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and {funFacts} to view the results in Discover once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
               values={{
-                seeDocs: (
+                funFacts: (
                   <EuiLink external href={''} target="_blank">
                     {i18n.EVALUATOR_FUN_FACT_DISCOVER_LINK}
                   </EuiLink>

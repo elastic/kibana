@@ -98,7 +98,7 @@ export const performEvaluation = async ({
   }
 
   // Merge final evaluation results w/ dataset
-  const finalEvalResults = mergedResults.map((d, i) => ({
+  const evalResults = mergedResults.map((d, i) => ({
     ...d,
     evaluation: finalResults[i],
   }));
@@ -112,7 +112,7 @@ export const performEvaluation = async ({
     totalInput: dataset.length,
   };
 
-  logger.info(`Final results:\n${JSON.stringify(finalEvalResults)}`);
+  logger.info(`Final results:\n${JSON.stringify(evalResults)}`);
 
-  return finalEvalResults;
+  return { evalResults, executionSummary };
 };

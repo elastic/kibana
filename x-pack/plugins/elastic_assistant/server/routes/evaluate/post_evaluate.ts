@@ -129,7 +129,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
           logger,
         });
 
-        const evalResults = await performEvaluation({
+        const { evalResults } = await performEvaluation({
           agentExecutorEvaluators: agents,
           dataset,
           evaluatorModel,
