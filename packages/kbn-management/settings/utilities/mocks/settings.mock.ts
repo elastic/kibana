@@ -8,23 +8,23 @@
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
 
-const defaults = {
-  requiresPageReload: false,
-  readonly: false,
-};
-
 type Settings = {
   [key in SettingType]: KnownTypeToMetadata<key>;
 };
 
 /**
  * A utility function returning a representative set of UiSettings.
- * @param requirePageReload The value of the `requirePageReload` param for all settings.
+ * @param requiresPageReload The value of the `requirePageReload` param for all settings.
  */
-export const getSettingsMock = (requirePageReload: boolean = false): Settings => {
-  if (requirePageReload) {
-    defaults.requiresPageReload = true;
-  }
+export const getSettingsMock = (
+  requiresPageReload: boolean = false,
+  readonly: boolean = false
+): Settings => {
+  const defaults = {
+    requiresPageReload,
+    readonly,
+  };
+
   return {
     array: {
       description: 'Description for Array test setting',
