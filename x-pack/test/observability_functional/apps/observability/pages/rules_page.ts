@@ -304,6 +304,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it(`shows the no permission prompt when the user has no permissions`, async () => {
+        // We kept this test to make sure that the stack management rule page
+        // is showing the right prompt corresponding to the right privileges.
+        // Knowing that o11y alert page won't come up if you do not have any
+        // kind of privileges to o11y
         await observability.users.setTestUserRole({
           elasticsearch: {
             cluster: [],
