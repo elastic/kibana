@@ -10,7 +10,7 @@ import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ThresholdSignalHistory } from './types';
 import { buildThresholdSignalHistory } from './build_signal_history';
-import { createErrorsFromShard } from '../utils/utils';
+import { createErrorsFromShard, makeFloatString } from '../utils/utils';
 
 interface GetThresholdSignalHistoryParams {
   from: string;
@@ -29,6 +29,7 @@ export const getThresholdSignalHistory = async ({
 }: GetThresholdSignalHistoryParams): Promise<{
   signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
+  searchDuration: string;
 }> => {
   const request = buildPreviousThresholdAlertRequest({
     from,
@@ -36,13 +37,16 @@ export const getThresholdSignalHistory = async ({
     frameworkRuleId,
     bucketByFields,
   });
-
+  const start = performance.now();
   const response = await ruleDataReader.search(request);
+  const end = performance.now();
+  const searchDuration = makeFloatString(end - start);
   return {
     signalHistory: buildThresholdSignalHistory({ alerts: response.hits.hits }),
     searchErrors: createErrorsFromShard({
       errors: response._shards.failures ?? [],
     }),
+    searchDuration,
   };
 };
 

@@ -17,6 +17,7 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   mergeReturns,
+  getTotalHitsValue,
 } from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
@@ -126,7 +127,7 @@ export const groupAndBulkCreate = async ({
   groupByFields,
   eventsTelemetry,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
-  return withSecuritySpan('groupAndBulkCreate', async () => {
+  return withSecuritySpan('groupAndBulkCreate', runOpts.durationMetrics, async () => {
     const tuple = runOpts.tuple;
 
     const filteredBucketHistory = filterBucketHistory({
@@ -148,6 +149,7 @@ export const groupAndBulkCreate = async ({
       state: {
         suppressionGroupHistory: filteredBucketHistory,
       },
+      durationMetrics: [],
     };
 
     const exceptionsWarning = getUnprocessedExceptionsWarnings(runOpts.unprocessedExceptions);
@@ -194,10 +196,15 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
+        trackTotalHits: true,
+        durationMetrics: runOpts.durationMetrics,
       };
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
         eventsSearchParams
       );
+
+      const totalHits = getTotalHitsValue(searchResult.hits.total);
+      runOpts.ruleExecutionLogger.debug(`totalHits: ${totalHits}`);
 
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);

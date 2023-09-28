@@ -38,7 +38,7 @@ export const readRules = async ({
 }: ReadRuleOptions): Promise<
   SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
-  return withSecuritySpan('readRules', async () => {
+  return withSecuritySpan('readRules', [], async () => {
     if (id != null) {
       try {
         const rule = await rulesClient.resolve({ id });

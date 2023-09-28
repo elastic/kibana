@@ -27,6 +27,7 @@ import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
+import type { DurationMetrics } from '../types';
 
 interface GetFilterArgs {
   type: Type;
@@ -38,6 +39,7 @@ interface GetFilterArgs {
   index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
   fields?: DataViewFieldBase[];
+  durationMetrics: DurationMetrics[];
 }
 
 interface QueryAttributes {
@@ -59,6 +61,7 @@ export const getFilter = async ({
   query,
   exceptionFilter,
   fields = [],
+  durationMetrics,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
@@ -79,7 +82,7 @@ export const getFilter = async ({
     if (savedId != null && index != null) {
       try {
         // try to get the saved object first
-        const savedObject = await withSecuritySpan('getSavedFilter', () =>
+        const savedObject = await withSecuritySpan('getSavedFilter', durationMetrics, () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
         return getQueryFilter({

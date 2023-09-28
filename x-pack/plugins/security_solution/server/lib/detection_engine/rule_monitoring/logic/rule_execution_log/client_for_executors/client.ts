@@ -33,10 +33,12 @@ import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import type {
+  DurationMetricReturn,
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { DurationMetrics } from '../../../../rule_types/types';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -78,23 +80,27 @@ export const createRuleExecutionLogClientForExecutors = (
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
-      await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
-        const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
-        const logMeta = correlationIds.getLogMeta();
+      await withSecuritySpan(
+        'IRuleExecutionLogForExecutors.logStatusChange',
+        args.metrics?.durationMetrics ?? [],
+        async () => {
+          const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
+          const logMeta = correlationIds.getLogMeta();
 
-        try {
-          const normalizedArgs = normalizeStatusChangeArgs(args);
+          try {
+            const normalizedArgs = normalizeStatusChangeArgs(args);
 
-          await Promise.all([
-            writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToRuleObject(normalizedArgs),
-            writeStatusChangeToEventLog(normalizedArgs),
-          ]);
-        } catch (e) {
-          const logMessage = `Error changing rule status to "${args.newStatus}"`;
-          writeExceptionToConsole(e, logMessage, logMeta);
+            await Promise.all([
+              writeStatusChangeToConsole(normalizedArgs, logMeta),
+              writeStatusChangeToRuleObject(normalizedArgs),
+              writeStatusChangeToEventLog(normalizedArgs),
+            ]);
+          } catch (e) {
+            const logMessage = `Error changing rule status to "${args.newStatus}"`;
+            writeExceptionToConsole(e, logMessage, logMeta);
+          }
         }
-      });
+      );
     },
   };
 
@@ -247,6 +253,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
     message: truncateValue(message) ?? '',
     metrics: metrics
       ? {
+          ...formatDurationMetrics(metrics.durationMetrics),
           total_search_duration_ms: normalizeDurations(metrics.searchDurations),
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
@@ -267,4 +274,16 @@ const normalizeDurations = (durations?: string[]): number | undefined => {
 
 const normalizeGap = (duration?: Duration): number | undefined => {
   return duration ? Math.round(duration.asSeconds()) : undefined;
+};
+
+const formatDurationMetrics = (durationMetrics?: DurationMetrics[]) => {
+  if (durationMetrics == null) {
+    return undefined;
+  }
+  const toReturn: DurationMetricReturn = {};
+  for (const { phaseName, duration } of durationMetrics) {
+    const newDuration = toReturn[phaseName] ?? 0;
+    toReturn[phaseName] = newDuration + parseInt(duration, 10);
+  }
+  return toReturn;
 };

@@ -73,6 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  durationMetrics: DurationMetrics[];
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -83,6 +84,7 @@ export interface RunOpts<TParams extends RuleParams> {
     maxSignals: number;
   };
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  durationMetrics: DurationMetrics[];
   listClient: ListClient;
   searchAfterSize: number;
   bulkCreate: BulkCreate;
@@ -372,6 +374,24 @@ export interface SearchAfterAndBulkCreateParams {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
+  durationMetrics: DurationMetrics[];
+}
+
+export enum RulePhase {
+  RecentTermsCompositeAgg = 'recent_terms_composite_agg',
+  HistoryWindowCompositeAgg = 'history_window_composite_agg',
+  DocumentSearchCompositeAgg = 'document_search_composite_agg',
+  DocumentSearch = 'document_search',
+  ThresholdCompositeAgg = 'threshold_composite_agg',
+  ThresholdSignalHistory = 'threshold_signal_history',
+  BulkCreate = 'bulk_create', // Difference between suppressed/unsuppressed/others?
+  AlertEnrichment = 'alert_enrichment',
+  ValueListFiltering = 'value_list_filtering',
+}
+
+export interface DurationMetrics {
+  phaseName: RulePhase;
+  duration: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -385,6 +405,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
+  durationMetrics: DurationMetrics[];
 }
 
 // the new fields can be added later if needed

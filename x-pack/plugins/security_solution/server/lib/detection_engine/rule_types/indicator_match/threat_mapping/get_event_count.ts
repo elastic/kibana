@@ -10,6 +10,7 @@ import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import { singleSearchAfter } from '../../utils/single_search_after';
 import { buildEventsSearchQuery } from '../../utils/build_events_query';
+import { getTotalHitsValue } from '../../utils/utils';
 
 export const MAX_PER_PAGE = 9000;
 
@@ -60,10 +61,13 @@ export const getEventList = async ({
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',
-    trackTotalHits: false,
+    trackTotalHits: true,
     runtimeMappings,
     overrideBody: eventListConfig,
   });
+
+  const totalHits = getTotalHitsValue(searchResult.hits.total);
+  ruleExecutionLogger.debug(`totalHits: ${totalHits}`);
 
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
   return searchResult;

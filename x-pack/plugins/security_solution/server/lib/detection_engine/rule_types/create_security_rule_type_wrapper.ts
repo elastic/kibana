@@ -26,7 +26,7 @@ import {
   isMachineLearningParams,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import type { CreateSecurityRuleTypeWrapper } from './types';
+import type { CreateSecurityRuleTypeWrapper, DurationMetrics } from './types';
 import { getListClient } from './utils/get_list_client';
 // eslint-disable-next-line no-restricted-imports
 import { getNotificationResultsLink } from '../rule_actions_legacy';
@@ -117,7 +117,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       },
       async executor(options) {
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
-        return withSecuritySpan('securityRuleTypeExecutor', async () => {
+        const durationMetrics: DurationMetrics[] = [];
+        return withSecuritySpan('securityRuleTypeExecutor', durationMetrics, async () => {
           const {
             executionId,
             params,
@@ -223,6 +224,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger,
                 ruleId: params.ruleId,
                 dataViewId: params.dataViewId,
+                durationMetrics,
               });
 
               inputIndex = index ?? [];
@@ -257,19 +259,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
 
               if (!wroteWarningStatus) {
-                const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                  services.scopedClusterClient.asCurrentUser.fieldCaps(
-                    {
-                      index: inputIndex,
-                      fields: secondaryTimestamp
-                        ? [primaryTimestamp, secondaryTimestamp]
-                        : [primaryTimestamp],
-                      include_unmapped: true,
-                      runtime_mappings: runtimeMappings,
-                      ignore_unavailable: true,
-                    },
-                    { meta: true }
-                  )
+                const timestampFieldCaps = await withSecuritySpan(
+                  'fieldCaps',
+                  durationMetrics,
+                  () =>
+                    services.scopedClusterClient.asCurrentUser.fieldCaps(
+                      {
+                        index: inputIndex,
+                        fields: secondaryTimestamp
+                          ? [primaryTimestamp, secondaryTimestamp]
+                          : [primaryTimestamp],
+                        include_unmapped: true,
+                        runtime_mappings: runtimeMappings,
+                        ignore_unavailable: true,
+                      },
+                      { meta: true }
+                    )
                 );
 
                 const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
@@ -403,6 +408,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     primaryTimestamp,
                     secondaryTimestamp,
                     ruleExecutionLogger,
+                    durationMetrics,
                     aggregatableTimestampField,
                     alertTimestampOverride,
                     alertWithSuppression,
@@ -425,6 +431,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
+                  durationMetrics: result.durationMetrics.concat(runResult.durationMetrics),
                 };
                 runState = runResult.state;
               }
@@ -440,6 +447,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 success: true,
                 warning: false,
                 warningMessages: [],
+                durationMetrics: [],
               };
             }
 
@@ -472,6 +480,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
                     enrichmentDurations: result.enrichmentTimes,
+                    durationMetrics: result.durationMetrics,
                   },
                 });
               }
@@ -483,6 +492,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  durationMetrics: result.durationMetrics,
                 },
               });
             }
@@ -496,6 +506,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
                 enrichmentDurations: result.enrichmentTimes,
+                durationMetrics: result.durationMetrics,
               },
             });
           }

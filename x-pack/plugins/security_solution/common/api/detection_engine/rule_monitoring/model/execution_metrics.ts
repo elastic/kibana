@@ -25,4 +25,5 @@ export const RuleExecutionMetrics = t.partial({
   total_indexing_duration_ms: DurationMetric,
   total_enrichment_duration_ms: DurationMetric,
   execution_gap_duration_s: DurationMetric,
+  total_value_list_filtering_duration_ms: DurationMetric,
 });

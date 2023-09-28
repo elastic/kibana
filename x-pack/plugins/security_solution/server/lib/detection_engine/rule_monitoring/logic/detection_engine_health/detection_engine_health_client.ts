@@ -32,7 +32,7 @@ export const createDetectionEngineHealthClient = (
 ): IDetectionEngineHealthClient => {
   return {
     calculateRuleHealth: (args: RuleHealthParameters): Promise<RuleHealthSnapshot> => {
-      return withSecuritySpan('IDetectionEngineHealthClient.calculateRuleHealth', async () => {
+      return withSecuritySpan('IDetectionEngineHealthClient.calculateRuleHealth', [], async () => {
         const ruleId = args.rule_id;
         try {
           // We call these two sequentially, because if the rule doesn't exist we need to throw 404
@@ -65,7 +65,7 @@ export const createDetectionEngineHealthClient = (
     },
 
     calculateSpaceHealth: (args: SpaceHealthParameters): Promise<SpaceHealthSnapshot> => {
-      return withSecuritySpan('IDetectionEngineHealthClient.calculateSpaceHealth', async () => {
+      return withSecuritySpan('IDetectionEngineHealthClient.calculateSpaceHealth', [], async () => {
         try {
           const [statsBasedOnRuleObjects, statsBasedOnEventLog] = await Promise.all([
             ruleObjectsHealthClient.calculateSpaceHealth(args),
@@ -96,39 +96,44 @@ export const createDetectionEngineHealthClient = (
     },
 
     calculateClusterHealth: (args: ClusterHealthParameters): Promise<ClusterHealthSnapshot> => {
-      return withSecuritySpan('IDetectionEngineHealthClient.calculateClusterHealth', async () => {
-        try {
-          const [statsBasedOnRuleObjects, statsBasedOnEventLog] = await Promise.all([
-            ruleObjectsHealthClient.calculateClusterHealth(args),
-            eventLogHealthClient.calculateClusterHealth(args),
-          ]);
+      return withSecuritySpan(
+        'IDetectionEngineHealthClient.calculateClusterHealth',
+        [],
+        async () => {
+          try {
+            const [statsBasedOnRuleObjects, statsBasedOnEventLog] = await Promise.all([
+              ruleObjectsHealthClient.calculateClusterHealth(args),
+              eventLogHealthClient.calculateClusterHealth(args),
+            ]);
 
-          return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
-            stats_over_interval: statsBasedOnEventLog.stats_over_interval,
-            history_over_interval: statsBasedOnEventLog.history_over_interval,
-            debug: {
-              ...statsBasedOnRuleObjects.debug,
-              ...statsBasedOnEventLog.debug,
-            },
-          };
-        } catch (e) {
-          const logMessage = 'Error calculating cluster health';
-          const logReason = e instanceof Error ? e.message : String(e);
-          const logSuffix = `[space id ${currentSpaceId}]`;
-          const logMeta: ExtMeta = {
-            kibana: { spaceId: currentSpaceId },
-          };
+            return {
+              stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+              stats_over_interval: statsBasedOnEventLog.stats_over_interval,
+              history_over_interval: statsBasedOnEventLog.history_over_interval,
+              debug: {
+                ...statsBasedOnRuleObjects.debug,
+                ...statsBasedOnEventLog.debug,
+              },
+            };
+          } catch (e) {
+            const logMessage = 'Error calculating cluster health';
+            const logReason = e instanceof Error ? e.message : String(e);
+            const logSuffix = `[space id ${currentSpaceId}]`;
+            const logMeta: ExtMeta = {
+              kibana: { spaceId: currentSpaceId },
+            };
 
-          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
-          throw e;
+            logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
+            throw e;
+          }
         }
-      });
+      );
     },
 
     installAssetsForMonitoringHealth: (): Promise<void> => {
       return withSecuritySpan(
         'IDetectionEngineHealthClient.installAssetsForMonitoringHealth',
+        [],
         async () => {
           try {
             await installAssetsForRuleMonitoring(savedObjectsImporter, logger, currentSpaceId);

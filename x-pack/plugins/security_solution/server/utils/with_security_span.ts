@@ -8,6 +8,9 @@ import type { SpanOptions } from '@kbn/apm-utils';
 import { withSpan } from '@kbn/apm-utils';
 import type agent from 'elastic-apm-node';
 import { APP_ID } from '../../common/constants';
+import { RulePhase } from '../lib/detection_engine/rule_types/types';
+import type { DurationMetrics } from '../lib/detection_engine/rule_types/types';
+import { makeFloatString } from '../lib/detection_engine/rule_types/utils/utils';
 
 type Span = Exclude<typeof agent.currentSpan, undefined | null>;
 
@@ -24,14 +27,28 @@ type Span = Exclude<typeof agent.currentSpan, undefined | null>;
  *
  * @returns Whatever the measured code block returns
  */
-export const withSecuritySpan = <T>(
+export const withSecuritySpan = async <T>(
   optionsOrName: SpanOptions | string,
+  durationMetrics: DurationMetrics[],
   cb: (span?: Span) => Promise<T>
-) =>
-  withSpan<T>(
+) => {
+  const start = performance.now();
+  const result = await withSpan<T>(
     {
       type: APP_ID,
       ...(typeof optionsOrName === 'string' ? { name: optionsOrName } : optionsOrName),
     },
     cb
   );
+  const end = performance.now();
+  if (
+    typeof optionsOrName === 'string' &&
+    Object.values(RulePhase).includes(optionsOrName as RulePhase)
+  ) {
+    durationMetrics.push({
+      phaseName: optionsOrName as RulePhase,
+      duration: makeFloatString(end - start),
+    });
+  }
+  return result;
+};

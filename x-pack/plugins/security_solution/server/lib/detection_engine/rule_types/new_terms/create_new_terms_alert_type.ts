@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { NewTermsRuleParams } from '../../rule_schema';
@@ -39,6 +40,7 @@ import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
   getMaxSignalsWarning,
+  getTotalHitsValue,
   getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
@@ -110,6 +112,7 @@ export const createNewTermsAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           inputIndexFields,
+          durationMetrics,
         },
         services,
         params,
@@ -134,6 +137,7 @@ export const createNewTermsAlertType = (
         query: params.query,
         exceptionFilter,
         fields: inputIndexFields,
+        durationMetrics,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -143,6 +147,7 @@ export const createNewTermsAlertType = (
       });
 
       let afterKey;
+      let trackTotalHits = true;
 
       const result = createSearchAfterReturnType();
 
@@ -161,47 +166,57 @@ export const createNewTermsAlertType = (
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
-        const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-          aggregations: buildRecentTermsAgg({
-            fields: params.newTermsFields,
-            after: afterKey,
-          }),
-          searchAfterSortIds: undefined,
-          index: inputIndex,
-          // The time range for the initial composite aggregation is the rule interval, `from` and `to`
-          from: tuple.from.toISOString(),
-          to: tuple.to.toISOString(),
-          services,
-          ruleExecutionLogger,
-          filter: esFilter,
-          pageSize: 0,
-          primaryTimestamp,
-          secondaryTimestamp,
-          runtimeMappings,
+        await withSecuritySpan('phase 1', durationMetrics, async () => {
+          const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+            aggregations: buildRecentTermsAgg({
+              fields: params.newTermsFields,
+              after: afterKey,
+            }),
+            searchAfterSortIds: undefined,
+            index: inputIndex,
+            // The time range for the initial composite aggregation is the rule interval, `from` and `to`
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            services,
+            ruleExecutionLogger,
+            filter: esFilter,
+            pageSize: 0,
+            primaryTimestamp,
+            secondaryTimestamp,
+            runtimeMappings,
+            trackTotalHits,
+            durationMetrics,
+          });
+          const searchResultWithAggs = searchResult as RecentTermsAggResult;
+          if (!searchResultWithAggs.aggregations) {
+            throw new Error('Aggregations were missing on recent terms search result');
+          }
+          logger.debug(`Time spent on composite agg: ${searchDuration}`);
+          if (trackTotalHits) {
+            const totalHits = getTotalHitsValue(searchResult.hits.total);
+            ruleExecutionLogger.debug(`Recent terms search totalHits: ${totalHits}`);
+          }
+
+          result.searchAfterTimes.push(searchDuration);
+          result.errors.push(...searchErrors);
+
+          afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
+
+          // If the aggregation returns no after_key it signals that we've paged through all results
+          // and the current page is empty so we can immediately break.
+          if (afterKey == null) {
+            break;
+          }
+          const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
+          ruleExecutionLogger.debug(
+            `Recent terms search unique terms count: ${bucketsForField.length}`
+          );
+          const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+          const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+            params.newTermsFields,
+            bucketsForField
+          );
         });
-        const searchResultWithAggs = searchResult as RecentTermsAggResult;
-        if (!searchResultWithAggs.aggregations) {
-          throw new Error('Aggregations were missing on recent terms search result');
-        }
-        logger.debug(`Time spent on composite agg: ${searchDuration}`);
-
-        result.searchAfterTimes.push(searchDuration);
-        result.errors.push(...searchErrors);
-
-        afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
-
-        // If the aggregation returns no after_key it signals that we've paged through all results
-        // and the current page is empty so we can immediately break.
-        if (afterKey == null) {
-          break;
-        }
-        const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
-        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
-          params.newTermsFields,
-          bucketsForField
-        );
-
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -232,11 +247,16 @@ export const createNewTermsAlertType = (
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
+          durationMetrics,
         });
         result.searchAfterTimes.push(pageSearchDuration);
         result.errors.push(...pageSearchErrors);
 
         logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
+        if (trackTotalHits) {
+          const totalHits = getTotalHitsValue(searchResult.hits.total);
+          ruleExecutionLogger.debug(`History window search totalHits: ${totalHits}`);
+        }
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
@@ -277,6 +297,7 @@ export const createNewTermsAlertType = (
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
+            durationMetrics,
           });
           result.searchAfterTimes.push(docFetchSearchDuration);
           result.errors.push(...docFetchSearchErrors);
@@ -323,6 +344,7 @@ export const createNewTermsAlertType = (
             break;
           }
         }
+        trackTotalHits = false;
       }
       return { ...result, state };
     },

@@ -16,6 +16,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { DurationMetrics } from '../types';
 
 export interface GetInputIndex {
   index: string[] | null | undefined;
@@ -25,6 +26,7 @@ export interface GetInputIndex {
   // the rule's rule_id
   ruleId: string;
   dataViewId?: string;
+  durationMetrics: DurationMetrics[];
 }
 
 export interface GetInputIndexReturn {
@@ -43,6 +45,7 @@ export const getInputIndex = async ({
   logger,
   ruleId,
   dataViewId,
+  durationMetrics,
 }: GetInputIndex): Promise<GetInputIndexReturn> => {
   // If data views defined, use it
   if (dataViewId != null && dataViewId !== '') {
@@ -85,7 +88,7 @@ export const getInputIndex = async ({
       runtimeMappings: {},
     };
   } else {
-    const configuration = await withSecuritySpan('getDefaultIndex', () =>
+    const configuration = await withSecuritySpan('getDefaultIndex', durationMetrics, () =>
       services.savedObjectsClient.get<{
         'securitySolution:defaultIndex': string[];
       }>('config', version)

@@ -30,7 +30,7 @@ export const createPrebuiltRuleAssetsClient = (
 ): IPrebuiltRuleAssetsClient => {
   return {
     fetchLatestAssets: () => {
-      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', async () => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', [], async () => {
         const findResult = await savedObjectsClient.find<
           PrebuiltRuleAsset,
           {
@@ -73,7 +73,7 @@ export const createPrebuiltRuleAssetsClient = (
     },
 
     fetchLatestVersions: (): Promise<RuleVersionSpecifier[]> => {
-      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', [], async () => {
         const findResult = await savedObjectsClient.find<
           PrebuiltRuleAsset,
           {
@@ -125,7 +125,7 @@ export const createPrebuiltRuleAssetsClient = (
     },
 
     fetchAssetsByVersion: (versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]> => {
-      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAssetsByVersion', async () => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAssetsByVersion', [], async () => {
         if (versions.length === 0) {
           // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
           return [];

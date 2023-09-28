@@ -45,7 +45,9 @@ import type {
   SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
+  DurationMetrics,
 } from '../types';
+import { RulePhase } from '../types';
 import type { ShardError } from '../../../types';
 import type {
   EqlRuleParams,
@@ -167,6 +169,7 @@ export const checkPrivilegesFromEsClient = async (
 ): Promise<Privilege> =>
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
+    [],
     async () =>
       (await esClient.transport.request({
         path: '/_security/user/_has_privileges',
@@ -656,6 +659,7 @@ export const createSearchAfterReturnType = ({
   createdSignals,
   errors,
   warningMessages,
+  durationMetrics,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -667,6 +671,7 @@ export const createSearchAfterReturnType = ({
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
+  durationMetrics?: DurationMetrics[];
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -679,6 +684,7 @@ export const createSearchAfterReturnType = ({
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
     warningMessages: warningMessages ?? [],
+    durationMetrics: durationMetrics ?? [],
   };
 };
 
@@ -720,6 +726,16 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
+  current.durationMetrics.push(
+    {
+      phaseName: RulePhase.BulkCreate,
+      duration: next.bulkCreateDuration,
+    },
+    {
+      phaseName: RulePhase.AlertEnrichment,
+      duration: next.enrichmentDuration,
+    }
+  );
 };
 
 export const mergeReturns = (
@@ -737,6 +753,7 @@ export const mergeReturns = (
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
       warningMessages: existingWarningMessages,
+      durationMetrics: existingDurationMetrics,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -750,6 +767,7 @@ export const mergeReturns = (
       createdSignals: newCreatedSignals,
       errors: newErrors,
       warningMessages: newWarningMessages,
+      durationMetrics: newDurationMetrics,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -763,6 +781,7 @@ export const mergeReturns = (
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      durationMetrics: [...existingDurationMetrics, ...newDurationMetrics],
     };
   });
 };

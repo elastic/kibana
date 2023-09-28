@@ -31,7 +31,7 @@ import type {
 } from './types';
 import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { getMaxSignalsWarning } from '../utils/utils';
+import { getMaxSignalsWarning, getTotalHitsValue } from '../utils/utils';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -86,6 +86,7 @@ export const findThresholdSignals = async ({
 
   if (hasThresholdFields(threshold)) {
     let sortKeys: Record<string, string | number | null> | undefined;
+    let trackTotalHits = true; // default to true so we track on initial run
     do {
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: buildThresholdMultiBucketAggregation({
@@ -105,9 +106,16 @@ export const findThresholdSignals = async ({
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        trackTotalHits,
       });
 
       searchAfterResults.searchDurations.push(searchDuration);
+      if (trackTotalHits) {
+        const totalHits = getTotalHitsValue(searchResult.hits.total);
+        ruleExecutionLogger.debug(`totalHits: ${totalHits}`);
+        trackTotalHits = false;
+      }
+
       if (!isEmpty(searchErrors)) {
         searchAfterResults.searchErrors.push(...searchErrors);
         sortKeys = undefined; // this will eject us out of the loop
@@ -147,6 +155,9 @@ export const findThresholdSignals = async ({
 
     searchAfterResults.searchDurations.push(searchDuration);
     searchAfterResults.searchErrors.push(...searchErrors);
+
+    const totalHits = getTotalHitsValue(searchResult.hits.total);
+    ruleExecutionLogger.debug(`totalHits: ${totalHits}`);
 
     if (
       !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
