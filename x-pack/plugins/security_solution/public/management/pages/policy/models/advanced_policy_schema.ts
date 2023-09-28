@@ -1330,4 +1330,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.kernel.fileaccess',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Sends file access events to the stack. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.image_load',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Collects image load events and use them for behaviour protection. By default, does not send events to the stack. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.image_load.capture',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
+      {
+        defaultMessage:
+          'Verbose collection of image load events. Sends all of them to the stack (High volume!). Default: false',
+      }
+    ),
+  },
 ];
