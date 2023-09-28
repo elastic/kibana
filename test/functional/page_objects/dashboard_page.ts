@@ -473,9 +473,7 @@ export class DashboardPageObject extends FtrService {
         await this.clickSave();
       }
 
-      if (await this.testSubjects.waitForDeleted('savedObjectSaveModal')) {
-        throw new Error('save modal still open');
-      }
+      await this.testSubjects.waitForDeleted('savedObjectSaveModal');
 
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');

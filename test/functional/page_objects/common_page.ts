@@ -501,9 +501,7 @@ export class CommonPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.click(testSubjectSelector);
       this.log.debug('Waiting for save modal to close');
-      if (await this.testSubjects.waitForDeleted('savedObjectSaveModal')) {
-        throw new Error('save modal still open');
-      }
+      await this.testSubjects.waitForDeleted('savedObjectSaveModal');
     });
   }
 
