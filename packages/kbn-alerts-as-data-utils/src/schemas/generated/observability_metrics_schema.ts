@@ -71,15 +71,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilityMetricsAlertRequired = rt.type({
 });
 const ObservabilityMetricsAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
 });
 
 // prettier-ignore

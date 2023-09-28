@@ -70,36 +70,18 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilityApmAlertRequired = rt.type({
 });
 const ObservabilityApmAlertOptional = rt.partial({
-  agent: rt.partial({
-    name: schemaString,
-  }),
-  error: rt.partial({
-    grouping_key: schemaString,
-    grouping_name: schemaString,
-  }),
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
-  processor: rt.partial({
-    event: schemaString,
-  }),
-  service: rt.partial({
-    environment: schemaString,
-    language: rt.partial({
-      name: schemaString,
-    }),
-    name: schemaString,
-  }),
-  transaction: rt.partial({
-    name: schemaString,
-    type: schemaString,
-  }),
+  'agent.name': schemaString,
+  'error.grouping_key': schemaString,
+  'error.grouping_name': schemaString,
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'processor.event': schemaString,
+  'service.environment': schemaString,
+  'service.language.name': schemaString,
+  'service.name': schemaString,
+  'transaction.name': schemaString,
+  'transaction.type': schemaString,
 });
 
 // prettier-ignore

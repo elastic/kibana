@@ -242,17 +242,14 @@ describe('ruleType', () => {
       },
       id: 'all documents',
       payload: {
-        kibana: {
-          alert: {
-            evaluation: { conditions: 'foo is less than 1', value: 0 },
-            reason: `alert '${ruleName}' is active for group 'all documents':
+        'kibana.alert.evaluation.conditions': 'foo is less than 1',
+        'kibana.alert.evaluation.value': '0',
+        'kibana.alert.reason': `alert '${ruleName}' is active for group 'all documents':
 
 - Value: 0
 - Conditions Met: foo is less than 1 over 5m
 - Timestamp: 1970-01-01T00:00:00.000Z`,
-            title: `alert ${ruleName} group all documents met threshold`,
-          },
-        },
+        'kibana.alert.title': `alert ${ruleName} group all documents met threshold`,
       },
       state: {},
     });
