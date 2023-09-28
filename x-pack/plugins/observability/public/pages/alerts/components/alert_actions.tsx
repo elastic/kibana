@@ -22,6 +22,7 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
+import { useUntrackAlerts } from '../../../hooks/use_untrack_alerts';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -63,6 +64,7 @@ export function AlertActions({
     },
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
+  const { mutateAsync: untrackAlerts } = useUntrackAlerts();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -123,6 +125,14 @@ export function AlertActions({
     selectCaseModal.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
+
+  const handleUntrackAlert = useCallback(async () => {
+    await untrackAlerts({
+      indices: [ecsData?._index ?? ''],
+      alertUuids: [alertId],
+    });
+    onSuccess();
+  }, [untrackAlerts, alertId, ecsData, onSuccess]);
 
   const actionsMenuItems = [
     ...(userCasesPermissions.create && userCasesPermissions.read
@@ -190,6 +200,15 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
+    <EuiContextMenuItem
+      data-test-subj="untrackAlert"
+      key="untrackAlert"
+      onClick={handleUntrackAlert}
+    >
+      {i18n.translate('xpack.observability.alerts.actions.untrack', {
+        defaultMessage: 'Mark alert as untracked',
+      })}
+    </EuiContextMenuItem>,
   ];
 
   const actionsToolTip =

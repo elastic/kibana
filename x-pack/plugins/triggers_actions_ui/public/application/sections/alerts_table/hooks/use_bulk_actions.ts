@@ -27,9 +27,11 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
+  MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
+import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -171,6 +173,33 @@ export const useBulkAddToCaseActions = ({
   ]);
 };
 
+export const useBulkUntrackActions = ({ setIsBulkActionsLoading, refresh, clearSelection }) => {
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  return [
+    {
+      label: MARK_AS_UNTRACKED,
+      key: 'mark-as-untracked',
+      disableOnQuery: true,
+      disabledLabel: MARK_AS_UNTRACKED,
+      'data-test-subj': 'mark-as-untracked',
+      onClick: async (alerts?: TimelineItem[]) => {
+        if (!alerts) return;
+        const alertUuids = alerts.map((alert) => alert._id);
+        const indices = alerts.map((alert) => alert._index ?? '');
+        setIsBulkActionsLoading();
+        await untrackAlerts({ indices, alertUuids });
+        onSuccess();
+      },
+    },
+  ];
+};
+
 export function useBulkActions({
   alerts,
   casesConfig,
@@ -184,25 +213,28 @@ export function useBulkActions({
   const clearSelection = () => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
+  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
+    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
+  };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
+  const untrackBulkActions = useBulkUntrackActions({
+    setIsBulkActionsLoading,
+    refresh,
+    clearSelection,
+  });
 
-  const bulkActions =
-    caseBulkActions.length !== 0
-      ? addItemsToInitialPanel({
-          panels: configBulkActionPanels,
-          items: caseBulkActions,
-        })
-      : configBulkActionPanels;
+  const initialItems = [...caseBulkActions, ...untrackBulkActions];
+
+  const bulkActions = addItemsToInitialPanel({
+    panels: configBulkActionPanels,
+    items: initialItems,
+  });
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
   }, [alerts, updateBulkActionsState]);
-
-  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
-    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
-  };
 
   return {
     isBulkActionsColumnActive,

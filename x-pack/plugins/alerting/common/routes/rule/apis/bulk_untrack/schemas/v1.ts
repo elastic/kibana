@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bulkUntrackParamsSchema = schema.object({
-  rule_id: schema.string(),
-  alert_ids: schema.arrayOf(schema.string()),
+export const bulkUntrackBodySchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+  alert_uuids: schema.arrayOf(schema.string()),
 });

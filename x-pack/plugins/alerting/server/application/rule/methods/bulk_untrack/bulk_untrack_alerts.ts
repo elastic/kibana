@@ -6,71 +6,51 @@
  */
 
 import Boom from '@hapi/boom';
-import { bulkUntrackParamsSchema } from './schemas';
-import type { BulkUntrackParams } from './types';
-import { Rule } from '../../../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { bulkUntrackBodySchema } from './schemas';
+import type { BulkUntrackBody } from './types';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts } from '../../../../rules_client/lib';
 
-export type { BulkUntrackParams };
+export type { BulkUntrackBody };
 
 export async function bulkUntrackAlerts(
   context: RulesClientContext,
-  params: BulkUntrackParams
+  params: BulkUntrackBody
 ): Promise<void> {
   try {
-    bulkUntrackParamsSchema.validate(params);
+    bulkUntrackBodySchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.bulkUntrack('${params.ruleId}')`,
+    `rulesClient.bulkUntrack('${params.alertUuids}')`,
     async () => await bulkUntrackAlertsWithOCC(context, params)
   );
 }
 
 async function bulkUntrackAlertsWithOCC(
   context: RulesClientContext,
-  { ruleId, alertIds }: BulkUntrackParams
+  { indices, alertUuids }: BulkUntrackBody
 ) {
-  const { attributes } = await context.unsecuredSavedObjectsClient.get<Rule>('alert', ruleId);
-
   try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: attributes.alertTypeId,
-      consumer: attributes.consumer,
-      operation: WriteOperations.MuteAlert,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
+    if (!context.alertsService) throw new Error('unable to access alertsService');
+    await context.alertsService.setAlertsToUntracked({ indices, alertUuids });
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNTRACK_ALERT,
+        outcome: 'success',
+      })
+    );
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNTRACK_ALERT,
-        savedObject: { type: 'alert', id: ruleId },
         error,
       })
     );
     throw error;
   }
-
-  context.auditLogger?.log(
-    ruleAuditEvent({
-      action: RuleAuditAction.UNTRACK_ALERT,
-      outcome: 'unknown',
-      savedObject: { type: 'alert', id: ruleId },
-    })
-  );
-
-  context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-
-  await untrackRuleAlerts(context, ruleId, attributes, alertIds);
 }

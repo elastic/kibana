@@ -6,14 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
-  ALERT_STATUS_UNTRACKED,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-  ALERT_INSTANCE_ID,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -204,63 +197,6 @@ export class AlertsClient<
     });
 
     return { hits, total };
-  }
-
-  public async setAlertStatusToUntracked(
-    indices: string[],
-    ruleIds: string[],
-    alertIds: string[] = ['*'] // OPTIONAL - If no alertIds are passed, untrack ALL ids by default
-  ) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const must: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
-      term: {
-        [ALERT_RULE_UUID]: { value: ruleId },
-      },
-    }));
-    must.push({
-      term: {
-        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
-      },
-    });
-    const should: Array<{ term: Record<string, { value: string }> }> = alertIds
-      .filter(() => alertIds[0] !== '*') // Generate an empty array if alertIds starts with ['*']
-      .map((alertId) => ({
-        term: {
-          [ALERT_INSTANCE_ID]: { value: alertId },
-        },
-      }));
-
-    try {
-      // Retry this updateByQuery up to 3 times to make sure the number of documents
-      // updated equals the number of documents matched
-      for (let retryCount = 0; retryCount < 3; retryCount++) {
-        const response = await esClient.updateByQuery({
-          index: indices,
-          allow_no_indices: true,
-          body: {
-            conflicts: 'proceed',
-            script: {
-              source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
-              lang: 'painless',
-            },
-            query: {
-              bool: {
-                must,
-                should,
-              },
-            },
-          },
-        });
-        if (response.total === response.updated) break;
-        this.options.logger.warn(
-          `Attempt ${retryCount + 1}: Failed to untrack ${
-            (response.total ?? 0) - (response.updated ?? 0)
-          } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
-        );
-      }
-    } catch (err) {
-      this.options.logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
-    }
   }
 
   public report(
@@ -629,11 +565,3 @@ export class AlertsClient<
     return this._isUsingDataStreams;
   }
 }
-
-const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
-// Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
-if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
-  ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
-} else {
-  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
-}`;

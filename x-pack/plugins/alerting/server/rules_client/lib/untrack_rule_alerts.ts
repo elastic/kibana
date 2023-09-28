@@ -19,8 +19,7 @@ import { RulesClientContext } from '../types';
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
-  attributes: Rule,
-  alertIds?: string[] // If no alertIds are passed, untrack ALL ids by default
+  attributes: Rule
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
@@ -37,9 +36,7 @@ export const untrackRuleAlerts = async (
         (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
       );
 
-      const untrackedAlertIds = Object.keys(untrackedAlerts).filter(
-        (alertId) => !alertIds || alertIds.includes(alertId)
-      );
+      const untrackedAlertIds = Object.keys(untrackedAlerts);
 
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
@@ -82,24 +79,10 @@ export const untrackRuleAlerts = async (
 
       // Untrack Lifecycle alerts (Alerts As Data-enabled)
       if (isLifecycleAlert) {
-        const alertsClient = await context.alertsService?.createAlertsClient({
-          namespace: context.namespace!,
-          rule: {
-            id,
-            name: attributes.name,
-            consumer: attributes.consumer,
-            revision: attributes.revision,
-            spaceId: context.spaceId,
-            tags: attributes.tags,
-            parameters: attributes.params,
-            executionId: '',
-          },
-          ruleType,
-          logger: context.logger,
-        });
-        if (!alertsClient) throw new Error('Could not create alertsClient');
         const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-        await alertsClient.setAlertStatusToUntracked(indices, [id], alertIds);
+        if (!context.alertsService)
+          throw new Error('Could not access alertsService to untrack alerts');
+        await context.alertsService.setAlertsToUntracked({ indices, ruleIds: [id] });
       }
     } catch (error) {
       // this should not block the rest of the disable process

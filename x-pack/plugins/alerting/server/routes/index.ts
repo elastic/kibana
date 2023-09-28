@@ -48,6 +48,7 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
+import { bulkUntrackAlertRoute } from './rule/apis/bulk_untrack';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
@@ -131,4 +132,5 @@ export function defineRoutes(opts: RouteOptions) {
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
+  bulkUntrackAlertRoute(router, licenseState);
 }

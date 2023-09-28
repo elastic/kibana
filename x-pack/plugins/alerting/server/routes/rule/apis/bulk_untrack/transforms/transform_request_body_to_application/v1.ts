@@ -6,12 +6,12 @@
  */
 
 import { RewriteRequestCase } from '../../../../../lib';
-import { BulkUntrackParams } from '../../../../../../application/rule/methods/bulk_untrack/types';
+import { BulkUntrackBody } from '../../../../../../application/rule/methods/bulk_untrack/types';
 
-export const transformRequestParamsToApplication: RewriteRequestCase<BulkUntrackParams> = ({
-  rule_id: ruleId,
-  alert_ids: alertIds,
+export const transformRequestBodyToApplication: RewriteRequestCase<BulkUntrackBody> = ({
+  indices,
+  alert_uuids: alertUuids,
 }) => ({
-  ruleId,
-  alertIds,
+  indices,
+  alertUuids,
 });

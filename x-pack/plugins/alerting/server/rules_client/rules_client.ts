@@ -64,7 +64,7 @@ import { getTags, GetTagsParams } from './methods/get_tags';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import {
   bulkUntrackAlerts,
-  BulkUntrackParams,
+  BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
 
 export type ConstructorOptions = Omit<
@@ -171,8 +171,7 @@ export class RulesClient {
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
   public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
 
-  public bulkUntrackAlerts = (options: BulkUntrackParams) =>
-    bulkUntrackAlerts(this.context, options);
+  public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 

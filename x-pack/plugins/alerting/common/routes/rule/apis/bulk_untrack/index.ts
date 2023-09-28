@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { bulkUntrackParamsSchema } from './schemas/latest';
-export { bulkUntrackParamsSchema as bulkUntrackParamsSchemaV1 } from './schemas/v1';
+export { bulkUntrackBodySchema } from './schemas/latest';
+export { bulkUntrackBodySchema as bulkUntrackBodySchemaV1 } from './schemas/v1';
 
-export type { BulkUntrackRequestParams } from './types/latest';
-export type { BulkUntrackRequestParams as BulkUntrackRequestParamsV1 } from './types/v1';
+export type { BulkUntrackRequestBody } from './types/latest';
+export type { BulkUntrackRequestBody as BulkUntrackRequestBodyV1 } from './types/v1';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { BulkUntrackParams } from './bulk_untrack_params';
+export type { BulkUntrackBody } from './bulk_untrack_body';

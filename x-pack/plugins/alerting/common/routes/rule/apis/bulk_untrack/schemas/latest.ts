@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { bulkUntrackParamsSchema } from './v1';
+export { bulkUntrackBodySchema } from './v1';
