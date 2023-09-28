@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/166461
-  describe.skip('Filter controls customization', () => {
+  describe('Filter controls customization', () => {
     before('initialize tests', async () => {
       await PageObjects.svlCommonPage.login();
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

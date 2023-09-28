@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/166016
-  describe.skip('DatasetSelection initialization and update', () => {
+  describe('DatasetSelection initialization and update', () => {
     describe('when the "index" query param does not exist', () => {
       it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
