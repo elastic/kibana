@@ -28,9 +28,6 @@ export const getCheapSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListR
   if (fieldSpec?.type === 'ip') {
     return cheapSuggestionAggSubtypes.ip;
   }
-  if (fieldSpec?.type === 'date') {
-    return cheapSuggestionAggSubtypes.date;
-  }
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return cheapSuggestionAggSubtypes.subtypeNested;
   }
@@ -43,11 +40,12 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    * (such as a keyword field or a keyword+text multi-field)
    */
   keywordOrText: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, fieldSpec, searchString, sort }: OptionsListRequestBody) => ({
       suggestions: {
         terms: {
           field: fieldName,
-          ...(searchString && searchString.length > 0
+          // disabling for date fields because applying a search string will return an error
+          ...(fieldSpec?.type !== 'date' && searchString && searchString.length > 0
             ? { include: `${getEscapedRegexQuery(searchString)}.*` }
             : {}),
           shard_size: 10,
@@ -200,33 +198,6 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       suggestions: get(rawEsResult, 'aggregations.nestedSuggestions.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
           acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
-          return acc;
-        },
-        []
-      ),
-    }),
-  },
-
-  /**
-   * the "date" query / parser should be used when the options list is built on a field of type date.
-   */
-  date: {
-    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
-      suggestions: {
-        terms: {
-          field: fieldName,
-          shard_size: 10,
-          order: getSortType(sort),
-        },
-      },
-    }),
-    parse: (rawEsResult) => ({
-      suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          acc.push({
-            value: suggestion.key,
-            docCount: suggestion.doc_count,
-          });
           return acc;
         },
         []

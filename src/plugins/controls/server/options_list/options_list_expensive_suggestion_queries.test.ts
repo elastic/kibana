@@ -325,6 +325,40 @@ describe('options list expensive queries', () => {
           }
         `);
       });
+
+      test('does not throw error when receiving search string', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: '@timestamp',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'desc' },
+          searchString: '2023',
+          fieldSpec: { type: 'date' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "suggestions": Object {
+              "terms": Object {
+                "field": "@timestamp",
+                "order": Object {
+                  "_key": "desc",
+                },
+                "shard_size": 10,
+                "size": 10,
+              },
+            },
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "@timestamp",
+              },
+            },
+          }
+        `);
+      });
     });
 
     describe('IP field', () => {
