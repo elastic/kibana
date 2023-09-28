@@ -210,24 +210,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next(finalResponse) {
+              next({ rawResponse }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
                       label: i18n.translate('data.search.es_search.hitsLabel', {
                         defaultMessage: 'Hits',
                       }),
-                      value: `${finalResponse.rawResponse.values.length}`,
+                      value: `${rawResponse.values.length}`,
                       description: i18n.translate('data.search.es_search.hitsDescription', {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
                   })
                   .json(params)
-                  .ok({ json: finalResponse });
+                  .ok({ json: rawResponse });
               },
               error(error) {
-                logInspectorRequest().json(params).error({ json: error });
+                logInspectorRequest().error({ json: error });
               },
             })
           );
