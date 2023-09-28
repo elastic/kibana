@@ -11,13 +11,21 @@ import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
 
+const upselling = new UpsellingService();
+
+export const contractStartServicesMock: ContractStartServices = {
+  extraRoutes$: of([]),
+  isSidebarEnabled$: of(true),
+  getComponent$: jest.fn(),
+  upselling,
+  dataQualityPanelConfig: undefined,
+};
+
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   setAppLinksSwitcher: jest.fn(),
   setDataQualityPanelConfig: jest.fn(),
 });
-
-const upselling = new UpsellingService();
 
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
@@ -33,12 +41,4 @@ const startMock = (): PluginStart => ({
 export const securitySolutionMock = {
   createSetup: setupMock,
   createStart: startMock,
-};
-
-export const contractStartServicesMock: ContractStartServices = {
-  extraRoutes$: of([]),
-  isSidebarEnabled$: of(true),
-  getComponent$: jest.fn(),
-  upselling,
-  dataQualityPanelConfig: undefined,
 };
