@@ -32,7 +32,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const security = getService('security');
 
   return {
-
     /**
      * Define a role that DOES grant privileges to create certain types of reports.
      */
