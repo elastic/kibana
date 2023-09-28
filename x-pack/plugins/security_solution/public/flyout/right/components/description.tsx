@@ -56,34 +56,41 @@ export const Description: FC = () => {
   }, [eventId, openPreviewPanel, indexName, scopeId, ruleId]);
 
   const viewRule = useMemo(
-    () =>
-      !isEmpty(ruleName) &&
-      !isEmpty(ruleId) && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="expand"
-            onClick={openRulePreview}
-            iconSide="right"
-            data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel',
-              {
-                defaultMessage: 'Show rule summary',
-              }
-            )}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
-              defaultMessage="Show rule summary"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      ),
+    () => (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          iconType="expand"
+          onClick={openRulePreview}
+          iconSide="right"
+          data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel',
+            {
+              defaultMessage: 'Show rule summary',
+            }
+          )}
+          disabled={isEmpty(ruleName) || isEmpty(ruleId)}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
+            defaultMessage="Show rule summary"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    ),
     [ruleName, openRulePreview, ruleId]
   );
 
-  const hasRuleDescription = ruleDescription && ruleDescription.length > 0;
+  const alertRuleDescription =
+    ruleDescription?.length > 0 ? (
+      ruleDescription
+    ) : (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.about.description.noRuleDescription"
+        defaultMessage="There's no description for this rule."
+      />
+    );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -112,7 +119,7 @@ export const Description: FC = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={DESCRIPTION_DETAILS_TEST_ID}>
-        {hasRuleDescription ? ruleDescription : '-'}
+        {isAlert ? alertRuleDescription : '-'}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
