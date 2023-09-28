@@ -18,9 +18,9 @@ const name = 'Some image field';
 const id = 'some:image:field';
 
 describe('ImageInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: ImageInputProps = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'image',
@@ -35,7 +35,7 @@ describe('ImageInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -43,7 +43,7 @@ describe('ImageInput', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('calls the onChange prop when a file is selected', async () => {
+  it('calls the onInputChange prop when a file is selected', async () => {
     const { getByTestId } = render(wrap(<ImageInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`) as HTMLInputElement;
     const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
@@ -55,7 +55,7 @@ describe('ImageInput', () => {
     expect(input.files?.length).toBe(1);
 
     // This doesn't work for some reason.
-    // expect(defaultProps.onChange).toHaveBeenCalledWith({ value: file });
+    // expect(defaultProps.onInputChange).toHaveBeenCalledWith({ value: file });
   });
 
   it('disables the input when isDisabled prop is true', () => {

@@ -448,6 +448,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -455,6 +456,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -462,6 +464,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 
@@ -469,6 +472,7 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
       .send()
       .expect(200),
 });
@@ -481,12 +485,14 @@ export const installLegacyRiskScore = async ({
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send({ riskScoreEntity: 'host' })
     .expect(200);
 
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send({ riskScoreEntity: 'user' })
     .expect(200);
 
