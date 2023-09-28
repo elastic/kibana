@@ -67,6 +67,7 @@ packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+packages/cloud @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
@@ -581,6 +582,8 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
+packages/kbn-resizable-layout @elastic/kibana-data-discovery
+examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations

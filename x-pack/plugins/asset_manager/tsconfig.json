@@ -22,6 +22,7 @@
     "@kbn/datemath",
     "@kbn/apm-data-access-plugin",
     "@kbn/core-http-browser-mocks",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/metrics-data-access-plugin"
   ]
 }

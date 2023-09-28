@@ -12,7 +12,8 @@
     "optionalPlugins": [
     ],
     "requiredPlugins": [
-      "apmDataAccess"
+      "apmDataAccess",
+      "metricsDataAccess"
     ],
     "browser": true,
     "server": true,

@@ -110,7 +110,6 @@ export const AssistantTitle: React.FC<{
           <EuiFlexItem grow={false}>
             <ConnectorSelectorInline
               isDisabled={isDisabled || selectedConversation === undefined}
-              onConnectorModalVisibilityChange={() => {}}
               selectedConnectorId={selectedConnectorId}
               selectedConversation={selectedConversation}
             />

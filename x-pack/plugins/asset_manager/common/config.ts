@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const INDEX_DEFAULTS = {
-  metrics: 'metricbeat-*,metrics-*',
   logs: 'filebeat-*,logs-*',
 };
 
@@ -20,7 +19,6 @@ export const configSchema = schema.object({
   // that value is propagated everywhere. For now, we duplicate the value here.
   sourceIndices: schema.object(
     {
-      metrics: schema.string({ defaultValue: INDEX_DEFAULTS.metrics }),
       logs: schema.string({ defaultValue: INDEX_DEFAULTS.logs }),
     },
     { defaultValue: INDEX_DEFAULTS }
