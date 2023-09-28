@@ -37,21 +37,6 @@ export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
 export const InventoryMetricRT = rt.keyof({
-  hostSystemOverview: null,
-  hostCpuUsage: null,
-  hostFilesystem: null,
-  hostK8sOverview: null,
-  hostK8sCpuCap: null,
-  hostK8sDiskCap: null,
-  hostK8sMemoryCap: null,
-  hostK8sPodCap: null,
-  hostLoad: null,
-  hostMemoryUsage: null,
-  hostNetworkTraffic: null,
-  hostDockerOverview: null,
-  hostDockerInfo: null,
-  hostDockerTop5ByCpu: null,
-  hostDockerTop5ByMemory: null,
   podOverview: null,
   podCpuUsage: null,
   podMemoryUsage: null,
@@ -71,12 +56,6 @@ export const InventoryMetricRT = rt.keyof({
   nginxRequestRate: null,
   nginxActiveConnections: null,
   nginxRequestsPerConnection: null,
-  awsOverview: null,
-  awsCpuUtilization: null,
-  awsNetworkBytes: null,
-  awsNetworkPackets: null,
-  awsDiskioBytes: null,
-  awsDiskioOps: null,
   awsEC2CpuUtilization: null,
   awsEC2NetworkTraffic: null,
   awsEC2DiskIOBytes: null,
@@ -377,7 +356,7 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 export interface InventoryMetrics {
-  tsvb: { [name: string]: TSVBMetricModelCreator };
+  tsvb?: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
@@ -403,7 +382,7 @@ export interface InventoryModel {
     uptime: boolean;
   };
   metrics: InventoryMetrics;
-  requiredMetrics: InventoryMetric[];
+  requiredMetrics?: InventoryMetric[];
   tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
 }
