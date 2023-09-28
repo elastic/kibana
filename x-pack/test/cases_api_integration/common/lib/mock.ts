@@ -48,6 +48,7 @@ export const postCaseReq: CasePostRequest = {
   },
   owner: 'securitySolutionFixture',
   assignees: [],
+  customFields: [],
 };
 
 /**
