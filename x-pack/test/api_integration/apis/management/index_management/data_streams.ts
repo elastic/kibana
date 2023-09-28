@@ -227,6 +227,16 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({ success: true });
       });
+
+      it('sets data retention to infinite', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({})
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
     });
 
     describe('Delete', () => {

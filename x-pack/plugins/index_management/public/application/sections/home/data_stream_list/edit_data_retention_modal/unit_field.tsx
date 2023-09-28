@@ -38,11 +38,12 @@ export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, e
                 color="text"
                 iconSide="right"
                 iconType="arrowDown"
-                onClick={() => setOpen((x) => !x)}
+                onClick={() => setOpen((isOpen) => !isOpen)}
                 data-test-subj="show-filters-button"
                 disabled={disabled}
               >
-                {options.find((x) => x.value === field.value)?.text ?? `${field.value}`}
+                {options.find((timeUnitOption) => timeUnitOption.value === field.value)?.text ??
+                  `${field.value}`}
               </EuiButtonEmpty>
             }
             ownFocus

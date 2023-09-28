@@ -76,7 +76,10 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
 
   const midpoint = Math.ceil(descriptionListItems.length / 2);
   const descriptionListColumnOne = descriptionListItems.slice(0, midpoint);
-  const descriptionListColumnTwo = descriptionListItems.slice(-midpoint);
+  const descriptionListColumnTwo = descriptionListItems.slice(
+    midpoint,
+    descriptionListItems.length
+  );
 
   return (
     <EuiFlexGroup>
@@ -302,7 +305,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     </EuiButton>
   );
 
-  const panels = [
+  const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       title: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelTitle', {
@@ -310,6 +313,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       }),
       items: [
         {
+          key: 'editDataRetention',
           name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataRetention', {
             defaultMessage: 'Edit data retention',
           }),
@@ -323,10 +327,10 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ...(dataStream?.privileges.delete_index
           ? [
               {
+                key: 'deleteDataStream',
                 name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelDelete', {
                   defaultMessage: 'Delete',
                 }),
-                color: 'danger',
                 'data-test-subj': 'deleteDataStreamButton',
                 icon: <EuiIcon type="trash" size="m" color="danger" />,
                 onClick: () => {
@@ -413,10 +417,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={panels as EuiContextMenuPanelDescriptor[]}
-                  />
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
                 </EuiPopover>
               </EuiFlexItem>
             )}

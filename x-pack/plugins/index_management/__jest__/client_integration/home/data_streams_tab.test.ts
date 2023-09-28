@@ -713,7 +713,8 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
         await clickNameAt(1);
 
-        find('manageDataStreamButton').simulate('click');
+        // Open manage data stream panel
+        testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeTruthy();
       });
 
@@ -725,6 +726,8 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
         await clickNameAt(0);
 
+        // Open manage data stream panel
+        testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeFalsy();
       });
     });
