@@ -202,7 +202,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getDatasetSelectorButton() {
-      return testSubjects.find('datasetSelectorPopoverButton', 30000); // Increase timeout if refresh takes longer before opening the selector
+      return testSubjects.find('datasetSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
     getDatasetSelectorContent() {

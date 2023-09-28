@@ -8,10 +8,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/166461
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
