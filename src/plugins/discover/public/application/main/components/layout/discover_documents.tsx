@@ -21,7 +21,7 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
-import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
+import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -34,6 +34,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -63,7 +64,7 @@ const progressStyle = css`
 `;
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
-const DataGridMemoized = React.memo(UnifiedDataTable);
+const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
@@ -277,7 +278,7 @@ function DiscoverDocumentsComponent({
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
             >
-              <DataGridMemoized
+              <DiscoverGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
                 columns={currentColumns}
                 expandedDoc={expandedDoc}

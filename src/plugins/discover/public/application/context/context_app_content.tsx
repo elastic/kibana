@@ -26,8 +26,9 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -66,7 +67,7 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(UnifiedDataTable);
+const DiscoverGridMemoized = React.memo(DiscoverGrid);
 const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 

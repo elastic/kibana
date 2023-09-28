@@ -1,0 +1,23 @@
+.dscGridToolbar {
+  padding: $euiSizeXS $euiSizeS;
+}
+
+.dscGridToolbarControlGroup {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadiusSmall;
+  padding: 0 $euiSizeXS;
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+}
+
+.dscGridToolbarControl {
+  padding-top: $euiSizeXS;
+  padding-bottom: $euiSizeXS;
+
+  & + & {
+    border-left: $euiBorderThin;
+    margin-left: $euiSizeXS;
+    padding-left: $euiSizeXS;
+  }
+}

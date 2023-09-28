@@ -16,9 +16,6 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   EuiDataGridSorting,
   EuiDataGrid,
-  EuiDataGridProps,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -30,7 +27,9 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
+  EuiDataGridCustomToolbarProps,
   EuiDataGridStyle,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -264,6 +263,15 @@ export interface UnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Optional render for the grid toolbar
+   * @param toolbarProps
+   * @param gridProps
+   */
+  renderCustomToolbar?: (
+    toolbarProps: EuiDataGridCustomToolbarProps,
+    gridProps: { totalHits?: number }
+  ) => React.ReactElement;
+  /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
@@ -327,6 +335,7 @@ export const UnifiedDataTable = ({
   onFieldEdited,
   services,
   renderCustomGridBody,
+  renderCustomToolbar,
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
@@ -528,6 +537,16 @@ export const UnifiedDataTable = ({
     ]
   );
 
+  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    () =>
+      renderCustomToolbar
+        ? (toolbarProps) =>
+            renderCustomToolbar(toolbarProps, {
+              totalHits,
+            })
+        : undefined,
+    [renderCustomToolbar, totalHits]
+  );
   /**
    * Render variables
    */
@@ -693,8 +712,6 @@ export const UnifiedDataTable = ({
         ? {
             allowDensity: false,
             allowRowHeight: true,
-            allowResetButton: false,
-            additionalDisplaySettings: <div>Example extra content</div>,
           }
         : undefined,
     [onUpdateRowHeight]
@@ -771,46 +788,6 @@ export const UnifiedDataTable = ({
     );
   }
 
-  const renderCustomToolbar: EuiDataGridProps['renderCustomToolbar'] = ({
-    columnControl,
-    columnSortingControl,
-    fullScreenControl,
-    keyboardShortcutsControl,
-    displayControl,
-  }) => {
-    return (
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>{`${totalHits} documents`}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <div className="unifiedDataTable__toolbarControlGroup">
-                <div className="unifiedDataTable__toolbarControl">{columnControl}</div>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="unifiedDataTable__toolbarControlGroup">
-                <div className="unifiedDataTable__toolbarControl">{columnSortingControl}</div>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="unifiedDataTable__toolbarControlGroup">
-                <div className="unifiedDataTable__toolbarControl">{keyboardShortcutsControl}</div>
-                <div className="unifiedDataTable__toolbarControl">{displayControl}</div>
-                <div className="unifiedDataTable__toolbarControl">{fullScreenControl}</div>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
@@ -842,7 +819,7 @@ export const UnifiedDataTable = ({
             inMemory={inMemory}
             gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
-            renderCustomToolbar={renderCustomToolbar}
+            renderCustomToolbar={renderCustomToolbarFn}
             trailingControlColumns={trailingControlColumns}
           />
         </div>
