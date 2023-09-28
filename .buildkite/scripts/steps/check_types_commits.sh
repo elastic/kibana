@@ -16,6 +16,27 @@ is_flag_set () {
   fi
 }
 
+get_args_for_flag_result=()
+get_args_for_flag () {
+  flag=$1
+  found=false
+  get_args_for_flag_result=()
+  if [ ${#argv[@]} -gt 0 ]; then
+    for i in "${!argv[@]}"; do
+      arg="${argv[$i]}"
+      if [ "$found" == false ] && [[ "$arg" == "$flag" ]]; then
+        found=true
+      elif [ "$found" == true ]; then
+        if [[ "$arg" == -* ]]; then
+          return
+        else
+          get_args_for_flag_result+=("$arg")
+        fi
+      fi
+    done
+  fi
+}
+
 if is_flag_set "--help" || is_flag_set "-h"; then
   echo "Detects the files changed in a given set of commits, finds the related"
   echo "tsconfig.json files, and scope the TypeScript type check to those."
@@ -49,7 +70,8 @@ if [[ "${CI-}" == "true" ]]; then
   diffArgs+=("$sha" "${GITHUB_PR_TRIGGERED_SHA-}")
 elif is_flag_set "--merge-base"; then
   # Similar to when CI=true, but locally
-  diffArgs+=("--merge-base" "${2-main}" "${3-HEAD}")
+  get_args_for_flag "--merge-base"
+  diffArgs+=("--merge-base" "${get_args_for_flag_result[0]-main}" "${get_args_for_flag_result[1]-HEAD}")
 elif is_flag_set "--cached"; then
   # Only check staged files
   diffArgs+=("--cached")
