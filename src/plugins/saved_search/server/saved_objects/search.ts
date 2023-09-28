@@ -10,7 +10,7 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from './search_migrations';
-import { SCHEMA_SEARCH_V8_8_0, SCHEMA_SEARCH_V8_10_0 } from './schema';
+import { SCHEMA_SEARCH_V8_8_0, SCHEMA_SEARCH_V8_11_0 } from './schema';
 
 export function getSavedSearchObjectType(
   getSearchSourceMigrations: () => MigrateFunctionsObject
@@ -44,7 +44,7 @@ export function getSavedSearchObjectType(
     },
     schemas: {
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
-      '8.10.0': SCHEMA_SEARCH_V8_10_0,
+      '8.11.0': SCHEMA_SEARCH_V8_11_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };
