@@ -271,6 +271,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   ),
                 }}
                 fullWidth
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === 'Enter' && formik.submitCount > 0) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
               />
             </FormRow>
 
