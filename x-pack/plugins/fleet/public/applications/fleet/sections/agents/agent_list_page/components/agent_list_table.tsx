@@ -31,6 +31,8 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
+import { AgentUpgradeStatus } from './agent_upgrade_status';
+
 import { EmptyPrompt } from './empty_prompt';
 
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
@@ -276,14 +278,26 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: VERSION_FIELD,
       sortable: true,
-      width: '70px',
+      width: '180px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-          <EuiFlexItem grow={false} className="eui-textNoWrap">
-            {safeMetadata(version)}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" className="eui-textNoWrap">
+                  {safeMetadata(version)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AgentUpgradeStatus
+                  agentStatus={agent.status}
+                  agentUpgradeDetails={agent.upgrade_details}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {isAgentSelectable(agent) &&
           latestAgentVersion &&

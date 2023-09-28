@@ -48,6 +48,17 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION';
 
+export type AgentUpgradeStateType =
+  | 'UPG_REQUESTED'
+  | 'UPG_SCHEDULED'
+  | 'UPG_DOWNLOADING'
+  | 'UPG_EXTRACTING'
+  | 'UPG_REPLACING'
+  | 'UPG_RESTARTING'
+  | 'UPG_WATCHING'
+  | 'UPG_ROLLBACK'
+  | 'UPG_FAILED';
+
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
@@ -102,6 +113,7 @@ interface AgentBase {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
+  upgrade_details?: AgentUpgradeDetails;
 }
 
 export interface AgentMetrics {
@@ -420,4 +432,16 @@ export interface ActionStatusOptions {
   errorSize: number;
   page?: number;
   perPage?: number;
+}
+
+export interface AgentUpgradeDetails {
+  target_version: string;
+  action_id: string;
+  state: AgentUpgradeStateType;
+  metadata: {
+    scheduled_at?: string;
+    download_percent?: number;
+    failed_state?: string; // TODO: create type with possible failed states
+    error_msg?: string;
+  };
 }
