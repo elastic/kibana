@@ -116,7 +116,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getKubernetesComplianceScore: async () => {
       await retry.waitFor(
         'Cloud posture dashboard summary section to be displayed',
-        async () => await dashboard.getKubernetesSummarySection()
+        async () => !!(await dashboard.getKubernetesSummarySection())
       );
 
       return await testSubjects.find('dashboard-summary-section-compliance-score');
