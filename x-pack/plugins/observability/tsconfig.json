@@ -87,6 +87,7 @@
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
     "@kbn/deeplinks-observability",
+    "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
