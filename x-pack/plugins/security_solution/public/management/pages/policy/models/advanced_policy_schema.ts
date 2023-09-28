@@ -1345,7 +1345,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'mac.advanced.events.image_load',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.fileaccess',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
       {
         defaultMessage:
           'Collects image load events and use them for behaviour protection. By default, does not send events to the stack. Default: true',
@@ -1356,7 +1356,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'mac.advanced.image_load.capture',
     first_supported_version: '8.11',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.image_load',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.image_load.capture',
       {
         defaultMessage:
           'Verbose collection of image load events. Sends all of them to the stack (High volume!). Default: false',
