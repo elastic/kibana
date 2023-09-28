@@ -229,7 +229,7 @@ export const defineLogRateAnalysisRoute = (
                   const indexInfo = await fetchIndexInfo(
                     client,
                     request.body,
-                    ['message'],
+                    ['message', 'error.message'],
                     abortSignal
                   );
 
@@ -238,7 +238,6 @@ export const defineLogRateAnalysisRoute = (
                   textFieldCandidates.push(...indexInfo.textFieldCandidates);
                   totalDocCount = indexInfo.totalDocCount;
                 } catch (e) {
-                  // console.log(e);
                   if (!isRequestAbortedError(e)) {
                     logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
                     pushError(`Failed to fetch index information.`);

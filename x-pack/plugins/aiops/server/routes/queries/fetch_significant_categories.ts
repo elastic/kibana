@@ -39,6 +39,22 @@ export const fetchSignificantCategories = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
+  // To make sure we have the same categories for both baseline and deviation,
+  // we do an initial query that spans across baseline start and deviation end.
+  // We could update this to query the exact baseline AND deviation range, but
+  // wanted to avoid the refactor here and it should be good enough for a start.
+  const categoriesOverall = await fetchCategories(
+    esClient,
+    params,
+    fieldNames,
+    params.baselineMin,
+    params.deviationMax,
+    logger,
+    sampleProbability,
+    emitError,
+    abortSignal
+  );
+
   const categoriesBaseline = await fetchCategories(
     esClient,
     params,
@@ -63,49 +79,60 @@ export const fetchSignificantCategories = async (
     abortSignal
   );
 
-  if (categoriesBaseline.length === 0 || categoriesDeviation.length === 0) return [];
-
-  const categoriesBaselineTotalCount = getCategoriesTotalCount(categoriesBaseline[0].categories);
-  const categoriesBaselineTestData = getCategoriesTestData(categoriesBaseline[0].categories);
-
-  const categoriesDeviationTotalCount = getCategoriesTotalCount(categoriesDeviation[0].categories);
-  const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation[0].categories);
-
-  // Get all unique keys from both arrays
-  const allKeys: string[] = Array.from(
-    new Set([
-      ...categoriesBaselineTestData.map((term) => term.key.toString()),
-      ...categoriesDeviationTestData.map((term) => term.key.toString()),
-    ])
-  ).slice(0, 100);
+  if (
+    categoriesBaseline.length !== fieldNames.length ||
+    categoriesDeviation.length !== fieldNames.length
+  )
+    return [];
 
   const significantCategories: SignificantTerm[] = [];
 
-  allKeys.forEach((key) => {
-    const baselineTerm = categoriesBaselineTestData.find((term) => term.key === key);
-    const deviationTerm = categoriesDeviationTestData.find((term) => term.key === key);
+  fieldNames.forEach((fieldName, i) => {
+    const categoriesBaselineTotalCount = getCategoriesTotalCount(categoriesBaseline[i].categories);
+    const categoriesBaselineTestData = getCategoriesTestData(categoriesBaseline[i].categories);
 
-    const observed: number = deviationTerm?.percentage ?? 0;
-    const expected: number = baselineTerm?.percentage ?? 0;
-    const chiSquared = Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
+    const categoriesDeviationTotalCount = getCategoriesTotalCount(
+      categoriesDeviation[i].categories
+    );
+    const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation[i].categories);
 
-    const pValue = criticalTableLookup(chiSquared, 1);
-    const score = Math.log(pValue);
+    // Get all unique keys from both arrays
+    const allKeys: string[] = Array.from(
+      new Set([
+        ...categoriesBaselineTestData.map((term) => term.key.toString()),
+        ...categoriesDeviationTestData.map((term) => term.key.toString()),
+      ])
+    ).slice(0, 100);
 
-    if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
-      significantCategories.push({
-        fieldName: 'message',
-        fieldValue: key,
-        doc_count: deviationTerm?.doc_count ?? 0,
-        bg_count: baselineTerm?.doc_count ?? 0,
-        total_doc_count: categoriesDeviationTotalCount,
-        total_bg_count: categoriesBaselineTotalCount,
-        score,
-        pValue,
-        normalizedScore: getNormalizedScore(score),
-        type: 'log-pattern',
-      });
-    }
+    allKeys.forEach((key) => {
+      const categoryData = categoriesOverall[i].categories.find((c) => c.key === key);
+
+      const baselineTerm = categoriesBaselineTestData.find((term) => term.key === key);
+      const deviationTerm = categoriesDeviationTestData.find((term) => term.key === key);
+
+      const observed: number = deviationTerm?.percentage ?? 0;
+      const expected: number = baselineTerm?.percentage ?? 0;
+      const chiSquared = Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
+
+      const pValue = criticalTableLookup(chiSquared, 1);
+      const score = Math.log(pValue);
+
+      if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
+        significantCategories.push({
+          key,
+          fieldName,
+          fieldValue: categoryData?.examples[0] ?? '',
+          doc_count: deviationTerm?.doc_count ?? 0,
+          bg_count: baselineTerm?.doc_count ?? 0,
+          total_doc_count: categoriesDeviationTotalCount,
+          total_bg_count: categoriesBaselineTotalCount,
+          score,
+          pValue,
+          normalizedScore: getNormalizedScore(score),
+          type: 'log-pattern',
+        });
+      }
+    });
   });
 
   return significantCategories;

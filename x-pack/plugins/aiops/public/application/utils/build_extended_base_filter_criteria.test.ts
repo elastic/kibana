@@ -12,6 +12,7 @@ import type { GroupTableItem } from '../../components/log_rate_analysis_results_
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
 const selectedSignificantTermMock: SignificantTerm = {
+  key: 'meta.cloud.instance_id.keyword:1234',
   doc_count: 53408,
   bg_count: 1154,
   fieldName: 'meta.cloud.instance_id.keyword',

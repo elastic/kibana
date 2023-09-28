@@ -170,6 +170,8 @@ export const fetchSignificantTermPValues = async (
 
       if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD) {
         result.push({
+          key: `${fieldName}:${String(bucket.key)}`,
+          type: 'keyword',
           fieldName,
           fieldValue: String(bucket.key),
           doc_count: bucket.doc_count,
@@ -179,7 +181,6 @@ export const fetchSignificantTermPValues = async (
           score: bucket.score,
           pValue,
           normalizedScore: getNormalizedScore(bucket.score),
-          type: 'keyword',
         });
       }
     }

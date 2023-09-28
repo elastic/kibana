@@ -63,6 +63,8 @@ export interface HistogramField {
  * aggregation type.
  */
 export interface SignificantTerm extends FieldValuePair {
+  key: string;
+  type: 'keyword' | 'log-pattern';
   doc_count: number;
   bg_count: number;
   total_doc_count: number;
@@ -70,7 +72,6 @@ export interface SignificantTerm extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
-  type: 'keyword' | 'log-pattern';
   histogram?: SignificantTermHistogramItem[];
   unique?: boolean;
 }

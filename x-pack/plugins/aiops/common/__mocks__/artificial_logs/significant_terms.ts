@@ -9,6 +9,7 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 export const significantTerms: SignificantTerm[] = [
   {
+    key: 'user:Peter',
     fieldName: 'user',
     fieldValue: 'Peter',
     doc_count: 1981,
@@ -21,6 +22,7 @@ export const significantTerms: SignificantTerm[] = [
     type: 'keyword',
   },
   {
+    key: 'response_code:500',
     fieldName: 'response_code',
     fieldValue: '500',
     doc_count: 1819,
@@ -33,6 +35,7 @@ export const significantTerms: SignificantTerm[] = [
     type: 'keyword',
   },
   {
+    key: 'url:home.php',
     fieldName: 'url',
     fieldValue: 'home.php',
     doc_count: 1744,
@@ -45,6 +48,7 @@ export const significantTerms: SignificantTerm[] = [
     type: 'keyword',
   },
   {
+    key: 'url:login.php',
     fieldName: 'url',
     fieldValue: 'login.php',
     doc_count: 1738,

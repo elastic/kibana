@@ -15,8 +15,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiCode,
   EuiIcon,
   EuiIconTip,
+  EuiText,
   EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
@@ -143,9 +145,19 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
-      render: (_, { fieldValue }) => {
-        return <div css={cssMultiLineTruncation}>{String(fieldValue)}</div>;
-      },
+      render: (_, { fieldValue, type }) => (
+        <div css={cssMultiLineTruncation}>
+          {type === 'keyword' ? (
+            String(fieldValue)
+          ) : (
+            <EuiText size="xs">
+              <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
+                {fieldValue}
+              </EuiCode>
+            </EuiText>
+          )}
+        </div>
+      ),
       sortable: true,
       textOnly: true,
       truncateText: false,
