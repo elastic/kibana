@@ -40,6 +40,7 @@ exports[`Should render icon select 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
+    repositionToCrossAxis={true}
   >
     <EuiFocusTrap
       clickOutsideDisables={true}
@@ -131,6 +132,7 @@ exports[`Should render icon select with custom icons 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
+    repositionToCrossAxis={true}
   >
     <EuiFocusTrap
       clickOutsideDisables={true}
