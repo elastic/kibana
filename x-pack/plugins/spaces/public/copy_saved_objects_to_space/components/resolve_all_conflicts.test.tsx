@@ -107,6 +107,7 @@ describe('ResolveAllConflicts', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
         <EuiContextMenuPanel
           items={

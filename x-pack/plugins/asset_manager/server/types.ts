@@ -11,13 +11,13 @@ import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
   esClient: ElasticsearchClient;
 }
 
 export const INDEX_DEFAULTS = {
-  metrics: 'metricbeat-*,metrics-*',
   logs: 'filebeat-*,logs-*',
 };
 
@@ -29,7 +29,6 @@ export const configSchema = schema.object({
   // that value is propagated everywhere. For now, we duplicate the value here.
   sourceIndices: schema.object(
     {
-      metrics: schema.string({ defaultValue: INDEX_DEFAULTS.metrics }),
       logs: schema.string({ defaultValue: INDEX_DEFAULTS.logs }),
     },
     { defaultValue: INDEX_DEFAULTS }
@@ -48,6 +47,7 @@ export type AssetManagerConfig = TypeOf<typeof configSchema>;
 
 export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;
