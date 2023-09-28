@@ -50,6 +50,22 @@ const MAX_CONCURRENT_DOWNLOADS_LABEL = i18n.translate(
   }
 );
 
+const USE_TEXT_EXTRACTION_SERVICE_LABEL = i18n.translate(
+  'searchConnectors.nativeConnectors.textExtractionService.label',
+  {
+    defaultMessage: 'Use text extraction service',
+  }
+);
+
+const USE_TEXT_EXTRACTION_SERVICE_TOOLTIP = i18n.translate(
+  'searchConnectors.nativeConnectors.textExtractionService.tooltip',
+  {
+    defaultMessage:
+      'Requires a separate deployment of the Elastic Data Extraction Service. ' +
+      'Also requires that pipeline settings disable text extraction.',
+  }
+);
+
 const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databaseLabel', {
   defaultMessage: 'Database',
 });
@@ -156,6 +172,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         value: 100,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -398,6 +429,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 50,
       },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -502,6 +548,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: 100,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -740,6 +801,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         value: 100,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -1655,6 +1731,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: 10,
       },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -1780,24 +1871,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: false,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceLabel',
-          {
-            defaultMessage: 'Use text extraction service',
-          }
-        ),
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 6,
         required: true,
         sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceTooltip',
-          {
-            defaultMessage:
-              'Requires a separate deployment of the Elastic Data Extraction Service. ' +
-              'Also requires that pipeline settings disable text extraction.',
-          }
-        ),
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],
