@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.expectFlyoutIsOpen();
 
         // Move the third link up one step
-        dashboardLinks.reorderLinks('link003', 3, 1, true);
+        await dashboardLinks.reorderLinks('link003', 3, 1, true);
 
         await dashboardLinks.clickPanelEditorSaveButton();
         await header.waitUntilLoadingHasFinished();

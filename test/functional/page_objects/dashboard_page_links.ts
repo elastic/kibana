@@ -154,10 +154,8 @@ export class DashboardPageLinks extends FtrService {
       linkLabel
     );
     await draggableButton.focus();
-    await this.retry.try(async () => {
-      await this.browser.pressKeys(this.browser.keys.SPACE);
-      linkToMove.elementHasClass('euiDraggable--isDragging');
-    });
+    await this.browser.pressKeys(this.browser.keys.SPACE);
+
     for (let i = 0; i < steps; i++) {
       await this.browser.pressKeys(reverse ? this.browser.keys.UP : this.browser.keys.DOWN);
     }
