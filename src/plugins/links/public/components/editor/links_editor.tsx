@@ -42,8 +42,8 @@ import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
-import { PanelEditorLink } from './panel_editor_link';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
+import { LinksEditorSingleLink } from './links_editor_single_link';
 
 import { TooltipWrapper } from '../tooltip_wrapper';
 
@@ -215,7 +215,7 @@ const LinksEditor = ({
                           data-test-subj={`links--panelEditor--draggableLink`}
                         >
                           {(provided) => (
-                            <PanelEditorLink
+                            <LinksEditorSingleLink
                               link={link}
                               parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}

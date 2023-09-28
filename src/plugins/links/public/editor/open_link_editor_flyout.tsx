@@ -14,7 +14,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';
-import { LinkEditor } from '../components/editor/links_editor_link';
+import { LinkEditor } from '../components/editor/link_editor';
 
 export interface LinksEditorProps {
   link?: Link;

@@ -30,7 +30,7 @@ import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE, Link } from '../../../common/content_management';
 
-export const PanelEditorLink = ({
+export const LinksEditorSingleLink = ({
   link,
   editLink,
   deleteLink,
