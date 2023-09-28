@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover } from '@elastic/eui';
+import styled from 'styled-components';
 import { Ping } from '../../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
 import { MonListDescription, MonListTitle } from './status_bar';
