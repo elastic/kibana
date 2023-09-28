@@ -17,6 +17,9 @@ is_flag_set () {
 }
 
 if is_flag_set "--help" || is_flag_set "-h"; then
+  echo "Detects the files changed in a given set of commits, finds the related"
+  echo "tsconfig.json files, and scope the TypeScript type check to those."
+  echo
   echo "Usage:"
   echo "  $0 [options]"
   echo "  $0 [ref1 [ref2]]"
