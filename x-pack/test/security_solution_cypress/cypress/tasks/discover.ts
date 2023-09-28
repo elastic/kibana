@@ -21,8 +21,14 @@ import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 export const switchDataViewTo = (dataviewName: string) => {
   openDataViewSwitcher();
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.GET_DATA_VIEW(dataviewName)).trigger('click');
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('not.be.visible');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('not.exist');
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
+};
+
+export const switchDataViewToESQL = () => {
+  openDataViewSwitcher();
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWICTHER).trigger('click');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
 };
 
 export const openDataViewSwitcher = () => {
@@ -38,7 +44,7 @@ export const waitForDiscoverGridToLoad = () => {
 };
 
 export const addDiscoverKqlQuery = (kqlQuery: string) => {
-  cy.get(DISCOVER_QUERY_INPUT).type(kqlQuery);
+  cy.get(DISCOVER_QUERY_INPUT).type(`${kqlQuery}{enter}`);
 };
 
 export const submitDiscoverSearchBar = () => {
