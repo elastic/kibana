@@ -78,6 +78,32 @@ When user navigates to Coverage Overview page
 And clicks on technique tile with non zero rules
 Then the popover should display the same number of rule names under their corresponding rule activity section
 And each name should link to its own rule details page
+And popover title should link to corresponding MITRE technique definition
+```
+
+#### **Scenario: User clicks on expand/collapse cells button**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+Given prebuilt rules installed and/or custom rules created
+And rules enabled
+When user navigates to Coverage Overview page
+And clicks on expand cells
+Then the grid should display expanded cell view for each tile
+And each tile should contain the correct number for enabled/disabled rule count display
+```
+
+#### **Scenario: User updates from 7.x to 8.x**
+
+**Automation**: Manual testing.
+
+```Gherkin
+Given user is on `7.x` version of kibana
+And has prebuilt rules installed and/or custom rules created
+When user upgrades to `8.x` version of kibana
+And navigates to the coverage overview page
+Then no errors should be thrown when displaying the dashboard containing the rule data
 ```
 
 ### Coverage overview workflow: filters
