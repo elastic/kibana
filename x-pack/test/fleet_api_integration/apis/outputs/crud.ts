@@ -475,7 +475,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(newOutput[0].shipper).to.equal(null);
       });
 
-      it.only('should allow secrets to be updated + delete unused secret', async function () {
+      it('should allow secrets to be updated + delete unused secret', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -1216,6 +1216,50 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           expect(deleteResponse.id).to.eql(outputId);
+        });
+
+        it('should delete secrets when deleting an output', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Kafka Output With Secret',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'ssl',
+              topics: [{ topic: 'topic1' }],
+              config_yaml: 'shipper: {}',
+              shipper: {
+                disk_queue_enabled: true,
+                disk_queue_path: 'path/to/disk/queue',
+                disk_queue_encryption_enabled: true,
+              },
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: {
+                ssl: {
+                  key: 'KEY',
+                },
+              },
+            })
+            .expect(200);
+
+          const outputWithSecretsId = res.body.item.id;
+          const secretId = res.body.item.secrets.ssl.key.id;
+
+          await supertest
+            .delete(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          try {
+            await getSecretById(secretId);
+            expect().fail('Secret should have been deleted');
+          } catch (e) {
+            // not found
+          }
         });
       });
 

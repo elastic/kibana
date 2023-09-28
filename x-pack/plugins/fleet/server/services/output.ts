@@ -55,6 +55,7 @@ import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
 import {
+  deleteOutputSecrets,
   deleteSecrets,
   extractAndUpdateOutputSecrets,
   extractAndWriteOutputSecrets,
@@ -677,6 +678,11 @@ class OutputService {
       action: 'delete',
       id: outputIdToUuid(id),
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
+    await deleteOutputSecrets({
+      esClient: appContextService.getInternalUserESClient(),
+      output: originalOutput,
     });
 
     return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));

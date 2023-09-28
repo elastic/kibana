@@ -300,6 +300,28 @@ function getOutputSecretPaths(
   return outputSecretPaths;
 }
 
+export async function deleteOutputSecrets(opts: {
+  output: Output;
+  esClient: ElasticsearchClient;
+}): Promise<void> {
+  const { output, esClient } = opts;
+
+  const outputType = output.type;
+  const outputSecretPaths = getOutputSecretPaths(outputType, output);
+
+  if (outputSecretPaths.length === 0) {
+    return Promise.resolve();
+  }
+
+  const secretIds = outputSecretPaths.map(({ value }) => (value as { id: string }).id);
+
+  try {
+    return deleteSecrets({ esClient, ids: secretIds });
+  } catch (err) {
+    appContextService.getLogger().warn(`Error deleting secrets: ${err}`);
+  }
+}
+
 export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
   const outputSecretPaths: PolicySecretReference[] = [];
 
