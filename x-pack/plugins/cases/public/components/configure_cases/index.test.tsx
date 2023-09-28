@@ -70,7 +70,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
   });
 
   describe('rendering', () => {
@@ -833,7 +833,7 @@ describe('ConfigureCases', () => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
-      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
     });
 
     it('should not render connectors and closure options', () => {
