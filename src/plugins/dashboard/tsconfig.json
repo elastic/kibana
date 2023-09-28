@@ -67,7 +67,8 @@
     "@kbn/serverless",
     "@kbn/no-data-page-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }
