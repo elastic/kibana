@@ -51,7 +51,7 @@ export const ModelDeployed = ({
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle',
-                    { defaultMessage: 'Your ELSER model has deployed but not started.' }
+                    { defaultMessage: 'Your ELSER v2 model has deployed but not started.' }
                   )}
                 </h3>
               </EuiText>

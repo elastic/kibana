@@ -776,10 +776,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.ChangePointDetectionAppStateProps.isServerless",
+            "id": "def-public.ChangePointDetectionAppStateProps.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "showFrozenDataTierChoice",
             "description": [
               "Optional flag to indicate whether kibana is running in serverless"
             ],
@@ -875,10 +875,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogCategorizationAppStateProps.isServerless",
+            "id": "def-public.LogCategorizationAppStateProps.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "showFrozenDataTierChoice",
             "description": [
               "Optional flag to indicate whether kibana is running in serverless"
             ],
@@ -990,10 +990,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisAppStateProps.isServerless",
+            "id": "def-public.LogRateAnalysisAppStateProps.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "showFrozenDataTierChoice",
             "description": [
               "Optional flag to indicate whether kibana is running in serverless"
             ],
@@ -1237,10 +1237,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisContentWrapperProps.isServerless",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "showFrozenDataTierChoice",
             "description": [
               "Optional flag to indicate whether kibana is running in serverless"
             ],
