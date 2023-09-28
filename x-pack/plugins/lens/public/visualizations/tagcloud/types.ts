@@ -7,7 +7,7 @@
 
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import type { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput, ColorMapping } from '@kbn/coloring';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export interface TagcloudState {
@@ -19,6 +19,7 @@ export interface TagcloudState {
   orientation: $Values<typeof Orientation>;
   palette?: PaletteOutput;
   showLabel: boolean;
+  colorMapping?: ColorMapping.Config;
 }
 
 export interface TagcloudConfig extends TagcloudState {

@@ -12,7 +12,6 @@ xpack.legacy_uptime.enabled: false
 xpack.serverless.observability.enabled: true
 
 ## Configure plugins
-xpack.infra.logs.app_target: discover
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing

@@ -8858,46 +8858,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
@@ -27781,46 +27741,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
-              },
-              {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
               },
               {
                 "plugin": "fleet",
