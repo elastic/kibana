@@ -12,6 +12,7 @@ import {
   type AppDeepLink,
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
