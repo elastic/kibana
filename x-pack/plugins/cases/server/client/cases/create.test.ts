@@ -495,31 +495,9 @@ describe('create', () => {
       );
     });
 
-    it('should not throw an error and fill out missing customFields when they are undefined', async () => {
-      await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
-
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
-            category: null,
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            customFields: [
-              { key: 'first_key', type: 'text', value: null },
-              { key: 'second_key', type: 'toggle', value: null },
-            ],
-          },
-          id: expect.any(String),
-          refresh: false,
-        })
+    it('should throw an error when required customFields are undefined', async () => {
+      await expect(create({ ...theCase }, clientArgs, casesClient)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing required custom fields: first_key"`
       );
     });
 
@@ -534,7 +512,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 5."`
+        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
