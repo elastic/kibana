@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'test_custom_field',
             type: CustomFieldTypes.TEXT,
-            value: null
+            value: null,
           },
         ],
         updated_by: nullUser,
