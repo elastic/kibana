@@ -2508,11 +2508,23 @@
           },
           {
             "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
+          },
+          {
+            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
           },
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
