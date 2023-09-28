@@ -58,7 +58,7 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
     return updatedAttributes;
   };
 
-  export const migrateGcpPackagePolicyToV8110: SavedObjectModelDataBackfillFn<
+export const migrateGcpPackagePolicyToV8110: SavedObjectModelDataBackfillFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
@@ -70,7 +70,7 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
 
   const gcpPackage = updatedAttributes.inputs.find((input) => input.type === 'cloudbeat/cis_gcp');
 
-  const gcpAccountTypeExist = gcpPackage?.streams[0]?.vars?.hasOwnProperty('gcp.account_type')
+  const gcpAccountTypeExist = gcpPackage?.streams[0]?.vars?.hasOwnProperty('gcp.account_type');
 
   if (gcpAccountTypeExist || !gcpPackage) {
     return {
@@ -78,9 +78,9 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
     };
   }
 
-  if(gcpPackage.streams[0].vars){
-    const migratedPolicy = {'gcp.account_type': {value: 'single-account', type: 'text'}}
-    gcpPackage.streams[0].vars = {...gcpPackage.streams[0].vars, ...migratedPolicy}
+  if (gcpPackage.streams[0].vars) {
+    const migratedPolicy = { 'gcp.account_type': { value: 'single-account', type: 'text' } };
+    gcpPackage.streams[0].vars = { ...gcpPackage.streams[0].vars, ...migratedPolicy };
   }
 
   return {
