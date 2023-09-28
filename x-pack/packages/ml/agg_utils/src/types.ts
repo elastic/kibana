@@ -56,6 +56,13 @@ export interface HistogramField {
   type: KBN_FIELD_TYPES;
 }
 
+export const SIGNIFICANT_TERM_TYPE = {
+  KEYWORD: 'keyword',
+  LOG_PATTERN: 'log_pattern',
+} as const;
+type SignificantTermTypeKeys = keyof typeof SIGNIFICANT_TERM_TYPE;
+export type SignificantTermType = typeof SIGNIFICANT_TERM_TYPE[SignificantTermTypeKeys];
+
 /**
  * Significant term meta data for a field/value pair.
  * Note this is used as a custom type within Log Rate Analysis
@@ -64,7 +71,7 @@ export interface HistogramField {
  */
 export interface SignificantTerm extends FieldValuePair {
   key: string;
-  type: 'keyword' | 'log-pattern';
+  type: SignificantTermType;
   doc_count: number;
   bg_count: number;
   total_doc_count: number;

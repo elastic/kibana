@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 
 import type { Category } from '../../../common/api/log_categorization/types';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
@@ -129,7 +129,7 @@ export const fetchSignificantCategories = async (
           score,
           pValue,
           normalizedScore: getNormalizedScore(score),
-          type: 'log-pattern',
+          type: SIGNIFICANT_TERM_TYPE.LOG_PATTERN,
         });
       }
     });

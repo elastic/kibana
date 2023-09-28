@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
 import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
@@ -171,7 +171,7 @@ export const fetchSignificantTermPValues = async (
       if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
-          type: 'keyword',
+          type: SIGNIFICANT_TERM_TYPE.KEYWORD,
           fieldName,
           fieldValue: String(bucket.key),
           doc_count: bucket.doc_count,
