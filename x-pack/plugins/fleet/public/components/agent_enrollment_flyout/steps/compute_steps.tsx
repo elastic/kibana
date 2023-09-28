@@ -38,6 +38,7 @@ import {
   InstallManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
   InstallGoogleCloudShellManagedAgentStep,
+  InstallAzureArmTemplateManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -272,6 +273,15 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
           cloudShellCommand: installManagedCommands.googleCloudShell,
+        })
+      );
+    } else if (cloudSecurityIntegration?.isAzureArmTemplate) {
+      steps.push(
+        InstallAzureArmTemplateManagedAgentStep({
+          selectedApiKeyId,
+          apiKeyData,
+          enrollToken,
+          cloudSecurityIntegration,
         })
       );
     } else {
