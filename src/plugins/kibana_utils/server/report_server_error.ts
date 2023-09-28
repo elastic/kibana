@@ -9,7 +9,10 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { KibanaResponseFactory } from '@kbn/core/server';
-import { sanitizeRequestParams, type SanitizedConnectionRequestParams } from './sanitize_request_params';
+import {
+  sanitizeRequestParams,
+  type SanitizedConnectionRequestParams,
+} from './sanitize_request_params';
 import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {

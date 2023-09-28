@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_search',
-              querystring: 'ignore_unavailable=true'
+              querystring: 'ignore_unavailable=true',
             });
           });
 
@@ -313,7 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_search',
-              querystring: 'ignore_unavailable=true'
+              querystring: 'ignore_unavailable=true',
             });
           });
         });
@@ -349,7 +349,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_async_search',
-              querystring: 'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
             });
           });
 
@@ -395,7 +396,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_async_search',
-              querystring: 'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
             });
           });
         });
@@ -484,7 +486,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/_sql',
-              querystring: 'format=json'
+              querystring: 'format=json',
             });
           });
 
@@ -513,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.requestParams).to.eql({
               method: 'POST',
               path: '/_sql',
-              querystring: 'format=json'
+              querystring: 'format=json',
             });
           });
         });
@@ -546,7 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_eql/search',
-              querystring: 'ignore_unavailable=true'
+              querystring: 'ignore_unavailable=true',
             });
           });
 
@@ -576,7 +578,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.requestParams).to.eql({
               method: 'POST',
               path: '/.kibana/_eql/search',
-              querystring: 'ignore_unavailable=true'
+              querystring: 'ignore_unavailable=true',
             });
           });
         });

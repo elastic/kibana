@@ -10,28 +10,32 @@ import { sanitizeRequestParams } from './sanitize_request_params';
 
 describe('sanitizeRequestParams', () => {
   test('should remove headers and body', () => {
-    expect(sanitizeRequestParams({
+    expect(
+      sanitizeRequestParams({
+        method: 'POST',
+        path: '/endpoint',
+        querystring: 'param1=value',
+        headers: {
+          Connection: 'Keep-Alive',
+        },
+        body: 'response',
+      })
+    ).toEqual({
       method: 'POST',
       path: '/endpoint',
       querystring: 'param1=value',
-      headers: {
-        Connection: 'Keep-Alive'
-      },
-      body: 'response',
-    })).toEqual({
-      method: 'POST',
-      path: '/endpoint',
-      querystring: 'param1=value',
-    })
+    });
   });
 
   test('should not include querystring key when its not provided', () => {
-    expect(sanitizeRequestParams({
+    expect(
+      sanitizeRequestParams({
+        method: 'POST',
+        path: '/endpoint',
+      })
+    ).toEqual({
       method: 'POST',
       path: '/endpoint',
-    })).toEqual({
-      method: 'POST',
-      path: '/endpoint',
-    })
+    });
   });
 });

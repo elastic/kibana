@@ -11,7 +11,11 @@ import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
-import { getKbnServerError, KbnServerError, sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
+import {
+  getKbnServerError,
+  KbnServerError,
+  sanitizeRequestParams,
+} from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,

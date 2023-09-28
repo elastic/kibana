@@ -8,13 +8,15 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 
-export type SanitizedConnectionRequestParams = Pick<ConnectionRequestParams, 'method' | 'path' | 'querystring'>;
+export type SanitizedConnectionRequestParams = Pick<
+  ConnectionRequestParams,
+  'method' | 'path' | 'querystring'
+>;
 
 export function sanitizeRequestParams(requestParams: ConnectionRequestParams) {
   return {
     method: requestParams.method,
     path: requestParams.path,
-    ...(requestParams.querystring ? { querystring: requestParams.querystring } : {})
+    ...(requestParams.querystring ? { querystring: requestParams.querystring } : {}),
   };
 }
-
