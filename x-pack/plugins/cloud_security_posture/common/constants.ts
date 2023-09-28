@@ -10,6 +10,7 @@ import {
   VulnSeverity,
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
+  AzureCredentialsTypeFieldMap,
 } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
@@ -65,6 +66,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
+export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
+
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
   'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
@@ -80,7 +83,7 @@ export const POSTURE_TYPE_ALL = 'all';
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
-  showFindingFlyoutEvidence: false,
+  showFindingFlyoutEvidence: true,
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
@@ -153,4 +156,9 @@ export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-de
 export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
   'credentials-file': ['gcp.credentials.file'],
   'credentials-json': ['gcp.credentials.json'],
+};
+
+export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP: AzureCredentialsTypeFieldMap = {
+  manual: [],
+  arm_template: [],
 };

@@ -55,6 +55,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -76,6 +78,7 @@ describe('listRuleTypes', () => {
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   };
   const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
@@ -90,6 +93,7 @@ describe('listRuleTypes', () => {
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   };
   const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
 
@@ -134,6 +138,7 @@ describe('listRuleTypes', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       },
       {
         id: 'myOtherType',
@@ -147,6 +152,7 @@ describe('listRuleTypes', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       },
     ]);
     beforeEach(() => {
@@ -170,6 +176,7 @@ describe('listRuleTypes', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]);
       authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);

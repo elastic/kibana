@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   AGENT,
   CONTAINER,
@@ -86,17 +87,20 @@ export interface ServiceMetadataDetails {
 
 export async function getServiceMetadataDetails({
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
 }): Promise<ServiceMetadataDetails> {
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
+    ...environmentQuery(environment),
     ...rangeQuery(start, end),
   ];
 
