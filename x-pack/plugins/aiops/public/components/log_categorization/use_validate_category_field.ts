@@ -8,10 +8,13 @@
 import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
+import { createCategorizeQuery } from '../../../common/api/log_categorization/create_categorize_query';
+
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { createCategorizeQuery } from './use_categorize_request';
 
 export function useValidateFieldRequest() {
   const { http } = useAiopsAppContext();
