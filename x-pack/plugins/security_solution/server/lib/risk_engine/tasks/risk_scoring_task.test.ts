@@ -168,6 +168,7 @@ describe('Risk Scoring Task', () => {
   describe('runTask()', () => {
     let riskScoringTaskInstanceMock: ReturnType<typeof riskScoringTaskMock.createInstance>;
     let getRiskScoreService: (namespace: string) => Promise<RiskScoreService>;
+    const mockIsCancelled = jest.fn().mockReturnValue(false);
 
     beforeEach(async () => {
       await startRiskScoringTask({
@@ -208,6 +209,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(1);
       });
@@ -233,6 +235,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
         });
 
         expect(mockRiskScoreService.getConfiguration).toHaveBeenCalledTimes(1);
@@ -243,6 +246,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(2);
       });
@@ -263,6 +267,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
         });
 
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
@@ -310,6 +315,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
           });
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
 
@@ -332,6 +338,7 @@ describe('Risk Scoring Task', () => {
           getRiskScoreService,
           logger: mockLogger,
           taskInstance: riskScoringTaskInstanceMock,
+          isCancelled: mockIsCancelled,
         });
 
         expect(initialState).not.toEqual(nextState);
@@ -360,6 +367,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -372,6 +380,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -385,6 +394,7 @@ describe('Risk Scoring Task', () => {
             getRiskScoreService: jest.fn().mockResolvedValueOnce(undefined),
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
+            isCancelled: mockIsCancelled,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -395,10 +405,14 @@ describe('Risk Scoring Task', () => {
       });
 
       describe('when the task timeout has been exceeded', () => {
+        beforeEach(() => {
+          mockIsCancelled.mockReturnValue(true);
+        });
+
         it('stops task execution', async () => {
           await runTask({
             getRiskScoreService,
-            isCancelled: true,
+            isCancelled: mockIsCancelled,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
           });
@@ -406,7 +420,18 @@ describe('Risk Scoring Task', () => {
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
         });
 
-        it.todo('reports an execution error');
+        it('logs that the task was cancelled', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+          });
+
+          expect(mockLogger.info).toHaveBeenCalledWith(
+            expect.stringContaining('task was cancelled')
+          );
+        });
       });
     });
   });
