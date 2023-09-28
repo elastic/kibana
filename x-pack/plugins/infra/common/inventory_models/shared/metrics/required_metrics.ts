@@ -13,12 +13,3 @@ export const nginx: InventoryMetric[] = [
   'nginxActiveConnections',
   'nginxRequestsPerConnection',
 ];
-
-export const aws: InventoryMetric[] = [
-  'awsOverview',
-  'awsCpuUtilization',
-  'awsNetworkBytes',
-  'awsNetworkPackets',
-  'awsDiskioOps',
-  'awsDiskioBytes',
-];

@@ -7,8 +7,8 @@
 import React from 'react';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../hooks/use_control_panels';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 
@@ -42,8 +42,41 @@ const CustomDatasetFilters = ({
 };
 
 const ControlGroupContainer = euiStyled.div`
-  .controlGroup {
-    min-height: unset;
+[class*='options_list_popover_footer--OptionsListPopoverFooter'] {
+  display: none;
+}
+
+[data-test-subj='optionsListControl__sortingOptionsButton'] {
+  display: none;
+}
+
+[id^='control-popover'] .euiPopoverTitle {
+  display: none;
+}
+
+  .euiFlexGroup.controlGroup {
+    min-height: 32px;
+  }
+
+  .euiFormControlLayout.euiFormControlLayout--group.controlFrame__formControlLayout {
+    height: 32px;
+
+    & .euiFormLabel.controlFrame__formControlLayoutLabel {
+      padding: 8px !important;
+    }
+
+    .euiButtonEmpty.euiFilterButton {
+      height: 32px;
+    }
+  }
+
+  .euiText.errorEmbeddableCompact__button {
+    padding: 8px;
+
+    .euiLink {
+      display: flex;
+      gap: 8px;
+    }
   }
 `;
 

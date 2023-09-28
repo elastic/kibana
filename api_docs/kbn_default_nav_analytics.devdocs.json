@@ -172,7 +172,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "[{ id: \"root\"; children: [{ link: \"discover\"; }, { link: \"dashboards\"; }, { link: \"visualize\"; }]; }]"
+              "[{ link: \"discover\"; }, { link: \"dashboards\"; }, { link: \"visualize\"; }]"
             ],
             "path": "packages/default-nav/analytics/default_navigation.ts",
             "deprecated": false,
