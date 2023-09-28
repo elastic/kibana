@@ -23,15 +23,13 @@ export const esqlToOptions = (
     return [];
   }
 
-  const options = (data?.columns ?? [])
-    .filter(({ meta }) => {
-      // if fieldType absent, we do not filter columns by type
-      if (!fieldType) {
-        return true;
-      }
-      return fieldType === meta.type;
-    })
-    .map(({ id }) => ({ label: id }));
+  const options = (data?.columns ?? []).reduce<Array<{ label: string }>>((acc, { id, meta }) => {
+    // if fieldType absent, we do not filter columns by type
+    if (!fieldType || fieldType === meta.type) {
+      acc.push({ label: id });
+    }
+    return acc;
+  }, []);
 
   return options;
 };

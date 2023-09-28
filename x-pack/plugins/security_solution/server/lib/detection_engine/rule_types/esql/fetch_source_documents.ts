@@ -25,7 +25,12 @@ export const fetchSourceDocuments = async ({
   esClient,
   index,
 }: FetchSourceDocumentsArgs): Promise<Record<string, { fields: estypes.SearchHit['fields'] }>> => {
-  const ids = results.map((doc) => doc._id).filter((id): id is string => id != null);
+  const ids = results.reduce<string[]>((acc, doc) => {
+    if (doc._id) {
+      acc.push(doc._id);
+    }
+    return acc;
+  }, []);
 
   // we will fetch source documents only for non-aggregating rules, since aggregating do not have _id
   if (ids.length === 0 || isRuleAggregating) {
