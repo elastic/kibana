@@ -21,21 +21,13 @@ export class Plugin implements AssetManagerPluginClass {
   }
 
   setup(core: CoreSetup) {
-    console.log(
-      '[[plugins.assetManager]] HEY LOOK AT ME HEY HEY HEY SETUP HEY SETUP this is in SETUP set up'
-    );
-    this.logger.info('This is the setup phaaaaaaase');
-    const configKeysMsg = `Config keys: ${Object.keys(this.config).join(', ')}`;
-    console.log('[[plugins.assetManager]]', configKeysMsg);
-    this.logger.info(configKeysMsg);
-
     // Check for config value and bail out if not "alpha-enabled"
     if (!this.config.alphaEnabled) {
-      this.logger.info('Public is NOT enabled');
+      this.logger.debug('Public is NOT enabled');
       return;
     }
 
-    this.logger.info('Public is enabled');
+    this.logger.debug('Public is enabled');
 
     const publicAssetsClient = new PublicAssetsClient(core.http);
     return {
