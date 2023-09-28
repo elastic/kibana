@@ -54,6 +54,7 @@ describe('extract search response warnings', () => {
               failures: response._shards.failures,
             },
           },
+          openInInspector: expect.any(Function),
         },
       ]);
     });
@@ -79,6 +80,7 @@ describe('extract search response warnings', () => {
               failures: response._shards.failures,
             },
           },
+          openInInspector: expect.any(Function),
         },
       ]);
     });
@@ -188,6 +190,7 @@ describe('extract search response warnings', () => {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
           clusters: response._clusters.details,
+          openInInspector: expect.any(Function),
         },
       ]);
     });
@@ -241,6 +244,7 @@ describe('extract search response warnings', () => {
           type: 'incomplete',
           message: 'The data might be incomplete or wrong.',
           clusters: response._clusters.details,
+          openInInspector: expect.any(Function),
         },
       ]);
     });
