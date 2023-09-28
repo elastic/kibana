@@ -46,6 +46,9 @@ python ./build_chromium/init.py
 # Run the build script with the path to the chromium src directory, the git commit hash
 python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
 
+# Make sure you are using python3, you can state the path explicitly if needed
+/usr/bin/python3 ./build_chromium/build.py 67649b10b92bb182fba357831ef7dd6a1baa5648 x64
+
 # OR You can build for ARM
 python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 arm64
 ```
@@ -91,7 +94,7 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    - 8 CPU
    - 30GB memory
    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - "Cloud API access scopes": must have **read / write** scope for the Storage API
+   - "Cloud API access scopes": must have **read / write** scope for the Storage API. Access scopes in the GCP VM instance needs to be set to allow full access to all Cloud APIs vs default access (this will return a 403 otherwise in the build.py script)
 4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
 
 ## Artifacts
@@ -101,8 +104,8 @@ The zip files and md5 files are copied to a **staging** bucket in GCP storage.
 
 To publish the built artifacts for bunding in Kibana, copy the files from the `headless_shell_staging` bucket to the `headless_shell` bucket.
 ```
-gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.md5 gs://headless_shell/
-gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.zip gs://headless_shell/
+gsutil cp gs://headless_shell_staging/chromium-67649b1-linux_arm64.md5 gs://headless_shell/
+gsutil cp gs://headless_shell_staging/chromium-67649b1-linux_arm64.zip gs://headless_shell/
 ```
 
 IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.

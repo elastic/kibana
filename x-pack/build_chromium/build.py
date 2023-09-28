@@ -94,7 +94,7 @@ runcmd('autoninja -C out/headless headless_shell')
 if arch_name != 'arm64':
   print('Optimizing headless_shell')
   shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
-  runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
+  runcmd('/usr/bin/strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
 # chromium-4747cc2-linux_x64.zip
