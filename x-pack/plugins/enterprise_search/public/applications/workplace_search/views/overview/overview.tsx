@@ -19,6 +19,7 @@ import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
+import { WorkplaceSearchGatePage } from './workplace_search_gate_form';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.title',
@@ -41,7 +42,7 @@ const HEADER_DESCRIPTION = i18n.translate(
 
 export const Overview: React.FC = () => {
   const {
-    organization: { name: orgName, defaultOrgName },
+    organization: { name: orgName, defaultOrgName, kibanaUIsEnabled },
   } = useValues(AppLogic);
 
   const { initializeOverview } = useActions(OverviewLogic);
@@ -56,7 +57,7 @@ export const Overview: React.FC = () => {
   const headerTitle = hideOnboarding ? HEADER_TITLE : ONBOARDING_HEADER_TITLE;
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
-  return (
+  return kibanaUIsEnabled ? (
     <WorkplaceSearchPageTemplate
       pageChrome={[]}
       pageHeader={
@@ -75,5 +76,7 @@ export const Overview: React.FC = () => {
       <EuiSpacer size="xl" />
       <RecentActivity />
     </WorkplaceSearchPageTemplate>
+  ) : (
+    <WorkplaceSearchGatePage isLoading={dataLoading} />
   );
 };

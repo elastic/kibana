@@ -83,18 +83,24 @@ describe('buildRecoveredAlert', () => {
       duration: '36000000',
     });
 
+    const updatedRule = {
+      ...alertRule,
+      [ALERT_RULE_NAME]: 'updated-rule-name',
+      [ALERT_RULE_PARAMETERS]: { bar: false },
+    };
+
     expect(
       buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
         // @ts-expect-error
         alert: existingExpandedActiveAlert,
         legacyAlert,
-        rule: alertRule,
+        rule: updatedRule,
         recoveryActionGroup: 'recovered',
         timestamp: '2023-03-29T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })
     ).toEqual({
-      ...alertRule,
+      ...updatedRule,
       event: {
         kind: 'signal',
       },
