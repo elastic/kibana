@@ -85,6 +85,10 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
+      customThresholdAlertsEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
+      }),
     }),
   }),
   deprecations: configDeprecations,

@@ -18,7 +18,10 @@ describe('usePluginConfig()', () => {
 
   it('returns the plugin config what was set through the provider', () => {
     const config = {
-      featureFlags: { metricsExplorerEnabled: false },
+      featureFlags: {
+        metricsExplorerEnabled: false,
+        customThresholdAlertsEnabled: true,
+      },
     };
     const { result } = renderHook(() => usePluginConfig(), {
       wrapper: ({ children }) => {
