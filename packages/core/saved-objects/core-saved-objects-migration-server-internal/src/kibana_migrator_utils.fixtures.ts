@@ -1478,23 +1478,6 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
-      links: {
-        properties: {
-          id: {
-            type: 'text',
-          },
-          title: {
-            type: 'text',
-          },
-          description: {
-            type: 'text',
-          },
-          links: {
-            dynamic: false,
-            properties: {},
-          },
-        },
-      },
       map: {
         properties: {
           description: {

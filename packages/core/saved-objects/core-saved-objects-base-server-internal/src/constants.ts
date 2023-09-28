@@ -71,7 +71,6 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
     'legacy-url-alias',
     'lens',
     'lens-ui-telemetry',
-    'links',
     'map',
     'metrics-explorer-view',
     'ml-job',
