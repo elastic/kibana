@@ -123,7 +123,7 @@ describe('Agent configuration', () => {
       .click({ force: true })
       .type('All');
 
-    cy.get('mark').contains('All').click();
+    cy.get('mark').contains('All').click({ force: true });
     cy.contains('Next step').click();
     cy.contains('Service name All');
     cy.contains('Environment All');
