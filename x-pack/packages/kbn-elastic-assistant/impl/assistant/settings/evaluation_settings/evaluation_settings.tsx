@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
-import { getGenAiConfig } from '../../../connectorland/helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from './use_perform_evaluation';
 
@@ -50,7 +50,7 @@ interface Props {
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
-  const { http } = useAssistantContext();
+  const { actionTypeRegistry, http } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
@@ -69,17 +69,19 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   const visColorsBehindText = euiPaletteComplementary(connectors?.length ?? 0);
   const modelOptions = useMemo(() => {
     return (
-      connectors?.map((connector, index) => {
-        const apiProvider = getGenAiConfig(connector)?.apiProvider;
-        const connectorDetails = connector.isPreconfigured ? PRECONFIGURED_CONNECTOR : apiProvider;
+      connectors?.map((c, index) => {
+        const apiProvider = getGenAiConfig(c)?.apiProvider;
+        const connectorTypeTitle =
+          apiProvider ?? getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId));
+        const connectorDetails = c.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
         return {
-          key: connector.id,
-          label: `${connector.name} (${connectorDetails})`,
+          key: c.id,
+          label: `${c.name} (${connectorDetails})`,
           color: visColorsBehindText[index],
         };
       }) ?? []
     );
-  }, [connectors, visColorsBehindText]);
+  }, [actionTypeRegistry, connectors, visColorsBehindText]);
 
   // Agents
   const [selectedAgentOptions, setSelectedAgentOptions] = useState<

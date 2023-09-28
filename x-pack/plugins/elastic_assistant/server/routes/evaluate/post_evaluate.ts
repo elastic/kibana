@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
@@ -24,6 +24,7 @@ import {
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
 import { getLlmType } from './utils';
+import { RequestBody } from '../../lib/langchain/types';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -85,12 +86,14 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         // Skeleton request to satisfy `subActionParams` spread in `ActionsClientLlm`
-        const skeletonRequest = {
+        const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
             params: {
-              subAction: 'test',
-              subActionParams: {},
+              subAction: 'invokeAI',
+              subActionParams: {
+                messages: [],
+              },
             },
           },
         };
