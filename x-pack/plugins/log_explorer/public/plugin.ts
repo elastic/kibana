@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
 import { createLogExplorer } from './components/log_explorer';
 import {
   LogExplorerPluginSetup,
@@ -15,17 +16,33 @@ import {
 } from './types';
 
 export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExplorerPluginStart> {
+  private locators?: LogExplorerLocators;
+
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {}
+  public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
+    const { share, discover } = plugins;
+
+    // Register Locators
+    const logExplorerLocator = share.url.locators.create(
+      new LogExplorerLocatorDefinition({
+        discover,
+      })
+    );
+
+    this.locators = {
+      logExplorerLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
+  }
 
   public start(core: CoreStart, plugins: LogExplorerStartDeps) {
-    const { data, discover } = plugins;
-
     const LogExplorer = createLogExplorer({
       core,
-      data,
-      discover,
+      plugins,
     });
 
     return {

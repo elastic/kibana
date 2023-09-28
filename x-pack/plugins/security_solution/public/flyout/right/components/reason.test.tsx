@@ -8,15 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import {
-  REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
-  REASON_DETAILS_TEST_ID,
-  REASON_TITLE_TEST_ID,
-} from './test_ids';
+import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 import { Reason } from './reason';
 import { RightPanelContext } from '../context';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { PreviewPanelKey } from '../../preview';
 
 const flyoutContextValue = {
@@ -42,6 +39,8 @@ const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
     </IntlProvider>
   );
 
+const NO_DATA_MESSAGE = "There's no source event information for this alert.";
+
 describe('<Reason />', () => {
   it('should render the component for alert', () => {
     const { getByTestId } = renderReason();
@@ -54,8 +53,9 @@ describe('<Reason />', () => {
   });
 
   it('should render the component for document', () => {
-    const dataFormattedForFieldBrowser = [...mockDataFormattedForFieldBrowser];
-    dataFormattedForFieldBrowser.shift();
+    const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser.filter(
+      (d) => d.field !== 'kibana.alert.rule.uuid'
+    );
     const panelContext = {
       ...panelContextValue,
       dataFormattedForFieldBrowser,
@@ -71,9 +71,9 @@ describe('<Reason />', () => {
       getFieldsData: () => {},
     } as unknown as RightPanelContext;
 
-    const { getByTestId } = renderReason(panelContext);
+    const { getByText } = renderReason(panelContext);
 
-    expect(getByTestId(REASON_DETAILS_TEST_ID)).toBeEmptyDOMElement();
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('should open preview panel when clicking on button', () => {
