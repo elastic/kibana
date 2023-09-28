@@ -9,7 +9,6 @@
     "@kbn/i18n",
     "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/object-versioning",
     "@kbn/config-schema",
@@ -27,7 +26,9 @@
     "@kbn/utility-types",
     "@kbn/ui-actions-plugin",
     "@kbn/logging",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }

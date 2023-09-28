@@ -11,8 +11,8 @@ import { Subject } from 'rxjs';
 import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from '../embeddable/types';
@@ -40,6 +40,19 @@ export async function openEditorFlyout(
   const attributeService = getLinksAttributeService();
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
+  const initialLinks = attributes?.links;
+
+  if (!initialLinks) {
+    /**
+     * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
+     * and can cause a "double opening" animation if the flyout opens before the tooltip has time to unmount; so,
+     * when creating a new links panel, we need to slow down the process a little bit so that the tooltip has time
+     * to disappear before we try to open the flyout.
+     *
+     * This does not apply to editing existing links panels, since there is no tooltip for this action.
+     */
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
@@ -103,7 +116,7 @@ export async function openEditorFlyout(
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <LinksEditor
-          initialLinks={attributes?.links}
+          initialLinks={initialLinks}
           initialLayout={attributes?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
@@ -111,9 +124,10 @@ export async function openEditorFlyout(
           parentDashboard={parentDashboard}
           isByReference={isByReference}
         />,
-        { theme$: coreServices.theme.theme$ }
+        { theme: coreServices.theme, i18n: coreServices.i18n }
       ),
       {
+        maxWidth: 720,
         ownFocus: true,
         outsideClickCloses: false,
         onClose: onCancel,

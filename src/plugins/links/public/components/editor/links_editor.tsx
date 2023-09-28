@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiForm,
@@ -80,7 +80,7 @@ const LinksEditor = ({
   isByReference: boolean;
 }) => {
   const toasts = coreServices.notifications.toasts;
-  const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+  const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
 
   const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
     initialLayout ?? LINKS_VERTICAL_LAYOUT
