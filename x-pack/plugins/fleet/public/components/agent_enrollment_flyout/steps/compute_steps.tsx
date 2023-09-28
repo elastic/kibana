@@ -344,6 +344,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
+    gcpProjectId,
   ]);
 
   if (!agentVersion) {
