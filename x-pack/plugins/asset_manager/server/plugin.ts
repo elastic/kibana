@@ -20,13 +20,14 @@ import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
-import { AssetManagerConfig, configSchema } from '../common/config';
+import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
   schema: configSchema,
+  exposeToBrowser: exposeToBrowserConfig,
 };
 
 export class AssetManagerServerPlugin
