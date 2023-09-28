@@ -18,3 +18,4 @@ export {
 } from '../common';
 
 export { KbnServerError, reportServerError, getKbnServerError } from './report_server_error';
+export { sanitizeRequestParams } from './sanitize_request_params';

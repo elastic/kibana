@@ -8,7 +8,7 @@
 
 import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnServerError, KbnServerError, sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
 
 export const esqlSearchStrategyProvider = (
@@ -50,7 +50,7 @@ export const esqlSearchStrategyProvider = (
           rawResponse: body,
           isPartial: false,
           isRunning: false,
-          ...(transportRequestParams ? { requestParams: transportRequestParams } : {}),
+          ...(transportRequestParams ? { requestParams: sanitizeRequestParams(transportRequestParams) } : {}),
           warning: headers?.warning,
         };
       } catch (e) {

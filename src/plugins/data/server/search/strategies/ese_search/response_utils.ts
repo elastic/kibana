@@ -7,6 +7,7 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
+import { sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
@@ -24,7 +25,7 @@ export function toAsyncKibanaSearchResponse(
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
-    ...(requestParams ? { requestParams } : {}),
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(response.response),
   };
 }

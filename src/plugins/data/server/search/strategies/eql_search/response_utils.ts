@@ -8,6 +8,7 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import { EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../../../common';
 
@@ -24,6 +25,6 @@ export function toEqlKibanaSearchResponse(
     rawResponse: response,
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
-    ...(requestParams ? { requestParams } : {}),
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
   };
 }

@@ -11,6 +11,7 @@ import { catchError } from 'rxjs/operators';
 import { errors } from '@elastic/elasticsearch';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
+import { sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import apm from 'elastic-apm-node';
 import {
   IKibanaSearchRequest,
@@ -52,7 +53,7 @@ export function registerBsearchRoute(
                   // eql strategy throws KbnServerError (like all of the other strategies)
                   requestParams:
                     err instanceof errors.ResponseError
-                      ? err.meta?.meta?.request?.params
+                      ? sanitizeRequestParams(err.meta?.meta?.request?.params)
                       : err.requestParams,
                 };
               })

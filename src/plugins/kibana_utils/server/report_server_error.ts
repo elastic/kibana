@@ -9,11 +9,12 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { KibanaResponseFactory } from '@kbn/core/server';
+import { sanitizeRequestParams, type SanitizedConnectionRequestParams } from './sanitize_request_params';
 import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;
-  public requestParams?: ConnectionRequestParams;
+  public requestParams?: SanitizedConnectionRequestParams;
   constructor(
     message: string,
     public readonly statusCode: number,
@@ -22,7 +23,7 @@ export class KbnServerError extends KbnError {
   ) {
     super(message);
     this.errBody = errBody;
-    this.requestParams = requestParams;
+    this.requestParams = requestParams ? sanitizeRequestParams(requestParams) : undefined;
   }
 }
 

@@ -11,7 +11,7 @@ import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnServerError, KbnServerError, sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -138,7 +138,7 @@ export const enhancedEsSearchStrategyProvider = (
       const requestParams = esResponse.meta?.request?.params;
       return {
         rawResponse: shimHitsTotal(response, options),
-        ...(requestParams ? { requestParams } : {}),
+        ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {

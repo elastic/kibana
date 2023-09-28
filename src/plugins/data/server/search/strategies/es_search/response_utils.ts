@@ -8,6 +8,7 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import { ISearchOptions } from '../../../../common';
 
 /**
@@ -33,7 +34,7 @@ export function toKibanaSearchResponse(
     rawResponse,
     isPartial: false,
     isRunning: false,
-    ...(requestParams ? { requestParams } : {}),
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

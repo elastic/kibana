@@ -7,6 +7,7 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
+import { sanitizeRequestParams } from '@kbn/kibana-utils-plugin/server';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlSearchStrategyResponse } from '../../../../common';
 
@@ -26,6 +27,6 @@ export function toAsyncKibanaSearchResponse(
     isRunning: response.is_running,
     took: Date.now() - startTime,
     ...(warning ? { warning } : {}),
-    ...(requestParams ? { requestParams } : {}),
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
   };
 }
