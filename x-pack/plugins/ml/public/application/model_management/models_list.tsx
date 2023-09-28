@@ -489,6 +489,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
+      width: '15%',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -497,7 +498,7 @@ export const ModelsList: FC<Props> = ({
         const isTechPreview = description?.includes('(Tech Preview)');
 
         return (
-          <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+          <EuiFlexGroup gutterSize={'s'} alignItems={'center'} wrap={true}>
             <EuiFlexItem grow={false}>{modelId}</EuiFlexItem>
             {isTechPreview ? (
               <EuiFlexItem grow={false}>
