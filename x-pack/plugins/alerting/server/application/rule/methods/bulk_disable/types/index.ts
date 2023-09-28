@@ -5,8 +5,9 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { bulkDisableRulesRequestBodySchemaV1 } from '..';
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
+import { bulkDisableRulesRequestBodySchema } from '../schemas';
+import type { SanitizedRule } from '../../../../../types';
+import type { RuleParams } from '../../../types';
 
 export interface BulkOperationError {
   message: string;
@@ -17,12 +18,10 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkDisableRulesRequestBody = TypeOf<typeof bulkDisableRulesRequestBodySchemaV1>;
+export type BulkDisableRulesRequestBody = TypeOf<typeof bulkDisableRulesRequestBodySchema>;
 
-export interface BulkDisableRulesResponse<Params extends RuleParamsV1 = never> {
-  body: {
-    rules: Array<RuleResponseV1<Params>>;
-    errors: BulkOperationError[];
-    total: number;
-  };
+export interface BulkDisableRulesResult<Params extends RuleParams> {
+  rules: Array<SanitizedRule<Params>>;
+  errors: BulkOperationError[];
+  total: number;
 }

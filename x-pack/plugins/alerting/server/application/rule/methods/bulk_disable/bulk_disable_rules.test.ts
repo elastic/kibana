@@ -5,52 +5,59 @@
  * 2.0.
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import {
-  disabledRule1,
-  disabledRule2,
   enabledRule1,
   enabledRule2,
   savedObjectWith409Error,
   savedObjectWith500Error,
-  returnedDisabledRule1,
-  returnedDisabledRule2,
-  siemRule1,
-  siemRule2,
-} from './test_helpers';
-import { migrateLegacyActions } from '../lib';
+  disabledRuleForBulkDisable1,
+  disabledRuleForBulkDisable2,
+  enabledRuleForBulkOps1,
+  enabledRuleForBulkOps2,
+  returnedRuleForBulkDisable1,
+  returnedRuleForBulkDisable2,
+  siemRuleForBulkOps1,
+  siemRuleForBulkOps2,
+} from '../../../../rules_client/tests/test_helpers';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
 
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
-
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
-
-jest.mock('../../task_runner/alert_task_instance', () => ({
+jest.mock('../../../../task_runner/alert_task_instance', () => ({
   taskInstanceToAlertTaskInstance: jest.fn(),
 }));
 
 const { taskInstanceToAlertTaskInstance } = jest.requireMock(
-  '../../task_runner/alert_task_instance'
+  '../../../../task_runner/alert_task_instance'
 );
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+}); // rewrite!!!
+
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -147,7 +154,7 @@ describe('bulkDisableRules', () => {
 
   test('should disable two rule', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRule1, disabledRule2],
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -173,14 +180,14 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedDisabledRule1, returnedDisabledRule2],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
       total: 2,
     });
   });
 
   test('should try to disable rules, one successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRule1, savedObjectWith500Error],
+      saved_objects: [disabledRuleForBulkDisable1, savedObjectWith500Error],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -200,7 +207,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
-      rules: [returnedDisabledRule1],
+      rules: [returnedRuleForBulkDisable1],
       total: 2,
     });
   });
@@ -208,7 +215,7 @@ describe('bulkDisableRules', () => {
   test('should try to disable rules, one successful and one with 409 error, which will not be deleted with retry', async () => {
     unsecuredSavedObjectsClient.bulkCreate
       .mockResolvedValueOnce({
-        saved_objects: [disabledRule1, savedObjectWith409Error],
+        saved_objects: [disabledRuleForBulkDisable1, savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
         saved_objects: [savedObjectWith409Error],
@@ -225,25 +232,25 @@ describe('bulkDisableRules', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1, enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkOps2] };
         },
       });
 
@@ -254,7 +261,7 @@ describe('bulkDisableRules', () => {
     expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
-      rules: [returnedDisabledRule1],
+      rules: [returnedRuleForBulkDisable1],
       total: 2,
     });
   });
@@ -262,10 +269,10 @@ describe('bulkDisableRules', () => {
   test('should try to disable rules, one successful and one with 409 error, which successfully will be disabled with retry', async () => {
     unsecuredSavedObjectsClient.bulkCreate
       .mockResolvedValueOnce({
-        saved_objects: [disabledRule1, savedObjectWith409Error],
+        saved_objects: [disabledRuleForBulkDisable1, savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
-        saved_objects: [disabledRule2],
+        saved_objects: [disabledRuleForBulkDisable1],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -273,19 +280,19 @@ describe('bulkDisableRules', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1, enabledRule2] };
+          yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1] };
+          yield { saved_objects: [enabledRuleForBulkOps1] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [enabledRule1] };
+          yield { saved_objects: [enabledRuleForBulkOps1] };
         },
       });
 
@@ -295,7 +302,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedDisabledRule1, returnedDisabledRule2],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable1],
       total: 2,
     });
   });
@@ -336,10 +343,10 @@ describe('bulkDisableRules', () => {
 
   test('should skip rule if it is already disabled', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
-      saved_objects: [enabledRule1, disabledRule2],
+      saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRule1],
+      saved_objects: [disabledRuleForBulkDisable1],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -359,7 +366,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedDisabledRule1],
+      rules: [returnedRuleForBulkDisable1],
       total: 2,
     });
   });
@@ -367,7 +374,7 @@ describe('bulkDisableRules', () => {
   describe('taskManager', () => {
     test('should call task manager bulkDisable', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1, disabledRule2],
+        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
       });
 
       taskManager.bulkDisable.mockResolvedValue({
@@ -402,16 +409,16 @@ describe('bulkDisableRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
-            ...enabledRule1,
+            ...enabledRuleForBulkOps1,
             attributes: {
-              ...enabledRule1.attributes,
+              ...enabledRuleForBulkOps1.attributes,
               scheduledTaskId: 'taskId1',
             },
           } as SavedObject,
           {
-            ...enabledRule2,
+            ...enabledRuleForBulkOps2,
             attributes: {
-              ...enabledRule1,
+              ...enabledRuleForBulkOps2.attributes,
               scheduledTaskId: 'taskId2',
             },
           } as SavedObject,
@@ -440,7 +447,7 @@ describe('bulkDisableRules', () => {
 
     test('should disable one task if one rule was successfully disabled and one has 500 error', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1, savedObjectWith500Error],
+        saved_objects: [disabledRuleForBulkDisable1, savedObjectWith500Error],
       });
 
       taskManager.bulkDisable.mockResolvedValue({
@@ -463,15 +470,15 @@ describe('bulkDisableRules', () => {
     test('should disable one task if one rule was successfully disabled and one was disabled from beginning', async () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
-          enabledRule1,
+          enabledRuleForBulkOps1,
           {
             ...enabledRule2,
-            attributes: { ...enabledRule2.attributes, enabled: false },
+            attributes: { ...enabledRuleForBulkOps2.attributes, enabled: false },
           },
         ],
       });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1],
+        saved_objects: [disabledRuleForBulkDisable1],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -482,7 +489,7 @@ describe('bulkDisableRules', () => {
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1, disabledRule2],
+        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
       });
       taskManager.bulkDisable.mockImplementation(() => {
         throw new Error('Something happend during bulkDisable');
@@ -500,9 +507,9 @@ describe('bulkDisableRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
-            ...disabledRule1,
+            ...disabledRuleForBulkDisable1,
             attributes: {
-              ...disabledRule1.attributes,
+              ...disabledRuleForBulkDisable1.attributes,
               scheduledTaskId: 'taskId1',
             },
           } as SavedObject,
@@ -527,7 +534,7 @@ describe('bulkDisableRules', () => {
 
     test('logs audit event when disabling rules', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1],
+        saved_objects: [disabledRuleForBulkDisable1],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -591,7 +598,7 @@ describe('bulkDisableRules', () => {
     });
     test('should call logEvent', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1, disabledRule2],
+        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -604,7 +611,7 @@ describe('bulkDisableRules', () => {
         throw new Error('UPS');
       });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRule1, disabledRule2],
+        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -623,38 +630,50 @@ describe('bulkDisableRules', () => {
         .mockResolvedValueOnce({
           close: jest.fn(),
           find: function* asyncGenerator() {
-            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2] };
+            yield {
+              saved_objects: [
+                enabledRuleForBulkOps1,
+                enabledRuleForBulkOps2,
+                siemRuleForBulkOps1,
+                siemRuleForBulkOps2,
+              ],
+            };
           },
         });
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2],
+        saved_objects: [
+          enabledRuleForBulkOps1,
+          enabledRuleForBulkOps2,
+          siemRuleForBulkOps1,
+          siemRuleForBulkOps2,
+        ],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: enabledRule1.attributes,
-        ruleId: enabledRule1.id,
+        attributes: enabledRuleForBulkOps1.attributes,
+        ruleId: enabledRuleForBulkOps1.id,
         actions: [],
         references: [],
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: enabledRule2.attributes,
-        ruleId: enabledRule2.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRule1.id,
+        attributes: enabledRuleForBulkOps2.attributes,
+        ruleId: enabledRuleForBulkOps2.id,
         actions: [],
         references: [],
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRule2.id,
+        ruleId: siemRuleForBulkOps1.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
+        ruleId: siemRuleForBulkOps2.id,
         actions: [],
         references: [],
       });

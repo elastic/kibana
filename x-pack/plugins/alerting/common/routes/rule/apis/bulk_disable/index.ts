@@ -16,7 +16,7 @@ export type {
 export type {
   BulkDisableRulesResponse as BulkDisableRulesResponseV1,
   BulkOperationError as BulkOperationErrorV1,
-  BulkDeleteRulesRequestBody as BulkDeleteRulesRequestBodyV1,
+  BulkDisableRulesRequestBody as BulkDisableRulesRequestBodyV1,
 } from './types/v1';
 
 export { validateBulkDisableRulesBody } from './validation/latest';

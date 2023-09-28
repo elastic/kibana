@@ -20,4 +20,4 @@ export type {
 } from './types/v1';
 
 export { validateBulkDeleteRulesBody } from './validation/latest';
-export { validateBulkDeleteRulesBody as validateBulkDeleteRulesBody } from './validation/v1';
+export { validateBulkDeleteRulesBody as validateBulkDeleteRulesBodyV1 } from './validation/v1';
