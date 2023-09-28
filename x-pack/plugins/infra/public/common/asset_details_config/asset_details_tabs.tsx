@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ContentTabIds, type Tab } from '../../../../../components/asset_details/types';
+import { ContentTabIds, type Tab } from '../../components/asset_details/types';
 
-export const orderedFlyoutTabs: Tab[] = [
+export const commonFlyoutTabs: Tab[] = [
   {
     id: ContentTabIds.OVERVIEW,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {

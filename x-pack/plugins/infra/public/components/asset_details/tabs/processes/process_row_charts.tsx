@@ -19,15 +19,15 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { useTimelineChartTheme } from '../../../../../../../utils/use_timeline_chart_theme';
-import { Color } from '../../../../../../../../common/color_palette';
-import { createFormatter } from '../../../../../../../../common/formatters';
-import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
-import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
-import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
+import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
+import { Color } from '../../../../../common/color_palette';
+import { createFormatter } from '../../../../../common/formatters';
+import { MetricsExplorerAggregation } from '../../../../../common/http_api';
 import { Process } from './types';
+import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
 
 interface Props {
   command: string;
