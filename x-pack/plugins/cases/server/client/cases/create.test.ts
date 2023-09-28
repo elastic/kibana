@@ -496,7 +496,9 @@ describe('create', () => {
     });
 
     it('should throw an error when required customFields are undefined', async () => {
-      await expect(create({ ...theCase }, clientArgs, casesClient)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(
+        create({ ...theCase }, clientArgs, casesClient)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to create case: Error: Missing required custom fields: first_key"`
       );
     });
