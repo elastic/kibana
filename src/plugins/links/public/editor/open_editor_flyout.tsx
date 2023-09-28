@@ -7,12 +7,11 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
-import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from '../embeddable/types';
@@ -41,6 +40,7 @@ export async function openEditorFlyout(
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
   const initialLinks = attributes?.links;
+  const overlayTracker = tracksOverlays(parentDashboard) ? parentDashboard : undefined;
 
   if (!initialLinks) {
     /**
@@ -55,8 +55,6 @@ export async function openEditorFlyout(
   }
 
   return new Promise((resolve, reject) => {
-    const closed$ = new Subject<true>();
-
     const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
@@ -76,7 +74,7 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      editorFlyout.close();
+      if (overlayTracker) overlayTracker.clearOverlays();
     };
 
     const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
@@ -96,22 +94,13 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      editorFlyout.close();
+      if (overlayTracker) overlayTracker.clearOverlays();
     };
 
     const onCancel = () => {
       reject();
-      editorFlyout.close();
+      if (overlayTracker) overlayTracker.clearOverlays();
     };
-
-    // Close the flyout whenever the breadcrumbs change - i.e. when the dashboard's title changes, or when
-    // the user navigates away from the given dashboard (to the listing page **or** to another app), etc.
-    coreServices.chrome
-      .getBreadcrumbs$()
-      .pipe(takeUntil(closed$), skip(1), take(1))
-      .subscribe(() => {
-        editorFlyout.close();
-      });
 
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
@@ -136,8 +125,6 @@ export async function openEditorFlyout(
       }
     );
 
-    editorFlyout.onClose.then(() => {
-      closed$.next(true);
-    });
+    if (overlayTracker) overlayTracker.openOverlay(editorFlyout);
   });
 }
