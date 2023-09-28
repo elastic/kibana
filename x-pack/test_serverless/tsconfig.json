@@ -57,8 +57,5 @@
     "@kbn/serverless-observability-settings",
     "@kbn/serverless-search-settings",
     "@kbn/serverless-security-settings",
-    "@kbn/config-schema",
-    "@kbn/ml-plugin",
-    "@kbn/ml-data-frame-analytics-utils",
   ]
 }
