@@ -19,6 +19,7 @@ export default defineCypressConfig({
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     grepTags: '@serverlessQA --@brokenInServerless --@skipInServerless',
+    grepIntegrationFolder: '../',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
