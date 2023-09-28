@@ -22,6 +22,9 @@ describe(
 
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       login();
 
       const body: AsApiContract<MaintenanceWindowCreateBody> = {
@@ -47,7 +50,7 @@ describe(
       });
     });
 
-    after(() => {
+    afterEach(() => {
       // Delete a test maintenance window
       if (maintenanceWindowId) {
         cy.request({
