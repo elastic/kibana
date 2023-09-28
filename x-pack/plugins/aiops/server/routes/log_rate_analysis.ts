@@ -717,7 +717,7 @@ export const defineLogRateAnalysisRoute = (
                 const significantCategoriesHistogramQueries = significantCategories.map((d) => {
                   const histogramQuery = getHistogramQuery(request.body);
                   const categoryQuery = getCategoryQuery(d.fieldName, [
-                    { key: `${d.fieldValue}`, count: d.doc_count, examples: [] },
+                    { key: `${d.key}`, count: d.doc_count, examples: [] },
                   ]);
                   if (Array.isArray(histogramQuery.bool?.filter)) {
                     histogramQuery.bool?.filter?.push(categoryQuery);
