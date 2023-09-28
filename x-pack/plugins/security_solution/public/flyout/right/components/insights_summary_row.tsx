@@ -8,8 +8,15 @@
 import type { ReactElement, VFC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedCount } from '../../../common/components/formatted_number';
 
 export interface InsightsSummaryRowProps {
@@ -58,6 +65,8 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   color,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const loadingDataTestSubj = `${dataTestSubj}Loading`;
   if (loading) {
     return (
@@ -88,19 +97,26 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   return (
     <EuiFlexGroup gutterSize="none" justifyContent={'spaceBetween'} alignItems={'center'}>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj={iconDataTestSubj}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
-            {
-              defaultMessage: 'Insight summary row icon',
-            }
-          )}
-          color="text"
-          display="empty"
-          iconType={icon}
-          size="s"
-        />
+        <EuiFlexGroup
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+          alignItems={'center'}
+        >
+          <EuiIcon
+            data-test-subj={iconDataTestSubj}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
+              {
+                defaultMessage: 'Insight summary row icon',
+              }
+            )}
+            color="text"
+            display="empty"
+            type={icon}
+            size="m"
+          />
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem
         data-test-subj={valueDataTestSubj}
