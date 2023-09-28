@@ -22,7 +22,7 @@ if is_flag_set "--help" || is_flag_set "-h"; then
   echo
   echo "Usage:"
   echo "  $0 [options]"
-  echo "  $0 [ref1 [ref2]]"
+  echo "  $0 [<ref1> [<ref2>]]"
   echo
   echo "Options:"
   echo "  --help, -h    Show this help"
