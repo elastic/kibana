@@ -18,7 +18,6 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = 
       <UseField
         path="options.required"
         component={CheckBoxField}
-        defaultValue={false}
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'toggle-custom-field-options',
