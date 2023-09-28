@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('should not patch a configuration with duplicated custom field keys', async () => {
+      it('should not allow patching the type of a custom field', async () => {
         const configuration = await createConfiguration(
           supertest,
           getConfigurationRequest({
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('should not allow patching the type of a custom field', async () => {
+      it('should not patch a configuration with duplicated custom field keys', async () => {
         const configuration = await createConfiguration(supertest);
         await updateConfiguration(
           supertest,
