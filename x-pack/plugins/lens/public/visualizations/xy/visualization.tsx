@@ -1122,7 +1122,10 @@ function getNotifiableFeatures(
   fieldFormats: FieldFormatsStart
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
-    (layer) => layer.ignoreGlobalFilters
+    (layer) =>
+      layer.ignoreGlobalFilters &&
+      // If all annotations are manual, do not report it
+      layer.annotations.some((annotation) => annotation.type !== 'manual')
   );
   if (!annotationsWithIgnoreFlag.length) {
     return [];
