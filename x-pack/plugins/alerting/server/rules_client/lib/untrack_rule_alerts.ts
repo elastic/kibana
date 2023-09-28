@@ -8,7 +8,8 @@
 import { mapValues } from 'lodash';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule, SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
+import { Rule } from '../../../common';
+import { SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { Alert } from '../../alert';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
@@ -18,7 +19,8 @@ import { RulesClientContext } from '../types';
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
-  attributes: RawRule
+  attributes: Rule,
+  alertIds?: string[] // If no alertIds are passed, untrack ALL ids by default
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
@@ -35,7 +37,9 @@ export const untrackRuleAlerts = async (
         (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
       );
 
-      const untrackedAlertIds = Object.keys(untrackedAlerts);
+      const untrackedAlertIds = Object.keys(untrackedAlerts).filter(
+        (alertId) => !alertIds || alertIds.includes(alertId)
+      );
 
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
@@ -87,7 +91,7 @@ export const untrackRuleAlerts = async (
             revision: attributes.revision,
             spaceId: context.spaceId,
             tags: attributes.tags,
-            parameters: attributes.parameters,
+            parameters: attributes.params,
             executionId: '',
           },
           ruleType,
@@ -95,7 +99,7 @@ export const untrackRuleAlerts = async (
         });
         if (!alertsClient) throw new Error('Could not create alertsClient');
         const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-        await alertsClient.setAlertStatusToUntracked(indices, [id]);
+        await alertsClient.setAlertStatusToUntracked(indices, [id], alertIds);
       }
     } catch (error) {
       // this should not block the rest of the disable process

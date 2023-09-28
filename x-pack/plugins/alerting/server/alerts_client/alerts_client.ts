@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -205,18 +206,29 @@ export class AlertsClient<
     return { hits, total };
   }
 
-  public async setAlertStatusToUntracked(indices: string[], ruleIds: string[]) {
+  public async setAlertStatusToUntracked(
+    indices: string[],
+    ruleIds: string[],
+    alertIds: string[] = ['*'] // OPTIONAL - If no alertIds are passed, untrack ALL ids by default
+  ) {
     const esClient = await this.options.elasticsearchClientPromise;
-    const terms: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
+    const must: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
       term: {
         [ALERT_RULE_UUID]: { value: ruleId },
       },
     }));
-    terms.push({
+    must.push({
       term: {
         [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
       },
     });
+    const should: Array<{ term: Record<string, { value: string }> }> = alertIds
+      .filter(() => alertIds[0] !== '*') // Generate an empty array if alertIds starts with ['*']
+      .map((alertId) => ({
+        term: {
+          [ALERT_INSTANCE_ID]: { value: alertId },
+        },
+      }));
 
     try {
       // Retry this updateByQuery up to 3 times to make sure the number of documents
@@ -233,7 +245,8 @@ export class AlertsClient<
             },
             query: {
               bool: {
-                must: terms,
+                must,
+                should,
               },
             },
           },

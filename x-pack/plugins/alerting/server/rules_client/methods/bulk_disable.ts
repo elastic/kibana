@@ -10,6 +10,7 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { Rule } from '../../../common';
 import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -115,7 +116,12 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            await untrackRuleAlerts(context, rule.id, rule.attributes);
+            await untrackRuleAlerts(
+              context,
+              rule.id,
+              // TODO: Remove this type conversion when moving bulk_disable to HTTP versioned schema
+              rule.attributes as unknown as Rule<never>
+            );
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
