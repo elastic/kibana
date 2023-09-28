@@ -7,26 +7,17 @@
  */
 import React from 'react';
 
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Form } from '@kbn/management-settings-components-form';
 
 import { EuiText, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { useFields } from './hooks/use_fields';
 
-const title = i18n.translate('management.settings.advancedSettingsLabel', {
+const title = i18nLib.translate('management.settings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
 });
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
-
-/**
- * Props for a {@link SettingsApplication} component.
- */
-export interface SettingsApplicationProps {
-  /** Start contract of the uiSettings service. */
-  settingsStart: SettingsStart;
-}
 
 /**
  * Component for displaying a {@link Form} component.

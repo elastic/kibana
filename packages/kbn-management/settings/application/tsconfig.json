@@ -22,5 +22,6 @@
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-components-form",
     "@kbn/i18n",
+    "@kbn/shared-ux-utility",
   ]
 }

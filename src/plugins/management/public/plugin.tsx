@@ -13,8 +13,6 @@ import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { SettingsApplication } from '@kbn/management-settings-application';
-import { SettingsApplicationKibanaProvider } from '@kbn/management-settings-application';
 import {
   CoreSetup,
   CoreStart,
@@ -28,6 +26,7 @@ import {
   AppDeepLink,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -47,6 +46,12 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
 }
+
+const LazyKibanaSettingsApplication = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-application')).KibanaSettingsApplication,
+}));
+
+const KibanaSettingsApplication = withSuspense(LazyKibanaSettingsApplication);
 
 export class ManagementPlugin
   implements
@@ -188,9 +193,7 @@ export class ManagementPlugin
 
           ReactDOM.render(
             <KibanaRenderContextProvider {...core}>
-              <SettingsApplicationKibanaProvider {...core}>
-                <SettingsApplication />
-              </SettingsApplicationKibanaProvider>
+              <KibanaSettingsApplication {...core} />
             </KibanaRenderContextProvider>,
             element
           );
