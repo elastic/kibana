@@ -10,7 +10,9 @@ import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { getSettingsMock, uiSettingsClientMock } from '../mocks';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+
+import { uiSettingsClientMock } from '../mocks';
 import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
