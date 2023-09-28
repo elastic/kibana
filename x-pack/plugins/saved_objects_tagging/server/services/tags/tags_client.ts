@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { CreateTagOptions } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
+import { CreateTagOptions, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
@@ -61,6 +61,28 @@ export class TagsClient implements ITagsClient {
     await pitFinder.close();
 
     return results.map(savedObjectToTag);
+  }
+
+  public async findByName(
+    name: string,
+    { exact = false }: { exact?: boolean | undefined } = {}
+  ): Promise<Tag | null> {
+    const response = await this.soClient.find<TagAttributes>({
+      type: this.type,
+      search: name,
+      searchFields: ['name'],
+      perPage: 1000,
+    });
+
+    if (response.total === 0) {
+      return null;
+    }
+
+    const tag = exact
+      ? response.saved_objects.find((t) => t.attributes.name.toLowerCase() === name.toLowerCase())
+      : response.saved_objects[0];
+
+    return tag ? savedObjectToTag(tag) : null;
   }
 
   public async delete(id: string) {
