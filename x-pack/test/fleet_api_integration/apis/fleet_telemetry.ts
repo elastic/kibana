@@ -126,7 +126,11 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
-    async function waitForAgents(expectedAgentCount: number, attempts: number, _attemptsMade = 0) {
+    async function waitForAgents(
+      expectedAgentCount: number,
+      attempts: number,
+      _attemptsMade = 0
+    ): Promise<any> {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?showInactive=true`)
         .set('kbn-xsrf', 'xxxx')
