@@ -74,7 +74,7 @@ const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: 
     {
       id: appCategories.ALERTS,
       title: i18n.translate('management.landing.withCardNavigation.alertsTitle', {
-        defaultMessage: 'Alerts',
+        defaultMessage: 'Alerts and insights',
       }),
       apps: getAppsForCategory(appCategories.ALERTS, filteredApps),
     },

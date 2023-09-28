@@ -94,7 +94,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
-      defaultMessage: 'Detect conditions in apps across Kibana and trigger actions.',
+      defaultMessage: 'Define when to generate alerts and notifications.',
     }),
     icon: <EuiIcon size="l" type="editorChecklist" />,
   },
@@ -120,7 +120,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
-      defaultMessage: 'Manage your saved dashboards, maps, data views, and Canvas workloads.',
+      defaultMessage: 'Manage your saved dashboards, maps, data views, and Canvas workpads.',
     }),
     icon: <EuiIcon size="l" type="save" />,
   },
@@ -134,7 +134,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Monitor the generation of PDF, PNG and CSV reports.',
+      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
     }),
     icon: <EuiIcon size="l" type="visPie" />,
   },
