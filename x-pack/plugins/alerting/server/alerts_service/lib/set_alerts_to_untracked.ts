@@ -21,6 +21,8 @@ export interface SetAlertsToUntrackedOpts {
   alertUuids?: string[];
 }
 
+type UntrackedAlertsResult = Array<{ [ALERT_RULE_UUID]: string; [ALERT_UUID]: string }>;
+
 export async function setAlertsToUntracked({
   logger,
   esClient,
@@ -30,7 +32,7 @@ export async function setAlertsToUntracked({
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-} & SetAlertsToUntrackedOpts) {
+} & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
   const shouldMatchRules: Array<{ term: Record<string, { value: string }> }> = ruleIds.map(
     (ruleId) => ({
       term: {
@@ -72,6 +74,7 @@ export async function setAlertsToUntracked({
   try {
     // Retry this updateByQuery up to 3 times to make sure the number of documents
     // updated equals the number of documents matched
+    let total = 0;
     for (let retryCount = 0; retryCount < 3; retryCount++) {
       const response = await esClient.updateByQuery({
         index: indices,
@@ -89,6 +92,7 @@ export async function setAlertsToUntracked({
           },
         },
       });
+      if (response.total) total = response.total;
       if (response.total === response.updated) break;
       logger.warn(
         `Attempt ${retryCount + 1}: Failed to untrack ${
@@ -96,8 +100,25 @@ export async function setAlertsToUntracked({
         } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
       );
     }
+
+    // Fetch and return updated rule and alert instance UUIDs
+    const searchResponse = await esClient.search({
+      index: indices,
+      allow_no_indices: true,
+      body: {
+        _source: [ALERT_RULE_UUID, ALERT_UUID],
+        size: total,
+        query: {
+          bool: {
+            must,
+          },
+        },
+      },
+    });
+    return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;
   } catch (err) {
     logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
+    return [];
   }
 }
 

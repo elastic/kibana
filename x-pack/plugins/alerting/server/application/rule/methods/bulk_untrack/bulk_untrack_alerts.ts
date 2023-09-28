@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { omitBy } from 'lodash';
 import Boom from '@hapi/boom';
+import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { bulkUntrackBodySchema } from './schemas';
 import type { BulkUntrackBody } from './types';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -37,7 +39,30 @@ async function bulkUntrackAlertsWithOCC(
 ) {
   try {
     if (!context.alertsService) throw new Error('unable to access alertsService');
-    await context.alertsService.setAlertsToUntracked({ indices, alertUuids });
+    const result = await context.alertsService.setAlertsToUntracked({ indices, alertUuids });
+
+    // Clear alert instances from their corresponding tasks so that they can remain untracked
+    const taskIds = [...new Set(result.map((doc) => doc[ALERT_RULE_UUID]))];
+    await context.taskManager.bulkUpdateState(taskIds, (state, id) => {
+      const uuidsToClear = result
+        .filter((doc) => doc[ALERT_RULE_UUID] === id)
+        .map((doc) => doc[ALERT_UUID]);
+      const alertTypeState = {
+        ...state.alertTypeState,
+        trackedAlerts: omitBy(state.alertTypeState.trackedAlerts, ({ alertUuid }) =>
+          uuidsToClear.includes(alertUuid)
+        ),
+      };
+      const alertInstances = omitBy(state.alertInstances, ({ meta: { uuid } }) =>
+        uuidsToClear.includes(uuid)
+      );
+      return {
+        ...state,
+        alertTypeState,
+        alertInstances,
+      };
+    });
+
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNTRACK_ALERT,
