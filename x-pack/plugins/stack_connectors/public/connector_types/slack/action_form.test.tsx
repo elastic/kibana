@@ -164,6 +164,7 @@ describe('ActionForm - Slack API Connector', () => {
 
     const testProps = {
       ...baseProps,
+      hasAlertsMappings: false,
       actions: testActions,
     };
 
