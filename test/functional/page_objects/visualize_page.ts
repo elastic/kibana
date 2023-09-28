@@ -389,13 +389,12 @@ export class VisualizePageObject extends FtrService {
     await this.setSaveModalValues(vizName, saveModalArgs);
     this.log.debug('Click Save Visualization button');
 
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
     const message = await this.common.closeToast();
     await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForSaveModalToClose();
 
     return message;
   }

@@ -478,7 +478,6 @@ export class DashboardPageObject extends FtrService {
     });
     const message = await this.common.closeToast();
     await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForSaveModalToClose();
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {

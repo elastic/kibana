@@ -127,8 +127,6 @@ export class TimeToVisualizePageObject extends FtrService {
     await this.setSaveModalValues(vizName, saveModalArgs);
     this.log.debug('Click Save Visualization button');
 
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
-
-    await this.common.waitForSaveModalToClose();
+    await this.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
   }
 }

@@ -178,8 +178,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await tagModal.isOpened()).to.be(false);
 
-        await testSubjects.click('confirmSaveSavedObjectButton');
-        await PageObjects.common.waitForSaveModalToClose();
+        await PageObjects.common.clickAndWaitForSaveModalToClose('confirmSaveSavedObjectButton');
 
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
