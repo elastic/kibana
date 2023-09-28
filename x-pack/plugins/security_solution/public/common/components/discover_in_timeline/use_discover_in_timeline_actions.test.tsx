@@ -206,7 +206,7 @@ describe('useDiscoverInTimelineActions', () => {
   describe('updateSavedSearch', () => {
     it('should add defaults to the savedSearch before updating saved search', async () => {
       const { result } = renderTestHook();
-      await result.current.updateSavedSearch(savedSearchMock);
+      await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
 
       expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
         1,
@@ -242,7 +242,7 @@ describe('useDiscoverInTimelineActions', () => {
 
       const LocalTestProvider = getTestProviderWithCustomState(localMockState);
       const { result } = renderTestHook(LocalTestProvider);
-      await result.current.updateSavedSearch(savedSearchMock);
+      await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
 
       expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
         1,

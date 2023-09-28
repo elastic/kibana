@@ -169,7 +169,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
 
   const debouncedUpdateSavedSearch = useMemo(
-    () => debounce(updateSavedSearch, 500),
+    () => debounce(updateSavedSearch, 300),
     [updateSavedSearch]
   );
 
@@ -181,7 +181,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     const latestState = getCombinedDiscoverSavedSearchState();
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
-    debouncedUpdateSavedSearch(latestState);
+    debouncedUpdateSavedSearch(latestState, timelineId);
     combinedDiscoverSavedSearchStateRef.current = latestState;
   }, [
     getCombinedDiscoverSavedSearchState,
@@ -194,6 +194,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     discoverTimerange,
     savedObjectId,
     isFetching,
+    timelineId,
+    dispatch,
   ]);
 
   useEffect(() => {
