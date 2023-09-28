@@ -30,6 +30,7 @@ import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { RouteGuard } from './lib/route_guard';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';
+import type { MlFeatures } from '../common/constants/app';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -82,5 +83,3 @@ export interface RouteInitialization {
   routeGuard: RouteGuard;
   getEnabledFeatures: () => MlFeatures;
 }
-
-export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;

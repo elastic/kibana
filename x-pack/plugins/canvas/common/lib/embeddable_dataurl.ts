@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { type ExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public/lib';
 import { EmbeddableInput } from '../../types';
 
-export const encode = (input: Partial<EmbeddableInput>) =>
-  Buffer.from(JSON.stringify(input)).toString('base64');
+export const encode = (
+  input: ExplicitInputWithAttributes | Partial<EmbeddableInput> | Readonly<EmbeddableInput>
+) => Buffer.from(JSON.stringify(input)).toString('base64');
 export const decode = (serializedInput: string) =>
   JSON.parse(Buffer.from(serializedInput, 'base64').toString());

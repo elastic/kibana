@@ -32,7 +32,7 @@ export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_
 
 export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
 
-export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker'));
+export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
