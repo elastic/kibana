@@ -535,9 +535,14 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({ output, esClient });
+    if (await isSecretStorageEnabled(esClient, soClient)) {
+      const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
+        output,
+        esClient,
+      });
 
-    if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+      if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
