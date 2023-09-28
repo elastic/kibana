@@ -25,6 +25,7 @@ import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
+import { formatAlertWithPayload } from './format_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -67,52 +68,49 @@ export const buildOngoingAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
-  return deepmerge.all(
-    [
-      alert,
-      cleanedPayload,
-      {
-        // Set latest rule configuration
-        ...rule,
-        // Update the timestamp to reflect latest update time
-        [TIMESTAMP]: timestamp,
-        [EVENT_ACTION]: 'active',
-        // Because we're building this alert after the action execution handler has been
-        // run, the scheduledExecutionOptions for the alert has been cleared and
-        // the lastScheduledActions has been set. If we ever change the order of operations
-        // to build and persist the alert before action execution handler, we will need to
-        // update where we pull the action group from.
-        // Set latest action group as this may have changed during execution (ex: error -> warning)
-        [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
-        // Set latest flapping state
-        [ALERT_FLAPPING]: legacyAlert.getFlapping(),
-        // Set latest flapping_history
-        [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
-        // Set latest maintenance window IDs
-        [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
-        // Set latest duration as ongoing alerts should have updated duration
-        ...(legacyAlert.getState().duration
-          ? { [ALERT_DURATION]: legacyAlert.getState().duration }
-          : {}),
-        // Fields that are explicitly not updated:
-        // event.kind
-        // instance.id
-        // status - ongoing alerts should maintain 'active' status
-        // uuid - ongoing alerts should carry over previous UUID
-        // start - ongoing alerts should keep the initial start time
-        // time_range - ongoing alerts should keep the initial time_range
-        // workflow_status - ongoing alerts should keep the initial workflow status
-        [SPACE_IDS]: rule[SPACE_IDS],
-        [VERSION]: kibanaVersion,
-        [TAGS]: Array.from(
-          new Set([
-            ...((cleanedPayload?.tags as string[]) ?? []),
-            ...(alert.tags ?? []),
-            ...(rule[ALERT_RULE_TAGS] ?? []),
-          ])
-        ),
-      },
-    ],
-    { arrayMerge: (_, sourceArray) => sourceArray }
-  ) as Alert & AlertData;
+  const alertUpdates = {
+    // Set latest rule configuration
+    ...rule,
+    // Update the timestamp to reflect latest update time
+    [TIMESTAMP]: timestamp,
+    [EVENT_ACTION]: 'active',
+    // Because we're building this alert after the action execution handler has been
+    // run, the scheduledExecutionOptions for the alert has been cleared and
+    // the lastScheduledActions has been set. If we ever change the order of operations
+    // to build and persist the alert before action execution handler, we will need to
+    // update where we pull the action group from.
+    // Set latest action group as this may have changed during execution (ex: error -> warning)
+    [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
+    // Set latest flapping state
+    [ALERT_FLAPPING]: legacyAlert.getFlapping(),
+    // Set latest flapping_history
+    [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+    // Set latest maintenance window IDs
+    [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest duration as ongoing alerts should have updated duration
+    ...(legacyAlert.getState().duration
+      ? { [ALERT_DURATION]: legacyAlert.getState().duration }
+      : {}),
+    // Fields that are explicitly not updated:
+    // event.kind
+    // instance.id
+    // status - ongoing alerts should maintain 'active' status
+    // uuid - ongoing alerts should carry over previous UUID
+    // start - ongoing alerts should keep the initial start time
+    // time_range - ongoing alerts should keep the initial time_range
+    // workflow_status - ongoing alerts should keep the initial workflow status
+    [SPACE_IDS]: rule[SPACE_IDS],
+    [VERSION]: kibanaVersion,
+    [TAGS]: Array.from(
+      new Set([
+        ...((cleanedPayload?.tags as string[]) ?? []),
+        ...(alert.tags ?? []),
+        ...(rule[ALERT_RULE_TAGS] ?? []),
+      ])
+    ),
+  };
+  const formattedAlert = formatAlertWithPayload(alert, { ...cleanedPayload, ...alertUpdates });
+  return deepmerge.all([formattedAlert, cleanedPayload, alertUpdates], {
+    arrayMerge: (_, sourceArray) => sourceArray,
+  }) as Alert & AlertData;
 };

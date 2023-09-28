@@ -378,7 +378,7 @@ describe('Alerts Client', () => {
       });
 
       describe('persistAlerts()', () => {
-        test('should index new alerts', async () => {
+        test('test me should index new alerts', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -631,6 +631,194 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+<<<<<<< Updated upstream
+=======
+                [ALERT_UUID]: '1',
+                [ALERT_START]: date,
+                [ALERT_STATUS]: 'active',
+                [ALERT_TIME_RANGE]: { gte: date },
+                [ALERT_UUID]: uuid2,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['default'],
+                [VERSION]: '8.9.0',
+                [TAGS]: ['rule-', '-tags'],
+              },
+            ],
+          });
+        });
+
+        test('should update ongoing alerts in existing index when ongoing alerts are unflattened', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: {
+                relation: 'eq',
+                value: 1,
+              },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: {
+                    '@timestamp': '2023-03-28T12:27:28.159Z',
+                    event: {
+                      action: 'active',
+                      kind: 'signal',
+                    },
+                    kibana: {
+                      alert: {
+                        action_group: 'default',
+                        duration: {
+                          us: '0',
+                        },
+                        flapping: false,
+                        flapping_history: [true],
+                        instance: {
+                          id: '1',
+                        },
+                        rule: {
+                          category: 'My test rule',
+                          consumer: 'bar',
+                          execution: {
+                            uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                          },
+                          name: 'rule-name',
+                          parameters: {
+                            bar: true,
+                          },
+                          producer: 'alerts',
+                          revision: 0,
+                          rule_type_id: 'test.rule-type',
+                          tags: ['rule-', '-tags'],
+                          uuid: '1',
+                        },
+                        start: '2023-03-28T12:27:28.159Z',
+                        status: 'active',
+                        time_range: {
+                          gte: '2023-03-28T12:27:28.159Z',
+                        },
+                        uuid: 'abc',
+                        workflow_status: 'open',
+                      },
+                      space_ids: ['default'],
+                      version: '8.8.0',
+                    },
+                    tags: ['rule-', '-tags'],
+                  },
+                },
+              ],
+            },
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            maxAlerts,
+            ruleLabel: `test: rule-name`,
+            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            activeAlertsFromState: {
+              '1': {
+                state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+                meta: {
+                  flapping: false,
+                  flappingHistory: [true],
+                  maintenanceWindowIds: [],
+                  lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+                  uuid: 'abc',
+                },
+              },
+            },
+            recoveredAlertsFromState: {},
+          });
+
+          // Report 1 new alert and 1 active alert
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid2 = alertsToReturn['2'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              // ongoing alert doc
+              {
+                [TIMESTAMP]: date,
+                [EVENT_ACTION]: 'active',
+                [EVENT_KIND]: 'signal',
+                [ALERT_ACTION_GROUP]: 'default',
+                [ALERT_DURATION]: '36000000000000',
+                [ALERT_FLAPPING]: false,
+                [ALERT_FLAPPING_HISTORY]: [true, false],
+                [ALERT_INSTANCE_ID]: '1',
+                [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_RULE_CATEGORY]: 'My test rule',
+                [ALERT_RULE_CONSUMER]: 'bar',
+                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                [ALERT_RULE_NAME]: 'rule-name',
+                [ALERT_RULE_PARAMETERS]: { bar: true },
+                [ALERT_RULE_PRODUCER]: 'alerts',
+                [ALERT_RULE_REVISION]: 0,
+                [ALERT_RULE_TYPE_ID]: 'test.rule-type',
+                [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+                [ALERT_RULE_UUID]: '1',
+                [ALERT_UUID]: '1',
+                [ALERT_START]: '2023-03-28T12:27:28.159Z',
+                [ALERT_STATUS]: 'active',
+                [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+                [ALERT_UUID]: 'abc',
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['default'],
+                [VERSION]: '8.9.0',
+                [TAGS]: ['rule-', '-tags'],
+              },
+              {
+                create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              {
+                [TIMESTAMP]: date,
+                [EVENT_ACTION]: 'open',
+                [EVENT_KIND]: 'signal',
+                [ALERT_ACTION_GROUP]: 'default',
+                [ALERT_DURATION]: '0',
+                [ALERT_FLAPPING]: false,
+                [ALERT_FLAPPING_HISTORY]: [true],
+                [ALERT_INSTANCE_ID]: '2',
+                [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_RULE_CATEGORY]: 'My test rule',
+                [ALERT_RULE_CONSUMER]: 'bar',
+                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                [ALERT_RULE_NAME]: 'rule-name',
+                [ALERT_RULE_PARAMETERS]: { bar: true },
+                [ALERT_RULE_PRODUCER]: 'alerts',
+                [ALERT_RULE_REVISION]: 0,
+                [ALERT_RULE_TYPE_ID]: 'test.rule-type',
+                [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+                [ALERT_RULE_UUID]: '1',
+                [ALERT_UUID]: '1',
+>>>>>>> Stashed changes
                 [ALERT_START]: date,
                 [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: date },
