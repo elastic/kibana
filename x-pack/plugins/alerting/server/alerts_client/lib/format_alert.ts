@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, get, isObject, merge, omit } from 'lodash';
+import { cloneDeep, get, merge, omit } from 'lodash';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   const parts = dottedFieldName.split('.');
