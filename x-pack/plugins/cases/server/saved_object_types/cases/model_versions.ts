@@ -24,32 +24,28 @@ export const modelVersion1: SavedObjectsModelVersion = {
             type: {
               type: 'keyword',
             },
-            field: {
-              properties: {
-                value: {
-                  type: 'keyword',
-                  fields: {
-                    number: {
-                      type: 'long',
-                      ignore_malformed: true,
-                    },
-                    boolean: {
-                      // @ts-expect-error: es types are not correct. ignore_malformed is supported.
-                      ignore_malformed: true,
-                      type: 'boolean',
-                    },
-                    string: {
-                      type: 'text',
-                    },
-                    date: {
-                      type: 'date',
-                      ignore_malformed: true,
-                    },
-                    ip: {
-                      type: 'ip',
-                      ignore_malformed: true,
-                    },
-                  },
+            value: {
+              type: 'keyword',
+              fields: {
+                number: {
+                  type: 'long',
+                  ignore_malformed: true,
+                },
+                boolean: {
+                  // @ts-expect-error: es types are not correct. ignore_malformed is supported.
+                  ignore_malformed: true,
+                  type: 'boolean',
+                },
+                string: {
+                  type: 'text',
+                },
+                date: {
+                  type: 'date',
+                  ignore_malformed: true,
+                },
+                ip: {
+                  type: 'ip',
+                  ignore_malformed: true,
                 },
               },
             },

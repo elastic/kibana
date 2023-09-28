@@ -255,13 +255,11 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": Array [
-                              "this is a text field value",
-                            ],
-                          },
                           "key": "string_custom_field_1",
                           "type": "text",
+                          "value": Array [
+                            "this is a text field value",
+                          ],
                         },
                       ],
                     },
@@ -311,13 +309,11 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": Array [
-                              "updated value",
-                            ],
-                          },
                           "key": "string_custom_field_1",
                           "type": "text",
+                          "value": Array [
+                            "updated value",
+                          ],
                         },
                       ],
                     },
@@ -367,11 +363,9 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": null,
-                          },
                           "key": "string_custom_field_1",
                           "type": "text",
+                          "value": null,
                         },
                       ],
                     },
@@ -407,13 +401,11 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": Array [
-                              "new custom field 2",
-                            ],
-                          },
                           "key": "string_custom_field_2",
                           "type": "text",
+                          "value": Array [
+                            "new custom field 2",
+                          ],
                         },
                       ],
                     },
@@ -463,13 +455,11 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": Array [
-                              "new value",
-                            ],
-                          },
                           "key": "string_custom_field_1",
                           "type": "text",
+                          "value": Array [
+                            "new value",
+                          ],
                         },
                       ],
                     },
@@ -519,13 +509,11 @@ describe('UserActionPersister', () => {
                     "payload": Object {
                       "customFields": Array [
                         Object {
-                          "field": Object {
-                            "value": Array [
-                              "new value",
-                            ],
-                          },
                           "key": "string_custom_field_1",
                           "type": "text",
+                          "value": Array [
+                            "new value",
+                          ],
                         },
                       ],
                     },

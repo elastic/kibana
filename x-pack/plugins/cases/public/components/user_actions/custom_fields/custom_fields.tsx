@@ -16,14 +16,17 @@ const getLabelTitle = (
   customField: CaseUICustomField,
   customFieldConfiguration?: CasesConfigurationUICustomField
 ) => {
-  const customFieldValue = customField.field.value;
+  const customFieldValue = customField.value;
   const label = customFieldConfiguration?.label ?? customFieldConfiguration?.key ?? i18n.UNKNOWN;
 
-  if (customFieldValue == null || customFieldValue.length === 0) {
+  if (
+    customFieldValue == null ||
+    (Array.isArray(customFieldValue) && customFieldValue.length === 0)
+  ) {
     return i18n.CHANGED_FIELD_TO_EMPTY(label);
   }
 
-  const value = customFieldValue[0];
+  const value = Array.isArray(customFieldValue) ? customFieldValue[0] : customFieldValue;
 
   return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${value}"`;
 };

@@ -10,7 +10,7 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { configureTextCustomFieldFactory } from './text/configure_text_field';
 import { configureToggleCustomFieldFactory } from './toggle/configure_toggle_field';
 
-export const builderMap: CustomFieldBuilderMap = Object.freeze({
+export const builderMap = Object.freeze({
   [CustomFieldTypes.TEXT]: configureTextCustomFieldFactory,
   [CustomFieldTypes.TOGGLE]: configureToggleCustomFieldFactory,
-} as const);
+} as const) as CustomFieldBuilderMap;

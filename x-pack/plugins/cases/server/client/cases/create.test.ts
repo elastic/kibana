@@ -448,12 +448,12 @@ describe('create', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       },
       {
         key: 'second_key',
         type: CustomFieldTypes.TOGGLE,
-        field: { value: [true] },
+        value: true,
       },
     ];
 
@@ -495,7 +495,7 @@ describe('create', () => {
       );
     });
 
-    it('should not throw an error and set default value when customFields are undefined', async () => {
+    it('should not throw an error and fill out missing customFields when they are undefined', async () => {
       await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
@@ -512,7 +512,10 @@ describe('create', () => {
             external_service: null,
             duration: null,
             status: CaseStatuses.open,
-            customFields: [],
+            customFields: [
+              { key: 'first_key', type: 'text', value: null },
+              { key: 'second_key', type: 'toggle', value: null },
+            ],
           },
           id: expect.any(String),
           refresh: false,
@@ -544,12 +547,12 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['this is a text field value', 'this is second'] },
+                value: ['this is a text field value', 'this is second'],
               },
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TOGGLE,
-                field: { value: [true] },
+                value: true,
               },
             ],
           },
@@ -570,7 +573,7 @@ describe('create', () => {
               {
                 key: 'missing_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: null },
+                value: null,
               },
             ],
           },
@@ -582,16 +585,16 @@ describe('create', () => {
       );
     });
 
-    it('throws error when custom fields are missing', async () => {
+    it('throws error when required custom fields are missing', async () => {
       await expect(
         create(
           {
             ...theCase,
             customFields: [
               {
-                key: 'first_key',
+                key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['this is a text field value', 'this is second'] },
+                value: ['this is a text field value', 'this is second'],
               },
             ],
           },
@@ -599,7 +602,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing custom field keys: second_key"`
+        `"Failed to create case: Error: Missing required custom fields: first_key"`
       );
     });
 
@@ -612,12 +615,12 @@ describe('create', () => {
               {
                 key: 'first_key',
                 type: CustomFieldTypes.TOGGLE,
-                field: { value: [true] },
+                value: true,
               },
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                field: { value: ['foobar'] },
+                value: ['foobar'],
               },
             ],
           },
@@ -646,12 +649,12 @@ describe('create', () => {
         {
           key: 'first_customField_key',
           type: CustomFieldTypes.TEXT,
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_customField_key',
           type: CustomFieldTypes.TOGGLE,
-          field: { value: [true] },
+          value: true,
         },
       ],
     };

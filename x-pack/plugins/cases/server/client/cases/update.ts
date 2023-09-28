@@ -38,7 +38,12 @@ import {
   isCommentRequestTypeAlert,
 } from '../../common/utils';
 import { arraysDifference, getCaseToUpdate } from '../utils';
-import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import {
+  dedupAssignees,
+  fillMissingCustomFields,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
+} from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -101,16 +106,11 @@ async function throwIfMaxUserActionsReached({
 
 async function validateCustomFieldsInRequest({
   casesToUpdate,
-  casesClient,
+  customFieldsConfigurationMap,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
-  casesClient: CasesClient;
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
 }) {
-  const configurations = await casesClient.configure.get({});
-  const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
-    configurations.map((conf) => [conf.owner, conf.customFields])
-  );
-
   casesToUpdate.forEach(({ updateReq, originalCase }) => {
     if (updateReq.customFields) {
       const owner = originalCase.attributes.owner;
@@ -369,6 +369,11 @@ export const update = async (
       );
     }
 
+    const configurations = await casesClient.configure.get({});
+    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
     const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
@@ -399,9 +404,13 @@ export const update = async (
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
-    await validateCustomFieldsInRequest({ casesToUpdate, casesClient });
+    await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
-    const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });
+    const patchCasesPayload = createPatchCasesPayload({
+      user,
+      casesToUpdate,
+      customFieldsConfigurationMap,
+    });
     const userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
@@ -491,8 +500,9 @@ export const update = async (
   }
 };
 
-const trimCaseAttributes = (
-  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>
+const normalizeCaseAttributes = (
+  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>,
+  customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
   let trimmedAttributes = { ...updateCaseAttributes };
 
@@ -518,15 +528,27 @@ const trimCaseAttributes = (
     };
   }
 
+  if (updateCaseAttributes.customFields) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      customFields: fillMissingCustomFields({
+        customFields: updateCaseAttributes.customFields,
+        customFieldsConfiguration,
+      }),
+    };
+  }
+
   return trimmedAttributes;
 };
 
 const createPatchCasesPayload = ({
   casesToUpdate,
   user,
+  customFieldsConfigurationMap,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -537,7 +559,10 @@ const createPatchCasesPayload = ({
 
       const dedupedAssignees = dedupAssignees(assignees);
 
-      const trimmedCaseAttributes = trimCaseAttributes(updateCaseAttributes);
+      const trimmedCaseAttributes = normalizeCaseAttributes(
+        updateCaseAttributes,
+        customFieldsConfigurationMap.get(originalCase.attributes.owner)
+      );
 
       return {
         caseId,

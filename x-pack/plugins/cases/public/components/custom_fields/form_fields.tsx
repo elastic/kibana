@@ -13,7 +13,6 @@ import {
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { CustomFieldType } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 
@@ -43,7 +42,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMo
     [setSelectedType]
   );
 
-  const builtCustomField: CustomFieldType | null = useMemo(() => {
+  const builtCustomField = useMemo(() => {
     const builder = builderMap[selectedType];
 
     if (builder == null) {

@@ -79,12 +79,12 @@ describe('Create case', () => {
         {
           key: 'first_custom_field_key',
           type: 'text',
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_custom_field_key',
           type: 'toggle',
-          field: { value: [true] },
+          value: true,
         },
       ];
 
@@ -191,12 +191,12 @@ describe('Create case', () => {
         {
           key: 'first_custom_field_key',
           type: 'text',
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_custom_field_key',
           type: 'toggle',
-          field: { value: [true] },
+          value: true,
         },
       ];
 

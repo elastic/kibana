@@ -15,7 +15,7 @@ describe('Custom field', () => {
         {
           key: 'first_custom_field_key',
           type: 'text',
-          field: { value: ['this is a text field value'] },
+          value: ['this is a text field value'],
         },
       ],
     };
@@ -37,23 +37,6 @@ describe('Custom field', () => {
         right: defaultRequest,
       });
     });
-
-    it('removes foo:bar attributes from the field', () => {
-      const query = CustomFieldsUserActionPayloadRt.decode({
-        ...defaultRequest,
-        customFields: [
-          {
-            ...defaultRequest.customFields[0],
-            field: { ...defaultRequest.customFields[0].field, foo: 'bar' },
-          },
-        ],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
   });
 
   describe('CustomFieldsUserActionRt', () => {
@@ -64,7 +47,7 @@ describe('Custom field', () => {
           {
             key: 'first_custom_field_key',
             type: 'text',
-            field: { value: ['this is a text field value'] },
+            value: ['this is a text field value'],
           },
         ],
       },

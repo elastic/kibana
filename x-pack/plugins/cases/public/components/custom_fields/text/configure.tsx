@@ -8,10 +8,11 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
 
-const ConfigureComponent: CustomFieldType['Configure'] = () => {
+const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
   return (
     <>
       <UseField

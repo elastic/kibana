@@ -155,12 +155,12 @@ const originalCasesWithCustomFields = [
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['old value'] },
+            value: ['old value'],
           },
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['old value 2'] },
+            value: ['old value 2'],
           },
         ],
       },
@@ -179,7 +179,7 @@ export const patchAddCustomFieldsToOriginalCasesRequest: PatchCasesArgs = {
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['this is a text field value'] },
+            value: ['this is a text field value'],
           },
         ],
       },
@@ -198,12 +198,12 @@ export const patchUpdateCustomFieldsCasesRequest: PatchCasesArgs = {
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['updated value'] },
+            value: ['updated value'],
           },
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['old value 2'] },
+            value: ['old value 2'],
           },
         ],
       },
@@ -222,12 +222,12 @@ export const patchUpdateResetCustomFieldsCasesRequest: PatchCasesArgs = {
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: null },
+            value: null,
           },
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['new custom field 2'] },
+            value: ['new custom field 2'],
           },
         ],
       },
@@ -246,17 +246,17 @@ export const patchNewCustomFieldConfAdded: PatchCasesArgs = {
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['new value'] },
+            value: ['new value'],
           },
           {
             key: 'string_custom_field_2',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['old value 2'] },
+            value: ['old value 2'],
           },
           {
             key: 'string_custom_field_3',
             type: CustomFieldTypes.TEXT,
-            field: { value: null },
+            value: null,
           },
         ],
       },
@@ -275,7 +275,7 @@ export const patchCustomFieldConfRemoved: PatchCasesArgs = {
           {
             key: 'string_custom_field_1',
             type: CustomFieldTypes.TEXT,
-            field: { value: ['new value'] },
+            value: ['new value'],
           },
         ],
       },

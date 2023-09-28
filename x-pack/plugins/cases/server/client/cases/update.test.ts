@@ -939,12 +939,12 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          field: { value: ['this is a text field value', 'this is second'] },
+          value: ['this is a text field value', 'this is second'],
         },
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE as const,
-          field: { value: null },
+          value: null,
         },
       ];
 
@@ -989,11 +989,68 @@ describe('update', () => {
       );
     });
 
+    it('fills out missing custom fields', async () => {
+      const customFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          value: ['this is a text field value', 'this is second'],
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields: [
+                  ...customFields,
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE as const,
+                    value: null,
+                  },
+                ],
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
     it('throws error when the customFields array is too long', async () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
         type: 'text',
-        field: { value: ['this is a text field value', 'this is second'] },
+        value: ['this is a text field value', 'this is second'],
       });
 
       await expect(
@@ -1027,12 +1084,12 @@ describe('update', () => {
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                 ],
               },
@@ -1058,12 +1115,12 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['this is a text field value', 'this is second'] },
+                    value: ['this is a text field value', 'this is second'],
                   },
                   {
                     key: 'missing_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: null },
+                    value: null,
                   },
                 ],
               },
@@ -1089,7 +1146,7 @@ describe('update', () => {
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TOGGLE,
-                    field: { value: null },
+                    value: null,
                   },
                 ],
               },
@@ -1099,7 +1156,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing custom field keys: first_key"`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: first_key"`
       );
     });
 
@@ -1115,12 +1172,12 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TOGGLE,
-                    field: { value: [true] },
+                    value: true,
                   },
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TEXT,
-                    field: { value: ['foobar'] },
+                    value: ['foobar'],
                   },
                 ],
               },
