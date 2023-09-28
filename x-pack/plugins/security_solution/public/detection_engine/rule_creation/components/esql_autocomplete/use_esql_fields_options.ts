@@ -6,7 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -48,7 +48,7 @@ type UseEsqlFieldOptions = (
  * fetches ES|QL fields and convert them to Combobox options
  */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
-  const kibana = useKibana<{ expressions: ExpressionsStart }>();
+  const kibana = useKibana();
 
   const { expressions } = kibana.services;
 

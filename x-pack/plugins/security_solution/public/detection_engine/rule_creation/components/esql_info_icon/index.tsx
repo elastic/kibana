@@ -7,9 +7,8 @@
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as i18n from './translations';
 
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -26,47 +25,18 @@ const EsqlInfoIconComponent = () => {
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonIcon iconType="iInCircle" onClick={onButtonClick} aria-label="Open help popover" />
+    <EuiButtonIcon iconType="iInCircle" onClick={onButtonClick} aria-label={i18n.ARIA_LABEL} />
   );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <Markdown
-          markdown={i18n.translate(
-            'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent',
-            {
-              defaultMessage: `
-### Aggregating rule
-Is a rule that uses {statsByLink} grouping commands. So, its result can not be matched with a particular document in ES.
-\`\`\`
-FROM logs*
-| STATS count = COUNT(host.name) BY host.name
-| SORT host.name
-\`\`\`
-
-    
-### Non-aggregating rule
-Is a rule that does not use {statsByLink} grouping commands. Hence, each row in result can be tracked to a source document in ES. For this type of rule,
-please use operator \`[metadata _id, _index, _version]\` after defining index source. This would allow deduplicate alerts and link them with the source document.
-
-Example
-
-\`\`\`
-FROM logs* [metadata _id, _index, _version]
-| WHERE event.id == "test"
-| LIMIT 10
-\`\`\`
-
-Please, ensure, metadata properties \`id\`, \`_index\`, \`_version\` are carried over through pipe operators.
-
-More information can be found on {startUsingEsqlLink}
-            `,
-              values: {
-                statsByLink: `[STATS..BY](${docLinks.links.esql.statsBy})`,
-                startUsingEsqlLink: `[WIP: Get started using ES|QL rules](${docLinks.links.esql.statsBy})`,
-              },
-            }
+          markdown={i18n.getTooltipContent(
+            docLinks.links.esql.statsBy,
+            // Docs team will provide actual link to a new page before release
+            // For now, it's just a mock
+            docLinks.links.esql.statsBy
           )}
         />
       </EuiText>

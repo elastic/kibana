@@ -21,7 +21,7 @@ export const getEsqlQueryConfig = ({
 }) => {
   const emptyResultsEsqlQuery = `${esqlQuery} | limit 0`;
   return {
-    queryKey: [esqlQuery ?? ''.trim()],
+    queryKey: [(esqlQuery ?? '').trim()],
     queryFn: async () => {
       if (!esqlQuery) {
         return undefined;

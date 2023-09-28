@@ -16,29 +16,7 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../../lib/kibana';
-
-/**
- * converts AggregateQuery type to Query
- * it needed because unified search bar emits 2 types of queries: Query and AggregateQuery
- * on security side we deal with one type only (Query), so we converge it to this type only
- */
-const convertToQueryType = (query: Query | AggregateQuery): Query => {
-  if ('esql' in query) {
-    return {
-      query: query.esql,
-      language: 'esql',
-    };
-  }
-
-  if ('sql' in query) {
-    return {
-      query: query.sql,
-      language: 'sql',
-    };
-  }
-
-  return query;
-};
+import { convertToQueryType } from './convert_to_query_type';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
