@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
