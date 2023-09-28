@@ -24,11 +24,37 @@ echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-docker pull "$SOURCE_IMAGE"
-docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
-docker push "$TARGET_IMAGE"
 
-ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
+docker manifest inspect "$SOURCE_IMAGE" | tee manifests.json
+
+ARM_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest' manifests.json)
+AMD_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest' manifests.json)
+
+echo docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
+docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
+echo linux/arm64 image pulled, with digest: $ARM_64_DIGEST
+
+echo docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
+docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
+echo linux/amd64 image pulled, with digest: $AMD_64_DIGEST
+
+docker tag "$SOURCE_IMAGE@$ARM_64_DIGEST" "$TARGET_IMAGE-arm64"
+docker tag "$SOURCE_IMAGE@$AMD_64_DIGEST" "$TARGET_IMAGE-amd64"
+
+docker push "$TARGET_IMAGE-arm64"
+docker push "$TARGET_IMAGE-amd64"
+
+docker manifest rm "$TARGET_IMAGE" || echo "Nothing to delete"
+
+docker manifest create "$TARGET_IMAGE" \
+--amend "$TARGET_IMAGE-arm64" \
+--amend "$TARGET_IMAGE-amd64"
+
+docker manifest push "$TARGET_IMAGE"
+
+docker manifest inspect "$TARGET_IMAGE"
+
+ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE@$ARM_64_DIGEST")
 ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
 
 docker logout docker.elastic.co
@@ -37,7 +63,7 @@ echo "Image push to $TARGET_IMAGE successful."
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
 
 MANIFEST_UPLOAD_PATH="Skipped"
-if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
+if [[ "${UPLOAD_MANIFEST:-}" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
   echo "--- Uploading latest-verified manifest to GCS"
   cat << EOT >> $MANIFEST_FILE_NAME
 {
@@ -58,10 +84,12 @@ EOT
   gsutil acl ch -u AllUsers:R "gs://$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME"
   MANIFEST_UPLOAD_PATH="<a href=\"https://storage.googleapis.com/$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME\">$MANIFEST_FILE_NAME</a>"
 
-elif [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ ]]; then
+elif [[ "${UPLOAD_MANIFEST:-}" =~ ^(1|true)$ ]]; then
   echo "--- Skipping upload of latest-verified manifest to GCS, ES Serverless build tag is not pointing to a hash"
 elif [[ "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
   echo "--- Skipping upload of latest-verified manifest to GCS, flag was not provided"
+else
+  echo "--- Skipping upload of latest-verified manifest to GCS, no flag and hash provided"
 fi
 
 echo "--- Annotating build with info"
