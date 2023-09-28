@@ -37,8 +37,10 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 /**
  * ES|QL returns results as a single page. max size of 10,000
+ * while we try increase size of the request to catch all events
+ * we don't want to overload ES/Kibana with large responses
  */
-const ESQL_SINGLE_PAGE_SIZE = 10000;
+const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = 1000;
 
 export const esqlExecutor = async ({
   runOpts: {
@@ -69,7 +71,10 @@ export const esqlExecutor = async ({
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
     let size = tuple.maxSignals;
-    while (result.createdSignalsCount <= tuple.maxSignals && size <= ESQL_SINGLE_PAGE_SIZE) {
+    while (
+      result.createdSignalsCount <= tuple.maxSignals &&
+      size <= ESQL_PAGE_SIZE_CIRCUIT_BREAKER
+    ) {
       const esqlRequest = buildEsqlSearchRequest({
         query: ruleParams.query,
         from: tuple.from.toISOString(),
