@@ -637,26 +637,13 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
       appMockRender.render(<ConfigureCases />);
 
-      const draggable = screen.getByTestId('draggable');
-
       expect(
-        within(draggable).getByTestId(
-          `custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`
-        )
+        screen.getByTestId(`custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`)
       ).toBeInTheDocument();
     });
 
@@ -666,25 +653,16 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
       appMockRender.render(<ConfigureCases />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       for (const field of customFieldsConfigurationMock) {
         expect(
-          within(droppable).getByTestId(`custom-field-${field.label}-${field.type}`)
+          within(list).getByTestId(`custom-field-${field.label}-${field.type}`)
         ).toBeInTheDocument();
       }
     });
@@ -695,29 +673,18 @@ describe('ConfigureCases', () => {
         data: {
           ...useCaseConfigureResponse.data,
           customFields: customFieldsConfigurationMock,
-          currentConfiguration: {
-            connector: {
-              id: 'resilient-2',
-              name: 'unchanged',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-            closureType: 'close-by-user',
-          },
         },
       }));
 
       appMockRender.render(<ConfigureCases />);
 
-      const droppable = screen.getByTestId('droppable');
+      const list = screen.getByTestId('custom-fields-list');
 
       userEvent.click(
-        within(droppable).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
       userEvent.click(screen.getByText('Delete'));
 
@@ -737,12 +704,60 @@ describe('ConfigureCases', () => {
       });
     });
 
+    it('updates a custom field correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('custom-fields-list');
+
+      userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+      );
+
+      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+
+      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
+
+      userEvent.click(screen.getByTestId('text-custom-field-options'));
+
+      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            {
+              ...customFieldsConfigurationMock[0],
+              label: `${customFieldsConfigurationMock[0].label}!!`,
+              required: !customFieldsConfigurationMock[0].required,
+            },
+            { ...customFieldsConfigurationMock[1] },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
     it('opens fly out for when click on add field', async () => {
       appMockRender.render(<ConfigureCases />);
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -750,12 +765,12 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
+      userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
     });
 
     it('closes fly out for when click on save field', async () => {
@@ -763,11 +778,11 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -793,7 +808,7 @@ describe('ConfigureCases', () => {
       });
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
     });
   });
 });

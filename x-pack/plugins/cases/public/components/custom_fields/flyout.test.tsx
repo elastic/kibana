@@ -11,9 +11,10 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { AddFieldFlyout } from './add_field_flyout';
+import { CustomFieldFlyout } from './flyout';
+import { customFieldsConfigurationMock } from '../../containers/mock';
 
-describe('AddFieldFlyout ', () => {
+describe('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {
@@ -21,6 +22,7 @@ describe('AddFieldFlyout ', () => {
     onSaveField: jest.fn(),
     isLoading: false,
     disabled: false,
+    customField: null,
   };
 
   beforeEach(() => {
@@ -29,21 +31,21 @@ describe('AddFieldFlyout ', () => {
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    expect(screen.getByTestId('add-custom-field-flyout-header')).toBeInTheDocument();
-    expect(screen.getByTestId('add-custom-field-flyout-cancel')).toBeInTheDocument();
-    expect(screen.getByTestId('add-custom-field-flyout-save')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-field-flyout-header')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-field-flyout-cancel')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-field-flyout-save')).toBeInTheDocument();
   });
 
   it('calls onSaveField on save field', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
     userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
     userEvent.click(screen.getByTestId('text-custom-field-options'));
 
-    userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
       expect(props.onSaveField).toBeCalledWith({
@@ -56,11 +58,11 @@ describe('AddFieldFlyout ', () => {
   });
 
   it('calls onSaveField with serialized data', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
     userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-    userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
       expect(props.onSaveField).toBeCalledWith({
@@ -73,17 +75,17 @@ describe('AddFieldFlyout ', () => {
   });
 
   it('does not call onSaveField when error', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     expect(props.onSaveField).not.toBeCalled();
   });
 
   it('calls onCloseFlyout on cancel', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
+    userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();
@@ -91,12 +93,25 @@ describe('AddFieldFlyout ', () => {
   });
 
   it('calls onCloseFlyout on close', async () => {
-    appMockRender.render(<AddFieldFlyout {...props} />);
+    appMockRender.render(<CustomFieldFlyout {...props} />);
 
     userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();
     });
+  });
+
+  it('renders flyout with data when customField value exist', async () => {
+    appMockRender.render(
+      <CustomFieldFlyout {...{ ...props, customField: customFieldsConfigurationMock[0] }} />
+    );
+
+    expect(await screen.findByTestId('custom-field-label-input')).toHaveAttribute(
+      'value',
+      customFieldsConfigurationMock[0].label
+    );
+    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('text-custom-field-options')).toHaveAttribute('checked');
   });
 });

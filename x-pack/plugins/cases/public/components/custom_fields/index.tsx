@@ -29,12 +29,14 @@ export interface Props {
   isLoading: boolean;
   handleAddCustomField: () => void;
   handleDeleteCustomField: (key: string) => void;
+  handleEditCustomField: (key: string) => void;
 }
 const CustomFieldsComponent: React.FC<Props> = ({
   disabled,
   isLoading,
   handleAddCustomField,
   handleDeleteCustomField,
+  handleEditCustomField,
   customFields,
 }) => {
   const { permissions } = useCasesContext();
@@ -50,6 +52,14 @@ const CustomFieldsComponent: React.FC<Props> = ({
     handleAddCustomField();
     setError(false);
   }, [handleAddCustomField, setError, customFields, error]);
+
+  const onEditCustomField = useCallback(
+    (key: string) => {
+      setError(false);
+      handleEditCustomField(key);
+    },
+    [setError, handleEditCustomField]
+  );
 
   if (customFields.length < MAX_CUSTOM_FIELDS_PER_CASE && error) {
     setError(false);
@@ -75,6 +85,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
             <CustomFieldsList
               customFields={customFields}
               onDeleteCustomField={handleDeleteCustomField}
+              onEditCustomField={onEditCustomField}
             />
             {error ? (
               <EuiFlexGroup justifyContent="center">

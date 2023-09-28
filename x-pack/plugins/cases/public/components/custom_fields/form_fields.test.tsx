@@ -35,6 +35,16 @@ describe('FormFields ', () => {
     expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
   });
 
+  it('disables field type selector on edit mode', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <FormFields isEditMode />
+      </FormTestComponent>
+    );
+
+    expect(screen.getByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
+  });
+
   it('submit data correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -56,9 +66,6 @@ describe('FormFields ', () => {
         {
           label: 'hello',
           type: 'toggle',
-          options: {
-            required: false,
-          },
         },
         true
       );

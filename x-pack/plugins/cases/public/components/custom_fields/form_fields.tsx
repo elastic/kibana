@@ -19,6 +19,7 @@ import { builderMap } from './builder';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
+  isEditMode?: boolean;
 }
 
 const fieldTypeSelectOptions = (): EuiSelectOption[] => {
@@ -32,7 +33,7 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
   return options;
 };
 
-const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
+const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMode }) => {
   const [selectedType, setSelectedType] = useState<CustomFieldTypes>(CustomFieldTypes.TEXT);
 
   const handleTypeChange = useCallback(
@@ -80,6 +81,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
             options,
             'data-test-subj': 'custom-field-type-selector',
             isLoading: isSubmitting,
+            disabled: isEditMode,
           },
           onChange: handleTypeChange,
         }}

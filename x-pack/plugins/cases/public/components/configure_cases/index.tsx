@@ -31,9 +31,10 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { CustomFields } from '../custom_fields';
-import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
+import { CustomFieldFlyout } from '../custom_fields/flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { addOrReplaceCustomField } from '../custom_fields/utils';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -64,7 +65,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
-  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
+  const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
+  const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
 
   const {
     data: {
@@ -239,8 +241,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   const onAddCustomFields = useCallback(() => {
-    setAddFieldFlyoutVisibility(true);
-  }, [setAddFieldFlyoutVisibility]);
+    setCustomFieldFlyoutVisibility(true);
+  }, [setCustomFieldFlyoutVisibility]);
 
   const onDeleteCustomField = useCallback(
     (key: string) => {
@@ -264,21 +266,36 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const onCloseAddFieldFlyout = useCallback(() => {
-    setAddFieldFlyoutVisibility(false);
-  }, [setAddFieldFlyoutVisibility]);
+  const onEditCustomField = useCallback(
+    (key: string) => {
+      const selectedCustomField = customFields.find((item) => item.key === key);
 
-  const onCustomFieldCreated = useCallback(
+      if (selectedCustomField) {
+        setCustomFieldToEdit(selectedCustomField);
+      }
+      setCustomFieldFlyoutVisibility(true);
+    },
+    [setCustomFieldFlyoutVisibility, setCustomFieldToEdit, customFields]
+  );
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setCustomFieldFlyoutVisibility(false);
+    setCustomFieldToEdit(null);
+  }, [setCustomFieldFlyoutVisibility, setCustomFieldToEdit]);
+
+  const onSaveCustomField = useCallback(
     (customFieldData: CustomFieldConfiguration) => {
+      const updatedFields = addOrReplaceCustomField(customFields, customFieldData);
       persistCaseConfigure({
         connector,
-        customFields: [...customFields, customFieldData],
+        customFields: updatedFields,
         id: configurationId,
         version: configurationVersion,
         closureType,
       });
 
-      setAddFieldFlyoutVisibility(false);
+      setCustomFieldFlyoutVisibility(false);
+      setCustomFieldToEdit(null);
     },
     [
       closureType,
@@ -290,8 +307,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
-    <AddFieldFlyout
+  const CustomFieldAddFlyout = customFieldFlyoutVisible ? (
+    <CustomFieldFlyout
       isLoading={loadingCaseConfigure || isPersistingConfiguration}
       disabled={
         !permissions.create ||
@@ -299,8 +316,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         loadingCaseConfigure ||
         isPersistingConfiguration
       }
+      customField={customFieldToEdit}
       onCloseFlyout={onCloseAddFieldFlyout}
-      onSaveField={onCustomFieldCreated}
+      onSaveField={onSaveCustomField}
     />
   ) : null;
 
@@ -364,6 +382,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 disabled={isPersistingConfiguration || loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}
                 handleDeleteCustomField={onDeleteCustomField}
+                handleEditCustomField={onEditCustomField}
               />
             </EuiFlexItem>
           </SectionWrapper>
