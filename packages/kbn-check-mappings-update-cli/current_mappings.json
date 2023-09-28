@@ -2936,6 +2936,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
