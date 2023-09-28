@@ -432,7 +432,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexListOfDocuments([doc1]);
 
-        const { previewId, logs } = await previewRule({
+        const { previewId } = await previewRule({
           supertest,
           rule,
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
